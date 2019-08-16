@@ -1,0 +1,90 @@
+Metadata-Version: 2.1
+Name: bcompiler
+Version: 1.3.22
+Summary: Program to migrate data for DfT BICC reporting process.
+Home-page: https://bitbucket.org/mrlemon/bcompiler
+Author: Matthew Lemon
+Author-email: matt@matthewlemon.com
+Maintainer: Matthew Lemon
+Maintainer-email: matt@matthewlemon.com
+License: MIT
+Keywords: data console commandline excel
+Platform: UNKNOWN
+Classifier: Development Status :: 3 - Alpha
+Classifier: Environment :: Console
+Classifier: Intended Audience :: Other Audience
+Classifier: Programming Language :: Python :: 3.5
+Classifier: Programming Language :: Python :: 3.6
+Classifier: Topic :: Text Processing
+Requires-Python: >=3.6
+Requires-Dist: openpyxl (==2.6.2)
+Requires-Dist: python-dateutil
+Requires-Dist: colorlog
+
+
+Quick Start
+-----------
+
+* Ensure Python 3.6.2 or later is installed on your system.
+* Ensure git is installed on your system.
+* ``pip install bcompiler``
+* ``bcompiler-init``
+* ``bcompiler --help``
+
+
+Introduction
+-------------
+
+``bcompiler`` is a tool to manage data involved in the BICC reporting process at the UK Department for Transport.
+
+``bcompiler`` processes data held in Excel files, either compiling similar data
+from many Excel files into a single master spreadsheet, or populating many
+Excel files using the data from a master spreadsheet.
+
+"Auxiliary" files are required to map data in each direction, and to templates.
+These files are contained in a DfT reporitory on GitHub. ``bcompiler`` can be
+used to obtain/update these files.
+
+Documentation
+-------------
+
+Full documentation for the project can be found at http://bcompiler.readthedocs.io/en/latest/index.html.
+
+
+News
+====
+
+11 July 2019
+------------
+
+- Bug fix
+
+30 October 2017
+---------------
+
+- Fix bug where not all columns in master are being processed during swimlane analyser.
+
+17 October 2017
+---------------
+
+- Changed ERROR log message to WARNING to accommodate dates mixed with free text.
+
+16 October 2017
+---------------
+
+- Fix bug where cell value in string and datetime value would try to compare arithmetically.
+
+11 October 2017
+---------------
+- Fix bug where `.xlsx` files not being picked up.
+- Improved exception handling and bug fixes.
+
+10 October 2017
+---------------
+- Handling cp1252 encoding coming through from Windows
+- Added CHANGES.txt
+- Minor bugfixes
+
+
+
+

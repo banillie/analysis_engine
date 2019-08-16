@@ -1,0 +1,4 @@
+[console_scripts]
+bcompiler = bcompiler.main:main
+bcompiler-init = bcompiler.process.bootstrap:main
+
