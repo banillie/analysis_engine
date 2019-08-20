@@ -1,105 +1,47 @@
 '''
 
-Programme for pulling out a single bit of data across chosen number of quarters. Data of interest is to be specified
+Programme for pulling out single data point across chosen number of quarters.
 
 It outputs a workbook with some conditional formatting to show, 1) changes in reported data - highlighted by salmon
-pink background, 2)when projects were not reporting cell is grey.
-reporting.
+pink background, 2)when projects were not reporting cell is grey, 3) the relevant colour of the data represents a rag
+status
 
-Instructions are provided
+Follow instruction as set out below are provided
 
-##TODO adapt so can also return milestone dates. have done a quick hack on this.
 
 '''
+
 from openpyxl import Workbook
 from bcompiler.utils import project_data_from_master
 from openpyxl.styles import PatternFill, Font
 from openpyxl.styles.differential import DifferentialStyle
 from openpyxl.formatting.rule import Rule
 import random
-
-def all_milestone_data(master_data):
-    upper_dict = {}
-
-    for name in master_data:
-        p_data = master_data[name]
-        lower_dict = {}
-        for i in range(1, 50):
-            try:
-                try:
-                    lower_dict[p_data['Approval MM' + str(i)]] = p_data['Approval MM' + str(i) + ' Forecast / Actual']
-                except KeyError:
-                    lower_dict[p_data['Approval MM' + str(i)]] = p_data['Approval MM' + str(i) + ' Forecast - Actual']
-            except KeyError:
-                pass
-
-            try:
-                lower_dict[p_data['Assurance MM' + str(i)]] = p_data['Assurance MM' + str(i) + ' Forecast - Actual']
-            except:
-                pass
-
-        for i in range(18, 67):
-            try:
-                lower_dict[p_data['Project MM' + str(i)]] = p_data['Project MM' + str(i) + ' Forecast - Actual']
-            except:
-                pass
-
-        upper_dict[name] = lower_dict
-
-    return upper_dict
-
-def date_return_milestones(dict_list, project_list, data_key):
-    wb = Workbook()
-    ws = wb.active
-
-    '''lists project names in ws'''
-    for x in range(0, len(project_list)):
-        ws.cell(row=x + 2, column=1, value=project_list[x])
-
-    '''project data into ws'''
-    for row_num in range(2, ws.max_row + 1):
-        project_name = ws.cell(row=row_num, column=1).value
-        print(project_name)
-        col_start = 2
-        for i, dictionary in enumerate(dict_list):
-            if project_name in dictionary:
-                ws.cell(row=row_num, column=col_start).value = dictionary[project_name][data_key]
-                if dictionary[project_name][data_key] == None:
-                    ws.cell(row=row_num, column=col_start).value = 'None'
-                try:
-                    if dict_list[i + 1][project_name][data_key] != dictionary[project_name][data_key]:
-                        # ws.cell(row=row_num, column=col_start).font = red_text # option of red text here
-                        ws.cell(row=row_num, column=col_start).fill = salmon_fill
-                except (IndexError, KeyError):
-                    pass
-                col_start += 1
-            else:
-                ws.cell(row=row_num, column=col_start).value = 'Not reporting'
-                col_start += 1
-
-    '''quarter tag / meta data into ws'''
-    quarter_labels = get_quarter_stamp(dict_list)
-    ws.cell(row=1, column=1, value='Project')
-    for i, label in enumerate(quarter_labels):
-        ws.cell(row=1, column=i + 2, value=label)
-
-    conditional_formatting(ws)  # apply conditional formatting
-
-    return wb
+from data import q1_1920, one_quarter_dict_list, bespoke_group_dict_list, list_of_dicts_all
+from engine_functions import all_milestone_data_bulk
 
 def data_return(dict_list, project_list, data_key):
+    ''' places all (non milestone) data of interest into excel file output '''
+
+    salmon_fill = PatternFill(start_color='ff8080', end_color='ff8080', fill_type='solid')
+    # red_text = Font(color="FF0000") #currently not in use
+
     wb = Workbook()
     ws = wb.active
 
     '''lists project names in ws'''
     for x in range(0, len(project_list)):
-        ws.cell(row=x + 2, column=1, value=project_list[x])
+        try:
+            ws.cell(row=x + 2, column=1).value = dict_list[0][project_list[x]]['DfT Group']
+        except KeyError:
+            pass
+        ws.cell(row=x + 2, column=2, value=project_list[x])
 
     '''project data into ws'''
     for row_num in range(2, ws.max_row + 1):
-        project_name = ws.cell(row=row_num, column=1).value
+        project_name = ws.cell(row=row_num, column=2).value
         print(project_name)
-        col_start = 2
+        col_start = 3
         for i, dictionary in enumerate(dict_list):
             if project_name in dictionary:
                 ws.cell(row=row_num, column=col_start).value = dictionary[project_name][data_key]
@@ -107,7 +49,6 @@ def data_return(dict_list, project_list, data_key):
                     ws.cell(row=row_num, column=col_start).value = 'None'
                 try:
                     if dict_list[i+1][project_name][data_key] != dictionary[project_name][data_key]:
-                        #ws.cell(row=row_num, column=col_start).font = red_text # option of red text here
                         ws.cell(row=row_num, column=col_start).fill = salmon_fill
                 except (IndexError, KeyError):
                     pass
@@ -118,16 +59,80 @@ def data_return(dict_list, project_list, data_key):
 
     '''quarter tag / meta data into ws'''
     quarter_labels = get_quarter_stamp(dict_list)
-    ws.cell(row=1, column=1, value='Project')
+    ws.cell(row=1, column=1, value='Group')
+    ws.cell(row=1, column=2, value='Project')
     for i, label in enumerate(quarter_labels):
-        ws.cell(row=1, column=i + 2, value=label)
+        ws.cell(row=1, column=i + 3, value=label)
 
     conditional_formatting(ws)  # apply conditional formatting
 
     return wb
 
-'''function for applying rag rating conditional formatting colouring if required'''
+def milestone_data_return(dict_list, project_list, data_key):
+    ''' places all (non milestone) data of interest into excel file output '''
+
+    salmon_fill = PatternFill(start_color='ff8080', end_color='ff8080', fill_type='solid')
+    # red_text = Font(color="FF0000") #currently not in use
+
+    wb = Workbook()
+    ws = wb.active
+
+    '''lists project names in ws'''
+    for x in range(0, len(project_list)):
+        try:
+            ws.cell(row=x + 2, column=1).value = dict_list[0][project_list[x]]['DfT Group']
+        except KeyError:
+            pass
+        ws.cell(row=x + 2, column=2, value=project_list[x])
+
+    '''project data into ws'''
+    for row_num in range(2, ws.max_row + 1):
+        project_name = ws.cell(row=row_num, column=2).value
+        print(project_name)
+        col_start = 3
+        for i, dictionary in enumerate(dict_list):
+            if project_name in dictionary:
+
+                milestone_dict = all_milestone_data_bulk([project_name], dictionary)
+                #print(milestone_dict)
+
+                try:
+                    ws.cell(row=row_num, column=col_start).value = tuple(milestone_dict[project_name][data_key])[0]
+
+                    if tuple(milestone_dict[project_name][data_key])[0] is None:
+                        ws.cell(row=row_num, column=col_start).value = 'None'
+                except KeyError:
+                    ws.cell(row=row_num, column=col_start).value = 'None'
+
+                try:
+
+                    last_milestone_dict = all_milestone_data_bulk([project_name], dict_list[i + 1])
+
+                    if tuple(last_milestone_dict[project_name][data_key])[0] != \
+                            tuple(milestone_dict[project_name][data_key])[0]:
+                        ws.cell(row=row_num, column=col_start).fill = salmon_fill
+                except (IndexError, KeyError):
+                    pass
+                col_start += 1
+            else:
+                ws.cell(row=row_num, column=col_start).value = 'Not reporting'
+                col_start += 1
+
+    '''quarter tag / meta data into ws'''
+    quarter_labels = get_quarter_stamp(dict_list)
+    ws.cell(row=1, column=1, value='Group')
+    ws.cell(row=1, column=2, value='Project')
+    for i, label in enumerate(quarter_labels):
+        ws.cell(row=1, column=i + 3, value=label)
+
+    conditional_formatting(ws)  # apply conditional formatting
+
+    return wb
+
 def conditional_formatting(worksheet):
+
+    '''function for applying rag rating conditional formatting colouring if required'''
+
     ag_text = Font(color="000000")
     ag_fill = PatternFill(bgColor="00a5b700")
     dxf = DifferentialStyle(font=ag_text, fill=ag_fill)
@@ -181,6 +186,8 @@ def conditional_formatting(worksheet):
     return worksheet
 
 def get_all_project_names(dict_list):
+
+    '''returns list of all projects across multiple dictionaries'''
     output_list = []
     for dict in dict_list:
         for name in dict:
@@ -190,6 +197,9 @@ def get_all_project_names(dict_list):
     return output_list
 
 def get_quarter_stamp(dict_list):
+
+    '''used to specify the quarter being reported'''
+
     output_list = []
     for dict in dict_list:
         proj_name = random.choice(list(dict.keys()))
@@ -198,64 +208,32 @@ def get_quarter_stamp(dict_list):
 
     return output_list
 
-red_text = Font(color="FF0000")
 
-salmon_fill = PatternFill(start_color='ff8080',
-                   end_color='ff8080',
-                   fill_type='solid')
+''' RUNNING PROGRAMME '''
 
-def place_in_order(data, category):
-    category_list = []
+'''Note that the all master data is taken from the data file'''
 
-    for project_name in data:
-        category_list.append(data[project_name][category])
-
-    list(set(category_list))
-
-    return category_list
-
-'''RUNNING PROGRAMME'''
-
-''' ONE. master data sources - this can be added to. If a quarter is not required it should be # out'''
-q1_1920 = project_data_from_master('C:\\Users\\Standalone\\general\\masters folder\\core_data\\master_1_2019_wip_(25_7_19).xlsx')
-q4_1819 = project_data_from_master('C:\\Users\\Standalone\\general\\masters folder\\core_data\\master_4_2018.xlsx')
-q3_1819 = project_data_from_master('C:\\Users\\Standalone\\general\\masters folder\\core_data\\master_3_2018.xlsx')
-q2_1819 = project_data_from_master('C:\\Users\\Standalone\\general\\masters folder\\core_data\\master_2_2018.xlsx')
-q1_1819 = project_data_from_master('C:\\Users\\Standalone\\general\\masters folder\\core_data\\master_1_2018.xlsx')
-q4_1718 = project_data_from_master('C:\\Users\\Standalone\\general\\masters folder\\core_data\\master_4_2017.xlsx')
-q3_1718 = project_data_from_master('C:\\Users\\Standalone\\general\\masters folder\\core_data\\master_3_2017.xlsx')
-q2_1718 = project_data_from_master('C:\\Users\\Standalone\\general\\masters folder\\core_data\\master_2_2017.xlsx')
-q1_1718 = project_data_from_master('C:\\Users\\Standalone\\general\\masters folder\\core_data\\master_1_2017.xlsx')
-q4_1617 = project_data_from_master('C:\\Users\\Standalone\\general\\masters folder\\core_data\\master_4_2016.xlsx')
-q3_1617 = project_data_from_master('C:\\Users\\Standalone\\general\\masters folder\\core_data\\master_3_2016.xlsx')
-
-''' TWO. list of master data dictionaries. There are two options. chose a tailor list, which will often be one - the 
-most recent quarter, or a combined list - this will often be all.this should be consistent with mata data sources given 
-above'''
-one_quarter_dict_list = [q1_1920]
-bespoke_group_dict_list = [q1_1920, q4_1819]
-list_of_dicts_all = [q1_1920, q4_1819, q3_1819, q2_1819, q1_1819, q4_1718, q3_1718, q2_1718, q1_1718, q4_1617, q3_1617]
-
-''' THREE. Compiling list of projects. There are two options. you can return data for projects currently in the 
-portfolio in a given quarter, only. Or you can return the total number/names of projects that have been in the 
- portfolio over all the master data dictionaries stated above'''
+''' ONE. Set relevant list of projects. This needs to be done in accordance with the data you are working with via the
+ data.py file '''
 one_quarter_list = list(q1_1920.keys())
 combined_quarters_list = get_all_project_names(list_of_dicts_all)
-specific_project_list = []
+specific_project_list = [] # opportunity to provide manual list of projects
 
-'''FOUR. consider if it's useful to place data in a particular order'''
-# group_names = ['Rail Group', 'HSMRPG', 'International Security and Environment', 'Roads Devolution & Motoring']
-# filtered_list_one = filter_group(one, 'HSMRPG')
-# filtered_list_two = filter_group(two, 'HSMRPG')
-# overall_list = sorted(list(set(filtered_list_one + filtered_list_two)))  ### To be completed
+'''TWO. Set data of interest. there are two options here. hash out whichever option you are not using'''
 
-'''FIVE. set data of interest. the list previously_used is simply a place to store previous day keys of interest so they
-can be accessed again easily'''
+'''option one - non-milestone data'''
+#data_interest = 'DfT Group'
 
-data_interest = 'BICC approval point'
+'''option two - milestone data'''
+milestone_data_interest = 'Project End Date'
 
-'''SIX. command to run the programme'''
+'''THREE. Run the programme'''
 
-run = data_return(list_of_dicts_all, combined_quarters_list, data_interest)
+'''option one - run the data_return function for all non-milestone data'''
+#run = data_return(list_of_dicts_all, combined_quarters_list, data_interest)
 
-run.save('C:\\Users\\Standalone\\general\\FBC_approvals_2.xlsx')
+'''option two - run the milestone_data_return for all milestone data'''
+run = milestone_data_return(list_of_dicts_all, one_quarter_list, milestone_data_interest)
+
+'''FOUR. specify the file path and name of the output document'''
+run.save('C:\\Users\\Standalone\\general\\project_end_date.xlsx')
