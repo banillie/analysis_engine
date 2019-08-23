@@ -18,7 +18,8 @@ See instructions on how to operate programme below.
 import datetime
 from bcompiler.utils import project_data_from_master
 from openpyxl import Workbook
-from engine_functions import all_milestone_data_bulk, ap_p_milestone_data_bulk, assurance_milestone_data_bulk, project_time_difference, bc_ref_stages, get_master_baseline_dict
+from analysis.engine_functions import all_milestone_data_bulk, ap_p_milestone_data_bulk, assurance_milestone_data_bulk, \
+    project_time_difference, bc_ref_stages, get_master_baseline_dict
 
 '''function for putting all data into excel for this programme'''
 def put_into_wb_all(project_list, t_dict, td_dict, td_dict2, wb):
@@ -157,4 +158,4 @@ print_miles = \
 
 '''5) specify file path to output document'''
 print_miles.save('C:\\Users\\Standalone\\general\\masters folder\\portfolio_milestones\\'
-                 'testing_engine.xlsx')
+                 'ok.xlsx')
