@@ -37,7 +37,10 @@ def create_master(workbook, latest_q_data):
                 ws.cell(row=row_num, column=2+i).value = latest_q_data[name][key]
             elif key not in latest_q_data[name].keys():
                 altered_lst_quarter = key.replace("lst qrt ", "")
-                ws.cell(row=row_num, column=2 + i).value = latest_q_data[name][altered_lst_quarter]
+                try:
+                    ws.cell(row=row_num, column=2 + i).value = latest_q_data[name][altered_lst_quarter]
+                except KeyError:
+                    ws.cell(row=row_num, column=40).value = 'Couldnt match'
                 ws.cell(row=row_num, column=2 + i).font = red_text
             else:
                 ws.cell(row=row_num, column=40).value = 'Couldnt match'
@@ -55,10 +58,12 @@ def create_master(workbook, latest_q_data):
     return workbook
 
 
-latest_dm = load_workbook("C:\\Users\\Standalone\\general\\masters folder\\commission\\Q2_1920_commission_testing.xlsx")
+latest_dm = load_workbook("C:\\Users\\Standalone\\general\\masters folder\\commission\\Q2_1920_commission_"
+                          "master_testing.xlsx")
 # 1) place file path to gmpp data map here
 
 run = create_master(latest_dm, q1_1920)
 
-run.save("C:\\Users\\Standalone\\general\\test_2.xlsx")
+run.save("C:\\Users\\Standalone\\general\\masters folder\\commission\\Q2_1920_commission_"
+                          "data_testing.xlsx")
 # Place file path for whether you want file to be saved and what you'd like it to be called here
