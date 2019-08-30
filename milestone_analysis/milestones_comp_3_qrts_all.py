@@ -16,10 +16,10 @@ See instructions on how to operate programme below.
 #TODO solve problem re filtering in excle when values have + sign in front of the them
 
 import datetime
-from bcompiler.utils import project_data_from_master
 from openpyxl import Workbook
 from analysis.engine_functions import all_milestone_data_bulk, ap_p_milestone_data_bulk, assurance_milestone_data_bulk, \
     project_time_difference, bc_ref_stages, get_master_baseline_dict
+from analysis.data import q1_1920, list_of_dicts_all
 
 '''function for putting all data into excel for this programme'''
 def put_into_wb_all(project_list, t_dict, td_dict, td_dict2, wb):
@@ -117,24 +117,6 @@ def run_milestone_comparator(function, proj_list, q_masters_dict_list, date_of_i
 
 '''INSTRUCTIONS FOR RUNNING THE PROGRAMME'''
 
-'''1) load all master quarter data files here'''
-q1_1920 = project_data_from_master('C:\\Users\\Standalone\\general\\masters folder\\core_data\\master_1_2019_wip'
-                                   '_(25_7_19).xlsx')
-q4_1819 = project_data_from_master('C:\\Users\\Standalone\\general\\masters folder\\core_data\\master_4_2018.xlsx')
-q3_1819 = project_data_from_master('C:\\Users\\Standalone\\general\\masters folder\\core_data\\master_3_2018.xlsx')
-q2_1819 = project_data_from_master('C:\\Users\\Standalone\\general\\masters folder\\core_data\\master_2_2018.xlsx')
-q1_1819 = project_data_from_master('C:\\Users\\Standalone\\general\\masters folder\\core_data\\master_1_2018.xlsx')
-q4_1718 = project_data_from_master('C:\\Users\\Standalone\\general\\masters folder\\core_data\\master_4_2017.xlsx')
-q3_1718 = project_data_from_master('C:\\Users\\Standalone\\general\\masters folder\\core_data\\master_3_2017.xlsx')
-q2_1718 = project_data_from_master('C:\\Users\\Standalone\\general\\masters folder\\core_data\\master_2_2017.xlsx')
-q1_1718 = project_data_from_master('C:\\Users\\Standalone\\general\\masters folder\\core_data\\master_1_2017.xlsx')
-q4_1617 = project_data_from_master('C:\\Users\\Standalone\\general\\masters folder\\core_data\\master_4_2016.xlsx')
-q3_1617 = project_data_from_master('C:\\Users\\Standalone\\general\\masters folder\\core_data\\master_3_2016.xlsx')
-
-'''2) Include in the below list, as the variable names, those quarters to include in analysis'''
-list_of_dicts_all = [q1_1920 ,q4_1819, q3_1819, q2_1819, q1_1819, q4_1718, q3_1718, q2_1718, q1_1718, q4_1617, q3_1617]
-#list_of_dicts_bespoke = [zero, last]
-
 ''' 3) set list of projects to be included in output. Still in development'''
 '''option one - all projects'''
 latest_q_list = list(q1_1920.keys())
@@ -146,7 +128,7 @@ group_projects_list = ['Rail Group', 'HSMRPG', 'International Security and Envir
 one_proj_list = ['Thameslink Programme']
 
 '''4) Specify date after which project milestones should be returned. NOTE: Python date format is (YYYY,MM,DD)'''
-start_date = datetime.date(2019, 1, 1)
+start_date = datetime.date(2019, 6, 1)
 
 '''5) choose the type of variables that you would like to place in run_milestone_comparator function, below. 
 The type of milestone you wish to analysis can be specified through choosing
@@ -154,8 +136,7 @@ all_milestone_data_bulk, ap_p_milestone_data_bulk, or assurance_milestone_data_b
 first to be inserted into the below function. After this select the list of the projects on which to perform analysis 
 and then the three quarters data that you have put into variables above, in order of newest to oldest.'''
 print_miles = \
-    run_milestone_comparator(all_milestone_data_bulk, latest_q_list, list_of_dicts_all, start_date)
+    run_milestone_comparator(assurance_milestone_data_bulk, latest_q_list, list_of_dicts_all, start_date)
 
 '''5) specify file path to output document'''
-print_miles.save('C:\\Users\\Standalone\\general\\masters folder\\portfolio_milestones\\'
-                 'ok.xlsx')
+print_miles.save('C:\\Users\\Standalone\\general\\assurance.xlsx')

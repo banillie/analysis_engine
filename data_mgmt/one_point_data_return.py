@@ -11,13 +11,12 @@ Follow instruction as set out below are provided
 '''
 
 from openpyxl import Workbook
-from bcompiler.utils import project_data_from_master
 from openpyxl.styles import PatternFill, Font
 from openpyxl.styles.differential import DifferentialStyle
 from openpyxl.formatting.rule import Rule
 import random
-from data import q1_1920, one_quarter_dict_list, bespoke_group_dict_list, list_of_dicts_all
-from engine_functions import all_milestone_data_bulk
+from analysis.data import q1_1920, one_quarter_dict_list, bespoke_group_dict_list, list_of_dicts_all
+from analysis.engine_functions import all_milestone_data_bulk, ap_p_milestone_data_bulk
 
 def data_return(dict_list, project_list, data_key):
     ''' places all (non milestone) data of interest into excel file output '''
@@ -43,15 +42,18 @@ def data_return(dict_list, project_list, data_key):
         col_start = 3
         for i, dictionary in enumerate(dict_list):
             if project_name in dictionary:
-                ws.cell(row=row_num, column=col_start).value = dictionary[project_name][data_key]
-                if dictionary[project_name][data_key] == None:
-                    ws.cell(row=row_num, column=col_start).value = 'None'
                 try:
-                    if dict_list[i+1][project_name][data_key] != dictionary[project_name][data_key]:
-                        ws.cell(row=row_num, column=col_start).fill = salmon_fill
-                except (IndexError, KeyError):
-                    pass
-                col_start += 1
+                    ws.cell(row=row_num, column=col_start).value = dictionary[project_name][data_key]
+                    if dictionary[project_name][data_key] == None:
+                        ws.cell(row=row_num, column=col_start).value = 'None'
+                    try:
+                        if dict_list[i+1][project_name][data_key] != dictionary[project_name][data_key]:
+                            ws.cell(row=row_num, column=col_start).fill = salmon_fill
+                    except (IndexError, KeyError):
+                        pass
+                    col_start += 1
+                except KeyError:
+                    ws.cell(row=row_num, column=col_start).value = 'data key not collected'
             else:
                 ws.cell(row=row_num, column=col_start).value = 'Not reporting'
                 col_start += 1
@@ -221,18 +223,18 @@ specific_project_list = [] # opportunity to provide manual list of projects
 '''TWO. Set data of interest. there are two options here. hash out whichever option you are not using'''
 
 '''option one - non-milestone data'''
-#data_interest = 'DfT Group'
+data_interest = 'Senior Responsible Owner (SRO)'
 
 '''option two - milestone data'''
-milestone_data_interest = 'Project End Date'
+#milestone_data_interest = 'Project End Date'
 
 '''THREE. Run the programme'''
 
 '''option one - run the data_return function for all non-milestone data'''
-#run = data_return(list_of_dicts_all, combined_quarters_list, data_interest)
+run = data_return(list_of_dicts_all, combined_quarters_list, data_interest)
 
 '''option two - run the milestone_data_return for all milestone data'''
-run = milestone_data_return(list_of_dicts_all, one_quarter_list, milestone_data_interest)
+#run = milestone_data_return(list_of_dicts_all, one_quarter_list, milestone_data_interest)
 
 '''FOUR. specify the file path and name of the output document'''
-run.save('C:\\Users\\Standalone\\general\\project_end_date.xlsx')
+run.save('C:\\Users\\Standalone\\general\\SROs.xlsx')
