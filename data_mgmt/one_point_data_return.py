@@ -223,7 +223,7 @@ specific_project_list = [] # opportunity to provide manual list of projects
 '''TWO. Set data of interest. there are two options here. hash out whichever option you are not using'''
 
 '''option one - non-milestone data'''
-data_interest = 'Senior Responsible Owner (SRO)'
+data_interest = 'Milestone Commentary'
 
 '''option two - milestone data'''
 #milestone_data_interest = 'Project End Date'
@@ -237,4 +237,4 @@ run = data_return(list_of_dicts_all, combined_quarters_list, data_interest)
 #run = milestone_data_return(list_of_dicts_all, one_quarter_list, milestone_data_interest)
 
 '''FOUR. specify the file path and name of the output document'''
-run.save('C:\\Users\\Standalone\\general\\SROs.xlsx')
+run.save('C:\\Users\\Standalone\\general\\sro_schedule_narratives.xlsx')
