@@ -141,10 +141,105 @@ def create_master(workbook, latest_q_data):
                         ws.cell(row=row_num, column=2 + i).value = \
                             dn_combine_text(latest_q_data[name], ['Job Title', 'PD Grade'])
 
+                    '''handling of resourcing info'''
+                    if key == "lst qrt Digital - Now":
+                        ws.cell(row=row_num, column=2 + i).value = \
+                            resource_combine_text(latest_q_data[name], ['Digital - Now', 'Digital - Future',
+                                                                        'Digital Short Narrative (Amber or Red)'])
+                    if key == "lst qrt Information Technology - Now":
+                        ws.cell(row=row_num, column=2 + i).value = \
+                            resource_combine_text(latest_q_data[name], ['Information Technology - Now', 'Information Technology - Future',
+                                                                        'Information Technology Short Narrative (Amber or Red)'])
+                    if key == "lst qrt Legal Commercial Contract Management - Now":
+                        ws.cell(row=row_num, column=2 + i).value = \
+                            resource_combine_text(latest_q_data[name], ['Legal Commercial Contract Management - Now', 'Legal Commercial Contract Management - Future',
+                                                                        'Legal Commercial Contract Management Short Narrative (Amber or Red)'])
+                    if key == "lst qrt Project Delivery - Now":
+                        ws.cell(row=row_num, column=2 + i).value = \
+                            resource_combine_text(latest_q_data[name], ['Project Delivery - Now', 'Project Delivery - Future',
+                                                                        'Project Delivery Short Narrative (Amber or Red)'])
+                    if key == "lst qrt Change Implementation - Now":
+                        ws.cell(row=row_num, column=2 + i).value = \
+                            resource_combine_text(latest_q_data[name], ['Change Implementation - Now', 'Change Implementation - Future',
+                                                                        'Change Implementation Short Narrative (Amber or Red)'])
+                    if key == "lst qrt Technical - Now":
+                        ws.cell(row=row_num, column=2 + i).value = \
+                            resource_combine_text(latest_q_data[name], ['Technical - Now', 'Technical - Future',
+                                                                        'Technical Short Narrative (Amber or Red)'])
+                    if key == "lst qrt Industry Knowledge - Now":
+                        ws.cell(row=row_num, column=2 + i).value = \
+                            resource_combine_text(latest_q_data[name], ['Industry Knowledge - Now', 'Industry Knowledge - Future',
+                                                                        'Industry Knowledge Short Narrative (Amber or Red)'])
+                    if key == "lst qrt Finance - Now":
+                        ws.cell(row=row_num, column=2 + i).value = \
+                            resource_combine_text(latest_q_data[name], ['Finance - Now', 'Finance - Future',
+                                                                        'Finance Short Narrative (Amber or Red)'])
+                    if key == "lst qrt Analysis Now":
+                        ws.cell(row=row_num, column=2 + i).value = \
+                            resource_combine_text(latest_q_data[name], ['Analysis - Now', 'Analysis - Future',
+                                                                        'Analysis Short Narrative (Amber or Red)'])
+                    if key == "lst qrt Communications & Stakeholder Engagement - Now":
+                        ws.cell(row=row_num, column=2 + i).value = \
+                            resource_combine_text(latest_q_data[name], ['Communications & Stakeholder Engagement - Now', 'Communications & Stakeholder Engagement - Future',
+                                                                        'Communications & Stakeholder Engagement Short Narrative (Amber or Red)'])
+
+                    '''handling of extra resource'''
+                    if key == "lst qrt Additional Capability 1 Descriptor":
+                        ws.cell(row=row_num, column=2 + i).value = \
+                            extra_resource_combine_text(latest_q_data[name], ['Additional Capability 1 Descriptor', 'Additional Capability 1 Now',
+                                                                        'Additional Capability 1 Future', 'Additional Capability 1 Short Narrative (Amber or Red)'])
+                    if key == "lst qrt Additional Capability 2 Descriptor":
+                        ws.cell(row=row_num, column=2 + i).value = \
+                            extra_resource_combine_text(latest_q_data[name], ['Additional Capability 2 Descriptor', 'Additional Capability 2 Now',
+                                                                        'Additional Capability 2 Future', 'Additional Capability 2 Short Narrative (Amber or Red)'])
+                    if key == "lst qrt Additional Capability 3 Descriptor":
+                        ws.cell(row=row_num, column=2 + i).value = \
+                            extra_resource_combine_text(latest_q_data[name], ['Additional Capability 3 Descriptor', 'Additional Capability 3 Now',
+                                                                        'Additional Capability 3 Future', 'Additional Capability 3 Short Narrative (Amber or Red)'])
+                    if key == "lst qrt Additional Capability 4 Descriptor":
+                        ws.cell(row=row_num, column=2 + i).value = \
+                            extra_resource_combine_text(latest_q_data[name], ['Additional Capability 4 Descriptor', 'Additional Capability 4 Now',
+                                                                        'Additional Capability 4 Future', 'Additional Capability 4 Short Narrative (Amber or Red)'])
+                    if key == "lst qrt Additional Capability 5 Descriptor":
+                        ws.cell(row=row_num, column=2 + i).value = \
+                            extra_resource_combine_text(latest_q_data[name], ['Additional Capability 5 Descriptor', 'Additional Capability 5 Now',
+                                                                        'Additional Capability 5 Future', 'Additional Capability 5 Short Narrative (Amber or Red)'])
+
+
+                    '''handling of project costs'''
+                    if key == "lst qrt RDEL one off costs":
+                        ws.cell(row=row_num, column=2 + i).value = \
+                            combine_figures(latest_q_data[name], ['Total RDEL BL one off new costs', 'Total RDEL Forecast one off new costs'])
+                    if key == "lst qrt RDEL recurring new costs":
+                        ws.cell(row=row_num, column=2 + i).value = \
+                            combine_figures(latest_q_data[name], ['Total RDEL BL recurring new costs', 'Total RDEL Forecast recurring new costs'])
+                    if key == "lst qrt RDEL recurring old costs":
+                        ws.cell(row=row_num, column=2 + i).value = \
+                            combine_figures(latest_q_data[name], ['Total RDEL BL recurring old costs', 'Total RDEL Forecast recurring old costs'])
+                    if key == "lst qrt RDEL non gov":
+                        ws.cell(row=row_num, column=2 + i).value = \
+                            combine_figures(latest_q_data[name], ['Total RDEL BL Non Gov costs', 'Total RDEL Forecast Non Gov costs'])
+                    if key == "lst qrt CDEL one off costs":
+                        ws.cell(row=row_num, column=2 + i).value = \
+                            combine_figures(latest_q_data[name], ['Total CDEL BL one off new costs', 'Total CDEL Forecast Total'])
+
 
                     if key == "lst qrt Total Budget/BL":
                         ws.cell(row=row_num, column=2 + i).value = combine_figures(latest_q_data[name],
                                                                                    ['Total Budget/BL', 'Total Forecast'])
+                    if key == "lst qrt 19-20 RDEL BL one off new costs":
+                        ws.cell(row=row_num, column=2 + i).value = combine_figures(latest_q_data[name],
+                                                                                   ['19-20 RDEL BL one off new costs', '19-20 RDEL BL Income'])
+                    if key == "lst qrt 19-20 RDEL Forecast one off new costs":
+                        ws.cell(row=row_num, column=2 + i).value = combine_figures(latest_q_data[name],
+                                                                                   ['19-20 RDEL Forecast one off new costs', '19-20 RDEL Forecast Income'])
+                    if key == "lst qrt 20-21 RDEL BL one off new costs":
+                        ws.cell(row=row_num, column=2 + i).value = combine_figures(latest_q_data[name],
+                                                                                   ['20-21 RDEL BL one off new costs', '20-21 RDEL BL Income'])
+                    if key == "lst qrt 20-21 RDEL Forecast one off new costs":
+                        ws.cell(row=row_num, column=2 + i).value = combine_figures(latest_q_data[name],
+                                                                                   ['20-21 RDEL Forecast one off new costs', '20-21 RDEL Forecast Income'])
+
                 except KeyError:
                     ws.cell(row=row_num, column=40).value = 'Couldnt match'
                 ws.cell(row=row_num, column=2 + i).font = red_text
@@ -182,6 +277,33 @@ def strategic_combine_text(q_data, string_list):
 
     if 'None' in combined_string:
         combined_string = ''
+
+    return combined_string
+
+def resource_combine_text(q_data, string_list):
+
+    '''essentially used to combined four text strings. different out to strategy above'''
+
+    text = string_list[0]
+    first_bit = ''
+    for i in text:
+        if i is not '-':
+            first_bit += i
+        else:
+            break
+
+    combined_string = first_bit[0:-1] + ' - ' + str(q_data[string_list[0]]) + ' : ' + str(q_data[string_list[1]]) + ' ; ' + \
+                      str(q_data[string_list[2]])
+
+    return combined_string
+
+def extra_resource_combine_text(q_data, string_list):
+
+    '''essentially used to combined four text strings. different out to strategy above'''
+
+
+    combined_string = str(q_data[string_list[0]]) + ' - ' + str(q_data[string_list[1]]) + ' : ' + \
+                      str(q_data[string_list[2]]) + ' ; ' + str(q_data[string_list[3]])
 
     return combined_string
 
