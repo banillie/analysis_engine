@@ -4,6 +4,7 @@
     <content url="file://$MODULE_DIR$">
       <excludeFolder url="file://$MODULE_DIR$/venu" />
     </content>
+    <content url="file://$USER_HOME$/python_libraries/projectlibrary/analysis" />
     <orderEntry type="jdk" jdkName="Python 3.6 (portfolio_analysis_env)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
