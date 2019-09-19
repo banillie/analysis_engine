@@ -1,0 +1,9 @@
+bcompiler==1.3.22
+colorama==0.4.1
+colorlog==4.0.2
+et-xmlfile==1.0.1
+jdcal==1.4.1
+openpyxl==2.6.2
+-e git+https://github.com/banillie/projectlibrary.git@4bbaf58085e88cea66b9582fd1304842bb54525d#egg=projectlibrary
+python-dateutil==2.8.0
+six==1.12.0
