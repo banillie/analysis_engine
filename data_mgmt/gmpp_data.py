@@ -144,8 +144,7 @@ def create_master(gmpp_wb, latest_data, last_gmpp):
 latest_dm = load_workbook("C:\\Users\\Standalone\\general\\masters folder\\gmpp_reporting\\gmpp_datamaps\\"
                           "gmpp_datamap.xlsx")    # 1) place file path to gmpp data map here
 
-dft_master = project_data_from_master("C:\\Users\\Standalone\\general\\masters folder\\core_data\\master_1_2019_wip"
-                                      "_(25_7_19).xlsx")
+dft_master = project_data_from_master("C:\\Users\\Standalone\\general\\masters folder\\core_data\\master_1_2019.xlsx")
 # 2) place file path to latest quarter master above
 
 old_hs2_master = project_data_from_master('C:\\Users\\Standalone\\general\\masters folder\\gmpp_reporting\\2018_19\\'
@@ -155,4 +154,3 @@ old_hs2_master = project_data_from_master('C:\\Users\\Standalone\\general\\maste
 run = create_master(latest_dm, dft_master, old_hs2_master)
 
 run.save("C:\\Users\\Standalone\\general\\test.xlsx")
-# Place file path for whether you want file to be saved and what you'd like it to be called here
