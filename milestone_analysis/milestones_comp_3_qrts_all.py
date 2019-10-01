@@ -1,4 +1,6 @@
-'''This programme to calculate time difference between reported milestones
+'''
+
+This programme to calculate time difference between reported milestones
 
 input documents:
 There quarters master information, typically:

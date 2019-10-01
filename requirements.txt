@@ -1,6 +1,8 @@
-bcompiler==1.3.22
+appdirs==1.4.3
+Click==7.0
 colorama==0.4.1
 colorlog==4.0.2
+datamaps==1.0.0b0
 et-xmlfile==1.0.1
 jdcal==1.4.1
 openpyxl==2.6.2
