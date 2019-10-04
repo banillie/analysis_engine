@@ -20,12 +20,12 @@ manually checked to verify that the data is red.
 
 '''
 
-from openpyxl import load_workbook, Workbook
+#import datetime
+from datamaps.api import project_data_from_master
+from openpyxl import Workbook, load_workbook
 #from collections import OrderedDict
 #from openpyxl.utils import column_index_from_string
-from openpyxl.styles import Color, PatternFill, Font, Border
-#import datetime
-from bcompiler.utils import project_data_from_master
+from openpyxl.styles import Border, Color, Font, PatternFill
 
 
 def create_master(gmpp_wb, latest_data, last_gmpp):
@@ -124,7 +124,7 @@ def create_master(gmpp_wb, latest_data, last_gmpp):
     for i, name in enumerate(gmpp_project_names):
         if name == 'High Speed Rail Programme (HS2)':
             print('HS2 financial data has been amended')
-            '''note minus 20 here. bug in the loop I haven't fixed yet. probably something to do with how data is 
+            '''note minus 20 here. bug in the loop I haven't fixed yet. probably something to do with how data is
             recorded in DM'''
             for row_num in range(2, ws.max_row-20):
                 key = ws.cell(row=row_num, column=1).value
