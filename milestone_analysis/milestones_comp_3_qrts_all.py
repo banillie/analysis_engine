@@ -19,9 +19,9 @@ See instructions on how to operate programme below.
 
 import datetime
 from openpyxl import Workbook
-from analysis.engine_functions import all_milestone_data_bulk, ap_p_milestone_data_bulk, assurance_milestone_data_bulk, \
+from engine_functions import all_milestone_data_bulk, ap_p_milestone_data_bulk, assurance_milestone_data_bulk, \
     project_time_difference, bc_ref_stages, get_master_baseline_dict
-from analysis.data import q1_1920, list_of_dicts_all
+from data import q1_1920, list_of_dicts_all
 
 '''function for putting all data into excel for this programme'''
 def put_into_wb_all(project_list, t_dict, td_dict, td_dict2, wb):
@@ -121,7 +121,7 @@ def run_milestone_comparator(function, proj_list, q_masters_dict_list, date_of_i
 
 ''' 3) set list of projects to be included in output. Still in development'''
 '''option one - all projects'''
-latest_q_list = list(q1_1920.keys())
+latest_q_list = q1_1920.projects
 
 '''option two - group of projects... in development'''
 group_projects_list = ['Rail Group', 'HSMRPG', 'International Security and Environment', 'Roads Devolution & Motoring']
