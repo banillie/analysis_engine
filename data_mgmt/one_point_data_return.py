@@ -17,7 +17,7 @@ from openpyxl.styles import PatternFill, Font
 from openpyxl.styles.differential import DifferentialStyle
 from openpyxl.formatting.rule import Rule
 import random
-from analysis.data import q1_1920, one_quarter_dict_list, bespoke_group_dict_list, list_of_dicts_all
+from analysis.data import q1_1920, one_quarter_master_list, bespoke_group_masters_list, list_of_masters_all
 from analysis.engine_functions import all_milestone_data_bulk, ap_p_milestone_data_bulk
 
 def data_return(masters_list, project_name_list, data_key):
@@ -245,7 +245,7 @@ def get_quarter_stamp(masters_list):
 ''' ONE. Set relevant list of projects. This needs to be done in accordance with the data you are working with via the
  data.py file '''
 one_quarter_list = q1_1920.projects
-combined_quarters_list = get_all_project_names(list_of_dicts_all)
+combined_quarters_list = get_all_project_names(list_of_masters_all)
 specific_project_list = [] # opportunity to provide manual list of projects
 
 '''TWO. Set data of interest. there are two options here. hash out whichever option you are not using'''
@@ -262,7 +262,7 @@ milestone_data_interest = 'Project End Date'
 #run = data_return(list_of_dicts_all, one_quarter_list, data_interest)
 
 '''option two - run the milestone_data_return for all milestone data'''
-run = milestone_data_return(list_of_dicts_all, one_quarter_list, milestone_data_interest)
+run = milestone_data_return(list_of_masters_all, one_quarter_list, milestone_data_interest)
 
 '''FOUR. specify the file path and name of the output document'''
 run.save('C:\\Users\\Standalone\\general\\project_end_date.xlsx')
