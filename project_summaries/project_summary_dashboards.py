@@ -171,7 +171,7 @@ def compare_text_newandold(text_1, text_2, doc):
 def printing(project_name, master_one, master_two, master_three, master_four, milestone_master):
     '''function that compiles the summary sheet'''
 
-    master_list = [master_one, master_two, master_three, master_4]
+    master_list = [master_one, master_two, master_three, master_four]
 
     doc = Document()
     print(project_name)
@@ -189,11 +189,12 @@ def printing(project_name, master_one, master_two, master_three, master_four, mi
         a = 'TBC'
     else:
         a = a
-        b = master_one.data[project_name]['SRO Phone No.']
-        if b == None:
-            b = 'TBC'
-        else:
-            b = b
+
+    b = master_one.data[project_name]['SRO Phone No.']
+    if b == None:
+        b = 'TBC'
+    else:
+        b = b
 
     y.add_run('SRO name:  ' + str(a) + ',   Tele:  ' + str(b))
 
@@ -289,7 +290,7 @@ def printing(project_name, master_one, master_two, master_three, master_four, mi
     e = b + c + d
     try:
         c = round(e / a * 100, 1)
-    except ZeroDivisionError:
+    except (ZeroDivisionError, TypeError):
         c = 0
     table1.cell(1, 1).text = str(c) + '%'
     a = str(master_one.data[project_name]['Source of Finance'])
@@ -309,8 +310,8 @@ def printing(project_name, master_one, master_two, master_three, master_four, mi
 
     #TODO further testing on code down to 308. current hard code solution not ideal, plus not sure working properly yet
 
-    gmpp_narrative_keys = ['Project Costs Narrative', 'Cost comparison with last quarters cost - narrative',
-                           'Cost comparison within this quarters cost - narrative']
+    gmpp_narrative_keys = ['Project Costs Narrative', 'Cost comparison with last quarters cost narrative',
+                           'Cost comparison within this quarters cost narrative']
 
     fin_text_1 = combine_narrtives(project_name, master_one, gmpp_narrative_keys)
     try:
@@ -424,7 +425,7 @@ quarter_list = ['This Quarter', 'Q1 1920', 'Q4 1819', 'Q3 1819']
 
 '''2) select list of projects that dashboards should be built for'''
 '''option one all'''
-current_q_list = q1_1920.projects
+current_q_list = q2_1920.projects
 
 '''option two select group - in dev'''
 #group_list = []
@@ -440,5 +441,5 @@ milestones = all_milestone_data_bulk(current_q_list, q1_1920)
 eventually placed in project file title'''
 for x in current_q_list:
     a = printing(x, q2_1920, q1_1920, q4_1819, q3_1819, milestones)
-    a.save('C://Users//Standalone//general//Q2_1920_{}_overview.docx'.format(x))
+    a.save('C://Users//Standalone//general//masters folder//project_dashboards//Q2_1920_{}_overview.docx'.format(x))
 
