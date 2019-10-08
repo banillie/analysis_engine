@@ -244,7 +244,7 @@ def printing(project_name, master_one, master_two, master_three, master_four, mi
                 rating = convert_rag_text(master.data[project_name][SRO_conf_key_list[i]])
                 table.cell(0, x + 1).text = rating
                 cell_colouring(table.cell(0, x + 1), rating)
-            except (TypeError, KeyError):
+            except TypeError:
                 table.cell(0, x + 1).text = 'N/A'
 
     '''DCA Narrative text'''
