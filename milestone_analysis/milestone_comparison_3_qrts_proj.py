@@ -1,0 +1,223 @@
+'''This programme to calculate time difference between reported milestones
+
+input documents:
+There quarters master information, typically:
+1) latest quarter data
+2) last quarter data
+3) year ago quarter data
+
+output document:
+1) excel workbook with all project milestone information
+
+See instructions on how to operate programme below.
+
+'''
+
+#TODO solve problem re filtering in excle when values have + sign in front of the them
+
+import datetime
+from openpyxl import Workbook
+from analysis.engine_functions import all_milestone_data_bulk, ap_p_milestone_data_bulk, assurance_milestone_data_bulk, \
+    project_time_difference, bc_ref_stages, get_master_baseline
+from analysis.data import q2_1920, list_of_masters_all
+
+
+def put_into_wb_all_single(project_name, t_data, td_data, td_data_two, baseline_list):
+    '''
+
+    Function that places all data into excel wb for this programme
+
+    project_name_list: list of project to return data for
+    t_data: dictionary containing milestone data for projects ToDO insert structure
+    td_data: dictionary containing time_delta milestone data for projects ToDo insert structure
+    td_data_two: dictionary containing second time_delta data for projects ToDO insert structure
+    wb: blank excel wb
+
+    '''
+
+    wb = Workbook()
+    ws = wb.active
+
+    row_num = 2
+    for i, milestone in enumerate(td_data[project_name].keys()):
+        ws.cell(row=row_num + i, column=1).value = project_name
+        ws.cell(row=row_num + i, column=2).value = milestone
+        try:
+            milestone_date = tuple(t_data[project_name][milestone])[0]
+            ws.cell(row=row_num + i, column=3).value = milestone_date
+        except KeyError:
+            ws.cell(row=row_num + i, column=3).value = 0
+
+        try:
+            value = td_data[project_name][milestone]
+            try:
+                if int(value) > 0:
+                    ws.cell(row=row_num + i, column=4).value = '+' + str(value) + ' (days)'
+                elif int(value) < 0:
+                    ws.cell(row=row_num + i, column=4).value = str(value) + ' (days)'
+                elif int(value) == 0:
+                    ws.cell(row=row_num + i, column=4).value = value
+            except ValueError:
+                ws.cell(row=row_num + i, column=4).value = value
+        except KeyError:
+            ws.cell(row=row_num + i, column=4).value = 0
+
+        try:
+            value = td_data_two[project_name][milestone]
+            try:
+                if int(value) > 0:
+                    ws.cell(row=row_num + i, column=5).value = '+' + str(value) + ' (days)'
+                elif int(value) < 0:
+                    ws.cell(row=row_num + i, column=5).value = str(value) + ' (days)'
+                elif int(value) == 0:
+                    ws.cell(row=row_num + i, column=5).value = value
+            except ValueError:
+                ws.cell(row=row_num + i, column=5).value = value
+        except KeyError:
+            ws.cell(row=row_num + i, column=5).value = 0
+
+        try:
+            milestone_date = tuple(t_data[project_name][milestone])[0]
+            ws.cell(row=row_num + i, column=6).value = t_data[project_name][milestone][milestone_date] # provided notes
+        except IndexError:
+            ws.cell(row=row_num + i, column=6).value = 0
+
+    ws.cell(row=1, column=1).value = 'Project'
+    ws.cell(row=1, column=2).value = 'Milestone'
+    ws.cell(row=1, column=3).value = 'Date'
+    ws.cell(row=1, column=4).value = '3/m change (days)'
+    ws.cell(row=1, column=5).value = 'baseline change (days)'
+    ws.cell(row=1, column=6).value = 'Notes'
+
+    ws.cell(row=1, column=8).value = 'data baseline quarter'
+    #ws.cell(row=2, column=8).value = baseline_list[project_name][2][0]
+
+    return wb
+
+# '''Function that checks whether reported milestone keys have changed between quarters'''
+# def check_m_keys_in_excel_single(name, t_dict_one, t_dict_two, t_dict_three):
+#     wb = Workbook()
+#     ws = wb.active
+#     red_text = Font(color="00fc2525")
+#
+#     row_num = 2
+#
+#     one = list(t_dict_one[name].keys())
+#     [x for x in one if x is not None].sort()
+#     two = list(t_dict_two[name].keys())
+#     [x for x in two if x is not None].sort()
+#     three = list(t_dict_three[name].keys())
+#     [x for x in three if x is not None].sort()
+#
+#     long = longest_list(one, two, three)
+#     for i in range(0, len(long)):
+#         ws.cell(row=row_num + i, column=1).value = name
+#         try:
+#             ws.cell(row=row_num + i, column=2).value = one[i]
+#         except IndexError:
+#             pass
+#         try:
+#             ws.cell(row=row_num + i, column=3).value = two[i]
+#             if two[i] not in one:
+#                 ws.cell(row=row_num + i, column=3).font = red_text
+#         except IndexError:
+#             pass
+#         try:
+#             ws.cell(row=row_num + i, column=4).value = three[i]
+#             if three[i] not in one:
+#                 ws.cell(row=row_num + i, column=4).font = red_text
+#         except IndexError:
+#             pass
+#
+#
+#     row_heading_list = ['Project', 'This quarter', 'Last quarter', 'Baseline quarter', 'KEY MATCH']
+#     for i, name in enumerate(row_heading_list):
+#         ws.cell(row=1, column=i+1).value = name
+#
+#     column_ltr_list = ['A', 'B', 'C', 'D', 'E']
+#     for ltr in (column_ltr_list):
+#         ws.column_dimensions[ltr].width = 40
+#
+#     return wb
+#
+# '''helper function for check_m_keys_in_excle'''
+# def longest_list(one, two, three):
+#     list_list = [one, two, three]
+#     a = len(one)
+#     b = len(two)
+#     c = len(three)
+#
+#     out = [a,b,c]
+#     out.sort()
+#     for x in list_list:
+#         if out[-1] == len(x):
+#             return x
+
+def run_milestone_comparator_single(function, project_name, masters_list, date_of_interest):
+    '''
+    Function that runs this programme.
+
+    function: The type of milestone you wish to analysis can be specified through choosing all_milestone_data_bulk,
+    ap_p_milestone_data_bulk, or assurance_milestone_data_bulk functions, all available from engine_function import
+    statement above.
+    project_name_list: list of project to return data for
+    masters_list: list of masters containing quarter information
+    date_of_interest: the date after which project milestones should be returned.
+
+    '''
+
+    '''firstly business cases of interest are filtered out by bc_ref_stage function'''
+    baseline_bc = bc_ref_stages([project_name], masters_list)
+    # print(baseline_bc)
+    baseline_list = get_master_baseline([project_name], masters_list, baseline_bc)
+    # print(q_masters_list)
+
+    p_current_milestones = function([project_name], masters_list[baseline_list[project_name][0]])
+    print(p_current_milestones)
+    p_last_milestones = function([project_name], masters_list[baseline_list[project_name][1]])
+    p_oldest_milestones = function([project_name], masters_list[baseline_list[project_name][2]])
+
+    '''calculate time current and last quarter'''
+    first_diff_dict = project_time_difference(p_current_milestones, p_last_milestones, date_of_interest)
+    second_diff_dict = project_time_difference(p_current_milestones, p_oldest_milestones, date_of_interest)
+
+    run = put_into_wb_all_single(project_name, p_current_milestones, first_diff_dict, second_diff_dict, baseline_list)
+
+    return run
+
+# def run_milestone_key_checker_single(function, proj_name, q_masters_dict_list, baseline_chain_dict):
+#     p_current_milestones_dict = function([proj_name], q_masters_dict_list[baseline_chain_dict[proj_name][0]])
+#     p_last_milestones_dict = function([proj_name], q_masters_dict_list[baseline_chain_dict[proj_name][1]])
+#     p_oldest_milestones_dict = function([proj_name], q_masters_dict_list[baseline_chain_dict[proj_name][2]])
+#
+#     run = check_m_keys_in_excel_single(proj_name, p_current_milestones_dict, p_last_milestones_dict, p_oldest_milestones_dict)
+#
+#     return run
+
+
+''' RUNNING THE PROGRAMME'''
+
+
+''' 3) set list of projects to be included in output. Still in development'''
+'''option one - all projects'''
+project_quarter_list = q2_1920.projects
+
+'''option two - group of projects... in development'''
+project_group_list = ['Rail Group', 'HSMRPG', 'International Security and Environment', 'Roads Devolution & Motoring']
+
+'''option three - single project'''
+one_project_list = ['Thameslink Programme']
+
+'''4) Specify date after which project milestones should be returned. NOTE: Python date format is (YYYY,MM,DD)'''
+start_date = datetime.date(2019, 6, 1)
+
+'''5) Running the milestone comparision programme.  
+The type of milestone you wish to analyse can be specified through choosing
+all_milestone_data_bulk, ap_p_milestone_data_bulk, or assurance_milestone_data_bulk functions.
+Finally enter the file path to where output documents should be saved. 
+Note keep {} in file name as this is where the project name is recorded in the file title'''
+for project_name in project_quarter_list:
+    print('Doing milestone movement analysis for ' + str(project_name))
+    wb = run_milestone_comparator_single(all_milestone_data_bulk, project_name, list_of_masters_all, start_date)
+    wb.save('C:\\Users\\Standalone\\general\\masters folder\\project_milestones\\'
+            'q2_1920_{}_milestone_movement_analysis.xlsx'.format(project_name))

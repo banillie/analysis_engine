@@ -22,8 +22,8 @@ See instructions on how to operate programme below.
 import datetime
 from openpyxl import Workbook
 from analysis.engine_functions import all_milestone_data_bulk, ap_p_milestone_data_bulk, \
-    assurance_milestone_data_bulk, project_time_difference, bc_ref_stages, get_master_baseline_dict
-from analysis.data import q1_1920, list_of_masters_all
+    assurance_milestone_data_bulk, project_time_difference, bc_ref_stages, get_master_baseline
+from analysis.data import q2_1920, list_of_masters_all
 
 def put_into_wb_all(project_name_list, t_data, td_data, td_data_two, wb):
     '''
@@ -116,9 +116,9 @@ def run_milestone_comparator(function, project_name_list, masters_list, date_of_
 
     '''firstly business cases of interest are filtered out by bc_ref_stage function'''
     baseline_bc = bc_ref_stages(project_name_list, masters_list)
-    print(baseline_bc)
-    q_masters_list = get_master_baseline_dict(project_name_list, masters_list, baseline_bc)
-    print(q_masters_list)
+    #print(baseline_bc)
+    baseline_list = get_master_baseline(project_name_list, masters_list, baseline_bc)
+    #print(q_masters_list)
 
     '''gather mini-dictionaries for each quarter'''
 
@@ -126,11 +126,11 @@ def run_milestone_comparator(function, project_name_list, masters_list, date_of_
     last_milestones_data = {}
     oldest_milestones_data = {}
     for project_name in project_name_list:
-        p_current_milestones_data = function([project_name], masters_list[q_masters_list[project_name][0]])
+        p_current_milestones_data = function([project_name], masters_list[baseline_list[project_name][0]])
         current_milestones_data.update(p_current_milestones_data)
-        p_last_milestones_data = function([project_name], masters_list[q_masters_list[project_name][1]])
+        p_last_milestones_data = function([project_name], masters_list[baseline_list[project_name][1]])
         last_milestones_data.update(p_last_milestones_data)
-        p_oldest_milestones_data = function([project_name], masters_list[q_masters_list[project_name][2]])
+        p_oldest_milestones_data = function([project_name], masters_list[baseline_list[project_name][2]])
         oldest_milestones_data.update(p_oldest_milestones_data)
 
     '''calculate time current and last quarter'''
@@ -151,7 +151,7 @@ def run_milestone_comparator(function, project_name_list, masters_list, date_of_
  data.py file '''
 
 '''option one - all projects'''
-project_q_list = q1_1920.projects
+project_q_list = q2_1920.projects
 
 '''option two - group of projects... in development'''
 group_projects_list = []
