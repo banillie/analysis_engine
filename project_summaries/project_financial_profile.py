@@ -8,7 +8,7 @@ from openpyxl import Workbook
 from openpyxl.chart import LineChart, Reference
 from openpyxl.chart.text import RichText
 from openpyxl.drawing.text import Paragraph, ParagraphProperties, CharacterProperties, Font
-from analysis.data import financial_analysis_masters_list
+from analysis.data import financial_analysis_masters_list, q2_1920
 from analysis.engine_functions import bc_ref_stages, get_master_baseline_dict
 
 
@@ -122,39 +122,40 @@ def place_in_excel(project_name, latest_financial_data, last_financial_data, bas
     data is displayed on right hand side of the data table
 
     project_name: project name
-    latest_financial_data: mini financial dictionary
-
+    latest_financial_data: mini financial dictionary current quarter
+    last_financial_data: mini financial dictionary last quarter
+    baseline_financial_data: mini financial dictionary baseline quarter
 
     '''
 
     wb = Workbook()
     ws = wb.active
-    data_list = [baseline_fin_data, last_fin_data, latest_fin_data]
+    data_list = [baseline_financial_data, last_financial_data, latest_financial_data]
     count = 0
 
     '''places in raw/reported data'''
     for data in data_list:
         for i, key in enumerate(capture_rdel):
             try:
-                ws.cell(row=i+3, column=2+count, value=data[name][key])
+                ws.cell(row=i+3, column=2+count, value=data[project_name][key])
             except KeyError:
                 ws.cell(row=i + 3, column=2 + count, value=0)
         for i, key in enumerate(capture_cdel):
             try:
-                ws.cell(row=i+3, column=3+count, value=data[name][key])
+                ws.cell(row=i+3, column=3+count, value=data[project_name][key])
             except KeyError:
                 ws.cell(row=i + 3, column=3 + count, value=0)
         for i, key in enumerate(capture_ng):
             try:
-                ws.cell(row=i+3, column=4+count, value=data[name][key])
+                ws.cell(row=i+3, column=4+count, value=data[project_name][key])
             except KeyError:
                 ws.cell(row=i + 3, column=4 + count, value=0)
         count += 4
 
     '''places in totals'''
-    baseline_totals = calculate_totals(name, baseline_fin_data)
-    last_q_totals = calculate_totals(name, last_fin_data)
-    latest_q_totals = calculate_totals(name, latest_fin_data)
+    baseline_totals = calculate_totals(project_name, baseline_financial_data)
+    last_q_totals = calculate_totals(project_name, last_financial_data)
+    latest_q_totals = calculate_totals(project_name, last_financial_data)
 
     total_list = [baseline_totals, last_q_totals, latest_q_totals]
 
@@ -189,6 +190,8 @@ def place_in_excel(project_name, latest_financial_data, last_financial_data, bas
 
     '''process for showing total cost profile. starting with data'''
 
+    #ToDo fix a bug which causing totals to not be printed correctly.
+
     row_start = 16
     for x, l in enumerate(total_list):
         for i, total in enumerate(l):
@@ -204,7 +207,7 @@ def place_in_excel(project_name, latest_financial_data, last_financial_data, bas
 
 
     chart = LineChart()
-    chart.title = str(name) + ' Cost Profile'
+    chart.title = str(project_name) + ' Cost Profile'
     chart.style = 4
     chart.x_axis.title = 'Financial Year'
     chart.y_axis.title = 'Cost £m'
@@ -244,9 +247,9 @@ def place_in_excel(project_name, latest_financial_data, last_financial_data, bas
 
     '''process for creating income chart'''
 
-    baseline_total_income = calculate_income_totals(name, baseline_fin_data)
-    last_q_total_income = calculate_income_totals(name, last_fin_data)
-    latest_q_total_income = calculate_income_totals(name, latest_fin_data)
+    baseline_total_income = calculate_income_totals(project_name, baseline_financial_data)
+    last_q_total_income = calculate_income_totals(project_name, last_financial_data)
+    latest_q_total_income = calculate_income_totals(project_name, latest_financial_data)
 
     total_income_list = [baseline_total_income, last_q_total_income, latest_q_total_income]
 
@@ -267,7 +270,7 @@ def place_in_excel(project_name, latest_financial_data, last_financial_data, bas
         '''income graph'''
 
         chart = LineChart()
-        chart.title = str(name) + ' Income Profile'
+        chart.title = str(project_name) + ' Income Profile'
         chart.style = 4
         chart.x_axis.title = 'Financial Year'
         chart.y_axis.title = 'Cost £m'
@@ -352,32 +355,32 @@ capture_income =['19-20 Forecast - Income both Revenue and Capital',
 
 all_data_lists = capture_rdel + capture_cdel + capture_ng + capture_income
 
-'''INSTRUCTIONS FOR RUNNING PROGRAMME'''
 
-'''1) load all master quarter data files here'''
-q1_1920 = project_data_from_master('C:\\Users\\Standalone\\general\\masters folder\\core_data\\master_1_2019_wip_'
-                                   '(25_7_19).xlsx')
-q4_1819 = project_data_from_master('C:\\Users\\Standalone\\general\\masters folder\\core_data\\master_4_2018.xlsx')
-q3_1819 = project_data_from_master('C:\\Users\\Standalone\\general\\masters folder\\core_data\\master_3_2018.xlsx')
-q2_1819 = project_data_from_master('C:\\Users\\Standalone\\general\\masters folder\\core_data\\master_2_2018.xlsx')
-q1_1819 = project_data_from_master('C:\\Users\\Standalone\\general\\masters folder\\core_data\\master_1_2018.xlsx')
-q4_1718 = project_data_from_master('C:\\Users\\Standalone\\general\\masters folder\\core_data\\master_4_2017.xlsx')
-q3_1718 = project_data_from_master('C:\\Users\\Standalone\\general\\masters folder\\core_data\\master_3_2017.xlsx')
-q2_1718 = project_data_from_master('C:\\Users\\Standalone\\general\\masters folder\\core_data\\master_2_2017.xlsx')
-q1_1718 = project_data_from_master('C:\\Users\\Standalone\\general\\masters folder\\core_data\\master_1_2017.xlsx')
-q4_1617 = project_data_from_master('C:\\Users\\Standalone\\general\\masters folder\\core_data\\master_4_2016.xlsx')
-q3_1617 = project_data_from_master('C:\\Users\\Standalone\\general\\masters folder\\core_data\\master_3_2016.xlsx')
+def run_financials_single(project_list, masters_list):
+    '''
+    Function for running the programme
 
-'''2) Include in the below list, as the variable names, those quarters to include in analysis
-NOTE - the comparison of financial totals us the 'bespoke' list consistent cost reporting (in nominal figures) was
- only achieved in q1_1819, so it would be incorrect to compare figures beyond this'''
-list_of_dicts_all = [q1_1920 ,q4_1819, q3_1819, q2_1819, q1_1819, q4_1718, q3_1718, q2_1718, q1_1718, q4_1617, q3_1617]
-list_of_dicts_bespoke = [q1_1920, q4_1819, q3_1819, q2_1819, q1_1819]
+    project_list: list of project names
+    masters_list: list of master dictionaries
+    '''
 
-'''3) project name list options - this is where the group of interest is specified '''
+    baseline_bc = bc_ref_stages(project_list, masters_list)
+    q_masters_list = get_master_baseline_dict(project_list, masters_list, baseline_bc)
+    latest_financial_data = financial_data(project_list, masters_list, q_masters_list, all_data_lists, 0)
+    last_financial_data = financial_data(project_list, masters_list, q_masters_list, all_data_lists, 1)
+    baseline_financial_data = financial_data(project_list, masters_list, q_masters_list, all_data_lists, 2)
+    for project_name in project_list:
+        wb = place_in_excel(project_name, latest_financial_data, last_financial_data, baseline_financial_data)
+        wb.save('C:\\Users\\Standalone\\general\\masters folder\\project_financial_profile\\'
+                'Q2_1920_{}_financial_profile.xlsx'.format(project_name))
+
+
+'''RUNNING PROGRAMME'''
+
+'''ONE. project name list options - this is where the group of interest is specified '''
 
 '''option 1 - all '''
-proj_names_all = list(q1_1920.keys())
+latest_quarter_projects = q2_1920.projects
 
 '''option 2 - a group'''
 #TODO write function for filtering list of project names based on group
@@ -386,23 +389,10 @@ proj_names_group = ['East Midlands Franchise', 'Rail Franchising Programme', 'We
 '''option 3 - bespoke list of projects'''
 proj_names_bespoke = ['East West Rail Programme (Western Section)']
 
-'''4) Enter at the bottom of this function the file path to where outputs should be saved.'''
+'''
+TWO. run the programme placing in the relevant variables. 
+project_list: list of project names
+masters_list: list of master dictionaries
+'''
 
-def run_financials_single(proj_list, q_masters_dict_list):
-    baseline_bc = bc_ref_stages(proj_list, q_masters_dict_list)
-    q_masters_list = get_master_baseline_dict(proj_list, q_masters_dict_list, baseline_bc)
-    latest_financial_data = financial_data(proj_list, q_masters_dict_list, q_masters_list, all_data_lists, 0)
-    last_financial_data = financial_data(proj_list, q_masters_dict_list, q_masters_list, all_data_lists, 1)
-    baseline_financial_data = financial_data(proj_list, q_masters_dict_list, q_masters_list, all_data_lists, 2)
-    for proj_name in proj_list:
-        wb = place_in_excel(proj_name, latest_financial_data, last_financial_data, baseline_financial_data)
-        wb.save('C:\\Users\\Standalone\\general\\masters folder\\project_financial_profile\\'
-                'Q1_1920_{}_financial_profile_test.xlsx'.format(proj_name))
-
-
-'''5) run the programme placing in the relevant variables. 
-the function is structured as run_financials_single(proj_list, q_masters_dict_list)
-i) proj_list = list of project names
-ii) q_master_dict_list = list of master dictionaries to be passed into the programme'''
-
-run_financials_single(proj_names_bespoke, list_of_dicts_bespoke)
+run_financials_single(latest_quarter_projects, financial_analysis_masters_list)

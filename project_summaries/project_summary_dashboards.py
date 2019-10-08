@@ -244,7 +244,7 @@ def printing(project_name, master_one, master_two, master_three, master_four, mi
                 rating = convert_rag_text(master.data[project_name][SRO_conf_key_list[i]])
                 table.cell(0, x + 1).text = rating
                 cell_colouring(table.cell(0, x + 1), rating)
-            except TypeError:
+            except (KeyError, TypeError):
                 table.cell(0, x + 1).text = 'N/A'
 
     '''DCA Narrative text'''
@@ -270,14 +270,16 @@ def printing(project_name, master_one, master_two, master_three, master_four, mi
 
     '''Financial Meta data'''
     table1 = doc.add_table(rows=2, cols=5)
-    table1.cell(0, 0).text = 'Forecast Whole Life Cost(£m):'
+    table1.cell(0, 0).text = 'Forecast Whole Life Cost (£m):'
     table1.cell(0, 1).text = 'Percentage Spent:'
     table1.cell(0, 2).text = 'Source of Funding:'
     table1.cell(0, 3).text = 'Nominal or Real figures:'
     table1.cell(0, 4).text = 'Full profile reported:'
 
-    table1.cell(1, 0).text = str(master_one[project_name]['Total Forecast'])
-    a = master_one.data[project_name]['Total Forecast']
+    wlc = round(master_one.data[project_name]['Total Forecast'], 1)
+    table1.cell(1, 0).text = str(wlc)
+    # str(master_one[project_name]['Total Forecast'])
+    # a = master_one.data[project_name]['Total Forecast']
     b = master_one.data[project_name]['Pre 19-20 RDEL Forecast Total']
     if b == None:
         b = 0
@@ -430,7 +432,7 @@ current_q_list = q2_1920.projects
 '''option two select group - in dev'''
 #group_list = []
 
-'''option three one prject'''
+'''option three one project'''
 #one_proj_list = ['High Speed Rail Programme (HS2)']
 
 '''3) enter the current_Q_dict variable into the below function. NOTE no change required. This is to ensure that the 
