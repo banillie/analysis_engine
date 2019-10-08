@@ -1,3 +1,4 @@
 -e git+https://github.com/hammerheadlemon/datamaps#egg=datamaps
 -e git+https://github.com/banillie/projectlibrary#egg=projectlibrary
-docx==0.2.4
+python-docx==0.8.10
+

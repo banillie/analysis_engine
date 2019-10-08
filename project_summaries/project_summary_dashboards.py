@@ -1,4 +1,5 @@
-'''Programme that compiles project dashboards/summary sheets.
+'''
+Programme that compiles project dashboards/summary sheets.
 
 Input:
 1) four quarters worth of data
@@ -8,14 +9,12 @@ Output:
 
 Supplementary programmes that need to be run to build charts for summary pages. Charts should be built and cut and paste
 into dashboards/summary sheets:
-1) project_finacial_profile.py . For financial charts
-2) milestone_comparison_3_quarters_ind.py . For milestones tables
+1) project_financial_profile.py . For financial charts
+2) milestone_comparison_3_qrts_proj.py . For milestones tables
 
 '''
 
-
 from docx import Document
-from bcompiler.utils import project_data_from_master
 import datetime
 from docx.oxml.ns import nsdecls
 from docx.oxml.ns import qn
@@ -24,22 +23,18 @@ from docx.oxml import OxmlElement
 from docx.shared import Cm, RGBColor
 import difflib
 
+from analysis.engine_functions import convert_rag_text, all_milestone_data_bulk
+from analysis.data import q2_1920, q1_1920, q4_1819, q3_1819
 
-def converting_RAGs(rag):
-    if rag == 'Green':
-        return 'G'
-    elif rag == 'Amber/Green':
-        return 'A/G'
-    elif rag == 'Amber':
-        return 'A'
-    elif rag == 'Amber/Red':
-        return 'A/R'
-    elif rag == 'Red':
-        return 'R'
-    else:
-        return 'None'
 
 def cell_colouring(cell, colour):
+    '''
+    function that handles cell colouring
+
+    cell: cell reference
+    color: colour reference
+    '''
+
     try:
         if colour == 'R':
             colour = parse_xml(r'<w:shd {} w:fill="cb1f00"/>'.format(nsdecls('w')))
@@ -57,8 +52,16 @@ def cell_colouring(cell, colour):
     except TypeError:
         pass
 
-'''function places text into doc highlighing all changes'''
+
 def compare_text_showall(text_1, text_2, doc):
+    '''
+    function places text into doc highlighting all changes
+
+    text_1:
+    text_2:
+    doc:
+    '''
+
     comp = difflib.Differ()
     diff = list(comp.compare(text_2.split(), text_1.split()))
     new_text = diff
@@ -108,8 +111,15 @@ def compare_text_showall(text_1, text_2, doc):
 
     return doc
 
-'''function places text into doc highlighing new and old text'''
 def compare_text_newandold(text_1, text_2, doc):
+    '''
+    function that places text into doc highlighting new and old text
+
+    text_1:
+    text_2:
+    doc:
+    '''
+
     comp = difflib.Differ()
     diff = list(comp.compare(text_2.split(), text_1.split()))
     new_text = diff
@@ -157,15 +167,16 @@ def compare_text_newandold(text_1, text_2, doc):
 
     return doc
 
-'''function that compiles the summary sheet'''
-def printing(name, dictionary_1, dictionary_2, dictionary_3, dictionary_4, milestone_dict):
 
-    dict_list = [dictionary_1, dictionary_2, dictionary_3, dictionary_4]
+def printing(project_name, master_one, master_two, master_three, master_four, milestone_master):
+    '''function that compiles the summary sheet'''
+
+    master_list = [master_one, master_two, master_three, master_4]
 
     doc = Document()
-    print(name)
-    heading = str(name)
-    name = str(name)
+    print(project_name)
+    heading = str(project_name)
+    name = str(project_name)
     # TODO: change heading font size
     # todo be able to change text sixe and font
     intro = doc.add_heading(str(heading), 0)
@@ -173,12 +184,12 @@ def printing(name, dictionary_1, dictionary_2, dictionary_3, dictionary_4, miles
     intro.bold = True
 
     y = doc.add_paragraph()
-    a = dictionary_1[name]['Senior Responsible Owner (SRO)']
+    a = master_one.data[project_name]['Senior Responsible Owner (SRO)']
     if a == None:
         a = 'TBC'
     else:
         a = a
-        b = dictionary_1[name]['SRO Phone No.']
+        b = master_one.data[project_name]['SRO Phone No.']
         if b == None:
             b = 'TBC'
         else:
@@ -187,12 +198,12 @@ def printing(name, dictionary_1, dictionary_2, dictionary_3, dictionary_4, miles
     y.add_run('SRO name:  ' + str(a) + ',   Tele:  ' + str(b))
 
     y = doc.add_paragraph()
-    a = dictionary_1[name]['Project Director (PD)']
+    a = master_one.data[project_name]['Project Director (PD)']
     if a == None:
         a = 'TBC'
     else:
         a = a
-        b = dictionary_1[name]['PD Phone No.']
+        b = master_one.data[project_name]['PD Phone No.']
         if b == None:
             b = 'TBC'
         else:
@@ -223,13 +234,13 @@ def printing(name, dictionary_1, dictionary_2, dictionary_3, dictionary_4, miles
                          'SRO Schedule Confidence']
 
     '''All SRO RAG rating placed in table'''
-    for i in range(0, len(dict_list)+1):
+    for i in range(0, len(master_list)+1):
         table = doc.add_table(rows=1, cols=5)
         table.cell(0, 0).width = Cm(7)
         table.cell(0, 0).text = SRO_conf_table_list[i]
-        for x, dictionary in enumerate(dict_list):
+        for x, master in enumerate(master_list):
             try:
-                rating = converting_RAGs(dictionary[name][SRO_conf_key_list[i]])
+                rating = convert_rag_text(master.data[project_name][SRO_conf_key_list[i]])
                 table.cell(0, x + 1).text = rating
                 cell_colouring(table.cell(0, x + 1), rating)
             except KeyError:
@@ -241,9 +252,9 @@ def printing(name, dictionary_1, dictionary_2, dictionary_3, dictionary_4, miles
     heading = 'SRO Overall DCA Narrative'
     y.add_run(str(heading)).bold = True
 
-    dca_a = dictionary_1[name]['Departmental DCA Narrative']
+    dca_a = master_one[project_name]['Departmental DCA Narrative']
     try:
-        dca_b = dictionary_2[name]['Departmental DCA Narrative']
+        dca_b = master_three[project_name]['Departmental DCA Narrative']
     except KeyError:
         dca_b = dca_a
 
@@ -264,15 +275,15 @@ def printing(name, dictionary_1, dictionary_2, dictionary_3, dictionary_4, miles
     table1.cell(0, 3).text = 'Nominal or Real figures:'
     table1.cell(0, 4).text = 'Full profile reported:'
 
-    table1.cell(1, 0).text = str(dictionary_1[name]['Total Forecast'])
-    a = dictionary_1[name]['Total Forecast']
-    b = dictionary_1[name]['Pre 19-20 RDEL Forecast Total']
+    table1.cell(1, 0).text = str(master_one[project_name]['Total Forecast'])
+    a = master_one.data[project_name]['Total Forecast']
+    b = master_one.data[project_name]['Pre 19-20 RDEL Forecast Total']
     if b == None:
         b = 0
-    c = dictionary_1[name]['Pre 19-20 CDEL Forecast Total']
+    c = master_one.data[project_name]['Pre 19-20 CDEL Forecast Total']
     if c == None:
         c = 0
-    d = dictionary_1[name]['Pre 19-20 Forecast Non-Gov']
+    d = master_one.data[project_name]['Pre 19-20 Forecast Non-Gov']
     if d == None:
         d = 0
     e = b + c + d
@@ -281,13 +292,13 @@ def printing(name, dictionary_1, dictionary_2, dictionary_3, dictionary_4, miles
     except ZeroDivisionError:
         c = 0
     table1.cell(1, 1).text = str(c) + '%'
-    a = str(dictionary_1[name]['Source of Finance'])
-    b = dictionary_1[name]['Other Finance type Description']
+    a = str(master_one.data[project_name]['Source of Finance'])
+    b = master_one.data[project_name]['Other Finance type Description']
     if b == None:
         table1.cell(1, 2).text = a
     else:
         table1.cell(1, 2).text = a + ' ' + str(b)
-    table1.cell(1, 3).text = str(dictionary_1[name]['Real or Nominal - Actual/Forecast'])
+    table1.cell(1, 3).text = str(master_one[project_name]['Real or Nominal - Actual/Forecast'])
     table1.cell(1, 4).text = ''
 
     '''Finance DCA Narrative text'''
@@ -301,9 +312,9 @@ def printing(name, dictionary_1, dictionary_2, dictionary_3, dictionary_4, miles
     gmpp_narrative_keys = ['Project Costs Narrative', 'Cost comparison with last quarters cost - narrative',
                            'Cost comparison within this quarters cost - narrative']
 
-    fin_text_1 = combine_narrtives(name, dictionary_1, gmpp_narrative_keys)
+    fin_text_1 = combine_narrtives(project_name, master_one, gmpp_narrative_keys)
     try:
-        fin_text_2 = combine_narrtives(name, dictionary_2, gmpp_narrative_keys)
+        fin_text_2 = combine_narrtives(project_name, master_two, gmpp_narrative_keys)
     except KeyError:
         fin_text_2 = fin_text_1
 
@@ -334,7 +345,7 @@ def printing(name, dictionary_1, dictionary_2, dictionary_3, dictionary_4, miles
     table1.cell(0, 2).text = 'Start of Operations:'
     table1.cell(0, 3).text = 'Project End Date:'
 
-    key_dates = milestone_dict[name]
+    key_dates = milestone_master[project_name]
 
     #c = key_dates['Start of Project']
     try:
@@ -345,7 +356,7 @@ def printing(name, dictionary_1, dictionary_2, dictionary_3, dictionary_4, miles
 
     table1.cell(1, 0).text = str(c)
 
-    table1.cell(1, 1).text = str(dictionary_1[name]['BICC approval point'])
+    table1.cell(1, 1).text = str(master_one[name]['BICC approval point'])
 
     try:
         a = key_dates['Start of Operation']
@@ -370,12 +381,12 @@ def printing(name, dictionary_1, dictionary_2, dictionary_3, dictionary_4, miles
     heading = 'SRO Milestone Narrative'
     y.add_run(str(heading)).bold = True
 
-    mile_dca_a = dictionary_1[name]['Milestone Commentary']
+    mile_dca_a = master_one.data[project_name]['Milestone Commentary']
     if mile_dca_a == None:
         mile_dca_a = 'None'
 
     try:
-        mile_dca_b = dictionary_2[name]['Milestone Commentary']
+        mile_dca_b = master_two.data[project_name]['Milestone Commentary']
         if mile_dca_b == None:
             mile_dca_b = 'None'
     except KeyError:
@@ -397,57 +408,23 @@ def printing(name, dictionary_1, dictionary_2, dictionary_3, dictionary_4, miles
 
     return doc
 
-def combine_narrtives(name, dict, key_list):
+def combine_narrtives(project_name, master, key_list):
+    '''function that combines text across different keys'''
     output = ''
     for key in key_list:
-        output = output + str(dict[name][key])
+        output = output + str(master.data[project_name][key])
 
     return output
-
-def all_milestone_data(master_data):
-    upper_dict = {}
-
-    for name in master_data:
-        p_data = master_data[name]
-        lower_dict = {}
-        for i in range(1, 50):
-            try:
-                try:
-                    lower_dict[p_data['Approval MM' + str(i)]] = p_data['Approval MM' + str(i) + ' Forecast / Actual']
-                except KeyError:
-                    lower_dict[p_data['Approval MM' + str(i)]] = p_data['Approval MM' + str(i) + ' Forecast - Actual']
-            except KeyError:
-                pass
-
-            try:
-                lower_dict[p_data['Assurance MM' + str(i)]] = p_data['Assurance MM' + str(i) + ' Forecast - Actual']
-            except:
-                pass
-
-        for i in range(18, 67):
-            try:
-                lower_dict[p_data['Project MM' + str(i)]] = p_data['Project MM' + str(i) + ' Forecast - Actual']
-            except:
-                pass
-
-        upper_dict[name] = lower_dict
-
-    return upper_dict
 
 
 '''RUNNING PROGRAMME'''
 
-quarter_list = ['This Quarter', 'Q4 1819', 'Q3 1819', 'Q2 1819']
+quarter_list = ['This Quarter', 'Q1 1920', 'Q4 1819', 'Q3 1819']
 
-'''1) enter file path to master data'''
-current_Q_dict = project_data_from_master('C:\\Users\\Standalone\\general\\masters folder\\core data\\master_1_2019_wip_(18_7_19).xlsx')
-last_Q_dict = project_data_from_master('C:\\Users\\Standalone\\general\\masters folder\\core data\\master_4_2018.xlsx')
-Q2_ago_dict = project_data_from_master('C:\\Users\\Standalone\\general\\masters folder\\core data\\master_3_2018.xlsx')
-Q3_ago_dict = project_data_from_master('C:\\Users\\Standalone\\general\\masters folder\\core data\\master_2_2018.xlsx')
 
 '''2) select list of projects that dashboards should be built for'''
 '''option one all'''
-current_Q_list = list(current_Q_dict.keys())
+current_q_list = q1_1920.projects
 
 '''option two select group - in dev'''
 #group_list = []
@@ -457,11 +434,11 @@ current_Q_list = list(current_Q_dict.keys())
 
 '''3) enter the current_Q_dict variable into the below function. NOTE no change required. This is to ensure that the 
 correct milestone dates are displayed in milestone meta data section'''
-milestones = all_milestone_data(current_Q_dict)
+milestones = all_milestone_data_bulk(current_q_list, q1_1920)
 
 '''4) enter file path to where files should be saved. NOTE {} to be kept in file path as this is where project name is 
 eventually placed in project file title'''
-for x in current_Q_list:
-    a = printing(x, current_Q_dict, last_Q_dict, Q2_ago_dict, Q3_ago_dict, milestones)
-    a.save('C://Users//Standalone//general//Q1_1920_{}_overview.docx'.format(x))
+for x in current_q_list:
+    a = printing(x, q2_1920, q1_1920, q4_1819, q3_1819, milestones)
+    a.save('C://Users//Standalone//general//Q2_1920_{}_overview.docx'.format(x))
 
