@@ -279,7 +279,7 @@ def printing(project_name, master_one, master_two, master_three, master_four, mi
     wlc = round(master_one.data[project_name]['Total Forecast'], 1)
     table1.cell(1, 0).text = str(wlc)
     # str(master_one[project_name]['Total Forecast'])
-    # a = master_one.data[project_name]['Total Forecast']
+    #a = master_one.data[project_name]['Total Forecast']
     b = master_one.data[project_name]['Pre 19-20 RDEL Forecast Total']
     if b == None:
         b = 0
@@ -291,7 +291,7 @@ def printing(project_name, master_one, master_two, master_three, master_four, mi
         d = 0
     e = b + c + d
     try:
-        c = round(e / a * 100, 1)
+        c = round(e / wlc * 100, 1)
     except (ZeroDivisionError, TypeError):
         c = 0
     table1.cell(1, 1).text = str(c) + '%'
@@ -403,9 +403,10 @@ def printing(project_name, master_one, master_two, master_three, master_four, mi
     heading = 'Project reported high-level milestones and schedule changes'
     y.add_run(str(heading)).bold = True
     y = doc.add_paragraph()
-    y.add_run('The below table presents all project reported remaining high-level milestones, with six months grace '
-              'from close of the current quarter. Milestones are sorted in chronological order. Changes in milestones '
-              'dates in comparison to those reported last quarter and one year ago have been calculated and are provided')
+    some_text = 'The below table presents all project reported remaining high-level milestones, with six months grace ' \
+                'from close of the current quarter. Milestones are sorted in chronological order. Changes in milestones' \
+                ' dates in comparison to last quarter and baseline have been calculated and are provided.'
+    y.add_run(str(some_text)).italic = True
     y = doc.add_paragraph()
     y.add_run('{insert chart}')
 
