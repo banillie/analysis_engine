@@ -18,7 +18,8 @@ from openpyxl.styles.differential import DifferentialStyle
 from openpyxl.formatting.rule import Rule
 import random
 from analysis.data import q1_1920, one_quarter_master_list, bespoke_group_masters_list, list_of_masters_all
-from analysis.engine_functions import all_milestone_data_bulk, ap_p_milestone_data_bulk
+from analysis.engine_functions import all_milestone_data_bulk, ap_p_milestone_data_bulk, assurance_milestone_data_bulk,\
+    get_all_project_names, get_quarter_stamp
 
 def data_return(masters_list, project_name_list, data_key):
     '''
@@ -203,39 +204,6 @@ def conditional_formatting(worksheet):
     worksheet.conditional_formatting.add('A1:X80', rule)
 
     return worksheet
-
-def get_all_project_names(masters_list):
-    '''
-    function returns list of all projects across multiple dictionaries
-
-    useful if you need project names across multiple quarters
-
-    masters_list: list of masters containing quarter information
-    '''
-
-    output_list = []
-    for master in masters_list:
-        for name in master.projects:
-            if name not in output_list:
-                output_list.append(name)
-
-    return output_list
-
-def get_quarter_stamp(masters_list):
-    '''
-    Function used to specify the quarter being reported.
-
-    masters_list: list of masters containing quarter information
-    '''
-
-    output_list = []
-    for master in masters_list:
-        project_name = random.choice(master.projects)
-        quarter_stamp = master.data[project_name]['Reporting period (GMPP - Snapshot Date)']
-        output_list.append(quarter_stamp)
-
-    return output_list
-
 
 ''' RUNNING PROGRAMME '''
 

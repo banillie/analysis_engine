@@ -26,7 +26,7 @@ from data import q1_1920, q4_1819
 
 '''Function that creates dictionary with keys of interest'''
 def inital_dict(project_name, master, key_list):
-    upper_dictionary = {}
+    upper_dictionaryionary = {}
     for name in project_name:
         lower_dictionary = {}
 
@@ -40,9 +40,9 @@ def inital_dict(project_name, master, key_list):
         except KeyError:
             pass
 
-        upper_dictionary[name] = lower_dictionary
+        upper_dictionaryionary[name] = lower_dictionary
 
-    return upper_dictionary
+    return upper_dictionaryionary
 
 def add_sop_pend_data(m_data, dict):
 
@@ -195,7 +195,7 @@ def up_or_down(latest_dca, last_dca):
 '''function for adding concatenated word strings to dictionary.
 note probably don't need the above function now, but can tidy up later'''
 def final_dict(dict_one, dict_two, con_list, dca_key):
-    upper_dict = {}
+    upper_dictionary = {}
 
     for name in dict_one:
         lower_dict = {}
@@ -217,9 +217,9 @@ def final_dict(dict_one, dict_two, con_list, dca_key):
         except KeyError:
             lower_dict['Change'] = 'NEW'
 
-        upper_dict[name] = lower_dict
+        upper_dictionary[name] = lower_dict
 
-    return upper_dict
+    return upper_dictionary
 
 def convert_rag_text(dca_rating):
 
