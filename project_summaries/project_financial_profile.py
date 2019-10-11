@@ -1,7 +1,15 @@
 '''
-Programme that creates financial cost profile for individual projects. Follow instructions below.
+This programme calculates individual project cost profiles.
 
-Recently modified so that the three different cost profiles calculated are i) latest, ii) last, iii) baseline.
+Output document:
+1) excel workbook with a cost profile for each project. Three different cost profiles calculated are i) latest,
+ii) last, iii) baseline.
+
+See instructions below.
+
+Note: all master data is taken from the data file. Make sure this is up to date and that all relevant data is in
+the import statement.
+
 '''
 
 from openpyxl import Workbook
@@ -331,6 +339,30 @@ def place_in_excel(project_name, latest_financial_data, last_financial_data, bas
 
     return wb
 
+def run_financials_single(project_name, masters_list):
+    '''
+    Function that runs this programme.
+
+    project_name: project name
+    masters_list: list of master dictionaries
+
+    output 'run' which is in fact a excel wb.
+    '''
+
+    '''firstly business cases of interest are filtered out by bc_ref_stage function'''
+    baseline_bc = bc_ref_stages([project_name], masters_list)
+    q_masters_list = master_baseline_index([project_name], masters_list, baseline_bc)
+
+    '''financial data across different quarters is captured'''
+    latest_financial_data = financial_data([project_name], masters_list, q_masters_list, all_data_lists, 0)
+    last_financial_data = financial_data([project_name], masters_list, q_masters_list, all_data_lists, 1)
+    baseline_financial_data = financial_data([project_name], masters_list, q_masters_list, all_data_lists, 2)
+
+    run = place_in_excel(project_name, latest_financial_data, last_financial_data, baseline_financial_data)
+
+    return run
+
+
 '''Lists of financial data keys to capture. This can be amended to years of interest'''
 capture_rdel = ['19-20 RDEL Forecast Total', '20-21 RDEL Forecast Total', '21-22 RDEL Forecast Total',
                 '22-23 RDEL Forecast Total', '23-24 RDEL Forecast Total', '24-25 RDEL Forecast Total',
@@ -351,26 +383,11 @@ capture_income =['19-20 Forecast - Income both Revenue and Capital',
                 '28-29 Forecast - Income both Revenue and Capital', 'Unprofiled Forecast Income']
 all_data_lists = capture_rdel + capture_cdel + capture_ng + capture_income
 
-def run_financials_single(project_list, masters_list):
-    '''
-    Function that
-
-    project_list: list of project names
-    masters_list: list of master dictionaries
-    '''
-
-    baseline_bc = bc_ref_stages(project_list, masters_list)
-    q_masters_list = master_baseline_index(project_list, masters_list, baseline_bc)
-    latest_financial_data = financial_data(project_list, masters_list, q_masters_list, all_data_lists, 0)
-    last_financial_data = financial_data(project_list, masters_list, q_masters_list, all_data_lists, 1)
-    baseline_financial_data = financial_data(project_list, masters_list, q_masters_list, all_data_lists, 2)
-    for project_name in project_list:
-        wb = place_in_excel(project_name, latest_financial_data, last_financial_data, baseline_financial_data)
-        wb.save('C:\\Users\\Standalone\\general\\masters folder\\project_financial_profile\\'
-                'Q2_1920_{}_financial_profile.xlsx'.format(project_name))
-
 
 '''RUNNING PROGRAMME'''
+
+'''Note: all master data is taken from the data file. Make sure this is up to date and that all relevant data is in 
+the import statement.'''
 
 '''ONE. project name list options - this is where the group of interest is specified '''
 
@@ -383,10 +400,14 @@ project_group_list = filter_project_group(q2_1920, 'HSMRPG')
 '''option three - single project'''
 one_project_list = ['High Speed Rail Programme (HS2)']
 
-'''
-TWO. run the programme placing in the relevant variables. 
-project_list: list of project names
-masters_list: list of master dictionaries
-'''
 
-run_financials_single(latest_quarter_projects, financial_analysis_masters_list)
+'''TWO. the following for statement prompts the programme to run. 
+step one - place the list of projects chosen in step two at the end of the for statement. i.e. for project_name in [here] 
+step two - provide relevant file path to document output. Changing the quarter stamp info as necessary. Note keep {} in 
+file name as this is where the project name is recorded in the file title'''
+
+for project_name in latest_quarter_projects:
+    print('Doing financial analysis for ' + str(project_name))
+    wb = run_financials_single(project_name, financial_analysis_masters_list)
+    wb.save('C:\\Users\\Standalone\\general\\masters folder\\project_financial_profile\\'
+            'q2_1920_{}_financial_profile.xlsx'.format(project_name))

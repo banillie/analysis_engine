@@ -113,7 +113,7 @@ def run_milestone_comparator_single(function, project_name, masters_list, date_o
     baseline_bc = bc_ref_stages([project_name], masters_list)
     baseline_list_index = master_baseline_index([project_name], masters_list, baseline_bc)
 
-
+    '''project milestone data is captured across different quarters'''
     p_current_milestones = function([project_name], masters_list[baseline_list_index[project_name][0]])
     p_last_milestones = function([project_name], masters_list[baseline_list_index[project_name][1]])
     p_oldest_milestones = function([project_name], masters_list[baseline_list_index[project_name][2]])

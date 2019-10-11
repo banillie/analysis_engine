@@ -3,8 +3,7 @@
 This programme creates a master spreadsheet to share with IPA for gmpp reporting. The 'master' print out is then
 shared with the IPA which runs an excel macro to populate individual gmpp reporting templates.
 
-Documents required to run the programme are set out below. The latest versions of these should be taken from TiME
-and saved onto laptops in the file paths at the bottom of the programme.
+Documents required to run the programme are set out below.
 
 Documents required are:
 1) the gmpp datamap (make sure you have the latest/final version).
@@ -20,15 +19,13 @@ manually checked to verify that the data is red.
 
 '''
 
-#import datetime
-from datamaps.api import project_data_from_master
-from openpyxl import Workbook, load_workbook
-#from collections import OrderedDict
-#from openpyxl.utils import column_index_from_string
+from openpyxl import load_workbook
 from openpyxl.styles import Border, Color, Font, PatternFill
+from analysis.data import q1_1920, gmpp_master
+from analysis.engine_functions import filter_gmpp
 
 
-def create_master(gmpp_wb, latest_data, last_gmpp):
+def create_master(gmpp_wb, master_data, master_gmpp):
     ws = gmpp_wb.active
 
     type_list = ['RDEL', 'CDEL', 'Non-Gov', 'Income'] # list of cost types. used to amend Hs2 data
@@ -37,30 +34,25 @@ def create_master(gmpp_wb, latest_data, last_gmpp):
     red_text = Font(color="00fc2525")
 
     # this section filters out only gmpp project names. Subsequent list is then used to populate ws
-    gmpp_project_names = []
-    for name in (list(latest_data.keys())):
-        #print(name)
-        if latest_data[name]['GMPP - IPA DCA last quarter'] != None:
-            #print(name)
-            gmpp_project_names.append(name)
+    gmpp_project_names = filter_gmpp(master_data)
 
-    for i, name in enumerate(gmpp_project_names):
-        print(name)
-        ws.cell(row=1, column=5+i).value = name  # place project names in file
+    for i, project_name in enumerate(gmpp_project_names):
+        print(project_name)
+        ws.cell(row=1, column=5+i).value = project_name  # place project names in file
 
         # for loop for placing data into the worksheet
         for row_num in range(2, ws.max_row+1):
             key = ws.cell(row=row_num, column=1).value
             # this loop places all latest raw data into the worksheet
-            if key in latest_data[name].keys():
-                ws.cell(row=row_num, column=5+i).value = latest_data[name][key]
+            if key in master_data.data[project_name].keys():
+                ws.cell(row=row_num, column=5+i).value = master_data.data[project_name][key]
             # elif key not in latest_data[name].keys():
             #     print(key)
 
                 # this section of the code ensures that all financial costs / benefit forecasts have a zero
                 for cost_type in type_list_2:
                     if cost_type in key:
-                        if latest_data[name][key] is None:
+                        if master_data.data[project_name][key] is None:
                             ws.cell(row=row_num, column=5 + i).value = 0
 
             # # this section handles some easily automated tweaks to data to meet IPA data structures for non-static data
@@ -121,17 +113,17 @@ def create_master(gmpp_wb, latest_data, last_gmpp):
             #             ws.cell(row=row_num, column=11 + i).value = last_gmpp[name][key]
 
     # this section handles HS2 data. placing old static data into the worksheet
-    for i, name in enumerate(gmpp_project_names):
-        if name == 'High Speed Rail Programme (HS2)':
+    for i, project_name in enumerate(gmpp_project_names):
+        if project_name == 'High Speed Rail Programme (HS2)':
             print('HS2 financial data has been amended')
             '''note minus 20 here. bug in the loop I haven't fixed yet. probably something to do with how data is
             recorded in DM'''
-            for row_num in range(2, ws.max_row-20):
+            for row_num in range(2, ws.max_row+1):
                 key = ws.cell(row=row_num, column=1).value
                 for cost_type in type_list:
                     try:
                         if cost_type in key:
-                            ws.cell(row=row_num, column=5 + i).value = last_gmpp[name][key]
+                            ws.cell(row=row_num, column=5 + i).value = master_gmpp.data[project_name][key]
                             ws.cell(row=row_num, column=5 + i).font = red_text
                     except (KeyError, TypeError):
                         pass
@@ -142,15 +134,8 @@ def create_master(gmpp_wb, latest_data, last_gmpp):
 #                          'Last Name', 'Project Costs Narrative']
 
 latest_dm = load_workbook("C:\\Users\\Standalone\\general\\masters folder\\gmpp_reporting\\gmpp_datamaps\\"
-                          "gmpp_datamap.xlsx")    # 1) place file path to gmpp data map here
+                          "gmpp_datamap_q2_1920.xlsx")
 
-dft_master = project_data_from_master("C:\\Users\\Standalone\\general\\masters folder\\core_data\\master_1_2019.xlsx")
-# 2) place file path to latest quarter master above
+run = create_master(latest_dm, q1_1920, gmpp_master)
 
-old_hs2_master = project_data_from_master('C:\\Users\\Standalone\\general\\masters folder\\gmpp_reporting\\2018_19\\'
-                                          'Q3_1819\\gmpp_master_Q3.xlsx')
-# 3) place file path to last quarter gmpp master here
-
-run = create_master(latest_dm, dft_master, old_hs2_master)
-
-run.save("C:\\Users\\Standalone\\general\\test.xlsx")
+run.save("C:\\Users\\Standalone\\general\\gmpp_dataset_testing.xlsx")

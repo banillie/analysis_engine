@@ -178,7 +178,7 @@ def printing(project_name, master_one, master_two, master_three, master_four, mi
     heading = str(project_name)
     name = str(project_name)
     # TODO: change heading font size
-    # todo be able to change text sixe and font
+    # todo be able to change text size and font
     intro = doc.add_heading(str(heading), 0)
     intro.alignment = 1
     intro.bold = True
@@ -425,8 +425,7 @@ def combine_narrtives(project_name, master, key_list):
 
 quarter_list = ['This Quarter', 'Q1 1920', 'Q4 1819', 'Q3 1819']
 
-
-'''2) select list of projects that dashboards should be built for'''
+'''One. select list of projects that dashboards should be built for'''
 '''option one all'''
 current_q_list = q2_1920.projects
 
