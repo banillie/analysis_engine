@@ -1,19 +1,14 @@
 '''
 
-This programme to calculate time difference between reported milestones
+This programme calculates the time difference between reported milestones
 
-input documents:
-There quarters master information, typically:
-1) latest quarter data
-2) last quarter data
-3) year ago quarter data
+Output document:
+1) one excel workbook contain all project milestone information.
 
-output document:
-1) excel workbook with all project milestone information
+See instructions below.
 
-One thing that this programme does not do is check with milestones have been removed.
-
-See instructions on how to operate programme below.
+Note: all master data is taken from the data file. Make sure this is up to date and that all relevant data is in
+the import statement.
 
 '''
 
@@ -21,8 +16,8 @@ See instructions on how to operate programme below.
 
 import datetime
 from openpyxl import Workbook
-from analysis.engine_functions import all_milestone_data_bulk, ap_p_milestone_data_bulk, \
-    assurance_milestone_data_bulk, project_time_difference, bc_ref_stages, get_master_baseline
+from analysis.engine_functions import all_milestone_data_bulk, ap_p_milestone_data_bulk, assurance_milestone_data_bulk, \
+    project_time_difference, bc_ref_stages, master_baseline_index, filter_project_group
 from analysis.data import q2_1920, list_of_masters_all
 
 def put_into_wb_all(project_name_list, t_data, td_data, td_data_two, wb):
@@ -31,9 +26,12 @@ def put_into_wb_all(project_name_list, t_data, td_data, td_data_two, wb):
     Function that places all data into excel wb for this programme
 
     project_name_list: list of project to return data for
-    t_data: dictionary containing milestone data for projects ToDO insert structure
-    td_data: dictionary containing time_delta milestone data for projects ToDo insert structure
-    td_data_two: dictionary containing second time_delta data for projects ToDO insert structure
+    t_data: dictionary containing milestone data for projects.
+    dictionary structure is {'project name': {'milestone name': datetime.date: 'notes'}}
+    td_data: dictionary containing time_delta milestone data for projects.
+    dictionary structure is {'project name': {'milestone name': 'time delta info'}}
+    td_data_two: dictionary containing second time_delta data for projects.
+    same structure as for td_data.
     wb: blank excel wb
 
     '''
@@ -96,7 +94,6 @@ def put_into_wb_all(project_name_list, t_data, td_data, td_data_two, wb):
 
     return wb
 
-
 def run_milestone_comparator(function, project_name_list, masters_list, date_of_interest):
 
     '''
@@ -116,9 +113,7 @@ def run_milestone_comparator(function, project_name_list, masters_list, date_of_
 
     '''firstly business cases of interest are filtered out by bc_ref_stage function'''
     baseline_bc = bc_ref_stages(project_name_list, masters_list)
-    #print(baseline_bc)
-    baseline_list = get_master_baseline(project_name_list, masters_list, baseline_bc)
-    #print(q_masters_list)
+    baseline_list = master_baseline_index(project_name_list, masters_list, baseline_bc)
 
     '''gather mini-dictionaries for each quarter'''
 
@@ -144,8 +139,8 @@ def run_milestone_comparator(function, project_name_list, masters_list, date_of_
 
 ''' RUNNING PROGRAMME '''
 
-'''Note that the all master data is taken from the data file. Make sure that this is up to date and that all relevant
-  data is being imported'''
+'''Note: all master data is taken from the data file. Make sure this is up to date and that all relevant data is in 
+the import statement.'''
 
 ''' ONE. Set relevant list of projects. This needs to be done in accordance with the data you are working with via the
  data.py file '''
@@ -154,7 +149,7 @@ def run_milestone_comparator(function, project_name_list, masters_list, date_of_
 project_q_list = q2_1920.projects
 
 '''option two - group of projects... in development'''
-group_projects_list = []
+group_projects_list = filter_project_group(q2_1920, 'HSMRPG')
 
 '''option three - single project'''
 one_proj_list = ['Thameslink Programme']

@@ -1,15 +1,14 @@
-'''This programme to calculate time difference between reported milestones
+'''
 
-input documents:
-There quarters master information, typically:
-1) latest quarter data
-2) last quarter data
-3) year ago quarter data
+This programme calculates the time difference between reported milestones
 
-output document:
-1) excel workbook with all project milestone information
+Output document:
+1) excel workbook with all project milestone information for each project
 
-See instructions on how to operate programme below.
+See instructions below.
+
+Note: all master data is taken from the data file. Make sure this is up to date and that all relevant data is in
+the import statement.
 
 '''
 
@@ -18,19 +17,22 @@ See instructions on how to operate programme below.
 import datetime
 from openpyxl import Workbook
 from analysis.engine_functions import all_milestone_data_bulk, ap_p_milestone_data_bulk, assurance_milestone_data_bulk, \
-    project_time_difference, bc_ref_stages, get_master_baseline
+    project_time_difference, bc_ref_stages, master_baseline_index, filter_project_group
 from analysis.data import q2_1920, list_of_masters_all
 
 
-def put_into_wb_all_single(project_name, t_data, td_data, td_data_two, baseline_list):
+def put_into_wb_all_single(project_name, t_data, td_data, td_data_two, baseline_record):
     '''
 
     Function that places all data into excel wb for this programme
 
     project_name_list: list of project to return data for
-    t_data: dictionary containing milestone data for projects ToDO insert structure
-    td_data: dictionary containing time_delta milestone data for projects ToDo insert structure
-    td_data_two: dictionary containing second time_delta data for projects ToDO insert structure
+    t_data: dictionary containing milestone data for projects.
+    dictionary structure is {'project name': {'milestone name': datetime.date: 'notes'}}
+    td_data: dictionary containing time_delta milestone data for projects.
+    dictionary structure is {'project name': {'milestone name': 'time delta info'}}
+    td_data_two: dictionary containing second time_delta data for projects.
+    same structure as for td_data.
     wb: blank excel wb
 
     '''
@@ -90,7 +92,7 @@ def put_into_wb_all_single(project_name, t_data, td_data, td_data_two, baseline_
     ws.cell(row=1, column=6).value = 'Notes'
 
     ws.cell(row=1, column=8).value = 'data baseline quarter'
-    #ws.cell(row=2, column=8).value = baseline_list[project_name][2][0]
+    ws.cell(row=2, column=8).value = baseline_record[project_name][2][0]
 
     return wb
 
@@ -168,20 +170,18 @@ def run_milestone_comparator_single(function, project_name, masters_list, date_o
 
     '''firstly business cases of interest are filtered out by bc_ref_stage function'''
     baseline_bc = bc_ref_stages([project_name], masters_list)
-    # print(baseline_bc)
-    baseline_list = get_master_baseline([project_name], masters_list, baseline_bc)
-    # print(q_masters_list)
+    baseline_list_index = master_baseline_index([project_name], masters_list, baseline_bc)
 
-    p_current_milestones = function([project_name], masters_list[baseline_list[project_name][0]])
-    print(p_current_milestones)
-    p_last_milestones = function([project_name], masters_list[baseline_list[project_name][1]])
-    p_oldest_milestones = function([project_name], masters_list[baseline_list[project_name][2]])
+
+    p_current_milestones = function([project_name], masters_list[baseline_list_index[project_name][0]])
+    p_last_milestones = function([project_name], masters_list[baseline_list_index[project_name][1]])
+    p_oldest_milestones = function([project_name], masters_list[baseline_list_index[project_name][2]])
 
     '''calculate time current and last quarter'''
-    first_diff_dict = project_time_difference(p_current_milestones, p_last_milestones, date_of_interest)
-    second_diff_dict = project_time_difference(p_current_milestones, p_oldest_milestones, date_of_interest)
+    first_diff_data = project_time_difference(p_current_milestones, p_last_milestones, date_of_interest)
+    second_diff_data = project_time_difference(p_current_milestones, p_oldest_milestones, date_of_interest)
 
-    run = put_into_wb_all_single(project_name, p_current_milestones, first_diff_dict, second_diff_dict, baseline_list)
+    run = put_into_wb_all_single(project_name, p_current_milestones, first_diff_data, second_diff_data, baseline_bc)
 
     return run
 
@@ -197,26 +197,29 @@ def run_milestone_comparator_single(function, project_name, masters_list, date_o
 
 ''' RUNNING THE PROGRAMME'''
 
+'''Note: all master data is taken from the data file. Make sure this is up to date and that all relevant data is in 
+the import statement.'''
 
-''' 3) set list of projects to be included in output. Still in development'''
+''' ONE. set list of projects to be included in output'''
 '''option one - all projects'''
 project_quarter_list = q2_1920.projects
 
-'''option two - group of projects... in development'''
-project_group_list = ['Rail Group', 'HSMRPG', 'International Security and Environment', 'Roads Devolution & Motoring']
+'''option two - group of projects. use filter_project_group function'''
+project_group_list = filter_project_group(q2_1920, 'HSMRPG')
 
 '''option three - single project'''
-one_project_list = ['Thameslink Programme']
+one_project_list = ['High Speed Rail Programme (HS2)']
 
-'''4) Specify date after which project milestones should be returned. NOTE: Python date format is (YYYY,MM,DD)'''
+'''TWO. Specify date after which project milestones should be returned. NOTE: Python date format is (YYYY,MM,DD)'''
 start_date = datetime.date(2019, 6, 1)
 
-'''5) Running the milestone comparision programme.  
-The type of milestone you wish to analyse can be specified through choosing
-all_milestone_data_bulk, ap_p_milestone_data_bulk, or assurance_milestone_data_bulk functions.
-Finally enter the file path to where output documents should be saved. 
-Note keep {} in file name as this is where the project name is recorded in the file title'''
-for project_name in project_quarter_list:
+'''THREE. the following for statement prompts the programme to run. 
+step one - place the list of projects chosen in step three at the end of the for statement. i.e. for project_name in [here] 
+step two - chose the variables required for the run_milestone_comparator_single function. The first argument in relation
+to which milestone data is to be analysed will normally be the only change. 
+step three - provide relevant file path to document output. Changing the quarter stamp info as necessary. Note keep {} in 
+file name as this is where the project name is recorded in the file title'''
+for project_name in project_group_list:
     print('Doing milestone movement analysis for ' + str(project_name))
     wb = run_milestone_comparator_single(all_milestone_data_bulk, project_name, list_of_masters_all, start_date)
     wb.save('C:\\Users\\Standalone\\general\\masters folder\\project_milestones\\'
