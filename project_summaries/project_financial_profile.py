@@ -9,7 +9,7 @@ from openpyxl.chart import LineChart, Reference
 from openpyxl.chart.text import RichText
 from openpyxl.drawing.text import Paragraph, ParagraphProperties, CharacterProperties, Font
 from analysis.data import financial_analysis_masters_list, q2_1920
-from analysis.engine_functions import bc_ref_stages, get_master_baseline_dict
+from analysis.engine_functions import bc_ref_stages, master_baseline_index, filter_project_group
 
 
 def financial_data(project_list, masters_list, bl_list, cells_to_capture, index):
@@ -155,7 +155,7 @@ def place_in_excel(project_name, latest_financial_data, last_financial_data, bas
     '''places in totals'''
     baseline_totals = calculate_totals(project_name, baseline_financial_data)
     last_q_totals = calculate_totals(project_name, last_financial_data)
-    latest_q_totals = calculate_totals(project_name, last_financial_data)
+    latest_q_totals = calculate_totals(project_name, latest_financial_data)
 
     total_list = [baseline_totals, last_q_totals, latest_q_totals]
 
@@ -189,9 +189,6 @@ def place_in_excel(project_name, latest_financial_data, last_financial_data, bas
         ws.cell(row=2+i, column=1, value=label)
 
     '''process for showing total cost profile. starting with data'''
-
-    #ToDo fix a bug which causing totals to not be printed correctly.
-
     row_start = 16
     for x, l in enumerate(total_list):
         for i, total in enumerate(l):
@@ -334,7 +331,7 @@ def place_in_excel(project_name, latest_financial_data, last_financial_data, bas
 
     return wb
 
-'''List of financial data keys to capture. This should be amended to years of interest'''
+'''Lists of financial data keys to capture. This can be amended to years of interest'''
 capture_rdel = ['19-20 RDEL Forecast Total', '20-21 RDEL Forecast Total', '21-22 RDEL Forecast Total',
                 '22-23 RDEL Forecast Total', '23-24 RDEL Forecast Total', '24-25 RDEL Forecast Total',
                 '25-26 RDEL Forecast Total', '26-27 RDEL Forecast Total', '27-28 RDEL Forecast Total',
@@ -352,20 +349,18 @@ capture_income =['19-20 Forecast - Income both Revenue and Capital',
                 '24-25 Forecast - Income both Revenue and Capital', '25-26 Forecast - Income both Revenue and Capital',
                 '26-27 Forecast - Income both Revenue and Capital', '27-28 Forecast - Income both Revenue and Capital',
                 '28-29 Forecast - Income both Revenue and Capital', 'Unprofiled Forecast Income']
-
 all_data_lists = capture_rdel + capture_cdel + capture_ng + capture_income
-
 
 def run_financials_single(project_list, masters_list):
     '''
-    Function for running the programme
+    Function that
 
     project_list: list of project names
     masters_list: list of master dictionaries
     '''
 
     baseline_bc = bc_ref_stages(project_list, masters_list)
-    q_masters_list = get_master_baseline_dict(project_list, masters_list, baseline_bc)
+    q_masters_list = master_baseline_index(project_list, masters_list, baseline_bc)
     latest_financial_data = financial_data(project_list, masters_list, q_masters_list, all_data_lists, 0)
     last_financial_data = financial_data(project_list, masters_list, q_masters_list, all_data_lists, 1)
     baseline_financial_data = financial_data(project_list, masters_list, q_masters_list, all_data_lists, 2)
@@ -382,12 +377,11 @@ def run_financials_single(project_list, masters_list):
 '''option 1 - all '''
 latest_quarter_projects = q2_1920.projects
 
-'''option 2 - a group'''
-#TODO write function for filtering list of project names based on group
-proj_names_group = ['East Midlands Franchise', 'Rail Franchising Programme', 'West Coast Partnership Franchise']
+'''option two - group of projects. use filter_project_group function'''
+project_group_list = filter_project_group(q2_1920, 'HSMRPG')
 
-'''option 3 - bespoke list of projects'''
-proj_names_bespoke = ['East West Rail Programme (Western Section)']
+'''option three - single project'''
+one_project_list = ['High Speed Rail Programme (HS2)']
 
 '''
 TWO. run the programme placing in the relevant variables. 

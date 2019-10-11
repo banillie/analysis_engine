@@ -16,7 +16,6 @@ from openpyxl import Workbook
 from openpyxl.styles import PatternFill, Font
 from openpyxl.styles.differential import DifferentialStyle
 from openpyxl.formatting.rule import Rule
-import random
 from analysis.data import q1_1920, one_quarter_master_list, bespoke_group_masters_list, list_of_masters_all
 from analysis.engine_functions import all_milestone_data_bulk, ap_p_milestone_data_bulk, assurance_milestone_data_bulk,\
     get_all_project_names, get_quarter_stamp
