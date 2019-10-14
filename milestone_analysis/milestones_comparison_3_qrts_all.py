@@ -94,7 +94,7 @@ def put_into_wb_all(project_name_list, t_data, td_data, td_data_two, wb):
 
     return wb
 
-def run_milestone_comparator(function, project_name_list, masters_list, date_of_interest):
+def run_milestone_comparator(function, project_name_list, masters_list):
 
     '''
     Function that runs this programme.
@@ -129,8 +129,8 @@ def run_milestone_comparator(function, project_name_list, masters_list, date_of_
         oldest_milestones_data.update(p_oldest_milestones_data)
 
     '''calculate time current and last quarter'''
-    first_diff_data = project_time_difference(current_milestones_data, last_milestones_data, date_of_interest)
-    second_diff_data = project_time_difference(current_milestones_data, oldest_milestones_data, date_of_interest)
+    first_diff_data = project_time_difference(current_milestones_data, last_milestones_data)
+    second_diff_data = project_time_difference(current_milestones_data, oldest_milestones_data)
 
     run = put_into_wb_all(project_name_list, current_milestones_data, first_diff_data, second_diff_data, wb)
 
@@ -154,10 +154,7 @@ group_projects_list = filter_project_group(q2_1920, 'HSMRPG')
 '''option three - single project'''
 one_proj_list = ['Thameslink Programme']
 
-'''TWO. Specify date after which project milestones should be returned. NOTE: Python date format is (YYYY,MM,DD)'''
-start_date = datetime.date(2019, 6, 1)
-
-'''THREE. choose the type of variables that you would like to place in run_milestone_comparator function. Arguments 
+'''TWO. choose the type of variables that you would like to place in run_milestone_comparator function. Arguments 
 are placed in this order. 
 
 1. function: The type of milestone you wish to analysis can be specified through choosing all_milestone_data_bulk, 
@@ -169,7 +166,7 @@ statement above.
  
 '''
 print_miles = \
-    run_milestone_comparator(all_milestone_data_bulk, project_q_list, list_of_masters_all, start_date)
+    run_milestone_comparator(all_milestone_data_bulk, project_q_list, list_of_masters_all)
 
 '''FOUR. specify file path to output document'''
-print_miles.save('C:\\Users\\Standalone\\general\\testing.xlsx')
+print_miles.save('C:\\Users\\Standalone\\general\\masters folder\\portfolio_milestones\\q2_testing.xlsx')
