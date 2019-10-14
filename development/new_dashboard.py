@@ -21,7 +21,7 @@ import datetime
 from openpyxl.styles import PatternFill, Font
 from openpyxl.styles.differential import DifferentialStyle
 from openpyxl.formatting.rule import Rule, IconSet, FormatObject
-from engine_functions import all_milestone_data_bulk
+from engine_functions import all_milestone_data_bulk, concatenate_dates, up_or_down
 from data import q1_1920, q4_1819
 
 '''Function that creates dictionary with keys of interest'''
@@ -59,138 +59,6 @@ def add_sop_pend_data(m_data, dict):
             dict[name]['Project End Date'] = None
 
     return dict
-
-'''function for converting dates into concatenated written time periods'''
-def concatenate_dates(date):
-    today = bicc_date
-    if date != None:
-        a = (date - today.date()).days
-        year = 365
-        month = 30
-        fortnight = 14
-        week = 7
-        if a >= 365:
-            yrs = int(a / year)
-            holding_days_years = a % year
-            months = int(holding_days_years / month)
-            holding_days_months = a % month
-            fortnights = int(holding_days_months / fortnight)
-            weeks = int(holding_days_months / week)
-        elif 0 <= a <= 365:
-            yrs = 0
-            months = int(a / month)
-            holding_days_months = a % month
-            fortnights = int(holding_days_months / fortnight)
-            weeks = int(holding_days_months / week)
-            # if 0 <= a <=60:
-        elif a <= -365:
-            yrs = int(a / year)
-            holding_days = a % -year
-            months = int(holding_days / month)
-            holding_days_months = a % -month
-            fortnights = int(holding_days_months / fortnight)
-            weeks = int(holding_days_months / week)
-        elif -365 <= a <= 0:
-            yrs = 0
-            months = int(a / month)
-            holding_days_months = a % -month
-            fortnights = int(holding_days_months / fortnight)
-            weeks = int(holding_days_months / week)
-            # if -60 <= a <= 0:
-        else:
-            print('something is wrong and needs checking')
-
-        if yrs == 1:
-            if months == 1:
-                return ('{} yr, {} mth'.format(yrs, months))
-            if months > 1:
-                return ('{} yr, {} mths'.format(yrs, months))
-            else:
-                return ('{} yr'.format(yrs))
-        elif yrs > 1:
-            if months == 1:
-                return ('{} yrs, {} mth'.format(yrs, months))
-            if months > 1:
-                return ('{} yrs, {} mths'.format(yrs, months))
-            else:
-                return ('{} yrs'.format(yrs))
-        elif yrs == 0:
-            if a == 0:
-                return ('Today')
-            elif 1 <= a <= 6:
-                return ('This week')
-            elif 7 <= a <= 13:
-                return ('Next week')
-            elif -7 <= a <= -1:
-                return ('Last week')
-            elif -14 <= a <= -8:
-                return ('-2 weeks')
-            elif 14 <= a <= 20:
-                return ('2 weeks')
-            elif 20 <= a <= 60:
-                if today.month == date.month:
-                    return ('Later this mth')
-                elif (date.month - today.month) == 1:
-                    return ('Next mth')
-                else:
-                    return ('2 mths')
-            elif -60 <= a <= -15:
-                if today.month == date.month:
-                    return ('Earlier this mth')
-                elif (date.month - today.month) == -1:
-                    return ('Last mth')
-                else:
-                    return ('-2 mths')
-            elif months == 12:
-                return ('1 yr')
-            else:
-                return ('{} mths'.format(months))
-
-        elif yrs == -1:
-            if months == -1:
-                return ('{} yr, {} mth'.format(yrs, -(months)))
-            if months < -1:
-                return ('{} yr, {} mths'.format(yrs, -(months)))
-            else:
-                return ('{} yr'.format(yrs))
-        elif yrs < -1:
-            if months == -1:
-                return ('{} yrs, {} mth'.format(yrs, -(months)))
-            if months < -1:
-                return ('{} yrs, {} mths'.format(yrs, -(months)))
-            else:
-                return ('{} yrs'.format(yrs))
-    else:
-        return ('None')
-
-'''function for calculating if confidence has increased decreased'''
-def up_or_down(latest_dca, last_dca):
-
-    if latest_dca == last_dca:
-        return (int(0))
-    elif latest_dca != last_dca:
-        if last_dca == 'Green':
-            if latest_dca != 'Amber/Green':
-                return (int(-1))
-        elif last_dca == 'Amber/Green':
-            if latest_dca == 'Green':
-                return (int(1))
-            else:
-                return (int(-1))
-        elif last_dca == 'Amber':
-            if latest_dca == 'Green':
-                return (int(1))
-            elif latest_dca == 'Amber/Green':
-                return (int(1))
-            else:
-                return (int(-1))
-        elif last_dca == 'Amber/Red':
-            if latest_dca == 'Red':
-                return (int(-1))
-            else:
-                return (int(1))
-        else:
-            return (int(1))
 
 '''function for adding concatenated word strings to dictionary.
 note probably don't need the above function now, but can tidy up later'''

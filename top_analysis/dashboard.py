@@ -40,9 +40,32 @@ import datetime
 from openpyxl.styles import PatternFill, Font
 from openpyxl.styles.differential import DifferentialStyle
 from openpyxl.formatting.rule import Rule, IconSet, FormatObject
-from analysis.data import q2_1920, q1_1920
+from analysis.data import q2_1920, q1_1920, q4_1819
 from analysis.engine_functions import all_milestone_data_bulk, convert_rag_text, concatenate_dates, up_or_down, \
     convert_bc_stage_text
+
+def highlight_close_dates_bicc(concate_calculation):
+    '''
+    function that further converts dates that have been concatenated so it is clearer whether/when the project
+    was last at BICC
+    :param concate_calculation: a concatenated date. provided by concatenate_dates function
+    :return: relevant text for dashboard
+    '''
+
+    if concate_calculation == '-2 weeks':
+        return 'Last BICC'
+    if concate_calculation == '2 weeks':
+        return 'Next BICC'
+    if concate_calculation == 'Today':
+        return 'This BICC'
+    if concate_calculation == '-2 weeks':
+        return 'Last BICC'
+    if concate_calculation == '2 weeks':
+        return 'Next BICC'
+    if concate_calculation == 'Today':
+        return 'This BICC'
+    else:
+        return concate_calculation
 
 def place_in_excel(master_one, master_two, wb):
     '''
@@ -72,16 +95,24 @@ def place_in_excel(master_one, master_two, wb):
                                                                          ['BICC approval point'])
 
             p_m_data = all_milestone_data_bulk([project_name], master_one)
-            print(p_m_data)
-            ws.cell(row=row_num, column=10).value = concatenate_dates\
-                (list(p_m_data[project_name]['Start of Operation'])[0])
-            ws.cell(row=row_num, column=11).value = concatenate_dates\
-                (list(p_m_data[project_name]['Project End Date'])[0])
+            try:
+                ws.cell(row=row_num, column=10).value = concatenate_dates\
+                    (list(p_m_data[project_name]['Start of Operation'])[0])
+            except KeyError:
+                ws.cell(row=row_num, column=10).value = 'no data'
+            try:
+                ws.cell(row=row_num, column=11).value = concatenate_dates\
+                    (list(p_m_data[project_name]['Project End Date'])[0])
+            except KeyError:
+                ws.cell(row=row_num, column=10).value = 'no data'
+
             ws.cell(row=row_num, column=12).value = convert_rag_text(master_one.data[project_name]
                                                                      ['SRO Finance confidence'])
             try:
-                ws.cell(row=row_num, column=13).value = master_one.data[project_name]['Last time at BICC']
-                ws.cell(row=row_num, column=14).value = master_one.data[project_name]['Next at BICC']
+                ws.cell(row=row_num, column=13).value = highlight_close_dates_bicc\
+                    (concatenate_dates(master_one.data[project_name]['Last time at BICC']))
+                ws.cell(row=row_num, column=14).value = highlight_close_dates_bicc\
+                    (concatenate_dates(master_one.data[project_name]['Next at BICC']))
             except KeyError:
                 print('programme has crashed due to last time at BICC and Next and BICC keys not being inserted into'
                       'master')
@@ -91,192 +122,55 @@ def place_in_excel(master_one, master_two, wb):
         if project_name in master_two.projects:
             ws.cell(row=row_num, column=5).value = convert_rag_text(master_two.data[project_name]['Departmental DCA'])
 
-    # Highlight cells that contain RAG text, with background and text the same colour. column E.
+    '''highlight cells that contain RAG text, with background and text the same colour'''
 
+    '''list of how rag ratings are shown in document'''
+    rag_txt_list = ["A/G", "A/R", "R", "G", "A"]
+
+    '''store of different colours'''
     ag_text = Font(color="00a5b700")
     ag_fill = PatternFill(bgColor="00a5b700")
-    dxf = DifferentialStyle(font=ag_text, fill=ag_fill)
-    rule = Rule(type="containsText", operator="containsText", text="A/G", dxf=dxf)
-    rule.formula = ['NOT(ISERROR(SEARCH("A/G",e1)))']
-    ws.conditional_formatting.add('e1:e100', rule)
-
     ar_text = Font(color="00f97b31")
     ar_fill = PatternFill(bgColor="00f97b31")
-    dxf = DifferentialStyle(font=ar_text, fill=ar_fill)
-    rule = Rule(type="containsText", operator="containsText", text="A/R", dxf=dxf)
-    rule.formula = ['NOT(ISERROR(SEARCH("A/R",e1)))']
-    ws.conditional_formatting.add('e1:e100', rule)
-
     red_text = Font(color="00fc2525")
     red_fill = PatternFill(bgColor="00fc2525")
-    dxf = DifferentialStyle(font=red_text, fill=red_fill)
-    rule = Rule(type="containsText", operator="containsText", text="R", dxf=dxf)
-    rule.formula = ['NOT(ISERROR(SEARCH("R",E1)))']
-    ws.conditional_formatting.add('E1:E100', rule)
-
     green_text = Font(color="0017960c")
     green_fill = PatternFill(bgColor="0017960c")
-    dxf = DifferentialStyle(font=green_text, fill=green_fill)
-    rule = Rule(type="containsText", operator="containsText", text="G", dxf=dxf)
-    rule.formula = ['NOT(ISERROR(SEARCH("G",e1)))']
-    ws.conditional_formatting.add('E1:E100', rule)
-
     amber_text = Font(color="00fce553")
     amber_fill = PatternFill(bgColor="00fce553")
-    dxf = DifferentialStyle(font=amber_text, fill=amber_fill)
-    rule = Rule(type="containsText", operator="containsText", text="A", dxf=dxf)
-    rule.formula = ['NOT(ISERROR(SEARCH("A",e1)))']
-    ws.conditional_formatting.add('e1:e100', rule)
 
-    # highlight cells in column g
+    '''placed into a list'''
+    txt_colour_list = [ag_text, ar_text, red_text, green_text, amber_text]
+    fill_colour_list = [ag_fill, ar_fill, red_fill, green_fill, amber_fill]
 
-    ag_text = Font(color="000000")
-    ag_fill = PatternFill(bgColor="00a5b700")
-    dxf = DifferentialStyle(font=ag_text, fill=ag_fill)
-    rule = Rule(type="containsText", operator="containsText", text="A/G", dxf=dxf)
-    rule.formula = ['NOT(ISERROR(SEARCH("A/G",g1)))']
-    ws.conditional_formatting.add('g1:g100', rule)
+    '''list of columns with conditional formatting'''
+    list_columns = ['e', 'g', 'h', 'l']
 
-    ar_text = Font(color="000000")
-    ar_fill = PatternFill(bgColor="00f97b31")
-    dxf = DifferentialStyle(font=ar_text, fill=ar_fill)
-    rule = Rule(type="containsText", operator="containsText", text="A/R", dxf=dxf)
-    rule.formula = ['NOT(ISERROR(SEARCH("A/R",g1)))']
-    ws.conditional_formatting.add('g1:g100', rule)
+    '''loops below place conditional formatting (cf) rules into the wb. There are two as the dashboard currently has 
+    two distinct sections/headings, which do not require cf. Therefore, cf starts and ends at the stated rows. this
+    is hard code that will need to be changed should the position of information in the dashboard change. It is an
+    easy change however'''
+    for column in list_columns:
+        for i, dca in enumerate(rag_txt_list):
+            text = txt_colour_list[i]
+            fill = fill_colour_list[i]
+            dxf = DifferentialStyle(font=text, fill=fill)
+            rule = Rule(type="containsText", operator="containsText", text=dca, dxf=dxf)
+            for_rule_formula = 'NOT(ISERROR(SEARCH("' + dca + '",' + column + '9)))'
+            rule.formula = [for_rule_formula]
+            ws.conditional_formatting.add('' + column + '9:' + column + '29', rule)
 
-    red_text = Font(color="000000")
-    red_fill = PatternFill(bgColor="00fc2525")
-    dxf = DifferentialStyle(font=red_text, fill=red_fill)
-    rule = Rule(type="containsText", operator="containsText", text="R", dxf=dxf)
-    rule.formula = ['NOT(ISERROR(SEARCH("R",g1)))']
-    ws.conditional_formatting.add('g1:g100', rule)
+    for column in list_columns:
+        for i, dca in enumerate(rag_txt_list):
+            text = txt_colour_list[i]
+            fill = fill_colour_list[i]
+            dxf = DifferentialStyle(font=text, fill=fill)
+            rule = Rule(type="containsText", operator="containsText", text=dca, dxf=dxf)
+            for_rule_formula = 'NOT(ISERROR(SEARCH("' + dca + '",' + column + '34)))'
+            rule.formula = [for_rule_formula]
+            ws.conditional_formatting.add('' + column + '34:' + column + '60', rule)
 
-    green_text = Font(color="000000")
-    green_fill = PatternFill(bgColor="0017960c")
-    dxf = DifferentialStyle(font=green_text, fill=green_fill)
-    rule = Rule(type="containsText", operator="containsText", text="G", dxf=dxf)
-    rule.formula = ['NOT(ISERROR(SEARCH("G",g1)))']
-    ws.conditional_formatting.add('g1:g100', rule)
-
-    amber_text = Font(color="000000")
-    amber_fill = PatternFill(bgColor="00fce553")
-    dxf = DifferentialStyle(font=amber_text, fill=amber_fill)
-    rule = Rule(type="containsText", operator="containsText", text="A", dxf=dxf)
-    rule.formula = ['NOT(ISERROR(SEARCH("A",g1)))']
-    ws.conditional_formatting.add('g1:g100', rule)
-
-    # highlight cells in column H
-
-    ag_text = Font(color="000000")
-    ag_fill = PatternFill(bgColor="00a5b700")
-    dxf = DifferentialStyle(font=ag_text, fill=ag_fill)
-    rule = Rule(type="containsText", operator="containsText", text="A/G", dxf=dxf)
-    rule.formula = ['NOT(ISERROR(SEARCH("A/G",h1)))']
-    ws.conditional_formatting.add('h1:h100', rule)
-
-    ar_text = Font(color="000000")
-    ar_fill = PatternFill(bgColor="00f97b31")
-    dxf = DifferentialStyle(font=ar_text, fill=ar_fill)
-    rule = Rule(type="containsText", operator="containsText", text="A/R", dxf=dxf)
-    rule.formula = ['NOT(ISERROR(SEARCH("A/R",h1)))']
-    ws.conditional_formatting.add('h1:h100', rule)
-
-    red_text = Font(color="000000")
-    red_fill = PatternFill(bgColor="00fc2525")
-    dxf = DifferentialStyle(font=red_text, fill=red_fill)
-    rule = Rule(type="containsText", operator="containsText", text="R", dxf=dxf)
-    rule.formula = ['NOT(ISERROR(SEARCH("R",h1)))']
-    ws.conditional_formatting.add('h1:h100', rule)
-
-    green_text = Font(color="000000")
-    green_fill = PatternFill(bgColor="0017960c")
-    dxf = DifferentialStyle(font=green_text, fill=green_fill)
-    rule = Rule(type="containsText", operator="containsText", text="G", dxf=dxf)
-    rule.formula = ['NOT(ISERROR(SEARCH("G",h1)))']
-    ws.conditional_formatting.add('h1:h100', rule)
-
-    amber_text = Font(color="000000")
-    amber_fill = PatternFill(bgColor="00fce553")
-    dxf = DifferentialStyle(font=amber_text, fill=amber_fill)
-    rule = Rule(type="containsText", operator="containsText", text="A", dxf=dxf)
-    rule.formula = ['NOT(ISERROR(SEARCH("A",h1)))']
-    ws.conditional_formatting.add('h1:h100', rule)
-
-    # highlight cells in column H
-
-    ag_text = Font(color="000000")
-    ag_fill = PatternFill(bgColor="00a5b700")
-    dxf = DifferentialStyle(font=ag_text, fill=ag_fill)
-    rule = Rule(type="containsText", operator="containsText", text="A/G", dxf=dxf)
-    rule.formula = ['NOT(ISERROR(SEARCH("A/G",l1)))']
-    ws.conditional_formatting.add('l1:l100', rule)
-
-    ar_text = Font(color="000000")
-    ar_fill = PatternFill(bgColor="00f97b31")
-    dxf = DifferentialStyle(font=ar_text, fill=ar_fill)
-    rule = Rule(type="containsText", operator="containsText", text="A/R", dxf=dxf)
-    rule.formula = ['NOT(ISERROR(SEARCH("A/R",l1)))']
-    ws.conditional_formatting.add('l1:l100', rule)
-
-    red_text = Font(color="000000")
-    red_fill = PatternFill(bgColor="00fc2525")
-    dxf = DifferentialStyle(font=red_text, fill=red_fill)
-    rule = Rule(type="containsText", operator="containsText", text="R", dxf=dxf)
-    rule.formula = ['NOT(ISERROR(SEARCH("R",l1)))']
-    ws.conditional_formatting.add('l1:l100', rule)
-
-    green_text = Font(color="000000")
-    green_fill = PatternFill(bgColor="0017960c")
-    dxf = DifferentialStyle(font=green_text, fill=green_fill)
-    rule = Rule(type="containsText", operator="containsText", text="G", dxf=dxf)
-    rule.formula = ['NOT(ISERROR(SEARCH("G",l1)))']
-    ws.conditional_formatting.add('l1:l100', rule)
-
-    amber_text = Font(color="000000")
-    amber_fill = PatternFill(bgColor="00fce553")
-    dxf = DifferentialStyle(font=amber_text, fill=amber_fill)
-    rule = Rule(type="containsText", operator="containsText", text="A", dxf=dxf)
-    rule.formula = ['NOT(ISERROR(SEARCH("A",l1)))']
-    ws.conditional_formatting.add('l1:l100', rule)
-
-
-    # Highlight cells that contain RAG text, with background and black text columns G to L.
-    # ag_text = Font(color="000000")
-    # ag_fill = PatternFill(bgColor="00a5b700")
-    # dxf = DifferentialStyle(font=ag_text, fill=ag_fill)
-    # rule = Rule(type="uniqueValues", operator="equal", text="A/G", dxf=dxf)
-    # rule.formula = ['NOT(ISERROR(SEARCH("A/G",G1)))']
-    # ws.conditional_formatting.add('G1:L100', rule)
-    #
-    # ar_text = Font(color="000000")
-    # ar_fill = PatternFill(bgColor="00f97b31")
-    # dxf = DifferentialStyle(font=ar_text, fill=ar_fill)
-    # rule = Rule(type="uniqueValues", operator="equal", text="A/R", dxf=dxf)
-    # rule.formula = ['NOT(ISERROR(SEARCH("A/R",G1)))']
-    # ws.conditional_formatting.add('G1:L100', rule)
-    #
-    # red_text = Font(color="000000")
-    # red_fill = PatternFill(bgColor="00fc2525")
-    # dxf = DifferentialStyle(font=red_text, fill=red_fill)
-    # rule = Rule(type="uniqueValues", operator="equal", text="R", dxf=dxf)
-    # rule.formula = ['NOT(ISERROR(SEARCH("R",G1)))']
-    # ws.conditional_formatting.add('G1:L100', rule)
-    #
-    # green_text = Font(color="000000")
-    # green_fill = PatternFill(bgColor="0017960c")
-    # dxf = DifferentialStyle(font=green_text, fill=green_fill)
-    # rule = Rule(type="uniqueValues", operator="equal", text="G", dxf=dxf)
-    # rule.formula = ['NOT(ISERROR(SEARCH("Green",G1)))']
-    # ws.conditional_formatting.add('G1:L100', rule)
-    #
-    # amber_text = Font(color="000000")
-    # amber_fill = PatternFill(bgColor="00fce553")
-    # dxf = DifferentialStyle(font=amber_text, fill=amber_fill)
-    # rule = Rule(type="uniqueValues", operator="equal", text="A", dxf=dxf)
-    # rule.formula = ['NOT(ISERROR(SEARCH("A",G1)))']
-    # ws.conditional_formatting.add('G1:L100', rule)
-
-    # highlighting new projects
+    '''this conditional formatting highlights new projects'''
     red_text = Font(color="00fc2525")
     white_fill = PatternFill(bgColor="000000")
     dxf = DifferentialStyle(font=red_text, fill=white_fill)
@@ -284,7 +178,7 @@ def place_in_excel(master_one, master_two, wb):
     rule.formula = ['NOT(ISERROR(SEARCH("NEW",F1)))']
     ws.conditional_formatting.add('F1:F100', rule)
 
-    # assign the icon set to a rule
+    '''this conditional formatting assigns the icon set to a rule'''
     first = FormatObject(type='num', val=-1)
     second = FormatObject(type='num', val=0)
     third = FormatObject(type='num', val=1)
@@ -292,22 +186,7 @@ def place_in_excel(master_one, master_two, wb):
     rule = Rule(type='iconSet', iconSet=iconset)
     ws.conditional_formatting.add('F1:F100', rule)
 
-    # change text in last at next at BICC column
-    for row_num in range(2, ws.max_row + 1):
-        if ws.cell(row=row_num, column=13).value == '-2 weeks':
-            ws.cell(row=row_num, column=13).value = 'Last BICC'
-        if ws.cell(row=row_num, column=13).value == '2 weeks':
-            ws.cell(row=row_num, column=13).value = 'Next BICC'
-        if ws.cell(row=row_num, column=13).value == 'Today':
-            ws.cell(row=row_num, column=13).value = 'This BICC'
-        if ws.cell(row=row_num, column=14).value == '-2 weeks':
-            ws.cell(row=row_num, column=14).value = 'Last BICC'
-        if ws.cell(row=row_num, column=14).value == '2 weeks':
-            ws.cell(row=row_num, column=14).value = 'Next BICC'
-        if ws.cell(row=row_num, column=14).value == 'Today':
-            ws.cell(row=row_num, column=14).value = 'This BICC'
-
-            # highlight text in bold
+    # highlights specific text in bold
     ft = Font(bold=True)
     for row_num in range(2, ws.max_row + 1):
         lis = ['This week', 'Next week', 'Last week', 'Two weeks',
@@ -323,6 +202,7 @@ def place_in_excel(master_one, master_two, wb):
             ws.cell(row=row_num, column=13).font = ft
         if ws.cell(row=row_num, column=14).value in lis:
             ws.cell(row=row_num, column=14).font = ft
+
     return wb
 
 
@@ -332,11 +212,8 @@ def place_in_excel(master_one, master_two, wb):
 dashboard_master = load_workbook('C:\\Users\\Standalone\\general\\masters folder\\portfolio_dashboards\\master.xlsx')
 
 '''TWO. Provide list of projects on which to provide analysis'''
-project_list = q2_1920.projects
+project_list = q1_1920.projects
 
-'''THREE. Specify data of BICC that is discussing the report. NOTE: Python date format is (YYYY,MM,DD)'''
-bicc_date = datetime.datetime(2019, 9, 9)
-
-'''FOUR. place arguments into the place_in_excle function and provide file path for saving output wb'''
-dashboard_completed = place_in_excel(q2_1920, q1_1920, dashboard_master)
+'''THREE. place arguments into the place_in_excle function and provide file path for saving output wb'''
+dashboard_completed = place_in_excel(q1_1920, q4_1819, dashboard_master)
 dashboard_completed.save('C:\\Users\\Standalone\\general\\masters folder\\portfolio_dashboards\\test.xlsx')

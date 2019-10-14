@@ -96,7 +96,7 @@ def put_into_wb_all_single(project_name, t_data, td_data, td_data_two, baseline_
 
     return wb
 
-def run_milestone_comparator_single(function, project_name, masters_list, date_of_interest):
+def run_milestone_comparator_single(function, project_name, masters_list):
     '''
     Function that runs this programme.
 
@@ -119,8 +119,8 @@ def run_milestone_comparator_single(function, project_name, masters_list, date_o
     p_oldest_milestones = function([project_name], masters_list[baseline_list_index[project_name][2]])
 
     '''calculate time current and last quarter'''
-    first_diff_data = project_time_difference(p_current_milestones, p_last_milestones, date_of_interest)
-    second_diff_data = project_time_difference(p_current_milestones, p_oldest_milestones, date_of_interest)
+    first_diff_data = project_time_difference(p_current_milestones, p_last_milestones)
+    second_diff_data = project_time_difference(p_current_milestones, p_oldest_milestones)
 
     run = put_into_wb_all_single(project_name, p_current_milestones, first_diff_data, second_diff_data, baseline_bc)
 
@@ -142,10 +142,7 @@ project_group_list = filter_project_group(q2_1920, 'HSMRPG')
 '''option three - single project'''
 one_project_list = ['High Speed Rail Programme (HS2)']
 
-'''TWO. Specify date after which project milestones should be returned. NOTE: Python date format is (YYYY,MM,DD)'''
-start_date = datetime.date(2019, 6, 1)
-
-'''THREE. the following for statement prompts the programme to run. 
+'''TWO. the following for statement prompts the programme to run. 
 step one - place the list of projects chosen in step three at the end of the for statement. i.e. for project_name in [here] 
 step two - chose the variables required for the run_milestone_comparator_single function. The first argument in relation
 to which milestone data is to be analysed will normally be the only change. 
@@ -153,6 +150,6 @@ step three - provide relevant file path to document output. Changing the quarter
 file name as this is where the project name is recorded in the file title'''
 for project_name in project_group_list:
     print('Doing milestone movement analysis for ' + str(project_name))
-    wb = run_milestone_comparator_single(all_milestone_data_bulk, project_name, list_of_masters_all, start_date)
+    wb = run_milestone_comparator_single(all_milestone_data_bulk, project_name, list_of_masters_all)
     wb.save('C:\\Users\\Standalone\\general\\masters folder\\project_milestones\\'
             'q2_1920_{}_milestone_movement_analysis.xlsx'.format(project_name))
