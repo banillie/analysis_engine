@@ -16,7 +16,7 @@ commission template in active reporting fields, as well as provide a record of w
 
 from openpyxl import load_workbook
 from openpyxl.styles import Color, PatternFill, Font, Border
-from analysis.data import q1_1920, q1_1920_test
+from analysis.data import q1_1920
 
 
 def create_master(workbook, latest_q_data):
