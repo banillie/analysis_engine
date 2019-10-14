@@ -306,6 +306,7 @@ def run_programme(master_one, master_two):
     finance_dca = calculate_dca_change('SRO Finance confidence', master_one, master_two)
     resource_dca = calculate_dca_change('Overall Resource DCA - Now', master_one, master_two)
     benefits_dca = calculate_dca_change('SRO Benefits RAG', master_one, master_two)
+    schedule_dca = calculate_overall_dials('SRO Schedule Confidence', master_one, master_two)
 
     print('DCA')
     calculate_overall_dials(sro_dca)
@@ -315,16 +316,20 @@ def run_programme(master_one, master_two):
     calculate_overall_dials(resource_dca)
     print('Benefits')
     calculate_overall_dials(benefits_dca)
+    print('Schedule')
+    calculate_overall_dials(schedule_dca)
 
     overall = print_dca_change(sro_dca)
     finance = print_dca_change(finance_dca)
     resource = print_dca_change(resource_dca)
     benefits = print_dca_change(benefits_dca)
+    schedule = print_dca_change(schedule_dca)
 
     overall.save('C:\\Users\\Standalone\\general\\masters folder\\speed_dials\\q2_1920_overall_dca.docx')
     finance.save('C:\\Users\\Standalone\\general\\masters folder\\speed_dials\\q2_1920_finance_dca.docx')
     resource.save('C:\\Users\\Standalone\\general\\masters folder\\speed_dials\\q2_1920_resource_dca.docx')
     benefits.save('C:\\Users\\Standalone\\general\\masters folder\\speed_dials\\q2_1920_benefits_dca.docx')
+    schedule.save('C:\\Users\\Standalone\\general\\masters folder\\speed_dials\\q2_1920_schedule_dca.docx')
 
 
 ''' RUNNING PROGRAMME '''

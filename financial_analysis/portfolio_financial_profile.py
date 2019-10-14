@@ -22,13 +22,13 @@ from analysis.engine_functions import bc_ref_stages, master_baseline_index, filt
 
 
 
-def year_totals(proj_list, proj_list_remove, data_key_list, q_masters_dict_list, q_masters_list, period):
+def year_totals(project_list, remove_from_totals_list, data_key_list, q_masters_dict_list, q_masters_list, period):
     #TODO convert output into dictionary
 
     fy_total_list = []
 
-    totals_proj_list = []
-    for proj_name in proj_list:
+    totals_project_list = []
+    for project_name in project_list:
         if proj_name not in proj_list_remove:
             totals_proj_list.append(proj_name)
 
