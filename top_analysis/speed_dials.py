@@ -306,7 +306,7 @@ def run_programme(master_one, master_two):
     finance_dca = calculate_dca_change('SRO Finance confidence', master_one, master_two)
     resource_dca = calculate_dca_change('Overall Resource DCA - Now', master_one, master_two)
     benefits_dca = calculate_dca_change('SRO Benefits RAG', master_one, master_two)
-    schedule_dca = calculate_overall_dials('SRO Schedule Confidence', master_one, master_two)
+    schedule_dca = calculate_dca_change('SRO Schedule Confidence', master_one, master_two)
 
     print('DCA')
     calculate_overall_dials(sro_dca)
