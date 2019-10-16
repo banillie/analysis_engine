@@ -20,12 +20,12 @@ manually checked to verify that the data is red.
 '''
 
 from openpyxl import load_workbook
-from openpyxl.styles import Border, Color, Font, PatternFill
-from analysis.data import q1_1920, gmpp_master
+from openpyxl.styles import Font
+from analysis.data import q2_1920
 from analysis.engine_functions import filter_gmpp
 
 
-def create_master(gmpp_wb, master_data, master_gmpp):
+def create_master(gmpp_wb, master_data):
     ws = gmpp_wb.active
 
     type_list = ['RDEL', 'CDEL', 'Non-Gov', 'Income'] # list of cost types. used to amend Hs2 data
@@ -38,14 +38,14 @@ def create_master(gmpp_wb, master_data, master_gmpp):
 
     for i, project_name in enumerate(gmpp_project_names):
         print(project_name)
-        ws.cell(row=1, column=5+i).value = project_name  # place project names in file
+        ws.cell(row=1, column=6+i).value = project_name  # place project names in file
 
         # for loop for placing data into the worksheet
         for row_num in range(2, ws.max_row+1):
             key = ws.cell(row=row_num, column=1).value
             # this loop places all latest raw data into the worksheet
             if key in master_data.data[project_name].keys():
-                ws.cell(row=row_num, column=5+i).value = master_data.data[project_name][key]
+                ws.cell(row=row_num, column=6+i).value = master_data.data[project_name][key]
             # elif key not in latest_data[name].keys():
             #     print(key)
 
@@ -53,80 +53,7 @@ def create_master(gmpp_wb, master_data, master_gmpp):
                 for cost_type in type_list_2:
                     if cost_type in key:
                         if master_data.data[project_name][key] is None:
-                            ws.cell(row=row_num, column=5 + i).value = 0
-
-            # # this section handles some easily automated tweaks to data to meet IPA data structures for non-static data
-            # if key == 'Project/Programme Name':
-            #     ws.cell(row=row_num, column=11+i).value = name
-            # #if key == 'FD Sign-Off':
-            # #    ws.cell(row=row_num, column=11+i).value = None
-            # #if key == 'New PD - If \'other\' please specify':
-            # #    ws.cell(row=row_num, column=11+i).value = None
-            # #if key == 'Person Completing this return: Email Address':
-            # #    ws.cell(row=row_num, column=11+i).value = 'robert.green@dft.gov.uk'
-            # if key == 'Dept Single Point of Contact (SPOC)':
-            #     ws.cell(row=row_num, column=11+i).value = 'Robert Green'          # HARDCODED
-            # if key == 'SPOC Email Address':
-            #     ws.cell(row=row_num, column=11+i).value = 'robert.green@dft.gov.uk'   # HARDCODED
-            # if key == 'Snapshot':
-            #     ws.cell(row=row_num, column=11+i).value = '3\1-Dec-18'      # HARDCODED. Change each quarter.
-
-
-            # if key == 'SRO First Name':
-            #     email = latest_data[name]['SRO Email']
-            #     email_1 = email.split("@")[0]
-            #     firstname = email.split(".")[0]
-            #     ws.cell(row=row_num, column=11+i).value = firstname
-            # if key == 'SRO Last Name':
-            #     email = latest_data[name]['SRO Email']
-            #     email_1 = email.split("@")[0]
-            #     surname = email_1.split(".")[1]
-            #     ws.cell(row=row_num, column=11+i).value = surname
-            # if key == 'PD First Name':
-            #     email = latest_data[name]['PD Email']
-            #     email_1 = email.split("@")[0]
-            #     firstname = email_1.split(".")[0]
-            #     ws.cell(row=row_num, column=11+i).value = firstname
-            # if key == 'PD Last Name':
-            #     email = latest_data[name]['PD Email']
-            #     email_1 = email.split("@")[0]
-            #     surname = email_1.split(".")[1]
-            #     ws.cell(row=row_num, column=11+i).value = surname
-            #
-            # if key == 'Project Cost Narrative':
-            #     rdel = latest_data[name]['Project Costs Narrative RDEL']
-            #     if rdel == None:
-            #         rdel = ''
-            #     cdel = latest_data[name]['Project Costs Narrative CDEL']
-            #     if cdel == None:
-            #         cdel = ''
-            #     ws.cell(row=row_num, column=11+i).value = rdel + cdel
-            #     #ws.cell(row=row_num, column=col_num).font = red_text
-            #
-            # '''this loop places all static gmpp specific information into worksheet. needs some further work
-            # this can overwrite in uncontrolled way new data being put into sheet. have made an attempt to fix this
-            # on list 116 below'''
-            # if key not in latest_data[name].keys():
-            #     if key in last_gmpp[name].keys():
-            #         if key not in list_gmpp_static_keys:
-            #             print(key)
-            #             ws.cell(row=row_num, column=11 + i).value = last_gmpp[name][key]
-
-    # this section handles HS2 data. placing old static data into the worksheet
-    for i, project_name in enumerate(gmpp_project_names):
-        if project_name == 'High Speed Rail Programme (HS2)':
-            print('HS2 financial data has been amended')
-            '''note minus 20 here. bug in the loop I haven't fixed yet. probably something to do with how data is
-            recorded in DM'''
-            for row_num in range(2, ws.max_row+1):
-                key = ws.cell(row=row_num, column=1).value
-                for cost_type in type_list:
-                    try:
-                        if cost_type in key:
-                            ws.cell(row=row_num, column=5 + i).value = master_gmpp.data[project_name][key]
-                            ws.cell(row=row_num, column=5 + i).font = red_text
-                    except (KeyError, TypeError):
-                        pass
+                            ws.cell(row=row_num, column=6 + i).value = 0
 
     return gmpp_wb
 
@@ -136,6 +63,6 @@ def create_master(gmpp_wb, master_data, master_gmpp):
 latest_dm = load_workbook("C:\\Users\\Standalone\\general\\masters folder\\gmpp_reporting\\gmpp_datamaps\\"
                           "gmpp_datamap_q2_1920.xlsx")
 
-run = create_master(latest_dm, q1_1920, gmpp_master)
+run = create_master(latest_dm, q2_1920)
 
-run.save("C:\\Users\\Standalone\\general\\gmpp_dataset_testing.xlsx")
+run.save("C:\\Users\\Standalone\\general\\gmpp_dataset_q2_1920.xlsx")

@@ -357,13 +357,13 @@ baseline_list = master_baseline_index(one_quarter_list, list_of_masters_all, bas
 
 '''THREE. Set data of interest. there are two options here. hash out whichever option you are not using'''
 
-'''option one - non-milestone data. NOTE. this must be in a list even if just one data key'''
+'''option one - non-milestone data. NOTE. this must be in a list [] even if just one data key'''
 data_interest = ['Working Contact Name', 'Working Contact Email', 'Brief project description (GMPP - brief descripton)',
                  'Business Case & Version No.', 'NPV for all projects and NPV for programmes if available',
                  'Initial Benefits Cost Ratio (BCR)', 'Adjusted Benefits Cost Ratio (BCR)',
                  'VfM Category single entry', 'VfM Category', 'Present Value Cost (PVC)', 'Present Value Benefit (PVB)']
 
-'''option two - milestone data'''
+'''option two - milestone data. NOTE. this must be in a list [] even if just one data key'''
 #milestone_data_interest = ['Project End Date', 'Start of Project']
 
 '''THREE. Run the programme'''
