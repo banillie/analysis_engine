@@ -21,7 +21,7 @@ from openpyxl import Workbook
 from openpyxl.styles import PatternFill, Font
 from openpyxl.styles.differential import DifferentialStyle
 from openpyxl.formatting.rule import Rule
-from analysis.data import q1_1920, one_quarter_master_list, bespoke_group_masters_list, list_of_masters_all
+from analysis.data import q2_1920, q1_1920, one_quarter_master_list, bespoke_group_masters_list, list_of_masters_all
 from analysis.engine_functions import all_milestone_data_bulk, ap_p_milestone_data_bulk, assurance_milestone_data_bulk,\
     get_all_project_names, get_quarter_stamp, bc_ref_stages, master_baseline_index
 
@@ -98,7 +98,6 @@ def return_baseline_data(masters_list, baseline_list, baseline_ref, project_name
     '''
 
     salmon_fill = PatternFill(start_color='ff8080', end_color='ff8080', fill_type='solid')
-    # red_text = Font(color="FF0000") #currently not in use
 
     wb = Workbook()
 
@@ -146,37 +145,42 @@ def return_baseline_data(masters_list, baseline_list, baseline_ref, project_name
 
     return wb
 
-def return_milestone_data(masters_list, project_name_list, data_key):
-    ''' places all milestone data of interest into excel file output
-
-    master_list: list of masters containing quarter information
-    project_name_list: list of project to return data for
-    data_key: the data key of interest
+def return_baseline_milestone_data(masters_list, baseline_list, baseline_ref, project_name_list, data_key_list):
+    '''
+    places all milestone data into output document with latest, last and baseline data. Also states which quarter
+    is being used as baseline
+    :param masters_list: list of master quarter data
+    :param baseline_list: list indexing where latest, last and baseline master data for each project
+    :param project_name_list: list of project names
+    :param data_key_list: data of interest/to return
+    :return: excel spreadsheet
     '''
 
     salmon_fill = PatternFill(start_color='ff8080', end_color='ff8080', fill_type='solid')
-    # red_text = Font(color="FF0000") #currently not in use
 
     wb = Workbook()
-    ws = wb.active
-
-    '''lists project names in ws'''
-    for x in range(0, len(project_name_list)):
-        try:
-            ws.cell(row=x + 2, column=1).value = masters_list[0].data[project_name_list[x]]['DfT Group']
-        except KeyError:
-            pass
-        ws.cell(row=x + 2, column=2, value=project_name_list[x])
 
     '''project data into ws'''
-    for row_num in range(2, ws.max_row + 1):
-        project_name = ws.cell(row=row_num, column=2).value
-        print(project_name)
-        col_start = 3
-        for i, master in enumerate(masters_list):
-            if project_name in master.projects:
+    for i, data_key in enumerate(data_key_list):
+        ws = wb.create_sheet(data_key, i)  # creating worksheets
+        ws.title = data_key  # title of worksheet
 
-                milestone_data = all_milestone_data_bulk([project_name], master)
+        '''lists project names in ws'''
+        for x in range(0, len(project_name_list)):
+            try:
+                ws.cell(row=x + 2, column=1).value = masters_list[0].data[project_name_list[x]]['DfT Group']
+            except KeyError:
+                pass
+            ws.cell(row=x + 2, column=2, value=project_name_list[x])
+
+        '''project data into ws'''
+        for row_num in range(2, ws.max_row + 1):
+            project_name = ws.cell(row=row_num, column=2).value
+            ws.cell(row=row_num, column=8).value = baseline_ref[project_name][2][0]  # ref to baseline quarter
+            print(project_name)
+            col_start = 3
+            for i in baseline_list[project_name]:
+                milestone_data = all_milestone_data_bulk([project_name], masters_list[i])
 
                 try:
                     ws.cell(row=row_num, column=col_start).value = tuple(milestone_data[project_name][data_key])[0]
@@ -196,18 +200,83 @@ def return_milestone_data(masters_list, project_name_list, data_key):
                 except (IndexError, KeyError):
                     pass
                 col_start += 1
-            else:
-                ws.cell(row=row_num, column=col_start).value = 'Not reporting'
-                col_start += 1
 
-    '''quarter tag / meta data into ws'''
-    quarter_labels = get_quarter_stamp(masters_list)
-    ws.cell(row=1, column=1, value='Group')
-    ws.cell(row=1, column=2, value='Project')
-    for i, label in enumerate(quarter_labels):
-        ws.cell(row=1, column=i + 3, value=label)
+        '''quarter tag / meta data into ws'''
+        baseline_labels = ['This quarter', 'Last quarter', 'Baseline quarter']
+        ws.cell(row=1, column=1, value='Group')
+        ws.cell(row=1, column=2, value='Project')
+        for i, label in enumerate(baseline_labels):
+            ws.cell(row=1, column=i + 3, value=label)
+        ws.cell(row=1, column=8, value='Quarter from which baseline data taken')
 
-    #conditional_formatting(ws)  # apply conditional formatting
+    return wb
+
+def return_milestone_data(masters_list, project_name_list, data_key_list):
+    ''' places all milestone data of interest into excel file output
+
+    master_list: list of masters containing quarter information
+    project_name_list: list of project to return data for
+    data_key: the data key of interest
+    '''
+
+    salmon_fill = PatternFill(start_color='ff8080', end_color='ff8080', fill_type='solid')
+    # red_text = Font(color="FF0000") #currently not in use
+
+    wb = Workbook()
+
+    '''project data into ws'''
+    for i, data_key in enumerate(data_key_list):
+        ws = wb.create_sheet(data_key, i)  # creating worksheets
+        ws.title = data_key  # title of worksheet
+
+        '''lists project names in ws'''
+        for x in range(0, len(project_name_list)):
+            try:
+                ws.cell(row=x + 2, column=1).value = masters_list[0].data[project_name_list[x]]['DfT Group']
+            except KeyError:
+                pass
+            ws.cell(row=x + 2, column=2, value=project_name_list[x])
+
+        '''project data into ws'''
+        for row_num in range(2, ws.max_row + 1):
+            project_name = ws.cell(row=row_num, column=2).value
+            print(project_name)
+            col_start = 3
+            for i, master in enumerate(masters_list):
+                if project_name in master.projects:
+
+                    milestone_data = all_milestone_data_bulk([project_name], master)
+
+                    try:
+                        ws.cell(row=row_num, column=col_start).value = tuple(milestone_data[project_name][data_key])[0]
+
+                        if tuple(milestone_data[project_name][data_key])[0] is None:
+                            ws.cell(row=row_num, column=col_start).value = 'None'
+                    except KeyError:
+                        ws.cell(row=row_num, column=col_start).value = 'None'
+
+                    try:
+
+                        last_milestone_data = all_milestone_data_bulk([project_name], masters_list[i + 1])
+
+                        if tuple(last_milestone_data[project_name][data_key])[0] != \
+                                tuple(milestone_data[project_name][data_key])[0]:
+                            ws.cell(row=row_num, column=col_start).fill = salmon_fill
+                    except (IndexError, KeyError):
+                        pass
+                    col_start += 1
+                else:
+                    ws.cell(row=row_num, column=col_start).value = 'Not reporting'
+                    col_start += 1
+
+        '''quarter tag / meta data into ws'''
+        quarter_labels = get_quarter_stamp(masters_list)
+        ws.cell(row=1, column=1, value='Group')
+        ws.cell(row=1, column=2, value='Project')
+        for i, label in enumerate(quarter_labels):
+            ws.cell(row=1, column=i + 3, value=label)
+
+        grey_conditional_formatting(ws)  # apply conditional formatting
 
     return wb
 
@@ -278,7 +347,7 @@ def grey_conditional_formatting(worksheet):
 
 ''' ONE. Set relevant list of projects. This needs to be done in accordance with the data you are working with via the
  data.py file '''
-one_quarter_list = q1_1920.projects
+one_quarter_list = q2_1920.projects
 combined_quarters_list = get_all_project_names(list_of_masters_all)
 specific_project_list = [] # opportunity to provide manual list of projects
 
@@ -289,22 +358,28 @@ baseline_list = master_baseline_index(one_quarter_list, list_of_masters_all, bas
 '''THREE. Set data of interest. there are two options here. hash out whichever option you are not using'''
 
 '''option one - non-milestone data. NOTE. this must be in a list even if just one data key'''
-data_interest = ['Total Forecast']
-                 #'Present Value Cost (PVC)']
+data_interest = ['Working Contact Name', 'Working Contact Email', 'Brief project description (GMPP - brief descripton)',
+                 'Business Case & Version No.', 'NPV for all projects and NPV for programmes if available',
+                 'Initial Benefits Cost Ratio (BCR)', 'Adjusted Benefits Cost Ratio (BCR)',
+                 'VfM Category single entry', 'VfM Category', 'Present Value Cost (PVC)', 'Present Value Benefit (PVB)']
 
 '''option two - milestone data'''
-#milestone_data_interest = 'Project End Date'
+#milestone_data_interest = ['Project End Date', 'Start of Project']
 
 '''THREE. Run the programme'''
 
-'''option one - run the data_return function for all non-milestone data'''
-run = return_data(list_of_masters_all, one_quarter_list, data_interest)
+'''option one - run the return_data function for all non-milestone data'''
+#run = return_data(list_of_masters_all, one_quarter_list, data_interest)
 
-'''option two - run the data_return_baseline function for all non-milestone data'''
-#run = return_baseline_data(list_of_masters_all, baseline_list, baseline_bc, one_quarter_list, data_interest)
+'''option two - run the return_baseline_data function for all non-milestone data'''
+run = return_baseline_data(list_of_masters_all, baseline_list, baseline_bc, one_quarter_list, data_interest)
 
-'''option two - run the milestone_data_return for all milestone data'''
-#run = milestone_data_return(list_of_masters_all, one_quarter_list, milestone_data_interest)
+'''option three - run the return_milestone_data for all milestone data'''
+#run = return_milestone_data(list_of_masters_all, one_quarter_list, milestone_data_interest)
+
+'''option four - run the return_baseline_milestone_data function for all milestone data'''
+#run = return_baseline_milestone_data(list_of_masters_all, baseline_list, baseline_bc, one_quarter_list,
+#                                     milestone_data_interest)
 
 '''FOUR. specify the file path and name of the output document'''
-run.save('C:\\Users\\Standalone\\general\\testing_greying_out.xlsx')
+run.save('C:\\Users\\Standalone\\general\\vfm_analysis_data_q2_1920_baseline.xlsx')
