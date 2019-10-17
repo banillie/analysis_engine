@@ -1,79 +1,83 @@
 '''
 programme for altering across all masters changes in milestone keys.
 
-working. bit of a hack at the mo though. further work required to finalise it and make pretty!
+Issue: not currently marking new text as red. not clear why this line of code not working
 
+code doesn't/can't handle keys that have been removed.
 '''
 
-#TODO get code to handle none data.
 
+from datamaps.api import project_data_from_master
 from openpyxl import load_workbook
 from openpyxl.styles import Font
-from analysis.data import list_of_masters_all
+from analysis.data import list_of_masters_all, q2_1920
 from analysis.engine_functions import ap_p_milestone_data_bulk, assurance_milestone_data_bulk, project_time_difference, \
     all_milestone_data_bulk, bc_ref_stages, master_baseline_index
 
-def change_key(proj_list, q_master_wb_title_list, baseline_list, key_change_dict):
+def change_key(project_list, master_wb_title_list, baseline_list, change_key):
+    '''
+    :param project_list: list of project names
+    :param master_wb_title_list: list of quarter master data workbooks. This is different from the master list of
+    python dictionaries usually passed into functions.
+    :param baseline_list: list which indexes where baseline information sits.
+    :param change_key: list of keys that need to be changed.
+    :return: the wbs in the master_wb_title_list with the data amended.
+    '''
+
     red_text = Font(color="00fc2525")
-    for proj_name in proj_list:
-        for index in baseline_list[proj_name]:
+
+    for name in project_list:
+        print(name)
+        for index in baseline_list[name]:
             print(index)
-            wb = load_workbook(q_master_wb_title_list[index])
+            wb = load_workbook(master_wb_title_list[index])
             ws = wb.active
             for col_num in range(2, ws.max_column + 1):
                 project_name = ws.cell(row=1, column=col_num).value
-                #print(project_name)
-                if project_name == proj_name:
-                    print(proj_name)
+                if project_name == name:
                     for row_num in range(2, ws.max_row + 1):
-                        for i in range(1, 6):
+                        for i in range(1, 11):
                             try:
-                                if ws.cell(row=row_num, column=col_num).value == key_change_dict[proj_name]['Key '+ str(i)]:
-                                    print(key_change_dict[proj_name]['Key '+ str(i)])
-                                    ws.cell(row=row_num, column=col_num).value = key_change_dict[proj_name]['Key '+ str(i)+' change']
-                                    print(key_change_dict[proj_name]['Key '+ str(i)+' change'])
+                                if ws.cell(row=row_num, column=col_num).value == change_key[project_name]['Key '+ str(i)]:
+                                    print(change_key[project_name]['Key '+ str(i)])
+                                    ws.cell(row=row_num, column=col_num).value = change_key[project_name]['Key '+ str(i)+' change']
+                                    print(change_key[project_name]['Key '+ str(i)+' change'])
                                     ws.cell(row=row_num, column=col_num).font = red_text
                                 else:
                                     pass
                             except KeyError:
                                 pass
 
-            wb.save(q_master_wb_title_list[index])
+            wb.save(master_wb_title_list[index])
 
 
 '''INSTRUCTIONS FOR RUNNING THE PROGRAMME'''
 
-'''1) load all master quarter data files here. They have to be store twice. The first time they are converted into
-dictionaries. The second time the filepath is stored as a part of the list (this is so the current masters can be 
-opened amended and saved again, make sure lists are identical'''
+'''ONE. List of file paths to masters'''
+master_list = ('C:\\Users\\Standalone\\general\\core_data\\master_2_2019.xlsx',
+               'C:\\Users\\Standalone\\general\\core_data\\master_1_2019.xlsx',
+               'C:\\Users\\Standalone\\general\\core_data\\master_4_2018.xlsx',
+               'C:\\Users\\Standalone\\general\\core_data\\master_3_2018.xlsx',
+               'C:\\Users\\Standalone\\general\\core_data\\master_2_2018.xlsx',
+               'C:\\Users\\Standalone\\general\\core_data\\master_1_2018.xlsx',
+               'C:\\Users\\Standalone\\general\\core_data\\master_4_2017.xlsx',
+               'C:\\Users\\Standalone\\general\\core_data\\master_3_2017.xlsx',
+               'C:\\Users\\Standalone\\general\\core_data\\master_2_2017.xlsx',
+               'C:\\Users\\Standalone\\general\\core_data\\master_1_2017.xlsx',
+               'C:\\Users\\Standalone\\general\\core_data\\master_4_2016.xlsx',
+               'C:\\Users\\Standalone\\general\\core_data\\master_3_2016.xlsx')
 
+'''TWO. Provide file path to document which contains information on the data that needs to be changed'''
+key_change = project_data_from_master('C:\\Users\\Standalone\\general\\masters folder\\project_milestones\\'
+                                      'master_key_change_record_q2_1920.xlsx', 2, 2019)
 
-'''ii) list of file paths to masters'''
-master_list = ('C:\\Users\\Standalone\\general\\masters folder\\core data\\master_1_2019_wip_(25_7_19).xlsx',
-               'C:\\Users\\Standalone\\general\\masters folder\\core data\\master_4_2018.xlsx',
-               'C:\\Users\\Standalone\\general\\masters folder\\core data\\master_3_2018.xlsx',
-               'C:\\Users\\Standalone\\general\\masters folder\\core data\\master_2_2018.xlsx',
-               'C:\\Users\\Standalone\\general\\masters folder\\core data\\master_1_2018.xlsx',
-               'C:\\Users\\Standalone\\general\\masters folder\\core data\\master_4_2017.xlsx',
-               'C:\\Users\\Standalone\\general\\masters folder\\core data\\master_3_2017.xlsx',
-               'C:\\Users\\Standalone\\general\\masters folder\\core data\\master_2_2017.xlsx',
-               'C:\\Users\\Standalone\\general\\masters folder\\core data\\master_1_2017.xlsx',
-               'C:\\Users\\Standalone\\general\\masters folder\\core data\\master_4_2016.xlsx',
-               'C:\\Users\\Standalone\\general\\masters folder\\core data\\master_3_2016.xlsx')
-
-'''2) Put the masters dictionaries into a list. '''
-
-'''3) provide file path to document which contains information on the data that needs to be changed'''
-key_change = project_data_from_master('C:\\Users\\Standalone\\general\\change_milestone_key_testing.xlsx')
-
-'''4) list of projects. taken from the key change document - as this contains the only projects that need information 
-changed'''
-proj_list = list(key_change.keys())
-proj_list_bespoke = ['South West Route Capacity', 'North of England Programme']
+'''THREE. List of projects. taken from the key change document - as this contains the only projects that need 
+information changed'''
+project_name_list = key_change.projects
 
 '''ignore this part. no change required'''
-baseline_bc = bc_ref_stages(proj_list, list_of_masters_all)
-q_master_baseline_no = master_baseline_index(proj_list, list_of_masters_all, baseline_bc)
+baseline_bc = bc_ref_stages(project_name_list, list_of_masters_all)
+master_baseline_no = master_baseline_index(project_name_list, list_of_masters_all, baseline_bc)
 
-'''5) enter relevant variables in the change_key function'''
-change_key(proj_list, master_list, q_master_baseline_no, key_change)
+'''FOUR. enter relevant variables in the change_key function'''
+change_key(project_name_list, master_list, master_baseline_no, key_change)

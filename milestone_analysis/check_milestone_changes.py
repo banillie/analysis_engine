@@ -97,7 +97,6 @@ def longest_list(one, two, three):
         if out[-1] == len(x):
             return x
 
-
 def run_milestone_key_checker_single(function, project_name, masters_list):
     '''
 
@@ -152,6 +151,6 @@ file name as this is where the project name is recorded in the file title'''
 
 for project_name in project_quarter_list:
     print('Doing milestone key name checking for ' + str(project_name))
-    wb = run_milestone_key_checker_single(all_milestone_data_bulk, project_name, list_of_masters_all, )
+    wb = run_milestone_key_checker_single(all_milestone_data_bulk, project_name, list_of_masters_all)
     wb.save('C:\\Users\\Standalone\\general\\masters folder\\project_milestones\\'
             'q2_1920_{}_milestone_keys_checker.xlsx'.format(project_name))

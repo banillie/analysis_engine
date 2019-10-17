@@ -36,7 +36,6 @@ the import statement.
 '''
 
 from openpyxl import load_workbook
-import datetime
 from openpyxl.styles import PatternFill, Font
 from openpyxl.styles.differential import DifferentialStyle
 from openpyxl.formatting.rule import Rule, IconSet, FormatObject
