@@ -40,7 +40,7 @@ import datetime
 from openpyxl.styles import PatternFill, Font
 from openpyxl.styles.differential import DifferentialStyle
 from openpyxl.formatting.rule import Rule, IconSet, FormatObject
-from analysis.data import q2_1920, q1_1920, q4_1819
+from analysis.data import q2_1920, q1_1920
 from analysis.engine_functions import all_milestone_data_bulk, convert_rag_text, concatenate_dates, up_or_down, \
     convert_bc_stage_text
 
@@ -212,8 +212,8 @@ def place_in_excel(master_one, master_two, wb):
 dashboard_master = load_workbook('C:\\Users\\Standalone\\general\\masters folder\\portfolio_dashboards\\master.xlsx')
 
 '''TWO. Provide list of projects on which to provide analysis'''
-project_list = q1_1920.projects
+project_list = q2_1920.projects
 
 '''THREE. place arguments into the place_in_excle function and provide file path for saving output wb'''
-dashboard_completed = place_in_excel(q1_1920, q4_1819, dashboard_master)
+dashboard_completed = place_in_excel(q2_1920, q1_1920, dashboard_master)
 dashboard_completed.save('C:\\Users\\Standalone\\general\\masters folder\\portfolio_dashboards\\test.xlsx')
