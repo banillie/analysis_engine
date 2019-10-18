@@ -137,7 +137,7 @@ project_quarter_list = q2_1920.projects
 project_group_list = filter_project_group(q2_1920, 'HSMRPG')
 
 '''option three - single project'''
-one_project_list = ['High Speed Rail Programme (HS2)']
+one_project_list = ['Commercial Vehicle Services (CVS)']
 
 '''TWO. Specify date after which project milestones should be returned. NOTE: Python date format is (YYYY,MM,DD)'''
 start_date = datetime.date(2019, 6, 1)

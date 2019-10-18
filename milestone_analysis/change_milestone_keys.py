@@ -27,7 +27,7 @@ def change_key(project_list, master_wb_title_list, baseline_list, change_key):
     red_text = Font(color="00fc2525")
 
     for name in project_list:
-        print(name)
+        #print(name)
         for index in baseline_list[name]:
             print(index)
             wb = load_workbook(master_wb_title_list[index])
@@ -35,17 +35,15 @@ def change_key(project_list, master_wb_title_list, baseline_list, change_key):
             for col_num in range(2, ws.max_column + 1):
                 project_name = ws.cell(row=1, column=col_num).value
                 if project_name == name:
+                    print(name)
                     for row_num in range(2, ws.max_row + 1):
                         for i in range(1, 11):
-                            try:
-                                if ws.cell(row=row_num, column=col_num).value == change_key[project_name]['Key '+ str(i)]:
+                            if ws.cell(row=row_num, column=col_num).value == change_key[project_name]['Key '+ str(i)]:
                                     print(change_key[project_name]['Key '+ str(i)])
-                                    ws.cell(row=row_num, column=col_num).value = change_key[project_name]['Key '+ str(i)+' change']
+                                    ws.cell(row=row_num, column=col_num).value = change_key.data[project_name]['Key '+ str(i)+' change']
                                     print(change_key[project_name]['Key '+ str(i)+' change'])
                                     ws.cell(row=row_num, column=col_num).font = red_text
-                                else:
-                                    pass
-                            except KeyError:
+                            else:
                                 pass
 
             wb.save(master_wb_title_list[index])
@@ -74,6 +72,7 @@ key_change = project_data_from_master('C:\\Users\\Standalone\\general\\masters f
 '''THREE. List of projects. taken from the key change document - as this contains the only projects that need 
 information changed'''
 project_name_list = key_change.projects
+#project_name_list = ['Commercial Vehicle Services (CVS)']
 
 '''ignore this part. no change required'''
 baseline_bc = bc_ref_stages(project_name_list, list_of_masters_all)
