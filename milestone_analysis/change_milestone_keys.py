@@ -37,7 +37,7 @@ def change_key(project_list, master_wb_title_list, baseline_list, change_key):
                 if project_name == name:
                     print(name)
                     for row_num in range(2, ws.max_row + 1):
-                        for i in range(1, 11):
+                        for i in range(1, 4): # TODO: non-hard code fix.
                             if ws.cell(row=row_num, column=col_num).value == change_key[project_name]['Key '+ str(i)]:
                                     print(change_key[project_name]['Key '+ str(i)])
                                     ws.cell(row=row_num, column=col_num).value = change_key.data[project_name]['Key '+ str(i)+' change']
