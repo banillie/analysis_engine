@@ -52,7 +52,6 @@ def cell_colouring(cell, colour):
     except TypeError:
         pass
 
-
 def compare_text_showall(text_1, text_2, doc):
     '''
     function places text into doc highlighting all changes
@@ -166,7 +165,6 @@ def compare_text_newandold(text_1, text_2, doc):
                 y.add_run(diff[i][1:])
 
     return doc
-
 
 def printing(project_name, master_one, master_two, master_three, master_four, milestone_master):
     '''function that compiles the summary sheet'''
@@ -427,21 +425,20 @@ quarter_list = ['This Quarter', 'Q1 1920', 'Q4 1819', 'Q3 1819']
 
 '''One. select list of projects that dashboards should be built for'''
 '''option one all'''
-current_q_list = q2_1920.projects
-
+project_quarter_list = q2_1920.projects
 '''option two select group - in dev'''
 #group_list = []
-
 '''option three one project'''
 #one_proj_list = ['High Speed Rail Programme (HS2)']
 
-'''3) enter the current_Q_dict variable into the below function. NOTE no change required. This is to ensure that the 
+'''TWO. enter the project list variable into the below function. NOTE no change required. This is to ensure that the 
 correct milestone dates are displayed in milestone meta data section'''
-milestones = all_milestone_data_bulk(current_q_list, q1_1920)
+milestones = all_milestone_data_bulk(project_quarter_list, q2_1920)
 
 '''4) enter file path to where files should be saved. NOTE {} to be kept in file path as this is where project name is 
 eventually placed in project file title'''
-for x in current_q_list:
-    a = printing(x, q2_1920, q1_1920, q4_1819, q3_1819, milestones)
-    a.save('C://Users//Standalone//general//masters folder//project_dashboards//Q2_1920_{}_overview.docx'.format(x))
+for project_name in project_quarter_list:
+    a = printing(project_name, q2_1920, q1_1920, q4_1819, q3_1819, milestones)
+    a.save('C://Users//Standalone//general//masters folder//project_dashboards//'
+           'q2_1920_{}_overview.docx'.format(project_name))
 

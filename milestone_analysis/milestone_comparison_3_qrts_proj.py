@@ -148,7 +148,7 @@ step two - chose the variables required for the run_milestone_comparator_single 
 to which milestone data is to be analysed will normally be the only change. 
 step three - provide relevant file path to document output. Changing the quarter stamp info as necessary. Note keep {} in 
 file name as this is where the project name is recorded in the file title'''
-for project_name in project_group_list:
+for project_name in project_quarter_list:
     print('Doing milestone movement analysis for ' + str(project_name))
     wb = run_milestone_comparator_single(all_milestone_data_bulk, project_name, list_of_masters_all)
     wb.save('C:\\Users\\Standalone\\general\\masters folder\\project_milestones\\'

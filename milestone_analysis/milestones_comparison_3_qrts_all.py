@@ -12,9 +12,6 @@ the import statement.
 
 '''
 
-#TODO solve problem re filtering in excle when values have + sign in front of the them
-
-import datetime
 from openpyxl import Workbook
 from analysis.engine_functions import all_milestone_data_bulk, ap_p_milestone_data_bulk, assurance_milestone_data_bulk, \
     project_time_difference, bc_ref_stages, master_baseline_index, filter_project_group
@@ -146,13 +143,13 @@ the import statement.'''
  data.py file '''
 
 '''option one - all projects'''
-project_q_list = q2_1920.projects
+project_quarter_list = q2_1920.projects
 
 '''option two - group of projects... in development'''
-group_projects_list = filter_project_group(q2_1920, 'HSMRPG')
+project_group_list = filter_project_group(q2_1920, 'HSMRPG')
 
 '''option three - single project'''
-one_proj_list = ['Thameslink Programme']
+one_project_list = ['Thameslink Programme']
 
 '''TWO. choose the type of variables that you would like to place in run_milestone_comparator function. Arguments 
 are placed in this order. 
@@ -166,7 +163,8 @@ statement above.
  
 '''
 print_miles = \
-    run_milestone_comparator(all_milestone_data_bulk, project_q_list, list_of_masters_all)
+    run_milestone_comparator(all_milestone_data_bulk, project_quarter_list, list_of_masters_all)
 
-'''FOUR. specify file path to output document'''
-print_miles.save('C:\\Users\\Standalone\\general\\masters folder\\portfolio_milestones\\q2_testing.xlsx')
+'''THREE. specify file path to output document'''
+print_miles.save('C:\\Users\\Standalone\\general\\masters folder\\portfolio_milestones\\'
+                 'q2_1920_milestone_analysis.xlsx')
