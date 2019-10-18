@@ -1,4 +1,6 @@
 '''
+THIS PROGRAMME IS NOT WORKING AND MAY NOW BE DEFUNCT AS WE NO LONGER COLLECT BICC DATES FROM PROJECTS.
+
 Use this programme to extract the dates at bicc being reported by projects and check
 whether they are correct. It produces a workbook with five columns A) project name
 B) reported last at bicc date C) a column for manually editing last at bicc dates D) reported next
