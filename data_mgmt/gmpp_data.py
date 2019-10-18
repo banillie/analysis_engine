@@ -57,8 +57,6 @@ def create_master(gmpp_wb, master_data):
 
     return gmpp_wb
 
-# list_gmpp_static_keys = ['SRO Last Name', 'SRO First Name', 'PD Last Name', 'PD First Name', 'First Name',
-#                          'Last Name', 'Project Costs Narrative']
 
 latest_dm = load_workbook("C:\\Users\\Standalone\\general\\masters folder\\gmpp_reporting\\gmpp_datamaps\\"
                           "gmpp_datamap_q2_1920.xlsx")
