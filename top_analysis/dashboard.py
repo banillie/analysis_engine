@@ -127,47 +127,73 @@ def place_in_excel(master_one, master_two, wb):
     rag_txt_list = ["A/G", "A/R", "R", "G", "A"]
 
     '''store of different colours'''
-    ag_text = Font(color="00a5b700")
+    ag_text = Font(color="00a5b700") # text same colour as background
     ag_fill = PatternFill(bgColor="00a5b700")
-    ar_text = Font(color="00f97b31")
+    ar_text = Font(color="00f97b31") # text same colour as background
     ar_fill = PatternFill(bgColor="00f97b31")
-    red_text = Font(color="00fc2525")
+    red_text = Font(color="00fc2525") # text same colour as background
     red_fill = PatternFill(bgColor="00fc2525")
-    green_text = Font(color="0017960c")
+    green_text = Font(color="0017960c") # text same colour as background
     green_fill = PatternFill(bgColor="0017960c")
-    amber_text = Font(color="00fce553")
+    amber_text = Font(color="00fce553") # text same colour as background
     amber_fill = PatternFill(bgColor="00fce553")
 
-    '''placed into a list'''
+    black_text = Font(color="00000000")
+
+    '''NOTE. these three lists need to have rag ratings in the same order'''
+    '''different colours are placed into a list'''
     txt_colour_list = [ag_text, ar_text, red_text, green_text, amber_text]
     fill_colour_list = [ag_fill, ar_fill, red_fill, green_fill, amber_fill]
+    '''list of how rag ratings are shown in document'''
+    rag_txt_list = ["A/G", "A/R", "R", "G", "A"]
 
     '''list of columns with conditional formatting'''
-    list_columns = ['e', 'g', 'h', 'l']
+    list_columns = ['g', 'h', 'l']
 
     '''loops below place conditional formatting (cf) rules into the wb. There are two as the dashboard currently has 
     two distinct sections/headings, which do not require cf. Therefore, cf starts and ends at the stated rows. this
     is hard code that will need to be changed should the position of information in the dashboard change. It is an
     easy change however'''
+
+    '''these two loops provide conditional formatting in column e with text and fill colours the same'''
+    for i, dca in enumerate(rag_txt_list):
+        text = txt_colour_list[i]
+        fill = fill_colour_list[i]
+        dxf = DifferentialStyle(font=text, fill=fill)
+        rule = Rule(type="containsText", operator="containsText", text=dca, dxf=dxf)
+        for_rule_formula = 'NOT(ISERROR(SEARCH("' + dca + '",e9)))'
+        rule.formula = [for_rule_formula]
+        ws.conditional_formatting.add('e9:e27', rule)
+
+    for i, dca in enumerate(rag_txt_list):
+        text = txt_colour_list[i]
+        fill = fill_colour_list[i]
+        dxf = DifferentialStyle(font=text, fill=fill)
+        rule = Rule(type="containsText", operator="containsText", text=dca, dxf=dxf)
+        for_rule_formula = 'NOT(ISERROR(SEARCH("' + dca + '",e32)))'
+        rule.formula = [for_rule_formula]
+        ws.conditional_formatting.add('e32:e60', rule)
+
+    '''same loop but the text is black. In addition these two loops go through the list_columns list above'''
     for column in list_columns:
         for i, dca in enumerate(rag_txt_list):
-            text = txt_colour_list[i]
+            text = black_text
             fill = fill_colour_list[i]
             dxf = DifferentialStyle(font=text, fill=fill)
             rule = Rule(type="containsText", operator="containsText", text=dca, dxf=dxf)
             for_rule_formula = 'NOT(ISERROR(SEARCH("' + dca + '",' + column + '9)))'
             rule.formula = [for_rule_formula]
-            ws.conditional_formatting.add('' + column + '9:' + column + '29', rule)
+            ws.conditional_formatting.add('' + column + '9:' + column + '27', rule)
 
     for column in list_columns:
         for i, dca in enumerate(rag_txt_list):
-            text = txt_colour_list[i]
+            text = black_text
             fill = fill_colour_list[i]
             dxf = DifferentialStyle(font=text, fill=fill)
             rule = Rule(type="containsText", operator="containsText", text=dca, dxf=dxf)
-            for_rule_formula = 'NOT(ISERROR(SEARCH("' + dca + '",' + column + '34)))'
+            for_rule_formula = 'NOT(ISERROR(SEARCH("' + dca + '",' + column + '32)))'
             rule.formula = [for_rule_formula]
-            ws.conditional_formatting.add('' + column + '34:' + column + '60', rule)
+            ws.conditional_formatting.add('' + column + '32:' + column + '60', rule)
 
     '''this conditional formatting highlights new projects'''
     red_text = Font(color="00fc2525")
@@ -215,4 +241,4 @@ project_list = q2_1920.projects
 
 '''THREE. place arguments into the place_in_excle function and provide file path for saving output wb'''
 dashboard_completed = place_in_excel(q2_1920, q1_1920, dashboard_master)
-dashboard_completed.save('C:\\Users\\Standalone\\general\\masters folder\\portfolio_dashboards\\test.xlsx')
+dashboard_completed.save('C:\\Users\\Standalone\\general\\masters folder\\portfolio_dashboards\\q2_1920_dashboard.xlsx')
