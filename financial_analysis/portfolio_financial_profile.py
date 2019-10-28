@@ -246,7 +246,7 @@ one_project_list = ['High Speed Rail Programme (HS2)']
 that needs to be removed from double counting or counting in general
 NOTE. option here to include a project if you want to see what the profile looks like with it e.g. Hs2 Programme'''
 dont_double_count = ['HS2 Phase 2b', 'HS2 Phase1', 'HS2 Phase2a', 'East Midlands Franchise',
-                     'West Coast Partnership Franchise']
+                     'West Coast Partnership Franchise', 'Northern Powerhouse Rail', 'East Coast Digital Programme']
 
 '''TWO. Enter variables created via options above into function and run programme. The function is structured as 
 follows... run_financials_all(project_list, project_list_remove, data_key_list, q_masters_dict_list)
