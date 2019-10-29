@@ -23,7 +23,7 @@ Instructions:
 Note some manual adjustments may need to be made to output document, this includes:
 1) Project WLC totals e.g. Hs2 Phases
 
-ToDo: tidy up / refactor code which is not working properly. 
+ToDo: tidy up / refactor code which is not working properly.
 
 '''
 
