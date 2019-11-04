@@ -140,7 +140,7 @@ project_quarter_list = q2_1920.projects
 project_group_list = filter_project_group(q2_1920, 'HSMRPG')
 
 '''option three - single project'''
-one_project_list = ['High Speed Rail Programme (HS2)']
+one_project_list = ['Midland Main Line Programme']
 
 '''TWO. the following for statement prompts the programme to run. 
 step one - place the list of projects chosen in step three at the end of the for statement. i.e. for project_name in [here] 
@@ -148,8 +148,8 @@ step two - chose the variables required for the run_milestone_comparator_single 
 to which milestone data is to be analysed will normally be the only change. 
 step three - provide relevant file path to document output. Changing the quarter stamp info as necessary. Note keep {} in 
 file name as this is where the project name is recorded in the file title'''
-for project_name in project_quarter_list:
+for project_name in one_project_list:
     print('Doing milestone movement analysis for ' + str(project_name))
-    wb = run_milestone_comparator_single(all_milestone_data_bulk, project_name, list_of_masters_all)
+    wb = run_milestone_comparator_single(ap_p_milestone_data_bulk, project_name, list_of_masters_all)
     wb.save('C:\\Users\\Standalone\\general\\masters folder\\project_milestones\\'
             'q2_1920_{}_milestone_movement_analysis.xlsx'.format(project_name))

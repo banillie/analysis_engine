@@ -351,7 +351,7 @@ def grey_conditional_formatting(worksheet):
  data.py file '''
 one_quarter_list = q2_1920.projects
 combined_quarters_list = get_all_project_names(list_of_masters_all)
-specific_project_list = [] # opportunity to provide manual list of projects
+specific_project_list = ['Oxford-Cambridge Expressway'] # opportunity to provide manual list of projects
 
 '''TWO. calculate baseline meta data'''
 baseline_bc = bc_ref_stages(one_quarter_list, list_of_masters_all)
@@ -360,7 +360,10 @@ baseline_list = master_baseline_index(one_quarter_list, list_of_masters_all, bas
 '''THREE. Set data of interest. there are two options here. hash out whichever option you are not using'''
 
 '''option one - non-milestone data. NOTE. this must be in a list [] even if just one data key'''
-data_interest = ['Total Forecast', 'Departmental DCA']
+data_interest = ['Working Contact Name', 'Working Contact Email', 'Brief project description (GMPP - brief descripton)',
+                 'Business Case & Version No.', 'NPV for all projects and NPV for programmes if available',
+                 'Initial Benefits Cost Ratio (BCR)', 'Adjusted Benefits Cost Ratio (BCR)',
+                 'VfM Category single entry', 'VfM Category', 'Present Value Cost (PVC)', 'Present Value Benefit (PVB)']
 
 '''option two - milestone data. NOTE. this must be in a list [] even if just one data key'''
 #milestone_data_interest = ['Project End Date', 'Start of Project']
@@ -368,10 +371,10 @@ data_interest = ['Total Forecast', 'Departmental DCA']
 '''THREE. Run the programme'''
 
 '''option one - run the return_data function for all non-milestone data'''
-run = return_data(list_of_masters_all, combined_quarters_list, data_interest)
+#run = return_data(list_of_masters_all, combined_quarters_list, data_interest)
 
 '''option two - run the return_baseline_data function for all non-milestone data'''
-#run = return_baseline_data(list_of_masters_all, baseline_list, baseline_bc, one_quarter_list, data_interest)
+run = return_baseline_data(list_of_masters_all, baseline_list, baseline_bc, specific_project_list, data_interest)
 
 '''option three - run the return_milestone_data for all milestone data'''
 #run = return_milestone_data(list_of_masters_all, one_quarter_list, milestone_data_interest)
@@ -381,7 +384,7 @@ run = return_data(list_of_masters_all, combined_quarters_list, data_interest)
 #                                     milestone_data_interest)
 
 '''FOUR. specify the file path and name of the output document'''
-run.save('C:\\Users\\Standalone\\general\\for_lizzie.xlsx')
+run.save('C:\\Users\\Standalone\\general\\vfm_data_ox_cam_express_baseline.xlsx')
 
 
 

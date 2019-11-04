@@ -350,7 +350,7 @@ def printing(project_name, master_one, master_two, master_three, master_four, mi
 
     #c = key_dates['Start of Project']
     try:
-        c = key_dates['Start of Project']
+        c = tuple(key_dates['Start of Project'])[0]
         c = datetime.datetime.strptime(c.isoformat(), '%Y-%M-%d').strftime('%d/%M/%Y')
     except (KeyError, AttributeError):
         c = 'Not reported'
@@ -360,7 +360,7 @@ def printing(project_name, master_one, master_two, master_three, master_four, mi
     table1.cell(1, 1).text = str(master_one[name]['BICC approval point'])
 
     try:
-        a = key_dates['Start of Operation']
+        a = tuple(key_dates['Start of Operation'])[0]
         a = datetime.datetime.strptime(a.isoformat(), '%Y-%M-%d').strftime('%d/%M/%Y')
         table1.cell(1, 2).text = str(a)
     except (KeyError, AttributeError):
@@ -368,7 +368,7 @@ def printing(project_name, master_one, master_two, master_three, master_four, mi
 
     #b = key_dates['Project End Date']
     try:
-        b = key_dates['Project End Date']
+        b = tuple(key_dates['Project End Date'])[0]
         b = datetime.datetime.strptime(b.isoformat(), '%Y-%M-%d').strftime('%d/%M/%Y')
     except (KeyError, AttributeError):
         b = 'Not reported'

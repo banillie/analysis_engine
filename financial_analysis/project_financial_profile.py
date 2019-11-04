@@ -123,7 +123,7 @@ def calculate_income_totals(project_name, financial_data):
 
     return income_list
 
-def place_in_excel(project_name, latest_financial_data, last_financial_data, baseline_financial_data):
+def place_in_excel(project_name, latest_financial_data, last_financial_data, baseline_financial_data, baseline_record):
     '''
     function places all data into excel spreadsheet and creates chart.
     data is placed into sheet in reverse order (see how data_list is ordered) so that most recent
@@ -201,6 +201,10 @@ def place_in_excel(project_name, latest_financial_data, last_financial_data, bas
     for x, l in enumerate(total_list):
         for i, total in enumerate(l):
             ws.cell(row=i + row_start, column=x + 2, value=total)
+
+    '''record which baseline is being used'''
+    ws.cell(row=1, column=16).value = 'Baseline quarter'
+    ws.cell(row=2, column=16).value = baseline_record[project_name][2][0]
 
     '''data for graph labeling'''
 
@@ -358,7 +362,7 @@ def run_financials_single(project_name, masters_list):
     last_financial_data = financial_data([project_name], masters_list, q_masters_list, all_data_lists, 1)
     baseline_financial_data = financial_data([project_name], masters_list, q_masters_list, all_data_lists, 2)
 
-    run = place_in_excel(project_name, latest_financial_data, last_financial_data, baseline_financial_data)
+    run = place_in_excel(project_name, latest_financial_data, last_financial_data, baseline_financial_data, baseline_bc)
 
     return run
 
@@ -398,7 +402,7 @@ latest_quarter_projects = q2_1920.projects
 project_group_list = filter_project_group(q2_1920, 'HSMRPG')
 
 '''option three - single project'''
-one_project_list = ['High Speed Rail Programme (HS2)']
+one_project_list = ['Lower Thames Crossing']
 
 
 '''TWO. the following for statement prompts the programme to run. 
@@ -406,7 +410,7 @@ step one - place the list of projects chosen in step two at the end of the for s
 step two - provide relevant file path to document output. Changing the quarter stamp info as necessary. Note keep {} in 
 file name as this is where the project name is recorded in the file title'''
 
-for project_name in latest_quarter_projects:
+for project_name in one_project_list:
     print('Doing financial analysis for ' + str(project_name))
     wb = run_financials_single(project_name, financial_analysis_masters_list)
     wb.save('C:\\Users\\Standalone\\general\\masters folder\\project_financial_profile\\'

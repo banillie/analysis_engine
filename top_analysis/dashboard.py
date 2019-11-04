@@ -66,7 +66,7 @@ def highlight_close_dates_bicc(concate_calculation):
     else:
         return concate_calculation
 
-def place_in_excel(master_one, master_two, wb):
+def place_in_excel(project_list, master_one, master_two, wb):
     '''
     function that places all information into the master dashboard sheet
     :param master_one:
@@ -79,7 +79,7 @@ def place_in_excel(master_one, master_two, wb):
     for row_num in range(2, ws.max_row + 1):
         project_name = ws.cell(row=row_num, column=3).value
         print(project_name)
-        if project_name in master_one.projects:
+        if project_name in project_list:
             ws.cell(row=row_num, column=4).value = master_one.data[project_name]['Total Forecast']
             try:
                 dca_now = master_one.data[project_name]['Departmental DCA']
@@ -237,8 +237,10 @@ def place_in_excel(master_one, master_two, wb):
 dashboard_master = load_workbook('C:\\Users\\Standalone\\general\\masters folder\\portfolio_dashboards\\master.xlsx')
 
 '''TWO. Provide list of projects on which to provide analysis'''
-project_list = q2_1920.projects
+quarter_project_list = q2_1920.projects
+one_project_list = ['Crossrail Programme']
 
 '''THREE. place arguments into the place_in_excle function and provide file path for saving output wb'''
-dashboard_completed = place_in_excel(q2_1920, q1_1920, dashboard_master)
-dashboard_completed.save('C:\\Users\\Standalone\\general\\masters folder\\portfolio_dashboards\\q2_1920_dashboard.xlsx')
+dashboard_completed = place_in_excel(one_project_list, q2_1920, q1_1920, dashboard_master)
+dashboard_completed.save('C:\\Users\\Standalone\\general\\masters folder\\portfolio_dashboards\\'
+                         'q2_1920_dashboard_crossrail.xlsx')

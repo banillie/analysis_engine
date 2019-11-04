@@ -163,8 +163,8 @@ statement above.
  
 '''
 print_miles = \
-    run_milestone_comparator(all_milestone_data_bulk, project_quarter_list, list_of_masters_all)
+    run_milestone_comparator(ap_p_milestone_data_bulk, project_quarter_list, list_of_masters_all)
 
 '''THREE. specify file path to output document'''
 print_miles.save('C:\\Users\\Standalone\\general\\masters folder\\portfolio_milestones\\'
-                 'q2_1920_milestone_analysis.xlsx')
+                 'q2_1920_milestone_analysis_ap_p_data.xlsx')
