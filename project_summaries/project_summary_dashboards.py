@@ -29,8 +29,7 @@ from analysis.data import q2_1920, q1_1920, q4_1819, q3_1819
 
 def cell_colouring(cell, colour):
     '''
-    function that handles cell colouring
-
+    Function that handles cell colouring
     cell: cell reference
     color: colour reference
     '''
@@ -54,16 +53,14 @@ def cell_colouring(cell, colour):
 
 def compare_text_showall(text_1, text_2, doc):
     '''
-    function places text into doc highlighting all changes
-
-    text_1:
-    text_2:
-    doc:
+    Function places text into doc highlighting all changes.
+    text_1: latest text. string.
+    text_2: last text. string
+    doc: word doc
     '''
 
     comp = difflib.Differ()
     diff = list(comp.compare(text_2.split(), text_1.split()))
-    new_text = diff
     y = doc.add_paragraph()
 
     for i in range(0, len(diff)):
@@ -113,10 +110,9 @@ def compare_text_showall(text_1, text_2, doc):
 def compare_text_newandold(text_1, text_2, doc):
     '''
     function that places text into doc highlighting new and old text
-
-    text_1:
-    text_2:
-    doc:
+    text_1: latest text. string.
+    text_2: last text. string
+    doc: word doc
     '''
 
     comp = difflib.Differ()
