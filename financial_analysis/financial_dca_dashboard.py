@@ -29,8 +29,8 @@ from openpyxl import load_workbook
 from openpyxl.styles import PatternFill, Font
 from openpyxl.styles.differential import DifferentialStyle
 from openpyxl.formatting.rule import Rule, IconSet, FormatObject
-from analysis.data import q2_1920, q1_1920, all_project_names
-from analysis.engine_functions import up_or_down, convert_rag_text
+from analysis.data import q2_1920, q1_1920, all_project_names, financial_narrative_keys
+from analysis.engine_functions import up_or_down, convert_rag_text, combine_narrtives
 
 def place_in_excel(master_data_latest, master_data_last):
     '''
@@ -56,7 +56,7 @@ def place_in_excel(master_data_latest, master_data_last):
             ws.cell(row=row_num, column=7).value = convert_rag_text(master_data_latest.data[project_name]
                                                                     ['SRO Finance confidence'])
             ws.cell(row=row_num, column=8).value = combine_narrtives(project_name, master_data_latest.data,
-                                                                     narrative_keys)
+                                                                     financial_narrative_keys)
 
     for row_num in range(2, ws.max_row + 1):
         project_name = ws.cell(row=row_num, column=3).value
@@ -148,37 +148,8 @@ def place_in_excel(master_data_latest, master_data_last):
     rule = Rule(type='iconSet', iconSet=iconset)
     ws.conditional_formatting.add('F1:F100', rule)
 
-    # highlights specific text in bold
-    ft = Font(bold=True)
-    for row_num in range(2, ws.max_row + 1):
-        lis = ['This week', 'Next week', 'Last week', 'Two weeks',
-               'Two weeks ago', 'This mth', 'Last mth', 'Next mth',
-               '2 mths', '3 mths', '-2 mths', '-3 mths', '-2 weeks',
-               'Today', 'Last BICC', 'Next BICC', 'This BICC',
-               'Later this mth']
-        if ws.cell(row=row_num, column=10).value in lis:
-            ws.cell(row=row_num, column=10).font = ft
-        if ws.cell(row=row_num, column=11).value in lis:
-            ws.cell(row=row_num, column=11).font = ft
-        if ws.cell(row=row_num, column=13).value in lis:
-            ws.cell(row=row_num, column=13).font = ft
-        if ws.cell(row=row_num, column=14).value in lis:
-            ws.cell(row=row_num, column=14).font = ft
 
     return wb
-
-
-def combine_narrtives(project_name, master_data, key_list):
-    output = ''
-    for key in key_list:
-        output = output + str(master_data[project_name][key])
-
-    return output
-
-'''keys of used to get narratives'''
-narrative_keys = ['Project Costs Narrative',
-                 'Cost comparison with last quarters cost narrative',
-                 'Cost comparison within this quarters cost narrative']
 
 
 '''  INSTRUCTIONS FOR RUNNING THE PROGRAMME'''
@@ -187,7 +158,7 @@ narrative_keys = ['Project Costs Narrative',
 wb = load_workbook('C:\\Users\\Standalone\\general\\masters folder\\portfolio_financial_profile\\'
                    'finance_dashboard master.xlsx')
 
-'''TWO. place the right quarter information into programme'''
+'''TWO. place the right quarter information into function'''
 output = place_in_excel(q2_1920, q1_1920)
 
 '''THREE. provide file path and specific name of output file.'''
