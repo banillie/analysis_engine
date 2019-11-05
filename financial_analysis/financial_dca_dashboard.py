@@ -1,27 +1,23 @@
 '''
 
-Programme for creating an aggregate portfolio financial dashboard
+Programme creates an aggregate portfolio financial dashboard
 
-input documents:
-1) Dashboard master document - this is an excel file. It should have the dashboard design, with all projects structured
-in the correct way (order), but all data fields left blank. Note if project data does not get placed into the correct
-part of the master, check that the project name is consistent with the name in master data. The names need to be
-exactly the same for information to be released.
-2) Master data for two quarters - this will usually be latest and previous quarter. now handled via the analysis.data
-import at tip.
+Input documents:
+1) Dashboard master document - this is an excel file. This is the dashboard design with all projects names, but
+all data fields left blank.
+2) Master data for two quarters - this will usually be latest and previous quarter.
 
-output document:
-3) Dashboard with all project data placed into dashboard. The aim of this programme is to get all relevant data into one
-document. From this point on only projects of interest. i.e. those with red confidence ratings or that have changed in
-financial confidence should remain on the dashboard. the others should be delete. The financial narrative provided for
+Output document:
+1) Dashboard with all project data placed into dashboard. The aim of this programme is to get all relevant data into one
+document. From this point the dashboard can be amended to suit needs. The financial narrative provided for
 each project should be checked.
 
-Instructions:
-1) provide path to dashboard master
-32 provide path and specify file name for output document
+Instructions as below.
 
-Note some manual adjustments may need to be made to output document, this includes:
-1) Project WLC totals e.g. Hs2 Phases
+Notes:
+1) If project data does not get placed into the master, check that the project name is consistent with the name in
+master data. The names need to be exactly the same for data to be released.
+2) Check WLC totals being pulled from the master, they may need tidying.
 
 '''
 
