@@ -14,7 +14,7 @@ the import statement.
 
 from openpyxl import Workbook
 from analysis.engine_functions import all_milestone_data_bulk, ap_p_milestone_data_bulk, assurance_milestone_data_bulk, \
-    project_time_difference, bc_ref_stages, master_baseline_index, filter_project_group
+    project_time_difference, bc_ref_stages, master_baseline_index, filter_project_group, approval_milestone_data_bulk
 from analysis.data import q2_1920, list_of_masters_all
 
 def put_into_wb_all(project_name_list, t_data, td_data, td_data_two, wb):
@@ -163,8 +163,8 @@ statement above.
  
 '''
 print_miles = \
-    run_milestone_comparator(ap_p_milestone_data_bulk, project_quarter_list, list_of_masters_all)
+    run_milestone_comparator(approval_milestone_data_bulk, project_quarter_list, list_of_masters_all)
 
 '''THREE. specify file path to output document'''
 print_miles.save('C:\\Users\\Standalone\\general\\masters folder\\portfolio_milestones\\'
-                 'q2_1920_milestone_analysis_ap_p_data.xlsx')
+                 'q2_1920_approval_milestones.xlsx')

@@ -360,10 +360,9 @@ baseline_list = master_baseline_index(one_quarter_list, list_of_masters_all, bas
 '''THREE. Set data of interest. there are two options here. hash out whichever option you are not using'''
 
 '''option one - non-milestone data. NOTE. this must be in a list [] even if just one data key'''
-data_interest = ['Working Contact Name', 'Working Contact Email', 'Brief project description (GMPP - brief descripton)',
-                 'Business Case & Version No.', 'NPV for all projects and NPV for programmes if available',
-                 'Initial Benefits Cost Ratio (BCR)', 'Adjusted Benefits Cost Ratio (BCR)',
-                 'VfM Category single entry', 'VfM Category', 'Present Value Cost (PVC)', 'Present Value Benefit (PVB)']
+data_interest = ['Total BEN Forecast - Total Monetised Benefits',
+                 'Total BEN Forecast - Disbenefit UK Economic',
+                 'Total BEN Forecast - Economic (inc Private Partner)']
 
 '''option two - milestone data. NOTE. this must be in a list [] even if just one data key'''
 #milestone_data_interest = ['Project End Date', 'Start of Project']
@@ -371,10 +370,10 @@ data_interest = ['Working Contact Name', 'Working Contact Email', 'Brief project
 '''THREE. Run the programme'''
 
 '''option one - run the return_data function for all non-milestone data'''
-#run = return_data(list_of_masters_all, combined_quarters_list, data_interest)
+run = return_data(list_of_masters_all, one_quarter_list, data_interest)
 
 '''option two - run the return_baseline_data function for all non-milestone data'''
-run = return_baseline_data(list_of_masters_all, baseline_list, baseline_bc, specific_project_list, data_interest)
+#run = return_baseline_data(list_of_masters_all, baseline_list, baseline_bc, specific_project_list, data_interest)
 
 '''option three - run the return_milestone_data for all milestone data'''
 #run = return_milestone_data(list_of_masters_all, one_quarter_list, milestone_data_interest)
@@ -384,7 +383,7 @@ run = return_baseline_data(list_of_masters_all, baseline_list, baseline_bc, spec
 #                                     milestone_data_interest)
 
 '''FOUR. specify the file path and name of the output document'''
-run.save('C:\\Users\\Standalone\\general\\vfm_data_ox_cam_express_baseline.xlsx')
+run.save('C:\\Users\\Standalone\\general\\benefits_info.xlsx')
 
 
 

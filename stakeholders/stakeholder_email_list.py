@@ -2,9 +2,9 @@
 programme for getting email list of stakeholders from the portfolio contact list spreadsheet
 '''
 
-#from openpyxl import load_workbook
-from bcompiler.utils import project_data_from_master
 import re
+from analysis.data import q2_1920, all_project_names
+from analysis.engine_functions import filter_project_group
 
 def get_stakeholder_list(stakeholder_dict, project_list):
     output_list = []
@@ -52,13 +52,7 @@ def filter_mode(stakeholder_dict, mode):
 
     return output_list
 
-stakeholders = project_data_from_master('C:\\Users\\Standalone\\general\\masters folder\\stakeholders\\2019_20\\'
-                                        'Q1_1920_Master_Portfolio_Contact_List.xlsx')
 
-all_projects = list(stakeholders.keys())
-
-roads_projects = filter_mode(stakeholders, 'Road')
-#specific_projects =
 
 he_major_roads = ['A14 Cambridge to Huntingdon Improvement Scheme', 'A303 Amesbury to Berwick Down',
                   'A428 Black Cat to Caxton Gibbett', 'Lower Thames Crossing']
