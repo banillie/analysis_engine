@@ -18,7 +18,7 @@ import datetime
 from openpyxl import Workbook
 from analysis.engine_functions import all_milestone_data_bulk, ap_p_milestone_data_bulk, assurance_milestone_data_bulk, \
     project_time_difference, bc_ref_stages, master_baseline_index, filter_project_group
-from analysis.data import q2_1920, list_of_masters_all
+from analysis.data import q2_1920, list_of_masters_all, rail_franchising, em_franchise, west_coast_partnership
 
 
 def put_into_wb_all_single(project_name, t_data, td_data, td_data_two, baseline_record):
@@ -140,7 +140,7 @@ project_quarter_list = q2_1920.projects
 project_group_list = filter_project_group(q2_1920, 'HSMRPG')
 
 '''option three - single project'''
-one_project_list = ['Midland Main Line Programme']
+one_project_list = [rail_franchising, em_franchise, west_coast_partnership]
 
 '''TWO. the following for statement prompts the programme to run. 
 step one - place the list of projects chosen in step three at the end of the for statement. i.e. for project_name in [here] 
