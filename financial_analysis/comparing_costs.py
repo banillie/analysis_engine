@@ -15,7 +15,7 @@ See instructions below.
 '''
 
 from openpyxl import Workbook
-from analysis.data import financial_analysis_masters_list, q2_1920, all_project_names, baseline_bc, q_masters_list, \
+from analysis.data import financial_analysis_masters_list, q2_1920, all_project_names, baseline_bc, baseline_index, \
     red_text, income_list, cost_list, year_interest_list, wlc_key
 
 def place_complex_comparision_excel(master_data_latest, master_data_last, master_data_baseline):
@@ -175,7 +175,7 @@ def get_yearly_costs(project_name_list, q_masters_data_list, cost_list, year_lis
     for year in year_list:
         lower_dictionary = {}
         for project_name in project_name_list:
-            project_data = q_masters_data_list[q_masters_list[project_name][index]].data[project_name]
+            project_data = q_masters_data_list[baseline_index[project_name][index]].data[project_name]
             total = 0
             for type in cost_list:
                 if year + type in project_data.keys():
@@ -204,7 +204,7 @@ def get_wlc(project_name_list, q_masters_data_list, wlc_key, index):
     upper_dictionary = {}
     lower_dictionary = {}
     for project_name in project_name_list:
-        project_data = q_masters_data_list[q_masters_list[project_name][index]].data[project_name]
+        project_data = q_masters_data_list[baseline_index[project_name][index]].data[project_name]
         total = project_data[wlc_key]
         lower_dictionary[project_name] = total
 

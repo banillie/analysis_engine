@@ -19,7 +19,7 @@ from openpyxl.chart import LineChart, Reference
 from openpyxl.chart.text import RichText
 from openpyxl.drawing.text import Paragraph, ParagraphProperties, CharacterProperties, Font
 from analysis.data import financial_analysis_masters_list, q2_1920, baseline_bc, baseline_index, all_financial_lists, \
-    capture_ng, capture_cdel, capture_rdel, capture_income
+    capture_ng, capture_cdel, capture_rdel, capture_income, cost_list, year_interest_list
 from analysis.engine_functions import filter_project_group
 
 
@@ -346,48 +346,23 @@ def place_in_excel_individual(project_name, latest_financial_data, last_financia
     return wb
 
 def place_in_excel_one_wb(project_name_list, latest_financial_data, last_financial_data, baseline_financial_data, \
-                          baseline_record):
+                          baseline_record, year_list, cost_list):
 
     wb = Workbook()
 
-    data_list = [baseline_financial_data, last_financial_data, latest_financial_data]
+    cost_list.append(' total')
 
     for i, project_name in enumerate(project_name_list):
         ws = wb.create_sheet(project_name, i)  # creating worksheets
         ws.title = project_name  # title of worksheet
 
         '''places in raw/reported data'''
-        count = 0
-        for data in data_list:
-            for i, key in enumerate(capture_rdel):
-                try:
-                    ws.cell(row=i+3, column=2+count, value=data[project_name][key])
-                except KeyError:
-                    ws.cell(row=i + 3, column=2 + count, value=0)
-            for i, key in enumerate(capture_cdel):
-                try:
-                    ws.cell(row=i+3, column=3+count, value=data[project_name][key])
-                except KeyError:
-                    ws.cell(row=i + 3, column=3 + count, value=0)
-            for i, key in enumerate(capture_ng):
-                try:
-                    ws.cell(row=i+3, column=4+count, value=data[project_name][key])
-                except KeyError:
-                    ws.cell(row=i + 3, column=4 + count, value=0)
-            count += 4
+        for i, year in enumerate(year_list):
+            for x, type in enumerate(cost_list):
+                ws.cell(row=i+3, column=x+2, value=baseline_financial_data[project_name][year + type])
+                ws.cell(row=i+3, column=x+6, value=last_financial_data[project_name][year + type])
+                ws.cell(row=i+3, column=x+10, value=latest_financial_data[project_name][year + type])
 
-        '''places in totals'''
-        baseline_totals = calculate_totals(project_name, baseline_financial_data)
-        last_q_totals = calculate_totals(project_name, last_financial_data)
-        latest_q_totals = calculate_totals(project_name, latest_financial_data)
-
-        total_list = [baseline_totals, last_q_totals, latest_q_totals]
-
-        c = 0
-        for l in total_list:
-            for i, total in enumerate(l):
-                ws.cell(row=i+3, column=5+c, value=total)
-            c += 4
 
         '''labeling data in table'''
 
@@ -413,10 +388,12 @@ def place_in_excel_one_wb(project_name_list, latest_financial_data, last_financi
             ws.cell(row=2+i, column=1, value=label)
 
         '''process for showing total cost profile. starting with data'''
-        row_start = 16
-        for x, l in enumerate(total_list):
-            for i, total in enumerate(l):
-                ws.cell(row=i + row_start, column=x + 2, value=total)
+        for i, year in enumerate(year_list):
+            for x, type in enumerate([' total']):
+                ws.cell(row=i+16, column=x+2, value=baseline_financial_data[project_name][year + type])
+                ws.cell(row=i+16, column=x+3, value=last_financial_data[project_name][year + type])
+                ws.cell(row=i+16, column=x+4, value=latest_financial_data[project_name][year + type])
+
 
         '''record which baseline is being used'''
         ws.cell(row=1, column=16).value = 'Baseline quarter'
@@ -599,10 +576,48 @@ def run_financials_one_wb(project_name_list, masters_list):
     return run
 
 
-'''RUNNING PROGRAMME'''
+def get_project_financial_profile(project_name_list, q_masters_data_list, cost_list, year_list, index):
+    '''
+    Function that gets projects project cost information and returns it in a python dictionary format.
+    :param project_name_list: list of project names
+    :param q_masters_data_list: list of master python dictionaries containing quarter information
+    :param cost_list: list of cost key names. this is necessary due to the total cost having be calculated across
+    rdel, cdel and non-gov breakdown.
+    :param year_list: list of year keys e.g. '19-20', '20-21'
+    :param index: index value for which master to use from the q_master_data_list . 0 is for latest, 1 last and
+    2 baseline. The actual index list q_master_list is set at a global level in this programme.
+    :return: a dictionary structured 'year': 'project_name': total. repeated for each year.
+    '''
 
-'''Note: all master data is taken from the data file. Make sure this is up to date and that all relevant data is in 
-the import statement.'''
+    upper_dictionary = {}
+
+    for project_name in project_name_list:
+        lower_dictionary = {}
+        for year in year_list:
+            project_data = q_masters_data_list[baseline_index[project_name][index]].data[project_name]
+            total = 0
+            for type in cost_list:
+
+                try:
+                    lower_dictionary[year + type] = project_data[year + type]
+                except KeyError:
+                    lower_dictionary[year + type] = None
+
+                if year + type in project_data.keys():
+                    cost = project_data[year + type]
+                    try:
+                        total = total + cost
+                    except TypeError:
+                        pass
+
+            lower_dictionary[year + ' total'] = total
+
+        upper_dictionary[project_name] = lower_dictionary
+
+    return upper_dictionary
+
+
+'''RUNNING PROGRAMME'''
 
 '''ONE. project name list options - this is where the group of interest is specified '''
 
@@ -615,17 +630,14 @@ project_group_list = filter_project_group(q2_1920, 'HSMRPG')
 '''option three - single project'''
 one_project_list = ['Lower Thames Crossing']
 
+latest_financial_data = get_project_financial_profile(latest_quarter_projects, financial_analysis_masters_list,
+                                                      cost_list, year_interest_list, 0)
+last_financial_data = get_project_financial_profile(latest_quarter_projects, financial_analysis_masters_list,
+                                                    cost_list, year_interest_list, 1)
+baseline_financial_data = get_project_financial_profile(latest_quarter_projects, financial_analysis_masters_list,
+                                                        cost_list, year_interest_list, 2)
 
-'''TWO. the following for statement prompts the programme to run. 
-step one - place the list of projects chosen in step two at the end of the for statement. i.e. for project_name in [here] 
-step two - provide relevant file path to document output. Changing the quarter stamp info as necessary. Note keep {} in 
-file name as this is where the project name is recorded in the file title'''
+output = place_in_excel_one_wb(latest_quarter_projects, latest_financial_data, last_financial_data,
+                               baseline_financial_data, baseline_bc, year_interest_list, cost_list)
 
-# for project_name in one_project_list:
-# #     print('Doing financial analysis for ' + str(project_name))
-# #     wb = run_financials_single(project_name, financial_analysis_masters_list)
-# #     wb.save('C:\\Users\\Standalone\\general\\masters folder\\project_financial_profile\\'
-# #             'q2_1920_{}_financial_profile.xlsx'.format(project_name))
-
-output = run_financials_one_wb(latest_quarter_projects, financial_analysis_masters_list)
 output.save('C:\\Users\\Standalone\\general\\all_project_financials.xlsx')
