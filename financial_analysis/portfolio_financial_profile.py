@@ -30,7 +30,6 @@ def place_in_excel(project_name_list):
     income_profile_data_list = [latest_income_profiles, last_income_profiles, baseline_income_profiles]
 
     for p, profile in enumerate(financial_profile_list):
-        print(profile)
         '''worksheet is created for each project'''
         ws = wb.create_sheet(profile, p)  # creating worksheets
         ws.title = profile  # title of worksheet
@@ -38,7 +37,6 @@ def place_in_excel(project_name_list):
         '''place information in each sheet'''
         ws.cell(row=1, column=1).value = 'Project'
         for i, project_name in enumerate(project_name_list):
-            print(project_name)
             '''lists project names in row one'''
             ws.cell(row=1, column=i + 2).value = project_name
 
