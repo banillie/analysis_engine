@@ -11,7 +11,7 @@ from datamaps.api import project_data_from_master
 from openpyxl.styles import PatternFill, Font
 from openpyxl.styles.differential import DifferentialStyle
 from openpyxl.formatting.rule import Rule, IconSet, FormatObject
-from engine_functions import up_or_down
+from analysis.engine_functions import up_or_down
 
 def cal_date_difference(milestone_date, old_milestone_date):
     '''
@@ -29,9 +29,9 @@ def cal_date_difference(milestone_date, old_milestone_date):
 def placing_excel(master_data_one, master_data_two):
     '''
     function that places all information into the summary dashboard sheet
-    :param dict_one:
-    :param dict_two:
-    :return:
+    :param master_data_one: python dictionary of latest ar data.
+    :param master_data_two: python dictionary of last ar data.
+    :return: populated Excel dashboard.
     '''
 
     for row_num in range(2, ws.max_row + 1):
@@ -65,9 +65,9 @@ def placing_excel(master_data_one, master_data_two):
             except KeyError:
                 ws.cell(row=row_num, column=9).value = 0
 
-            ws.cell(row=row_num, column=10).value = master_data_one.data[project_name]['18/19 baseline']
-            ws.cell(row=row_num, column=11).value = master_data_one.data[project_name]['18/19 forecast']
-            ws.cell(row=row_num, column=12).value = master_data_one.data[project_name]['18/19 variance']
+            ws.cell(row=row_num, column=10).value = master_data_one.data[project_name]['in year baseline']
+            ws.cell(row=row_num, column=11).value = master_data_one.data[project_name]['in year forecast']
+            ws.cell(row=row_num, column=12).value = master_data_one.data[project_name]['in year variance']
             wlc_one = master_data_one.data[project_name]['WLC baseline']
             ws.cell(row=row_num, column=13).value = wlc_one
             try:
@@ -76,6 +76,8 @@ def placing_excel(master_data_one, master_data_two):
                 ws.cell(row=row_num, column=14).value = wlc_diff
             except KeyError:
                 ws.cell(row=row_num, column=14).value = 0
+            except TypeError:
+                ws.cell(row=row_num, column=14).value = 'Check wlc value/data'
 
 
     for row_num in range(2, ws.max_row + 1):
