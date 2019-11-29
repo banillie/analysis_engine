@@ -66,11 +66,11 @@ def highlight_close_dates_bicc(concate_calculation):
     else:
         return concate_calculation
 
-def place_in_excel(project_list, master_one, master_two, wb):
+def place_in_excel(project_list, master_data_one, master_data_two, wb):
     '''
     function that places all information into the master dashboard sheet
-    :param master_one:
-    :param master_two:
+    :param master_data_one:
+    :param master_data_two:
     :return:
     '''
 
@@ -80,20 +80,19 @@ def place_in_excel(project_list, master_one, master_two, wb):
         project_name = ws.cell(row=row_num, column=3).value
         print(project_name)
         if project_name in project_list:
-            ws.cell(row=row_num, column=4).value = master_one.data[project_name]['Total Forecast']
+            ws.cell(row=row_num, column=4).value = master_data_one.data[project_name]['Total Forecast']
             try:
-                dca_now = master_one.data[project_name]['Departmental DCA']
-                dca_past = master_two.data[project_name]['Departmental DCA']
+                dca_now = master_data_one.data[project_name]['Departmental DCA']
+                dca_past = master_data_two.data[project_name]['Departmental DCA']
                 ws.cell(row=row_num, column=6).value = up_or_down(dca_now, dca_past)
             except KeyError:
                 ws.cell(row=row_num, column=6).value = 'NEW'
-            ws.cell(row=row_num, column=7).value = convert_rag_text(master_one.data[project_name]['Departmental DCA'])
-            ws.cell(row=row_num, column=8).value = convert_rag_text(master_one.data[project_name]
-                                                                    ['GMPP - IPA DCA last quarter'])
-            ws.cell(row=row_num, column=9).value = convert_bc_stage_text(master_one.data[project_name]
+            ws.cell(row=row_num, column=7).value = convert_rag_text(master_data_one.data[project_name]
+                                                                    ['Departmental DCA'])
+            ws.cell(row=row_num, column=9).value = convert_bc_stage_text(master_data_one.data[project_name]
                                                                          ['BICC approval point'])
 
-            p_m_data = all_milestone_data_bulk([project_name], master_one)
+            p_m_data = all_milestone_data_bulk([project_name], master_data_one)
             try:
                 ws.cell(row=row_num, column=10).value = concatenate_dates\
                     (list(p_m_data[project_name]['Start of Operation'])[0])
@@ -105,26 +104,26 @@ def place_in_excel(project_list, master_one, master_two, wb):
             except KeyError:
                 ws.cell(row=row_num, column=10).value = 'no data'
 
-            ws.cell(row=row_num, column=12).value = convert_rag_text(master_one.data[project_name]
+            ws.cell(row=row_num, column=12).value = convert_rag_text(master_data_one.data[project_name]
                                                                      ['SRO Finance confidence'])
             try:
                 ws.cell(row=row_num, column=13).value = highlight_close_dates_bicc\
-                    (concatenate_dates(master_one.data[project_name]['Last time at BICC']))
+                    (concatenate_dates(master_data_one.data[project_name]['Last time at BICC']))
                 ws.cell(row=row_num, column=14).value = highlight_close_dates_bicc\
-                    (concatenate_dates(master_one.data[project_name]['Next at BICC']))
+                    (concatenate_dates(master_data_one.data[project_name]['Next at BICC']))
             except KeyError:
                 print('programme has crashed due to last time at BICC and Next and BICC keys not being inserted into'
-                      'master')
+                      'master. Make sure these keys and project values are included in the master.')
 
     for row_num in range(2, ws.max_row + 1):
         project_name = ws.cell(row=row_num, column=3).value
-        if project_name in master_two.projects:
-            ws.cell(row=row_num, column=5).value = convert_rag_text(master_two.data[project_name]['Departmental DCA'])
+        if project_name in master_data_two.projects:
+            ws.cell(row=row_num, column=5).value = convert_rag_text(master_data_two.data[project_name]
+                                                                    ['Departmental DCA'])
+            ws.cell(row=row_num, column=8).value = convert_rag_text(master_data_two.data[project_name]
+                                                                    ['GMPP - IPA DCA last quarter'])
 
     '''highlight cells that contain RAG text, with background and text the same colour'''
-
-    '''list of how rag ratings are shown in document'''
-    rag_txt_list = ["A/G", "A/R", "R", "G", "A"]
 
     '''store of different colours'''
     ag_text = Font(color="00a5b700") # text same colour as background
