@@ -21,99 +21,9 @@ import datetime
 from openpyxl.styles import PatternFill, Font
 from openpyxl.styles.differential import DifferentialStyle
 from openpyxl.formatting.rule import Rule, IconSet, FormatObject
-from engine_functions import all_milestone_data_bulk, concatenate_dates, up_or_down
-from data import q1_1920, q4_1819
-
-'''Function that creates dictionary with keys of interest'''
-def inital_dict(project_name, master, key_list):
-    upper_dictionaryionary = {}
-    for name in project_name:
-        lower_dictionary = {}
-
-        try:
-            p_data = master.data[name]
-
-            for value in key_list:
-                if value in p_data.keys():
-                    lower_dictionary[value] = p_data[value]
-
-        except KeyError:
-            pass
-
-        upper_dictionaryionary[name] = lower_dictionary
-
-    return upper_dictionaryionary
-
-def add_sop_pend_data(m_data, dict):
-
-    for name in dict.keys():
-        try:
-            dict[name]['Start of Operation'] = m_data[name]['Start of Operation']
-        except KeyError:
-            print(name + ' no sop date')
-            dict[name]['Start of Operation'] = None
-        try:
-            dict[name]['Project End Date'] = m_data[name]['Project End Date']
-        except KeyError:
-            print(name + ' no proj end date')
-            dict[name]['Project End Date'] = None
-
-    return dict
-
-'''function for adding concatenated word strings to dictionary.
-note probably don't need the above function now, but can tidy up later'''
-def final_dict(dict_one, dict_two, con_list, dca_key):
-    upper_dictionary = {}
-
-    for name in dict_one:
-        lower_dict = {}
-        p_dict_one = dict_one[name]
-        for key in p_dict_one:
-            if key in con_list:
-                try:
-                    lower_dict[key] = concatenate_dates(p_dict_one[key])
-                except TypeError:
-                    try:
-                        lower_dict[key] = concatenate_dates(tuple(p_dict_one[key])[0])
-                    except TypeError:
-                        lower_dict[key] = 'check data'
-            else:
-                lower_dict[key] = p_dict_one[key]
-
-        try:
-            lower_dict['Change'] = up_or_down(p_dict_one[dca_key], dict_two[name][dca_key])
-        except KeyError:
-            lower_dict['Change'] = 'NEW'
-
-        upper_dictionary[name] = lower_dict
-
-    return upper_dictionary
-
-def convert_rag_text(dca_rating):
-
-    if dca_rating == 'Green':
-        return 'G'
-    elif dca_rating == 'Amber/Green':
-        return 'A/G'
-    elif dca_rating == 'Amber':
-        return 'A'
-    elif dca_rating == 'Amber/Red':
-        return 'A/R'
-    elif dca_rating == 'Red':
-        return 'R'
-
-def convert_bc_stage_text(bc_stage):
-
-    if bc_stage == 'Strategic Outline Case':
-        return 'SOBC'
-    elif bc_stage == 'Outline Business Case':
-        return 'OBC'
-    elif bc_stage == 'Full Business Case':
-        return 'FBC'
-    elif bc_stage == 'pre-Strategic Outline Case':
-        return 'pre-SOBC'
-    else:
-        return bc_stage
+from analysis.engine_functions import all_milestone_data_bulk, concatenate_dates, up_or_down, convert_rag_text, \
+    convert_bc_stage_text
+from analysis.data import q2_1920, q1_1920
 
 def calculating_schedule_progression(proj_name, m_data):
 
@@ -157,41 +67,40 @@ def calculating_cost_progression(master_data, proj_name):
 
     return output
 
-
-
 '''function that places all information into the summary dashboard sheet'''
-def placing_excel(dict_one, dict_two, altered_dict, milestone_dict):
+def placing_excel(project_name_list, master_data_one, master_data_two):
 
     for row_num in range(2, ws.max_row + 1):
         project_name = ws.cell(row=row_num, column=3).value
         print(project_name)
-        if project_name in dict_one.projects:
-            ws.cell(row=row_num, column=4).value = round(dict_one.data[project_name]['Total Forecast'], 0)
-            ws.cell(row=row_num, column=5).value = dict_one.data[project_name]['Adjusted Benefits Cost Ratio (BCR)']
-            ws.cell(row=row_num, column=6).value = tuple(altered_dict[project_name]['Project End Date'])[0]
-            ws.cell(row=row_num, column=7).value = convert_rag_text(dict_one.data[project_name]['Departmental DCA'])
-            ws.cell(row=row_num, column=8).value = altered_dict[project_name]['Change']
-            ws.cell(row=row_num, column=10).value = calculating_schedule_progression(project_name, milestone_dict)
-            ws.cell(row=row_num, column=11).value = calculating_cost_progression(dict_one, project_name)
-            ws.cell(row=row_num, column=12).value = \
-                dict_one.data[project_name]['Optimism Bias Percentage Used in Cost Baselines']
-            ws.cell(row=row_num, column=13).value = dict_one.data[project_name]['Overall figure for Optimism Bias (£m)']
-            ws.cell(row=row_num, column=14).value = \
-                dict_one.data[project_name]['Built in contingency (% of Whole Life Cost)']
-            ws.cell(row=row_num, column=15).value = dict_one.data[project_name]['Overall contingency (£m)']
+        if project_name in project_name_list:
+            ws.cell(row=row_num, column=4).value = convert_bc_stage_text(master_data_one.data[project_name]
+                                                                         ['BICC approval point'])
+            ws.cell(row=row_num, column=5).value = round(master_data_one.data[project_name]['Total Forecast'], 0)
+            ws.cell(row=row_num, column=6).value = master_data_one.data[project_name]['Adjusted Benefits Cost Ratio (BCR)']
 
-            # ws.cell(row=row_num, column=8).value = convert_rag_text(dict_one[project_name]['GMPP - IPA DCA last quarter'])
-            # ws.cell(row=row_num, column=9).value = convert_bc_stage_text(dict_one[project_name]['BICC approval point'])
-            # ws.cell(row=row_num, column=10).value = dict_one[project_name]['Start of Operation']
-            # ws.cell(row=row_num, column=11).value = dict_one[project_name]['Project End Date']
-            # ws.cell(row=row_num, column=12).value = convert_rag_text(dict_one[project_name]['SRO Finance confidence'])
-            # ws.cell(row=row_num, column=13).value = dict_one[project_name]['Last time at BICC']
-            # ws.cell(row=row_num, column=14).value = dict_one[project_name]['Next at BICC']
+            p_m_data = all_milestone_data_bulk([project_name], master_data_one)
+            try:
+                ws.cell(row=row_num, column=7).value = (list(p_m_data[project_name]['Project End Date'])[0])
+            except KeyError:
+                ws.cell(row=row_num, column=7).value = 'No end date'
+
+            ws.cell(row=row_num, column=10).value = convert_rag_text(master_data_one.data[project_name]['Departmental DCA'])
+            try:
+                dca_now = master_data_one.data[project_name]['Departmental DCA']
+                dca_past = master_data_two.data[project_name]['Departmental DCA']
+                ws.cell(row=row_num, column=9).value = up_or_down(dca_now, dca_past)
+            except KeyError:
+                ws.cell(row=row_num, column=9).value = 'NEW'
+            ws.cell(row=row_num, column=11).value = calculating_schedule_progression(project_name, p_m_data)
+            ws.cell(row=row_num, column=12).value = calculating_cost_progression(master_data_one, project_name)
+            ws.cell(row=row_num, column=13).value = master_data_one.data[project_name]['Overall figure for Optimism Bias (£m)']
+            ws.cell(row=row_num, column=14).value = master_data_one.data[project_name]['Overall contingency (£m)']
 
     for row_num in range(2, ws.max_row + 1):
         project_name = ws.cell(row=row_num, column=3).value
-        if project_name in dict_two.projects:
-            ws.cell(row=row_num, column=9).value = convert_rag_text(dict_two.data[project_name]['Departmental DCA'])
+        if project_name in master_data_two.projects:
+            ws.cell(row=row_num, column=8).value = convert_rag_text(master_data_two.data[project_name]['Departmental DCA'])
 
     # Highlight cells that contain RAG text, with background and text the same colour. column G.
 
@@ -408,35 +317,15 @@ def placing_excel(dict_one, dict_two, altered_dict, milestone_dict):
     return wb
 
 
-'''keys of interest for current quarter'''
-dash_keys = ['Total Forecast', 'Departmental DCA', 'BICC approval point',
-            'Project Lifecycle Stage', 'SRO Finance confidence', 'Last time at BICC', 'Next at BICC',
-             'GMPP - IPA DCA last quarter']
-
-'''key of interest for previous quarter'''
-dash_keys_previous_quarter = ['Departmental DCA']
-
-keys_to_concatenate = ['Start of Operation', 'Last time at BICC',
-                       'Next at BICC']
 
 '''1) Provide file to empty dashboard document'''
 wb = load_workbook(
     'C:\\Users\\Standalone\\general\\masters folder\\portfolio_dashboards\\pdip_dashboard_poc_master.xlsx')
 ws = wb.active
 
-p_names = q1_1920.projects
+p_names = q2_1920.projects
 
-'''3) Specify data of bicc that is discussing the report. NOTE: Python date format is (YYYY,MM,DD)'''
-bicc_date = datetime.datetime(2019, 9, 9)
-
-
-latest_q_dict = inital_dict(p_names, q1_1920, dash_keys)
-last_q_dict = inital_dict(p_names, q4_1819, dash_keys_previous_quarter)
-m_data = all_milestone_data_bulk(p_names, q1_1920)
-latest_q_dict_2 = add_sop_pend_data(m_data, latest_q_dict)
-merged_dict = final_dict(latest_q_dict_2, last_q_dict, keys_to_concatenate, 'Departmental DCA')
-
-wb = placing_excel(q1_1920, q4_1819, merged_dict, m_data)
+wb = placing_excel(p_names, q2_1920, q1_1920)
 
 '''4) provide file path and specific name of output file.'''
-wb.save('C:\\Users\\Standalone\\general\\masters folder\\portfolio_dashboards\\pdip_dashboard_poc_completed.xlsx')
+wb.save('C:\\Users\\Standalone\\general\\masters folder\\portfolio_dashboards\\pdip_dashboard_poc_testing.xlsx')

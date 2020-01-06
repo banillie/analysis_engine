@@ -48,11 +48,11 @@ def return_data(masters_list, project_name_list, data_key_list):
 
         '''lists project names in ws'''
         for x in range(0, len(project_name_list)):
+            ws.cell(row=x + 2, column=2, value=project_name_list[x])
             try:
                 ws.cell(row=x + 2, column=1).value = masters_list[0].data[project_name_list[x]]['DfT Group']
             except KeyError:
                 pass
-            ws.cell(row=x + 2, column=2, value=project_name_list[x])
 
 
         for row_num in range(2, ws.max_row + 1):
@@ -72,7 +72,8 @@ def return_data(masters_list, project_name_list, data_key_list):
                             pass
                         col_start += 1
                     except KeyError:
-                        ws.cell(row=row_num, column=col_start).value = 'data key not collected'
+                        ws.cell(row=row_num, column=col_start).value = 'Data not collected'
+                        col_start += 1
                 else:
                     ws.cell(row=row_num, column=col_start).value = 'Not reporting'
                     col_start += 1
@@ -110,11 +111,11 @@ def return_baseline_data(masters_list, baseline_list, baseline_ref, project_name
 
         '''lists project names in ws'''
         for x in range(0, len(project_name_list)):
+            ws.cell(row=x + 2, column=2, value=project_name_list[x])
             try:
                 ws.cell(row=x + 2, column=1).value = masters_list[0].data[project_name_list[x]]['DfT Group']
             except KeyError:
                 pass
-            ws.cell(row=x + 2, column=2, value=project_name_list[x])
 
         '''project data into ws'''
         for row_num in range(2, ws.max_row + 1):
@@ -169,11 +170,11 @@ def return_baseline_milestone_data(masters_list, baseline_list, baseline_ref, pr
 
         '''lists project names in ws'''
         for x in range(0, len(project_name_list)):
+            ws.cell(row=x + 2, column=2, value=project_name_list[x])
             try:
                 ws.cell(row=x + 2, column=1).value = masters_list[0].data[project_name_list[x]]['DfT Group']
             except KeyError:
                 pass
-            ws.cell(row=x + 2, column=2, value=project_name_list[x])
 
         '''project data into ws'''
         for row_num in range(2, ws.max_row + 1):
@@ -255,7 +256,7 @@ def return_milestone_data(masters_list, project_name_list, data_key_list):
                         if tuple(milestone_data[project_name][data_key])[0] is None:
                             ws.cell(row=row_num, column=col_start).value = 'None'
                     except KeyError:
-                        ws.cell(row=row_num, column=col_start).value = 'None'
+                        ws.cell(row=row_num, column=col_start).value = 'Data not collected'
 
                     try:
 
@@ -340,6 +341,13 @@ def grey_conditional_formatting(worksheet):
     rule.formula = ['NOT(ISERROR(SEARCH("Not reporting",A1)))']
     worksheet.conditional_formatting.add('A1:X80', rule)
 
+    grey_text = Font(color="cfcfea")
+    grey_fill = PatternFill(bgColor="cfcfea")
+    dxf = DifferentialStyle(font=grey_text, fill=grey_fill)
+    rule = Rule(type="containsText", operator="containsText", text="Data not collected", dxf=dxf)
+    rule.formula = ['NOT(ISERROR(SEARCH("Data not collected",A1)))']
+    worksheet.conditional_formatting.add('A1:X80', rule)
+
     return worksheet
 
 ''' RUNNING PROGRAMME '''
@@ -360,12 +368,10 @@ baseline_list = master_baseline_index(one_quarter_list, list_of_masters_all, bas
 '''THREE. Set data of interest. there are two options here. hash out whichever option you are not using'''
 
 '''option one - non-milestone data. NOTE. this must be in a list [] even if just one data key'''
-data_interest = ['Total BEN Forecast - Total Monetised Benefits',
-                 'Total BEN Forecast - Disbenefit UK Economic',
-                 'Total BEN Forecast - Economic (inc Private Partner)']
+data_interest = ['GMPP - IPA DCA']
 
 '''option two - milestone data. NOTE. this must be in a list [] even if just one data key'''
-#milestone_data_interest = ['Project End Date', 'Start of Project']
+milestone_data_interest = ['Project End Date', 'Start of Project']
 
 '''THREE. Run the programme'''
 
@@ -383,8 +389,7 @@ run = return_data(list_of_masters_all, one_quarter_list, data_interest)
 #                                     milestone_data_interest)
 
 '''FOUR. specify the file path and name of the output document'''
-run.save('C:\\Users\\Standalone\\general\\benefits_info.xlsx')
-
+run.save('C:\\Users\\Standalone\\general\\gmpp_dcas.xlsx')
 
 
 '''old lists stored here for use in future'''
@@ -393,3 +398,7 @@ vfm_analysis_list = ['Working Contact Name', 'Working Contact Email', 'Brief pro
                  'Business Case & Version No.', 'NPV for all projects and NPV for programmes if available',
                  'Initial Benefits Cost Ratio (BCR)', 'Adjusted Benefits Cost Ratio (BCR)',
                  'VfM Category single entry', 'VfM Category', 'Present Value Cost (PVC)', 'Present Value Benefit (PVB)']
+
+ipa_ar_fields_1920 =  ['Department', '19-20 RDEL BL Total', '19-20 CDEL BL WLC',
+                 '19-20 RDEL Forecast Total', '19-20 CDEL Forecast Total WLC', 'Total BL',
+                 'GMPP - IPA ID Number']
