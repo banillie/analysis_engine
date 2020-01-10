@@ -452,6 +452,7 @@ def benefits_info(wb):
                 ws.cell(row=row_num, column=5).font = Font(name='Arial', size=10, color='00fc2525')
 
             '''initial bcr'''
+            'git'
             initial_bcr = list_of_masters_all[0].data[project_name]['Initial Benefits Cost Ratio (BCR)']
             ws.cell(row=row_num, column=6).value = initial_bcr
             '''initial bcr baseline'''
