@@ -435,6 +435,5 @@ milestones = all_milestone_data_bulk(project_quarter_list, q2_1920)
 eventually placed in project file title'''
 for project_name in project_quarter_list:
     a = printing(project_name, q2_1920, q1_1920, q4_1819, q3_1819, milestones)
-    a.save('C://Users//Standalone//general//masters folder//project_dashboards//'
-           'q2_1920_{}_overview.docx'.format(project_name))
+    a.save('/home/will/Documents/portfolio/project_dashboards/q2_1920_{}_overview.docx'.format(project_name))
 

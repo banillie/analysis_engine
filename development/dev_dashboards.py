@@ -12,26 +12,10 @@ output document:
 
 Instructions:
 1) provide path to dashboard master
-2) change bicc_date variable
 3) provide path and specify file name for output document
 
-Supplementary instructions:
-These things need to be done to check and assure the data going into the dashboard. Use the other programmes available
-for undertaking these tasks.
-1) Check that project stage/last at BICC data is correct. This is done via the bc_stage_from_master and
-bc_amended_to_master programmes.
-2) insert into the master document last at / next at BICC project data. This is done via the bicc_dates_from_master and
-bicc_dates_amended_to_master programmes.
-
-Note that some manual adjustments need to be made to:
-1) Project WLC totals e.g. Hs2 Phases
-2) The last/next at BICC specification. e.g. Hs2 Prog should be changed to 'often'
-
-NOTE - code should ideally be refactored in line with latest structure as sort of hacked together at mo to accommodate
-the change in data keys (i.e. new template).
-
 Note: all master data is taken from the data file. Make sure this is up to date and that all relevant data is in
-the import statement.
+the import statement, and that bicc_date is correct.
 '''
 
 from openpyxl import load_workbook
@@ -58,7 +42,6 @@ def place_in_excel(wb):
     benefits_info(wb)
 
     return wb
-
 
 def financial_info(wb):
 
@@ -633,14 +616,12 @@ for project_name in latest_quarter_project_names:
 ''' RUNNING THE PROGRAMME '''
 
 '''ONE. Provide file path to dashboard master'''
-dashboard_master = load_workbook('C:\\Users\\Standalone\\general\\masters folder\\portfolio_dashboards\\'
-                                 'new_dashboards_master.xlsx')
+dashboard_master = load_workbook('/home/will/Documents/portfolio/portfolio_dashboards/new_dashboards_master.xlsx')
 
 '''TWO. Provide list of projects on which to provide analysis'''
-quarter_project_list = q2_1920.projects
+quarter_project_list = list_of_masters_all[0].projects
 one_project_list = ['Crossrail Programme']
 
 '''THREE. place arguments into the place_in_excle function and provide file path for saving output wb'''
 dashboard_completed = place_in_excel(dashboard_master)
-dashboard_completed.save('C:\\Users\\Standalone\\general\\masters folder\\portfolio_dashboards\\'
-                         'new_dashboards_with_data.xlsx')
+dashboard_completed.save('/home/will/Documents/portfolio/portfolio_dashboards/new_dashboards_with_data.xlsx')
