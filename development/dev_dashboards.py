@@ -95,83 +95,47 @@ def financial_info(wb):
             if percentage_change > 5 or percentage_change < -5:
                 ws.cell(row=row_num, column=8).font = Font(name='Arial', size=10, color='00fc2525')
 
-            '''FY Total current quarter'''
-            fy_now =  financial_analysis_masters_list[0].data[project_name]['19-20 RDEL Forecast Total'] + \
-                      financial_analysis_masters_list[0].data[project_name]['19-20 CDEL Forecast Total WLC']
-            ws.cell(row=row_num, column=9).value = fy_now
-
-            '''FY variance against lst quarter'''
-            try:
-                fy_lst_quarter = financial_analysis_masters_list[1].data[project_name]['19-20 RDEL Forecast Total'] + \
-                      financial_analysis_masters_list[1].data[project_name]['19-20 CDEL Forecast Total WLC']
-                diff = fy_now - fy_lst_quarter
-                if float(diff) > 0.49 or float(diff) < -0.49:
-                    ws.cell(row=row_num, column=10).value = diff
-                else:
-                    ws.cell(row=row_num, column=10).value = '-'
-
-                percentage_change = ((fy_now - fy_lst_quarter) / fy_now) * 100
-                if percentage_change > 5 or percentage_change < -5:
-                    ws.cell(row=row_num, column=10).font = Font(name='Arial', size=10, color='00fc2525')
-            except (KeyError, ZeroDivisionError):
-                ws.cell(row=row_num, column=10).value = '-'
-            '''FY variance against start FY'''
-            try:
-                fy_start = q4_1819.data[project_name]['19-20 RDEL Forecast Total'] + \
-                      q4_1819.data[project_name]['19-20 CDEL Forecast Total WLC']
-                diff = fy_now - fy_start
-                ws.cell(row=row_num, column=11).value = diff
-                if float(diff) > 0.49 or float(diff) < -0.49:
-                    ws.cell(row=row_num, column=11).value = diff
-                else:
-                    ws.cell(row=row_num, column=11).value = '-'
-
-                percentage_change = ((fy_now - fy_start) / fy_now) * 100
-                if percentage_change > 5 or percentage_change < -5:
-                    ws.cell(row=row_num, column=11).font = Font(name='Arial', size=10, color='00fc2525')
-            except (KeyError, ZeroDivisionError):
-                ws.cell(row=row_num, column=11).value = '-'
-
-            '''Spent WLC'''
+            '''Aggregate Spent'''
             '''Committed spend'''
+            '''remaining'''
             '''P-Value'''
 
             '''Contigency'''
-            ws.cell(row=row_num, column=15).value = \
+            ws.cell(row=row_num, column=13).value = \
                 financial_analysis_masters_list[0].data[project_name]['Overall contingency (£m)']
 
             '''OB'''
-            ws.cell(row=row_num, column=16).value = \
+            ws.cell(row=row_num, column=14).value = \
                 financial_analysis_masters_list[0].data[project_name]['Overall figure for Optimism Bias (£m)']
 
             '''financial DCA rating - this quarter'''
-            ws.cell(row=row_num, column=17).value = convert_rag_text(financial_analysis_masters_list[0].data
+            ws.cell(row=row_num, column=15).value = convert_rag_text(financial_analysis_masters_list[0].data
                                                                      [project_name]['SRO Finance confidence'])
             '''financial DCA rating - last qrt'''
             try:
-                ws.cell(row=row_num, column=18).value = convert_rag_text(financial_analysis_masters_list[1].data
+                ws.cell(row=row_num, column=16).value = convert_rag_text(financial_analysis_masters_list[1].data
+                                                                     [project_name]['SRO Finance confidence'])
+            except KeyError:
+                ws.cell(row=row_num, column=16).value = ''
+            '''financial DCA rating - 2 qrts ago'''
+            try:
+                ws.cell(row=row_num, column=17).value = convert_rag_text(financial_analysis_masters_list[2].data
+                                                                     [project_name]['SRO Finance confidence'])
+            except KeyError:
+                ws.cell(row=row_num, column=17).value = ''
+            '''financial DCA rating - 3 qrts ago'''
+            try:
+                ws.cell(row=row_num, column=18).value = convert_rag_text(financial_analysis_masters_list[3].data
                                                                      [project_name]['SRO Finance confidence'])
             except KeyError:
                 ws.cell(row=row_num, column=18).value = ''
-            '''financial DCA rating - 2 qrts ago'''
-            try:
-                ws.cell(row=row_num, column=19).value = convert_rag_text(financial_analysis_masters_list[2].data
-                                                                     [project_name]['SRO Finance confidence'])
-            except KeyError:
-                ws.cell(row=row_num, column=19).value = ''
-            '''financial DCA rating - 3 qrts ago'''
-            try:
-                ws.cell(row=row_num, column=20).value = convert_rag_text(financial_analysis_masters_list[3].data
-                                                                     [project_name]['SRO Finance confidence'])
-            except KeyError:
-                ws.cell(row=row_num, column=20).value = ''
             '''financial DCA rating - baseline'''
-            ws.cell(row=row_num, column=21).value = \
+            ws.cell(row=row_num, column=19).value = \
                 convert_rag_text(financial_analysis_masters_list[fin_bc_index[project_name][2]].data[project_name]
                                  ['SRO Finance confidence'])
 
     '''list of columns with conditional formatting'''
-    list_columns = ['q', 'r', 's', 't', 'u']
+    list_columns = ['o', 'p', 'q', 'r', 's']
 
     '''loops below place conditional formatting (cf) rules into the wb. There are two as the dashboard currently has 
     two distinct sections/headings, which do not require cf. Therefore, cf starts and ends at the stated rows. this
