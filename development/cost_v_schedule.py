@@ -93,7 +93,7 @@ def calculate_schedule_change(project_name):
 
     return percent_change
 
-def calculate_schedule_change_full_check(project_name):
+def calculate_schedule_change_full_check(project_name, ws, x):
     '''this function isn't to be used but contains the workings for reaching the change figure so keeping in case
     helpful in future'''
 

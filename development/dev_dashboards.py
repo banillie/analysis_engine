@@ -41,6 +41,8 @@ def place_in_excel(wb):
 
     benefits_info(wb)
 
+    overall_info(wb)
+
     return wb
 
 def financial_info(wb):
@@ -526,6 +528,162 @@ def benefits_info(wb):
                 ws.cell(row=row_num, column=col_num).value = '-'
 
     return wb
+
+def overall_info(wb):
+    ws = wb.worksheets[3]
+
+    for row_num in range(2, ws.max_row + 1):
+        project_name = ws.cell(row=row_num, column=3).value
+        if project_name in latest_quarter_project_names:
+            '''BC Stage'''
+            bc_stage = financial_analysis_masters_list[0].data[project_name]['BICC approval point']
+            ws.cell(row=row_num, column=4).value = convert_bc_stage_text(bc_stage)
+            bc_stage_lst_qrt = financial_analysis_masters_list[1].data[project_name]['BICC approval point']
+            if bc_stage != bc_stage_lst_qrt:
+                ws.cell(row=row_num, column=4).font = Font(name='Arial', size=10, color='00fc2525')
+
+            '''planning stage'''
+            plan_stage = financial_analysis_masters_list[0].data[project_name]['Project stage']
+            ws.cell(row=row_num, column=5).value = plan_stage
+            plan_stage_lst_qrt = financial_analysis_masters_list[1].data[project_name]['Project stage']
+            if plan_stage != plan_stage_lst_qrt:
+                ws.cell(row=row_num, column=5).font = Font(name='Arial', size=10, color='00fc2525')
+
+            '''Total WLC'''
+            wlc_now = financial_analysis_masters_list[0].data[project_name]['Total Forecast']
+            ws.cell(row=row_num, column=6).value = wlc_now
+            '''WLC variance against lst quarter'''
+            try:
+                wlc_lst_quarter = financial_analysis_masters_list[1].data[project_name]['Total Forecast']
+                diff_lst_qrt = wlc_now - wlc_lst_quarter
+                if float(diff_lst_qrt) > 0.49 or float(diff_lst_qrt) < -0.49:
+                    ws.cell(row=row_num, column=7).value = diff_lst_qrt
+                else:
+                    ws.cell(row=row_num, column=7).value = '-'
+
+                percentage_change = ((wlc_now - wlc_lst_quarter) / wlc_now) * 100
+                if percentage_change > 5 or percentage_change < -5:
+                    ws.cell(row=row_num, column=7).font = Font(name='Arial', size=10, color='00fc2525')
+            except KeyError:
+                ws.cell(row=row_num, column=7).value = '-'
+
+            '''WLC variance against baseline quarter'''
+            wlc_baseline = financial_analysis_masters_list[fin_bc_index[project_name][2]].data[project_name][
+                'Total Forecast']
+            diff_bl = wlc_now - wlc_baseline
+            if float(diff_bl) > 0.49 or float(diff_bl) < -0.49:
+                ws.cell(row=row_num, column=8).value = diff_bl
+            else:
+                ws.cell(row=row_num, column=8).value = '-'
+
+            percentage_change = ((wlc_now - wlc_baseline) / wlc_now) * 100
+            if percentage_change > 5 or percentage_change < -5:
+                ws.cell(row=row_num, column=8).font = Font(name='Arial', size=10, color='00fc2525')
+
+            '''vfm category now'''
+            if list_of_masters_all[0].data[project_name]['VfM Category lower range'] is None:
+                vfm_cat = list_of_masters_all[0].data[project_name]['VfM Category single entry']
+                ws.cell(row=row_num, column=9).value = vfm_cat
+            else:
+                vfm_cat = str(list_of_masters_all[0].data[project_name]['VfM Category lower range']) + ' - ' + \
+                          str(list_of_masters_all[0].data[project_name]['VfM Category upper range'])
+                ws.cell(row=row_num, column=9).value = vfm_cat
+
+            '''full operation current date'''
+            try:
+                foc_one = tuple(current_milestones_all[project_name]['Full Operating Capacity (FOC)'])[0]
+                if foc_one is None:
+                    foc_two = tuple(current_milestones_all[project_name]['Full Operations'])[0]
+                    ws.cell(row=row_num, column=10).value = foc_two
+                    if foc_two < bicc_date:
+                        ws.cell(row=row_num, column=10).value = 'Completed'
+                else:
+                    ws.cell(row=row_num, column=10).value = foc_one
+                    if foc_one < bicc_date:
+                        ws.cell(row=row_num, column=10).value = 'Completed'
+            except (KeyError, TypeError):
+                ws.cell(row=row_num, column=16).value = ''
+            '''foc variance against lst quarter'''
+            try:
+                foc_lst_qrt_diff = first_diff_data[project_name]['Full Operating Capacity (FOC)']
+                if foc_lst_qrt_diff is None:
+                    foc_lst_qrt_diff = first_diff_data[project_name]['Full Operations']
+                    ws.cell(row=row_num, column=11).value = foc_lst_qrt_diff
+                if foc_lst_qrt_diff > 46:
+                    ws.cell(row=row_num, column=11).font = Font(name='Arial', size=10, color='00fc2525')
+            except (KeyError, TypeError):
+                ws.cell(row=row_num, column=11).value = ''
+            '''fo variance against baseline'''
+            try:
+                foc_bl_diff = second_diff_data[project_name]['Full Operating Capacity (FOC)']
+                if foc_bl_diff is None:
+                    foc_bl_diff = second_diff_data[project_name]['Full Operations']
+                    ws.cell(row=row_num, column=12).value = foc_bl_diff
+                if foc_bl_diff > 86:
+                    ws.cell(row=row_num, column=12).font = Font(name='Arial', size=10, color='00fc2525')
+            except (KeyError, TypeError):
+                ws.cell(row=row_num, column=12).value = ''
+
+            '''IPA DCA rating'''
+            ipa_dca = convert_rag_text(list_of_masters_all[0].data[project_name]['GMPP - IPA DCA'])
+            ws.cell(row=row_num, column=13).value = ipa_dca
+            if ipa_dca == 'None':
+                ws.cell(row=row_num, column=13).value = ''
+            '''DCA rating - this quarter'''
+            ws.cell(row=row_num, column=14).value = convert_rag_text(list_of_masters_all[0].data
+                                                                     [project_name]['Departmental DCA'])
+            '''DCA rating - last qrt'''
+            try:
+                ws.cell(row=row_num, column=15).value = convert_rag_text(list_of_masters_all[1].data
+                                                                         [project_name]['Departmental DCA'])
+            except KeyError:
+                ws.cell(row=row_num, column=15).value = ''
+            '''DCA rating - 2 qrts ago'''
+            try:
+                ws.cell(row=row_num, column=16).value = convert_rag_text(list_of_masters_all[2].data
+                                                                         [project_name]['Departmental DCA'])
+            except KeyError:
+                ws.cell(row=row_num, column=16).value = ''
+            '''DCA rating - 3 qrts ago'''
+            try:
+                ws.cell(row=row_num, column=17).value = convert_rag_text(list_of_masters_all[3].data
+                                                                         [project_name]['Departmental DCA'])
+            except KeyError:
+                ws.cell(row=row_num, column=17).value = ''
+            '''DCA rating - baseline'''
+            try:
+                ws.cell(row=row_num, column=18).value = \
+                    convert_rag_text(list_of_masters_all[bc_index[project_name][2]].data[project_name]
+                                     ['Departmental DCA'])
+            except:
+                ws.cell(row=row_num, column=18).value = ''
+
+        '''list of columns with conditional formatting'''
+        list_columns = ['m', 'n', 'o', 'p', 'q', 'r']
+
+        '''loops below place conditional formatting (cf) rules into the wb. There are two as the dashboard currently has 
+        two distinct sections/headings, which do not require cf. Therefore, cf starts and ends at the stated rows. this
+        is hard code that will need to be changed should the position of information in the dashboard change. It is an
+        easy change however'''
+
+        '''same loop but the text is black. In addition these two loops go through the list_columns list above'''
+        for column in list_columns:
+            for i, dca in enumerate(rag_txt_list):
+                text = black_text
+                fill = fill_colour_list[i]
+                dxf = DifferentialStyle(font=text, fill=fill)
+                rule = Rule(type="containsText", operator="containsText", text=dca, dxf=dxf)
+                for_rule_formula = 'NOT(ISERROR(SEARCH("' + dca + '",' + column + '5)))'
+                rule.formula = [for_rule_formula]
+                ws.conditional_formatting.add('' + column + '5:' + column + '60', rule)
+
+        for row_num in range(2, ws.max_row + 1):
+            for col_num in range(5, ws.max_column + 1):
+                if ws.cell(row=row_num, column=col_num).value == 0:
+                    ws.cell(row=row_num, column=col_num).value = '-'
+
+    return wb
+
 
 
 '''highlight cells that contain RAG text, with background and text the same colour'''
