@@ -6,10 +6,15 @@ from analysis.data import list_of_masters_all, bc_index, latest_quarter_project_
     fin_bc_index
 from analysis.engine_functions import all_milestone_data_bulk
 from openpyxl import Workbook
+from collections import Counter
 
 def cost_v_schedule_chart():
 
     l_data = list_of_masters_all[0]
+
+    sorted_by_rag = sort_by_rag(l_data)
+
+    rag_occurance = Counter(x[1] for x in sorted_by_rag)
 
     wb = Workbook()
     ws = wb.active
@@ -20,7 +25,7 @@ def cost_v_schedule_chart():
     ws.cell(row=2, column=5).value = 'WLC'
     ws.cell(row=2, column=6).value = 'DCA'
 
-    for x, project_name in enumerate(l_data.projects):
+    for x, project_name in enumerate():
         print(project_name)
         ws.cell(row=x+3, column=2).value = project_name
         ws.cell(row=x+3, column=3).value = calculate_schedule_change(project_name)
@@ -29,6 +34,17 @@ def cost_v_schedule_chart():
         ws.cell(row=x+3, column=6).value = l_data.data[project_name]['Departmental DCA']
 
     return wb
+
+def sort_by_rag(quarter_data):
+
+    rag_list = []
+    for project_name in quarter_data.projects:
+        rag = quarter_data.data[project_name]['Departmental DCA']
+        rag_list.append((project_name, rag))
+
+    rag_list_sorted = sorted(rag_list, key=lambda x:x[1])
+
+    return rag_list_sorted
 
 def calculate_wlc_change(project_name):
 
