@@ -19,7 +19,8 @@ Follow instruction as set out below are provided
 '''
 
 from openpyxl import Workbook
-from analysis.data import list_of_masters_all, latest_quarter_project_names, bc_index, baseline_bc_stamp, salmon_fill
+from analysis.data import list_of_masters_all, latest_quarter_project_names, bc_index, baseline_bc_stamp, salmon_fill, \
+    root_path
 from analysis.engine_functions import get_all_project_names, get_quarter_stamp, grey_conditional_formatting
 
 def return_data(project_name_list, data_key_list):
@@ -122,7 +123,7 @@ def return_baseline_data(project_name_list, data_key_list):
                     except (IndexError, KeyError):
                         pass
                     col_start += 1
-                except KeyError:
+                except (KeyError, TypeError):
                     ws.cell(row=row_num, column=col_start).value = 'Data not collected'
                     col_start += 1
 
@@ -135,7 +136,6 @@ def return_baseline_data(project_name_list, data_key_list):
         ws.cell(row=1, column=8, value='Quarter from which baseline data taken')
 
     return wb
-
 
 ''' RUNNING PROGRAMME '''
 
@@ -150,7 +150,14 @@ specific_project_list = [] # list of projects. get project name in import statem
 
 '''TWO. Set data of interest. there are two options here. hash out whichever option you are not using'''
 '''option one - non-milestone data. NOTE. this must be in a list [] even if just one data key'''
-data_interest = ['BICC approval point']
+data_interest = ['Departmental DCA', 'Working Contact Name', 'Working Contact Email',
+                 'Brief project description (GMPP - brief descripton)',
+                 'Business Case & Version No.', 'BICC approval point',
+                 'NPV for all projects and NPV for programmes if available',
+                 'Initial Benefits Cost Ratio (BCR)', 'Adjusted Benefits Cost Ratio (BCR)',
+                 'VfM Category single entry', 'VfM Category lower range', 'VfM Category upper range',
+                 'Present Value Cost (PVC)', 'Present Value Benefit (PVB)', 'SRO Benefits RAG',
+                 'Benefits Narrative', 'Ben comparison with last quarters cost - narrative']
 
 '''THREE. Run the programme'''
 '''option one - run the return_data function for all non-milestone data'''
@@ -160,18 +167,22 @@ run_standard = return_data(one_quarter_list, data_interest)
 run_baseline = return_baseline_data(one_quarter_list, data_interest)
 
 '''FOUR. specify the file path and name of the output document'''
-run_standard.save('/home/will/Documents/portfolio/bicc_approval_data.xlsx')
+run_standard.save(root_path/'output/q3_1920_vfm_data.xlsx')
 
-run_baseline.save('/home/will/Documents/portfolio/baseline_bicc_approval_data.xlsx')
+run_baseline.save(root_path/'output/q3_1920_vfm_baseline_data.xlsx')
 
 '''old lists stored here for use in future'''
 
-old_entries = ['GMPP - IPA DCA']
+old_entries = ['GMPP - IPA DCA', 'BICC approval point']
 
-vfm_analysis_list = ['Working Contact Name', 'Working Contact Email', 'Brief project description (GMPP - brief descripton)',
-                 'Business Case & Version No.', 'NPV for all projects and NPV for programmes if available',
+vfm_analysis_list = ['Departmental DCA', 'Working Contact Name', 'Working Contact Email',
+                 'Brief project description (GMPP - brief descripton)',
+                 'Business Case & Version No.', 'BICC approval point',
+                 'NPV for all projects and NPV for programmes if available',
                  'Initial Benefits Cost Ratio (BCR)', 'Adjusted Benefits Cost Ratio (BCR)',
-                 'VfM Category single entry', 'VfM Category', 'Present Value Cost (PVC)', 'Present Value Benefit (PVB)']
+                 'VfM Category single entry', 'VfM Category lower range', 'VfM Category upper range',
+                 'Present Value Cost (PVC)', 'Present Value Benefit (PVB)', 'SRO Benefits RAG',
+                 'Benefits Narrative', 'Ben comparison with last quarters cost - narrative']
 
 ipa_ar_fields_1920 =  ['Department', '19-20 RDEL BL Total', '19-20 CDEL BL WLC',
                  '19-20 RDEL Forecast Total', '19-20 CDEL Forecast Total WLC', 'Total BL',

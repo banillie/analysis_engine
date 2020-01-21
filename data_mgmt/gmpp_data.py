@@ -15,8 +15,7 @@ IMPORTANT to note:
 '''
 
 from openpyxl import load_workbook
-from openpyxl.styles import Font
-from analysis.data import q2_1920
+from analysis.data import q3_1920
 from analysis.engine_functions import filter_gmpp
 
 
@@ -25,8 +24,6 @@ def create_master(gmpp_wb, master_data):
 
     type_list = ['RDEL', 'CDEL', 'Non-Gov', 'Income'] # list of cost types. used to amend Hs2 data
     zero_list = ['RDEL', 'CDEL', 'Non-Gov', 'Income', 'BEN'] # list of cost/ben types. used to remove none value entries
-
-    red_text = Font(color="00fc2525")
 
     # this section filters out only gmpp project names. Subsequent list is then used to populate ws
     gmpp_project_names = filter_gmpp(master_data)
@@ -60,9 +57,8 @@ def create_master(gmpp_wb, master_data):
 
     return gmpp_wb
 
-
 latest_dm = load_workbook("/home/will/Documents/portfolio/gmpp/gmpp_datamap_q3_1920.xlsx")
 
-run = create_master(latest_dm, q2_1920)
+run = create_master(latest_dm, q3_1920)
 
 run.save("/home/will/Documents/portfolio/gmpp/gmpp_dataset_q3_1920.xlsx")

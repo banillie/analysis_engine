@@ -19,7 +19,8 @@ Follow instruction as set out below are provided
 
 from openpyxl import Workbook
 from openpyxl.styles import PatternFill
-from analysis.data import list_of_masters_all, latest_quarter_project_names, bc_index, baseline_bc_stamp, salmon_fill
+from analysis.data import list_of_masters_all, latest_quarter_project_names, bc_index, baseline_bc_stamp, salmon_fill, \
+    root_path
 from analysis.engine_functions import all_milestone_data_bulk, ap_p_milestone_data_bulk, assurance_milestone_data_bulk,\
     get_all_project_names, get_quarter_stamp, grey_conditional_formatting
 
@@ -55,25 +56,29 @@ def return_baseline_milestone_data(project_name_list, data_key_list):
             print(project_name)
             col_start = 3
             for i in bc_index[project_name]:
-                milestone_data = all_milestone_data_bulk([project_name], list_of_masters_all[i])
-
                 try:
-                    ws.cell(row=row_num, column=col_start).value = tuple(milestone_data[project_name][data_key])[0]
+                    milestone_data = all_milestone_data_bulk([project_name], list_of_masters_all[i])
 
-                    if tuple(milestone_data[project_name][data_key])[0] is None:
+                    try:
+                        ws.cell(row=row_num, column=col_start).value = tuple(milestone_data[project_name][data_key])[0]
+
+                        if tuple(milestone_data[project_name][data_key])[0] is None:
+                            ws.cell(row=row_num, column=col_start).value = 'None'
+                    except KeyError:
                         ws.cell(row=row_num, column=col_start).value = 'None'
-                except KeyError:
+
+                    try:
+
+                        last_milestone_data = all_milestone_data_bulk([project_name], list_of_masters_all[i + 1])
+
+                        if tuple(last_milestone_data[project_name][data_key])[0] != \
+                                tuple(milestone_data[project_name][data_key])[0]:
+                            ws.cell(row=row_num, column=col_start).fill = salmon_fill
+                    except (IndexError, KeyError):
+                        pass
+                except TypeError:
                     ws.cell(row=row_num, column=col_start).value = 'None'
 
-                try:
-
-                    last_milestone_data = all_milestone_data_bulk([project_name], list_of_masters_all[i + 1])
-
-                    if tuple(last_milestone_data[project_name][data_key])[0] != \
-                            tuple(milestone_data[project_name][data_key])[0]:
-                        ws.cell(row=row_num, column=col_start).fill = salmon_fill
-                except (IndexError, KeyError):
-                    pass
                 col_start += 1
 
         '''quarter tag / meta data into ws'''
@@ -179,9 +184,9 @@ run_standard = return_milestone_data(one_quarter_list, milestone_data_interest)
 run_baseline = return_baseline_milestone_data(one_quarter_list, milestone_data_interest)
 
 '''FOUR. specify the file path and name of the output document'''
-run_standard.save('/home/will/Documents/portfolio/testing_milestone_data.xlsx')
+run_standard.save(root_path/'output/foc_data.xlsx')
 
-run_baseline.save('/home/will/Documents/portfolio/testing_baseline_milestone_return_data.xlsx')
+run_baseline.save(root_path/'output/foc_baseline_data.xlsx')
 
 
 '''old lists stored here for use in future'''
