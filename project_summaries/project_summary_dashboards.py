@@ -17,14 +17,12 @@ into dashboards/summary sheets:
 from docx import Document
 import datetime
 from docx.oxml.ns import nsdecls
-from docx.oxml.ns import qn
 from docx.oxml import parse_xml
-from docx.oxml import OxmlElement
 from docx.shared import Cm, RGBColor
 import difflib
 
 from analysis.engine_functions import convert_rag_text, all_milestone_data_bulk
-from analysis.data import q2_1920, q1_1920, q4_1819, q3_1819
+from analysis.data import latest_quarter_project_names, list_of_masters_all, root_path
 
 
 def cell_colouring(cell, colour):
@@ -162,10 +160,10 @@ def compare_text_newandold(text_1, text_2, doc):
 
     return doc
 
-def printing(project_name, master_one, master_two, master_three, master_four, milestone_master):
+def printing(project_name, milestone_master):
     '''function that compiles the summary sheet'''
 
-    master_list = [master_one, master_two, master_three, master_four]
+    master_list = list_of_masters_all[0:4]
 
     doc = Document()
     print(project_name)
@@ -178,13 +176,13 @@ def printing(project_name, master_one, master_two, master_three, master_four, mi
     intro.bold = True
 
     y = doc.add_paragraph()
-    a = master_one.data[project_name]['Senior Responsible Owner (SRO)']
+    a = list_of_masters_all[0].data[project_name]['Senior Responsible Owner (SRO)']
     if a == None:
         a = 'TBC'
     else:
         a = a
 
-    b = master_one.data[project_name]['SRO Phone No.']
+    b = list_of_masters_all[0].data[project_name]['SRO Phone No.']
     if b == None:
         b = 'TBC'
     else:
@@ -193,12 +191,12 @@ def printing(project_name, master_one, master_two, master_three, master_four, mi
     y.add_run('SRO name:  ' + str(a) + ',   Tele:  ' + str(b))
 
     y = doc.add_paragraph()
-    a = master_one.data[project_name]['Project Director (PD)']
+    a = list_of_masters_all[0].data[project_name]['Project Director (PD)']
     if a == None:
         a = 'TBC'
     else:
         a = a
-        b = master_one.data[project_name]['PD Phone No.']
+        b = list_of_masters_all[0].data[project_name]['PD Phone No.']
         if b == None:
             b = 'TBC'
         else:
@@ -247,9 +245,9 @@ def printing(project_name, master_one, master_two, master_three, master_four, mi
     heading = 'SRO Overall DCA Narrative'
     y.add_run(str(heading)).bold = True
 
-    dca_a = master_one[project_name]['Departmental DCA Narrative']
+    dca_a = list_of_masters_all[0].data[project_name]['Departmental DCA Narrative']
     try:
-        dca_b = master_three[project_name]['Departmental DCA Narrative']
+        dca_b = list_of_masters_all[1].data[project_name]['Departmental DCA Narrative']
     except KeyError:
         dca_b = dca_a
 
@@ -270,17 +268,17 @@ def printing(project_name, master_one, master_two, master_three, master_four, mi
     table1.cell(0, 3).text = 'Nominal or Real figures:'
     table1.cell(0, 4).text = 'Full profile reported:'
 
-    wlc = round(master_one.data[project_name]['Total Forecast'], 1)
+    wlc = round(list_of_masters_all[0].data[project_name]['Total Forecast'], 1)
     table1.cell(1, 0).text = str(wlc)
-    # str(master_one[project_name]['Total Forecast'])
-    #a = master_one.data[project_name]['Total Forecast']
-    b = master_one.data[project_name]['Pre 19-20 RDEL Forecast Total']
+    # str(list_of_masters_all[0].data[project_name]['Total Forecast'])
+    #a = list_of_masters_all[0].data[project_name]['Total Forecast']
+    b = list_of_masters_all[0].data[project_name]['Pre 19-20 RDEL Forecast Total']
     if b == None:
         b = 0
-    c = master_one.data[project_name]['Pre 19-20 CDEL Forecast Total']
+    c = list_of_masters_all[0].data[project_name]['Pre 19-20 CDEL Forecast Total']
     if c == None:
         c = 0
-    d = master_one.data[project_name]['Pre 19-20 Forecast Non-Gov']
+    d = list_of_masters_all[0].data[project_name]['Pre 19-20 Forecast Non-Gov']
     if d == None:
         d = 0
     e = b + c + d
@@ -289,13 +287,13 @@ def printing(project_name, master_one, master_two, master_three, master_four, mi
     except (ZeroDivisionError, TypeError):
         c = 0
     table1.cell(1, 1).text = str(c) + '%'
-    a = str(master_one.data[project_name]['Source of Finance'])
-    b = master_one.data[project_name]['Other Finance type Description']
+    a = str(list_of_masters_all[0].data[project_name]['Source of Finance'])
+    b = list_of_masters_all[0].data[project_name]['Other Finance type Description']
     if b == None:
         table1.cell(1, 2).text = a
     else:
         table1.cell(1, 2).text = a + ' ' + str(b)
-    table1.cell(1, 3).text = str(master_one[project_name]['Real or Nominal - Actual/Forecast'])
+    table1.cell(1, 3).text = str(list_of_masters_all[0].data[project_name]['Real or Nominal - Actual/Forecast'])
     table1.cell(1, 4).text = ''
 
     '''Finance DCA Narrative text'''
@@ -309,9 +307,9 @@ def printing(project_name, master_one, master_two, master_three, master_four, mi
     gmpp_narrative_keys = ['Project Costs Narrative', 'Cost comparison with last quarters cost narrative',
                            'Cost comparison within this quarters cost narrative']
 
-    fin_text_1 = combine_narrtives(project_name, master_one, gmpp_narrative_keys)
+    fin_text_1 = combine_narrtives(project_name, list_of_masters_all[0], gmpp_narrative_keys)
     try:
-        fin_text_2 = combine_narrtives(project_name, master_two, gmpp_narrative_keys)
+        fin_text_2 = combine_narrtives(project_name, list_of_masters_all[1], gmpp_narrative_keys)
     except KeyError:
         fin_text_2 = fin_text_1
 
@@ -353,7 +351,7 @@ def printing(project_name, master_one, master_two, master_three, master_four, mi
 
     table1.cell(1, 0).text = str(c)
 
-    table1.cell(1, 1).text = str(master_one[name]['BICC approval point'])
+    table1.cell(1, 1).text = str(list_of_masters_all[0].data[project_name]['BICC approval point'])
 
     try:
         a = tuple(key_dates['Start of Operation'])[0]
@@ -378,12 +376,12 @@ def printing(project_name, master_one, master_two, master_three, master_four, mi
     heading = 'SRO Milestone Narrative'
     y.add_run(str(heading)).bold = True
 
-    mile_dca_a = master_one.data[project_name]['Milestone Commentary']
+    mile_dca_a = list_of_masters_all[0].data[project_name]['Milestone Commentary']
     if mile_dca_a == None:
         mile_dca_a = 'None'
 
     try:
-        mile_dca_b = master_two.data[project_name]['Milestone Commentary']
+        mile_dca_b = list_of_masters_all[1].data[project_name]['Milestone Commentary']
         if mile_dca_b == None:
             mile_dca_b = 'None'
     except KeyError:
@@ -417,23 +415,23 @@ def combine_narrtives(project_name, master, key_list):
 
 '''RUNNING PROGRAMME'''
 
-quarter_list = ['This Quarter', 'Q1 1920', 'Q4 1819', 'Q3 1819']
+quarter_list = ['This Qrt', 'Q2 1920', 'Q1 1920', 'Q4 1819']
 
 '''One. select list of projects that dashboards should be built for'''
 '''option one all'''
-project_quarter_list = q2_1920.projects
+project_name_list = latest_quarter_project_names
 '''option two select group - in dev'''
-#group_list = []
+#projects = []
 '''option three one project'''
-#one_proj_list = ['High Speed Rail Programme (HS2)']
+#projects = ['High Speed Rail Programme (HS2)']
 
 '''TWO. enter the project list variable into the below function. NOTE no change required. This is to ensure that the 
 correct milestone dates are displayed in milestone meta data section'''
-milestones = all_milestone_data_bulk(project_quarter_list, q2_1920)
+milestones = all_milestone_data_bulk(project_name_list, list_of_masters_all[0])
 
 '''4) enter file path to where files should be saved. NOTE {} to be kept in file path as this is where project name is 
 eventually placed in project file title'''
-for project_name in project_quarter_list:
-    a = printing(project_name, q2_1920, q1_1920, q4_1819, q3_1819, milestones)
-    a.save('/home/will/Documents/portfolio/project_dashboards/q2_1920_{}_overview.docx'.format(project_name))
+for project_name in project_name_list:
+    a = printing(project_name, milestones)
+    a.save(root_path/'output/q3_1920_{}_summary.docx'.format(project_name))
 
