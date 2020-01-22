@@ -14,10 +14,8 @@ the import statement.
 
 import datetime
 from openpyxl import Workbook
-from openpyxl.styles import Font
-from analysis.engine_functions import all_milestone_data_bulk, filter_project_group
-from analysis.data import q2_1920, list_of_masters_all, latest_quarter_project_names, red_text, baseline_bc_stamp, \
-    bc_index, root_path
+from analysis.engine_functions import all_milestone_data_bulk
+from analysis.data import list_of_masters_all, latest_quarter_project_names, red_text, bc_index, root_path
 
 def check_m_keys_in_excel_single():
     '''
@@ -117,4 +115,4 @@ start_date = datetime.date(2019, 6, 1)
 '''THREE. the following for statement prompts the programme to run'''
 
 output = check_m_keys_in_excel_single()
-output.save(root_path/'output/test_checking_milestones.xlsx')
+output.save(root_path/'output/checking_milestones_q3_1920.xlsx')

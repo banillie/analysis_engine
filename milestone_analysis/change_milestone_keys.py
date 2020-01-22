@@ -65,7 +65,7 @@ master_list = (root_path/'core_data/master_3_2019.xlsx',
                root_path/'core_data/master_3_2016.xlsx')
 
 '''TWO. Provide file path to document which contains information on the data that needs to be changed'''
-key_change = project_data_from_master(root_path/'input/change_fop_milestones.xlsx', 2, 2019)
+key_change = project_data_from_master(root_path/'input/change_milestone_keys_q3_1920.xlsx', 2, 2019)
 
 '''THREE. List of projects. taken from the key change document - as this contains the only projects that need 
 information changed'''
