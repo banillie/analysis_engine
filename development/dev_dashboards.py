@@ -278,34 +278,27 @@ def schedule_info(wb):
 
             '''full operation current date'''
             try:
-                foc_one = tuple(current_milestones_all[project_name]['Full Operating Capacity (FOC)'])[0]
-                if foc_one is None:
-                    foc_two = tuple(current_milestones_all[project_name]['Full Operations'])[0]
-                    ws.cell(row=row_num, column=16).value = foc_two
-                    if foc_two < bicc_date:
-                        ws.cell(row=row_num, column=16).value = 'Completed'
+                foc = tuple(current_milestones_all[project_name]['Full Operations'])[0]
+                ws.cell(row=row_num, column=16).value = foc
+                if foc < bicc_date:
+                    ws.cell(row=row_num, column=16).value = 'Completed'
                 else:
-                    ws.cell(row=row_num, column=16).value = foc_one
-                    if foc_one < bicc_date:
-                        ws.cell(row=row_num, column=16).value = 'Completed'
+                    ws.cell(row=row_num, column=16).value = foc
             except (KeyError, TypeError):
                 ws.cell(row=row_num, column=16).value = ''
-            '''foc variance against lst quarter'''
+
+            '''fop against lst quarter'''
             try:
-                foc_lst_qrt_diff = first_diff_data[project_name]['Full Operating Capacity (FOC)']
-                if foc_lst_qrt_diff is None:
-                    foc_lst_qrt_diff = first_diff_data[project_name]['Full Operations']
-                    ws.cell(row=row_num, column=17).value = foc_lst_qrt_diff
+                foc_lst_qrt_diff = first_diff_data[project_name]['Full Operations']
+                ws.cell(row=row_num, column=17).value = foc_lst_qrt_diff
                 if foc_lst_qrt_diff > 46:
                     ws.cell(row=row_num, column=17).font = Font(name='Arial', size=10, color='00fc2525')
             except (KeyError, TypeError):
                 ws.cell(row=row_num, column=17).value = ''
-            '''fo variance against baseline'''
+            '''fop against baseline'''
             try:
-                foc_bl_diff = second_diff_data[project_name]['Full Operating Capacity (FOC)']
-                if foc_bl_diff is None:
-                    foc_bl_diff = second_diff_data[project_name]['Full Operations']
-                    ws.cell(row=row_num, column=18).value = foc_bl_diff
+                foc_bl_diff = second_diff_data[project_name]['Full Operations']
+                ws.cell(row=row_num, column=18).value = foc_bl_diff
                 if foc_bl_diff > 86:
                     ws.cell(row=row_num, column=18).font = Font(name='Arial', size=10, color='00fc2525')
             except (KeyError, TypeError):
@@ -597,7 +590,7 @@ def overall_info(wb):
                 ws.cell(row=row_num, column=8).value = diff_bl
             else:
                 ws.cell(row=row_num, column=8).value = '-'
-
+            print(project_name)
             percentage_change = ((wlc_now - wlc_baseline) / wlc_now) * 100
             if percentage_change > 5 or percentage_change < -5:
                 ws.cell(row=row_num, column=8).font = Font(name='Arial', size=10, color='00fc2525')
@@ -611,40 +604,56 @@ def overall_info(wb):
                           str(list_of_masters_all[0].data[project_name]['VfM Category upper range'])
                 ws.cell(row=row_num, column=9).value = vfm_cat
 
+            '''vfm category last qrt'''
+            try:
+                if list_of_masters_all[1].data[project_name]['VfM Category lower range'] is None:
+                    vfm_cat_l_qrt = list_of_masters_all[1].data[project_name][
+                        'VfM Category single entry']
+                else:
+                    vfm_cat_l_qrt = str(list_of_masters_all[1].data[project_name][
+                                               'VfM Category lower range']) + ' - ' + \
+                                       str(list_of_masters_all[1].data[project_name][
+                                               'VfM Category upper range'])
+            except KeyError:
+                try:
+                    vfm_cat_l_qrt = list_of_masters_all[1].data[project_name][
+                        'VfM Category single entry']
+                except KeyError:
+                    try:
+                        vfm_cat_l_qrt = list_of_masters_all[1].data[project_name]['VfM Category']
+                    except:
+                        vfm_cat_l_qrt = None
+
+            if vfm_cat != vfm_cat_l_qrt:
+                ws.cell(row=row_num, column=9).font = Font(name='Arial', size=10, color='00fc2525')
+
             '''full operation current date'''
             try:
-                foc_one = tuple(current_milestones_all[project_name]['Full Operating Capacity (FOC)'])[0]
-                if foc_one is None:
-                    foc_two = tuple(current_milestones_all[project_name]['Full Operations'])[0]
-                    ws.cell(row=row_num, column=10).value = foc_two
-                    if foc_two < bicc_date:
-                        ws.cell(row=row_num, column=10).value = 'Completed'
+                foc = tuple(current_milestones_all[project_name]['Full Operations'])[0]
+                ws.cell(row=row_num, column=16).value = foc
+                if foc < bicc_date:
+                    ws.cell(row=row_num, column=16).value = 'Completed'
                 else:
-                    ws.cell(row=row_num, column=10).value = foc_one
-                    if foc_one < bicc_date:
-                        ws.cell(row=row_num, column=10).value = 'Completed'
+                    ws.cell(row=row_num, column=16).value = foc
             except (KeyError, TypeError):
                 ws.cell(row=row_num, column=16).value = ''
-            '''foc variance against lst quarter'''
+
+            '''fop against lst quarter'''
             try:
-                foc_lst_qrt_diff = first_diff_data[project_name]['Full Operating Capacity (FOC)']
-                if foc_lst_qrt_diff is None:
-                    foc_lst_qrt_diff = first_diff_data[project_name]['Full Operations']
-                    ws.cell(row=row_num, column=11).value = foc_lst_qrt_diff
+                foc_lst_qrt_diff = first_diff_data[project_name]['Full Operations']
+                ws.cell(row=row_num, column=17).value = foc_lst_qrt_diff
                 if foc_lst_qrt_diff > 46:
-                    ws.cell(row=row_num, column=11).font = Font(name='Arial', size=10, color='00fc2525')
+                    ws.cell(row=row_num, column=17).font = Font(name='Arial', size=10, color='00fc2525')
             except (KeyError, TypeError):
-                ws.cell(row=row_num, column=11).value = ''
-            '''fo variance against baseline'''
+                ws.cell(row=row_num, column=17).value = ''
+            '''fop against baseline'''
             try:
-                foc_bl_diff = second_diff_data[project_name]['Full Operating Capacity (FOC)']
-                if foc_bl_diff is None:
-                    foc_bl_diff = second_diff_data[project_name]['Full Operations']
-                    ws.cell(row=row_num, column=12).value = foc_bl_diff
+                foc_bl_diff = second_diff_data[project_name]['Full Operations']
+                ws.cell(row=row_num, column=18).value = foc_bl_diff
                 if foc_bl_diff > 86:
-                    ws.cell(row=row_num, column=12).font = Font(name='Arial', size=10, color='00fc2525')
+                    ws.cell(row=row_num, column=18).font = Font(name='Arial', size=10, color='00fc2525')
             except (KeyError, TypeError):
-                ws.cell(row=row_num, column=12).value = ''
+                ws.cell(row=row_num, column=18).value = ''
 
             '''IPA DCA rating'''
             ipa_dca = convert_rag_text(list_of_masters_all[0].data[project_name]['GMPP - IPA DCA'])
@@ -768,4 +777,4 @@ one_project_list = ['Crossrail Programme']
 
 '''THREE. place arguments into the place_in_excle function and provide file path for saving output wb'''
 dashboard_completed = place_in_excel(dashboard_master)
-dashboard_completed.save(root_path/'output/new_dashboards_with_data.xlsx')
+dashboard_completed.save(root_path/'output/new_dashboards_q3_1920.xlsx')
