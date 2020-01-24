@@ -2,24 +2,17 @@
 Programme produces outputs (figures) for building the speed dials page
 
 outputs:
-programme prints out into MS word high level numbers for speed dials
-overall SRO DCA changes between quarters - in MS word. Typically current and last. But can be adapted to whichever two
-quarters are of interest
-overall SRO finance confidence changes between quarters - same as for overall sro dca
-overall SRO benefits confidence changes between quarters - same as for overall sro dca
-overall SRO resource confidence changes between quarters - same as for overall sro dca
+- Programme saves (into output dir) Word documents project changes for each dial.
+- It prints out in the console calculations for overall dial position. (Note to improve so outputs go into excel wb).
 
 follow instructions below.
 
 Note: all master data is taken from the data file. Make sure this is up to date and that all relevant data is in
 the import statement.
-
-TODO: have calculate overall dials information included as part of the ms word output documents, not just a print out in the console.
-TODO: better solution than having to specifying file paths in the run_programme function.
 '''
 
 import docx
-from analysis.data import q2_1920, q1_1920
+from analysis.data import list_of_masters_all, root_path
 
 def calculate_dca_change(category, master_one, master_two):
     '''
@@ -293,7 +286,7 @@ def calculate_overall_dials(dca_change_master):
 
         print(result)
 
-def run_programme(master_one, master_two):
+def run_programme():
     '''
     Function that runs the programme.
 
@@ -302,11 +295,11 @@ def run_programme(master_one, master_two):
     :return: four ms word documents.
     '''
 
-    sro_dca = calculate_dca_change('Departmental DCA', master_one, master_two)
-    finance_dca = calculate_dca_change('SRO Finance confidence', master_one, master_two)
-    resource_dca = calculate_dca_change('Overall Resource DCA - Now', master_one, master_two)
-    benefits_dca = calculate_dca_change('SRO Benefits RAG', master_one, master_two)
-    schedule_dca = calculate_dca_change('SRO Schedule Confidence', master_one, master_two)
+    sro_dca = calculate_dca_change('Departmental DCA', list_of_masters_all[0], list_of_masters_all[1])
+    finance_dca = calculate_dca_change('SRO Finance confidence', list_of_masters_all[0], list_of_masters_all[1])
+    resource_dca = calculate_dca_change('Overall Resource DCA - Now', list_of_masters_all[0], list_of_masters_all[1])
+    benefits_dca = calculate_dca_change('SRO Benefits RAG', list_of_masters_all[0], list_of_masters_all[1])
+    schedule_dca = calculate_dca_change('SRO Schedule Confidence', list_of_masters_all[0], list_of_masters_all[1])
 
     print('DCA')
     calculate_overall_dials(sro_dca)
@@ -325,21 +318,14 @@ def run_programme(master_one, master_two):
     benefits = print_dca_change(benefits_dca)
     schedule = print_dca_change(schedule_dca)
 
-    overall.save('C:\\Users\\Standalone\\general\\masters folder\\speed_dials\\q2_1920_overall_dca.docx')
-    finance.save('C:\\Users\\Standalone\\general\\masters folder\\speed_dials\\q2_1920_finance_dca.docx')
-    resource.save('C:\\Users\\Standalone\\general\\masters folder\\speed_dials\\q2_1920_resource_dca.docx')
-    benefits.save('C:\\Users\\Standalone\\general\\masters folder\\speed_dials\\q2_1920_benefits_dca.docx')
-    schedule.save('C:\\Users\\Standalone\\general\\masters folder\\speed_dials\\q2_1920_schedule_dca.docx')
+    overall.save(root_path/'output/overall_speed_dials_q3_1920.docx')
+    finance.save(root_path/'output/financial_speed_dials_q3_1920.docx')
+    resource.save(root_path/'output/resource_speed_dials_q3_1920.docx')
+    benefits.save(root_path/'output/benefits_speed_dials_q3_1920.docx')
+    schedule.save(root_path/'output/schedule_speed_dials_q3_1920.docx')
 
 
 ''' RUNNING PROGRAMME '''
+'''simple run programme and check analysis_engine/output dir for word document outputs'''
 
-''' Note: all master data is taken from the data file. Make sure this is up to date and that all relevant data is in
-the import statement.'''
-
-'''ONE. the below programme simply need to be run. now commands required. However, need to find a way to easily change
-file paths
-
-Note. file paths for saving outputs currently need to be specified in the programme itself'''
-
-run_programme(q2_1920, q1_1920)
+run_programme()
