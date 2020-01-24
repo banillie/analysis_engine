@@ -13,6 +13,8 @@ the import statement.
 
 import docx
 from analysis.data import list_of_masters_all, root_path
+from collections import Counter
+from openpyxl import Workbook
 
 def calculate_dca_change(category, master_one, master_two):
     '''
@@ -98,7 +100,7 @@ def calculate_dca_change(category, master_one, master_two):
                 if output[project_name]['DCA_lq'] == None:
                     output[project_name]['Change'] = 5
 
-    print(output)
+    #print(output)
     return output
 
 def print_dca_change(dca_change_master):
@@ -216,84 +218,80 @@ def print_dca_change(dca_change_master):
 
     return doc
 
-def calculate_overall_dials(dca_change_master):
-    empty_list = []
-    for x in dca_change_master:
-        empty_list.append(dca_change_master[x]['DCA'])
+def sort_by_rag(quarter_data, dca_type):
 
-    '''this section is necessary as some dcas have 5 options, while others have three'''
-    if len(list(set(empty_list))) > 3:
-        count_list = []
-        red = empty_list.count('Red')
-        count_list.append(('Red', red))
-        amber_red = empty_list.count('Amber/Red')
-        count_list.append(('Amber/Red', amber_red))
-        amber = empty_list.count('Amber')
-        count_list.append(('Amber', amber))
-        amber_green = empty_list.count('Amber/Green')
-        count_list.append(('Amber/Green', amber_green))
-        green = empty_list.count('Green')
-        count_list.append(('Green', green))
+    rag_list = []
+    for project_name in list_of_masters_all[0].projects:
+        rag = quarter_data.data[project_name][dca_type]
+        if rag is not None:
+            rag_list.append((project_name, rag))
+        else:
+            pass
 
-        print(count_list)
+    rag_list_sorted = sorted(rag_list, key=lambda x:x[1])
 
-        total = 0
-        for i in range(0, len(count_list)):
-            total += (count_list[i][1])
+    return rag_list_sorted
 
-        print('total number of projects ' + str(total))
+def calculate_overall_dials():
 
-        a = count_list[0][1] * 0
-        b = count_list[1][1] * 25
-        c = count_list[2][1] * 50
-        d = count_list[3][1] * 75
-        e = count_list[4][1] * 100
+    wb = Workbook()
+    ws = wb.active
 
-        score = a + b + c + d + e
-        maximum = total * 100
+    l_data = list_of_masters_all[0]
 
-        result = score / maximum
+    #overall = sort_by_rag(l_data, 'Departmental DCA')
 
-        print(result)
+    dca_rags = Counter(x[1] for x in sort_by_rag(l_data, 'Departmental DCA'))
+    fin_rags = Counter(x[1] for x in sort_by_rag(l_data, 'SRO Finance confidence'))
+    ben_rags = Counter(x[1] for x in sort_by_rag(l_data, 'SRO Benefits RAG'))
+    schedule_rags = Counter(x[1] for x in sort_by_rag(l_data, 'SRO Schedule Confidence'))
+    resource_rags = Counter(x[1] for x in sort_by_rag(l_data, 'Overall Resource DCA - Now'))
 
+    rag_list = [dca_rags, fin_rags, ben_rags, schedule_rags, resource_rags]
+    rag_cl_list = ['Red', 'Amber/Red', 'Amber', 'Amber/Green', 'Green']
 
+    for x, colour in enumerate(rag_cl_list):
+        for i, type in enumerate(rag_list):
+            ws.cell(row=x+2, column=i+2).value = type[colour]
 
-    if len(list(set(empty_list))) <= 3:
-        count_list = []
-        red = empty_list.count('Red')
-        count_list.append(('Red', red))
-        amber = empty_list.count('Amber')
-        count_list.append(('Amber', amber))
-        green = empty_list.count('Green')
-        count_list.append(('Green', green))
+    for x, value in enumerate(rag_cl_list):
+        ws.cell(row=x+2, column=1).value = value
 
-        print(count_list)
+    #
+    #     total = 0
+    #     for i in range(0, len(count_list)):
+    #         total += (count_list[i][1])
+    #
+    #     print('total number of projects ' + str(total))
+    #
+    #     a = count_list[0][1] * 0
+    #     b = count_list[1][1] * 25
+    #     c = count_list[2][1] * 50
+    #     d = count_list[3][1] * 75
+    #     e = count_list[4][1] * 100
+    #
+    #     score = a + b + c + d + e
+    #     maximum = total * 100
+    #
+    #     result = score / maximum
+    #
+    #     print(result)
+    #
+    #
+    #     a = count_list[0][1] * 0
+    #     b = count_list[1][1] * 50
+    #     c = count_list[2][1] * 100
+    #
+    #     score = a + b + c
+    #     maximum = total * 100
+    #
+    #     result = score / maximum
+    #
+    # print(result)
 
-        total = 0
-        for i in range(0, len(count_list)):
-            total += (count_list[i][1])
-
-        print('total number of projects ' + str(total))
-
-        a = count_list[0][1] * 0
-        b = count_list[1][1] * 50
-        c = count_list[2][1] * 100
-
-        score = a + b + c
-        maximum = total * 100
-
-        result = score / maximum
-
-        print(result)
+    return wb
 
 def run_programme():
-    '''
-    Function that runs the programme.
-
-    :param master_one: master quarter of interest one. typically latest quarter
-    :param master_two: master quarter of interest two. typically last quarter
-    :return: four ms word documents.
-    '''
 
     sro_dca = calculate_dca_change('Departmental DCA', list_of_masters_all[0], list_of_masters_all[1])
     finance_dca = calculate_dca_change('SRO Finance confidence', list_of_masters_all[0], list_of_masters_all[1])
@@ -301,16 +299,8 @@ def run_programme():
     benefits_dca = calculate_dca_change('SRO Benefits RAG', list_of_masters_all[0], list_of_masters_all[1])
     schedule_dca = calculate_dca_change('SRO Schedule Confidence', list_of_masters_all[0], list_of_masters_all[1])
 
-    print('DCA')
-    calculate_overall_dials(sro_dca)
-    print('Finance')
-    calculate_overall_dials(finance_dca)
-    print('Resource')
-    calculate_overall_dials(resource_dca)
-    print('Benefits')
-    calculate_overall_dials(benefits_dca)
-    print('Schedule')
-    calculate_overall_dials(schedule_dca)
+    output = calculate_overall_dials()
+    output.save(root_path/'output/dials.xlsx')
 
     overall = print_dca_change(sro_dca)
     finance = print_dca_change(finance_dca)
