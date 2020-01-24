@@ -433,5 +433,5 @@ milestones = all_milestone_data_bulk(project_name_list, list_of_masters_all[0])
 eventually placed in project file title'''
 for project_name in project_name_list:
     a = printing(project_name, milestones)
-    a.save(root_path/'output/q3_1920_{}_summary.docx'.format(project_name))
+    a.save(root_path/'output/proj_summaries/q3_1920_{}_summary.docx'.format(project_name))
 

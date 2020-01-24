@@ -21,12 +21,11 @@ the import statement, and that bicc_date is correct.
 from openpyxl import load_workbook
 from openpyxl.styles import PatternFill, Font
 from openpyxl.styles.differential import DifferentialStyle
-from openpyxl.formatting.rule import Rule, IconSet, FormatObject
-from analysis.data import q1_1920, q4_1819, financial_analysis_masters_list, q2_1920, \
-    fin_bc_index, income_list, cost_list, wlc_key, latest_quarter_project_names, list_of_masters_all, \
-    bc_index
-from analysis.engine_functions import all_milestone_data_bulk, convert_rag_text, concatenate_dates, up_or_down, \
-    convert_bc_stage_text, project_time_difference, bicc_date, ap_p_milestone_data_bulk
+from openpyxl.formatting.rule import Rule
+from analysis.data import financial_analysis_masters_list, fin_bc_index, latest_quarter_project_names, \
+    list_of_masters_all, bc_index, root_path
+from analysis.engine_functions import all_milestone_data_bulk, convert_rag_text, convert_bc_stage_text, \
+    project_time_difference, bicc_date, ap_p_milestone_data_bulk
 
 def place_in_excel(wb):
     '''
@@ -55,16 +54,22 @@ def financial_info(wb):
             '''BC Stage'''
             bc_stage = financial_analysis_masters_list[0].data[project_name]['BICC approval point']
             ws.cell(row=row_num, column=4).value = convert_bc_stage_text(bc_stage)
-            bc_stage_lst_qrt = financial_analysis_masters_list[1].data[project_name]['BICC approval point']
-            if bc_stage != bc_stage_lst_qrt:
-                ws.cell(row=row_num, column=4).font = Font(name='Arial', size=10, color='00fc2525')
+            try:
+                bc_stage_lst_qrt = financial_analysis_masters_list[1].data[project_name]['BICC approval point']
+                if bc_stage != bc_stage_lst_qrt:
+                    ws.cell(row=row_num, column=4).font = Font(name='Arial', size=10, color='00fc2525')
+            except KeyError:
+                pass
 
             '''planning stage'''
             plan_stage = financial_analysis_masters_list[0].data[project_name]['Project stage']
             ws.cell(row=row_num, column=5).value = plan_stage
-            plan_stage_lst_qrt = financial_analysis_masters_list[1].data[project_name]['Project stage']
-            if plan_stage != plan_stage_lst_qrt:
-                ws.cell(row=row_num, column=5).font = Font(name='Arial', size=10, color='00fc2525')
+            try:
+                plan_stage_lst_qrt = financial_analysis_masters_list[1].data[project_name]['Project stage']
+                if plan_stage != plan_stage_lst_qrt:
+                    ws.cell(row=row_num, column=5).font = Font(name='Arial', size=10, color='00fc2525')
+            except KeyError:
+                pass
 
 
             '''Total WLC'''
@@ -173,16 +178,21 @@ def schedule_info(wb):
             '''BICC approval point'''
             bc_stage = list_of_masters_all[0].data[project_name]['BICC approval point']
             ws.cell(row=row_num, column=4).value = convert_bc_stage_text(bc_stage)
-            bc_stage_lst_qrt = list_of_masters_all[1].data[project_name]['BICC approval point']
-            if bc_stage != bc_stage_lst_qrt:
-                ws.cell(row=row_num, column=4).font = Font(name='Arial', size=10, color='00fc2525')
-
+            try:
+                bc_stage_lst_qrt = list_of_masters_all[1].data[project_name]['BICC approval point']
+                if bc_stage != bc_stage_lst_qrt:
+                    ws.cell(row=row_num, column=4).font = Font(name='Arial', size=10, color='00fc2525')
+            except KeyError:
+                pass
             '''Next stage'''
             plan_stage = list_of_masters_all[0].data[project_name]['Project stage']
             ws.cell(row=row_num, column=5).value = plan_stage
-            plan_stage_lst_qrt = list_of_masters_all[1].data[project_name]['Project stage']
-            if plan_stage != plan_stage_lst_qrt:
-                ws.cell(row=row_num, column=5).font = Font(name='Arial', size=10, color='00fc2525')
+            try:
+                plan_stage_lst_qrt = list_of_masters_all[1].data[project_name]['Project stage']
+                if plan_stage != plan_stage_lst_qrt:
+                    ws.cell(row=row_num, column=5).font = Font(name='Arial', size=10, color='00fc2525')
+            except KeyError:
+                pass
 
             '''Next milestone name and variance'''
             local_milestone_dates = []
@@ -390,15 +400,21 @@ def benefits_info(wb):
             '''BICC approval point'''
             bc_stage = list_of_masters_all[0].data[project_name]['BICC approval point']
             ws.cell(row=row_num, column=4).value = convert_bc_stage_text(bc_stage)
-            bc_stage_lst_qrt = list_of_masters_all[1].data[project_name]['BICC approval point']
-            if bc_stage != bc_stage_lst_qrt:
-                ws.cell(row=row_num, column=4).font = Font(name='Arial', size=10, color='00fc2525')
+            try:
+                bc_stage_lst_qrt = list_of_masters_all[1].data[project_name]['BICC approval point']
+                if bc_stage != bc_stage_lst_qrt:
+                    ws.cell(row=row_num, column=4).font = Font(name='Arial', size=10, color='00fc2525')
+            except:
+                pass
             '''Next stage'''
             proj_stage = list_of_masters_all[0].data[project_name]['Project stage']
             ws.cell(row=row_num, column=5).value = proj_stage
-            proj_stage_lst_qrt = list_of_masters_all[1].data[project_name]['Project stage']
-            if proj_stage != proj_stage_lst_qrt:
-                ws.cell(row=row_num, column=5).font = Font(name='Arial', size=10, color='00fc2525')
+            try:
+                proj_stage_lst_qrt = list_of_masters_all[1].data[project_name]['Project stage']
+                if proj_stage != proj_stage_lst_qrt:
+                    ws.cell(row=row_num, column=5).font = Font(name='Arial', size=10, color='00fc2525')
+            except:
+                pass
 
             '''initial bcr'''
             initial_bcr = list_of_masters_all[0].data[project_name]['Initial Benefits Cost Ratio (BCR)']
@@ -538,16 +554,22 @@ def overall_info(wb):
             '''BC Stage'''
             bc_stage = financial_analysis_masters_list[0].data[project_name]['BICC approval point']
             ws.cell(row=row_num, column=4).value = convert_bc_stage_text(bc_stage)
-            bc_stage_lst_qrt = financial_analysis_masters_list[1].data[project_name]['BICC approval point']
-            if bc_stage != bc_stage_lst_qrt:
-                ws.cell(row=row_num, column=4).font = Font(name='Arial', size=10, color='00fc2525')
+            try:
+                bc_stage_lst_qrt = financial_analysis_masters_list[1].data[project_name]['BICC approval point']
+                if bc_stage != bc_stage_lst_qrt:
+                    ws.cell(row=row_num, column=4).font = Font(name='Arial', size=10, color='00fc2525')
+            except KeyError:
+                pass
 
             '''planning stage'''
             plan_stage = financial_analysis_masters_list[0].data[project_name]['Project stage']
             ws.cell(row=row_num, column=5).value = plan_stage
-            plan_stage_lst_qrt = financial_analysis_masters_list[1].data[project_name]['Project stage']
-            if plan_stage != plan_stage_lst_qrt:
-                ws.cell(row=row_num, column=5).font = Font(name='Arial', size=10, color='00fc2525')
+            try:
+                plan_stage_lst_qrt = financial_analysis_masters_list[1].data[project_name]['Project stage']
+                if plan_stage != plan_stage_lst_qrt:
+                    ws.cell(row=row_num, column=5).font = Font(name='Arial', size=10, color='00fc2525')
+            except KeyError:
+                pass
 
             '''Total WLC'''
             wlc_now = financial_analysis_masters_list[0].data[project_name]['Total Forecast']
@@ -738,7 +760,7 @@ for project_name in latest_quarter_project_names:
 ''' RUNNING THE PROGRAMME '''
 
 '''ONE. Provide file path to dashboard master'''
-dashboard_master = load_workbook('/home/will/Documents/portfolio/portfolio_dashboards/new_dashboards_master.xlsx')
+dashboard_master = load_workbook(root_path/'input/new_dashboards_master.xlsx')
 
 '''TWO. Provide list of projects on which to provide analysis'''
 quarter_project_list = list_of_masters_all[0].projects
@@ -746,4 +768,4 @@ one_project_list = ['Crossrail Programme']
 
 '''THREE. place arguments into the place_in_excle function and provide file path for saving output wb'''
 dashboard_completed = place_in_excel(dashboard_master)
-dashboard_completed.save('/home/will/Documents/portfolio/portfolio_dashboards/new_dashboards_with_data.xlsx')
+dashboard_completed.save(root_path/'output/new_dashboards_with_data.xlsx')

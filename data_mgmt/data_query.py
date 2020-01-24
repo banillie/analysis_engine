@@ -167,9 +167,9 @@ run_standard = return_data(one_quarter_list, data_interest)
 run_baseline = return_baseline_data(one_quarter_list, data_interest)
 
 '''FOUR. specify the file path and name of the output document'''
-run_standard.save(root_path/'output/q3_1920_vfm_data.xlsx')
+run_standard.save(root_path/'output/q3_1920_vfm_data_v2.xlsx')
 
-run_baseline.save(root_path/'output/q3_1920_vfm_baseline_data.xlsx')
+run_baseline.save(root_path/'output/q3_1920_vfm_baseline_data_v2.xlsx')
 
 '''old lists stored here for use in future'''
 

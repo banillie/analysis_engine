@@ -3,18 +3,21 @@ some new code to create costs v schedule graph
 '''
 
 from analysis.data import list_of_masters_all, bc_index, latest_quarter_project_names, financial_analysis_masters_list, \
-    fin_bc_index
+    fin_bc_index, root_path, south_west_route_capacity, gwrm, manchester_north_west_quad, a66, hs2_1, hs2_2a, hs2_2b, \
+    ox_cam_expressway, cvs, a428, ist, east_coast_mainline
 from analysis.engine_functions import all_milestone_data_bulk
 from openpyxl import Workbook
+from openpyxl.chart import Series, Reference, BubbleChart
 from collections import Counter
 
-def cost_v_schedule_chart():
+def cost_v_schedule_chart(list_project_names):
 
     l_data = list_of_masters_all[0]
 
-    sorted_by_rag = sort_by_rag(l_data)
+    sorted_by_rag = sort_by_rag(l_data, list_project_names)
 
     rag_occurance = Counter(x[1] for x in sorted_by_rag)
+    print(rag_occurance)
 
     wb = Workbook()
     ws = wb.active
@@ -25,20 +28,73 @@ def cost_v_schedule_chart():
     ws.cell(row=2, column=5).value = 'WLC'
     ws.cell(row=2, column=6).value = 'DCA'
 
-    for x, project_name in enumerate():
-        print(project_name)
+    for x, tuple in enumerate(sorted_by_rag):
+        project_name = tuple[0]
         ws.cell(row=x+3, column=2).value = project_name
         ws.cell(row=x+3, column=3).value = calculate_schedule_change(project_name)
         ws.cell(row=x+3, column=4).value = calculate_wlc_change(project_name)
         ws.cell(row=x+3, column=5).value = l_data.data[project_name]['Total Forecast']
         ws.cell(row=x+3, column=6).value = l_data.data[project_name]['Departmental DCA']
 
+    bubble_chart(ws, rag_occurance)
+
     return wb
 
-def sort_by_rag(quarter_data):
+def bubble_chart(ws, rag_count):
+
+    chart = BubbleChart()
+    chart.style = 18  # use a preset style
+
+    # add the first series of data
+    amber_stop = 2 + rag_count['Amber']
+    xvalues = Reference(ws, min_col=3, min_row=3, max_row= amber_stop)
+    yvalues = Reference(ws, min_col=4, min_row=3, max_row= amber_stop)
+    size = Reference(ws, min_col=5, min_row=3, max_row= amber_stop)
+    series = Series(values=yvalues, xvalues=xvalues, zvalues=size, title="Amber")
+    chart.series.append(series)
+    series.graphicalProperties.solidFill = "fce553"
+
+    # add the second
+    amber_g_stop = amber_stop + rag_count['Amber/Green']
+    xvalues = Reference(ws, min_col=3, min_row= amber_stop + 1, max_row= amber_g_stop)
+    yvalues = Reference(ws, min_col=4, min_row= amber_stop + 1, max_row= amber_g_stop)
+    size = Reference(ws, min_col=5, min_row= amber_stop + 1, max_row= amber_g_stop)
+    series = Series(values=yvalues, xvalues=xvalues, zvalues=size, title="Amber/Green")
+    chart.series.append(series)
+    series.graphicalProperties.solidFill = "a5b700"
+
+    amber_r_stop = amber_g_stop + rag_count['Amber/Red']
+    xvalues = Reference(ws, min_col=3, min_row=amber_g_stop + 1, max_row=amber_r_stop)
+    yvalues = Reference(ws, min_col=4, min_row=amber_g_stop + 1, max_row=amber_r_stop)
+    size = Reference(ws, min_col=5, min_row=amber_g_stop + 1, max_row=amber_r_stop)
+    series = Series(values=yvalues, xvalues=xvalues, zvalues=size, title="Amber/Red")
+    chart.series.append(series)
+    series.graphicalProperties.solidFill = "f97b31"
+
+    green_stop = amber_r_stop + rag_count['Green']
+    xvalues = Reference(ws, min_col=3, min_row=amber_r_stop + 1, max_row=green_stop)
+    yvalues = Reference(ws, min_col=4, min_row=amber_r_stop + 1, max_row=green_stop)
+    size = Reference(ws, min_col=5, min_row=amber_r_stop + 1, max_row=green_stop)
+    series = Series(values=yvalues, xvalues=xvalues, zvalues=size, title="Green")
+    chart.series.append(series)
+    series.graphicalProperties.solidFill = "17960c"
+
+    red_stop = green_stop + rag_count['Red']
+    xvalues = Reference(ws, min_col=3, min_row=green_stop + 1, max_row=red_stop)
+    yvalues = Reference(ws, min_col=4, min_row=green_stop + 1, max_row=red_stop)
+    size = Reference(ws, min_col=5, min_row=green_stop + 1, max_row=red_stop)
+    series = Series(values=yvalues, xvalues=xvalues, zvalues=size, title="Red")
+    chart.series.append(series)
+    series.graphicalProperties.solidFill = "cb1f00"
+
+    ws.add_chart(chart, "E1")
+
+    return ws
+
+def sort_by_rag(quarter_data, list_project_names):
 
     rag_list = []
-    for project_name in quarter_data.projects:
+    for project_name in list_project_names:
         rag = quarter_data.data[project_name]['Departmental DCA']
         rag_list.append((project_name, rag))
 
@@ -53,7 +109,10 @@ def calculate_wlc_change(project_name):
     '''WLC variance against baseline quarter'''
     wlc_baseline = financial_analysis_masters_list[fin_bc_index[project_name][2]].data[project_name]['Total Forecast']
 
-    percentage_change = int(((wlc_now - wlc_baseline) / wlc_now) * 100)
+    try:
+        percentage_change = int(((wlc_now - wlc_baseline) / wlc_now) * 100)
+    except ZeroDivisionError:
+        percentage_change = 'couldn\'t calculate'
 
     return percentage_change
 
@@ -187,8 +246,10 @@ def calculate_schedule_change_full_check(project_name, ws, x):
     except TypeError:
         ws.cell(row=x + 3, column=8).value = 'couldn\'t calculate'
 
-
 current_milestones_all = all_milestone_data_bulk(latest_quarter_project_names, list_of_masters_all[0])
 
-run = cost_v_schedule_chart()
-run.save('/home/will/Documents/portfolio/cost_v_schedule.xlsx')
+project_list = [south_west_route_capacity, gwrm, manchester_north_west_quad, a66, hs2_1, hs2_2a, hs2_2b, \
+    ox_cam_expressway, cvs, a428, ist, east_coast_mainline]
+
+run = cost_v_schedule_chart(project_list)
+run.save(root_path/'output/cost_v_schedule_filtered.xlsx')

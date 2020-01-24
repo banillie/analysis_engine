@@ -9,9 +9,9 @@ the import statement.
 '''
 
 from openpyxl import Workbook
-from analysis.data import q1_1920
+from analysis.data import list_of_masters_all, root_path
 
-def dandelion_data(master_data):
+def dandelion_data():
     '''
     Simple function that returns data required for the dandelion graph. Sorting done via excel.
 
@@ -22,10 +22,10 @@ def dandelion_data(master_data):
     wb = Workbook()
     ws = wb.active
 
-    for i, project_name in enumerate(master_data.projects):
-        ws.cell(row=2 + i, column=1).value = master_data.data[project_name]['DfT Group']
+    for i, project_name in enumerate(list_of_masters_all[0].projects):
+        ws.cell(row=2 + i, column=1).value = list_of_masters_all[0].data[project_name]['DfT Group']
         ws.cell(row=2 + i, column=2).value = project_name
-        ws.cell(row=2 + i, column=3).value = master_data.data[project_name]['Total Forecast']
+        ws.cell(row=2 + i, column=3).value = list_of_masters_all[0].data[project_name]['Total Forecast']
 
     ws.cell(row=1, column=1).value = 'Group'
     ws.cell(row=1, column=2).value = 'Project Name'
@@ -43,5 +43,5 @@ Note. much of the work required for the final output is done in excel. Refer to 
 '''ONE. place the master quarter data of interest into the dandelion data function and specify the file path for where 
 the output excel file should be saved'''
 
-output = dandelion_data(q1_1920)
-output.save('C:\\Users\\Standalone\\general\\masters folder\\dandelion\\testing.xlsx')
+output = dandelion_data()
+output.save(root_path/'output/dandelion.xlsx')
