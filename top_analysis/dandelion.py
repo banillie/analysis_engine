@@ -35,13 +35,5 @@ def dandelion_data():
 
 '''  RUNNING PROGRAMME '''
 
-'''Note: all master data is taken from the data file. Make sure this is up to date and that all relevant data is in
-the import statement.
-
-Note. much of the work required for the final output is done in excel. Refer to separate gist hub guidance'''
-
-'''ONE. place the master quarter data of interest into the dandelion data function and specify the file path for where 
-the output excel file should be saved'''
-
 output = dandelion_data()
 output.save(root_path/'output/dandelion.xlsx')
