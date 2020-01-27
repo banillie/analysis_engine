@@ -15,8 +15,8 @@ See instructions below.
 '''
 
 from openpyxl import Workbook
-from analysis.data import financial_analysis_masters_list, q2_1920, all_project_names, baseline_bc, baseline_index, \
-    red_text, income_list, cost_list, year_interest_list, wlc_key
+from analysis.data import red_text, wlc_key, latest_cost_profiles, last_cost_profiles, \
+    baseline_cost_profiles, latest_quarter_project_names, list_of_masters_all, fin_bc_index, root_path
 
 def place_complex_comparision_excel(master_data_latest, master_data_last, master_data_baseline):
     '''
@@ -85,11 +85,13 @@ def place_complex_comparision_excel(master_data_latest, master_data_last, master
                         ws.cell(row=i + 2, column=6).font = red_text
                 except TypeError:
                     ws.cell(row=i + 2, column=4).value = 'check project data'
+                except KeyError:
+                    ws.cell(row=i + 2, column=4).value = 'not reporting'
             else:
                 ws.cell(row=i + 2, column=4).value = 'None'
 
 
-        #Note the ordering of data. Done in this manner so that data is displayed in graph in the correct way.
+        # Note the ordering of data. Done in this manner so that data is displayed in graph in the correct way.
         ws.cell(row=1, column=1).value = 'Project Name'
         ws.cell(row=1, column=2).value = 'latest quarter (£m)'
         ws.cell(row=1, column=3).value = 'last quarter (£m)'
@@ -157,45 +159,10 @@ def place_standard_comparision_excel(master_data_latest, master_data_baseline):
 
     return wb
 
-def get_yearly_costs(project_name_list, q_masters_data_list, cost_list, year_list, index):
-    '''
-    Function that gets projects yearly cost information and returns it in a python dictionary format.
-    :param project_name_list: list of project names
-    :param q_masters_data_list: list of master python dictionaries containing quarter information
-    :param cost_list: list of cost key names. this is necessary due to the total cost having be calculated across
-    rdel, cdel and non-gov breakdown.
-    :param year_list: list of year keys e.g. '19-20', '20-21'
-    :param index: index value for which master to use from the q_master_data_list . 0 is for latest, 1 last and
-    2 baseline. The actual index list q_master_list is set at a global level in this programme.
-    :return: a dictionary structured 'year': 'project_name': total. repeated for each year.
-    '''
-
-    upper_dictionary = {}
-
-    for year in year_list:
-        lower_dictionary = {}
-        for project_name in project_name_list:
-            project_data = q_masters_data_list[baseline_index[project_name][index]].data[project_name]
-            total = 0
-            for type in cost_list:
-                if year + type in project_data.keys():
-                    cost = project_data[year + type]
-                    try:
-                        total = total + cost
-                    except TypeError:
-                        pass
-
-            lower_dictionary[project_name] = total
-
-        upper_dictionary[year] = lower_dictionary
-
-    return upper_dictionary
-
-def get_wlc(project_name_list, q_masters_data_list, wlc_key, index):
+def get_wlc(project_name_list, wlc_key, index):
     '''
     Function that gets projects wlc cost information and returns it in a python dictionary format.
     :param project_name_list: list of project names
-    :param q_masters_data_list: list of master python dictionaries containing quarter information
     :param wlc_key: project whole life cost (wlc) key
     :param index: index value for which master to use from the q_master_data_list . 0 is for latest, 1 last and
     2 baseline. The actual index list q_master_list is set at a global level in this programme.
@@ -204,46 +171,41 @@ def get_wlc(project_name_list, q_masters_data_list, wlc_key, index):
     upper_dictionary = {}
     lower_dictionary = {}
     for project_name in project_name_list:
-        project_data = q_masters_data_list[baseline_index[project_name][index]].data[project_name]
-        total = project_data[wlc_key]
-        lower_dictionary[project_name] = total
+        try:
+            project_data = list_of_masters_all[fin_bc_index[project_name][index]].data[project_name]
+            total = project_data[wlc_key]
+            lower_dictionary[project_name] = total
+        except TypeError:
+            lower_dictionary[project_name] = 0
 
     upper_dictionary['wlc'] = lower_dictionary
 
     return upper_dictionary
 
-'''getting financial year profile breakdown'''
-latest_fy = get_yearly_costs(all_project_names, financial_analysis_masters_list, cost_list, year_interest_list, 0)
-last_fy = get_yearly_costs(all_project_names, financial_analysis_masters_list, cost_list, year_interest_list, 1)
-baseline_fy = get_yearly_costs(all_project_names, financial_analysis_masters_list, cost_list, year_interest_list, 2)
 
 '''getting financial wlc cost breakdown'''
-latest_wlc = get_wlc(all_project_names, financial_analysis_masters_list, wlc_key, 0)
-last_wlc = get_wlc(all_project_names, financial_analysis_masters_list, wlc_key, 1)
-baseline_wlc = get_wlc(all_project_names, financial_analysis_masters_list, wlc_key, 2)
+latest_wlc = get_wlc(latest_quarter_project_names, wlc_key, 0)
+last_wlc = get_wlc(latest_quarter_project_names, wlc_key, 1)
+baseline_wlc = get_wlc(latest_quarter_project_names, wlc_key, 2)
 
 '''creating excel outputs'''
 output_one = place_complex_comparision_excel(latest_wlc, last_wlc, baseline_wlc)
-output_two = place_complex_comparision_excel(latest_fy, last_fy, baseline_fy)
+output_two = place_complex_comparision_excel(latest_cost_profiles, last_cost_profiles, baseline_cost_profiles)
 output_three = place_standard_comparision_excel(latest_wlc, baseline_wlc)
-output_four = place_standard_comparision_excel(latest_fy, baseline_fy)
+output_four = place_standard_comparision_excel(latest_cost_profiles, baseline_cost_profiles)
 
 '''INSTRUCTIONS FOR RUNNING PROGRAMME'''
 
 '''Valid file paths for all the below need to be provided'''
 
 '''ONE. Provide file path to where to save complex wlc breakdown'''
-output_one.save("C:\\Users\\Standalone\\general\\masters folder\\portfolio_financial_profile\\"
-                "q2_1920_comparing_costs_wlc_complex.xlsx")
+output_one.save(root_path/'output/comparing_wlc_complex_q3_1920.xlsx')
 
 '''TWO. Provide file path to where to save complex yearly cost profile breakdown'''
-output_two.save("C:\\Users\\Standalone\\general\\masters folder\\portfolio_financial_profile\\"
-                "q2_1920_comparing_costs_profiles_complex.xlsx")
+output_two.save(root_path/'output/comparing_cost_profiles_complex_q3_1920.xlsx')
 
 '''THREE. Provide file path to where to save standard wlc breakdown'''
-output_three.save("C:\\Users\\Standalone\\general\\masters folder\\portfolio_financial_profile\\"
-                "q2_1920_comparing_costs_wlc_standard.xlsx")
+output_three.save(root_path/'output/comparing_wlc_standard_q3_1920.xlsx')
 
 '''FOUR. Provide file path to where to save standard yearly cost profile breakdown'''
-output_four.save("C:\\Users\\Standalone\\general\\masters folder\\portfolio_financial_profile\\"
-                "q2_1920_comparing_costs_profiles_standard.xlsx")
+output_four.save(root_path/'output/comparing_cost_profiles_standard_q3_1920.xlsx')

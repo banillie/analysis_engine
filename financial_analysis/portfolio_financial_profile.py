@@ -17,9 +17,9 @@ from openpyxl import Workbook
 from openpyxl.chart import LineChart, Reference
 from openpyxl.chart.text import RichText
 from openpyxl.drawing.text import Paragraph, ParagraphProperties, CharacterProperties, Font
-from analysis.data import q2_1920, cost_list, income_list, year_list, baseline_bcs, latest_cost_profiles, \
+from analysis.data import cost_list, income_list, year_list, latest_cost_profiles, \
     last_cost_profiles, baseline_cost_profiles, latest_income_profiles, last_income_profiles, \
-    baseline_income_profiles, dont_double_count
+    baseline_income_profiles, dont_double_count, root_path, latest_quarter_project_names
 from analysis.engine_functions import filter_project_group, calculate_group_project_total
 
 def place_in_excel(project_name_list):
@@ -44,7 +44,11 @@ def place_in_excel(project_name_list):
             row_number = 1
             for cost in cost_list:
                 for year in year_list:
-                    ws.cell(row=row_number + 1, column=i+2).value = cost_profile_data_list[p][project_name][year + cost]
+                    try:
+                        ws.cell(row=row_number + 1, column=i+2).value = \
+                            cost_profile_data_list[p][project_name][year + cost]
+                    except KeyError:
+                        pass
                     row_number += 1
 
         '''places totals in final column'''
@@ -103,14 +107,13 @@ def place_in_excel(project_name_list):
 
 '''ONE. set project name list options - this is where the group of projects is specified '''
 '''option 1 - all '''
-latest_quarter_projects = q2_1920.projects
+#latest_quarter_projects = q2_1920.projects
 '''option two - group of projects. use filter_project_group function'''
-project_group_list = filter_project_group(q2_1920, 'HSMRPG')
+#project_group_list = filter_project_group(q2_1920, 'HSMRPG')
 '''option three - single project'''
-one_project_list = []
+#one_project_list = []
 
 '''TWO. place the variable containing the group of interest into the place_in_excel function and specify file path
 to where output wb should be save'''
-output = place_in_excel(project_group_list)
-output.save("C:\\Users\\Standalone\\general\\masters folder\\portfolio_financial_profile\\"
-            "q2_1920_portfolio_financial_profiles.xlsx")
+output = place_in_excel(latest_quarter_project_names)
+output.save(root_path/'output/portfolio_financial_profile_q3_1920.xlsx')
