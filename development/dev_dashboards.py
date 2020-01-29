@@ -25,7 +25,7 @@ from openpyxl.formatting.rule import Rule
 from analysis.data import financial_analysis_masters_list, fin_bc_index, latest_quarter_project_names, \
     list_of_masters_all, bc_index, root_path
 from analysis.engine_functions import all_milestone_data_bulk, convert_rag_text, convert_bc_stage_text, \
-    project_time_difference, bicc_date, ap_p_milestone_data_bulk
+    project_time_difference, ap_p_milestone_data_bulk, bicc_date
 
 def place_in_excel(wb):
     '''
@@ -542,67 +542,67 @@ def overall_info(wb):
     ws = wb.worksheets[3]
 
     for row_num in range(2, ws.max_row + 1):
-        project_name = ws.cell(row=row_num, column=3).value
+        project_name = ws.cell(row=row_num, column=2).value
         if project_name in latest_quarter_project_names:
             '''BC Stage'''
             bc_stage = financial_analysis_masters_list[0].data[project_name]['BICC approval point']
-            ws.cell(row=row_num, column=4).value = convert_bc_stage_text(bc_stage)
+            ws.cell(row=row_num, column=3).value = convert_bc_stage_text(bc_stage)
             try:
                 bc_stage_lst_qrt = financial_analysis_masters_list[1].data[project_name]['BICC approval point']
                 if bc_stage != bc_stage_lst_qrt:
-                    ws.cell(row=row_num, column=4).font = Font(name='Arial', size=10, color='00fc2525')
+                    ws.cell(row=row_num, column=3).font = Font(name='Arial', size=10, color='00fc2525')
             except KeyError:
                 pass
 
             '''planning stage'''
             plan_stage = financial_analysis_masters_list[0].data[project_name]['Project stage']
-            ws.cell(row=row_num, column=5).value = plan_stage
+            ws.cell(row=row_num, column=4).value = plan_stage
             try:
                 plan_stage_lst_qrt = financial_analysis_masters_list[1].data[project_name]['Project stage']
                 if plan_stage != plan_stage_lst_qrt:
-                    ws.cell(row=row_num, column=5).font = Font(name='Arial', size=10, color='00fc2525')
+                    ws.cell(row=row_num, column=4).font = Font(name='Arial', size=10, color='00fc2525')
             except KeyError:
                 pass
 
             '''Total WLC'''
             wlc_now = financial_analysis_masters_list[0].data[project_name]['Total Forecast']
-            ws.cell(row=row_num, column=6).value = wlc_now
+            ws.cell(row=row_num, column=5).value = wlc_now
             '''WLC variance against lst quarter'''
             try:
                 wlc_lst_quarter = financial_analysis_masters_list[1].data[project_name]['Total Forecast']
                 diff_lst_qrt = wlc_now - wlc_lst_quarter
                 if float(diff_lst_qrt) > 0.49 or float(diff_lst_qrt) < -0.49:
-                    ws.cell(row=row_num, column=7).value = diff_lst_qrt
+                    ws.cell(row=row_num, column=6).value = diff_lst_qrt
                 else:
-                    ws.cell(row=row_num, column=7).value = '-'
+                    ws.cell(row=row_num, column=6).value = '-'
 
                 percentage_change = ((wlc_now - wlc_lst_quarter) / wlc_now) * 100
                 if percentage_change > 5 or percentage_change < -5:
-                    ws.cell(row=row_num, column=7).font = Font(name='Arial', size=10, color='00fc2525')
+                    ws.cell(row=row_num, column=6).font = Font(name='Arial', size=10, color='00fc2525')
             except KeyError:
-                ws.cell(row=row_num, column=7).value = '-'
+                ws.cell(row=row_num, column=6).value = '-'
 
             '''WLC variance against baseline quarter'''
             wlc_baseline = financial_analysis_masters_list[fin_bc_index[project_name][2]].data[project_name][
                 'Total Forecast']
             diff_bl = wlc_now - wlc_baseline
             if float(diff_bl) > 0.49 or float(diff_bl) < -0.49:
-                ws.cell(row=row_num, column=8).value = diff_bl
+                ws.cell(row=row_num, column=7).value = diff_bl
             else:
-                ws.cell(row=row_num, column=8).value = '-'
+                ws.cell(row=row_num, column=7).value = '-'
             print(project_name)
             percentage_change = ((wlc_now - wlc_baseline) / wlc_now) * 100
             if percentage_change > 5 or percentage_change < -5:
-                ws.cell(row=row_num, column=8).font = Font(name='Arial', size=10, color='00fc2525')
+                ws.cell(row=row_num, column=7).font = Font(name='Arial', size=10, color='00fc2525')
 
             '''vfm category now'''
             if list_of_masters_all[0].data[project_name]['VfM Category lower range'] is None:
                 vfm_cat = list_of_masters_all[0].data[project_name]['VfM Category single entry']
-                ws.cell(row=row_num, column=9).value = vfm_cat
+                ws.cell(row=row_num, column=8).value = vfm_cat
             else:
                 vfm_cat = str(list_of_masters_all[0].data[project_name]['VfM Category lower range']) + ' - ' + \
                           str(list_of_masters_all[0].data[project_name]['VfM Category upper range'])
-                ws.cell(row=row_num, column=9).value = vfm_cat
+                ws.cell(row=row_num, column=8).value = vfm_cat
 
             '''vfm category baseline'''
             try:
@@ -625,72 +625,73 @@ def overall_info(wb):
                         vfm_cat_baseline = None
 
             if vfm_cat != vfm_cat_baseline:
-                ws.cell(row=row_num, column=9).font = Font(name='Arial', size=10, color='00fc2525')
+                ws.cell(row=row_num, column=8).font = Font(name='Arial', size=10, color='00fc2525')
 
             '''full operation current date'''
             try:
                 foc = tuple(current_milestones_all[project_name]['Full Operations'])[0]
-                ws.cell(row=row_num, column=10).value = foc
+                ws.cell(row=row_num, column=9).value = foc
                 if foc < bicc_date:
-                    ws.cell(row=row_num, column=10).value = 'Completed'
+                    ws.cell(row=row_num, column=9).value = 'Completed'
                 else:
-                    ws.cell(row=row_num, column=10).value = foc
+                    ws.cell(row=row_num, column=9).value = foc
             except (KeyError, TypeError):
-                ws.cell(row=row_num, column=10).value = ''
+                ws.cell(row=row_num, column=9).value = ''
 
             '''fop against lst quarter'''
             try:
                 foc_lst_qrt_diff = first_diff_data[project_name]['Full Operations']
-                ws.cell(row=row_num, column=11).value = foc_lst_qrt_diff
+                ws.cell(row=row_num, column=10).value = foc_lst_qrt_diff
                 if foc_lst_qrt_diff > 46:
-                    ws.cell(row=row_num, column=11).font = Font(name='Arial', size=10, color='00fc2525')
+                    ws.cell(row=row_num, column=10).font = Font(name='Arial', size=10, color='00fc2525')
             except (KeyError, TypeError):
-                ws.cell(row=row_num, column=11).value = ''
+                ws.cell(row=row_num, column=10).value = ''
             '''fop against baseline'''
             try:
                 foc_bl_diff = second_diff_data[project_name]['Full Operations']
-                ws.cell(row=row_num, column=12).value = foc_bl_diff
+                ws.cell(row=row_num, column=11).value = foc_bl_diff
                 if foc_bl_diff > 86:
-                    ws.cell(row=row_num, column=12).font = Font(name='Arial', size=10, color='00fc2525')
+                    ws.cell(row=row_num, column=11).font = Font(name='Arial', size=10, color='00fc2525')
             except (KeyError, TypeError):
-                ws.cell(row=row_num, column=12).value = ''
+                ws.cell(row=row_num, column=11).value = ''
 
             '''IPA DCA rating'''
             ipa_dca = convert_rag_text(list_of_masters_all[0].data[project_name]['GMPP - IPA DCA'])
             ws.cell(row=row_num, column=13).value = ipa_dca
             if ipa_dca == 'None':
                 ws.cell(row=row_num, column=13).value = ''
+
             '''DCA rating - this quarter'''
-            ws.cell(row=row_num, column=14).value = convert_rag_text(list_of_masters_all[0].data
+            ws.cell(row=row_num, column=15).value = convert_rag_text(list_of_masters_all[0].data
                                                                      [project_name]['Departmental DCA'])
             '''DCA rating - last qrt'''
             try:
-                ws.cell(row=row_num, column=15).value = convert_rag_text(list_of_masters_all[1].data
-                                                                         [project_name]['Departmental DCA'])
-            except KeyError:
-                ws.cell(row=row_num, column=15).value = ''
-            '''DCA rating - 2 qrts ago'''
-            try:
-                ws.cell(row=row_num, column=16).value = convert_rag_text(list_of_masters_all[2].data
-                                                                         [project_name]['Departmental DCA'])
-            except KeyError:
-                ws.cell(row=row_num, column=16).value = ''
-            '''DCA rating - 3 qrts ago'''
-            try:
-                ws.cell(row=row_num, column=17).value = convert_rag_text(list_of_masters_all[3].data
+                ws.cell(row=row_num, column=17).value = convert_rag_text(list_of_masters_all[1].data
                                                                          [project_name]['Departmental DCA'])
             except KeyError:
                 ws.cell(row=row_num, column=17).value = ''
+            '''DCA rating - 2 qrts ago'''
+            try:
+                ws.cell(row=row_num, column=18).value = convert_rag_text(list_of_masters_all[2].data
+                                                                         [project_name]['Departmental DCA'])
+            except KeyError:
+                ws.cell(row=row_num, column=18).value = ''
+            '''DCA rating - 3 qrts ago'''
+            try:
+                ws.cell(row=row_num, column=19).value = convert_rag_text(list_of_masters_all[3].data
+                                                                         [project_name]['Departmental DCA'])
+            except KeyError:
+                ws.cell(row=row_num, column=19).value = ''
             '''DCA rating - baseline'''
             try:
-                ws.cell(row=row_num, column=18).value = \
+                ws.cell(row=row_num, column=21).value = \
                     convert_rag_text(list_of_masters_all[bc_index[project_name][2]].data[project_name]
                                      ['Departmental DCA'])
             except:
-                ws.cell(row=row_num, column=18).value = ''
+                ws.cell(row=row_num, column=21).value = ''
 
         '''list of columns with conditional formatting'''
-        list_columns = ['m', 'n', 'o', 'p', 'q', 'r']
+        list_columns = ['m', 'o', 'q', 'r', 's', 'u']
 
         '''loops below place conditional formatting (cf) rules into the wb. There are two as the dashboard currently has 
         two distinct sections/headings, which do not require cf. Therefore, cf starts and ends at the stated rows. this
