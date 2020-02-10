@@ -144,11 +144,6 @@ def financial_info(wb):
     '''list of columns with conditional formatting'''
     list_columns = ['o', 'p', 'q', 'r', 's']
 
-    '''loops below place conditional formatting (cf) rules into the wb. There are two as the dashboard currently has 
-    two distinct sections/headings, which do not require cf. Therefore, cf starts and ends at the stated rows. this
-    is hard code that will need to be changed should the position of information in the dashboard change. It is an
-    easy change however'''
-
     '''same loop but the text is black. In addition these two loops go through the list_columns list above'''
     for column in list_columns:
         for i, dca in enumerate(rag_txt_list):
@@ -358,11 +353,6 @@ def schedule_info(wb):
 
     '''list of columns with conditional formatting'''
     list_columns = ['v', 'w', 'x', 'y', 'z']
-
-    '''loops below place conditional formatting (cf) rules into the wb. There are two as the dashboard currently has 
-    two distinct sections/headings, which do not require cf. Therefore, cf starts and ends at the stated rows. this
-    is hard code that will need to be changed should the position of information in the dashboard change. It is an
-    easy change however'''
 
     '''same loop but the text is black. In addition these two loops go through the list_columns list above'''
     for column in list_columns:
@@ -693,11 +683,6 @@ def overall_info(wb):
         '''list of columns with conditional formatting'''
         list_columns = ['m', 'o', 'q', 'r', 's', 'u']
 
-        '''loops below place conditional formatting (cf) rules into the wb. There are two as the dashboard currently has 
-        two distinct sections/headings, which do not require cf. Therefore, cf starts and ends at the stated rows. this
-        is hard code that will need to be changed should the position of information in the dashboard change. It is an
-        easy change however'''
-
         '''same loop but the text is black. In addition these two loops go through the list_columns list above'''
         for column in list_columns:
             for i, dca in enumerate(rag_txt_list):
@@ -707,7 +692,7 @@ def overall_info(wb):
                 rule = Rule(type="containsText", operator="containsText", text=dca, dxf=dxf)
                 for_rule_formula = 'NOT(ISERROR(SEARCH("' + dca + '",' + column + '5)))'
                 rule.formula = [for_rule_formula]
-                ws.conditional_formatting.add('' + column + '5:' + column + '60', rule)
+                ws.conditional_formatting.add(column + '5:' + column + '60', rule)
 
         for row_num in range(2, ws.max_row + 1):
             for col_num in range(5, ws.max_column + 1):
@@ -715,7 +700,6 @@ def overall_info(wb):
                     ws.cell(row=row_num, column=col_num).value = '-'
 
     return wb
-
 
 
 '''highlight cells that contain RAG text, with background and text the same colour'''

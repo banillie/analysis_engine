@@ -150,26 +150,20 @@ specific_project_list = [] # list of projects. get project name in import statem
 
 '''TWO. Set data of interest. there are two options here. hash out whichever option you are not using'''
 '''option one - non-milestone data. NOTE. this must be in a list [] even if just one data key'''
-data_interest = ['Departmental DCA', 'Working Contact Name', 'Working Contact Email',
-                 'Brief project description (GMPP - brief descripton)',
-                 'Business Case & Version No.', 'BICC approval point',
-                 'NPV for all projects and NPV for programmes if available',
-                 'Initial Benefits Cost Ratio (BCR)', 'Adjusted Benefits Cost Ratio (BCR)',
-                 'VfM Category single entry', 'VfM Category lower range', 'VfM Category upper range',
-                 'Present Value Cost (PVC)', 'Present Value Benefit (PVB)', 'SRO Benefits RAG',
-                 'Benefits Narrative', 'Ben comparison with last quarters cost - narrative']
+data_interest = ['Brief project description (GMPP - brief descripton)',
+                 'Delivery Narrative']
 
 '''THREE. Run the programme'''
 '''option one - run the return_data function for all non-milestone data'''
-run_standard = return_data(one_quarter_list, data_interest)
+run_standard = return_data(combined_quarters_list, data_interest)
 
 '''option two - run the return_baseline_data function for all non-milestone data'''
-run_baseline = return_baseline_data(one_quarter_list, data_interest)
+#run_baseline = return_baseline_data(one_quarter_list, data_interest)
 
 '''FOUR. specify the file path and name of the output document'''
-run_standard.save(root_path/'output/q3_1920_vfm_data_v2.xlsx')
+run_standard.save(root_path/'output/confidence_all.xlsx')
 
-run_baseline.save(root_path/'output/q3_1920_vfm_baseline_data_v2.xlsx')
+#run_baseline.save(root_path/'output/confidence_all.xlsx')
 
 '''old lists stored here for use in future'''
 

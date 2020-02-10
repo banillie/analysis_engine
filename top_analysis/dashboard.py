@@ -39,7 +39,7 @@ from openpyxl import load_workbook
 from openpyxl.styles import PatternFill, Font
 from openpyxl.styles.differential import DifferentialStyle
 from openpyxl.formatting.rule import Rule, IconSet, FormatObject
-from analysis.data import q2_1920, q1_1920
+from analysis.data import q2_1920, q1_1920, root_path
 from analysis.engine_functions import all_milestone_data_bulk, convert_rag_text, concatenate_dates, up_or_down, \
     convert_bc_stage_text
 
@@ -120,8 +120,8 @@ def place_in_excel(project_list, master_data_one, master_data_two, wb):
         if project_name in master_data_two.projects:
             ws.cell(row=row_num, column=5).value = convert_rag_text(master_data_two.data[project_name]
                                                                     ['Departmental DCA'])
-            ws.cell(row=row_num, column=8).value = convert_rag_text(master_data_two.data[project_name]
-                                                                    ['GMPP - IPA DCA last quarter'])
+            # ws.cell(row=row_num, column=8).value = convert_rag_text(master_data_two.data[project_name]
+            #                                                         ['GMPP - IPA DCA last quarter'])
 
     '''highlight cells that contain RAG text, with background and text the same colour'''
 
@@ -233,7 +233,7 @@ def place_in_excel(project_list, master_data_one, master_data_two, wb):
 ''' RUNNING THE PROGRAMME '''
 
 '''ONE. Provide file path to dashboard master'''
-dashboard_master = load_workbook('C:\\Users\\Standalone\\general\\masters folder\\portfolio_dashboards\\master.xlsx')
+dashboard_master = load_workbook(root_path/'input/master_test.xlsx')
 
 '''TWO. Provide list of projects on which to provide analysis'''
 quarter_project_list = q2_1920.projects
@@ -241,5 +241,4 @@ one_project_list = ['Crossrail Programme']
 
 '''THREE. place arguments into the place_in_excle function and provide file path for saving output wb'''
 dashboard_completed = place_in_excel(one_project_list, q2_1920, q1_1920, dashboard_master)
-dashboard_completed.save('C:\\Users\\Standalone\\general\\masters folder\\portfolio_dashboards\\'
-                         'q2_1920_dashboard_crossrail.xlsx')
+dashboard_completed.save(root_path/'output/master_populated.xlsx')

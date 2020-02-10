@@ -14,9 +14,10 @@ the import statement.
 
 from openpyxl import Workbook
 from analysis.engine_functions import all_milestone_data_bulk, ap_p_milestone_data_bulk, assurance_milestone_data_bulk, \
-    project_time_difference, bc_ref_stages, master_baseline_index, filter_project_group, approval_milestone_data_bulk
+    project_time_difference, bc_ref_stages, master_baseline_index, filter_project_group, approval_milestone_data_bulk, \
+    root_path
 from analysis.data import q2_1920, list_of_masters_all, hs2_1, hs2_2a, hs2_2b, hs2_programme, northern_powerhouse, \
-    ewr_central, ewr_western, hexagon
+    ewr_central, ewr_western, hexagon, latest_quarter_project_names
 
 def put_into_wb_all(project_name_list, t_data, td_data, td_data_two, wb):
     '''
@@ -144,13 +145,13 @@ the import statement.'''
  data.py file '''
 
 '''option one - all projects'''
-latest_quarter_projects = q2_1920.projects
+#latest_quarter_projects = q2_1920.projects
 
 '''option two - group of projects... in development'''
 #project_group_list = filter_project_group(q2_1920, 'HSMRPG')
 
 '''option three - single project'''
-other_project_list = [hs2_1, hs2_2a, hs2_2b, hs2_programme, northern_powerhouse, ewr_central, ewr_western, hexagon]
+#other_project_list = [hs2_1, hs2_2a, hs2_2b, hs2_programme, northern_powerhouse, ewr_central, ewr_western, hexagon]
 
 '''TWO. choose the type of variables that you would like to place in run_milestone_comparator function. Arguments 
 are placed in this order. 
@@ -163,8 +164,7 @@ statement above.
 4. date_of_interest: the date after which project milestones should be returned. 
  
 '''
-print_miles = \
-    run_milestone_comparator(ap_p_milestone_data_bulk, latest_quarter_projects, list_of_masters_all)
+run = run_milestone_comparator(all_milestone_data_bulk, latest_quarter_project_names, list_of_masters_all)
 
 '''THREE. specify file path to output document'''
-print_miles.save('C:\\Users\\Standalone\\general\\masters folder\\portfolio_milestones\\q2_1920_milestones.xlsx')
+run.save(root_path/'output/all_reported_milestones_q3_1920.xlsx')

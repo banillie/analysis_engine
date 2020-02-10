@@ -116,4 +116,4 @@ def place_in_excel(project_name_list):
 '''TWO. place the variable containing the group of interest into the place_in_excel function and specify file path
 to where output wb should be save'''
 output = place_in_excel(latest_quarter_project_names)
-output.save(root_path/'output/portfolio_financial_profile_q3_1920.xlsx')
+output.save(root_path/'output/portfolio_financial_profile_q3_1920_without_he.xlsx')
