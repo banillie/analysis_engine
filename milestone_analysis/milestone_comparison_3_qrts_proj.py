@@ -17,7 +17,8 @@ the import statement.
 from openpyxl import Workbook
 from analysis.engine_functions import all_milestone_data_bulk, ap_p_milestone_data_bulk, assurance_milestone_data_bulk, \
     project_time_difference, filter_project_group
-from analysis.data import list_of_masters_all, bc_index, baseline_bc_stamp, latest_quarter_project_names, root_path
+from analysis.data import list_of_masters_all, bc_index, baseline_bc_stamp, latest_quarter_project_names, root_path, \
+    manchester_north_west_quad
 
 
 def put_into_wb_all_single(function):
@@ -118,10 +119,8 @@ the import statement.'''
 ''' ONE. set list of projects to be included in output'''
 
 '''option two - group of projects. use filter_project_group function'''
-#project_name_list = filter_project_group(q2_1920, 'HSMRPG')
+latest_quarter_project_names = [manchester_north_west_quad]
 
-'''option three - single project'''
-#project_name_list = [rail_franchising, em_franchise, west_coast_partnership]
 
 output = put_into_wb_all_single(all_milestone_data_bulk)
-output.save(root_path/'output/milestone_movement_q3_1920.xlsx')
+output.save(root_path/'output/milestone_movement_q3_1920_MNWQ.xlsx')

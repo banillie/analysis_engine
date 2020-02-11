@@ -25,7 +25,7 @@ from openpyxl.formatting.rule import Rule
 from analysis.data import financial_analysis_masters_list, fin_bc_index, latest_quarter_project_names, \
     list_of_masters_all, bc_index, root_path
 from analysis.engine_functions import all_milestone_data_bulk, convert_rag_text, convert_bc_stage_text, \
-    project_time_difference, ap_p_milestone_data_bulk, bicc_date
+    project_time_difference, ap_p_milestone_data_bulk, bicc_date, concatenate_dates, highlight_close_dates_ipdc
 
 def place_in_excel(wb):
     '''
@@ -619,7 +619,7 @@ def overall_info(wb):
 
             '''full operation current date'''
             try:
-                foc = tuple(current_milestones_all[project_name]['Full Operations'])[0]
+                foc = tuple(current_milestones_all[project_name]['Project End Date'])[0]
                 ws.cell(row=row_num, column=9).value = foc
                 if foc < bicc_date:
                     ws.cell(row=row_num, column=9).value = 'Completed'
@@ -630,7 +630,7 @@ def overall_info(wb):
 
             '''fop against lst quarter'''
             try:
-                foc_lst_qrt_diff = first_diff_data[project_name]['Full Operations']
+                foc_lst_qrt_diff = first_diff_data[project_name]['Project End Date']
                 ws.cell(row=row_num, column=10).value = foc_lst_qrt_diff
                 if foc_lst_qrt_diff > 46:
                     ws.cell(row=row_num, column=10).font = Font(name='Arial', size=10, color='00fc2525')
@@ -638,50 +638,60 @@ def overall_info(wb):
                 ws.cell(row=row_num, column=10).value = ''
             '''fop against baseline'''
             try:
-                foc_bl_diff = second_diff_data[project_name]['Full Operations']
+                foc_bl_diff = second_diff_data[project_name]['Project End Date']
                 ws.cell(row=row_num, column=11).value = foc_bl_diff
                 if foc_bl_diff > 86:
                     ws.cell(row=row_num, column=11).font = Font(name='Arial', size=10, color='00fc2525')
             except (KeyError, TypeError):
                 ws.cell(row=row_num, column=11).value = ''
 
+
+            try:
+                ws.cell(row=row_num, column=12).value = highlight_close_dates_ipdc\
+                    (concatenate_dates(list_of_masters_all[0].data[project_name]['Last time at BICC']))
+                ws.cell(row=row_num, column=13).value = highlight_close_dates_ipdc\
+                    (concatenate_dates(list_of_masters_all[0].data[project_name]['Next at BICC']))
+            except TypeError:
+                print(project_name + ' caused error in last at / next at ipdc calculation')
+
+
             '''IPA DCA rating'''
             ipa_dca = convert_rag_text(list_of_masters_all[0].data[project_name]['GMPP - IPA DCA'])
-            ws.cell(row=row_num, column=13).value = ipa_dca
+            ws.cell(row=row_num, column=15).value = ipa_dca
             if ipa_dca == 'None':
-                ws.cell(row=row_num, column=13).value = ''
+                ws.cell(row=row_num, column=15).value = ''
 
             '''DCA rating - this quarter'''
-            ws.cell(row=row_num, column=15).value = convert_rag_text(list_of_masters_all[0].data
+            ws.cell(row=row_num, column=17).value = convert_rag_text(list_of_masters_all[0].data
                                                                      [project_name]['Departmental DCA'])
             '''DCA rating - last qrt'''
             try:
-                ws.cell(row=row_num, column=17).value = convert_rag_text(list_of_masters_all[1].data
-                                                                         [project_name]['Departmental DCA'])
-            except KeyError:
-                ws.cell(row=row_num, column=17).value = ''
-            '''DCA rating - 2 qrts ago'''
-            try:
-                ws.cell(row=row_num, column=18).value = convert_rag_text(list_of_masters_all[2].data
-                                                                         [project_name]['Departmental DCA'])
-            except KeyError:
-                ws.cell(row=row_num, column=18).value = ''
-            '''DCA rating - 3 qrts ago'''
-            try:
-                ws.cell(row=row_num, column=19).value = convert_rag_text(list_of_masters_all[3].data
+                ws.cell(row=row_num, column=19).value = convert_rag_text(list_of_masters_all[1].data
                                                                          [project_name]['Departmental DCA'])
             except KeyError:
                 ws.cell(row=row_num, column=19).value = ''
+            '''DCA rating - 2 qrts ago'''
+            try:
+                ws.cell(row=row_num, column=20).value = convert_rag_text(list_of_masters_all[2].data
+                                                                         [project_name]['Departmental DCA'])
+            except KeyError:
+                ws.cell(row=row_num, column=20).value = ''
+            '''DCA rating - 3 qrts ago'''
+            try:
+                ws.cell(row=row_num, column=21).value = convert_rag_text(list_of_masters_all[3].data
+                                                                         [project_name]['Departmental DCA'])
+            except KeyError:
+                ws.cell(row=row_num, column=21).value = ''
             '''DCA rating - baseline'''
             try:
-                ws.cell(row=row_num, column=21).value = \
+                ws.cell(row=row_num, column=23).value = \
                     convert_rag_text(list_of_masters_all[bc_index[project_name][2]].data[project_name]
                                      ['Departmental DCA'])
             except:
-                ws.cell(row=row_num, column=21).value = ''
+                ws.cell(row=row_num, column=23).value = ''
 
         '''list of columns with conditional formatting'''
-        list_columns = ['m', 'o', 'q', 'r', 's', 'u']
+        list_columns = ['o', 'q', 's', 't', 'u', 'w']
 
         '''same loop but the text is black. In addition these two loops go through the list_columns list above'''
         for column in list_columns:
