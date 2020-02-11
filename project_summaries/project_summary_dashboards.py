@@ -22,7 +22,7 @@ from docx.shared import Cm, RGBColor
 import difflib
 
 from analysis.engine_functions import convert_rag_text, all_milestone_data_bulk
-from analysis.data import latest_quarter_project_names, list_of_masters_all, root_path
+from analysis.data import latest_quarter_project_names, list_of_masters_all, root_path, manchester_north_west_quad
 
 
 def cell_colouring(cell, colour):
@@ -423,15 +423,15 @@ project_name_list = latest_quarter_project_names
 '''option two select group - in dev'''
 #projects = []
 '''option three one project'''
-#projects = ['High Speed Rail Programme (HS2)']
+one_project = [manchester_north_west_quad]
 
 '''TWO. enter the project list variable into the below function. NOTE no change required. This is to ensure that the 
 correct milestone dates are displayed in milestone meta data section'''
-milestones = all_milestone_data_bulk(project_name_list, list_of_masters_all[0])
+milestones = all_milestone_data_bulk(one_project, list_of_masters_all[0])
 
 '''4) enter file path to where files should be saved. NOTE {} to be kept in file path as this is where project name is 
 eventually placed in project file title'''
-for project_name in project_name_list:
+for project_name in one_project:
     a = printing(project_name, milestones)
-    a.save(root_path/'output/proj_summaries/q3_1920_{}_summary.docx'.format(project_name))
+    a.save(root_path/'output/proj_summaries/q3_1920_{}_summary_revised.docx'.format(project_name))
 
