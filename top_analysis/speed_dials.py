@@ -114,6 +114,7 @@ def print_dca_change(dca_change_master):
     sub.add_run(sub_head).bold = True
     down = 0
     for project_name in dca_change_master:
+        print(project_name)
         #print(project_name, dca_change_master[project_name])
         if dca_change_master[project_name]['Change'] == -4:
             p = doc.add_paragraph()
@@ -249,6 +250,7 @@ def calculate_overall_dials():
 
     rag_list = [dca_rags, fin_rags, ben_rags, schedule_rags, resource_rags]
     rag_cl_list = ['Red', 'Amber/Red', 'Amber', 'Amber/Green', 'Green']
+    confidence_type_list = ['Overall', 'Finance', 'Benefits', 'Schedule', 'Resources']
 
     for x, colour in enumerate(rag_cl_list):
         for i, type in enumerate(rag_list):
@@ -256,6 +258,9 @@ def calculate_overall_dials():
 
     for x, value in enumerate(rag_cl_list):
         ws.cell(row=x+2, column=1).value = value
+
+    for x, value in enumerate(confidence_type_list):
+        ws.cell(row=1, column=x+2).value = value
 
     #
     #     total = 0
