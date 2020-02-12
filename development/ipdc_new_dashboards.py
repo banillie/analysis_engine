@@ -408,8 +408,11 @@ def benefits_info(wb):
                     list_of_masters_all[bc_index[project_name][2]].data[project_name]['Initial Benefits Cost Ratio (BCR)']
                 ws.cell(row=row_num, column=7).value = baseline_initial_bcr
                 if initial_bcr != baseline_initial_bcr:
-                    ws.cell(row=row_num, column=6).font = Font(name='Arial', size=10, color='00fc2525')
-                    ws.cell(row=row_num, column=7).font = Font(name='Arial', size=10, color='00fc2525')
+                    if baseline_initial_bcr is None:
+                        pass
+                    else:
+                        ws.cell(row=row_num, column=6).font = Font(name='Arial', size=10, color='00fc2525')
+                        ws.cell(row=row_num, column=7).font = Font(name='Arial', size=10, color='00fc2525')
             except TypeError:
                 ws.cell(row=row_num, column=7).value = ''
 
@@ -422,8 +425,11 @@ def benefits_info(wb):
                     list_of_masters_all[bc_index[project_name][2]].data[project_name]['Initial Benefits Cost Ratio (BCR)']
                 ws.cell(row=row_num, column=9).value = baseline_adjusted_bcr
                 if adjusted_bcr != baseline_adjusted_bcr:
-                    ws.cell(row=row_num, column=8).font = Font(name='Arial', size=10, color='00fc2525')
-                    ws.cell(row=row_num, column=9).font = Font(name='Arial', size=10, color='00fc2525')
+                    if baseline_adjusted_bcr is None:
+                        pass
+                    else:
+                        ws.cell(row=row_num, column=8).font = Font(name='Arial', size=10, color='00fc2525')
+                        ws.cell(row=row_num, column=9).font = Font(name='Arial', size=10, color='00fc2525')
             except TypeError:
                 ws.cell(row=row_num, column=9).value = ''
 
@@ -455,8 +461,11 @@ def benefits_info(wb):
                     ws.cell(row=row_num, column=11).value = vfm_cat_baseline
 
             if vfm_cat != vfm_cat_baseline:
-                ws.cell(row=row_num, column=10).font = Font(name='Arial', size=10, color='00fc2525')
-                ws.cell(row=row_num, column=11).font = Font(name='Arial', size=10, color='00fc2525')
+                if vfm_cat_baseline is None:
+                    pass
+                else:
+                    ws.cell(row=row_num, column=10).font = Font(name='Arial', size=10, color='00fc2525')
+                    ws.cell(row=row_num, column=11).font = Font(name='Arial', size=10, color='00fc2525')
 
             '''total monetised benefits'''
             tmb = list_of_masters_all[0].data[project_name]['Total BEN Forecast - Total Monetised Benefits']
@@ -615,7 +624,10 @@ def overall_info(wb):
                         vfm_cat_baseline = None
 
             if vfm_cat != vfm_cat_baseline:
-                ws.cell(row=row_num, column=8).font = Font(name='Arial', size=10, color='00fc2525')
+                if vfm_cat_baseline is None:
+                    pass
+                else:
+                    ws.cell(row=row_num, column=8).font = Font(name='Arial', size=10, color='00fc2525')
 
             '''full operation current date'''
             try:

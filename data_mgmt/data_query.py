@@ -20,7 +20,7 @@ Follow instruction as set out below are provided
 
 from openpyxl import Workbook
 from analysis.data import list_of_masters_all, latest_quarter_project_names, bc_index, baseline_bc_stamp, salmon_fill, \
-    root_path
+    root_path, ewr_central
 from analysis.engine_functions import get_all_project_names, get_quarter_stamp, grey_conditional_formatting
 
 def return_data(project_name_list, data_key_list):
@@ -146,28 +146,30 @@ def return_baseline_data(project_name_list, data_key_list):
  data.py file '''
 one_quarter_list = latest_quarter_project_names
 combined_quarters_list = get_all_project_names(list_of_masters_all)
-specific_project_list = [] # list of projects. get project name in import statement
+specific_project_list = [ewr_central] # list of projects. get project name in import statement
 
 '''TWO. Set data of interest. there are two options here. hash out whichever option you are not using'''
 '''option one - non-milestone data. NOTE. this must be in a list [] even if just one data key'''
-data_interest = ['Brief project description (GMPP - brief descripton)',
-                 'Delivery Narrative']
+data_interest = ['VfM Category single entry', 'VfM Category lower range', 'VfM Category upper range']
 
 '''THREE. Run the programme'''
 '''option one - run the return_data function for all non-milestone data'''
-run_standard = return_data(combined_quarters_list, data_interest)
+run_standard = return_data(specific_project_list, data_interest)
 
 '''option two - run the return_baseline_data function for all non-milestone data'''
 #run_baseline = return_baseline_data(one_quarter_list, data_interest)
 
 '''FOUR. specify the file path and name of the output document'''
-run_standard.save(root_path/'output/confidence_all.xlsx')
+run_standard.save(root_path/'output/ewrc_vfm.xlsx')
 
 #run_baseline.save(root_path/'output/confidence_all.xlsx')
 
 '''old lists stored here for use in future'''
 
-old_entries = ['GMPP - IPA DCA', 'BICC approval point']
+old_entries = ['GMPP - IPA DCA', 'BICC approval point',
+               'Brief project description (GMPP - brief descripton)',
+               'Delivery Narrative'
+               ]
 
 vfm_analysis_list = ['Departmental DCA', 'Working Contact Name', 'Working Contact Email',
                  'Brief project description (GMPP - brief descripton)',
