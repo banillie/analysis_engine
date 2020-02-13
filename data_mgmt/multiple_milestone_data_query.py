@@ -86,7 +86,7 @@ def return_multiple_milestone_data(project_name_list, data_key_list):
 '''TWO. Set data of interest. there are two options here. hash out whichever option you are not using'''
 
 '''option two - milestone data. NOTE. this must be in a list [] even if just one data key'''
-milestone_data_interest = ['Start of Project', 'SOBC - BICC Approval', 'OBC - BICC Approval', 'FBC - BICC Approval', \
+milestone_data_interest = ['Start of Project',
                            'Start of Construction/build', 'Start of Operation', 'Project End Date']
 
 '''THREE. Run the programme'''
@@ -94,8 +94,9 @@ milestone_data_interest = ['Start of Project', 'SOBC - BICC Approval', 'OBC - BI
 run_standard = return_multiple_milestone_data(latest_quarter_project_names, milestone_data_interest)
 
 '''FOUR. specify the file path and name of the output document'''
-run_standard.save(root_path/'output/new_milestone_analysis_data.xlsx')
+run_standard.save(root_path/'output/heathrow_analysis_data.xlsx')
 
 '''old lists stored here for use in future'''
-old_entries = ['Project End Date', 'Start of Project']
+old_entries = ['Project End Date', 'Start of Project', 'Start of Project', 'SOBC - BICC Approval', 'OBC - BICC Approval', 'FBC - BICC Approval', \
+               'Start of Construction/build', 'Start of Operation', 'Project End Date']
 

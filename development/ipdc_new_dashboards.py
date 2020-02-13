@@ -417,12 +417,12 @@ def benefits_info(wb):
                 ws.cell(row=row_num, column=7).value = ''
 
             '''adjusted bcr'''
-            adjusted_bcr = list_of_masters_all[0].data[project_name]['Initial Benefits Cost Ratio (BCR)']
+            adjusted_bcr = list_of_masters_all[0].data[project_name]['Adjusted Benefits Cost Ratio (BCR)']
             ws.cell(row=row_num, column=8).value = adjusted_bcr
             '''adjusted bcr baseline'''
             try:
                 baseline_adjusted_bcr = \
-                    list_of_masters_all[bc_index[project_name][2]].data[project_name]['Initial Benefits Cost Ratio (BCR)']
+                    list_of_masters_all[bc_index[project_name][2]].data[project_name]['Adjusted Benefits Cost Ratio (BCR)']
                 ws.cell(row=row_num, column=9).value = baseline_adjusted_bcr
                 if adjusted_bcr != baseline_adjusted_bcr:
                     if baseline_adjusted_bcr is None:
