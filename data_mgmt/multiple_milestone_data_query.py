@@ -27,7 +27,6 @@ def return_multiple_milestone_data(project_name_list, data_key_list):
 
     master = list_of_masters_all[0]
 
-    salmon_fill = PatternFill(start_color='ff8080', end_color='ff8080', fill_type='solid')
 
     wb = Workbook()
     ws = wb.active
