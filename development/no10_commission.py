@@ -1,6 +1,8 @@
-'''returns data required by no 10 commission'''
+'''development code for querying data required by no 10 commission
 
-# TODO. conditional formatting, quarter stamp information.
+However, longer term this code will replace other data query code in the data_mgmt file'''
+
+# TODO. change date format in excel wb
 
 from openpyxl import Workbook
 from openpyxl.styles import PatternFill, Font
