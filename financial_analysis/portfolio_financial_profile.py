@@ -17,17 +17,20 @@ from openpyxl import Workbook
 from openpyxl.chart import LineChart, Reference
 from openpyxl.chart.text import RichText
 from openpyxl.drawing.text import Paragraph, ParagraphProperties, CharacterProperties, Font
-from analysis.data import cost_list, income_list, year_list, latest_cost_profiles, \
-    last_cost_profiles, baseline_cost_profiles, latest_income_profiles, last_income_profiles, \
-    baseline_income_profiles, dont_double_count, root_path, latest_quarter_project_names
+from analysis.data import cost_list, income_list, year_list, latest_cost_profiles, last_cost_profiles, \
+    baseline_1_cost_profiles, baseline_2_cost_profiles, latest_income_profiles, \
+    last_income_profiles, baseline_1_income_profiles, baseline_2_income_profiles, dont_double_count, root_path, \
+    latest_quarter_project_names
 from analysis.engine_functions import filter_project_group, calculate_group_project_total
 
 def place_in_excel(project_name_list):
     wb = Workbook()
 
-    financial_profile_list = ['Latest Profile', 'Last quarter profile', 'Baseline Profile']
-    cost_profile_data_list = [latest_cost_profiles, last_cost_profiles, baseline_cost_profiles]
-    income_profile_data_list = [latest_income_profiles, last_income_profiles, baseline_income_profiles]
+    financial_profile_list = ['Latest Profile', 'Last quarter profile', 'Baseline 1 Profile', 'Baseline 2 Profile']
+    cost_profile_data_list = [latest_cost_profiles, last_cost_profiles, baseline_1_cost_profiles, \
+                              baseline_2_cost_profiles]
+    income_profile_data_list = [latest_income_profiles, last_income_profiles, baseline_1_income_profiles, \
+                                baseline_2_income_profiles]
 
     for p, profile in enumerate(financial_profile_list):
         '''worksheet is created for each project'''
@@ -116,4 +119,4 @@ def place_in_excel(project_name_list):
 '''TWO. place the variable containing the group of interest into the place_in_excel function and specify file path
 to where output wb should be save'''
 output = place_in_excel(latest_quarter_project_names)
-output.save(root_path/'output/portfolio_financial_profile_q3_1920_without_he.xlsx')
+output.save(root_path/'output/portfolio_financial_profiles.xlsx')
