@@ -1,14 +1,9 @@
 '''development code for returning multiple data key values (for one quarter) into one wb'''
 
-# TODO. change date format in excel wb
-
 from openpyxl import Workbook
-from openpyxl.styles.differential import DifferentialStyle
-from openpyxl.formatting.rule import Rule
-from analysis.data import list_of_masters_all, latest_quarter_project_names, bc_index, baseline_bc_stamp, salmon_fill, \
-    root_path
-from analysis.engine_functions import all_milestone_data_bulk, ap_p_milestone_data_bulk, assurance_milestone_data_bulk,\
-    get_all_project_names, get_quarter_stamp, grey_conditional_formatting
+from analysis.data import list_of_masters_all, latest_quarter_project_names, root_path, conditional_text, \
+    text_colours, background_colours
+from analysis.engine_functions import all_milestone_data_bulk, conditional_formatting
 
 def return_data(project_name_list, data_key_list):
 
@@ -26,6 +21,8 @@ def return_data(project_name_list, data_key_list):
                 if key in list_of_masters_all[0].data[project_name].keys():
                     value = list_of_masters_all[0].data[project_name][key]
                     ws.cell(row=2+i, column=2+y, value=value) #retuns value
+                    if value is None:
+                        ws.cell(row=2 + i, column=2 + y, value='missing data')
 
                 # milestone keys
                 else:
@@ -33,6 +30,9 @@ def return_data(project_name_list, data_key_list):
                     value = tuple(milestones[project_name][key])[0]
                     ws.cell(row=2 + i, column=2 + y, value=value)
                     ws.cell(row=2 + i, column=2 + y).number_format = 'dd/mm/yy'
+                    if value is None:
+                        ws.cell(row=2 + i, column=2 + y, value='missing data')
+
 
             except KeyError:
                 if project_name in list_of_masters_all[0].projects: #loop calculates if project was not reporting or data missing
@@ -40,8 +40,10 @@ def return_data(project_name_list, data_key_list):
                 else:
                     ws.cell(row=2+i, column=2+y, value='project not reporting')
 
-        '''quarter tag information'''
-        ws.cell(row=1, column=1, value='Project')
+    conditional_formatting(ws, list_columns, conditional_text, text_colours, background_colours, '1', '60')
+
+    '''quarter tag information'''
+    ws.cell(row=1, column=1, value='Project')
 
 
     return wb
@@ -55,6 +57,7 @@ key_list = ['BICC approval point',
             'Brief project description (GMPP - brief descripton)',
             'Project End Date']
 
+list_columns = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'q', 's', 't', 'u', 'w']
 '''running prog - step one'''
 run_project_all = return_data(latest_quarter_project_names, key_list)
 
