@@ -31,7 +31,6 @@ def return_data(project_name_list, data_key_list):
                 else:
                     milestones = all_milestone_data_bulk([project_name], list_of_masters_all[0])
                     value = tuple(milestones[project_name][key])[0]
-                    print(value)
                     ws.cell(row=2 + i, column=2 + y, value=value)
                     ws.cell(row=2 + i, column=2 + y).number_format = 'dd/mm/yy'
 
