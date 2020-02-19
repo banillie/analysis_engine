@@ -9,9 +9,9 @@ from openpyxl.styles import PatternFill, Font
 from openpyxl.styles.differential import DifferentialStyle
 from openpyxl.formatting.rule import Rule
 from analysis.data import list_of_masters_all, latest_quarter_project_names, bc_index, baseline_bc_stamp, salmon_fill, \
-    root_path
-from analysis.engine_functions import all_milestone_data_bulk, ap_p_milestone_data_bulk, assurance_milestone_data_bulk,\
-    get_all_project_names, get_quarter_stamp, grey_conditional_formatting
+    root_path, conditional_text, text_colours, background_colours
+from analysis.engine_functions import all_milestone_data_bulk, get_all_project_names, get_quarter_stamp, \
+    conditional_formatting
 
 def return_baseline_data_projects(project_name_list, data_key_list):
 
@@ -60,16 +60,7 @@ def return_baseline_data_projects(project_name_list, data_key_list):
         ws.cell(row=1, column=1, value='Key')
         ws.cell(row=1, column=2, value='Latest')
 
-        '''conditional formating'''
-        for column in list_columns:
-            for i, txt in enumerate(conditional_text):
-                text = text_colours[i]
-                fill = background_colours[i]
-                dxf = DifferentialStyle(font=text, fill=fill)
-                rule = Rule(type="containsText", operator="containsText", text=txt, dxf=dxf)
-                for_rule_formula = 'NOT(ISERROR(SEARCH("' + txt + '",' + column + '1)))'
-                rule.formula = [for_rule_formula]
-                ws.conditional_formatting.add(column + '1:' + column + '60', rule)
+    conditional_formatting(ws, list_columns, conditional_text, text_colours, background_colours, '1', '60')
 
     return wb
 

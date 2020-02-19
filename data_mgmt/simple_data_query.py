@@ -45,9 +45,7 @@ def return_data(project_name_list, data_key_list):
     '''quarter tag information'''
     ws.cell(row=1, column=1, value='Project')
 
-
     return wb
-
 
 '''data keys of interest'''
 key_list = ['BICC approval point',
