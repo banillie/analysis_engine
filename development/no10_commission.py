@@ -246,8 +246,8 @@ def return_data_metrics(project_name_list, data_key_list):
         ws.cell(row=1, column=1, value='Group')
         ws.cell(row=1, column=2, value='Projects')
         quarter_labels = get_quarter_stamp(list_of_masters_all)
-        for i, label in enumerate(quarter_labels):
-            ws.cell(row=1, column=i + 3, value=label)
+        for l, label in enumerate(quarter_labels):
+            ws.cell(row=1, column=l + 3, value=label)
 
         '''conditional formating'''
         for column in list_columns:
