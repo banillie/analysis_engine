@@ -48,18 +48,26 @@ def return_data(project_name_list, data_key_list):
     return wb
 
 '''data keys of interest'''
-key_list = ['BICC approval point',
+key_list = ['SRO Full Name',
+            'SRO Email',
+            'SRO Phone No.',
+            'PD Full Name',
+            'PD Email',
+            'PD Phone No.',
+            'Working Contact Name',
+            'Working Contact Email']
+
+list_columns = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'q', 's', 't', 'u', 'w']
+
+'''running prog - step one'''
+run_project_all = return_data(latest_quarter_project_names, key_list)
+
+'''step two'''
+run_project_all.save(root_path/'output/major_projects_contacts.xlsx')
+
+old_key_search_list = ['BICC approval point',
             'SRO Full Name',
             'SRO Email',
             'SRO Phone No.',
             'Brief project description (GMPP - brief descripton)',
             'Project End Date']
-
-list_columns = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'q', 's', 't', 'u', 'w']
-'''running prog - step one'''
-run_project_all = return_data(latest_quarter_project_names, key_list)
-
-
-
-'''step two'''
-run_project_all.save(root_path/'output/ties_data.xlsx')
