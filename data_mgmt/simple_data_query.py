@@ -1,4 +1,4 @@
-'''development code for returning multiple data key values (for one quarter) into one wb'''
+'''Returns latest project values for specified keys of interest into single sheet workbook'''
 
 from openpyxl import Workbook
 from analysis.data import list_of_masters_all, latest_quarter_project_names, root_path, conditional_text, \
