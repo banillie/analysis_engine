@@ -1,16 +1,17 @@
 '''Returns project values across multiple masters for specified keys of interest. Return for each key is provided
-on a separate wb
+on a separate wb. Code can handle both standard and project milestone keys, as well as project name lists across
+multiple quarters.
 
 There are two outputs.
 1) wb containing all values
 2) wb containing bl values only'''
 
-#TODO bl output specify which qrt bl data taken from (maybe another output). improve output for all projects in both functions. shortern conditional formatting names
+#TODO bl output specify which qrt bl data taken from (maybe another output). improve output for all projects in both functions. flag changes between quarters.
 
 from openpyxl import Workbook
 from analysis.data import list_of_masters_all, latest_quarter_project_names, root_path, gen_txt_list, \
     gen_txt_colours, gen_fill_colours, baseline_bc_stamp, list_column_ltrs, list_of_rag_keys, rag_txt_list_full, \
-    rag_fill_colours, rag_txt_colours, all_project_names
+    rag_fill_colours, rag_txt_colours, all_project_names, salmon_fill, midlands_rail_hub
 from analysis.engine_functions import all_milestone_data_bulk, conditional_formatting, get_quarter_stamp
 
 def return_data(project_name_list, data_key_list):
@@ -40,29 +41,49 @@ def return_data(project_name_list, data_key_list):
             ws.cell(row=2 + y, column=2, value=project_name)  # project name returned
 
             for x, master in enumerate(list_of_masters_all):
-                try:
-                    #standard keys
-                    if key in list_of_masters_all[x].data[project_name].keys():
-                        value = list_of_masters_all[x].data[project_name][key]
-                        ws.cell(row=2 + y, column=3 + x, value=value) #retuns value
-                        if value is None:
-                            ws.cell(row=2 + y, column=3 + x, value='missing data')
+                if project_name in master.projects:
+                    try:
+                        #standard keys
+                        if key in list_of_masters_all[x].data[project_name].keys():
+                            value = list_of_masters_all[x].data[project_name][key]
+                            print(key, value)
+                            ws.cell(row=2 + y, column=3 + x, value=value) #returns value
+                            if value is None:
+                                ws.cell(row=2 + y, column=3 + x, value='md')
 
-                    # milestone keys
-                    else:
-                        milestones = all_milestone_data_bulk([project_name], list_of_masters_all[x])
-                        value = tuple(milestones[project_name][key])[x]
-                        ws.cell(row=2 + y, column=3 + x, value=value)
-                        ws.cell(row=2 + y, column=3 + x).number_format = 'dd/mm/yy'
-                        if value is None:
-                            ws.cell(row=2 + y, column=3 + x, value='missing data')
+                            try: # checks for change against last quarter
+                                lst_value = list_of_masters_all[x + 1].data[project_name][key]
+                                if value != lst_value:
+                                    ws.cell(row=2 + y, column=3 + x).fill = salmon_fill
+                            except (KeyError, IndexError):
+                                pass
 
-                except (KeyError, IndexError):
-                    if project_name in list_of_masters_all[x].projects:
-                        #loop calculates if project was not reporting or data missing
-                        ws.cell(row=2 + y, column=3 + x, value='missing data')
-                    else:
-                        ws.cell(row=2 + y, column=3 + x, value='project not reporting')
+                        # milestone keys
+                        else:
+                            milestones = all_milestone_data_bulk([project_name], list_of_masters_all[x])
+                            value = tuple(milestones[project_name][key])[0]
+                            ws.cell(row=2 + y, column=3 + x, value=value)
+                            ws.cell(row=2 + y, column=3 + x).number_format = 'dd/mm/yy'
+                            if value is None:
+                                ws.cell(row=2 + y, column=3 + x, value='md')
+
+                            try:  # loop checks if value has changed since last quarter
+                                old_milestones = all_milestone_data_bulk([project_name], list_of_masters_all[x + 1])
+                                lst_value = tuple(old_milestones[project_name][key])[0]
+                                if value != lst_value:
+                                    ws.cell(row=2 + y, column=3 + x).fill = salmon_fill
+                            except (KeyError, IndexError):
+                                pass
+
+                    except KeyError:
+                        if project_name in master.projects:
+                            #loop calculates if project was not reporting or data missing
+                            ws.cell(row=2 + y, column=3 + x, value='knc')
+                        else:
+                            ws.cell(row=2 + y, column=3 + x, value='pnr')
+
+                else:
+                    ws.cell(row=2 + y, column=3 + x, value='pnr')
 
         '''quarter tag information'''
         ws.cell(row=1, column=1, value='Group')
@@ -107,47 +128,43 @@ def return_baseline_data(project_name_list, data_key_list):
             ws.cell(row=2 + y, column=1, value=group)
             ws.cell(row=2 + y, column=2, value=project_name)  # project name returned
 
-            try:
-                if key in list_of_masters_all[0].data[project_name].keys():
-                    # standard keys
-                    ws.cell(row=2 + y, column=3).value = list_of_masters_all[0].data[project_name][
-                        key]  # returns latest value
-                    for x in range(0, len(baseline_bc_stamp[project_name])):
-                        index = baseline_bc_stamp[project_name][x][2]
-                        try:
-                            value = list_of_masters_all[index].data[project_name][key]
-                            if value is None:
-                                ws.cell(row=2 + y, column=4 + x).value = 'missing data'
-                            else:
-                                ws.cell(row=2 + y, column=4 + x, value=value)
-                        except KeyError:
-                            ws.cell(row=2 + y, column=4 + x).value = 'key not collected'
-
-                else:
-                    # milestones keys
-                    milestones = all_milestone_data_bulk([project_name], list_of_masters_all[0])
+            if key in list_of_masters_all[0].data[project_name].keys():
+                # standard keys
+                ws.cell(row=2 + y, column=3).value = list_of_masters_all[0].data[project_name][
+                    key]  # returns latest value
+                for x in range(0, len(baseline_bc_stamp[project_name])):
+                    index = baseline_bc_stamp[project_name][x][2]
                     try:
-                        ws.cell(row=2 + y, column=3).value = tuple(milestones[project_name][key])[0]  # returns latest value
-                        ws.cell(row=2 + y, column=3).number_format = 'dd/mm/yy'
+                        value = list_of_masters_all[index].data[project_name][key]
+                        if value is None:
+                            ws.cell(row=2 + y, column=4 + x).value = 'md'
+                        else:
+                            ws.cell(row=2 + y, column=4 + x, value=value)
                     except KeyError:
-                        ws.cell(row=2 + y, column=3).value = 'missing data'
+                        ws.cell(row=2 + y, column=4 + x).value = 'knc'
 
-                    for x in range(0, len(baseline_bc_stamp[project_name])):
-                        #returns baselines
-                        index = baseline_bc_stamp[project_name][x][2]
-                        try:
-                            milestones = all_milestone_data_bulk([project_name], list_of_masters_all[index])
-                            value = tuple(milestones[project_name][key])[0]
-                            if value is None:
-                                ws.cell(row=2 + y, column=4 + x).value = 'missing data'
-                            else:
-                                ws.cell(row=2 + y, column=4 + x).value = value
-                                ws.cell(row=2 + y, column=4 + x).number_format = 'dd/mm/yy'
-                        except KeyError:
-                            ws.cell(row=2 + y, column=4 + x).value = 'project not reporting'
+            else:
+                # milestones keys
+                milestones = all_milestone_data_bulk([project_name], list_of_masters_all[0])
+                try:
+                    ws.cell(row=2 + y, column=3).value = tuple(milestones[project_name][key])[0]  # returns latest value
+                    ws.cell(row=2 + y, column=3).number_format = 'dd/mm/yy'
+                except KeyError:
+                    ws.cell(row=2 + y, column=3).value = 'md'
 
-            except KeyError:
-                pass
+                for x in range(0, len(baseline_bc_stamp[project_name])):
+                    #returns baselines
+                    index = baseline_bc_stamp[project_name][x][2]
+                    try:
+                        milestones = all_milestone_data_bulk([project_name], list_of_masters_all[index])
+                        value = tuple(milestones[project_name][key])[0]
+                        if value is None:
+                            ws.cell(row=2 + y, column=4 + x).value = 'md'
+                        else:
+                            ws.cell(row=2 + y, column=4 + x).value = value
+                            ws.cell(row=2 + y, column=4 + x).number_format = 'dd/mm/yy'
+                    except KeyError:
+                        ws.cell(row=2 + y, column=4 + x).value = 'pnr'
 
         ws.cell(row=1, column=1, value='Group')
         ws.cell(row=1, column=2, value='Project')
@@ -172,14 +189,14 @@ data_interest = ['VfM Category single entry', 'VfM Category lower range', 'VfM C
 
 '''Running the programme'''
 '''output one - all data'''
-run_standard = return_data(all_project_names, data_interest)
+run_standard = return_data([midlands_rail_hub], data_interest)
 '''output two - bl data'''
-run_baseline = return_baseline_data(all_project_names, data_interest)
+#run_baseline = return_baseline_data(latest_quarter_project_names, data_interest)
 
 
 '''Specify name of the output document here'''
 run_standard.save(root_path/'output/data_query_testing.xlsx')
-run_baseline.save(root_path/'output/data_query_testing_bl.xlsx')
+#run_baseline.save(root_path/'output/data_query_testing_bl.xlsx')
 
 '''old lists stored here for use in future'''
 old_entries = ['GMPP - IPA DCA', 'BICC approval point',
