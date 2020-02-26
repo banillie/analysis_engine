@@ -6,7 +6,7 @@ There are two outputs.
 1) wb containing all values
 2) wb containing bl values only'''
 
-#TODO bl output specify which qrt bl data taken from (maybe another output). improve output for all projects in both functions. flag changes between quarters.
+#TODO bl output specify which qrt bl data taken from (maybe another output). improve output for all projects in both functions.
 
 from openpyxl import Workbook
 from analysis.data import list_of_masters_all, latest_quarter_project_names, root_path, gen_txt_list, \
