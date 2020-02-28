@@ -6,12 +6,11 @@ There are two outputs.
 1) wb containing all values
 2) wb containing bl values only'''
 
-#TODO bl output specify which qrt bl data taken from (maybe another output). improve output for all projects in both functions.
 
 from openpyxl import Workbook
 from analysis.data import list_of_masters_all, latest_quarter_project_names, root_path, gen_txt_list, \
-    gen_txt_colours, gen_fill_colours, baseline_bc_stamp, list_column_ltrs, list_of_rag_keys, rag_txt_list_full, \
-    rag_fill_colours, rag_txt_colours, all_project_names, salmon_fill, midlands_rail_hub
+    gen_txt_colours, gen_fill_colours, list_column_ltrs, list_of_rag_keys, rag_txt_list_full, \
+    rag_fill_colours, rag_txt_colours, all_project_names, salmon_fill, bc_index
 from analysis.engine_functions import all_milestone_data_bulk, conditional_formatting, get_quarter_stamp
 
 def return_data(project_name_list, data_key_list):
@@ -46,7 +45,6 @@ def return_data(project_name_list, data_key_list):
                         #standard keys
                         if key in list_of_masters_all[x].data[project_name].keys():
                             value = list_of_masters_all[x].data[project_name][key]
-                            print(key, value)
                             ws.cell(row=2 + y, column=3 + x, value=value) #returns value
                             if value is None:
                                 ws.cell(row=2 + y, column=3 + x, value='md')
@@ -125,56 +123,42 @@ def return_baseline_data(project_name_list, data_key_list):
                     if project_name in master.projects:
                         group = list_of_masters_all[m].data[project_name]['DfT Group']
 
-            ws.cell(row=2 + y, column=1, value=group)
+            ws.cell(row=2 + y, column=1, value=group) # group info
             ws.cell(row=2 + y, column=2, value=project_name)  # project name returned
 
-            if key in list_of_masters_all[0].data[project_name].keys():
-                # standard keys
-                ws.cell(row=2 + y, column=3).value = list_of_masters_all[0].data[project_name][
-                    key]  # returns latest value
-                for x in range(0, len(baseline_bc_stamp[project_name])):
-                    index = baseline_bc_stamp[project_name][x][2]
-                    try:
-                        value = list_of_masters_all[index].data[project_name][key]
-                        if value is None:
-                            ws.cell(row=2 + y, column=4 + x).value = 'md'
-                        else:
-                            ws.cell(row=2 + y, column=4 + x, value=value)
-                    except KeyError:
-                        ws.cell(row=2 + y, column=4 + x).value = 'knc'
-
-            else:
-                # milestones keys
-                milestones = all_milestone_data_bulk([project_name], list_of_masters_all[0])
-                try:
-                    ws.cell(row=2 + y, column=3).value = tuple(milestones[project_name][key])[0]  # returns latest value
-                    ws.cell(row=2 + y, column=3).number_format = 'dd/mm/yy'
+            for x in range(0, len(bc_index[project_name])):
+                index = bc_index[project_name][x]
+                try: # standard keys
+                    value = list_of_masters_all[index].data[project_name][key]
+                    if value is None:
+                        ws.cell(row=2 + y, column=3 + x).value = 'md'
+                    else:
+                        ws.cell(row=2 + y, column=3 + x, value=value)
                 except KeyError:
-                    ws.cell(row=2 + y, column=3).value = 'md'
-
-                for x in range(0, len(baseline_bc_stamp[project_name])):
-                    #returns baselines
-                    index = baseline_bc_stamp[project_name][x][2]
-                    try:
+                    try: # milestone keys
                         milestones = all_milestone_data_bulk([project_name], list_of_masters_all[index])
                         value = tuple(milestones[project_name][key])[0]
                         if value is None:
-                            ws.cell(row=2 + y, column=4 + x).value = 'md'
+                            ws.cell(row=2 + y, column=3 + x).value = 'md'
                         else:
-                            ws.cell(row=2 + y, column=4 + x).value = value
-                            ws.cell(row=2 + y, column=4 + x).number_format = 'dd/mm/yy'
-                    except KeyError:
-                        ws.cell(row=2 + y, column=4 + x).value = 'pnr'
+                            ws.cell(row=2 + y, column=3 + x).value = value
+                            ws.cell(row=2 + y, column=3 + x).number_format = 'dd/mm/yy'
+                    except KeyError: # exception catches both standard and milestone keys
+                        ws.cell(row=2 + y, column=3 + x).value = 'knc'
+                except TypeError:
+                    ws.cell(row=2 + y, column=3 + x).value = 'pnr'
 
         ws.cell(row=1, column=1, value='Group')
         ws.cell(row=1, column=2, value='Project')
         ws.cell(row=1, column=3, value='Latest')
-        ws.cell(row=1, column=4, value='BL 1')
-        ws.cell(row=1, column=5, value='BL 2')
-        ws.cell(row=1, column=6, value='BL 3')
-        ws.cell(row=1, column=7, value='BL 4')
+        ws.cell(row=1, column=4, value='Last quarter')
+        ws.cell(row=1, column=5, value='BL 1')
+        ws.cell(row=1, column=6, value='BL 2')
+        ws.cell(row=1, column=7, value='BL 3')
+        ws.cell(row=1, column=8, value='BL 4')
+        ws.cell(row=1, column=9, value='BL 5')
 
-        list_columns = list_column_ltrs[2:8] # hard coded so not ideal
+        list_columns = list_column_ltrs[2:9] # hard coded so not ideal
 
         if key in list_of_rag_keys:
             conditional_formatting(ws, list_columns, rag_txt_list_full, rag_txt_colours, rag_fill_colours, '1', '60')
@@ -189,14 +173,13 @@ data_interest = ['VfM Category single entry', 'VfM Category lower range', 'VfM C
 
 '''Running the programme'''
 '''output one - all data'''
-run_standard = return_data([midlands_rail_hub], data_interest)
+run_standard = return_data(latest_quarter_project_names, data_interest)
 '''output two - bl data'''
-#run_baseline = return_baseline_data(latest_quarter_project_names, data_interest)
-
+run_baseline = return_baseline_data(all_project_names, data_interest)
 
 '''Specify name of the output document here'''
 run_standard.save(root_path/'output/data_query_testing.xlsx')
-#run_baseline.save(root_path/'output/data_query_testing_bl.xlsx')
+run_baseline.save(root_path/'output/data_query_testing_bl.xlsx')
 
 '''old lists stored here for use in future'''
 old_entries = ['GMPP - IPA DCA', 'BICC approval point',
