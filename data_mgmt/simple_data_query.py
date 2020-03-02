@@ -1,73 +1,121 @@
-'''Returns latest project values for specified keys of interest into single sheet workbook'''
+'''
+Returns list of project values for a single master for specified keys of interest. Return is contained within one wb.
+Code can handle both standard and project milestone keys, as well as project name lists across
+multiple quarters.
+
+There is one outputs.
+1) wb containing all values.
+
+Conditional formatting is placed in the files as follows:
+rag_rating colours
+missing data (md) = black grey
+project not reporting (pnr) = light grey
+key not collected (knc) = light blue grey
+'''
+
 
 from openpyxl import Workbook
-from analysis.data import list_of_masters_all, latest_quarter_project_names, root_path, conditional_text, \
-    text_colours, background_colours
+from analysis.data import list_of_masters_all, latest_quarter_project_names, root_path, gen_txt_list, \
+    gen_txt_colours, gen_fill_colours, list_column_ltrs, list_of_rag_keys, rag_txt_list_full, \
+    rag_fill_colours, rag_txt_colours, salmon_fill
 from analysis.engine_functions import all_milestone_data_bulk, conditional_formatting
 
-def return_data(project_name_list, data_key_list):
-
+def return_data(data_key_list):
+    '''
+    returns values of interest across multiple ws for baseline values only.
+    project_name_list: list of project names
+    data_key_list: list of data keys containing values of interest.
+    '''
     wb = Workbook()
     ws = wb.active
 
-    for i, project_name in enumerate(project_name_list):
-        '''list project names, groups and stage in ws'''
-        ws.cell(row=2 + i, column=1).value = project_name
-        for y, key in enumerate(data_key_list):
-            ws.cell(row=1, column=2+y, value=key) #returns key
+    '''list project names, groups and stage in ws'''
+    for y, project_name in enumerate(latest_quarter_project_names):
 
-            try:
-                #standard keys
-                if key in list_of_masters_all[0].data[project_name].keys():
-                    value = list_of_masters_all[0].data[project_name][key]
-                    ws.cell(row=2+i, column=2+y, value=value) #retuns value
-                    if value is None:
-                        ws.cell(row=2 + i, column=2 + y, value='missing data')
+        group = list_of_masters_all[0].data[project_name]['DfT Group']
 
-                # milestone keys
+        ws.cell(row=2 + y, column=1, value=group) # group info
+        ws.cell(row=2 + y, column=2, value=project_name)  # project name returned
+
+        for x, key in enumerate(data_key_list):
+            ws.cell(row=1, column=3 + x, value=key)
+            try: # standard keys
+                value = list_of_masters_all[0].data[project_name][key]
+                if value is None:
+                    ws.cell(row=2 + y, column=3 + x).value = 'md'
                 else:
+                    ws.cell(row=2 + y, column=3 + x, value=value)
+                try:  # checks for change against last quarter
+                    lst_value = list_of_masters_all[1].data[project_name][key]
+                    if value != lst_value:
+                        ws.cell(row=2 + y, column=3 + x).fill = salmon_fill
+                except (KeyError, IndexError):
+                    pass
+            except KeyError:
+                try: # milestone keys
                     milestones = all_milestone_data_bulk([project_name], list_of_masters_all[0])
                     value = tuple(milestones[project_name][key])[0]
-                    ws.cell(row=2 + i, column=2 + y, value=value)
-                    ws.cell(row=2 + i, column=2 + y).number_format = 'dd/mm/yy'
                     if value is None:
-                        ws.cell(row=2 + i, column=2 + y, value='missing data')
+                        ws.cell(row=2 + y, column=3 + x).value = 'md'
+                    else:
+                        ws.cell(row=2 + y, column=3 + x).value = value
+                        ws.cell(row=2 + y, column=3 + x).number_format = 'dd/mm/yy'
+                    try:  # loop checks if value has changed since last quarter
+                        old_milestones = all_milestone_data_bulk([project_name], list_of_masters_all[1])
+                        lst_value = tuple(old_milestones[project_name][key])[0]
+                        if value != lst_value:
+                            ws.cell(row=2 + y, column=3 + x).fill = salmon_fill
+                    except (KeyError, IndexError):
+                        pass
+                except KeyError: # exception catches both standard and milestone keys
+                    ws.cell(row=2 + y, column=3 + x).value = 'knc'
+                except TypeError:
+                    ws.cell(row=2 + y, column=3 + x).value = 'pnr'
 
-
-            except KeyError:
-                if project_name in list_of_masters_all[0].projects: #loop calculates if project was not reporting or data missing
-                    ws.cell(row=2+ i, column=2+y, value='missing data')
-                else:
-                    ws.cell(row=2+i, column=2+y, value='project not reporting')
-
-    conditional_formatting(ws, list_columns, conditional_text, text_colours, background_colours, '1', '60')
-
+    for z, key in enumerate(data_key_list):
+        if key in list_of_rag_keys:
+            print(key)
+            conditional_formatting(ws, [list_column_ltrs[z]], rag_txt_list_full, rag_txt_colours, rag_fill_colours,
+                                   '1', '60')
     '''quarter tag information'''
-    ws.cell(row=1, column=1, value='Project')
+    ws.cell(row=1, column=1, value='Group')
+    ws.cell(row=1, column=2, value='Projects')
+
+    conditional_formatting(ws, list_column_ltrs, gen_txt_list, gen_txt_colours, gen_fill_colours, '1', '60')
 
     return wb
 
-'''data keys of interest'''
-key_list = ['SRO Full Name',
-            'SRO Email',
-            'SRO Phone No.',
-            'PD Full Name',
-            'PD Email',
-            'PD Phone No.',
-            'Working Contact Name',
-            'Working Contact Email']
+'''data keys of interest. Place all keys of interest as stings in this list'''
+data_interest = ['VfM Category single entry',
+                 'VfM Category lower range',
+                 'VfM Category upper range',
+                 'SRO Benefits RAG',
+                 'Start of Operation',
+                 'Full Operations',
+                 'Project End Date']
 
-list_columns = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'q', 's', 't', 'u', 'w']
+'''Running the programme'''
 
-'''running prog - step one'''
-run_project_all = return_data(latest_quarter_project_names, key_list)
+'''output one - all data'''
+run_standard = return_data(data_interest)
 
-'''step two'''
-run_project_all.save(root_path/'output/major_projects_contacts.xlsx')
+'''Specify name of the output document here. See general guidance re saving output files'''
+run_standard.save(root_path/'output/data_query_test.xlsx')
 
-old_key_search_list = ['BICC approval point',
-            'SRO Full Name',
-            'SRO Email',
-            'SRO Phone No.',
-            'Brief project description (GMPP - brief descripton)',
-            'Project End Date']
+'''old lists stored here for use in future'''
+old_entries = ['GMPP - IPA DCA', 'BICC approval point',
+               'Brief project description (GMPP - brief descripton)',
+               'Delivery Narrative']
+
+vfm_analysis_list = ['Departmental DCA', 'Working Contact Name', 'Working Contact Email',
+                 'Brief project description (GMPP - brief descripton)',
+                 'Business Case & Version No.', 'BICC approval point',
+                 'NPV for all projects and NPV for programmes if available',
+                 'Initial Benefits Cost Ratio (BCR)', 'Adjusted Benefits Cost Ratio (BCR)',
+                 'VfM Category single entry', 'VfM Category lower range', 'VfM Category upper range',
+                 'Present Value Cost (PVC)', 'Present Value Benefit (PVB)', 'SRO Benefits RAG',
+                 'Benefits Narrative', 'Ben comparison with last quarters cost - narrative']
+
+ipa_ar_fields_1920 =  ['Department', '19-20 RDEL BL Total', '19-20 CDEL BL WLC',
+                 '19-20 RDEL Forecast Total', '19-20 CDEL Forecast Total WLC', 'Total BL',
+                 'GMPP - IPA ID Number']
