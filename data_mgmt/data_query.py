@@ -4,7 +4,14 @@ multiple quarters.
 
 There are two outputs.
 1) wb containing all values
-2) wb containing bl values only'''
+2) wb containing bl values only
+
+conditional formatting is placed in the files as follows:
+rag_rating colours
+missing data (md) = black grey
+project not reporting (pnr) = light grey
+key not collected (knc) = light blue grey
+'''
 
 
 from openpyxl import Workbook

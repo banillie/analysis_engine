@@ -1,4 +1,5 @@
-'''Changes key names contained in master data sets. Works across all masters'''
+'''Changes key names contained in master data workbooks. Works across all masters. Changes are highlighted with red
+text'''
 
 from openpyxl import load_workbook
 from datamaps.api import project_data_from_master
