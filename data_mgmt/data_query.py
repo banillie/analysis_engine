@@ -6,7 +6,7 @@ There are two outputs.
 1) wb containing all values
 2) wb containing bl values only
 
-conditional formatting is placed in the files as follows:
+Conditional formatting is placed in the files as follows:
 rag_rating colours
 missing data (md) = black grey
 project not reporting (pnr) = light grey
@@ -174,19 +174,32 @@ def return_baseline_data(project_name_list, data_key_list):
 
     return wb
 
-'''data keys of interest'''
-data_interest = ['VfM Category single entry', 'VfM Category lower range', 'VfM Category upper range',
-                 'SRO Benefits RAG', 'Start of Operation', 'Full Operations', 'Project End Date']
+'''data keys of interest. Place all keys of interest as stings in this list'''
+data_interest = ['VfM Category single entry',
+                 'VfM Category lower range',
+                 'VfM Category upper range',
+                 'SRO Benefits RAG',
+                 'Start of Operation',
+                 'Full Operations',
+                 'Project End Date']
 
 '''Running the programme'''
-'''output one - all data'''
-run_standard = return_data(latest_quarter_project_names, data_interest)
-'''output two - bl data'''
-run_baseline = return_baseline_data(all_project_names, data_interest)
 
-'''Specify name of the output document here'''
-run_standard.save(root_path/'output/data_query_testing.xlsx')
-run_baseline.save(root_path/'output/data_query_testing_bl.xlsx')
+'''output one - all data. 
+first variable = list of project names. There are two options. 1) latest_quarter_project_names 2) all_projects_names
+(which includes older projects that are not currently reporting. 
+second variable = data_interest. This name does not change. List compiled above'''
+run_standard = return_data(latest_quarter_project_names, data_interest)
+
+'''output two - bl data
+first variable = list of project names. There are two options. 1) latest_quarter_project_names 2) all_projects_names
+(which includes older projects that are not currently reporting. 
+second variable = data_interest. This name does not change. List compiled above'''
+run_baseline = return_baseline_data(latest_quarter_project_names, data_interest)
+
+'''Specify name of the output document here. See general guidance re saving output files'''
+run_standard.save(root_path/'output/data_query.xlsx')
+run_baseline.save(root_path/'output/data_query_bl.xlsx')
 
 '''old lists stored here for use in future'''
 old_entries = ['GMPP - IPA DCA', 'BICC approval point',
