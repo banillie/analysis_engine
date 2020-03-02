@@ -57,8 +57,8 @@ def create_master(gmpp_wb, master_data):
 
     return gmpp_wb
 
-latest_dm = load_workbook(root_path/'input/gmpp_datamap_master_q3_1920.xlsx')
+master_dm = load_workbook(root_path/'input/gmpp_datamap_master_q3_1920.xlsx')
 
-run = create_master(latest_dm, q3_1920)
+run = create_master(master_dm, q3_1920)
 
-run.save(root_path/'output/hs2_tru_gmpp_dataset_q3_1920.xlsx')
+run.save(root_path/'output/gmpp_dataset_q3_1920.xlsx')
