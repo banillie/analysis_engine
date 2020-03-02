@@ -74,9 +74,8 @@ def return_data(data_key_list):
 
     for z, key in enumerate(data_key_list):
         if key in list_of_rag_keys:
-            print(key)
-            conditional_formatting(ws, [list_column_ltrs[z]], rag_txt_list_full, rag_txt_colours, rag_fill_colours,
-                                   '1', '60')
+            conditional_formatting(ws, [list_column_ltrs[z+2]], rag_txt_list_full, rag_txt_colours, rag_fill_colours,
+                                   '1', '60') # plus 2 in column ltrs as values start being placed in at col 2.
     '''quarter tag information'''
     ws.cell(row=1, column=1, value='Group')
     ws.cell(row=1, column=2, value='Projects')
