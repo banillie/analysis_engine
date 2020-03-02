@@ -2,18 +2,19 @@
 
 This programme creates a master spreadsheet for commissioning templates.
 
-Documents required to run the programme are set out below. The latest versions of these should be taken from TiME
-and saved onto laptops in the file paths at the bottom of the programme.
+Documents required to run the programme are set out below. Make sure you are using the latest version of these
+files.
 
 Documents required are:
-1) the internal commission datamap (make sure you have the latest/final version).
-2) Master data commission file.
-3) last quarter DfT_master spreadsheet.
+1) The internal commission datamap in excel file format. This is the dm with all keys necessary for master to
+templates Datamap command.
+2) Master data commission file. See note below
+3) last quarter DfT_master spreadsheet. See note below.
 
 Note that 2 and 3 need to be separate because they may have different data, if a project has changed the date it
-reported after the DL for providing quarter data.
+reported after the DL for providing quarter data, it should go in the master commission file.
 
-In this programme masters uploaded using the datamaps api rather than via the analysis.data file. This allows more
+Note In this programme masters uploaded using the datamaps api rather than via the analysis.data file. This allows more
 flexibility around which masters are being used. Which is useful for handling the master data commission file.
 
 '''
@@ -371,15 +372,17 @@ def add_combine_figures(q_data, string_list):
 
     return combined_string
 
+
+master_dm = load_workbook(root_path/'input/commission_master_dm.xlsx')
+
 commission_master = project_data_from_master(root_path/'core_data/master_4_2019_commission_initial.xlsx', 4, 2019)
 
-q3_1920 = project_data_from_master(root_path/'core_data/master_3_2019.xlsx', 3, 2019)
+latest_quarter_master = project_data_from_master(root_path/'core_data/master_3_2019.xlsx', 3, 2019)
 
-master_dm = load_workbook(root_path/'core_data/master_dm.xlsx')
 
 '''compile list of project names. This step is necessary to remove projects that finished reporting last quarter'''
-project_name_list_commission = [x for x in commission_master.projects if x in q3_1920.projects]
+project_name_list_commission = [x for x in commission_master.projects if x in latest_quarter_master.projects]
 
-run = create_master(master_dm, project_name_list_commission, commission_master, q2_1920)
+run = create_master(master_dm, project_name_list_commission, commission_master, latest_quarter_master)
 
-run.save(root_path/'core_data/Q4_1920_commission_data_final.xlsx')
+run.save(root_path/'output/Q4_1920_commission_data_final.xlsx')
