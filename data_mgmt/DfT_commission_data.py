@@ -20,7 +20,7 @@ flexibility around which masters are being used. Which is useful for handling th
 
 from openpyxl import load_workbook
 from openpyxl.styles import Color, PatternFill, Font, Border
-#from analysis.data import q1_1920
+from analysis.data import root_path
 from datamaps.api import project_data_from_master
 
 
@@ -371,20 +371,15 @@ def add_combine_figures(q_data, string_list):
 
     return combined_string
 
-commission_master = project_data_from_master('C:\\Users\\Standalone\\general\\masters folder\\commission\\'
-                                             'master_3_2019_commission_inital.xlsx', 2, 2019)
+commission_master = project_data_from_master(root_path/'core_data/master_4_2019_commission_initial.xlsx', 4, 2019)
 
-q2_1920 = project_data_from_master('C:\\Users\\Standalone\\general\\core_data\\master_2_2019.xlsx', 2, 2019)
+q3_1920 = project_data_from_master(root_path/'core_data/master_3_2019.xlsx', 3, 2019)
 
-latest_dm = load_workbook("C:\\Users\\Standalone\\general\\masters folder\\commission\\Q3_1920_commission_master"
-                          ".xlsx")
+master_dm = load_workbook(root_path/'core_data/master_dm.xlsx')
 
-# Hack. Done in rush. Needs tidying.
-to_remove = [x for x in q2_1920.projects if x not in commission_master.projects]
-project_name_list = q2_1920.projects
-for x in to_remove:
-    project_name_list.remove(x)
+'''compile list of project names. This step is necessary to remove projects that finished reporting last quarter'''
+project_name_list_commission = [x for x in commission_master.projects if x in q3_1920.projects]
 
-run = create_master(latest_dm, project_name_list, commission_master, q2_1920)
+run = create_master(master_dm, project_name_list_commission, commission_master, q2_1920)
 
-run.save("C:\\Users\\Standalone\\general\\masters folder\\commission\\Q3_1920_commission_data_final.xlsx")
+run.save(root_path/'core_data/Q4_1920_commission_data_final.xlsx')
