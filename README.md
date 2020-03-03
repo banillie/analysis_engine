@@ -1,6 +1,6 @@
 # analysis_engine 
 
-## About analysis_engine :zap:
+## About analysis_engine :zap: :rocket: :factory:
 Collection of code to run portfolio management reporting processes in the Department for Transport. 
 
 `analysis_engine` is still in development, although robustness is improving.
@@ -72,13 +72,18 @@ requirements.txt`.
 This should complete your local environment set up. 
 
 Note this process creates the necessary framework for `analysis_engine` to run correctly. All `analysis_engine` code is held remotely
-on Github at [analysis_engine](https://github.com/banillie/analysis_engine). This code is underpinned by having the correct
-dependencies in your local environment. See the requirements.txt file for a list of these dependencies. Key dependencies 
-are Datamaps, Openpyxl and a library of code which handles the transformation of master data into a synthetic data base. 
-This code is held here [projectlibrary](https://github.com/banillie/projectlibrary). Note that in `projectlibrary`
-`analysis` `data.py` the master data section shows the file paths used to convert master data into python dictionaries.  
+on Github. This code is underpinned by having the correct dependencies in your local environment. See the requirements.txt 
+file for a list of these dependencies. Key dependencies are Datamaps, Openpyxl and a library of code which handles the 
+transformation of master data into a synthetic data base. This code is held here [projectlibrary](https://github.com/banillie/projectlibrary). 
+Note that in `projectlibrary` `analysis` `data.py` the master data section shows the file paths used to convert master data into python dictionaries.  
 
 ## Maintaining virtual environment
 
+`analysis_engine` is in development and updated regularly to improve performance and add new code. Each time it is used 
+locally the user should do the following to ensure that they have the most up-to-date code. 
 
+1. `VCS` `Git` `Pull`. This will pull down all the latest code the remote repository onto your local machine. If necessary
+the user should accept merging with maters. 
 
+2. In the terminal type `pip install -U -r requirements.txt` This will update your virtual environment so that you have 
+all the latest dependencies. 
