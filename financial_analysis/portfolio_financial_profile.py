@@ -2,21 +2,16 @@
 Programme that creates a financial profiles for a group of projects i.e. can produce the portfolio profile or a chosen
 set of projects profile.
 
-Output document is an excel wb with three tabs containing the groups'latest quarter', 'last quarter', and
-'baseline quarter' financial profiles
+Output document is an excel wb with four tabs containing the aggregate financial profile for 'latest quarter',
+'last quarter', 'baseline 1' (i.e. nearest baseline of approvals) 'baseline 2' (second nearest baselines).
 
-Just data handling for now. No graphics produced. To be done manually.
+Just data handling for now. No graphics produced. Graph needs to be done manually.
 
 See instructions below.
 
-Note: all master data is taken from the data file. Make sure this is up to date and that all relevant data is in
-the import statement.
 '''
 
 from openpyxl import Workbook
-from openpyxl.chart import LineChart, Reference
-from openpyxl.chart.text import RichText
-from openpyxl.drawing.text import Paragraph, ParagraphProperties, CharacterProperties, Font
 from analysis.data import cost_list, income_list, year_list, latest_cost_profiles, last_cost_profiles, \
     baseline_1_cost_profiles, baseline_2_cost_profiles, latest_income_profiles, \
     last_income_profiles, baseline_1_income_profiles, baseline_2_income_profiles, dont_double_count, root_path, \
@@ -108,15 +103,8 @@ def place_in_excel(project_name_list):
 
 ''' RUNNING PROGRAMME'''
 
-'''ONE. set project name list options - this is where the group of projects is specified '''
-'''option 1 - all '''
-#latest_quarter_projects = q2_1920.projects
-'''option two - group of projects. use filter_project_group function'''
-#project_group_list = filter_project_group(q2_1920, 'HSMRPG')
-'''option three - single project'''
-#one_project_list = []
-
-'''TWO. place the variable containing the group of interest into the place_in_excel function and specify file path
-to where output wb should be save'''
+'''To run the programme place list of project names into function. 
+NOTE: Default option is list of all current projects in portfolio. In majority of cases uses should just run the 
+programme'''
 output = place_in_excel(latest_quarter_project_names)
-output.save(root_path/'output/portfolio_financial_profiles.xlsx')
+output.save(root_path/'output/portfolio_financial_profile_q3_1920.xlsx')
