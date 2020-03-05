@@ -16,7 +16,7 @@ See instructions below.
 
 from openpyxl import Workbook
 from analysis.data import red_text, wlc_key, latest_cost_profiles, last_cost_profiles, \
-    baseline_cost_profiles, latest_quarter_project_names, list_of_masters_all, fin_bc_index, root_path
+    baseline_1_cost_profiles, latest_quarter_project_names, list_of_masters_all, fin_bc_index, root_path
 
 def place_complex_comparision_excel(master_data_latest, master_data_last, master_data_baseline):
     '''
@@ -190,9 +190,9 @@ baseline_wlc = get_wlc(latest_quarter_project_names, wlc_key, 2)
 
 '''creating excel outputs'''
 output_one = place_complex_comparision_excel(latest_wlc, last_wlc, baseline_wlc)
-output_two = place_complex_comparision_excel(latest_cost_profiles, last_cost_profiles, baseline_cost_profiles)
+output_two = place_complex_comparision_excel(latest_cost_profiles, last_cost_profiles, baseline_1_cost_profiles)
 output_three = place_standard_comparision_excel(latest_wlc, baseline_wlc)
-output_four = place_standard_comparision_excel(latest_cost_profiles, baseline_cost_profiles)
+output_four = place_standard_comparision_excel(latest_cost_profiles, baseline_1_cost_profiles)
 
 '''INSTRUCTIONS FOR RUNNING PROGRAMME'''
 
