@@ -104,7 +104,7 @@ def place_in_excel(project_name_list):
 ''' RUNNING PROGRAMME'''
 
 '''To run the programme place list of project names into function. 
-NOTE: Default option is list of all current projects in portfolio. In majority of cases uses should just run the 
-programme'''
+NOTE: Default option is list of all current projects in portfolio. In majority of cases user should just run the 
+default programme'''
 output = place_in_excel(latest_quarter_project_names)
 output.save(root_path/'output/portfolio_financial_profile_q3_1920.xlsx')

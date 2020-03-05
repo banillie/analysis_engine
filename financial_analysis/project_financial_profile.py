@@ -9,9 +9,6 @@ iii) baseline (nearest).
 
 See instructions below.
 
-Note: all master data is taken from the data file. Make sure this is up to date and that all relevant data is in
-the import statement.
-
 '''
 
 from openpyxl import Workbook
@@ -19,8 +16,10 @@ from openpyxl.chart import LineChart, Reference
 from openpyxl.chart.text import RichText
 from openpyxl.drawing.text import Paragraph, ParagraphProperties, CharacterProperties, Font
 from analysis.data import cost_list, income_list, year_list, baseline_bc_stamp, latest_cost_profiles, last_cost_profiles, \
-    baseline_cost_profiles, latest_income_profiles, last_income_profiles, baseline_income_profiles, \
+    baseline_1_cost_profiles, latest_income_profiles, last_income_profiles, baseline_1_income_profiles, \
     latest_quarter_project_names, root_path
+
+#TODO update code so it includes older baseline profiles as is now the case for the portfolio profile.
 
 def place_in_excel_one_wb(project_name_list):
 
@@ -38,7 +37,7 @@ def place_in_excel_one_wb(project_name_list):
         ''''places in raw/reported cost data'''
         for i, year in enumerate(year_list):
             for x, type in enumerate(cost_list):
-                ws.cell(row=i+3, column=x+2, value=baseline_cost_profiles[project_name][year + type])
+                ws.cell(row=i+3, column=x+2, value=baseline_1_cost_profiles[project_name][year + type])
                 try:
                     ws.cell(row=i+3, column=x+6, value=last_cost_profiles[project_name][year + type])
                 except KeyError:
@@ -74,7 +73,7 @@ def place_in_excel_one_wb(project_name_list):
         '''Total cost profile. starting with data placement'''
         for i, year in enumerate(year_list):
             for x, type in enumerate([' total']):
-                ws.cell(row=i+16, column=x+2, value=baseline_cost_profiles[project_name][year + type])
+                ws.cell(row=i+16, column=x+2, value=baseline_1_cost_profiles[project_name][year + type])
                 ws.cell(row=i+16, column=x+3, value=last_cost_profiles[project_name][year + type])
                 ws.cell(row=i+16, column=x+4, value=latest_cost_profiles[project_name][year + type])
 
@@ -135,7 +134,7 @@ def place_in_excel_one_wb(project_name_list):
         if total_income > 0:
             for i, year in enumerate(year_list):
                 for type in income_list:
-                    ws.cell(row=i + 32, column=2, value=baseline_income_profiles[project_name][year + type])
+                    ws.cell(row=i + 32, column=2, value=baseline_1_income_profiles[project_name][year + type])
                     ws.cell(row=i + 32, column=3, value=last_income_profiles[project_name][year + type])
                     ws.cell(row=i + 32, column=4, value=latest_income_profiles[project_name][year + type])
 
@@ -193,17 +192,8 @@ def place_in_excel_one_wb(project_name_list):
 
 '''RUNNING PROGRAMME'''
 
-'''ONE. project name list options - create group(s) of interest. latest_quarter_projects is created by placing 
-.projects after quarter data variable e.g. q2_1920.projects'''
-# '''option 1 - all '''
-# latest_quarter_projects = q2_1920.projects
-# '''option two - group of projects. Use filter_project_group function'''
-# project_group_list = filter_project_group(q2_1920, 'HSMRPG')
-# '''option three - single project'''
-# one_project_list = []
-
-'''TWO. commands to make programme run. 
-1. Place the project name list of interest in to the place_in_excel_one_wb
-2. Provide the file path to where you want the output file to be saved'''
+'''To run the programme place list of project names into function. 
+NOTE: Default option is list of all current projects in portfolio. In majority of cases user should just run the 
+default programme'''
 output = place_in_excel_one_wb(latest_quarter_project_names)
 output.save(root_path/'output/project_financial_profiles_q3_1920.xlsx')
