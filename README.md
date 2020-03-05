@@ -79,11 +79,12 @@ Note that in `projectlibrary` `analysis` `data.py` the master data section shows
 
 ## Maintaining virtual environment
 
-`analysis_engine` is in development and updated regularly to improve performance and add new code. Each time it is used 
-locally the user should do the following to ensure that they have the most up-to-date code. 
+`analysis_engine` is in development and updated regularly to improve performance and add new code. Each time it is used on
+ a local machine the user should do the following to ensure that they have the most up-to-date code. 
 
-1. `VCS` `Git` `Pull`. This will pull down all the latest code the remote repository onto your local machine. If necessary
-the user should accept merging with maters. 
+1. `VCS` `Git` `Pull`. This will pull down all the latest code from the remote repository onto your local machine. If necessary
+the user should accept merging with the master.
 
 2. In the terminal type `pip install -U -r requirements.txt` This will update your virtual environment so that you have 
 all the latest dependencies. 
+
