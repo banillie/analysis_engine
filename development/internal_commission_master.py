@@ -2,9 +2,10 @@
 the front of the keys. This will then be used for structuring overall commission master and migrating relevant
 quarter data into the commission master
 
-in development'''
+in development. not working, but keeping as could be useful'''
 
 from openpyxl import load_workbook, Workbook
+from analysis.data import list_of_masters_all, root_path
 
 def get_key_names(workbook):
     key_list = []
@@ -25,11 +26,6 @@ def get_key_names(workbook):
 
     return wb
 
+run = get_key_names(list_of_masters_all[0])
 
-master = load_workbook(
-        'C:\\Users\\Standalone\\general\\masters folder\\core_data\\master_1_2019_wip_(25_7_19).xlsx')
-
-test = get_key_names(master)
-
-test.save(
-    'C:\\Users\\Standalone\\general\\lst_quarter_keys.xlsx')
+run.save(root_path/'output/keys_with_lst_quarter.xlsx')
