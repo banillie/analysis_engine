@@ -16,6 +16,8 @@ Instructions:
 
 Note: all master data is taken from the data file. Make sure this is up to date and that all relevant data is in
 the import statement, and that bicc_date is correct.
+
+TODO: refactor
 '''
 
 from openpyxl import load_workbook
