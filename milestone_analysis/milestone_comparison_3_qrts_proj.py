@@ -12,7 +12,7 @@ the import statement.
 
 '''
 
-#TODO solve problem re filtering in excle when values have + sign in front of the them
+#TODO solve problem re filtering in excel when values have + sign in front of the them
 
 from openpyxl import Workbook
 from analysis.engine_functions import all_milestone_data_bulk, ap_p_milestone_data_bulk, assurance_milestone_data_bulk, \
@@ -58,6 +58,7 @@ def put_into_wb_all_single(function):
             try:
                 milestone_date = tuple(p_current_milestones[project_name][milestone])[0]
                 ws.cell(row=row_num + i, column=3).value = milestone_date
+                ws.cell(row=row_num + i, column=3).number_format = 'dd/mm/yy'
             except KeyError:
                 ws.cell(row=row_num + i, column=3).value = 0
 
@@ -119,8 +120,8 @@ the import statement.'''
 ''' ONE. set list of projects to be included in output'''
 
 '''option two - group of projects. use filter_project_group function'''
-latest_quarter_project_names = [manchester_north_west_quad]
+#latest_quarter_project_names = [manchester_north_west_quad]
 
 
 output = put_into_wb_all_single(all_milestone_data_bulk)
-output.save(root_path/'output/milestone_movement_q3_1920_MNWQ.xlsx')
+output.save(root_path/'output/milestone_movement_q3_1920.xlsx')
