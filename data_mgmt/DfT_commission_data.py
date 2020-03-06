@@ -11,11 +11,11 @@ templates Datamap command.
 2) Master data commission file. See note below
 3) last quarter DfT_master spreadsheet. See note below.
 
-Note that 2 and 3 need to be separate because they may have different data, if a project has changed the date it
+Note that 2 and 3 need to be separate because they may have different data, if a project has changed the data it
 reported after the DL for providing quarter data, it should go in the master commission file.
 
 Note In this programme masters uploaded using the datamaps api rather than via the analysis.data file. This allows more
-flexibility around which masters are being used. Which is useful for handling the master data commission file.
+flexibility around which masters are being used, which is useful for handling the master data commission file.
 
 '''
 
