@@ -1,5 +1,9 @@
 '''
-some new code to create costs v schedule graph
+Creates costs v schedule graph.
+
+Code still in development but working.
+
+Follow instructions at end.
 '''
 
 from analysis.data import list_of_masters_all, bc_index, latest_quarter_project_names, financial_analysis_masters_list, \
@@ -248,8 +252,22 @@ def calculate_schedule_change_full_check(project_name, ws, x):
 
 current_milestones_all = all_milestone_data_bulk(latest_quarter_project_names, list_of_masters_all[0])
 
-project_list = [south_west_route_capacity, gwrm, manchester_north_west_quad, a66, hs2_1, hs2_2a, hs2_2b, \
-    ox_cam_expressway, cvs, a428, ist, east_coast_mainline]
+filtered_project_list = [south_west_route_capacity,
+                         gwrm,
+                         manchester_north_west_quad,
+                         a66,
+                         hs2_1,
+                         hs2_2a,
+                         hs2_2b,
+                         ox_cam_expressway,
+                         cvs,
+                         a428,
+                         ist,
+                         east_coast_mainline]
 
-run = cost_v_schedule_chart(project_list)
-run.save(root_path/'output/cost_v_schedule_filtered.xlsx')
+'''INSTRUCTIONS
+
+Enter project list variable into function. Recommend firstly doing so for all projects (e.g. latest_quarter_project
+_names) to identify projects of interest and then placing those projects into the filtered_project_list above '''
+run = cost_v_schedule_chart(latest_quarter_project_names)
+run.save(root_path/'output/cost_v_schedule_unfiltered.xlsx')
