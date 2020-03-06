@@ -1,12 +1,17 @@
 '''
-Programme for creating the gmpp address reference for gmpp master data. might be useful for the future.
+Creates the 'address reference' used by IPA for gmpp reporting from the DfT internal cell_reference and template_
+sheet.
+
+Output goes into wb.
+
+probably throw away code
 '''
 
 from datamaps.api import project_data_from_master
 from openpyxl import Workbook
+from analysis.data import root_path
 
-gmpp_dm = project_data_from_master('C:\\Users\\Standalone\\general\\masters folder\\gmpp_reporting\\'
-                                   'gmpp_datamaps\\gmpp_datamap_q2_1920.xlsx', 2, 2019)
+gmpp_dm = project_data_from_master(root_path/'input/gmpp_master_dm.xlsx', 2, 2019)
 
 def create_address(dm):
     a = list(dm.data['template_sheet'].values())
@@ -28,4 +33,4 @@ def create_address(dm):
 
 run = create_address(gmpp_dm)
 
-run.save('C:\\Users\\Standalone\\general\\masters folder\\gmpp_reporting\\gmpp_datamaps\\gmpp_data_q2_1920.xlsx')
+run.save(root_path/'output/test.xlsx')
