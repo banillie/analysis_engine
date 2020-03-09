@@ -1,7 +1,6 @@
 '''
 THIS PROGRAMME IS NOT WORKING AND MAY NOW BE DEFUNCT AS WE NO LONGER COLLECT BICC DATES FROM PROJECTS.
 
-
 This programme collects data from the document created by the 'BICC_dates_from_master' programme, typically
 should be titled '{quarter_info}_bicc_dates_doc' and inserts any manual edits to reported bicc dates
 into the quarter master data document.
