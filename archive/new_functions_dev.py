@@ -1,3 +1,5 @@
+'''archiving... can probably delete. think all code has been intergrated into analysis_engine as necessary'''
+
 from analysis.data import latest_quarter_projects, list_of_masters_all, latest_cost_profiles, cost_list, year_list
 
 
