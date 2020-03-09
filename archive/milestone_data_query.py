@@ -1,4 +1,5 @@
 '''
+Archived as handling of milestone data is now done in latest data query programmes.
 
 Programme for querying and returning milestone data from master data set.
 
