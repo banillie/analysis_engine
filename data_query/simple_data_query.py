@@ -85,10 +85,16 @@ def return_data(data_key_list):
     return wb
 
 '''data keys of interest. Place all keys of interest as stings in this list'''
-data_interest = ['VfM Category single entry',
+data_interest = ['IPDC approval point',
+                 'Total Forecast',
+                 'VfM Category single entry',
                  'VfM Category lower range',
                  'VfM Category upper range',
-                 'SRO Benefits RAG',
+                 'Present Value Cost (PVC)',
+                 'Present Value Benefit (PVB)',
+                 'Initial Benefits Cost Ratio (BCR)',
+                 'Adjusted Benefits Cost Ratio (BCR)',
+                 'Start of Construction/build',
                  'Start of Operation',
                  'Full Operations',
                  'Project End Date']
@@ -99,7 +105,7 @@ data_interest = ['VfM Category single entry',
 run_standard = return_data(data_interest)
 
 '''Specify name of the output document here. See general guidance re saving output files'''
-run_standard.save(root_path/'output/data_query_test.xlsx')
+run_standard.save(root_path/'output/su_data_query.xlsx')
 
 '''old lists stored here for use in future'''
 old_entries = ['GMPP - IPA DCA', 'BICC approval point',
