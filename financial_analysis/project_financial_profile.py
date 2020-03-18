@@ -16,12 +16,13 @@ from openpyxl.chart import LineChart, Reference
 from openpyxl.chart.text import RichText
 from openpyxl.drawing.text import Paragraph, ParagraphProperties, CharacterProperties, Font
 from analysis.data import cost_list, income_list, year_list, baseline_bc_stamp, latest_cost_profiles, last_cost_profiles, \
-    baseline_1_cost_profiles, latest_income_profiles, last_income_profiles, baseline_1_income_profiles, \
-    latest_quarter_project_names, root_path
+    baseline_1_cost_profiles, latest_income_profiles, last_income_profiles, baseline_1_income_profiles, root_path
 
 #TODO update code so it includes older baseline profiles as is now the case for the portfolio profile.
 
-def place_in_excel_one_wb(project_name_list):
+def place_in_excel_one_wb():
+
+    project_name_list = list(latest_cost_profiles.keys())
 
     wb = Workbook()
 
@@ -192,8 +193,15 @@ def place_in_excel_one_wb(project_name_list):
 
 '''RUNNING PROGRAMME'''
 
-'''To run the programme place list of project names into function. 
-NOTE: Default option is list of all current projects in portfolio. In majority of cases user should just run the 
-default programme'''
-output = place_in_excel_one_wb(latest_quarter_project_names)
-output.save(root_path/'output/project_financial_profiles_q3_1920.xlsx')
+'''
+Only one part of programme is to be amended each quarter. place which ever quarter information being produced at 
+end of output file name e.g. q4_1920. Note make sure file ends with .xlsx format
+
+Note when code completes it may state:
+UserWarning: Title is more than 31 characters. Some applications may not be able to read the file 
+warnings.warn("Title is more than 31 characters. Some applications may not be able to read the file"). 
+However, you can ignore and open the file as usual.
+'''
+
+output = place_in_excel_one_wb()
+output.save(root_path/'output/ind_project_financial_profiles_q4_1920.xlsx')
