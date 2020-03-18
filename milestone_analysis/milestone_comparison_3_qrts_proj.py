@@ -17,8 +17,7 @@ the import statement.
 from openpyxl import Workbook
 from analysis.engine_functions import all_milestone_data_bulk, ap_p_milestone_data_bulk, assurance_milestone_data_bulk, \
     project_time_difference, filter_project_group
-from analysis.data import list_of_masters_all, bc_index, baseline_bc_stamp, latest_quarter_project_names, root_path, \
-    manchester_north_west_quad
+from analysis.data import list_of_masters_all, bc_index, baseline_bc_stamp, root_path
 
 
 def put_into_wb_all_single(function):
@@ -38,15 +37,15 @@ def put_into_wb_all_single(function):
     '''
 
     '''get all milestone data'''
-    p_current_milestones = function(latest_quarter_project_names, list_of_masters_all[0])
-    p_last_milestones = function(latest_quarter_project_names, list_of_masters_all[1])
+    p_current_milestones = function(list_of_masters_all[0].projects, list_of_masters_all[0])
+    p_last_milestones = function(list_of_masters_all[1].projects, list_of_masters_all[1])
 
     '''calculate time current and last quarter'''
     first_diff_data = project_time_difference(p_current_milestones, p_last_milestones)
 
     wb = Workbook()
 
-    for x, project_name in enumerate(latest_quarter_project_names):
+    for x, project_name in enumerate(list_of_masters_all[0].projects):
         '''worksheet is created for each project'''
         ws = wb.create_sheet(project_name, x)  # creating worksheets
         ws.title = project_name  # title of worksheet
@@ -114,14 +113,15 @@ def put_into_wb_all_single(function):
 
 ''' RUNNING THE PROGRAMME'''
 
-'''Note: all master data is taken from the data file. Make sure this is up to date and that all relevant data is in 
-the import statement.'''
+'''
+Only one part of programme is to be amended each quarter. place which ever quarter information being produced at 
+end of output file name e.g. q4_1920. Note make sure file ends with .xlsx format
 
-''' ONE. set list of projects to be included in output'''
-
-'''option two - group of projects. use filter_project_group function'''
-#latest_quarter_project_names = [manchester_north_west_quad]
-
+Note when code completes it may state:
+UserWarning: Title is more than 31 characters. Some applications may not be able to read the file 
+warnings.warn("Title is more than 31 characters. Some applications may not be able to read the file"). 
+However, you can ignore and open the file as usual.
+'''
 
 output = put_into_wb_all_single(all_milestone_data_bulk)
-output.save(root_path/'output/milestone_movement_q3_1920.xlsx')
+output.save(root_path/'output/milestone_movement_q4_1920.xlsx')
