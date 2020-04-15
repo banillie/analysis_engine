@@ -15,7 +15,7 @@ IMPORTANT to note:
 '''
 
 from openpyxl import load_workbook
-from analysis.data import q3_1920, root_path, hs2_programme, tru
+from analysis.data import q4_1920, root_path
 from analysis.engine_functions import filter_gmpp
 
 
@@ -28,7 +28,7 @@ def create_master(gmpp_wb, master_data):
     # this section filters out only gmpp project names. Subsequent list is then used to populate ws
     gmpp_project_names = filter_gmpp(master_data)
 
-    for i, project_name in enumerate([hs2_programme, tru]):
+    for i, project_name in enumerate(gmpp_project_names):
         print(project_name)
         ws.cell(row=1, column=6+i).value = project_name  # place project names in file
 
@@ -51,14 +51,14 @@ def create_master(gmpp_wb, master_data):
                         except KeyError:
                             keys_not_found.append(key)
 
-        #This is where loop to amend Hs2 data could be placed
+        # This is where loop to amend Hs2 data could be placed
 
     print(keys_not_found)
 
     return gmpp_wb
 
-master_dm = load_workbook(root_path/'input/gmpp_datamap_master_q3_1920.xlsx')
+master_dm = load_workbook(root_path/'input/gmpp_master_dm.xlsx')
 
-run = create_master(master_dm, q3_1920)
+run = create_master(master_dm, q4_1920)
 
-run.save(root_path/'output/gmpp_dataset_q3_1920.xlsx')
+run.save(root_path/'output/dft_gmpp_dataset_q4_1920.xlsx')
