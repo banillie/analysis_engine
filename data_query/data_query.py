@@ -175,10 +175,10 @@ def return_baseline_data(project_name_list, data_key_list):
 
     return wb
 
+'''Running the programme'''
+
 '''data keys of interest. Place all keys of interest as stings in this list'''
 data_interest = ['Total Forecast']
-
-'''Running the programme'''
 
 '''output one - all data. 
 first variable = list of project names. There are two options. 1) latest_quarter_project_names 2) all_projects_names
