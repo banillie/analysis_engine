@@ -15,9 +15,9 @@ key not collected (knc) = light blue grey
 
 
 from openpyxl import Workbook
-from analysis.data import list_of_masters_all, latest_quarter_project_names, root_path, gen_txt_list, \
+from analysis.data import list_of_masters_all, root_path, gen_txt_list, \
     gen_txt_colours, gen_fill_colours, list_column_ltrs, list_of_rag_keys, rag_txt_list_full, \
-    rag_fill_colours, rag_txt_colours, all_project_names, salmon_fill, bc_index
+    rag_fill_colours, rag_txt_colours, salmon_fill, bc_index
 from analysis.engine_functions import all_milestone_data_bulk, conditional_formatting, get_quarter_stamp
 
 def return_data(project_name_list, data_key_list):
@@ -53,15 +53,16 @@ def return_data(project_name_list, data_key_list):
                         if key in list_of_masters_all[x].data[project_name].keys():
                             value = list_of_masters_all[x].data[project_name][key]
                             ws.cell(row=2 + y, column=3 + x, value=value) #returns value
+
                             if value is None:
                                 ws.cell(row=2 + y, column=3 + x, value='md')
 
-                            try: # checks for change against last quarter
-                                lst_value = list_of_masters_all[x + 1].data[project_name][key]
-                                if value != lst_value:
-                                    ws.cell(row=2 + y, column=3 + x).fill = salmon_fill
-                            except (KeyError, IndexError):
-                                pass
+                        try: # checks for change against last quarter
+                            lst_value = list_of_masters_all[x + 1].data[project_name][key]
+                            if value != lst_value:
+                                ws.cell(row=2 + y, column=3 + x).fill = salmon_fill
+                        except (KeyError, IndexError):
+                            pass
 
                         # milestone keys
                         else:
@@ -97,7 +98,7 @@ def return_data(project_name_list, data_key_list):
         for l, label in enumerate(quarter_labels):
             ws.cell(row=1, column=l + 3, value=label)
 
-        list_columns = list_column_ltrs[0:len(list_of_masters_all)+3]
+        list_columns = list_column_ltrs[2:len(list_of_masters_all)+4]
 
         if key in list_of_rag_keys:
             conditional_formatting(ws, list_columns, rag_txt_list_full, rag_txt_colours, rag_fill_colours, '1', '60')
@@ -165,7 +166,7 @@ def return_baseline_data(project_name_list, data_key_list):
         ws.cell(row=1, column=8, value='BL 4')
         ws.cell(row=1, column=9, value='BL 5')
 
-        list_columns = list_column_ltrs[2:9] # hard coded so not ideal
+        list_columns = list_column_ltrs[2:10] # hard coded so not ideal
 
         if key in list_of_rag_keys:
             conditional_formatting(ws, list_columns, rag_txt_list_full, rag_txt_colours, rag_fill_colours, '1', '60')
@@ -175,7 +176,16 @@ def return_baseline_data(project_name_list, data_key_list):
     return wb
 
 '''data keys of interest. Place all keys of interest as stings in this list'''
-data_interest = ['Project End Date']
+data_interest = ['NPV for all projects and NPV for programmes if available',
+                 'Adjusted Benefits Cost Ratio (BCR)',
+                 'Initial Benefits Cost Ratio (BCR)',
+                 'Present Value Cost (PVC)',
+                 'Present Value Benefit (PVB)',
+                 'VfM Category single entry',
+                 'VfM Category lower range',
+                 'VfM Category upper range',
+                 'Benefits Narrative',
+                 'Start of Operation']
 
 '''Running the programme'''
 
@@ -183,17 +193,17 @@ data_interest = ['Project End Date']
 first variable = list of project names. There are two options. 1) latest_quarter_project_names 2) all_projects_names
 (which includes older projects that are not currently reporting. 
 second variable = data_interest. This name does not change. List compiled above'''
-run_standard = return_data(latest_quarter_project_names, data_interest)
+run_standard = return_data(list_of_masters_all[0].projects, data_interest)
 
 '''output two - bl data
 first variable = list of project names. There are two options. 1) latest_quarter_project_names 2) all_projects_names
 (which includes older projects that are not currently reporting. 
 second variable = data_interest. This name does not change. List compiled above'''
-run_baseline = return_baseline_data(latest_quarter_project_names, data_interest)
+run_baseline = return_baseline_data(list_of_masters_all[0].projects, data_interest)
 
 '''Specify name of the output document here. See general guidance re saving output files'''
-run_standard.save(root_path/'output/data_query.xlsx')
-run_baseline.save(root_path/'output/data_query_bl.xlsx')
+run_standard.save(root_path/'output/vfm_data_q4_2019.xlsx')
+run_baseline.save(root_path/'output/vfm_data_bl_q4_2019.xlsx')
 
 '''old lists stored here for use in future'''
 project_basics = ['Brief project description (GMPP - brief descripton)',

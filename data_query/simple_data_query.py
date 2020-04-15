@@ -15,7 +15,7 @@ key not collected (knc) = light blue grey
 
 
 from openpyxl import Workbook
-from analysis.data import list_of_masters_all, latest_quarter_project_names, root_path, gen_txt_list, \
+from analysis.data import list_of_masters_all, root_path, gen_txt_list, \
     gen_txt_colours, gen_fill_colours, list_column_ltrs, list_of_rag_keys, rag_txt_list_full, \
     rag_fill_colours, rag_txt_colours, salmon_fill
 from analysis.engine_functions import all_milestone_data_bulk, conditional_formatting
@@ -30,7 +30,7 @@ def return_data(data_key_list):
     ws = wb.active
 
     '''list project names, groups and stage in ws'''
-    for y, project_name in enumerate(latest_quarter_project_names):
+    for y, project_name in enumerate(list_of_masters_all[0].projects):
 
         group = list_of_masters_all[0].data[project_name]['DfT Group']
 
