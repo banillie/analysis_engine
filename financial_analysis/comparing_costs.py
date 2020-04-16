@@ -16,7 +16,7 @@ See instructions below.
 
 from openpyxl import Workbook
 from analysis.data import red_text, wlc_key, latest_cost_profiles, last_cost_profiles, \
-    baseline_1_cost_profiles, latest_quarter_project_names, list_of_masters_all, fin_bc_index, root_path
+    baseline_1_cost_profiles, list_of_masters_all, fin_bc_index, root_path
 
 def place_complex_comparision_excel(master_data_latest, master_data_last, master_data_baseline):
     '''
@@ -184,9 +184,9 @@ def get_wlc(project_name_list, wlc_key, index):
 
 
 '''getting financial wlc cost breakdown'''
-latest_wlc = get_wlc(latest_quarter_project_names, wlc_key, 0)
-last_wlc = get_wlc(latest_quarter_project_names, wlc_key, 1)
-baseline_wlc = get_wlc(latest_quarter_project_names, wlc_key, 2)
+latest_wlc = get_wlc(list_of_masters_all[0].projects, wlc_key, 0)
+last_wlc = get_wlc(list_of_masters_all[0].projects, wlc_key, 1)
+baseline_wlc = get_wlc(list_of_masters_all[0].projects, wlc_key, 2)
 
 '''creating excel outputs'''
 output_one = place_complex_comparision_excel(latest_wlc, last_wlc, baseline_wlc)
@@ -199,13 +199,13 @@ output_four = place_standard_comparision_excel(latest_cost_profiles, baseline_1_
 '''Valid file paths for all the below need to be provided'''
 
 '''ONE. Provide file path to where to save complex wlc breakdown'''
-output_one.save(root_path/'output/comparing_wlc_complex_q3_1920.xlsx')
+output_one.save(root_path/'output/comparing_wlc_complex_q4_1920.xlsx')
 
 '''TWO. Provide file path to where to save complex yearly cost profile breakdown'''
-output_two.save(root_path/'output/comparing_cost_profiles_complex_q3_1920.xlsx')
+output_two.save(root_path/'output/comparing_cost_profiles_complex_q4_1920.xlsx')
 
 '''THREE. Provide file path to where to save standard wlc breakdown'''
-output_three.save(root_path/'output/comparing_wlc_standard_q3_1920.xlsx')
+output_three.save(root_path/'output/comparing_wlc_standard_q4_1920.xlsx')
 
 '''FOUR. Provide file path to where to save standard yearly cost profile breakdown'''
-output_four.save(root_path/'output/comparing_cost_profiles_standard_q3_1920.xlsx')
+output_four.save(root_path/'output/comparing_cost_profiles_standard_q4_1920.xlsx')
