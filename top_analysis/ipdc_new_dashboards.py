@@ -806,4 +806,4 @@ dashboard_master = load_workbook(root_path/'input/dashboards_master.xlsx')
 
 '''THREE. place arguments into the place_in_excle function and provide file path for saving output wb'''
 dashboard_completed = place_in_excel(dashboard_master)
-dashboard_completed.save(root_path/'output/new_dashboards_q4_1920.xlsx')
+dashboard_completed.save(root_path/'output/dashboards_q4_1920.xlsx')
