@@ -24,7 +24,7 @@ from openpyxl import load_workbook
 from openpyxl.styles import PatternFill, Font
 from openpyxl.styles.differential import DifferentialStyle
 from openpyxl.formatting.rule import Rule
-from analysis.data import financial_analysis_masters_list, fin_bc_index, latest_quarter_project_names, \
+from analysis.data import financial_analysis_masters_list, fin_bc_index, \
     list_of_masters_all, bc_index, root_path
 from analysis.engine_functions import all_milestone_data_bulk, convert_rag_text, convert_bc_stage_text, \
     project_time_difference, ap_p_milestone_data_bulk, bicc_date, concatenate_dates, highlight_close_dates_ipdc
@@ -52,9 +52,9 @@ def financial_info(wb):
 
     for row_num in range(2, ws.max_row + 1):
         project_name = ws.cell(row=row_num, column=3).value
-        if project_name in latest_quarter_project_names:
+        if project_name in list_of_masters_all[0].projects:
             '''BC Stage'''
-            bc_stage = financial_analysis_masters_list[0].data[project_name]['BICC approval point']
+            bc_stage = financial_analysis_masters_list[0].data[project_name]['IPDC approval point']
             ws.cell(row=row_num, column=4).value = convert_bc_stage_text(bc_stage)
             try:
                 bc_stage_lst_qrt = financial_analysis_masters_list[1].data[project_name]['BICC approval point']
@@ -86,23 +86,34 @@ def financial_info(wb):
                 else:
                     ws.cell(row=row_num, column=7).value = '-'
 
-                percentage_change = ((wlc_now - wlc_lst_quarter) / wlc_now) * 100
-                if percentage_change > 5 or percentage_change < -5:
-                    ws.cell(row=row_num, column=7).font = Font(name='Arial', size=10, color='00fc2525')
+                try:
+                    percentage_change = ((wlc_now - wlc_lst_quarter) / wlc_now) * 100
+                    if percentage_change > 5 or percentage_change < -5:
+                        ws.cell(row=row_num, column=7).font = Font(name='Arial', size=10, color='00fc2525')
+                except ZeroDivisionError:
+                    pass
+
             except KeyError:
                 ws.cell(row=row_num, column=7).value = '-'
 
             '''WLC variance against baseline quarter'''
             wlc_baseline = financial_analysis_masters_list[fin_bc_index[project_name][2]].data[project_name]['Total Forecast']
-            diff_bl = wlc_now - wlc_baseline
-            if float(diff_bl) > 0.49 or float(diff_bl) < -0.49:
-                ws.cell(row=row_num, column=8).value = diff_bl
-            else:
-                ws.cell(row=row_num, column=8).value = '-'
+            #print(str(project_name) + '' + str(wlc_baseline))
+            try:
+                diff_bl = wlc_now - wlc_baseline
+                if float(diff_bl) > 0.49 or float(diff_bl) < -0.49:
+                    ws.cell(row=row_num, column=8).value = diff_bl
+                else:
+                    ws.cell(row=row_num, column=8).value = '-'
+            except TypeError: # exception is here as some projects e.g. Hs2 phase 2b have (real) written into historical totals
+                pass
 
-            percentage_change = ((wlc_now - wlc_baseline) / wlc_now) * 100
-            if percentage_change > 5 or percentage_change < -5:
-                ws.cell(row=row_num, column=8).font = Font(name='Arial', size=10, color='00fc2525')
+            try:
+                percentage_change = ((wlc_now - wlc_baseline) / wlc_now) * 100
+                if percentage_change > 5 or percentage_change < -5:
+                    ws.cell(row=row_num, column=8).font = Font(name='Arial', size=10, color='00fc2525')
+            except (ZeroDivisionError, TypeError): # zerodivision error obvious, type error handling as above
+                pass
 
             '''Aggregate Spent'''
             '''Committed spend'''
@@ -171,12 +182,12 @@ def schedule_info(wb):
 
     for row_num in range(2, ws.max_row + 1):
         project_name = ws.cell(row=row_num, column=3).value
-        if project_name in latest_quarter_project_names:
+        if project_name in list_of_masters_all[0].projects:
             '''BICC approval point'''
-            bc_stage = list_of_masters_all[0].data[project_name]['BICC approval point']
+            bc_stage = list_of_masters_all[0].data[project_name]['IPDC approval point']
             ws.cell(row=row_num, column=4).value = convert_bc_stage_text(bc_stage)
             try:
-                bc_stage_lst_qrt = list_of_masters_all[1].data[project_name]['BICC approval point']
+                bc_stage_lst_qrt = list_of_masters_all[1].data[project_name]['IPDC approval point']
                 if bc_stage != bc_stage_lst_qrt:
                     ws.cell(row=row_num, column=4).font = Font(name='Arial', size=10, color='00fc2525')
             except KeyError:
@@ -200,27 +211,30 @@ def schedule_info(wb):
                 elif date > bicc_date:
                         local_milestone_dates.append((date, x))
 
-            try:
-                next_milestone_name = list(current_milestones_ap_p[project_name].keys())[local_milestone_dates[0][1]]
-                ws.cell(row=row_num, column=6).value = next_milestone_name
-                next_milestone_date = local_milestone_dates[0][0]
-                ws.cell(row=row_num, column=7).value = next_milestone_date
-            except (TypeError, KeyError):
-                ws.cell(row=row_num, column=6).value = 'None Scheduled'
-            try:
-                lst_qrt_diff = first_diff_data[project_name][next_milestone_name]
-                ws.cell(row=row_num, column=8).value = lst_qrt_diff
-                if lst_qrt_diff > 25:
-                    ws.cell(row=row_num, column=8).font = Font(name='Arial', size=10, color='00fc2525')
-            except (TypeError, KeyError):
-                ws.cell(row=row_num, column=8).value = ''
-            try:
-                bl_qrt_diff = second_diff_data[project_name][next_milestone_name]
-                ws.cell(row=row_num, column=9).value = bl_qrt_diff
-                if bl_qrt_diff > 46:
-                    ws.cell(row=row_num, column=9).font = Font(name='Arial', size=10, color='00fc2525')
-            except (TypeError, KeyError):
-                ws.cell(row=row_num, column=9).value = ''
+            if len(local_milestone_dates) != 0: # checks if list is empty
+                try:
+                    next_milestone_name = list(current_milestones_ap_p[project_name].keys())[local_milestone_dates[0][1]]
+                    ws.cell(row=row_num, column=6).value = next_milestone_name
+                    next_milestone_date = local_milestone_dates[0][0]
+                    ws.cell(row=row_num, column=7).value = next_milestone_date
+                except (TypeError, KeyError):
+                    ws.cell(row=row_num, column=6).value = 'None Scheduled'
+                try:
+                    lst_qrt_diff = first_diff_data[project_name][next_milestone_name]
+                    ws.cell(row=row_num, column=8).value = lst_qrt_diff
+                    if lst_qrt_diff > 25:
+                        ws.cell(row=row_num, column=8).font = Font(name='Arial', size=10, color='00fc2525')
+                except (TypeError, KeyError):
+                    ws.cell(row=row_num, column=8).value = ''
+                try:
+                    bl_qrt_diff = second_diff_data[project_name][next_milestone_name]
+                    ws.cell(row=row_num, column=9).value = bl_qrt_diff
+                    if bl_qrt_diff > 46:
+                        ws.cell(row=row_num, column=9).font = Font(name='Arial', size=10, color='00fc2525')
+                except (TypeError, KeyError):
+                    ws.cell(row=row_num, column=9).value = ''
+            else:
+                pass
 
 
             '''start of construction (soc) current date'''
@@ -380,13 +394,13 @@ def benefits_info(wb):
 
     for row_num in range(2, ws.max_row + 1):
         project_name = ws.cell(row=row_num, column=3).value
-        if project_name in latest_quarter_project_names:
+        if project_name in list_of_masters_all[0].projects:
 
             '''BICC approval point'''
-            bc_stage = list_of_masters_all[0].data[project_name]['BICC approval point']
+            bc_stage = list_of_masters_all[0].data[project_name]['IPDC approval point']
             ws.cell(row=row_num, column=4).value = convert_bc_stage_text(bc_stage)
             try:
-                bc_stage_lst_qrt = list_of_masters_all[1].data[project_name]['BICC approval point']
+                bc_stage_lst_qrt = list_of_masters_all[1].data[project_name]['IPDC approval point']
                 if bc_stage != bc_stage_lst_qrt:
                     ws.cell(row=row_num, column=4).font = Font(name='Arial', size=10, color='00fc2525')
             except:
@@ -544,12 +558,12 @@ def overall_info(wb):
 
     for row_num in range(2, ws.max_row + 1):
         project_name = ws.cell(row=row_num, column=2).value
-        if project_name in latest_quarter_project_names:
+        if project_name in list_of_masters_all[0].projects:
             '''BC Stage'''
-            bc_stage = financial_analysis_masters_list[0].data[project_name]['BICC approval point']
+            bc_stage = financial_analysis_masters_list[0].data[project_name]['IPDC approval point']
             ws.cell(row=row_num, column=3).value = convert_bc_stage_text(bc_stage)
             try:
-                bc_stage_lst_qrt = financial_analysis_masters_list[1].data[project_name]['BICC approval point']
+                bc_stage_lst_qrt = financial_analysis_masters_list[1].data[project_name]['IPDC approval point']
                 if bc_stage != bc_stage_lst_qrt:
                     ws.cell(row=row_num, column=3).font = Font(name='Arial', size=10, color='00fc2525')
             except KeyError:
@@ -577,24 +591,35 @@ def overall_info(wb):
                 else:
                     ws.cell(row=row_num, column=6).value = '-'
 
-                percentage_change = ((wlc_now - wlc_lst_quarter) / wlc_now) * 100
-                if percentage_change > 5 or percentage_change < -5:
-                    ws.cell(row=row_num, column=6).font = Font(name='Arial', size=10, color='00fc2525')
+                try:
+                    percentage_change = ((wlc_now - wlc_lst_quarter) / wlc_now) * 100
+                    if percentage_change > 5 or percentage_change < -5:
+                        ws.cell(row=row_num, column=6).font = Font(name='Arial', size=10, color='00fc2525')
+                except ZeroDivisionError:
+                    pass
+
             except KeyError:
                 ws.cell(row=row_num, column=6).value = '-'
 
             '''WLC variance against baseline quarter'''
             wlc_baseline = financial_analysis_masters_list[fin_bc_index[project_name][2]].data[project_name][
                 'Total Forecast']
-            diff_bl = wlc_now - wlc_baseline
-            if float(diff_bl) > 0.49 or float(diff_bl) < -0.49:
-                ws.cell(row=row_num, column=7).value = diff_bl
-            else:
-                ws.cell(row=row_num, column=7).value = '-'
-            print(project_name)
-            percentage_change = ((wlc_now - wlc_baseline) / wlc_now) * 100
-            if percentage_change > 5 or percentage_change < -5:
-                ws.cell(row=row_num, column=7).font = Font(name='Arial', size=10, color='00fc2525')
+            try:
+                diff_bl = wlc_now - wlc_baseline
+                if float(diff_bl) > 0.49 or float(diff_bl) < -0.49:
+                    ws.cell(row=row_num, column=7).value = diff_bl
+                else:
+                    ws.cell(row=row_num, column=7).value = '-'
+                #print(project_name)
+                try:
+                    percentage_change = ((wlc_now - wlc_baseline) / wlc_now) * 100
+                    if percentage_change > 5 or percentage_change < -5:
+                        ws.cell(row=row_num, column=7).font = Font(name='Arial', size=10, color='00fc2525')
+                except ZeroDivisionError:
+                    pass
+
+            except TypeError:
+                pass
 
             '''vfm category now'''
             if list_of_masters_all[0].data[project_name]['VfM Category lower range'] is None:
@@ -754,16 +779,15 @@ rag_txt_list = ["A/G", "A/R", "R", "G", "A"]
 '''python dictionary of all project milestone for the latest and last quarter are put into variables here, because these
 are single source calculations. The baseline milestones are calcuated in functions and project baseline quarter are 
 project specific'''
-current_milestones_all = all_milestone_data_bulk(latest_quarter_project_names, list_of_masters_all[0])
-last_qrt_milestone_all = all_milestone_data_bulk(latest_quarter_project_names, list_of_masters_all[1])
-
-current_milestones_ap_p = ap_p_milestone_data_bulk(latest_quarter_project_names, list_of_masters_all[0])
+current_milestones_all = all_milestone_data_bulk(list_of_masters_all[0].projects, list_of_masters_all[0])
+last_qrt_milestone_all = all_milestone_data_bulk(list_of_masters_all[0].projects, list_of_masters_all[1])
+current_milestones_ap_p = ap_p_milestone_data_bulk(list_of_masters_all[0].projects, list_of_masters_all[0])
 
 '''calcualting milestone time deltas'''
 current_milestones_data = {}
 last_milestones_data = {}
 oldest_milestones_data = {}
-for project_name in latest_quarter_project_names:
+for project_name in list_of_masters_all[0].projects:
     p_current_milestones_data = all_milestone_data_bulk([project_name], list_of_masters_all[0])
     current_milestones_data.update(p_current_milestones_data)
     p_last_milestones_data = all_milestone_data_bulk([project_name], list_of_masters_all[1])
@@ -778,12 +802,8 @@ for project_name in latest_quarter_project_names:
 ''' RUNNING THE PROGRAMME '''
 
 '''ONE. Provide file path to dashboard master'''
-dashboard_master = load_workbook(root_path/'input/new_dashboards_master.xlsx')
-
-'''TWO. Provide list of projects on which to provide analysis'''
-quarter_project_list = list_of_masters_all[0].projects
-one_project_list = ['Crossrail Programme']
+dashboard_master = load_workbook(root_path/'input/dashboards_master.xlsx')
 
 '''THREE. place arguments into the place_in_excle function and provide file path for saving output wb'''
 dashboard_completed = place_in_excel(dashboard_master)
-dashboard_completed.save(root_path/'output/new_dashboards_q3_1920.xlsx')
+dashboard_completed.save(root_path/'output/new_dashboards_q4_1920.xlsx')
