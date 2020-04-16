@@ -30,8 +30,8 @@ def place_in_excel_one_wb():
 
     for i, project_name in enumerate(project_name_list):
         '''worksheet is created for each project'''
-        ws = wb.create_sheet(project_name, i)  # creating worksheets
-        ws.title = project_name  # title of worksheet
+        ws = wb.create_sheet(project_name[:29], i)  # creating worksheets. names restricted to 30 characters.
+        ws.title = project_name[:29]  # title of worksheet
 
         '''COST PROFILE CHART'''
 
@@ -196,12 +196,7 @@ def place_in_excel_one_wb():
 '''
 Only one part of programme is to be amended each quarter. place which ever quarter information being produced at 
 end of output file name e.g. q4_1920. Note make sure file ends with .xlsx format
-
-Note when code completes it may state:
-UserWarning: Title is more than 31 characters. Some applications may not be able to read the file 
-warnings.warn("Title is more than 31 characters. Some applications may not be able to read the file"). 
-However, you can ignore and open the file as usual.
 '''
 
 output = place_in_excel_one_wb()
-output.save(root_path/'output/ind_project_financial_profiles_q4_1920.xlsx')
+output.save(root_path/'output/ind_project_financials_q4_1920.xlsx')

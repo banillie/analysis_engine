@@ -47,8 +47,8 @@ def put_into_wb_all_single(function):
 
     for x, project_name in enumerate(list_of_masters_all[0].projects):
         '''worksheet is created for each project'''
-        ws = wb.create_sheet(project_name, x)  # creating worksheets
-        ws.title = project_name  # title of worksheet
+        ws = wb.create_sheet(project_name[:29], x)  # creating worksheets. name restricted to 30 characters
+        ws.title = project_name[:29]  # title of worksheet.
 
         row_num = 2
         for i, milestone in enumerate(first_diff_data[project_name].keys()):
@@ -117,11 +117,7 @@ def put_into_wb_all_single(function):
 Only one part of programme is to be amended each quarter. place which ever quarter information being produced at 
 end of output file name e.g. q4_1920. Note make sure file ends with .xlsx format
 
-Note when code completes it may state:
-UserWarning: Title is more than 31 characters. Some applications may not be able to read the file 
-warnings.warn("Title is more than 31 characters. Some applications may not be able to read the file"). 
-However, you can ignore and open the file as usual.
 '''
 
 output = put_into_wb_all_single(all_milestone_data_bulk)
-output.save(root_path/'output/ind_project_milestone_analysis_q4_1920.xlsx')
+output.save(root_path/'output/ind_project_milestones_q4_1920.xlsx')
