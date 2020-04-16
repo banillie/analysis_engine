@@ -13,9 +13,8 @@ See instructions below.
 
 from openpyxl import Workbook
 from analysis.data import cost_list, income_list, year_list, latest_cost_profiles, last_cost_profiles, \
-    baseline_1_cost_profiles, baseline_2_cost_profiles, latest_income_profiles, \
-    last_income_profiles, baseline_1_income_profiles, baseline_2_income_profiles, dont_double_count, root_path, \
-    latest_quarter_project_names
+    baseline_1_cost_profiles, baseline_2_cost_profiles, latest_income_profiles, list_of_masters_all, \
+    last_income_profiles, baseline_1_income_profiles, baseline_2_income_profiles, dont_double_count, root_path
 from analysis.engine_functions import filter_project_group, calculate_group_project_total
 
 def place_in_excel(project_name_list):
@@ -106,5 +105,5 @@ def place_in_excel(project_name_list):
 '''To run the programme place list of project names into function. 
 NOTE: Default option is list of all current projects in portfolio. In majority of cases user should just run the 
 default programme'''
-output = place_in_excel(latest_quarter_project_names)
-output.save(root_path/'output/portfolio_financial_profile_q3_1920.xlsx')
+output = place_in_excel(list_of_masters_all[0].projects)
+output.save(root_path/'output/portfolio_financial_profile_q4_1920.xlsx')
