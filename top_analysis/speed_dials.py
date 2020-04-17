@@ -3,7 +3,7 @@ Programme produces outputs (figures) for building the speed dials page
 
 outputs:
 - Programme saves (into output dir) Word documents project changes for each dial.
-- It prints out in the console calculations for overall dial position. (Note to improve so outputs go into excel wb).
+- It prints out in the calculations for overall dial position into excel output titled dials.
 
 follow instructions below.
 
@@ -115,7 +115,7 @@ def print_dca_change(dca_change_master):
     down = 0
     for project_name in dca_change_master:
         print(project_name)
-        #print(project_name, dca_change_master[project_name])
+        print(project_name, dca_change_master[project_name])
         if dca_change_master[project_name]['Change'] == -4:
             p = doc.add_paragraph()
             a = dca_change_master[project_name]['DCA']
@@ -313,11 +313,11 @@ def run_programme():
     benefits = print_dca_change(benefits_dca)
     schedule = print_dca_change(schedule_dca)
 
-    overall.save(root_path/'output/overall_speed_dials_q3_1920.docx')
-    finance.save(root_path/'output/financial_speed_dials_q3_1920.docx')
-    resource.save(root_path/'output/resource_speed_dials_q3_1920.docx')
-    benefits.save(root_path/'output/benefits_speed_dials_q3_1920.docx')
-    schedule.save(root_path/'output/schedule_speed_dials_q3_1920.docx')
+    overall.save(root_path/'output/overall_speed_dials_q4_1920.docx')
+    finance.save(root_path/'output/financial_speed_dials_q4_1920.docx')
+    resource.save(root_path/'output/resource_speed_dials_q4_1920.docx')
+    benefits.save(root_path/'output/benefits_speed_dials_q4_1920.docx')
+    schedule.save(root_path/'output/schedule_speed_dials_q4_1920.docx')
 
 
 ''' RUNNING PROGRAMME '''
