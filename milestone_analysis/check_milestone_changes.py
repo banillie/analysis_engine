@@ -15,7 +15,7 @@ the import statement.
 import datetime
 from openpyxl import Workbook
 from analysis.engine_functions import all_milestone_data_bulk
-from analysis.data import list_of_masters_all, latest_quarter_project_names, red_text, bc_index, root_path
+from analysis.data import list_of_masters_all, red_text, bc_index, root_path
 
 def check_m_keys_in_excel_single():
     '''
@@ -30,10 +30,10 @@ def check_m_keys_in_excel_single():
 
     wb = Workbook()
 
-    for i, project_name in enumerate(latest_quarter_project_names):
+    for i, project_name in enumerate(list_of_masters_all[0].projects):
         '''worksheet is created for each project'''
-        ws = wb.create_sheet(project_name, i)  # creating worksheets
-        ws.title = project_name  # title of worksheet
+        ws = wb.create_sheet(project_name[:29], i)  # creating worksheets
+        ws.title = project_name[:29]  # title of worksheet
 
         row_num = 2
 
@@ -101,8 +101,8 @@ def longest_list(one, two, three):
         if out[-1] == len(x):
             return x
 
-p_current_milestones_data = all_milestone_data_bulk(latest_quarter_project_names, list_of_masters_all[0])
-p_last_milestones_data = all_milestone_data_bulk(latest_quarter_project_names, list_of_masters_all[1])
+p_current_milestones_data = all_milestone_data_bulk(list_of_masters_all[0].projects, list_of_masters_all[0])
+p_last_milestones_data = all_milestone_data_bulk(list_of_masters_all[0].projects, list_of_masters_all[1])
 
 ''' RUNNING THE PROGRAMME'''
 
@@ -110,9 +110,9 @@ p_last_milestones_data = all_milestone_data_bulk(latest_quarter_project_names, l
 the import statement.'''
 
 '''TWO. Specify date after which project milestones should be returned. NOTE: Python date format is (YYYY,MM,DD)'''
-start_date = datetime.date(2019, 6, 1)
+start_date = datetime.date(2019, 11, 1)
 
 '''THREE. the following for statement prompts the programme to run'''
 
 output = check_m_keys_in_excel_single()
-output.save(root_path/'output/checking_milestones_q3_1920.xlsx')
+output.save(root_path/'output/checking_milestones_q4_1920.xlsx')
