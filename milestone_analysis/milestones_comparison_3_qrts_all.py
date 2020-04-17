@@ -115,9 +115,10 @@ def run_milestone_comparator(function, project_name_list, masters_list):
     last_milestones_data = {}
     oldest_milestones_data = {}
     for project_name in project_name_list:
-        p_current_milestones_data = function([project_name], masters_list[bc_index[project_name][0]])
+        print(project_name)
+        p_current_milestones_data = function([project_name], masters_list[0])
         current_milestones_data.update(p_current_milestones_data)
-        p_last_milestones_data = function([project_name], masters_list[bc_index[project_name][1]])
+        p_last_milestones_data = function([project_name], masters_list[1])
         last_milestones_data.update(p_last_milestones_data)
         p_oldest_milestones_data = function([project_name], masters_list[bc_index[project_name][2]])
         oldest_milestones_data.update(p_oldest_milestones_data)
@@ -133,22 +134,7 @@ def run_milestone_comparator(function, project_name_list, masters_list):
 
 ''' RUNNING PROGRAMME '''
 
-'''Note: all master data is taken from the data file. Make sure this is up to date and that all relevant data is in 
-the import statement.'''
-
-''' ONE. Set relevant list of projects. This needs to be done in accordance with the data you are working with via the
- data.py file '''
-
-'''option one - all projects'''
-#latest_quarter_projects = q2_1920.projects
-
-'''option two - group of projects... in development'''
-#project_group_list = filter_project_group(q2_1920, 'HSMRPG')
-
-'''option three - single project'''
-#other_project_list = [hs2_1, hs2_2a, hs2_2b, hs2_programme, northern_powerhouse, ewr_central, ewr_western, hexagon]
-
-'''TWO. choose the type of variables that you would like to place in run_milestone_comparator function. Arguments 
+'''choose the type of variables that you would like to place in run_milestone_comparator function. Arguments 
 are placed in this order. 
 
 1. function: The type of milestone you wish to analysis can be specified through choosing all_milestone_data_bulk, 
@@ -160,5 +146,5 @@ statement above.
 '''
 run = run_milestone_comparator(all_milestone_data_bulk, list_of_masters_all[0].projects, list_of_masters_all)
 
-'''THREE. specify file path to output document'''
+'''specify file path to output document'''
 run.save(root_path/'output/portfolio_milestone_analysis_q4_1920.xlsx')
