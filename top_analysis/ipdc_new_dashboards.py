@@ -57,7 +57,7 @@ def financial_info(wb):
             bc_stage = financial_analysis_masters_list[0].data[project_name]['IPDC approval point']
             ws.cell(row=row_num, column=4).value = convert_bc_stage_text(bc_stage)
             try:
-                bc_stage_lst_qrt = financial_analysis_masters_list[1].data[project_name]['BICC approval point']
+                bc_stage_lst_qrt = financial_analysis_masters_list[1].data[project_name]['IPDC approval point']
                 if bc_stage != bc_stage_lst_qrt:
                     ws.cell(row=row_num, column=4).font = Font(name='Arial', size=10, color='00fc2525')
             except KeyError:
