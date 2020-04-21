@@ -29,8 +29,8 @@ def return_data(project_name_list, data_key_list):
 
     for i, key in enumerate(data_key_list):
         '''worksheet is created for each project'''
-        ws = wb.create_sheet(key, i)  # creating worksheets
-        ws.title = key  # title of worksheet
+        ws = wb.create_sheet(key[:29], i)  # creating worksheets
+        ws.title = key[:29]  # title of worksheet
 
         '''list project names, groups and stage in ws'''
         for y, project_name in enumerate(project_name_list):
@@ -117,8 +117,8 @@ def return_baseline_data(project_name_list, data_key_list):
 
     for i, key in enumerate(data_key_list):
         '''worksheet is created for each project'''
-        ws = wb.create_sheet(key, i)  # creating worksheets
-        ws.title = key  # title of worksheet
+        ws = wb.create_sheet(key[:29], i)  # creating worksheets
+        ws.title = key[:29]  # title of worksheet
 
         '''list project names, groups and stage in ws'''
         for y, project_name in enumerate(project_name_list):
@@ -178,7 +178,7 @@ def return_baseline_data(project_name_list, data_key_list):
 '''Running the programme'''
 
 '''data keys of interest. Place all keys of interest as stings in this list'''
-data_interest = ['Total Forecast']
+data_interest = ['Total BEN Forecast - Total Monetised Benefits']
 
 '''output one - all data. 
 first variable = list of project names. There are two options. 1) latest_quarter_project_names 2) all_projects_names
