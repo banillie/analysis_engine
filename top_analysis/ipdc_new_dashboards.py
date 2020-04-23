@@ -450,22 +450,25 @@ def benefits_info(wb):
                 ws.cell(row=row_num, column=9).value = ''
 
             '''vfm category now'''
-            if list_of_masters_all[0].data[project_name]['VfM Category lower range'] is None:
-                vfm_cat = list_of_masters_all[0].data[project_name]['VfM Category single entry']
+            if list_of_masters_all[0].data[project_name]['VfM Category single entry'] is None:
+                vfm_cat = str(list_of_masters_all[0].data[project_name]['VfM Category lower range']) + ' - ' + \
+                          str(list_of_masters_all[0].data[project_name]['VfM Category upper range'])
                 ws.cell(row=row_num, column=10).value = vfm_cat
             else:
-                vfm_cat = str(list_of_masters_all[0].data[project_name]['VfM Category lower range']) + ' - ' + \
-                    str(list_of_masters_all[0].data[project_name]['VfM Category upper range'])
+                vfm_cat = list_of_masters_all[0].data[project_name]['VfM Category single entry']
                 ws.cell(row=row_num, column=10).value = vfm_cat
 
             '''vfm category baseline'''
             try:
-                if list_of_masters_all[bc_index[project_name][2]].data[project_name]['VfM Category lower range'] is None:
-                    vfm_cat_baseline = list_of_masters_all[bc_index[project_name[2]]].data[project_name]['VfM Category single entry']
+                if list_of_masters_all[bc_index[project_name][2]].data[project_name]['VfM Category single entry'] is None:
+                    vfm_cat_baseline = str(list_of_masters_all[bc_index[project_name][2]].data[project_name][
+                                               'VfM Category lower range']) + ' - ' + \
+                                       str(list_of_masters_all[bc_index[project_name][2]].data[project_name][
+                                               'VfM Category upper range'])
                     ws.cell(row=row_num, column=11).value = vfm_cat_baseline
                 else:
-                    vfm_cat_baseline = str(list_of_masters_all[bc_index[project_name][2]].data[project_name]['VfM Category lower range']) + ' - ' + \
-                        str(list_of_masters_all[bc_index[project_name][2]].data[project_name]['VfM Category upper range'])
+                    vfm_cat_baseline = list_of_masters_all[bc_index[project_name[2]]].data[project_name][
+                        'VfM Category single entry']
                     ws.cell(row=row_num, column=11).value = vfm_cat_baseline
 
             except KeyError:
@@ -622,24 +625,25 @@ def overall_info(wb):
                 pass
 
             '''vfm category now'''
-            if list_of_masters_all[0].data[project_name]['VfM Category lower range'] is None:
-                vfm_cat = list_of_masters_all[0].data[project_name]['VfM Category single entry']
-                ws.cell(row=row_num, column=8).value = vfm_cat
-            else:
+            if list_of_masters_all[0].data[project_name]['VfM Category single entry'] is None:
                 vfm_cat = str(list_of_masters_all[0].data[project_name]['VfM Category lower range']) + ' - ' + \
                           str(list_of_masters_all[0].data[project_name]['VfM Category upper range'])
+                ws.cell(row=row_num, column=8).value = vfm_cat
+            else:
+                vfm_cat = list_of_masters_all[0].data[project_name]['VfM Category single entry']
                 ws.cell(row=row_num, column=8).value = vfm_cat
 
             '''vfm category baseline'''
             try:
-                if list_of_masters_all[bc_index[project_name][2]].data[project_name]['VfM Category lower range'] is None:
-                    vfm_cat_baseline = list_of_masters_all[1].data[project_name][
-                        'VfM Category single entry']
-                else:
+                if list_of_masters_all[bc_index[project_name][2]].data[project_name]['VfM Category single entry'] is None:
                     vfm_cat_baseline = str(list_of_masters_all[bc_index[project_name][2]].data[project_name][
                                                'VfM Category lower range']) + ' - ' + \
                                        str(list_of_masters_all[bc_index[project_name][2]].data[project_name][
                                                'VfM Category upper range'])
+                else:
+                    vfm_cat_baseline = list_of_masters_all[1].data[project_name][
+                        'VfM Category single entry']
+
             except KeyError:
                 try:
                     vfm_cat_baseline = list_of_masters_all[bc_index[project_name][2]].data[project_name][
