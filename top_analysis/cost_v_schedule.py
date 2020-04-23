@@ -7,8 +7,8 @@ Follow instructions at end.
 '''
 
 from analysis.data import list_of_masters_all, bc_index, financial_analysis_masters_list, \
-    fin_bc_index, root_path, south_west_route_capacity, gwrm, manchester_north_west_quad, a66, hs2_1, hs2_2a, hs2_2b, \
-    ox_cam_expressway, cvs, a428, ist, east_coast_mainline
+    fin_bc_index, root_path, south_west_route_capacity, gwrm, manchester_north_west_quad, hs2_1, hs2_2a, hs2_2b, \
+    ox_cam_expressway, cvs, a428, ist, east_coast_mainline, m4, iep, wrlth, a66, ewr_western, a303
 from analysis.engine_functions import all_milestone_data_bulk
 from openpyxl import Workbook
 from openpyxl.chart import Series, Reference, BubbleChart
@@ -253,23 +253,26 @@ def calculate_schedule_change_full_check(project_name, ws, x):
 current_milestones_all = all_milestone_data_bulk(list_of_masters_all[0].projects,
                                                  list_of_masters_all[0])
 
-filtered_project_list = [south_west_route_capacity,
+filtered_project_list = [m4,
+                         south_west_route_capacity,
                          gwrm,
                          manchester_north_west_quad,
                          a66,
-                         hs2_1,
+                         iep,
                          hs2_2a,
                          hs2_2b,
                          ox_cam_expressway,
-                         cvs,
                          a428,
+                         a303,
                          ist,
-                         east_coast_mainline]
+                         east_coast_mainline,
+                         wrlth,
+                         ewr_western]
 
 '''INSTRUCTIONS
 
 Enter project list variable into function. Recommend firstly doing so for all projects (e.g. latest_quarter_project
 _names) to identify projects of interest and then placing those projects into the filtered_project_list above '''
 
-run = cost_v_schedule_chart(list_of_masters_all[0].projects)
+run = cost_v_schedule_chart(filtered_project_list)
 run.save(root_path/'output/cost_v_schedule_unfiltered_q4_1920.xlsx')
