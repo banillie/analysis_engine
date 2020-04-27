@@ -20,8 +20,7 @@ Create the following directories in your `My Documents` directory:
     analysis_engine/output
 
 Master data is stored in the `core_data` directory in the form of individual excel wbs containing master data for each quarter.
-Master wbs must be saved in the `core_data` directory with correct title formats 
-e.g `(root_path/'core_data/master_3_2019.xlsx', 3, 2019)`. 
+Master wbs must be saved in the `core_data` directory with correct title formats e.g. master_3_2019.xlsx. 
  
 `analysis_engine` works by converting these master wbs into variables and lists containing python dictionaries, which 
 operate together as a local synthetic database, and then used as the basis for generating analytical outputs. 
@@ -42,9 +41,9 @@ If you are familiar with setting up virtual environments and working with PyChar
 steps are set out in a particular way to help a user who is unfamiliar/new to working with Python, PyCharm, Github and 
 virtual environments. 
 
-Firstly you need to make sure Python is installed. The most straight forward way to ensure that Python is installed is
-to simply install the latest version of Python from its website. Go to the Python website and download the option 
-provided on the website. Accept all default download options. 
+Firstly you need to install Python. Go to the Python website and download the latest Python 3.7 e.g. 3.7.7. Note do not
+download 3.8 as that is not currently compatible with all the programmes in `analysis_engine`. When installing Python
+accept all default download options. 
 
 Secondly install the community edition of PyCharm from the PyCharm website. Make sure you download the community edition.
 Accept all default options, but check the create 64 bit desktop app if you can. 
