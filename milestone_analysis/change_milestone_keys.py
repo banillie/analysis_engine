@@ -4,6 +4,8 @@ programme for altering across all masters changes in milestone keys.
 Issue: not currently marking new text as red. not clear why this line of code not working
 
 code doesn't/can't handle keys that have been removed.
+
+TODO: make sure that changes are being highlighted in Red text
 '''
 
 
