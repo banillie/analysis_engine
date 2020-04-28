@@ -21,7 +21,6 @@ def cost_v_schedule_chart(list_project_names):
     sorted_by_rag = sort_by_rag(l_data, list_project_names)
 
     rag_occurance = Counter(x[1] for x in sorted_by_rag)
-    print(rag_occurance)
 
     wb = Workbook()
     ws = wb.active
@@ -274,5 +273,5 @@ filtered_project_list = [m4,
 Enter project list variable into function. Recommend firstly doing so for all projects (e.g. latest_quarter_project
 _names) to identify projects of interest and then placing those projects into the filtered_project_list above '''
 
-run = cost_v_schedule_chart(filtered_project_list)
+run = cost_v_schedule_chart(list_of_masters_all[0].projects)
 run.save(root_path/'output/cost_v_schedule_unfiltered_q4_1920.xlsx')

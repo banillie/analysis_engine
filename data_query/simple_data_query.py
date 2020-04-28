@@ -85,19 +85,15 @@ def return_data(data_key_list):
     return wb
 
 '''data keys of interest. Place all keys of interest as stings in this list'''
-data_interest = ['IPDC approval point',
-                 'Total Forecast',
-                 'VfM Category single entry',
-                 'VfM Category lower range',
-                 'VfM Category upper range',
-                 'Present Value Cost (PVC)',
-                 'Present Value Benefit (PVB)',
-                 'Initial Benefits Cost Ratio (BCR)',
-                 'Adjusted Benefits Cost Ratio (BCR)',
-                 'Start of Construction/build',
-                 'Start of Operation',
-                 'Full Operations',
-                 'Project End Date']
+data_interest = ['SRO Full Name',
+                 'SRO Email',
+                 'SRO Phone No.',
+                 'PD Full Name',
+                 'PD Email',
+                 'PD Phone No.',
+                 'Working Contact Name',
+                 'Working Contact Email',
+                 'Working Contact Telephone']
 
 '''Running the programme'''
 
@@ -105,7 +101,7 @@ data_interest = ['IPDC approval point',
 run_standard = return_data(data_interest)
 
 '''Specify name of the output document here. See general guidance re saving output files'''
-run_standard.save(root_path/'output/su_data_query.xlsx')
+run_standard.save(root_path/'output/simple_data_query_output.xlsx')
 
 '''old lists stored here for use in future'''
 old_entries = ['GMPP - IPA DCA', 'BICC approval point',
@@ -124,3 +120,27 @@ vfm_analysis_list = ['Departmental DCA', 'Working Contact Name', 'Working Contac
 ipa_ar_fields_1920 =  ['Department', '19-20 RDEL BL Total', '19-20 CDEL BL WLC',
                  '19-20 RDEL Forecast Total', '19-20 CDEL Forecast Total WLC', 'Total BL',
                  'GMPP - IPA ID Number']
+
+vfm_2 = ['IPDC approval point',
+                 'Total Forecast',
+                 'VfM Category single entry',
+                 'VfM Category lower range',
+                 'VfM Category upper range',
+                 'Present Value Cost (PVC)',
+                 'Present Value Benefit (PVB)',
+                 'Initial Benefits Cost Ratio (BCR)',
+                 'Adjusted Benefits Cost Ratio (BCR)',
+                 'Start of Construction/build',
+                 'Start of Operation',
+                 'Full Operations',
+                 'Project End Date']
+
+stakeholders = ['SRO Full Name',
+                 'SRO Email',
+                 'SRO Phone No.',
+                 'PD Full Name',
+                 'PD Email',
+                 'PD Phone No.',
+                 'Working Contact Name',
+                 'Working Contact Email',
+                 'Working Contact Telephone']

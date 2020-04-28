@@ -421,6 +421,7 @@ def combine_narrtives(project_name, master, key_list):
 '''Set the column titles for the first table, re confidence ratings in the summary sheet'''
 quarter_list = ['This Qrt', 'Q3 1920', 'Q2 1920', 'Q1 1920']
 
-'''enter into the function the quarter details for the output files e.g. _q4_1920 (note put underscore at front'''
+'''enter into the printing function the quarter details for the output files e.g. _q4_1920 (note put underscore at 
+front)'''
 printing('_q4_1920')
 

@@ -178,7 +178,8 @@ def return_baseline_data(project_name_list, data_key_list):
 '''Running the programme'''
 
 '''data keys of interest. Place all keys of interest as stings in this list'''
-data_interest = ['Total BEN Forecast - Total Monetised Benefits']
+data_interest = ['Total Forecast']
+
 
 '''output one - all data. 
 first variable = list of project names. There are two options. 1) latest_quarter_project_names 2) all_projects_names
@@ -193,8 +194,8 @@ second variable = data_interest. This name does not change. List compiled above'
 run_baseline = return_baseline_data(list_of_masters_all[0].projects, data_interest)
 
 '''Specify name of the output document here. See general guidance re saving output files'''
-run_standard.save(root_path/'output/data_query_return.xlsx')
-run_baseline.save(root_path/'output/data_query_return_bl.xlsx')
+run_standard.save(root_path/'output/data_query_output.xlsx')
+run_baseline.save(root_path/'output/data_query_output_bls.xlsx')
 
 '''old lists stored here for use in future'''
 project_basics = ['Brief project description (GMPP - brief descripton)',
@@ -237,7 +238,10 @@ ipa_ar_fields_1920 =  ['Department',
                        'Total BL',
                        'GMPP - IPA ID Number']
 
-milestones = ['Start of Operation',
+milestones = ['SOBC - IPDC Appoval',
+              'OBC - IPDC Approval',
+              'FBC - IPDC Approval',
+              'Start of Operation',
               'Full Operations',
               'Project End Date']
 

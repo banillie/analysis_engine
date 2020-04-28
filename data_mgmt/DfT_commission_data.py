@@ -375,7 +375,7 @@ def add_combine_figures(q_data, string_list):
 
 master_dm = load_workbook(root_path/'input/commission_master_dm.xlsx')
 
-commission_master = project_data_from_master(root_path/'core_data/master_4_2019_commission_initial.xlsx', 4, 2019)
+commission_master = project_data_from_master(root_path/'core_data/master_4_2019.xlsx', 4, 2019)
 
 latest_quarter_master = project_data_from_master(root_path/'core_data/master_3_2019.xlsx', 3, 2019)
 
@@ -385,4 +385,4 @@ project_name_list_commission = [x for x in commission_master.projects if x in la
 
 run = create_master(master_dm, project_name_list_commission, commission_master, latest_quarter_master)
 
-run.save(root_path/'output/Q4_1920_commission_data_final.xlsx')
+run.save(root_path/'output/master_for_datamaps_test.xlsx')
