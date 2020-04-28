@@ -5,7 +5,7 @@ outputs:
 - Programme saves (into output dir) Word documents project changes for each dial.
 - It prints out in the calculations for overall dial position into excel output titled dials.
 
-follow instructions below.
+Follow instructions at end of code.
 
 Note: all master data is taken from the data file. Make sure this is up to date and that all relevant data is in
 the import statement.
@@ -114,8 +114,8 @@ def print_dca_change(dca_change_master):
     sub.add_run(sub_head).bold = True
     down = 0
     for project_name in dca_change_master:
-        print(project_name)
-        print(project_name, dca_change_master[project_name])
+        # print(project_name)
+        # print(project_name, dca_change_master[project_name])
         if dca_change_master[project_name]['Change'] == -4:
             p = doc.add_paragraph()
             a = dca_change_master[project_name]['DCA']
@@ -240,8 +240,6 @@ def calculate_overall_dials():
 
     l_data = list_of_masters_all[0]
 
-    #overall = sort_by_rag(l_data, 'Departmental DCA')
-
     dca_rags = Counter(x[1] for x in sort_by_rag(l_data, 'Departmental DCA'))
     fin_rags = Counter(x[1] for x in sort_by_rag(l_data, 'SRO Finance confidence'))
     ben_rags = Counter(x[1] for x in sort_by_rag(l_data, 'SRO Benefits RAG'))
@@ -253,8 +251,11 @@ def calculate_overall_dials():
     confidence_type_list = ['Overall', 'Finance', 'Benefits', 'Schedule', 'Resources']
 
     for x, colour in enumerate(rag_cl_list):
-        for i, type in enumerate(rag_list):
-            ws.cell(row=x+2, column=i+2).value = type[colour]
+        for i, rag_dict in enumerate(rag_list):
+            ws.cell(row=x+2, column=i+2).value = rag_dict[colour]
+
+    for x, rag_dict in enumerate(rag_list):
+        ws.cell(row=7, column=x+2).value = sum(rag_dict.values())
 
     for x, value in enumerate(rag_cl_list):
         ws.cell(row=x+2, column=1).value = value
@@ -262,41 +263,12 @@ def calculate_overall_dials():
     for x, value in enumerate(confidence_type_list):
         ws.cell(row=1, column=x+2).value = value
 
-    #
-    #     total = 0
-    #     for i in range(0, len(count_list)):
-    #         total += (count_list[i][1])
-    #
-    #     print('total number of projects ' + str(total))
-    #
-    #     a = count_list[0][1] * 0
-    #     b = count_list[1][1] * 25
-    #     c = count_list[2][1] * 50
-    #     d = count_list[3][1] * 75
-    #     e = count_list[4][1] * 100
-    #
-    #     score = a + b + c + d + e
-    #     maximum = total * 100
-    #
-    #     result = score / maximum
-    #
-    #     print(result)
-    #
-    #
-    #     a = count_list[0][1] * 0
-    #     b = count_list[1][1] * 50
-    #     c = count_list[2][1] * 100
-    #
-    #     score = a + b + c
-    #     maximum = total * 100
-    #
-    #     result = score / maximum
-    #
-    # print(result)
+    ws.cell(row=7, column=1).value = 'Total'
+    ws.cell(row=1, column=1).value = 'DCA'
 
     return wb
 
-def run_programme():
+def run_programme(quarter_output):
 
     sro_dca = calculate_dca_change('Departmental DCA', list_of_masters_all[0], list_of_masters_all[1])
     finance_dca = calculate_dca_change('SRO Finance confidence', list_of_masters_all[0], list_of_masters_all[1])
@@ -305,7 +277,7 @@ def run_programme():
     schedule_dca = calculate_dca_change('SRO Schedule Confidence', list_of_masters_all[0], list_of_masters_all[1])
 
     output = calculate_overall_dials()
-    output.save(root_path/'output/dials.xlsx')
+    output.save(root_path/'output/speed_dials_{}.xlsx'.format(quarter_output))
 
     overall = print_dca_change(sro_dca)
     finance = print_dca_change(finance_dca)
@@ -313,14 +285,15 @@ def run_programme():
     benefits = print_dca_change(benefits_dca)
     schedule = print_dca_change(schedule_dca)
 
-    overall.save(root_path/'output/overall_speed_dials_q4_1920.docx')
-    finance.save(root_path/'output/financial_speed_dials_q4_1920.docx')
-    resource.save(root_path/'output/resource_speed_dials_q4_1920.docx')
-    benefits.save(root_path/'output/benefits_speed_dials_q4_1920.docx')
-    schedule.save(root_path/'output/schedule_speed_dials_q4_1920.docx')
+    overall.save(root_path/'output/overall_speed_dials_{}.docx'.format(quarter_output))
+    finance.save(root_path/'output/financial_speed_dials_{}.docx'.format(quarter_output))
+    resource.save(root_path/'output/resource_speed_dials_{}.docx'.format(quarter_output))
+    benefits.save(root_path/'output/benefits_speed_dials_{}.docx'.format(quarter_output))
+    schedule.save(root_path/'output/schedule_speed_dials_{}.docx'.format(quarter_output))
 
 
 ''' RUNNING PROGRAMME '''
-'''simple run programme and check analysis_engine/output dir for word document outputs'''
 
-run_programme()
+'''enter into the run_programme function the quarter details for the output files e.g. _q4_1920 (note put underscore at 
+front)'''
+run_programme('q4_1920')
