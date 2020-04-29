@@ -47,13 +47,13 @@ def printing():
              new_2.add_run('')
 
          except KeyError:
-             pass
-             # new_3 = doc.add_paragraph
-             # new_3.add_run('First time project reporting')
-             # new_4 = doc.add_paragraph
-             # new_4.add_run(latest_txt)
-             # new_5 = doc.add_paragraph
-             # new_5.add_run('')
+
+             sentence = 'First time project is reporting'
+             p = doc.add_paragraph()
+             runner = p.add_run(sentence)
+             runner.bold = True
+             doc.add_paragraph(latest_txt)
+             doc.add_paragraph()
 
 
      return doc
