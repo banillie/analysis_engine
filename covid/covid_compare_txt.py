@@ -48,7 +48,7 @@ def printing():
 
          except KeyError:
 
-             sentence = 'First time project is reporting'
+             sentence = 'First time project is reporting or the project had changed name in master'
              p = doc.add_paragraph()
              runner = p.add_run(sentence)
              runner.bold = True
