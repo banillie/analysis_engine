@@ -48,7 +48,7 @@ def printing():
 
          except KeyError:
 
-             sentence = 'First time project is reporting or the project had changed name in master'
+             sentence = 'First time project is reporting or the project has changed name in master'
              p = doc.add_paragraph()
              runner = p.add_run(sentence)
              runner.bold = True
@@ -63,7 +63,7 @@ def printing():
 '''Insert into the two file paths below the name of latest and last master, after core_data/ .
 Example master file name is master_170420.xlsx. Note make sure .xlsx is at end of file name. 
 The rest of the file path information can remain unchanged'''
-latest_master = project_data_from_master(root_path/'core_data/master_170420.xlsx', 1, 2020)
+latest_master = project_data_from_master(root_path/'core_data/master_290420.xlsx', 1, 2020)
 last_master = project_data_from_master(root_path/'core_data/master_020420.xlsx', 1, 2020)
 
 run = printing()
