@@ -633,31 +633,32 @@ def overall_info(wb):
                 vfm_cat = list_of_masters_all[0].data[project_name]['VfM Category single entry']
                 ws.cell(row=row_num, column=8).value = vfm_cat
 
-            '''vfm category baseline'''
+            '''vfm category last quarter'''
             try:
-                if list_of_masters_all[bc_index[project_name][2]].data[project_name]['VfM Category single entry'] is None:
-                    vfm_cat_baseline = str(list_of_masters_all[bc_index[project_name][2]].data[project_name][
+                if list_of_masters_all[1].data[project_name]['VfM Category single entry'] is None:
+                    vfm_cat_last_quarter = str(list_of_masters_all[1].data[project_name][
                                                'VfM Category lower range']) + ' - ' + \
-                                       str(list_of_masters_all[bc_index[project_name][2]].data[project_name][
+                                       str(list_of_masters_all[1].data[project_name][
                                                'VfM Category upper range'])
                 else:
-                    vfm_cat_baseline = list_of_masters_all[1].data[project_name][
+                    vfm_cat_last_quarter = list_of_masters_all[1].data[project_name][
                         'VfM Category single entry']
 
             except KeyError:
+                # handles projects that have been reporting for latest quarter only
                 try:
-                    vfm_cat_baseline = list_of_masters_all[bc_index[project_name][2]].data[project_name][
+                    vfm_cat_last_quarter = list_of_masters_all[bc_index[project_name][2]].data[project_name][
                         'VfM Category single entry']
                 except KeyError:
-                    try:
-                        vfm_cat_baseline = list_of_masters_all[bc_index[project_name][2]].data[project_name]['VfM Category']
-                    except:
-                        vfm_cat_baseline = None
+                    # try:
+                    vfm_cat_last_quarter = list_of_masters_all[bc_index[project_name][2]].data[project_name]['VfM Category']
+                    # except:
+                    #     vfm_cat_last_quarter = None
 
-            if vfm_cat != vfm_cat_baseline:
-                if vfm_cat_baseline is None:
-                    pass
-                else:
+            if vfm_cat != vfm_cat_last_quarter:
+                # if vfm_cat_last_quarter is None:
+                #     pass
+                # else:
                     ws.cell(row=row_num, column=8).font = Font(name='Arial', size=10, color='00fc2525')
 
             '''full operation current date'''
@@ -695,7 +696,7 @@ def overall_info(wb):
                 ws.cell(row=row_num, column=13).value = highlight_close_dates_ipdc\
                     (concatenate_dates(list_of_masters_all[0].data[project_name]['Next at BICC']))
             except TypeError:
-                print(project_name + ' caused error in last at / next at ipdc calculation')
+                print(project_name + ' last at / next at ipdc data could not be calculated. Check data.')
 
 
             '''IPA DCA rating'''
