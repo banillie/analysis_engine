@@ -20,6 +20,7 @@ def printing():
      doc = Document()
 
      for project_name in latest_master.projects:
+         #project_name = latest_master.data[project]['Project']
          heading = str(project_name)
          intro = doc.add_heading(str(heading), 0)
          intro.alignment = 1
@@ -43,6 +44,23 @@ def printing():
              except AttributeError:
                  pass
 
+             if last_txt is None:
+                 sentence = 'Project did not provide text last time. Latest text provided, but not compared' \
+                            ' against anything.'
+                 p = doc.add_paragraph()
+                 runner = p.add_run(sentence)
+                 runner.bold = True
+                 doc.add_paragraph(latest_txt)
+                 doc.add_paragraph()
+
+             if latest_txt is None:
+                 sentence = 'Project did not provide text this time. Text provided last time given here'
+                 p = doc.add_paragraph()
+                 runner = p.add_run(sentence)
+                 runner.bold = True
+                 doc.add_paragraph(latest_txt)
+                 doc.add_paragraph()
+
              new_2 = doc.add_paragraph()
              new_2.add_run('')
 
@@ -63,8 +81,8 @@ def printing():
 '''Insert into the two file paths below the name of latest and last master, after core_data/ .
 Example master file name is master_170420.xlsx. Note make sure .xlsx is at end of file name. 
 The rest of the file path information can remain unchanged'''
-latest_master = project_data_from_master(root_path/'core_data/master_290420.xlsx', 1, 2020)
-last_master = project_data_from_master(root_path/'core_data/master_020420.xlsx', 1, 2020)
+latest_master = project_data_from_master(root_path/'core_data/latest_master.xlsx', 1, 2020)
+last_master = project_data_from_master(root_path/'core_data/master_170420.xlsx', 1, 2020)
 
 run = printing()
 
