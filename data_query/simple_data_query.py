@@ -84,16 +84,9 @@ def return_data(data_key_list):
 
     return wb
 
-'''data keys of interest. Place all keys of interest as stings in this list'''
-data_interest = ['SRO Full Name',
-                 'SRO Email',
-                 'SRO Phone No.',
-                 'PD Full Name',
-                 'PD Email',
-                 'PD Phone No.',
-                 'Working Contact Name',
-                 'Working Contact Email',
-                 'Working Contact Telephone']
+'''data keys of interest. Place all keys of interest as stings in to a list or use one of the imported
+lists from the data file'''
+data_interest = []
 
 '''Running the programme'''
 
@@ -103,44 +96,8 @@ run_standard = return_data(data_interest)
 '''Specify name of the output document here. See general guidance re saving output files'''
 run_standard.save(root_path/'output/simple_data_query_output.xlsx')
 
-'''old lists stored here for use in future'''
-old_entries = ['GMPP - IPA DCA', 'BICC approval point',
-               'Brief project description (GMPP - brief descripton)',
-               'Delivery Narrative']
 
-vfm_analysis_list = ['Departmental DCA', 'Working Contact Name', 'Working Contact Email',
-                 'Brief project description (GMPP - brief descripton)',
-                 'Business Case & Version No.', 'BICC approval point',
-                 'NPV for all projects and NPV for programmes if available',
-                 'Initial Benefits Cost Ratio (BCR)', 'Adjusted Benefits Cost Ratio (BCR)',
-                 'VfM Category single entry', 'VfM Category lower range', 'VfM Category upper range',
-                 'Present Value Cost (PVC)', 'Present Value Benefit (PVB)', 'SRO Benefits RAG',
-                 'Benefits Narrative', 'Ben comparison with last quarters cost - narrative']
 
-ipa_ar_fields_1920 =  ['Department', '19-20 RDEL BL Total', '19-20 CDEL BL WLC',
-                 '19-20 RDEL Forecast Total', '19-20 CDEL Forecast Total WLC', 'Total BL',
-                 'GMPP - IPA ID Number']
 
-vfm_2 = ['IPDC approval point',
-                 'Total Forecast',
-                 'VfM Category single entry',
-                 'VfM Category lower range',
-                 'VfM Category upper range',
-                 'Present Value Cost (PVC)',
-                 'Present Value Benefit (PVB)',
-                 'Initial Benefits Cost Ratio (BCR)',
-                 'Adjusted Benefits Cost Ratio (BCR)',
-                 'Start of Construction/build',
-                 'Start of Operation',
-                 'Full Operations',
-                 'Project End Date']
 
-stakeholders = ['SRO Full Name',
-                 'SRO Email',
-                 'SRO Phone No.',
-                 'PD Full Name',
-                 'PD Email',
-                 'PD Phone No.',
-                 'Working Contact Name',
-                 'Working Contact Email',
-                 'Working Contact Telephone']
+

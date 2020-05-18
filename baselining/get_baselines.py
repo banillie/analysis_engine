@@ -3,7 +3,7 @@ output is excel wb with project bl data on seperate ws.
 Could be of future use'''
 
 from openpyxl import Workbook
-from analysis.data import list_of_masters_all, latest_quarter_project_names, root_path, baseline_bc_stamp
+from analysis.data import list_of_masters_all, root_path, baseline_bc_stamp
 from analysis.engine_functions import get_quarter_stamp, baseline_information
 
 def get_baseline(project_name_list, baseline_data, comp_baseline_list):
@@ -11,8 +11,8 @@ def get_baseline(project_name_list, baseline_data, comp_baseline_list):
 
     for i, name in enumerate(project_name_list):
         '''worksheet is created for each project'''
-        ws = wb.create_sheet(name, i)  # creating worksheets
-        ws.title = name  # title of worksheet
+        ws = wb.create_sheet(name[0:29], i)  # creating worksheets
+        ws.title = name[0:29]  # title of worksheet
 
         for data in (baseline_data[name]):
             column_index = data[2]
@@ -33,16 +33,18 @@ def get_baseline(project_name_list, baseline_data, comp_baseline_list):
             ws.cell(row=n+4, column=1, value=key)
 
         ws.cell(row=1, column=1, value='Quarter')
-        ws.cell(row=2, column=1, value='IPDC bc approval')
-        ws.cell(row=3, column=1, value='Re-baselined this quarter')
+        ws.cell(row=2, column=1, value='IPDC BC approval')
+        ws.cell(row=3, column=1, value='Re-baselined in quarter')
+        ws.cell(row=13, column=1, value='Notes')
+
 
 
     return wb
 
 baseline_name_list = ['this quarter',
-                      'ALB milestones',
-                      'ALB cost',
-                      'ALB benefits',
+                      'ALB/Programme milestones',
+                      'ALB/Programme cost',
+                      'ALB/Programme benefits',
                       'IPDC milestones',
                       'IPDC cost',
                       'IPDC benefits',
@@ -52,12 +54,12 @@ baseline_name_list = ['this quarter',
 
 all_baselines_list = []
 for x in baseline_name_list:
-    baselines = baseline_information(latest_quarter_project_names, list_of_masters_all, x)
+    baselines = baseline_information(list_of_masters_all[0].projects, list_of_masters_all, x)
     all_baselines_list.append(baselines)
 
 '''Running the programme'''
 '''output one - all data'''
-run = get_baseline(latest_quarter_project_names, baseline_bc_stamp, all_baselines_list)
+run = get_baseline(list_of_masters_all[0].projects, baseline_bc_stamp, all_baselines_list)
 
 '''Specify name of the output document here'''
 run.save(root_path/'output/baseline_info.xlsx')

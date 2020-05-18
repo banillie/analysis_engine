@@ -36,7 +36,7 @@ def change_key(project_list, master_wb_title_list, change_key):
                 if project_name == name:
                     print(name)
                     for row_num in range(2, ws.max_row + 1):
-                        for i in range(1, 4): # TODO: non-hard code fix.
+                        for i in range(1, 13): # TODO: non-hard code fix. change key length?
                             if ws.cell(row=row_num, column=col_num).value == change_key[project_name]['Key '+ str(i)]:
                                     print(change_key[project_name]['Key '+ str(i)])
                                     ws.cell(row=row_num, column=col_num).value = change_key.data[project_name]['Key '+ str(i)+' change']
@@ -71,8 +71,8 @@ key_change = project_data_from_master(root_path/'input/change_milestone_keys_q4_
 
 '''THREE. List of projects. taken from the key change document - as this contains the only projects that need 
 information changed'''
-project_name_list = key_change.projects
-#project_name_list = ['Commercial Vehicle Services (CVS)']
+#project_name_list = key_change.projects
+project_name_list = ['A303 Amesbury to Berwick Down']
 
 '''FOUR. enter relevant variables in the change_key function'''
 change_key(project_name_list, master_list, key_change)

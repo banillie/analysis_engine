@@ -176,10 +176,8 @@ def return_baseline_data(project_name_list, data_key_list):
     return wb
 
 '''Running the programme'''
-
-'''data keys of interest. Place all keys of interest as stings in this list'''
+'''Place all keys of interest as stings in to a list or use one of the imported lists from the data file'''
 data_interest = ['Total Forecast']
-
 
 '''output one - all data. 
 first variable = list of project names. There are two options. 1) latest_quarter_project_names 2) all_projects_names
@@ -196,58 +194,3 @@ run_baseline = return_baseline_data(list_of_masters_all[0].projects, data_intere
 '''Specify name of the output document here. See general guidance re saving output files'''
 run_standard.save(root_path/'output/data_query_output.xlsx')
 run_baseline.save(root_path/'output/data_query_output_bls.xlsx')
-
-'''old lists stored here for use in future'''
-project_basics = ['Brief project description (GMPP - brief descripton)',
-                  'Delivery Narrative']
-
-vfm_analysis_list = ['Departmental DCA',
-                     'Working Contact Name',
-                     'Working Contact Email',
-                     'Brief project description (GMPP - brief descripton)',
-                     'Business Case & Version No.',
-                     'BICC approval point',
-                     'NPV for all projects and NPV for programmes if available',
-                     'Initial Benefits Cost Ratio (BCR)',
-                     'Adjusted Benefits Cost Ratio (BCR)',
-                     'VfM Category single entry',
-                     'VfM Category lower range',
-                     'VfM Category upper range',
-                     'Present Value Cost (PVC)',
-                     'Present Value Benefit (PVB)',
-                     'SRO Benefits RAG',
-                     'Benefits Narrative',
-                     'Ben comparison with last quarters cost - narrative']
-
-vfm_analysis_list_two = ['NPV for all projects and NPV for programmes if available',
-                 'Adjusted Benefits Cost Ratio (BCR)',
-                 'Initial Benefits Cost Ratio (BCR)',
-                 'Present Value Cost (PVC)',
-                 'Present Value Benefit (PVB)',
-                 'VfM Category single entry',
-                 'VfM Category lower range',
-                 'VfM Category upper range',
-                 'Benefits Narrative',
-                 'Start of Operation']
-
-ipa_ar_fields_1920 =  ['Department',
-                       '19-20 RDEL BL Total',
-                       '19-20 CDEL BL WLC',
-                       '19-20 RDEL Forecast Total',
-                       '19-20 CDEL Forecast Total WLC',
-                       'Total BL',
-                       'GMPP - IPA ID Number']
-
-milestones = ['SOBC - IPDC Appoval',
-              'OBC - IPDC Approval',
-              'FBC - IPDC Approval',
-              'Start of Operation',
-              'Full Operations',
-              'Project End Date']
-
-costs = ['Total Forecast']
-
-rags = ['SRO Benefits RAG',
-        'GMPP - IPA DCA']
-
-baselines = ['IPDC approval point']
