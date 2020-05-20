@@ -35,15 +35,15 @@ the user. Output file names are generated via file paths e.g. `root_path/'output
 
 Each file contains guidance on how it can be run . 
 
-## Virtual environment set up
+## Getting set-up. Python, Git, Pycharm and virtual environment. 
 
 If you are familiar with setting up virtual environments and working with PyCharm this section can be skipped. The below
 steps are set out in a particular way to help a user who is unfamiliar/new to working with Python, PyCharm, Github and 
 virtual environments. 
 
 Firstly you need to install Python. Go to the Python website and download the latest Python 3.7 e.g. 3.7.7. Note do not
-download 3.8 as that is not currently compatible with all the programmes in `analysis_engine`. When installing Python
-accept all default download options. 
+download 3.8 as that is not currently compatible with all the programmes in `analysis_engine`. To install choose 
+Windows x86-64 executable installer and ensure that the PATH box is ticked when running the installation. 
 
 Secondly install the community edition of PyCharm from the PyCharm website. Make sure you download the community edition.
 Accept all default options, but check the create 64 bit desktop app if you can. 
