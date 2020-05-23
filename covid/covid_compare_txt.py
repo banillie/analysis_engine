@@ -19,7 +19,7 @@ def printing():
 
      doc = Document()
 
-     for project_name in latest_master.projects:
+     for project_name in covid_master_list[0].projects:
          #project_name = latest_master.data[project]['Project']
          heading = str(project_name)
          intro = doc.add_heading(str(heading), 0)
@@ -30,14 +30,14 @@ def printing():
          new.add_run('')
 
 
-         latest_txt = latest_master.data[project_name]['Project Narrative']
+         latest_txt = covid_master_list[0].data[project_name]['Project Narrative']
          if latest_txt is None:
-             latest_txt = latest_master.data[project_name]['Group Narrative']
+             latest_txt = covid_master_list[0].data[project_name]['Group Narrative']
 
          try:
-             last_txt = last_master.data[project_name]['Project Narrative']
+             last_txt = covid_master_list[1].data[project_name]['Project Narrative']
              if last_txt is None:
-                 last_txt = last_master.data[project_name]['Group Narrative']
+                 last_txt = covid_master_list[1].data[project_name]['Group Narrative']
 
              try:
                 compare_text_newandold(latest_txt, last_txt, doc)
@@ -78,14 +78,17 @@ def printing():
 
 '''RUNNING PROGRAMME INSTRUCTIONS'''
 
-'''Insert into the two file paths below the name of latest and last master, after core_data/ .
-Example master file name is master_170420.xlsx. Note make sure .xlsx is at end of file name. 
-The rest of the file path information can remain unchanged'''
-latest_master = project_data_from_master(root_path/'core_data/latest_master.xlsx', 1, 2020)
-last_master = project_data_from_master(root_path/'core_data/master_170420.xlsx', 1, 2020)
+'''Ensure the latest master is being uploaded and placed in the masters list'''
 
-run = printing()
+master_29_05 = project_data_from_master(root_path/'core_data/covid_19/master_290520.xlsx', 1, 2020)
+master_13_05 = project_data_from_master(root_path/'core_data/covid_19/master_130520.xlsx', 1, 2020)
+master_01_05 = project_data_from_master(root_path/'core_data/covid_19/master_010520.xlsx', 1, 2020)
+
+covid_master_list = [master_29_05,
+                     master_13_05,
+                     master_01_05]
 
 '''The name of the output document can be changed via changing the file path here, if desired. The standard
 name output name is covid_compare_text. Note make sure .docx is at end'''
-run.save(root_path/'output/covid_compare_text.docx')
+run = printing()
+run.save(root_path/'output/covid_19/covid_compare_text.docx')
