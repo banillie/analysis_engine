@@ -11,21 +11,25 @@ def get_data(wb):
 
     for name in (list_of_masters_all[0].projects):
         '''worksheet is created for each project'''
-        ws = wb[name[0:29]]  # opening project ws
+        try:
+            ws = wb[name[0:29]]  # opening project ws
 
-        other_dict = {}
+            other_dict = {}
 
-        for x in range(2, ws.max_column+1):
-            lower_dictionary = {}
-            quarter = ws.cell(row=1, column=x).value
-            for i in range(2, ws.max_row):
-                value = ws.cell(row=i, column=x).value
-                key = ws.cell(row=i, column=1).value
-                lower_dictionary[key] = value
+            for x in range(2, ws.max_column+1):
+                lower_dictionary = {}
+                quarter = ws.cell(row=1, column=x).value
+                for i in range(2, ws.max_row):
+                    value = ws.cell(row=i, column=x).value
+                    key = ws.cell(row=i, column=1).value
+                    lower_dictionary[key] = value
 
-            other_dict[quarter] = lower_dictionary
+                other_dict[quarter] = lower_dictionary
 
-        bl_dict[name] = other_dict
+            bl_dict[name] = other_dict
+
+        except KeyError:
+            pass
 
     return bl_dict
 
@@ -63,35 +67,14 @@ def place_in_masters(project_list, master_wb_title_list, baseline_data):
                     for row_num in range(2, ws.max_row + 1):
                         if ws.cell(row=row_num, column=1).value == 'Reporting period (GMPP - Snapshot Date)':
                             quarter = ws.cell(row=row_num, column=col_num).value
-                            print(quarter)
-                            try:
-                                project_bl_dict_keys = list(project_bl_dict[quarter].keys())
-                            except KeyError:
-                                # exception handling as q4 quarter stamp not consistent.
-                                # To be change/tidied in the master.
-                                try:
-                                    project_bl_dict_keys = list(project_bl_dict['Q4 Jan - Mar 2019'].keys())
-                                except KeyError:
-                                    project_bl_dict_keys = list(project_bl_dict['Q4 1819'].keys())
-
-
-                    # some hard coding required via wb_key_list as key names between master and bl_data
-                    # not a match. To sort for next iteration
+                            project_bl_dict_keys = list(project_bl_dict[quarter].keys())
 
                     for i, dict_key in enumerate(project_bl_dict_keys):
                         for row_num in range(2, ws.max_row + 1):
                             wb_key = ws.cell(row=row_num, column=1).value
                             if wb_key == wb_key_list[i]:
-                                try:
-                                    ws.cell(row=row_num, column=col_num).value = project_bl_dict[quarter][dict_key]
-                                    ws.cell(row=row_num, column=col_num).font = red_text
-                                except KeyError:
-                                    #exception handling the same as above
-                                    try:
-                                        ws.cell(row=row_num, column=col_num).value = project_bl_dict['Q4 1819'][dict_key]
-                                    except KeyError:
-                                        ws.cell(row=row_num, column=col_num).value = \
-                                            project_bl_dict['Q4 Jan - Mar 2019'][dict_key]
+                                ws.cell(row=row_num, column=col_num).value = project_bl_dict[quarter][dict_key]
+                                ws.cell(row=row_num, column=col_num).font = red_text
 
                 else:
                     pass
@@ -106,6 +89,22 @@ def check_keys():
         q_data_keys = list(q_data.keys())
         if 'Re-baseline ALB/Programme milestones' in q_data_keys:
             print('Yes')
+
+def change_quarter_string():
+
+    for master in bl_data_list:
+        wb = load_workbook(master)
+        for ws in wb.worksheets:
+            ws.cell(row=1, column=6).value = 'Q4 1819'
+            ws.cell(row=1, column=6).font = red_text
+            ws.cell(row=1, column=7).value = 'Q3 Oct - Dec 2018'
+            ws.cell(row=1, column=7).font = red_text
+            ws.cell(row=1, column=13).value = 'Q1 Apr - Jun 2017'
+            ws.cell(row=1, column=13).font = red_text
+            ws.cell(row=1, column=14).value = 'Q4 Jan - Mar 2017'
+            ws.cell(row=1, column=14).font = red_text
+        wb.save(master)
+
 
 master_list = [root_path/'core_data/master_4_2019.xlsx',
                root_path/'core_data/master_3_2019.xlsx',
@@ -122,10 +121,18 @@ master_list = [root_path/'core_data/master_4_2019.xlsx',
                root_path/'core_data/master_4_2016.xlsx',
                root_path/'core_data/master_3_2016.xlsx']
 
-baseline_data_wb = load_workbook(root_path / 'input/baseline_info_2.xlsx')
+bl_data_list = [root_path / 'input/baseline_info_HSMRPG_projects.xlsx',
+                    root_path / 'input/baseline_info_amis_projects.xlsx',
+                    root_path / 'input/baseline_info_FTTS.XLSX',
+                    root_path / 'input/baseline_info_HE_projects.xlsx',
+                    root_path / 'input/baseline_info_rail.xlsx']
+
+baseline_data_wb = load_workbook(root_path / 'input/baseline_info_HSMRPG_projects.xlsx')
 
 bl_data = get_data(baseline_data_wb)
 
-place_in_masters(list_of_masters_all[0].projects, master_list, bl_data)
+place_in_masters(bl_data.keys(), master_list, bl_data)
 
 #check_keys()
+
+#change_quarter_string()
