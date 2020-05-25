@@ -1,12 +1,13 @@
-'''Throw away code for compiling bl information on projects, used to commission and collect further data from projects
-output is excel wb with project bl data on seperate ws.
-Could be of future use'''
+'''code that creates wb with all project bl meta data point'''
+
 
 from openpyxl import Workbook
 from analysis.data import list_of_masters_all, root_path, baseline_bc_stamp
 from analysis.engine_functions import get_quarter_stamp, baseline_information
 
 def get_baseline(project_name_list, baseline_data, comp_baseline_list):
+    '''functions places all bl data into a wb'''
+
     wb = Workbook()
 
     for i, name in enumerate(project_name_list):
@@ -36,8 +37,6 @@ def get_baseline(project_name_list, baseline_data, comp_baseline_list):
         ws.cell(row=2, column=1, value='IPDC BC approval')
         ws.cell(row=3, column=1, value='Re-baselined in quarter')
         ws.cell(row=13, column=1, value='Notes')
-
-
 
     return wb
 
