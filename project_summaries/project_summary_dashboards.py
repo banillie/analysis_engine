@@ -18,11 +18,14 @@ from docx import Document
 import datetime
 from docx.oxml.ns import nsdecls
 from docx.oxml import parse_xml
-from docx.shared import Cm, RGBColor
+from docx.shared import Cm, RGBColor, Inches
 import difflib
+import matplotlib.pyplot as plt
 
 from analysis.engine_functions import convert_rag_text, all_milestone_data_bulk
-from analysis.data import list_of_masters_all, root_path
+from analysis.data import list_of_masters_all, root_path, latest_cost_profiles, last_cost_profiles, \
+    baseline_1_cost_profiles, year_list
+
 
 
 def cell_colouring(cell, colour):
@@ -329,7 +332,26 @@ def printing(quarter_output):
         heading = 'Financial Analysis - Cost Profile'
         y.add_run(str(heading)).bold = True
         y = doc.add_paragraph()
-        y.add_run('{insert chart}')
+
+        '''financial chart'''
+
+        profile_data = get_financial_data(project_name)
+
+        fig, ax = plt.subplots()
+
+        year = ['19/20', '20/21', '21/22', '22/23', '23/24', '24/25', '25/26', '26/27', '27/28', '28/29']
+        baseline_profile = profile_data[2]
+        last_profile = profile_data[1]
+        latest_profile = profile_data[0]
+        ax.plot(year, baseline_profile, color='blue')
+        ax.plot(year, last_profile, color='yellow')
+        ax.plot(year, latest_profile, color='g')
+        ax.set(xlabel='Years', ylabel='Cost £m')
+        ax.set_title(str(project_name) + ' cost profile')
+        # plt.show()
+        ax.figure.savefig('cost_profile.png')
+
+        doc.add_picture('cost_profile.png', width=Inches(5))
 
         '''milestone section'''
         y = doc.add_paragraph()
@@ -415,6 +437,18 @@ def combine_narrtives(project_name, master, key_list):
 
     return output
 
+amended_year_list = year_list[:-1]
+
+def get_financial_data(project_name):
+    latest = []
+    last = []
+    baseline = []
+    for year in amended_year_list:
+        baseline.append(baseline_1_cost_profiles[project_name][year + ' total'])
+        last.append(last_cost_profiles[project_name][year + ' total'])
+        latest.append(latest_cost_profiles[project_name][year + ' total'])
+
+    return latest, last, baseline
 
 '''RUNNING PROGRAMME'''
 
