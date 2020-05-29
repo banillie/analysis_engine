@@ -15,15 +15,14 @@ the import statement.
 #TODO solve problem re filtering in excel when values have + sign in front of the them
 
 from openpyxl import Workbook
-from analysis.engine_functions import all_milestone_data_bulk, ap_p_milestone_data_bulk, assurance_milestone_data_bulk, \
-    project_time_difference, filter_project_group
+from analysis.engine_functions import project_time_difference, all_milestones_dict
 from analysis.data import list_of_masters_all, bc_index, baseline_bc_stamp, root_path
 
 
 def put_into_wb_all_single(function):
     '''
 
-    Function that places all data into excel wb for this programme
+    Function that places all individual milestone data into excel wb.
 
     project_name_list: list of project to return data for
     t_data: dictionary containing milestone data for projects.
@@ -119,5 +118,5 @@ end of output file name e.g. q4_1920. Note make sure file ends with .xlsx format
 
 '''
 
-output = put_into_wb_all_single(all_milestone_data_bulk)
-output.save(root_path/'output/ind_project_milestones_q4_1920.xlsx')
+output = put_into_wb_all_single(all_milestones_dict)
+output.save(root_path/'output/ind_project_milestones_q4_1920_2.xlsx')
