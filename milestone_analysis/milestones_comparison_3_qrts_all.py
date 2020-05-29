@@ -13,10 +13,8 @@ the import statement.
 '''
 
 from openpyxl import Workbook
-from analysis.engine_functions import all_milestone_data_bulk, ap_p_milestone_data_bulk, assurance_milestone_data_bulk, \
-    project_time_difference, bc_ref_stages, master_baseline_index, filter_project_group, approval_milestone_data_bulk, \
-    root_path
-from analysis.data import list_of_masters_all, bc_index
+from analysis.engine_functions import project_time_difference, all_milestones_dict
+from analysis.data import list_of_masters_all, root_path, ipdc_milestone_bl_index, hsmrpg
 
 def put_into_wb_all(project_name_list, t_data, td_data, td_data_two, wb):
     '''
@@ -44,34 +42,19 @@ def put_into_wb_all(project_name_list, t_data, td_data, td_data_two, wb):
             try:
                 milestone_date = tuple(t_data[project_name][milestone])[0]
                 ws.cell(row=row_num + i, column=3).value = milestone_date
+                ws.cell(row=row_num + i, column=3).number_format = 'dd/mm/yy'
             except KeyError:
                 ws.cell(row=row_num + i, column=3).value = 0
 
             try:
                 value = td_data[project_name][milestone]
-                # try:
-                    # if int(value) > 0:
-                    #     ws.cell(row=row_num + i, column=4).value = '+' + str(value) + ' (days)'
-                    # elif int(value) < 0:
-                    #     ws.cell(row=row_num + i, column=4).value = str(value) + ' (days)'
-                    # elif int(value) == 0:
                 ws.cell(row=row_num + i, column=4).value = value
-                # except ValueError:
-                #     ws.cell(row=row_num + i, column=4).value = value
             except KeyError:
                 ws.cell(row=row_num + i, column=4).value = 0
 
             try:
                 value = td_data_two[project_name][milestone]
-                # try:
-                    # if int(value) > 0:
-                    #     ws.cell(row=row_num + i, column=5).value = '+' + str(value) + ' (days)'
-                    # elif int(value) < 0:
-                    #     ws.cell(row=row_num + i, column=5).value = str(value) + ' (days)'
-                    # elif int(value) == 0:
                 ws.cell(row=row_num + i, column=5).value = value
-                # except ValueError:
-                #     ws.cell(row=row_num + i, column=5).value = value
             except KeyError:
                 ws.cell(row=row_num + i, column=5).value = 0
 
@@ -115,12 +98,12 @@ def run_milestone_comparator(function, project_name_list, masters_list):
     last_milestones_data = {}
     oldest_milestones_data = {}
     for project_name in project_name_list:
-        print(project_name)
+        #print(project_name)
         p_current_milestones_data = function([project_name], masters_list[0])
         current_milestones_data.update(p_current_milestones_data)
         p_last_milestones_data = function([project_name], masters_list[1])
         last_milestones_data.update(p_last_milestones_data)
-        p_oldest_milestones_data = function([project_name], masters_list[bc_index[project_name][2]])
+        p_oldest_milestones_data = function([project_name], masters_list[ipdc_milestone_bl_index[project_name][2]])
         oldest_milestones_data.update(p_oldest_milestones_data)
 
     '''calculate time current and last quarter'''
@@ -130,7 +113,6 @@ def run_milestone_comparator(function, project_name_list, masters_list):
     run = put_into_wb_all(project_name_list, current_milestones_data, first_diff_data, second_diff_data, wb)
 
     return run
-
 
 ''' RUNNING PROGRAMME '''
 
@@ -144,7 +126,7 @@ statement above.
 3. masters_list: list of masters containing quarter information
  
 '''
-run = run_milestone_comparator(all_milestone_data_bulk, list_of_masters_all[0].projects, list_of_masters_all)
+run = run_milestone_comparator(all_milestones_dict, hsmrpg, list_of_masters_all)
 
 '''specify file path to output document'''
-run.save(root_path/'output/portfolio_milestone_analysis_q4_1920.xlsx')
+run.save(root_path/'output/portfolio_milestone_analysis_test.xlsx')
