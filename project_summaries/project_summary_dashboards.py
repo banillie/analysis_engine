@@ -18,13 +18,13 @@ from docx import Document
 import datetime
 from docx.oxml.ns import nsdecls
 from docx.oxml import parse_xml
-from docx.shared import Cm, RGBColor, Inches
+from docx.shared import Cm, RGBColor, Inches, Pt
 import difflib
 import matplotlib.pyplot as plt
 
 from analysis.engine_functions import convert_rag_text, all_milestone_data_bulk
 from analysis.data import list_of_masters_all, root_path, latest_cost_profiles, last_cost_profiles, \
-    baseline_1_cost_profiles, year_list
+    baseline_1_cost_profiles, year_list, a66, a303, crossrail, thameslink
 
 
 
@@ -167,12 +167,18 @@ def printing(quarter_output):
     '''function that compiles the summary sheet'''
 
     master_list = list_of_masters_all[0:4]
+    test_project_list = [a66, a303, crossrail, thameslink]
 
     milestone_master = all_milestone_data_bulk(list_of_masters_all[0].projects, list_of_masters_all[0])
 
-    for project_name in list_of_masters_all[0].projects:
+    for project_name in test_project_list:
         doc = Document()
         print(project_name)
+
+        font = doc.styles['Normal'].font
+        font.name = 'Arial'
+        font.size = Pt(10)
+
         heading = str(project_name)
         name = str(project_name)
         # TODO: change heading font size
@@ -337,21 +343,27 @@ def printing(quarter_output):
 
         profile_data = get_financial_data(project_name)
 
-        fig, ax = plt.subplots()
-
         year = ['19/20', '20/21', '21/22', '22/23', '23/24', '24/25', '25/26', '26/27', '27/28', '28/29']
         baseline_profile = profile_data[2]
         last_profile = profile_data[1]
         latest_profile = profile_data[0]
-        ax.plot(year, baseline_profile, color='blue')
-        ax.plot(year, last_profile, color='yellow')
-        ax.plot(year, latest_profile, color='g')
-        ax.set(xlabel='Years', ylabel='Cost £m')
-        ax.set_title(str(project_name) + ' cost profile')
-        # plt.show()
+
+
+        fig, ax = plt.subplots(figsize=(20,10))
+        plt.style.use('fivethirtyeight')
+        #plt.style.use('seaborn-muted')
+
+        plt.subplots_adjust(left=0.1, bottom=0.1, right=0.8, top=0.9, wspace=0.2, hspace=0.2)
+
+        ax.plot(year, baseline_profile, color='blue', label='baseline')
+        ax.plot(year, last_profile, color='yellow', label='last quarter')
+        ax.plot(year, latest_profile, color='green', label='latest')
+        ax.set(xlabel='Financial Years', ylabel='Cost (£m)')
+        ax.set_title(str(project_name))
+        ax.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0.)
         ax.figure.savefig('cost_profile.png')
 
-        doc.add_picture('cost_profile.png', width=Inches(5))
+        doc.add_picture('cost_profile.png', width=Inches(6))
 
         '''milestone section'''
         y = doc.add_paragraph()
