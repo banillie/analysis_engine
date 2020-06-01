@@ -3,32 +3,34 @@ from analysis.data import latest_cost_profiles, last_cost_profiles, baseline_1_c
     year_list, root_path, a66, a303, crossrail, thameslink
 from docx import Document
 from docx.shared import Inches
+from docx.enum.section import WD_ORIENT
 
 doc = Document()
 amended_year_list = year_list[:-1]
 #plt.style.use('fivethirtyeight') #maybe? or sort graph style?
 
-def get_financial_data(project_name):
+def get_financial_data(project_name, cost_type):
+    '''gets project financial data'''
     latest = []
     last = []
     baseline = []
     for year in amended_year_list:
-        baseline.append(baseline_1_cost_profiles[project_name][year + ' total'])
-        last.append(last_cost_profiles[project_name][year + ' total'])
-        latest.append(latest_cost_profiles[project_name][year + ' total'])
+        baseline.append(baseline_1_cost_profiles[project_name][year + cost_type])
+        last.append(last_cost_profiles[project_name][year + cost_type])
+        latest.append(latest_cost_profiles[project_name][year + cost_type])
 
     return latest, last, baseline
 
-def put_in_word(project_name_list):
+def single_chart(project_name_list):
+    '''creates matplotlob chart and places it in word doc'''
     for project_name in project_name_list:
         y = doc.add_paragraph()
         heading = 'Financial Analysis - Cost Profile'
         y.add_run(str(heading)).bold = True
-        y = doc.add_paragraph()
 
         '''financial chart'''
 
-        profile_data = get_financial_data(project_name)
+        profile_data = get_financial_data(project_name, ' total')
 
         year = ['19/20', '20/21', '21/22', '22/23', '23/24', '24/25', '25/26', '26/27', '27/28', '28/29']
         baseline_profile = profile_data[2]
@@ -67,7 +69,74 @@ def put_in_word(project_name_list):
 
         doc.save(root_path/'output/graph.docx')
 
-project_list = [a66]
-                #a303, crossrail, thameslink]
+def two_graph_chart(project_list):
+    for project_name in project_list:
+        profile_data_total = get_financial_data(project_name, ' total')
+        profile_data_rdel = get_financial_data(project_name, ' RDEL Forecast Total')
+        profile_data_cdel = get_financial_data(project_name, ' CDEL Forecast Total')
 
-put_in_word(project_list)
+        year = ['19/20', '20/21', '21/22', '22/23', '23/24', '24/25', '25/26', '26/27', '27/28', '28/29']
+        baseline_profile_total = profile_data_total[2]
+        last_profile_total = profile_data_total[1]
+        latest_profile_total = profile_data_total[0]
+
+        latest_profile_rdel = profile_data_rdel[0]
+        latest_profile_cdel = profile_data_cdel[0]
+
+        fig, (ax1, ax2) = plt.subplots(2, figsize=(20,10))
+        fig.suptitle(str(project_name) + ' Cost Analysis')  # title
+
+        ax1.plot(year, baseline_profile_total, color='blue', label='baseline', linewidth=4.0, marker="o")
+        ax1.plot(year, last_profile_total, color='yellow', label='last quarter', linewidth=4.0, marker="o")
+        ax1.plot(year, latest_profile_total, color='green', label='latest', linewidth=4.0, marker="o")
+
+        ax2.plot(year, latest_profile_cdel, color='red', label='CDEL', linewidth=4.0, marker="o")
+        ax2.plot(year, latest_profile_rdel, color='blue', label='RDEL', linewidth=4.0, marker="o")
+
+        ax1.set_xlabel('Financial Years')
+        ax1.set_ylabel('Cost (£m)')
+        xlab1 = ax1.xaxis.get_label()
+        ylab1 = ax1.yaxis.get_label()
+        xlab1.set_style('italic')
+        xlab1.set_size(10)
+        ylab1.set_style('italic')
+        ylab1.set_size(10)
+        ax1.grid(color='grey', linestyle='-', linewidth=0.2)
+        ax1.legend(borderpad=2)
+        #TODO give legends a header
+
+        ax2.set_xlabel('Financial Years')
+        ax2.set_ylabel('Cost (£m)')
+        xlab2 = ax2.xaxis.get_label()
+        ylab2 = ax2.yaxis.get_label()
+        xlab2.set_style('italic')
+        xlab2.set_size(10)
+        ylab2.set_style('italic')
+        ylab2.set_size(10)
+        ax2.grid(color='grey', linestyle='-', linewidth=0.2)
+        ax2.legend(borderpad=2)
+
+        fig.savefig('cost_profile.png')
+
+        #put into word doc
+        y = doc.add_paragraph()
+        heading = 'Annex - Financial Analysis'
+        y.add_run(str(heading)).bold = True
+
+        sections = doc.sections
+        section_2 = sections[0]
+        new_width, new_height = section_2.page_height, section_2.page_width
+        section_2.orientation = WD_ORIENT.LANDSCAPE
+        section_2.page_width = new_width
+        section_2.page_height = new_height
+
+        doc.add_picture('cost_profile.png', width=Inches(5.8))  # to place nicely in doc
+
+        doc.save(root_path / 'output/graph_2.docx')
+
+
+project_list = [a66, crossrail, a303, thameslink]
+
+#single_chart(project_list)
+
+two_graph_chart(project_list)
