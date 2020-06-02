@@ -199,4 +199,4 @@ end of output file name e.g. q4_1920. Note make sure file ends with .xlsx format
 '''
 
 output = place_in_excel_one_wb()
-output.save(root_path/'output/ind_project_financials_q4_1920.xlsx')
+output.save(root_path/'output/test_get_chart.xlsx')
