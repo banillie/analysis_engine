@@ -134,9 +134,88 @@ def two_graph_chart(project_list):
 
         doc.save(root_path / 'output/graph_2.docx')
 
+def three_graph_chart(project_list):
+    for project_name in project_list:
+        profile_data_total = get_financial_data(project_name, ' total')
+        profile_data_rdel = get_financial_data(project_name, ' RDEL Forecast Total')
+        profile_data_cdel = get_financial_data(project_name, ' CDEL Forecast Total')
 
-project_list = [a66, crossrail, a303, thameslink]
+        year = ['19/20', '20/21', '21/22', '22/23', '23/24', '24/25', '25/26', '26/27', '27/28', '28/29']
+        baseline_profile_total = profile_data_total[2]
+        last_profile_total = profile_data_total[1]
+        latest_profile_total = profile_data_total[0]
+
+        latest_profile_rdel = profile_data_rdel[0]
+        latest_profile_cdel = profile_data_cdel[0]
+
+        plt.subplot(2, 1, 1)
+        plt.plot(year, baseline_profile_total, color='blue', label='baseline', linewidth=4.0, marker="o")
+        plt.plot(year, last_profile_total, color='yellow', label='last quarter', linewidth=4.0, marker="o")
+        plt.plot(year, latest_profile_total, color='green', label='latest', linewidth=4.0, marker="o")
+
+        plt.subplot(2, 2, 3)
+        plt.plot(year, latest_profile_cdel, color='red', label='CDEL', linewidth=4.0, marker="o")
+        plt.plot(year, latest_profile_rdel, color='blue', label='RDEL', linewidth=4.0, marker="o")
+
+        plt.subplot(2, 2, 4)
+
+        # fig, (ax1, ax2, ax3) = plt.subplots(3, figsize=(20,10))
+        # fig.suptitle(str(project_name) + ' Cost Analysis')  # title
+
+        # ax1.plot(year, baseline_profile_total, color='blue', label='baseline', linewidth=4.0, marker="o")
+        # ax1.plot(year, last_profile_total, color='yellow', label='last quarter', linewidth=4.0, marker="o")
+        # ax1.plot(year, latest_profile_total, color='green', label='latest', linewidth=4.0, marker="o")
+        #
+        # ax2.plot(year, latest_profile_cdel, color='red', label='CDEL', linewidth=4.0, marker="o")
+        # ax2.plot(year, latest_profile_rdel, color='blue', label='RDEL', linewidth=4.0, marker="o")
+        #
+        # ax1.set_xlabel('Financial Years')
+        # ax1.set_ylabel('Cost (£m)')
+        # xlab1 = ax1.xaxis.get_label()
+        # ylab1 = ax1.yaxis.get_label()
+        # xlab1.set_style('italic')
+        # xlab1.set_size(10)
+        # ylab1.set_style('italic')
+        # ylab1.set_size(10)
+        # ax1.grid(color='grey', linestyle='-', linewidth=0.2)
+        # ax1.legend(borderpad=2)
+        # #TODO give legends a header
+        #
+        # ax2.set_xlabel('Financial Years')
+        # ax2.set_ylabel('Cost (£m)')
+        # xlab2 = ax2.xaxis.get_label()
+        # ylab2 = ax2.yaxis.get_label()
+        # xlab2.set_style('italic')
+        # xlab2.set_size(10)
+        # ylab2.set_style('italic')
+        # ylab2.set_size(10)
+        # ax2.grid(color='grey', linestyle='-', linewidth=0.2)
+        # ax2.legend(borderpad=2)
+        #
+        # fig.savefig('cost_profile.png')
+        #
+        # #put into word doc
+        # y = doc.add_paragraph()
+        # heading = 'Annex - Financial Analysis'
+        # y.add_run(str(heading)).bold = True
+        #
+        # sections = doc.sections
+        # section_2 = sections[0]
+        # new_width, new_height = section_2.page_height, section_2.page_width
+        # section_2.orientation = WD_ORIENT.LANDSCAPE
+        # section_2.page_width = new_width
+        # section_2.page_height = new_height
+        #
+        # doc.add_picture('cost_profile.png', width=Inches(5.8))  # to place nicely in doc
+        #
+        # doc.save(root_path / 'output/graph_2.docx')
+
+
+
+project_name_list = [a66, crossrail, a303, thameslink]
 
 #single_chart(project_list)
 
-two_graph_chart(project_list)
+two_graph_chart(project_name_list)
+
+#three_graph_chart([a66])
