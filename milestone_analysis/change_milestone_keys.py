@@ -1,11 +1,8 @@
 '''
 programme for altering across all masters changes in milestone keys.
 
-Issue: not currently marking new text as red. not clear why this line of code not working
-
 code doesn't/can't handle keys that have been removed.
 
-TODO: make sure that changes are being highlighted in Red text
 '''
 
 
@@ -27,7 +24,6 @@ def change_key(project_list, master_wb_title_list, change_key):
     red_text = Font(color="00fc2525")
 
     for name in project_list:
-        #print(name)
         for master in master_wb_title_list:
             wb = load_workbook(master)
             ws = wb.active
@@ -67,12 +63,12 @@ master_list = (root_path/'core_data/master_4_2019.xlsx',
                root_path/'core_data/master_3_2016.xlsx')
 
 '''TWO. Provide file path to document which contains information on the data that needs to be changed'''
-key_change = project_data_from_master(root_path/'input/change_milestone_keys_q4_1920.xlsx', 2, 2019)
+key_change = project_data_from_master(root_path/'input/change_milestone_keys_q4_1920_2.xlsx', 2, 2019)
 
 '''THREE. List of projects. taken from the key change document - as this contains the only projects that need 
 information changed'''
-#project_name_list = key_change.projects
-project_name_list = ['A303 Amesbury to Berwick Down']
+project_name_list = key_change.projects
+#project_name_list = ['A303 Amesbury to Berwick Down']
 
 '''FOUR. enter relevant variables in the change_key function'''
 change_key(project_name_list, master_list, key_change)
