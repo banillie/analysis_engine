@@ -86,7 +86,9 @@ def return_data(data_key_list):
 
 '''data keys of interest. Place all keys of interest as stings in to a list or use one of the imported
 lists from the data file'''
-data_interest = []
+data_interest = ['Senior Responsible Owner (SRO)',
+                 'Departmental DCA',
+                 'GMPP - IPA DCA']
 
 '''Running the programme'''
 
@@ -94,7 +96,7 @@ data_interest = []
 run_standard = return_data(data_interest)
 
 '''Specify name of the output document here. See general guidance re saving output files'''
-run_standard.save(root_path/'output/simple_data_query_output.xlsx')
+run_standard.save(root_path/'output/no_10_stocktake_suggestion.xlsx')
 
 
 
