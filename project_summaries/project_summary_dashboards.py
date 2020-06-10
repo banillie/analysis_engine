@@ -15,20 +15,25 @@ into dashboards/summary sheets:
 '''
 
 from docx import Document
-import datetime
 from docx.oxml.ns import nsdecls
 from docx.oxml import parse_xml
 from docx.shared import Cm, RGBColor, Inches, Pt
 from docx.enum.section import WD_SECTION_START, WD_ORIENT
 import difflib
 import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
+from matplotlib import rcParams
 import numpy as np
+import datetime
+from datetime import timedelta
+from textwrap import wrap
+
 
 from analysis.engine_functions import convert_rag_text, all_milestone_data_bulk, project_time_difference, \
     milestone_analysis_date, all_milestones_dict
 from analysis.data import list_of_masters_all, root_path, latest_cost_profiles, last_cost_profiles, \
     baseline_1_cost_profiles, year_list, SRO_conf_key_list, SRO_conf_table_list, bc_index, p_current_milestones, \
-    p_last_milestones, first_diff_data, \
+    p_last_milestones, first_diff_data, ipdc_date, \
     a66, a303, crossrail, thameslink
 
 import os
@@ -173,7 +178,7 @@ def produce_word_doc():
 
     master_list = list_of_masters_all[0:4]
     test_project_list = [a66]
-                         #,a303, crossrail, thameslink]
+                         #a303, crossrail, thameslink]
 
     for project_name in test_project_list:
         doc = Document()
@@ -279,7 +284,60 @@ def produce_word_doc():
 
         #Finance chart
         #doc.add_paragraph().add_run(str('Financial Analysis')).bold = True #don't need this
-        two_graph_chart(doc, project_name)
+        financial_graph_charts(doc, project_name)
+
+        #milestone swimlane chart
+        #Data
+        p_baseline_milestones = all_milestones_dict([project_name], list_of_masters_all[bc_index[project_name][2]])
+        m_data = milestone_schedule_data_new(p_current_milestones, p_last_milestones, p_baseline_milestones,
+                                         project_name)
+        labels = ['\n'.join(wrap(l, 20)) for l in m_data[0]] #add \n to y axis labels
+        # a = np.array(m_data[1])[-1] - np.array(m_data[1])[0]
+        # print(a)
+        # if a >= timedelta(days=1095):
+        #     print('yes')
+
+        #make charts.
+        no_milestones = len(m_data[0])
+        num_graphs = no_graphs(no_milestones)
+
+        #if num_graphs == 1:
+        milestone_swimlane_charts(doc, project_name, np.array(labels), np.array(m_data[1]), np.array(m_data[2]), \
+                                  np.array(m_data[3]))
+
+        # if num_graphs == 2:
+        #     milestone_swimlane_charts(doc, project_name, np.array(labels[:15]), np.array(m_data[1][:15]),
+        #                               np.array(m_data[2][:15]), np.array(m_data[3][:15]))
+        #     milestone_swimlane_charts(doc, project_name, np.array(labels[15:no_milestones]),
+        #                               np.array(m_data[1][15:no_milestones]),
+        #                               np.array(m_data[2][15:no_milestones]),
+        #                               np.array(m_data[3][15:no_milestones]))
+        # if num_graphs == 3:
+        #     milestone_swimlane_charts(doc, project_name, np.array(labels[:15]), np.array(m_data[1][:15]),
+        #                               np.array(m_data[2][:15]), np.array(m_data[3][:15]))
+        #     milestone_swimlane_charts(doc, project_name, np.array(labels[15:30]),
+        #                               np.array(m_data[1][15:30]),
+        #                               np.array(m_data[2][15:30]),
+        #                               np.array(m_data[3][15:30]))
+        #     milestone_swimlane_charts(doc, project_name, np.array(labels[30:no_milestones]),
+        #                               np.array(m_data[1][30:no_milestones]),
+        #                               np.array(m_data[2][30:no_milestones]),
+        #                               np.array(m_data[3][30:no_milestones]))
+        # if num_graphs == 4:
+        #     milestone_swimlane_charts(doc, project_name, np.array(labels[:15]), np.array(m_data[1][:15]),
+        #                               np.array(m_data[2][:15]), np.array(m_data[3][:15]))
+        #     milestone_swimlane_charts(doc, project_name, np.array(labels[15:30]),
+        #                               np.array(m_data[1][15:30]),
+        #                               np.array(m_data[2][15:30]),
+        #                               np.array(m_data[3][15:30]))
+        #     milestone_swimlane_charts(doc, project_name, np.array(labels[30:45]),
+        #                               np.array(m_data[1][30:45]),
+        #                               np.array(m_data[2][30:45]),
+        #                               np.array(m_data[3][30:45]))
+        #     milestone_swimlane_charts(doc, project_name, np.array(labels[45:no_milestones]),
+        #                               np.array(m_data[1][45:no_milestones]),
+        #                               np.array(m_data[2][45:no_milestones]),
+        #                               np.array(m_data[3][45:no_milestones]))
 
         #milestone table
         doc.add_section(WD_SECTION_START.NEW_PAGE)
@@ -291,7 +349,7 @@ def produce_word_doc():
                     ' dates in comparison to last quarter and baseline have been calculated and are provided.'
         doc.add_paragraph().add_run(str(some_text)).italic = True
 
-        milestone_table(doc, all_milestones_dict, project_name)
+        milestone_table(doc, p_baseline_milestones, project_name)
 
 
         # '''Financial Meta data'''
@@ -410,6 +468,16 @@ def produce_word_doc():
         #TODO add quarter info in title
         doc.save(root_path/'output/{}_summary.docx'.format(project_name))
 
+def no_graphs(num_milestones):
+    if num_milestones <= 15:
+        return 1
+    if 16 <= num_milestones <= 30:
+        return 2
+    if 31 <= num_milestones <= 45:  #side note >= 22.5 returns false for some reason.
+        return 3
+    if 46 <= num_milestones:
+        return 4
+
 def combine_narrtives(project_name, master, key_list):
     '''function that combines text across different keys'''
     output = ''
@@ -439,7 +507,7 @@ def get_financial_data(project_name, cost_type):
 
     return latest, last, baseline
 
-def two_graph_chart(doc, project_name):
+def financial_graph_charts(doc, project_name):
 
     #cost profile time change chart
     profile_data_total = get_financial_data(project_name, ' total')
@@ -561,10 +629,64 @@ def two_graph_chart(doc, project_name):
 
     return doc
 
-def milestone_table(doc, function, project_name):
+def milestone_swimlane_charts(doc, project_name, latest_milestone_names, latest_milestone_dates, \
+                              last_milestone_dates, baseline_milestone_dates):
+    doc.add_section(WD_SECTION_START.NEW_PAGE)
 
-    p_oldest_milestones = function([project_name], list_of_masters_all[bc_index[project_name][2]])
-    second_diff_data = project_time_difference(p_current_milestones, p_oldest_milestones)
+    #build scatter chart
+    years = mdates.YearLocator()  # every year
+    months = mdates.MonthLocator()  # every month
+    years_fmt = mdates.DateFormatter('%Y')
+    months_fmt = mdates.DateFormatter('%M')
+
+    fig, ax1 = plt.subplots()
+    fig.suptitle(project_name + ' schedule', fontweight='bold')  # title
+    # set fig size
+    fig.set_figheight(6)
+    fig.set_figwidth(8)
+
+    ax1.scatter(baseline_milestone_dates, latest_milestone_names, label='Baseline')
+    ax1.scatter(last_milestone_dates, latest_milestone_names, label='Last Qrt')
+    ax1.scatter(latest_milestone_dates, latest_milestone_names, label='Latest Qrt')
+
+    # format the ticks
+    ax1.xaxis.set_major_locator(years)
+    ax1.xaxis.set_minor_locator(months)
+
+    td = latest_milestone_dates[-1] - latest_milestone_dates[0]
+    if td >= timedelta(days=1095):
+        ax1.xaxis.set_major_formatter(years_fmt)
+        ax1.xaxis.set_minor_formatter(months_fmt)
+    else:
+        ax1.xaxis.set_major_formatter(years_fmt)
+
+
+    ax1.legend()
+
+    #reverse y axis so order is earliest to oldest
+    ax1 = plt.gca()
+    ax1.set_ylim(ax1.get_ylim()[::-1])
+    ax1.tick_params(axis='y', which='major', labelsize=8) #rotation an option hear
+
+    fig.autofmt_xdate() #fit labels nicely
+
+    plt.axvline(ipdc_date) #line at date of BICC
+    plt.text(ipdc_date, 10, 'IPDC Q1 PfM Report', rotation=90)
+
+    #size of chart and fit
+    plt.tight_layout()
+    fig.tight_layout(rect=[0, 0.03, 1, 0.95]) #for title
+
+    fig.savefig('schedule.png')
+
+    doc.add_picture('schedule.png', width=Inches(8))  # to place nicely in doc
+    os.remove('/home/will/code/python/analysis_engine/project_summaries/schedule.png')
+
+    return doc
+
+def milestone_table(doc, p_baseline_milestones, project_name):
+
+    second_diff_data = project_time_difference(p_current_milestones, p_baseline_milestones)
 
     table = doc.add_table(rows=1, cols=5)
     hdr_cells = table.rows[0].cells
@@ -683,13 +805,104 @@ def bar_chart_benefits(project_name):
     index_2 = index_1[0:3]
     index_2.reverse()
     for x in index_2:
-        print(x)
+        #print(x)
         for y in key_list:
             ben = list_of_masters_all[x].data[project_name][y]
-            print(ben)
+            #print(ben)
             cost_list.append(ben)
 
     return cost_list
+
+def milestone_schedule_data(latest_m_dict, last_m_dict, baseline_m_dict, project_name):
+    milestone_names = []
+    mile_d_l_lst = []
+    mile_d_last_lst = []
+    mile_d_bl_lst = []
+
+    #lengthy for loop designed so that all milestones and dates are stored and shown in output chart, even if they
+    #were not present in last and baseline data reporting
+    for m in list(latest_m_dict[project_name].keys()):
+        if m == 'Project - Business Case End Date':  # filter out as to far in future
+            pass
+        else:
+            if m is not None:
+                m_d = tuple(latest_m_dict[project_name][m])[0]
+
+            if m in list(last_m_dict[project_name].keys()):
+                m_d_lst = tuple(last_m_dict[project_name][m])[0]
+            else:
+                m_d_lst = tuple(latest_m_dict[project_name][m])[0]
+
+            if m in list(baseline_m_dict[project_name].keys()):
+                m_d_bl = tuple(baseline_m_dict[project_name][m])[0]
+            else:
+                m_d_bl = tuple(latest_m_dict[project_name][m])[0]
+
+            if m_d is not None:
+                milestone_names.append(m)
+                mile_d_l_lst.append(m_d)
+                if m_d_lst is not None:
+                    mile_d_last_lst.append(m_d_lst)
+                else:
+                    mile_d_last_lst.append(m_d)
+                if m_d_bl is not None:
+                    mile_d_bl_lst.append(m_d_bl)
+                else:
+                    if m_d_lst is not None:
+                        mile_d_bl_lst.append(m_d_lst)
+                    else:
+                        mile_d_bl_lst.append(m_d)
+
+    return milestone_names, mile_d_l_lst, mile_d_last_lst, mile_d_bl_lst
+
+def milestone_schedule_data_new(latest_m_dict, last_m_dict, baseline_m_dict, project_name, *ipdc_date):
+    milestone_names = []
+    mile_d_l_lst = []
+    mile_d_last_lst = []
+    mile_d_bl_lst = []
+
+    #lengthy for loop designed so that all milestones and dates are stored and shown in output chart, even if they
+    #were not present in last and baseline data reporting
+    for m in list(latest_m_dict[project_name].keys()):
+        if m == 'Project - Business Case End Date':  # filter out as to far in future
+            pass
+        else:
+            if m is not None:
+                m_d = tuple(latest_m_dict[project_name][m])[0]
+
+            if m in list(last_m_dict[project_name].keys()):
+                m_d_lst = tuple(last_m_dict[project_name][m])[0]
+            else:
+                m_d_lst = tuple(latest_m_dict[project_name][m])[0]
+
+            if m in list(baseline_m_dict[project_name].keys()):
+                m_d_bl = tuple(baseline_m_dict[project_name][m])[0]
+            else:
+                m_d_bl = tuple(latest_m_dict[project_name][m])[0]
+
+            if m_d is not None:
+                #print(m_d)
+                #first_date = ipdc_date - timedelta(days=30*6)
+                #first_date = datetime.date(2020, 2, 19)
+                #last_date = ipdc_date + timedelta(days=365*2)
+                #last_date = datetime.date(2022, 8, 17)
+                #print(first_date, m_d, last_date)
+                if datetime.date(2020, 2, 19) <= m_d <= datetime.date(2022, 8, 17):
+                    milestone_names.append(m)
+                    mile_d_l_lst.append(m_d)
+                    if m_d_lst is not None:
+                        mile_d_last_lst.append(m_d_lst)
+                    else:
+                        mile_d_last_lst.append(m_d)
+                    if m_d_bl is not None:
+                        mile_d_bl_lst.append(m_d_bl)
+                    else:
+                        if m_d_lst is not None:
+                            mile_d_bl_lst.append(m_d_lst)
+                        else:
+                            mile_d_bl_lst.append(m_d)
+
+    return milestone_names, mile_d_l_lst, mile_d_last_lst, mile_d_bl_lst
 
 '''RUNNING PROGRAMME'''
 
