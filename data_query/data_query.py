@@ -17,7 +17,7 @@ key not collected (knc) = light blue grey
 from openpyxl import Workbook
 from analysis.data import list_of_masters_all, root_path, gen_txt_list, \
     gen_txt_colours, gen_fill_colours, list_column_ltrs, list_of_rag_keys, rag_txt_list_full, \
-    rag_fill_colours, rag_txt_colours, salmon_fill, bc_index, milestones
+    rag_fill_colours, rag_txt_colours, salmon_fill, bc_index, all_project_names
 from analysis.engine_functions import all_milestone_data_bulk, conditional_formatting, get_quarter_stamp
 
 def return_data(project_name_list, data_key_list):
@@ -177,13 +177,14 @@ def return_baseline_data(project_name_list, data_key_list):
 
 '''Running the programme'''
 '''Place all keys of interest as stings in to a list or use one of the imported lists from the data file'''
-data_interest = milestones
+data_interest = ['GMPP - IPA ID Number',
+                 'GMPP (GMPP - formally joined GMPP)']
 
 '''output one - all data. 
 first variable = list of project names. There are two options. 1) latest_quarter_project_names 2) all_projects_names
 (which includes older projects that are not currently reporting. 
 second variable = data_interest. This name does not change. List compiled above'''
-run_standard = return_data(list_of_masters_all[0].projects, data_interest)
+run_standard = return_data(all_project_names, data_interest)
 
 '''output two - bl data
 first variable = list of project names. There are two options. 1) latest_quarter_project_names 2) all_projects_names

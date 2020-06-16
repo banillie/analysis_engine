@@ -14,7 +14,7 @@ the import statement.
 
 from openpyxl import Workbook
 from analysis.engine_functions import project_time_difference, all_milestones_dict
-from analysis.data import list_of_masters_all, root_path, ipdc_milestone_bl_index, hsmrpg
+from analysis.data import list_of_masters_all, root_path, bc_index, p_current_milestones, p_last_milestones
 
 def put_into_wb_all(project_name_list, t_data, td_data, td_data_two, wb):
     '''
@@ -61,7 +61,7 @@ def put_into_wb_all(project_name_list, t_data, td_data, td_data_two, wb):
             try:
                 milestone_date = tuple(t_data[project_name][milestone])[0]
                 ws.cell(row=row_num + i, column=6).value = t_data[project_name][milestone][milestone_date]  # provides notes
-            except IndexError:
+            except (IndexError, KeyError):
                 ws.cell(row=row_num + i, column=6).value = 0
 
         row_num = row_num + len(td_data[project_name])
@@ -94,23 +94,17 @@ def run_milestone_comparator(function, project_name_list, masters_list):
 
     '''gather mini-dictionaries for each quarter'''
 
-    current_milestones_data = {}
-    last_milestones_data = {}
     oldest_milestones_data = {}
     for project_name in project_name_list:
-        #print(project_name)
-        p_current_milestones_data = function([project_name], masters_list[0])
-        current_milestones_data.update(p_current_milestones_data)
-        p_last_milestones_data = function([project_name], masters_list[1])
-        last_milestones_data.update(p_last_milestones_data)
-        p_oldest_milestones_data = function([project_name], masters_list[ipdc_milestone_bl_index[project_name][2]])
+        print(project_name)
+        p_oldest_milestones_data = function([project_name], masters_list[bc_index[project_name][2]])
         oldest_milestones_data.update(p_oldest_milestones_data)
 
     '''calculate time current and last quarter'''
-    first_diff_data = project_time_difference(current_milestones_data, last_milestones_data)
-    second_diff_data = project_time_difference(current_milestones_data, oldest_milestones_data)
+    first_diff_data = project_time_difference(p_current_milestones, p_last_milestones)
+    second_diff_data = project_time_difference(p_current_milestones, oldest_milestones_data)
 
-    run = put_into_wb_all(project_name_list, current_milestones_data, first_diff_data, second_diff_data, wb)
+    run = put_into_wb_all(project_name_list, p_current_milestones, first_diff_data, second_diff_data, wb)
 
     return run
 
@@ -126,7 +120,8 @@ statement above.
 3. masters_list: list of masters containing quarter information
  
 '''
-run = run_milestone_comparator(all_milestones_dict, hsmrpg, list_of_masters_all)
+run = run_milestone_comparator(all_milestones_dict, list_of_masters_all[0].projects,
+                               list_of_masters_all)
 
 '''specify file path to output document'''
-run.save(root_path/'output/portfolio_milestone_analysis_test.xlsx')
+run.save(root_path/'output/portfolio_milestones_readout.xlsx')

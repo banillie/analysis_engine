@@ -118,19 +118,9 @@ def two_graph_chart(project_list):
 
         fig.savefig('cost_profile.png')
 
-        #put into word doc
-        y = doc.add_paragraph()
-        heading = 'Annex - Financial Analysis'
-        y.add_run(str(heading)).bold = True
+        doc.add_picture('cost_profile.png', width=Inches(12))  # to place nicely in doc
 
-        sections = doc.sections
-        section_2 = sections[0]
-        new_width, new_height = section_2.page_height, section_2.page_width
-        section_2.orientation = WD_ORIENT.LANDSCAPE
-        section_2.page_width = new_width
-        section_2.page_height = new_height
 
-        doc.add_picture('cost_profile.png', width=Inches(5.8))  # to place nicely in doc
 
         doc.save(root_path / 'output/graph_2.docx')
 

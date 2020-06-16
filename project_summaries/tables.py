@@ -4,7 +4,7 @@ from docx import Document
 from docx.shared import Pt
 from docx.enum.section import WD_ORIENT
 
-def table(function):
+def milestone_table(function):
 
     doc = Document()
     sections = doc.sections

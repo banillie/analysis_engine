@@ -17,7 +17,7 @@ key not collected (knc) = light blue grey
 from openpyxl import Workbook
 from analysis.data import list_of_masters_all, root_path, gen_txt_list, \
     gen_txt_colours, gen_fill_colours, list_column_ltrs, list_of_rag_keys, rag_txt_list_full, \
-    rag_fill_colours, rag_txt_colours, salmon_fill
+    rag_fill_colours, rag_txt_colours, salmon_fill, milestones
 from analysis.engine_functions import all_milestone_data_bulk, conditional_formatting
 
 def return_data(data_key_list):
@@ -86,9 +86,7 @@ def return_data(data_key_list):
 
 '''data keys of interest. Place all keys of interest as stings in to a list or use one of the imported
 lists from the data file'''
-data_interest = ['Senior Responsible Owner (SRO)',
-                 'Departmental DCA',
-                 'GMPP - IPA DCA']
+data_interest = milestones
 
 '''Running the programme'''
 
@@ -96,7 +94,7 @@ data_interest = ['Senior Responsible Owner (SRO)',
 run_standard = return_data(data_interest)
 
 '''Specify name of the output document here. See general guidance re saving output files'''
-run_standard.save(root_path/'output/no_10_stocktake_suggestion.xlsx')
+run_standard.save(root_path/'output/no_10_milestones.xlsx')
 
 
 

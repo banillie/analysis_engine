@@ -9,6 +9,7 @@ from openpyxl import load_workbook
 from datamaps.api import project_data_from_master
 from analysis.data import root_path, red_text
 
+#TODO include master datamap in this list also
 list_master_names = [root_path/'core_data/master_4_2019.xlsx',
                      root_path/'core_data/master_3_2019.xlsx',
                root_path/'core_data/master_2_2019.xlsx',
