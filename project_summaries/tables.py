@@ -32,10 +32,11 @@ def table():
         row_cells[3].text = 'l'
         row_cells[4].text = 'oooo'
 
-    # for cell in table.columns[2].cells:
-    #     cell.width = Cm(4)
+    #change table column width
+    for cell in table.columns[2].cells:
+         cell.width = Cm(4)  #not working
 
-    set_col_widths(table)
+    set_col_widths(table) #not working
 
     make_rows_bold(table.rows[0]) # makes top of table bold. Found function on stack overflow.
 
