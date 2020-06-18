@@ -182,7 +182,8 @@ def produce_word_doc():
     '''Function that compiles each summary sheet'''
 
     master_list = list_of_masters_all[0:4]
-    test_project_list = [tru, wrlth]
+    test_project_list = [tru]
+    #, wrlth]
         #sarh2, south_west_route_capacity, a66, a303, crossrail, thameslink]
 
 
@@ -244,13 +245,17 @@ def produce_word_doc():
                     row_cells[i+1].text = 'N/A'
 
         table.style = 'Table Grid'
+        make_rows_bold(table.rows[0])  # makes top of table bold. Found function on stack overflow.
 
         # TODO develop way of setting table column widths
-        # TODO add text re what red text means.
-        #set_col_widths(table)
+
+        doc.add_paragraph()
+        p = doc.add_paragraph()
+        text = '*Red text highlights changes in narratives from last quarter'
+        p.add_run(text).font.color.rgb = RGBColor(255, 0, 0)
 
         #DCA narrative
-        doc.add_paragraph()
+        #doc.add_paragraph()
 
         headings_list = ['SRO delivery confidence narrative',
                          'Financial cost narrative',
@@ -304,13 +309,61 @@ def produce_word_doc():
         rc_profiled = np.array([rdel_profiled, cdel_profiled])
         rc_unprofiled = np.array([rdel_fin[8], cdel_fin[8]])
 
-        # '''Financial Meta data'''
+        source_of_finance = list_of_masters_all[0].data[project_name]['Source of Finance']
+        contingency = list_of_masters_all[0].data[project_name]['Overall contingency (£m)']
+        con_included_wlc = list_of_masters_all[0].data[project_name]['Overall figure for Optimism Bias (£m)']
+        ob = list_of_masters_all[0].data[project_name]['Overall figure for Optimism Bias (£m)']
+        ob_included_wlc = list_of_masters_all[0].data[project_name]['Is this Optimism Bias included within the WLC?']
+        '''vfm category now'''
+        if list_of_masters_all[0].data[project_name]['VfM Category single entry'] is None:
+            vfm_cat = str(list_of_masters_all[0].data[project_name]['VfM Category lower range']) + ' - ' + \
+                      str(list_of_masters_all[0].data[project_name]['VfM Category upper range'])
+        else:
+            vfm_cat = list_of_masters_all[0].data[project_name]['VfM Category single entry']
+        bcr = list_of_masters_all[0].data[project_name]['Adjusted Benefits Cost Ratio (BCR)']
+        #total_bens = list_of_masters_all[0].data[project_name]['']
+
+        '''milestone data'''
+        ipdc_business_case_stage = list_of_masters_all[0].data[project_name]['IPDC approval point']
+        delivery_stage = list_of_masters_all[0].data[project_name]['Project stage']
+        try:
+            start_con_build = tuple(p_current_milestones[project_name]['Start of Construction/build'])[0]
+            start_con_build_text = start_con_build.strftime("%d/%m/%Y")
+        except (KeyError, AttributeError):
+            start_con_build = 'Not Reported' #TODO make red in output
+        try:
+            start_ops = tuple(p_current_milestones[project_name]['Start of Operation'])[0]
+            start_ops_text = start_ops.strftime("%d/%m/%Y")
+        except (KeyError, AttributeError):
+            start_ops_text = 'Not Reported'
+        try:
+            full_ops = tuple(p_current_milestones[project_name]['Full Operations'])[0]
+            full_ops_text = start_ops.strftime("%d/%m/%Y")
+        except (KeyError, AttributeError):
+            full_ops_text = 'Not Reported'
+
+        '''ben data'''
+        total_ben = get_ben_totals(project_name)  # all totals
+        # print(fin_all)
+
+        # totals by spent, profiled and unprofiled
+        total_ben_profiled_bl = total_ben[1] - (total_ben[0] + total_ben[2])
+        total_ben_profiled_lst = total_ben[4] - (total_ben[3] + total_ben[5])
+        total_ben_profiled_now = total_ben[7] - (total_ben[6] + total_ben[8])
+        b_achieved = np.array([total_ben[0], total_ben[3], total_ben[6]])
+        b_profiled = np.array([total_ben_profiled_bl, total_ben_profiled_lst, total_ben_profiled_now])
+        b_unprofiled = np.array([total_ben[2], total_ben[5], total_ben[8]])
+
+        # '''Meta data'''
         doc.add_section(WD_SECTION_START.NEW_PAGE)
+        doc.add_paragraph('Financial data')
         table = doc.add_table(rows=1, cols=5)
+        #table.allow_autofit = False
         hdr_cells = table.rows[0].cells
         hdr_cells[0].text = 'WLC'
         hdr_cells[1].text = '£' + str(round(total_fin[7])) + 'm'
         hdr_cells[2].text = 'Project Business Case Stage'
+        #hdr_cells[2].width = 4846320
         hdr_cells[3].text = ''
         hdr_cells[4].text = ''
         row_cells = table.add_row().cells
@@ -344,113 +397,120 @@ def produce_word_doc():
         row_cells[3].text = ''
         row_cells[4].text = ''
 
+        for cell in table.columns[2].cells:
+            cell.width = Cm(4)
 
-        '''start of analysis'''
-        new_section = doc.add_section(WD_SECTION_START.NEW_PAGE)
-        new_width, new_height = new_section.page_height, new_section.page_width
-        new_section.orientation = WD_ORIENT.LANDSCAPE
-        new_section.page_width = new_width
-        new_section.page_height = new_height
+        # for cell in table.columns[2].cells:
+        #     cell.width = Inches(0.1)
 
-        '''Financial charts'''
-        financial_graph_charts(doc, project_name, t_spent, t_profiled, t_unprofiled, total_fin,
-                               rc_spent, rc_profiled, rc_unprofiled)
+        #set_col_widths(table)
 
-        '''milestone swimlane charts'''
-        #get baseline milestone data
-        p_baseline_milestones = all_milestones_dict([project_name], list_of_masters_all[bc_index[project_name][2]])
-
-        #chart of with milestone over the next two years
-        m_data = milestone_schedule_data_filtered(p_current_milestones, p_last_milestones, p_baseline_milestones,
-                                         project_name)
-        # add \n to y axis labels and cut down if two long
-        labels = ['\n'.join(wrap(l, 40)) for l in m_data[0]]
-        final_labels = []
-        for l in labels:
-            if len(l) > 70:
-                final_labels.append(l[:70])
-            else:
-                final_labels.append(l)
-
-        #Chart
-        no_milestones = len(m_data[0])
-
-
-        title = 'Project schedule two year window'
-        if no_milestones <= 15:
-            milestone_swimlane_charts(doc, project_name, np.array(final_labels), np.array(m_data[1]), np.array(m_data[2]), \
-                                  np.array(m_data[3]), title)
-
-        if 16 <= no_milestones <= 35:
-            half = int(no_milestones/2)
-            milestone_swimlane_charts(doc, project_name, np.array(final_labels[:half]), np.array(m_data[1][:half]),
-                                      np.array(m_data[2][:half]), np.array(m_data[3][:half]), title)
-            title = title + ' cont.'
-            milestone_swimlane_charts(doc, project_name, np.array(final_labels[half:no_milestones]),
-                                      np.array(m_data[1][half:no_milestones]),
-                                      np.array(m_data[2][half:no_milestones]),
-                                      np.array(m_data[3][half:no_milestones]), title)
-
-        #chart with all milestones
-        m_data = milestone_schedule_data(p_current_milestones, p_last_milestones, p_baseline_milestones,
-                                                  project_name)
-        #print(m_data)
-        # add \n to y axis labels and cut down if two long
-        labels = ['\n'.join(wrap(l, 40)) for l in m_data[0]]
-        final_labels = []
-        for l in labels:
-            if len(l) > 70:
-                final_labels.append(l[:70])
-            else:
-                final_labels.append(l)
-
-        # Chart
-        no_milestones = len(m_data[0])
-
-        title = 'Project total schedule'
-        if no_milestones <= 20:
-            milestone_swimlane_charts(doc, project_name, np.array(final_labels), np.array(m_data[1]),
-                                      np.array(m_data[2]), \
-                                      np.array(m_data[3]), title)
-
-        if 21 <= no_milestones <= 40:
-            half = int(no_milestones/2)
-            milestone_swimlane_charts(doc, project_name, np.array(final_labels[:half]),
-                                      np.array(m_data[1][:half]),
-                                      np.array(m_data[2][:half]), np.array(m_data[3][:half]), title)
-            title = title + ' schedule all cont.'
-            milestone_swimlane_charts(doc, project_name, np.array(final_labels[half:no_milestones]),
-                                      np.array(m_data[1][half:no_milestones]),
-                                      np.array(m_data[2][half:no_milestones]),
-                                      np.array(m_data[3][half:no_milestones]), title)
-
-        if 41 <= no_milestones <= 70:
-            third = int(no_milestones/3)
-            milestone_swimlane_charts(doc, project_name, np.array(final_labels[:third]),
-                                      np.array(m_data[1][:third]),
-                                      np.array(m_data[2][:third]), np.array(m_data[3][:third]), title)
-            title = title + ' schedule all cont.'
-            milestone_swimlane_charts(doc, project_name, np.array(final_labels[third:third*2]),
-                                      np.array(m_data[1][third:third*2]),
-                                      np.array(m_data[2][third:third*2]),
-                                      np.array(m_data[3][third:third*2]), title)
-            title = title + ' schedule all cont.'
-            milestone_swimlane_charts(doc, project_name, np.array(final_labels[third*2:no_milestones]),
-                                      np.array(m_data[1][third*2:no_milestones]),
-                                      np.array(m_data[2][third*2:no_milestones]),
-                                      np.array(m_data[3][third*2:no_milestones]), title)
-
-
-        #milestone table
-        doc.add_section(WD_SECTION_START.NEW_PAGE)
-        #table heading
-        doc.add_paragraph().add_run(str('Project high-level milestones')).bold = True
-        some_text = 'The below table presents all project reported remaining high-level milestones, with six months grace ' \
-                    'from close of the current quarter. Milestones are sorted in chronological order. Changes in milestones' \
-                    ' dates in comparison to last quarter and baseline have been calculated and are provided.'
-        doc.add_paragraph().add_run(str(some_text)).italic = True
-
-        milestone_table(doc, p_baseline_milestones, project_name)
+        # '''start of analysis'''
+        # new_section = doc.add_section(WD_SECTION_START.NEW_PAGE)
+        # new_width, new_height = new_section.page_height, new_section.page_width
+        # new_section.orientation = WD_ORIENT.LANDSCAPE
+        # new_section.page_width = new_width
+        # new_section.page_height = new_height
+        #
+        # '''Financial charts'''
+        # financial_graph_charts(doc, project_name, t_spent, t_profiled, t_unprofiled, total_fin,
+        #                        rc_spent, rc_profiled, rc_unprofiled)
+        #
+        # '''milestone swimlane charts'''
+        # #get baseline milestone data
+        # p_baseline_milestones = all_milestones_dict([project_name], list_of_masters_all[bc_index[project_name][2]])
+        #
+        # #chart of with milestone over the next two years
+        # m_data = milestone_schedule_data_filtered(p_current_milestones, p_last_milestones, p_baseline_milestones,
+        #                                  project_name)
+        # # add \n to y axis labels and cut down if two long
+        # labels = ['\n'.join(wrap(l, 40)) for l in m_data[0]]
+        # final_labels = []
+        # for l in labels:
+        #     if len(l) > 70:
+        #         final_labels.append(l[:70])
+        #     else:
+        #         final_labels.append(l)
+        #
+        # #Chart
+        # no_milestones = len(m_data[0])
+        #
+        #
+        # title = 'Project schedule two year window'
+        # if no_milestones <= 15:
+        #     milestone_swimlane_charts(doc, project_name, np.array(final_labels), np.array(m_data[1]), np.array(m_data[2]), \
+        #                           np.array(m_data[3]), title)
+        #
+        # if 16 <= no_milestones <= 35:
+        #     half = int(no_milestones/2)
+        #     milestone_swimlane_charts(doc, project_name, np.array(final_labels[:half]), np.array(m_data[1][:half]),
+        #                               np.array(m_data[2][:half]), np.array(m_data[3][:half]), title)
+        #     title = title + ' cont.'
+        #     milestone_swimlane_charts(doc, project_name, np.array(final_labels[half:no_milestones]),
+        #                               np.array(m_data[1][half:no_milestones]),
+        #                               np.array(m_data[2][half:no_milestones]),
+        #                               np.array(m_data[3][half:no_milestones]), title)
+        #
+        # #chart with all milestones
+        # m_data = milestone_schedule_data(p_current_milestones, p_last_milestones, p_baseline_milestones,
+        #                                           project_name)
+        # #print(m_data)
+        # # add \n to y axis labels and cut down if two long
+        # labels = ['\n'.join(wrap(l, 40)) for l in m_data[0]]
+        # final_labels = []
+        # for l in labels:
+        #     if len(l) > 70:
+        #         final_labels.append(l[:70])
+        #     else:
+        #         final_labels.append(l)
+        #
+        # # Chart
+        # no_milestones = len(m_data[0])
+        #
+        # title = 'Project total schedule'
+        # if no_milestones <= 20:
+        #     milestone_swimlane_charts(doc, project_name, np.array(final_labels), np.array(m_data[1]),
+        #                               np.array(m_data[2]), \
+        #                               np.array(m_data[3]), title)
+        #
+        # if 21 <= no_milestones <= 40:
+        #     half = int(no_milestones/2)
+        #     milestone_swimlane_charts(doc, project_name, np.array(final_labels[:half]),
+        #                               np.array(m_data[1][:half]),
+        #                               np.array(m_data[2][:half]), np.array(m_data[3][:half]), title)
+        #     title = title + ' schedule all cont.'
+        #     milestone_swimlane_charts(doc, project_name, np.array(final_labels[half:no_milestones]),
+        #                               np.array(m_data[1][half:no_milestones]),
+        #                               np.array(m_data[2][half:no_milestones]),
+        #                               np.array(m_data[3][half:no_milestones]), title)
+        #
+        # if 41 <= no_milestones <= 70:
+        #     third = int(no_milestones/3)
+        #     milestone_swimlane_charts(doc, project_name, np.array(final_labels[:third]),
+        #                               np.array(m_data[1][:third]),
+        #                               np.array(m_data[2][:third]), np.array(m_data[3][:third]), title)
+        #     title = title + ' schedule all cont.'
+        #     milestone_swimlane_charts(doc, project_name, np.array(final_labels[third:third*2]),
+        #                               np.array(m_data[1][third:third*2]),
+        #                               np.array(m_data[2][third:third*2]),
+        #                               np.array(m_data[3][third:third*2]), title)
+        #     title = title + ' schedule all cont.'
+        #     milestone_swimlane_charts(doc, project_name, np.array(final_labels[third*2:no_milestones]),
+        #                               np.array(m_data[1][third*2:no_milestones]),
+        #                               np.array(m_data[2][third*2:no_milestones]),
+        #                               np.array(m_data[3][third*2:no_milestones]), title)
+        #
+        #
+        # #milestone table
+        # doc.add_section(WD_SECTION_START.NEW_PAGE)
+        # #table heading
+        # doc.add_paragraph().add_run(str('Project high-level milestones')).bold = True
+        # some_text = 'The below table presents all project reported remaining high-level milestones, with six months grace ' \
+        #             'from close of the current quarter. Milestones are sorted in chronological order. Changes in milestones' \
+        #             ' dates in comparison to last quarter and baseline have been calculated and are provided.'
+        # doc.add_paragraph().add_run(str(some_text)).italic = True
+        #
+        # milestone_table(doc, p_baseline_milestones, project_name)
 
 
         #TODO add quarter info in title
@@ -466,12 +526,17 @@ def combine_narrtives(project_name, master, key_list):
 
     return output
 
-def set_col_widths(table):
-    widths = (Inches(2), Inches(1), Inches(1), Inches(1), Inches(1))
-    for col in table.columns:
-        #print(col)
+# def set_col_widths(table):
+#     widths = (Inches(2), Inches(1), Inches(1), Inches(1), Inches(1))
+#     for col in table.columns:
+#         for idx, width in enumerate(widths):
+#             col.cells[idx].width = width
+
+def set_col_widths(t):
+    widths = (Inches(1), Inches(1), Inches(0.2), Inches(1), Inches(1))
+    for row in t.rows:
         for idx, width in enumerate(widths):
-            col.cells[idx].width = width
+            row.cells[idx].width = width
 
 def get_financial_profile(project_name, cost_type):
     '''gets project financial data'''
@@ -786,7 +851,7 @@ def get_financial_totals(project_name):
 
     return total_cost_list, rdel_cost_list, cdel_cost_list
 
-def bar_chart_benefits(project_name):
+def get_ben_totals(project_name):
     '''gets benefits data to place into the bar chart element in the financial analysis graphs'''
 
     key_list = ['Pre-profile BEN Total',
@@ -799,11 +864,14 @@ def bar_chart_benefits(project_name):
     index_2 = index_1[0:3]
     index_2.reverse()
     for x in index_2:
-        #print(x)
-        for y in key_list:
-            ben = list_of_masters_all[x].data[project_name][y]
-            #print(ben)
-            cost_list.append(ben)
+        if x is not None:
+            for y in key_list:
+                ben = list_of_masters_all[x].data[project_name][y]
+                cost_list.append(ben)
+        else:
+            for i in range(len(key_list)):
+                ben = 0
+                cost_list.append(ben)
 
     return cost_list
 
@@ -1011,7 +1079,10 @@ def milestone_schedule_data_filtered(latest_m_dict, last_m_dict, baseline_m_dict
 
 '''enter into the printing function the quarter details for the output files e.g. _q4_1920 (note put underscore at 
 front)'''
-produce_word_doc()
+#produce_word_doc()
 
-#test = all_milestones_dict([hs2_2b], list_of_masters_all[0])
+output = []
+for x in list_of_masters_all[0].projects:
+    b = get_ben_totals(x)
+    output.append(b)
 
