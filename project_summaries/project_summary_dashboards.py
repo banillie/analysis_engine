@@ -182,13 +182,10 @@ def produce_word_doc():
     '''Function that compiles each summary sheet'''
 
     master_list = list_of_masters_all[0:4]
-    test_project_list = [tru]
-    #, wrlth]
-        #sarh2, south_west_route_capacity, a66, a303, crossrail, thameslink]
 
-
-    for project_name in test_project_list:
-            #master_list[0].projects:
+    for project_name in [sarh2]:
+        # sarh2, south_west_route_capacity, a66, a303, crossrail, thameslink]
+        #master_list[0].projects:
         doc = Document()
         print(project_name)
 
@@ -254,7 +251,7 @@ def produce_word_doc():
         text = '*Red text highlights changes in narratives from last quarter'
         p.add_run(text).font.color.rgb = RGBColor(255, 0, 0)
 
-        #DCA narrative
+        '''DCA narrative'''
         #doc.add_paragraph()
 
         headings_list = ['SRO delivery confidence narrative',
@@ -288,6 +285,10 @@ def produce_word_doc():
             compare_text_newandold(text_one, text_two, doc)
 
         '''Financial data'''
+        project_profile_data_total = get_financial_profile(project_name, ' total')
+        project_profile_data_rdel = get_financial_profile(project_name, ' RDEL Forecast Total')
+        project_profile_data_cdel = get_financial_profile(project_name, ' CDEL Forecast Total')
+
         fin_all = get_financial_totals(project_name) # all totals
         #print(fin_all)
 
@@ -343,8 +344,9 @@ def produce_word_doc():
             full_ops_text = 'Not Reported'
 
         '''ben data'''
-        total_ben = get_ben_totals(project_name)  # all totals
-        # print(fin_all)
+        all_ben = get_ben_totals(project_name)  # all totals
+        total_ben = all_ben[0]
+        #print(total_ben)
 
         # totals by spent, profiled and unprofiled
         total_ben_profiled_bl = total_ben[1] - (total_ben[0] + total_ben[2])
@@ -354,163 +356,220 @@ def produce_word_doc():
         b_profiled = np.array([total_ben_profiled_bl, total_ben_profiled_lst, total_ben_profiled_now])
         b_unprofiled = np.array([total_ben[2], total_ben[5], total_ben[8]])
 
-        # '''Meta data'''
-        doc.add_section(WD_SECTION_START.NEW_PAGE)
-        doc.add_paragraph('Financial data')
-        table = doc.add_table(rows=1, cols=5)
-        #table.allow_autofit = False
-        hdr_cells = table.rows[0].cells
-        hdr_cells[0].text = 'WLC'
-        hdr_cells[1].text = '£' + str(round(total_fin[7])) + 'm'
-        hdr_cells[2].text = 'Project Business Case Stage'
-        #hdr_cells[2].width = 4846320
-        hdr_cells[3].text = ''
-        hdr_cells[4].text = ''
-        row_cells = table.add_row().cells
-        row_cells[0].text = 'Spent'
-        row_cells[1].text = '£' + str(round(total_fin[6])) + 'm'
-        row_cells[2].text = ''
-        row_cells[3].text = ''
-        row_cells[4].text = ''
-        row_cells = table.add_row().cells
-        row_cells[0].text = 'Profiled'
-        row_cells[1].text = '£' + str(round(total_profiled_now)) + 'm'
-        row_cells[2].text = ''
-        row_cells[3].text = ''
-        row_cells[4].text = ''
-        row_cells = table.add_row().cells
-        row_cells[0].text = 'Unprofiled'
-        row_cells[1].text = '£' + str(round(total_fin[8])) + 'm'
-        row_cells[2].text = ''
-        row_cells[3].text = ''
-        row_cells[4].text = ''
-        row_cells = table.add_row().cells
-        row_cells[0].text = 'RDEl Total'
-        row_cells[1].text = '£' + str(round(rdel_fin[7])) + 'm'
-        row_cells[2].text = ''
-        row_cells[3].text = ''
-        row_cells[4].text = ''
-        row_cells = table.add_row().cells
-        row_cells[0].text = 'CDEl Total'
-        row_cells[1].text = '£' + str(round(cdel_fin[7])) + 'm'
-        row_cells[2].text = ''
-        row_cells[3].text = ''
-        row_cells[4].text = ''
+        ben_type_all = all_ben[1]
+        #print(ben_type_all)
+        b_cashable_profiled = ben_type_all[8] - (ben_type_all[0] + ben_type_all[4])
+        b_non_cashable_profiled = ben_type_all[9] - (ben_type_all[1] + ben_type_all[5])
+        b_economic_profiled = ben_type_all[10] - (ben_type_all[2] + ben_type_all[6])
+        b_disbenefit_profiled = ben_type_all[11] - (ben_type_all[3] + ben_type_all[7])
+        b_type_achieved = np.array([ben_type_all[0], ben_type_all[1], ben_type_all[2], ben_type_all[3]])
+        b_type_profiled = np.array([b_cashable_profiled,
+                                   b_non_cashable_profiled,
+                                   b_economic_profiled,
+                                   b_disbenefit_profiled])
+        b_type_unprofiled = np.array([ben_type_all[4], ben_type_all[5], ben_type_all[6], ben_type_all[7]])
+        b_type_disbenefit = [ben_type_all[3], ben_type_all[7], ben_type_all[1]]
 
-        for cell in table.columns[2].cells:
-            cell.width = Cm(4)
+        # # '''Meta data'''
+        # doc.add_section(WD_SECTION_START.NEW_PAGE)
+        # doc.add_paragraph('Financial data')
+        # table = doc.add_table(rows=1, cols=5)
+        # #table.allow_autofit = False
+        # hdr_cells = table.rows[0].cells
+        # hdr_cells[0].text = 'WLC'
+        # hdr_cells[1].text = '£' + str(round(total_fin[7])) + 'm'
+        # hdr_cells[2].text = 'Project Business Case Stage'
+        # #hdr_cells[2].width = 4846320
+        # hdr_cells[3].text = ''
+        # hdr_cells[4].text = ''
+        # row_cells = table.add_row().cells
+        # row_cells[0].text = 'Spent'
+        # row_cells[1].text = '£' + str(round(total_fin[6])) + 'm'
+        # row_cells[2].text = ''
+        # row_cells[3].text = ''
+        # row_cells[4].text = ''
+        # row_cells = table.add_row().cells
+        # row_cells[0].text = 'Profiled'
+        # row_cells[1].text = '£' + str(round(total_profiled_now)) + 'm'
+        # row_cells[2].text = ''
+        # row_cells[3].text = ''
+        # row_cells[4].text = ''
+        # row_cells = table.add_row().cells
+        # row_cells[0].text = 'Unprofiled'
+        # row_cells[1].text = '£' + str(round(total_fin[8])) + 'm'
+        # row_cells[2].text = ''
+        # row_cells[3].text = ''
+        # row_cells[4].text = ''
+        # row_cells = table.add_row().cells
+        # row_cells[0].text = 'RDEl Total'
+        # row_cells[1].text = '£' + str(round(rdel_fin[7])) + 'm'
+        # row_cells[2].text = ''
+        # row_cells[3].text = ''
+        # row_cells[4].text = ''
+        # row_cells = table.add_row().cells
+        # row_cells[0].text = 'CDEl Total'
+        # row_cells[1].text = '£' + str(round(cdel_fin[7])) + 'm'
+        # row_cells[2].text = ''
+        # row_cells[3].text = ''
+        # row_cells[4].text = ''
+        #
+        # for cell in table.columns[2].cells:
+        #     cell.width = Cm(4)
 
         # for cell in table.columns[2].cells:
         #     cell.width = Inches(0.1)
 
         #set_col_widths(table)
 
-        # '''start of analysis'''
-        # new_section = doc.add_section(WD_SECTION_START.NEW_PAGE)
-        # new_width, new_height = new_section.page_height, new_section.page_width
-        # new_section.orientation = WD_ORIENT.LANDSCAPE
-        # new_section.page_width = new_width
-        # new_section.page_height = new_height
-        #
-        # '''Financial charts'''
-        # financial_graph_charts(doc, project_name, t_spent, t_profiled, t_unprofiled, total_fin,
-        #                        rc_spent, rc_profiled, rc_unprofiled)
-        #
-        # '''milestone swimlane charts'''
-        # #get baseline milestone data
-        # p_baseline_milestones = all_milestones_dict([project_name], list_of_masters_all[bc_index[project_name][2]])
-        #
-        # #chart of with milestone over the next two years
-        # m_data = milestone_schedule_data_filtered(p_current_milestones, p_last_milestones, p_baseline_milestones,
-        #                                  project_name)
-        # # add \n to y axis labels and cut down if two long
-        # labels = ['\n'.join(wrap(l, 40)) for l in m_data[0]]
-        # final_labels = []
-        # for l in labels:
-        #     if len(l) > 70:
-        #         final_labels.append(l[:70])
-        #     else:
-        #         final_labels.append(l)
-        #
-        # #Chart
-        # no_milestones = len(m_data[0])
-        #
-        #
-        # title = 'Project schedule two year window'
-        # if no_milestones <= 15:
-        #     milestone_swimlane_charts(doc, project_name, np.array(final_labels), np.array(m_data[1]), np.array(m_data[2]), \
-        #                           np.array(m_data[3]), title)
-        #
-        # if 16 <= no_milestones <= 35:
-        #     half = int(no_milestones/2)
-        #     milestone_swimlane_charts(doc, project_name, np.array(final_labels[:half]), np.array(m_data[1][:half]),
-        #                               np.array(m_data[2][:half]), np.array(m_data[3][:half]), title)
-        #     title = title + ' cont.'
-        #     milestone_swimlane_charts(doc, project_name, np.array(final_labels[half:no_milestones]),
-        #                               np.array(m_data[1][half:no_milestones]),
-        #                               np.array(m_data[2][half:no_milestones]),
-        #                               np.array(m_data[3][half:no_milestones]), title)
-        #
-        # #chart with all milestones
-        # m_data = milestone_schedule_data(p_current_milestones, p_last_milestones, p_baseline_milestones,
-        #                                           project_name)
-        # #print(m_data)
-        # # add \n to y axis labels and cut down if two long
-        # labels = ['\n'.join(wrap(l, 40)) for l in m_data[0]]
-        # final_labels = []
-        # for l in labels:
-        #     if len(l) > 70:
-        #         final_labels.append(l[:70])
-        #     else:
-        #         final_labels.append(l)
-        #
-        # # Chart
-        # no_milestones = len(m_data[0])
-        #
-        # title = 'Project total schedule'
-        # if no_milestones <= 20:
-        #     milestone_swimlane_charts(doc, project_name, np.array(final_labels), np.array(m_data[1]),
-        #                               np.array(m_data[2]), \
-        #                               np.array(m_data[3]), title)
-        #
-        # if 21 <= no_milestones <= 40:
-        #     half = int(no_milestones/2)
-        #     milestone_swimlane_charts(doc, project_name, np.array(final_labels[:half]),
-        #                               np.array(m_data[1][:half]),
-        #                               np.array(m_data[2][:half]), np.array(m_data[3][:half]), title)
-        #     title = title + ' schedule all cont.'
-        #     milestone_swimlane_charts(doc, project_name, np.array(final_labels[half:no_milestones]),
-        #                               np.array(m_data[1][half:no_milestones]),
-        #                               np.array(m_data[2][half:no_milestones]),
-        #                               np.array(m_data[3][half:no_milestones]), title)
-        #
-        # if 41 <= no_milestones <= 70:
-        #     third = int(no_milestones/3)
-        #     milestone_swimlane_charts(doc, project_name, np.array(final_labels[:third]),
-        #                               np.array(m_data[1][:third]),
-        #                               np.array(m_data[2][:third]), np.array(m_data[3][:third]), title)
-        #     title = title + ' schedule all cont.'
-        #     milestone_swimlane_charts(doc, project_name, np.array(final_labels[third:third*2]),
-        #                               np.array(m_data[1][third:third*2]),
-        #                               np.array(m_data[2][third:third*2]),
-        #                               np.array(m_data[3][third:third*2]), title)
-        #     title = title + ' schedule all cont.'
-        #     milestone_swimlane_charts(doc, project_name, np.array(final_labels[third*2:no_milestones]),
-        #                               np.array(m_data[1][third*2:no_milestones]),
-        #                               np.array(m_data[2][third*2:no_milestones]),
-        #                               np.array(m_data[3][third*2:no_milestones]), title)
-        #
-        #
-        # #milestone table
-        # doc.add_section(WD_SECTION_START.NEW_PAGE)
-        # #table heading
-        # doc.add_paragraph().add_run(str('Project high-level milestones')).bold = True
-        # some_text = 'The below table presents all project reported remaining high-level milestones, with six months grace ' \
-        #             'from close of the current quarter. Milestones are sorted in chronological order. Changes in milestones' \
-        #             ' dates in comparison to last quarter and baseline have been calculated and are provided.'
-        # doc.add_paragraph().add_run(str(some_text)).italic = True
-        #
-        # milestone_table(doc, p_baseline_milestones, project_name)
+        '''start of analysis'''
+        new_section = doc.add_section(WD_SECTION_START.NEW_PAGE)
+        new_width, new_height = new_section.page_height, new_section.page_width
+        new_section.orientation = WD_ORIENT.LANDSCAPE
+        new_section.page_width = new_width
+        new_section.page_height = new_height
+
+        '''Financial charts'''
+        fin_profile_graph(doc,
+                          project_profile_data_total,
+                          project_profile_data_rdel,
+                          project_profile_data_cdel)
+        fin_ben_total_charts(doc,
+                             t_spent,
+                             t_profiled,
+                             t_unprofiled,
+                             total_fin,
+                             rc_spent,
+                             rc_profiled,
+                             rc_unprofiled,
+                             b_achieved,
+                             b_profiled,
+                             b_unprofiled,
+                             b_type_achieved,
+                             b_type_profiled,
+                             b_type_unprofiled,
+                             b_type_disbenefit,
+                             total_ben)
+
+        '''milestone swimlane charts'''
+        #get baseline milestone data
+        p_baseline_milestones = all_milestones_dict([project_name], list_of_masters_all[bc_index[project_name][2]])
+
+        #chart of with milestone over the next two years
+        m_data = milestone_schedule_data(p_current_milestones,
+                                         p_last_milestones,
+                                         p_baseline_milestones,
+                                         project_name,
+                                         milestone_filter_start_date,
+                                         milestone_filter_end_date)
+        # add \n to y axis labels and cut down if two long
+        labels = ['\n'.join(wrap(l, 40)) for l in m_data[0]]
+        final_labels = []
+        for l in labels:
+            if len(l) > 70:
+                final_labels.append(l[:70])
+            else:
+                final_labels.append(l)
+
+        #Chart
+        no_milestones = len(m_data[0])
+
+
+        title = 'Project schedule two year window'
+        if no_milestones <= 15:
+            milestone_swimlane_charts(doc, project_name, np.array(final_labels), np.array(m_data[1]), np.array(m_data[2]), \
+                                  np.array(m_data[3]), title)
+
+        if 16 <= no_milestones <= 35:
+            half = int(no_milestones/2)
+            milestone_swimlane_charts(doc, project_name, np.array(final_labels[:half]), np.array(m_data[1][:half]),
+                                      np.array(m_data[2][:half]), np.array(m_data[3][:half]), title)
+            title = title + ' cont.'
+            milestone_swimlane_charts(doc, project_name, np.array(final_labels[half:no_milestones]),
+                                      np.array(m_data[1][half:no_milestones]),
+                                      np.array(m_data[2][half:no_milestones]),
+                                      np.array(m_data[3][half:no_milestones]), title)
+
+        #chart with all milestones
+        m_data = milestone_schedule_data(p_current_milestones,
+                                         p_last_milestones,
+                                         p_baseline_milestones,
+                                         project_name)
+        #print(m_data)
+        # add \n to y axis labels and cut down if two long
+        labels = ['\n'.join(wrap(l, 40)) for l in m_data[0]]
+        final_labels = []
+        for l in labels:
+            if len(l) > 70:
+                final_labels.append(l[:70])
+            else:
+                final_labels.append(l)
+
+        # Chart
+        no_milestones = len(m_data[0])
+
+        title = 'Project total schedule'
+        if no_milestones <= 20:
+            milestone_swimlane_charts(doc, project_name, np.array(final_labels), np.array(m_data[1]),
+                                      np.array(m_data[2]), \
+                                      np.array(m_data[3]), title)
+
+        if 21 <= no_milestones <= 40:
+            half = int(no_milestones/2)
+            milestone_swimlane_charts(doc, project_name, np.array(final_labels[:half]),
+                                      np.array(m_data[1][:half]),
+                                      np.array(m_data[2][:half]), np.array(m_data[3][:half]), title)
+            title = title + ' cont.'
+            milestone_swimlane_charts(doc, project_name, np.array(final_labels[half:no_milestones]),
+                                      np.array(m_data[1][half:no_milestones]),
+                                      np.array(m_data[2][half:no_milestones]),
+                                      np.array(m_data[3][half:no_milestones]), title)
+
+        if 41 <= no_milestones <= 70:
+            third = int(no_milestones/3)
+            milestone_swimlane_charts(doc, project_name, np.array(final_labels[:third]),
+                                      np.array(m_data[1][:third]),
+                                      np.array(m_data[2][:third]), np.array(m_data[3][:third]), title)
+            title = title + ' cont.'
+            milestone_swimlane_charts(doc, project_name, np.array(final_labels[third:third*2]),
+                                      np.array(m_data[1][third:third*2]),
+                                      np.array(m_data[2][third:third*2]),
+                                      np.array(m_data[3][third:third*2]), title)
+            #title = title + ' schedule all cont.'
+            milestone_swimlane_charts(doc, project_name, np.array(final_labels[third*2:no_milestones]),
+                                      np.array(m_data[1][third*2:no_milestones]),
+                                      np.array(m_data[2][third*2:no_milestones]),
+                                      np.array(m_data[3][third*2:no_milestones]), title)
+
+
+        #milestone table
+        doc.add_section(WD_SECTION_START.NEW_PAGE)
+        #table heading
+        doc.add_paragraph().add_run(str('Project high-level milestones')).bold = True
+        some_text = 'The below table presents all project reported remaining high-level milestones, with six months grace ' \
+                    'from close of the current quarter. Milestones are sorted in chronological order. Changes in milestones' \
+                    ' dates in comparison to last quarter and baseline have been calculated and are provided.'
+        doc.add_paragraph().add_run(str(some_text)).italic = True
+
+        milestone_table(doc, p_baseline_milestones, project_name)
+
+        '''Back to portrait'''
+        new_section = doc.add_section(WD_SECTION_START.NEW_PAGE)
+        new_width, new_height = new_section.page_height, new_section.page_width
+        new_section.orientation = WD_ORIENT.PORTRAIT
+        new_section.page_width = new_width
+        new_section.page_height = new_height
+
+        '''Project Scope'''
+        doc.add_paragraph().add_run('Project Scope').bold = True
+        text_one = str(list_of_masters_all[0].data[project_name]['Project Scope'])
+        try:
+            text_two = str(list_of_masters_all[1].data[project_name]['Project Scope'])
+        except KeyError:
+            text_two = text_one
+
+        # different options for comparing costs
+        # compare_text_showall(dca_a, dca_b, doc)
+        compare_text_newandold(text_one, text_two, doc)
 
 
         #TODO add quarter info in title
@@ -551,17 +610,124 @@ def get_financial_profile(project_name, cost_type):
 
     return latest, last, baseline
 
-def financial_graph_charts(doc, project_name, total_spent, total_profiled, total_unprofiled, total_fin,
-                           rc_spent, rc_profiled, rc_unprofiled):
+def fin_ben_total_charts(doc,
+                         total_spent,
+                         total_profiled,
+                         total_unprofiled,
+                         total_fin,
+                         rc_spent,
+                         rc_profiled,
+                         rc_unprofiled,
+                         delivered_ben,
+                         profiled_ben,
+                         unprofiled_ben,
+                         type_delivered_ben,
+                         type_profiled_ben,
+                         type_unprofiled_ben,
+                         type_disbenefit_ben,
+                         total_ben):
 
     fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2) #four sub plotsprint
 
-    '''cost profile charts'''
-    profile_data_total = get_financial_profile(project_name, ' total')
-    profile_data_rdel = get_financial_profile(project_name, ' RDEL Forecast Total')
-    profile_data_cdel = get_financial_profile(project_name, ' CDEL Forecast Total')
+    fig.suptitle('Project costs and benefits analysis', fontweight='bold') # title
 
-    year = ['19/20', '20/21', '21/22', '22/23', '23/24', '24/25', '25/26', '26/27', '27/28', '28/29']
+    #Spent, Profiled and Unprofile chart
+    labels = ['Baseline', 'Last Quarter', 'Latest']
+    width = 0.5
+    ax1.bar(labels, total_spent, width, label='Spent')
+    ax1.bar(labels, total_profiled, width, bottom=total_spent, label='Profiled')
+    ax1.bar(labels, total_unprofiled, width, bottom=total_spent + total_profiled, label='Unprofiled')
+    ax1.legend(prop={'size': 6})
+    ax1.set_ylabel('Cost (£m)')
+    ylab1 = ax1.yaxis.get_label()
+    ylab1.set_style('italic')
+    ylab1.set_size(8)
+    ax1.tick_params(axis='x', which='major', labelsize=6)
+    ax1.tick_params(axis='y', which='major', labelsize=6)
+    ax1.set_title('Fig 1 - cost total change over time', loc='left', fontsize=8, fontweight='bold')
+
+    #scaling y axis
+    #y axis value setting so it takes either highest ben or cost figure
+    cost_max = max(total_fin) + max(total_fin)/5
+    ben_max = max(total_ben) + max(total_ben)/5
+    y_max = max([cost_max, ben_max])
+    ax1.set_ylim(0, y_max)
+
+    #rdel/cdel bar chart
+
+    labels = ['RDEL', 'CDEL']
+    width = 0.5
+    ax3.bar(labels, rc_spent, width, label='Spent')
+    ax3.bar(labels, rc_profiled, width, bottom=rc_spent, label='Profiled')
+    ax3.bar(labels, rc_unprofiled, width, bottom=rc_spent + rc_profiled, label='Unprofiled')
+    ax3.legend(prop={'size': 6})
+    ax3.set_ylabel('Costs (£m)')
+    ylab3 = ax3.yaxis.get_label()
+    ylab3.set_style('italic')
+    ylab3.set_size(8)
+    ax3.tick_params(axis='x', which='major', labelsize=6)
+    ax3.tick_params(axis='y', which='major', labelsize=6)
+    ax3.set_title('Fig 2 - wlc cost type break down', loc='left', fontsize=8, fontweight='bold')
+
+    #y_max = max(total_fin) + max(total_fin) * 1 / 5
+    ax3.set_ylim(0, y_max) #scale y axis max
+
+    # benefits change
+    labels = ['Baseline', 'Last Quarter', 'Latest']
+    width = 0.5
+    ax2.bar(labels, delivered_ben, width, label='Delivered')
+    ax2.bar(labels, profiled_ben, width, bottom=delivered_ben, label='Profiled')
+    ax2.bar(labels, unprofiled_ben, width, bottom=delivered_ben + profiled_ben, label='Unprofiled')
+    ax2.legend(prop={'size': 6})
+    ax2.set_ylabel('Benefits (£m)')
+    ylab2 = ax2.yaxis.get_label()
+    ylab2.set_style('italic')
+    ylab2.set_size(8)
+    ax2.tick_params(axis='x', which='major', labelsize=6)
+    ax2.tick_params(axis='y', which='major', labelsize=6)
+    ax2.set_title('Fig 3 - ben total change over time', loc='left', fontsize=8, fontweight='bold')
+
+    ax2.set_ylim(0, y_max)
+
+    # benefits break down
+    labels = ['Cashable', 'Non-Cashable', 'Economic', 'Disbenefit']
+    width = 0.5
+    ax4.bar(labels, type_delivered_ben, width, label='Delivered')
+    ax4.bar(labels, type_profiled_ben, width, bottom=type_delivered_ben, label='Profiled')
+    ax4.bar(labels, type_unprofiled_ben, width, bottom=type_delivered_ben + type_profiled_ben, label='Unprofiled')
+    ax4.legend(prop={'size': 6})
+    ax4.set_ylabel('Benefits (£m)')
+    ylab4 = ax4.yaxis.get_label()
+    ylab4.set_style('italic')
+    ylab4.set_size(8)
+    ax4.tick_params(axis='x', which='major', labelsize=6)
+    ax4.tick_params(axis='y', which='major', labelsize=6)
+    ax4.set_title('Fig 4 - benefits profile type', loc='left', fontsize=8, fontweight='bold')
+
+    y_min = min(type_disbenefit_ben)
+    ax4.set_ylim(y_min, y_max)
+
+    # size of chart and fit
+    fig.canvas.draw()
+    fig.tight_layout(rect=[0, 0.03, 1, 0.95])  # for title
+
+    fig.savefig('cost_bens_overview.png')
+    plt.close()  # automatically closes figure so don't need to do manually.
+
+    doc.add_picture('cost_bens_overview.png', width=Inches(8))  # to place nicely in doc
+    os.remove('/home/will/code/python/analysis_engine/project_summaries/cost_bens_overview.png')
+
+    return doc
+
+def fin_profile_graph(doc,
+                      profile_data_total,
+                      profile_data_rdel,
+                      profile_data_cdel):
+
+    fig, (ax1, ax2) = plt.subplots(2) #four sub plotsprint
+
+    '''cost profile charts'''
+    year = year_list[:-1]
     baseline_profile_total = profile_data_total[2]
     last_profile_total = profile_data_total[1]
     latest_profile_total = profile_data_total[0]
@@ -570,9 +736,6 @@ def financial_graph_charts(doc, project_name, total_spent, total_profiled, total
     latest_profile_cdel = profile_data_cdel[0]
 
     fig.suptitle('Project financial analysis', fontweight='bold') # title
-    # set fig size
-    #fig.set_figheight(6)
-    #fig.set_figwidth(8)
 
     #plot cost change profile chart
     ax1.plot(year, baseline_profile_total, label='Baseline', linewidth=3.0, marker="o")
@@ -589,64 +752,32 @@ def financial_graph_charts(doc, project_name, total_spent, total_profiled, total
     ax1.legend(prop={'size': 6})
     ax1.set_title('Fig 1 - cost profile changes', loc='left', fontsize=8, fontweight='bold')
 
+    # scaling y axis
+    # y axis value setting so it takes highest cost profile yeah
+    all = profile_data_total[0] + profile_data_total[1] + profile_data_total[2]
+    y_max = max(all) + max(all) * 1 / 5
+    ax1.set_ylim(0, y_max)
+
     # plot rdel/cdel chart data
-    ax3.plot(year, latest_profile_cdel, label='CDEL', linewidth=3.0, marker="o")
-    ax3.plot(year, latest_profile_rdel, label='RDEL', linewidth=3.0, marker="o")
+    ax2.plot(year, latest_profile_cdel, label='CDEL', linewidth=3.0, marker="o")
+    ax2.plot(year, latest_profile_rdel, label='RDEL', linewidth=3.0, marker="o")
 
     #rdel/cdel profile chart styling
-    ax3.tick_params(axis='x', which='major', labelsize=6, rotation=45)
-    ax3.set_xlabel('Financial Years')
-    ax3.set_ylabel('Cost (£m)')
-    xlab3 = ax3.xaxis.get_label()
-    ylab3 = ax3.yaxis.get_label()
-    xlab3.set_style('italic')
-    xlab3.set_size(8)
-    ylab3.set_style('italic')
-    ylab3.set_size(8)
-    ax3.grid(color='grey', linestyle='-', linewidth=0.2)
-    ax3.legend(prop={'size': 6})
-
-    ax3.set_title('Fig 2 - cost profile spend type', loc='left', fontsize=8, fontweight='bold')
-
-    #Spent, Profiled and Unprofile chart
-    labels = ['Baseline', 'Last Quarter', 'Latest']
-    width = 0.5
-    ax2.bar(labels, total_spent, width, label='Spent')
-    ax2.bar(labels, total_profiled, width, bottom=total_spent, label='Profiled')
-    ax2.bar(labels, total_unprofiled, width, bottom=total_spent + total_profiled, label='Unprofiled')
-    ax2.legend(prop={'size': 6})
+    ax2.tick_params(axis='x', which='major', labelsize=6, rotation=45)
+    ax2.set_xlabel('Financial Years')
     ax2.set_ylabel('Cost (£m)')
+    xlab2 = ax2.xaxis.get_label()
     ylab2 = ax2.yaxis.get_label()
+    xlab2.set_style('italic')
+    xlab2.set_size(8)
     ylab2.set_style('italic')
     ylab2.set_size(8)
-    ax2.tick_params(axis='x', which='major', labelsize=6)
-    ax2.tick_params(axis='y', which='major', labelsize=6)
-    ax2.set_title('Fig 3 - wlc break down', loc='left', fontsize=8, fontweight='bold')
+    ax2.grid(color='grey', linestyle='-', linewidth=0.2)
+    ax2.legend(prop={'size': 6})
 
-    #scaling y axis
-    y_max = max(total_fin) + max(total_fin)*1/5
     ax2.set_ylim(0, y_max)
 
-    #rdel/cdel bar chart
-
-    labels = ['RDEL', 'CDEL']
-    width = 0.5
-    ax4.bar(labels, rc_spent, width, label='Spent')
-    ax4.bar(labels, rc_profiled, width, bottom=rc_spent, label='Profiled')
-    ax4.bar(labels, rc_unprofiled, width, bottom=rc_spent + rc_profiled, label='Unprofiled')
-    ax4.legend(prop={'size': 6})
-    ax4.set_ylabel('Costs (£m)')
-    ylab3 = ax4.yaxis.get_label()
-    ylab3.set_style('italic')
-    ylab3.set_size(8)
-    ax4.tick_params(axis='x', which='major', labelsize=6)
-    ax4.tick_params(axis='y', which='major', labelsize=6)
-    ax4.set_title('Fig 4 - cost type break down', loc='left', fontsize=8, fontweight='bold')
-
-    #scale y axis
-    #both_types = rdel_bar_chart_data + cdel_bar_chart_data
-    y_max = max(total_fin) + max(total_fin) * 1 / 5
-    ax4.set_ylim(0, y_max)
+    ax2.set_title('Fig 2 - cost profile spend type', loc='left', fontsize=8, fontweight='bold')
 
     # size of chart and fit
     fig.canvas.draw()
@@ -659,6 +790,7 @@ def financial_graph_charts(doc, project_name, total_spent, total_profiled, total
     os.remove('/home/will/code/python/analysis_engine/project_summaries/cost_profile.png')
 
     return doc
+
 
 def milestone_swimlane_charts(doc, project_name, latest_milestone_names, latest_milestone_dates, \
                               last_milestone_dates, baseline_milestone_dates, graph_title):
@@ -854,73 +986,96 @@ def get_financial_totals(project_name):
 def get_ben_totals(project_name):
     '''gets benefits data to place into the bar chart element in the financial analysis graphs'''
 
-    key_list = ['Pre-profile BEN Total',
-                'Unprofiled Remainder BEN Forecast - Total Monetised Benefits',
-                'Total BEN Forecast - Total Monetised Benefits']
+    ben_change_key_list = ['Pre-profile BEN Total',
+                           'Total BEN Forecast - Total Monetised Benefits',
+                           'Unprofiled Remainder BEN Forecast - Total Monetised Benefits']
 
-    cost_list = []
+    ben_type_key_list = ['Pre-profile BEN Forecast Gov Cashable',
+                  'Pre-profile BEN Forecast Gov Non-Cashable',
+                  'Pre-profile BEN Forecast - Economic (inc Private Partner)',
+                  'Pre-profile BEN Forecast - Disbenefit UK Economic',
+                  'Unprofiled Remainder BEN Forecast - Gov. Cashable',
+                  'Unprofiled Remainder BEN Forecast - Gov. Non-Cashable',
+                  'Unprofiled Remainder BEN Forecast - Economic (inc Private Partner)',
+                  'Unprofiled Remainder BEN Forecast - Disbenefit UK Economic',
+                  'Total BEN Forecast - Gov. Cashable',
+                  'Total BEN Forecast - Gov. Non-Cashable',
+                  'Total BEN Forecast - Economic (inc Private Partner)',
+                  'Total BEN Forecast - Disbenefit UK Economic']
 
+
+    ben_list = []
     index_1 = bc_index[project_name]
     index_2 = index_1[0:3]
     index_2.reverse()
     for x in index_2:
         if x is not None:
-            for y in key_list:
+            for y in ben_change_key_list:
                 ben = list_of_masters_all[x].data[project_name][y]
-                cost_list.append(ben)
+                ben_list.append(ben)
         else:
-            for i in range(len(key_list)):
+            for i in range(len(ben_change_key_list)):
                 ben = 0
-                cost_list.append(ben)
+                ben_list.append(ben)
 
-    return cost_list
-
-def milestone_schedule_data(latest_m_dict, last_m_dict, baseline_m_dict, project_name):
-    milestone_names = []
-    mile_d_l_lst = []
-    mile_d_last_lst = []
-    mile_d_bl_lst = []
-
-    #lengthy for loop designed so that all milestones and dates are stored and shown in output chart, even if they
-    #were not present in last and baseline data reporting
-    for m in list(latest_m_dict[project_name].keys()):
-        if m == 'Project - Business Case End Date':  # filter out as to far in future
-            pass
+    ben_type_list = []
+    for y in ben_type_key_list:
+        ben = list_of_masters_all[0].data[project_name][y]
+        if ben is not None:
+            ben_type_list.append(ben)
         else:
-            if m is not None:
-                m_d = tuple(latest_m_dict[project_name][m])[0]
+            ben_type_list.append(0)
 
-            try:
-                if m in list(last_m_dict[project_name].keys()):
-                    m_d_lst = tuple(last_m_dict[project_name][m])[0]
-                else:
-                    m_d_lst = tuple(latest_m_dict[project_name][m])[0]
-            except KeyError:
-                m_d_lst = tuple(latest_m_dict[project_name][m])[0] #for projects not reporting last quarter
+    return ben_list, ben_type_list
 
-            if m in list(baseline_m_dict[project_name].keys()):
-                m_d_bl = tuple(baseline_m_dict[project_name][m])[0]
-            else:
-                m_d_bl = tuple(latest_m_dict[project_name][m])[0]
+# def milestone_schedule_data(latest_m_dict, last_m_dict, baseline_m_dict, project_name):
+#     milestone_names = []
+#     mile_d_l_lst = []
+#     mile_d_last_lst = []
+#     mile_d_bl_lst = []
+#
+#     #lengthy for loop designed so that all milestones and dates are stored and shown in output chart, even if they
+#     #were not present in last and baseline data reporting
+#     for m in list(latest_m_dict[project_name].keys()):
+#         if m == 'Project - Business Case End Date':  # filter out as to far in future
+#             pass
+#         else:
+#             if m is not None:
+#                 m_d = tuple(latest_m_dict[project_name][m])[0]
+#
+#             try:
+#                 if m in list(last_m_dict[project_name].keys()):
+#                     m_d_lst = tuple(last_m_dict[project_name][m])[0]
+#                 else:
+#                     m_d_lst = tuple(latest_m_dict[project_name][m])[0]
+#             except KeyError:
+#                 m_d_lst = tuple(latest_m_dict[project_name][m])[0] #for projects not reporting last quarter
+#
+#             if m in list(baseline_m_dict[project_name].keys()):
+#                 m_d_bl = tuple(baseline_m_dict[project_name][m])[0]
+#             else:
+#                 m_d_bl = tuple(latest_m_dict[project_name][m])[0]
+#
+#             if m_d is not None:
+#                 milestone_names.append(m)
+#                 mile_d_l_lst.append(m_d)
+#                 if m_d_lst is not None:
+#                     mile_d_last_lst.append(m_d_lst)
+#                 else:
+#                     mile_d_last_lst.append(m_d)
+#                 if m_d_bl is not None:
+#                     mile_d_bl_lst.append(m_d_bl)
+#                 else:
+#                     if m_d_lst is not None:
+#                         mile_d_bl_lst.append(m_d_lst)
+#                     else:
+#                         mile_d_bl_lst.append(m_d)
+#
+#     return milestone_names, mile_d_l_lst, mile_d_last_lst, mile_d_bl_lst
 
-            if m_d is not None:
-                milestone_names.append(m)
-                mile_d_l_lst.append(m_d)
-                if m_d_lst is not None:
-                    mile_d_last_lst.append(m_d_lst)
-                else:
-                    mile_d_last_lst.append(m_d)
-                if m_d_bl is not None:
-                    mile_d_bl_lst.append(m_d_bl)
-                else:
-                    if m_d_lst is not None:
-                        mile_d_bl_lst.append(m_d_lst)
-                    else:
-                        mile_d_bl_lst.append(m_d)
-
-    return milestone_names, mile_d_l_lst, mile_d_last_lst, mile_d_bl_lst
-
-def milestone_schedule_data_filtered(latest_m_dict, last_m_dict, baseline_m_dict, project_name):
+def milestone_schedule_data(latest_m_dict, last_m_dict, baseline_m_dict, project_name,
+                                     filter_start_date = datetime.date(2000, 1, 1),
+                                     filter_end_date = datetime.date(2050, 1, 1)):
     milestone_names = []
     mile_d_l_lst = []
     mile_d_last_lst = []
@@ -949,7 +1104,7 @@ def milestone_schedule_data_filtered(latest_m_dict, last_m_dict, baseline_m_dict
                 m_d_bl = tuple(latest_m_dict[project_name][m])[0]
 
             if m_d is not None:
-                if milestone_filter_start_date <= m_d <= milestone_filter_end_date:
+                if filter_start_date <= m_d <= filter_end_date:
                     milestone_names.append(m)
                     mile_d_l_lst.append(m_d)
                     if m_d_lst is not None:
@@ -1079,10 +1234,10 @@ def milestone_schedule_data_filtered(latest_m_dict, last_m_dict, baseline_m_dict
 
 '''enter into the printing function the quarter details for the output files e.g. _q4_1920 (note put underscore at 
 front)'''
-#produce_word_doc()
+produce_word_doc()
 
-output = []
-for x in list_of_masters_all[0].projects:
-    b = get_ben_totals(x)
-    output.append(b)
+# output = []
+# for x in list_of_masters_all[0].projects:
+#     b = get_ben_totals(x)
+#     output.append(b)
 
