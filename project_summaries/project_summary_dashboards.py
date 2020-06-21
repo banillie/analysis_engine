@@ -19,6 +19,7 @@ from docx.oxml.ns import nsdecls
 from docx.oxml import parse_xml
 from docx.shared import Cm, RGBColor, Inches, Pt
 from docx.enum.section import WD_SECTION_START, WD_ORIENT
+from docx.enum.text import WD_ALIGN_PARAGRAPH
 import difflib
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
@@ -31,7 +32,7 @@ from collections import Counter
 
 
 from analysis.engine_functions import convert_rag_text, all_milestone_data_bulk, project_time_difference, \
-    all_milestones_dict \
+    all_milestones_dict, convert_bc_stage_text \
     #duplicate_milestone_keys
 from analysis.data import list_of_masters_all, root_path, latest_cost_profiles, last_cost_profiles, \
     baseline_1_cost_profiles, year_list, SRO_conf_key_list, SRO_conf_table_list, bc_index, p_current_milestones, \
@@ -135,6 +136,7 @@ def compare_text_newandold(text_1, text_2, doc):
     diff = list(comp.compare(text_2.split(), text_1.split()))
     new_text = diff
     y = doc.add_paragraph()
+    y.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
 
     for i in range(0, len(diff)):
         f = len(diff) - 1
@@ -178,12 +180,17 @@ def compare_text_newandold(text_1, text_2, doc):
 
     return doc
 
+def set_col_widths(t, widths):
+    for row in t.rows:
+        for idx, width in enumerate(widths):
+            row.cells[idx].width = width
+
 def produce_word_doc():
     '''Function that compiles each summary sheet'''
 
     master_list = list_of_masters_all[0:4]
 
-    for project_name in [sarh2]:
+    for project_name in [thameslink]:
         # sarh2, south_west_route_capacity, a66, a303, crossrail, thameslink]
         #master_list[0].projects:
         doc = Document()
@@ -191,7 +198,7 @@ def produce_word_doc():
 
         font = doc.styles['Normal'].font
         font.name = 'Arial'
-        font.size = Pt(10)
+        font.size = Pt(12)
 
         heading = str(project_name)
         intro = doc.add_heading(str(heading), 0)
@@ -199,6 +206,7 @@ def produce_word_doc():
         intro.bold = True
 
         para_1 = doc.add_paragraph()
+        para_1.alignment = WD_ALIGN_PARAGRAPH.RIGHT
         sro_name = list_of_masters_all[0].data[project_name]['Senior Responsible Owner (SRO)']
         if sro_name is None:
             sro_name = 'TBC'
@@ -207,9 +215,10 @@ def produce_word_doc():
         if sro_phone == None:
             sro_phone = 'TBC'
 
-        para_1.add_run('SRO name:  ' + str(sro_name) + ',   Tel:  ' + str(sro_phone))
+        para_1.add_run('SRO: ' + str(sro_name) + ', ' + str(sro_phone)).bold = True
 
         para_2 = doc.add_paragraph()
+        para_2.alignment = WD_ALIGN_PARAGRAPH.RIGHT
         pd_name = list_of_masters_all[0].data[project_name]['Project Director (PD)']
         if pd_name is None:
             pd_name = 'TBC'
@@ -218,7 +227,7 @@ def produce_word_doc():
         if pd_phone is None:
             pd_phone = 'TBC'
 
-        para_2.add_run('PD name:  ' + str(pd_name) + ',   Tel:  ' + str(pd_phone))
+        para_2.add_run('PD: ' + str(pd_name) + ', ' + str(pd_phone)).bold = True
 
         '''Start of table with DCA confidence ratings'''
         table = doc.add_table(rows=1, cols=5)
@@ -242,9 +251,10 @@ def produce_word_doc():
                     row_cells[i+1].text = 'N/A'
 
         table.style = 'Table Grid'
-        make_rows_bold(table.rows[0])  # makes top of table bold. Found function on stack overflow.
-
-        # TODO develop way of setting table column widths
+        make_rows_bold([table.rows[0]])  # makes top of table bold.
+        #make_columns_bold([table.columns[0]]) #right cells in table bold
+        column_widths = (Cm(3.5), Cm(3), Cm(3), Cm(3), Cm(3))
+        set_col_widths(table, column_widths)
 
         doc.add_paragraph()
         p = doc.add_paragraph()
@@ -312,8 +322,13 @@ def produce_word_doc():
 
         source_of_finance = list_of_masters_all[0].data[project_name]['Source of Finance']
         contingency = list_of_masters_all[0].data[project_name]['Overall contingency (£m)']
-        con_included_wlc = list_of_masters_all[0].data[project_name]['Overall figure for Optimism Bias (£m)']
+        con_included_wlc = list_of_masters_all[0].data[project_name]\
+                           ['Is this Continency amount included within the WLC?']
+
         ob = list_of_masters_all[0].data[project_name]['Overall figure for Optimism Bias (£m)']
+        if ob is None:
+            ob = 'None'
+
         ob_included_wlc = list_of_masters_all[0].data[project_name]['Is this Optimism Bias included within the WLC?']
         '''vfm category now'''
         if list_of_masters_all[0].data[project_name]['VfM Category single entry'] is None:
@@ -322,26 +337,34 @@ def produce_word_doc():
         else:
             vfm_cat = list_of_masters_all[0].data[project_name]['VfM Category single entry']
         bcr = list_of_masters_all[0].data[project_name]['Adjusted Benefits Cost Ratio (BCR)']
-        #total_bens = list_of_masters_all[0].data[project_name]['']
 
         '''milestone data'''
-        ipdc_business_case_stage = list_of_masters_all[0].data[project_name]['IPDC approval point']
+        ipdc_business_case_stage = convert_bc_stage_text(
+            list_of_masters_all[0].data[project_name]['IPDC approval point'])
         delivery_stage = list_of_masters_all[0].data[project_name]['Project stage']
+        if delivery_stage is None:
+            delivery_stage = 'Not reported'
+        try:
+            start_project = tuple(p_current_milestones[project_name]['Start of Project'])[0]
+            start_project_text = start_project.strftime("%d/%m/%Y")
+        except (KeyError, AttributeError):
+            start_project_text = 'Not reported'
+
         try:
             start_con_build = tuple(p_current_milestones[project_name]['Start of Construction/build'])[0]
             start_con_build_text = start_con_build.strftime("%d/%m/%Y")
         except (KeyError, AttributeError):
-            start_con_build = 'Not Reported' #TODO make red in output
+            start_con_build_text = 'Not reported'
         try:
             start_ops = tuple(p_current_milestones[project_name]['Start of Operation'])[0]
             start_ops_text = start_ops.strftime("%d/%m/%Y")
         except (KeyError, AttributeError):
-            start_ops_text = 'Not Reported'
+            start_ops_text = 'Not reported'
         try:
             full_ops = tuple(p_current_milestones[project_name]['Full Operations'])[0]
-            full_ops_text = start_ops.strftime("%d/%m/%Y")
+            full_ops_text = full_ops.strftime("%d/%m/%Y")
         except (KeyError, AttributeError):
-            full_ops_text = 'Not Reported'
+            full_ops_text = 'Not reported'
 
         '''ben data'''
         all_ben = get_ben_totals(project_name)  # all totals
@@ -370,56 +393,166 @@ def produce_word_doc():
         b_type_unprofiled = np.array([ben_type_all[4], ben_type_all[5], ben_type_all[6], ben_type_all[7]])
         b_type_disbenefit = [ben_type_all[3], ben_type_all[7], ben_type_all[1]]
 
-        # # '''Meta data'''
-        # doc.add_section(WD_SECTION_START.NEW_PAGE)
-        # doc.add_paragraph('Financial data')
-        # table = doc.add_table(rows=1, cols=5)
-        # #table.allow_autofit = False
-        # hdr_cells = table.rows[0].cells
-        # hdr_cells[0].text = 'WLC'
-        # hdr_cells[1].text = '£' + str(round(total_fin[7])) + 'm'
-        # hdr_cells[2].text = 'Project Business Case Stage'
-        # #hdr_cells[2].width = 4846320
-        # hdr_cells[3].text = ''
-        # hdr_cells[4].text = ''
-        # row_cells = table.add_row().cells
-        # row_cells[0].text = 'Spent'
-        # row_cells[1].text = '£' + str(round(total_fin[6])) + 'm'
-        # row_cells[2].text = ''
-        # row_cells[3].text = ''
-        # row_cells[4].text = ''
-        # row_cells = table.add_row().cells
-        # row_cells[0].text = 'Profiled'
-        # row_cells[1].text = '£' + str(round(total_profiled_now)) + 'm'
-        # row_cells[2].text = ''
-        # row_cells[3].text = ''
-        # row_cells[4].text = ''
-        # row_cells = table.add_row().cells
-        # row_cells[0].text = 'Unprofiled'
-        # row_cells[1].text = '£' + str(round(total_fin[8])) + 'm'
-        # row_cells[2].text = ''
-        # row_cells[3].text = ''
-        # row_cells[4].text = ''
-        # row_cells = table.add_row().cells
-        # row_cells[0].text = 'RDEl Total'
-        # row_cells[1].text = '£' + str(round(rdel_fin[7])) + 'm'
-        # row_cells[2].text = ''
-        # row_cells[3].text = ''
-        # row_cells[4].text = ''
-        # row_cells = table.add_row().cells
-        # row_cells[0].text = 'CDEl Total'
-        # row_cells[1].text = '£' + str(round(cdel_fin[7])) + 'm'
-        # row_cells[2].text = ''
-        # row_cells[3].text = ''
-        # row_cells[4].text = ''
-        #
-        # for cell in table.columns[2].cells:
-        #     cell.width = Cm(4)
+        '''Meta data table'''
+        doc.add_section(WD_SECTION_START.NEW_PAGE)
+        '''Costs meta data'''
+        paragraph = doc.add_paragraph()
+        paragraph.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+        paragraph.add_run('Annex A. High level MI data and analysis').bold = True
 
-        # for cell in table.columns[2].cells:
-        #     cell.width = Inches(0.1)
+        run = doc.add_paragraph().add_run('Costs')
+        font = run.font
+        font.bold = True
+        font.underline = True
+        table = doc.add_table(rows=1, cols=4)
+        hdr_cells = table.rows[0].cells
+        hdr_cells[0].text = 'WLC:'
+        hdr_cells[1].text = '£' + str(round(total_fin[7])) + 'm'
+        hdr_cells[2].text = 'Spent:'
+        hdr_cells[3].text = '£' + str(round(total_fin[6])) + 'm'
+        row_cells = table.add_row().cells
+        row_cells[0].text = 'RDEL Total:'
+        row_cells[1].text = '£' + str(round(rdel_fin[7])) + 'm'
+        row_cells[2].text = 'Profiled:'
+        row_cells[3].text = '£' + str(round(total_profiled_now)) + 'm'
+        row_cells = table.add_row().cells
+        row_cells[0].text = 'CDEL Total:'
+        row_cells[1].text = '£' + str(round(cdel_fin[7])) + 'm'
+        row_cells[2].text = 'Unprofiled:'
+        row_cells[3].text = '£' + str(round(total_fin[8])) + 'm'
 
-        #set_col_widths(table)
+        #set column width
+        column_widths = (Cm(4), Cm(3), Cm(4), Cm(3))
+        set_col_widths(table, column_widths)
+        #make column keys bold
+        make_columns_bold([table.columns[0], table.columns[2]])
+        change_text_size([table.columns[0], table.columns[1], table.columns[2], table.columns[3]], 10)
+
+        '''Financial data'''
+        doc.add_paragraph()
+        run = doc.add_paragraph().add_run('Financial')
+        font = run.font
+        font.bold = True
+        font.underline = True
+        table = doc.add_table(rows=1, cols=4)
+        hdr_cells = table.rows[0].cells
+        hdr_cells[0].text = 'Type of funding:'
+        hdr_cells[1].text = source_of_finance
+        hdr_cells[2].text = 'Contingency:'
+        hdr_cells[3].text = '£' + str(round(contingency)) + 'm'
+        row_cells = table.add_row().cells
+        row_cells[0].text = 'Optimism Bias (OB):'
+        if ob == 'None':
+            row_cells[1].text = ob
+        else:
+            row_cells[1].text = '£' + str(round(ob)) + 'm'
+        row_cells[2].text = 'Contigency in costs:'
+        row_cells[3].text = con_included_wlc
+        row_cells = table.add_row().cells
+        row_cells[0].text = 'OB in costs:'
+        row_cells[1].text = ob_included_wlc
+        row_cells[2].text = ''
+        row_cells[3].text = ''
+
+        # set column width
+        column_widths = (Cm(4), Cm(3), Cm(4), Cm(3))
+        set_col_widths(table, column_widths)
+        # make column keys bold
+        make_columns_bold([table.columns[0], table.columns[2]])
+        change_text_size([table.columns[0], table.columns[1], table.columns[2], table.columns[3]], 10)
+
+        '''Project Stage data'''
+        doc.add_paragraph()
+        run = doc.add_paragraph().add_run('Stage')
+        font = run.font
+        font.bold = True
+        font.underline = True
+        table = doc.add_table(rows=1, cols=4)
+        hdr_cells = table.rows[0].cells
+        hdr_cells[0].text = 'Business case stage (IPDC approved):'
+        hdr_cells[1].text = ipdc_business_case_stage
+        hdr_cells[2].text = 'Delivery stage:'
+        hdr_cells[3].text = delivery_stage
+
+        # set column width
+        column_widths = (Cm(4), Cm(3), Cm(4), Cm(3))
+        set_col_widths(table, column_widths)
+        # make column keys bold
+        make_columns_bold([table.columns[0], table.columns[2]])
+        change_text_size([table.columns[0], table.columns[1], table.columns[2], table.columns[3]], 10)
+        make_text_red([table.columns[1], table.columns[3]])  # make 'not reported red'
+
+        '''Milestone/Stage meta data'''
+        doc.add_paragraph()
+        run = doc.add_paragraph().add_run('Schedule/Milestones')
+        font = run.font
+        font.bold = True
+        font.underline = True
+        table = doc.add_table(rows=1, cols=4)
+        hdr_cells = table.rows[0].cells
+        hdr_cells[0].text = 'Start date:'
+        hdr_cells[1].text = start_project_text
+        hdr_cells[2].text = 'Start of operations:'
+        hdr_cells[3].text = start_ops_text
+        row_cells = table.add_row().cells
+        row_cells[0].text = 'Start of construction:'
+        row_cells[1].text = start_con_build_text
+        row_cells[2].text = 'Full Operations:'
+        row_cells[3].text = full_ops_text
+
+        # set column width
+        column_widths = (Cm(4), Cm(3), Cm(4), Cm(3))
+        set_col_widths(table, column_widths)
+        # make column keys bold
+        make_columns_bold([table.columns[0], table.columns[2]])
+        change_text_size([table.columns[0], table.columns[1], table.columns[2], table.columns[3]], 10)
+        make_text_red([table.columns[1], table.columns[3]]) #make 'not reported red'
+
+        '''benefits meta data'''
+        doc.add_paragraph()
+        run = doc.add_paragraph().add_run('VfM')
+        font = run.font
+        font.bold = True
+        font.underline = True
+        table = doc.add_table(rows=1, cols=4)
+        hdr_cells = table.rows[0].cells
+        hdr_cells[0].text = 'VfM category:'
+        hdr_cells[1].text = vfm_cat
+        hdr_cells[2].text = 'BCR:'
+        hdr_cells[3].text = str(bcr)
+
+        # set column width
+        column_widths = (Cm(4), Cm(3), Cm(4), Cm(3))
+        set_col_widths(table, column_widths)
+        # make column keys bold
+        make_columns_bold([table.columns[0], table.columns[2]])
+        change_text_size([table.columns[0], table.columns[1], table.columns[2], table.columns[3]], 10)
+        make_text_red([table.columns[1], table.columns[3]])  # make 'not reported red'
+
+        '''benefits meta data'''
+        doc.add_paragraph()
+        run = doc.add_paragraph().add_run('Benefits')
+        font = run.font
+        font.bold = True
+        font.underline = True
+        table = doc.add_table(rows=1, cols=5)
+        hdr_cells = table.rows[0].cells
+        hdr_cells[0].text = 'Total Benefits:'
+        hdr_cells[1].text = '£' + str(round(total_ben[7])) + 'm'
+        hdr_cells[2].text = 'Benefits delivered:'
+        hdr_cells[3].text = '£' + str(round(total_ben[6])) + 'm'
+        row_cells = table.add_row().cells
+        row_cells[0].text = 'Benefits profiled:'
+        row_cells[1].text = '£' + str(round(total_ben_profiled_now)) + 'm'
+        row_cells[2].text = 'Benefits unprofiled:'
+        row_cells[3].text = '£' + str(round(total_ben[8])) + 'm'
+
+        # set column width
+        column_widths = (Cm(4), Cm(3), Cm(4), Cm(3))
+        set_col_widths(table, column_widths)
+        # make column keys bold
+        make_columns_bold([table.columns[0], table.columns[2]])
+        change_text_size([table.columns[0], table.columns[1], table.columns[2], table.columns[3]], 10)
 
         '''start of analysis'''
         new_section = doc.add_section(WD_SECTION_START.NEW_PAGE)
@@ -461,6 +594,7 @@ def produce_word_doc():
                                          project_name,
                                          milestone_filter_start_date,
                                          milestone_filter_end_date)
+
         # add \n to y axis labels and cut down if two long
         labels = ['\n'.join(wrap(l, 40)) for l in m_data[0]]
         final_labels = []
@@ -470,9 +604,7 @@ def produce_word_doc():
             else:
                 final_labels.append(l)
 
-        #Chart
         no_milestones = len(m_data[0])
-
 
         title = 'Project schedule two year window'
         if no_milestones <= 15:
@@ -571,7 +703,6 @@ def produce_word_doc():
         # compare_text_showall(dca_a, dca_b, doc)
         compare_text_newandold(text_one, text_two, doc)
 
-
         #TODO add quarter info in title
         doc.save(root_path/'output/{}_summary.docx'.format(project_name))
 
@@ -585,17 +716,6 @@ def combine_narrtives(project_name, master, key_list):
 
     return output
 
-# def set_col_widths(table):
-#     widths = (Inches(2), Inches(1), Inches(1), Inches(1), Inches(1))
-#     for col in table.columns:
-#         for idx, width in enumerate(widths):
-#             col.cells[idx].width = width
-
-def set_col_widths(t):
-    widths = (Inches(1), Inches(1), Inches(0.2), Inches(1), Inches(1))
-    for row in t.rows:
-        for idx, width in enumerate(widths):
-            row.cells[idx].width = width
 
 def get_financial_profile(project_name, cost_type):
     '''gets project financial data'''
@@ -823,6 +943,22 @@ def milestone_swimlane_charts(doc, project_name, latest_milestone_names, latest_
             ax1.xaxis.set_minor_formatter(months_fmt)
             plt.setp(ax1.xaxis.get_minorticklabels(), rotation=45)
             plt.setp(ax1.xaxis.get_majorticklabels(), rotation=45, weight='bold')
+            # scaling x axis
+            # x axis value to no more than three months after last latest milestone date, or three months
+            # before first latest milestone date. Hack, can be improved. Text highlights movements off chart.
+            x_max = last_milestone_dates[-1] + timedelta(days=90)
+            x_min = last_milestone_dates[0] - timedelta(days=90)
+            for date in baseline_milestone_dates:
+                if date > x_max:
+                    ax1.set_xlim(x_min, x_max)
+                    plt.figtext(0.98, 0.03,
+                                'Check full schedule to see all milestone movements',
+                                horizontalalignment='right', fontsize=6, fontweight='bold')
+                if date < x_min:
+                    ax1.set_xlim(x_min, x_max)
+                    plt.figtext(0.98, 0.03,
+                                'Check full schedule to see all milestone movements',
+                                horizontalalignment='right', fontsize=6, fontweight='bold')
         else:
             ax1.xaxis.set_major_locator(years)
             ax1.xaxis.set_minor_locator(months)
@@ -842,9 +978,7 @@ def milestone_swimlane_charts(doc, project_name, latest_milestone_names, latest_
     try:
         if latest_milestone_dates[0] <= ipdc_date <= latest_milestone_dates[-1]:
             plt.axvline(ipdc_date)
-            # ax1.set_title('Line represents when IPDC will discuss Q1 20_21 portfolio management report',
-            #               loc='left', fontsize=8, fontweight='bold')
-            plt.figtext(0.99, 0.01, 'Line represents when IPDC will discuss Q1 20_21 portfolio management report',
+            plt.figtext(0.98, 0.01, 'Line represents when IPDC will discuss Q1 20_21 portfolio management report',
                         horizontalalignment='right', fontsize=6, fontweight='bold')
     except IndexError:
         pass
@@ -872,9 +1006,6 @@ def milestone_table(doc, p_baseline_milestones, project_name):
     hdr_cells[2].text = 'Change from Lst Qrt'
     hdr_cells[3].text = 'Change from BL'
     hdr_cells[4].text = 'Notes'
-
-    # TODO specify column widths
-
 
     for milestone in p_current_milestones[project_name].keys():
 
@@ -920,17 +1051,46 @@ def milestone_table(doc, p_baseline_milestones, project_name):
 
     table.style = 'Table Grid'
 
-    make_rows_bold(table.rows[0]) # makes top of table bold. Found function on stack overflow.
+    # column widths
+    column_widths = (Cm(6), Cm(2.6), Cm(2), Cm(2), Cm(8.95))
+    set_col_widths(table, column_widths)
+    # make_columns_bold([table.columns[0], table.columns[3]])  # make keys bold
+    # make_text_red([table.columns[1], table.columns[4]])  # make 'not reported red'
+
+    make_rows_bold([table.rows[0]]) # makes top of table bold. Found function on stack overflow.
 
     return doc
 
-def make_rows_bold(*rows):
+def make_rows_bold(rows=list):
     '''Makes text bold in specified row'''
     for row in rows:
         for cell in row.cells:
             for paragraph in cell.paragraphs:
                 for run in paragraph.runs:
                     run.font.bold = True
+
+def make_columns_bold(columns=list):
+    for column in columns:
+        for cell in column.cells:
+            for paragraph in cell.paragraphs:
+                for run in paragraph.runs:
+                    run.font.bold = True
+
+def make_text_red(columns=list):
+    for column in columns:
+        for cell in column.cells:
+            for paragraph in cell.paragraphs:
+                for run in paragraph.runs:
+                    if run.text == 'Not reported':
+                        run.font.color.rgb = RGBColor(255, 0, 0)
+
+def change_text_size(columns=list, size=int):
+    for column in columns:
+        for cell in column.cells:
+            for paragraph in cell.paragraphs:
+                for run in paragraph.runs:
+                    font = run.font
+                    font.size = Pt(size)
 
 def plus_minus_days(change_value):
     '''mini function to place plus or minus sign before time delta
@@ -1028,51 +1188,6 @@ def get_ben_totals(project_name):
 
     return ben_list, ben_type_list
 
-# def milestone_schedule_data(latest_m_dict, last_m_dict, baseline_m_dict, project_name):
-#     milestone_names = []
-#     mile_d_l_lst = []
-#     mile_d_last_lst = []
-#     mile_d_bl_lst = []
-#
-#     #lengthy for loop designed so that all milestones and dates are stored and shown in output chart, even if they
-#     #were not present in last and baseline data reporting
-#     for m in list(latest_m_dict[project_name].keys()):
-#         if m == 'Project - Business Case End Date':  # filter out as to far in future
-#             pass
-#         else:
-#             if m is not None:
-#                 m_d = tuple(latest_m_dict[project_name][m])[0]
-#
-#             try:
-#                 if m in list(last_m_dict[project_name].keys()):
-#                     m_d_lst = tuple(last_m_dict[project_name][m])[0]
-#                 else:
-#                     m_d_lst = tuple(latest_m_dict[project_name][m])[0]
-#             except KeyError:
-#                 m_d_lst = tuple(latest_m_dict[project_name][m])[0] #for projects not reporting last quarter
-#
-#             if m in list(baseline_m_dict[project_name].keys()):
-#                 m_d_bl = tuple(baseline_m_dict[project_name][m])[0]
-#             else:
-#                 m_d_bl = tuple(latest_m_dict[project_name][m])[0]
-#
-#             if m_d is not None:
-#                 milestone_names.append(m)
-#                 mile_d_l_lst.append(m_d)
-#                 if m_d_lst is not None:
-#                     mile_d_last_lst.append(m_d_lst)
-#                 else:
-#                     mile_d_last_lst.append(m_d)
-#                 if m_d_bl is not None:
-#                     mile_d_bl_lst.append(m_d_bl)
-#                 else:
-#                     if m_d_lst is not None:
-#                         mile_d_bl_lst.append(m_d_lst)
-#                     else:
-#                         mile_d_bl_lst.append(m_d)
-#
-#     return milestone_names, mile_d_l_lst, mile_d_last_lst, mile_d_bl_lst
-
 def milestone_schedule_data(latest_m_dict, last_m_dict, baseline_m_dict, project_name,
                                      filter_start_date = datetime.date(2000, 1, 1),
                                      filter_end_date = datetime.date(2050, 1, 1)):
@@ -1121,114 +1236,6 @@ def milestone_schedule_data(latest_m_dict, last_m_dict, baseline_m_dict, project
 
     return milestone_names, mile_d_l_lst, mile_d_last_lst, mile_d_bl_lst
 
-# def duplicate_milestone_keys(project_names, milestone_data):
-#     '''
-#     Function that checks if there are duplicate milestone keys for projects
-#
-#     Project_names: list of project names of interest / in range
-#     Master_data: quarter master data set
-#
-#     Dictionary is structured as {'project name': ['list of duplicates']}
-#
-#     '''
-#
-#     output_dict = {}
-#
-#     for name in project_names:
-#         m_name_list = list(milestone_data[name].keys())
-#         #print(m_name_list)
-#         duplicates = []
-#         dont_include = [None, 'other key approvals', 'Other key milestones', 'other approval point',
-#                         'other project milestone']
-#         count = list(Counter(elem for elem in m_name_list))
-#         print(count)
-#         for i in count.items():
-#             if i[1] > 1:
-#                 if i[1] not in dont_include:
-#                     duplicates.append(i[0])
-#
-#         output_dict[name] = duplicates
-#
-#     return output_dict
-#
-# # latest_m_keys = duplicate_milestone_keys(list_of_masters_all[0].projects, p_current_milestones)
-# # last_m_keys = duplicate_milestone_keys(list_of_masters_all[1].projects, p_last_milestones)
-#
-# def all_milestones_dict(project_names, master_data):
-#     '''
-#     Function that puts project milestone data in dictionary in order of newest date first.
-#
-#     Project_names: list of project names of interest / in range
-#     Master_data: quarter master data set
-#
-#     Dictionary is structured as {'project name': {'milestone name': datetime.date: 'notes'}}
-#
-#     '''
-#
-#     upper_dict = {}
-#
-#     for name in project_names:
-#         lower_dict = {}
-#         try:
-#             p_data = master_data.data[name]
-#             raw_list = []
-#             for i in range(1, 50):
-#                 try:
-#                     try:
-#                         t = (p_data['Approval MM' + str(i)],
-#                              p_data['Approval MM' + str(i) + ' Forecast / Actual'],
-#                              p_data['Approval MM' + str(i) + ' Notes'])
-#                         raw_list.append(t)
-#                     except KeyError:
-#                         t = (p_data['Approval MM' + str(i)],
-#                              p_data['Approval MM' + str(i) + ' Forecast - Actual'],
-#                              p_data['Approval MM' + str(i) + ' Notes'])
-#                         raw_list.append(t)
-#
-#                     t = (p_data['Assurance MM' + str(i)],
-#                          p_data['Assurance MM' + str(i) + ' Forecast - Actual'],
-#                          p_data['Assurance MM' + str(i) + ' Notes'])
-#                     raw_list.append(t)
-#
-#                 except KeyError:
-#                     pass
-#
-#             for i in range(18, 67):
-#                 try:
-#                     t = (p_data['Project MM' + str(i)],
-#                          p_data['Project MM' + str(i) + ' Forecast - Actual'],
-#                          p_data['Project MM' + str(i) + ' Notes'])
-#                     raw_list.append(t)
-#                 except KeyError:
-#                     pass
-#         except KeyError:
-#             pass
-#
-#         #put the list in chronological order
-#         sorted_list = sorted(raw_list, key=lambda k: (k[1] is None, k[1]))
-#
-#         #loop to stop key names being the same. Not ideal as doesn't handle keys that may already have numbers as
-#         #strings at end of names. But still useful
-#         extra = 1
-#         for x in sorted_list:
-#             if x[0] is not None:
-#                 if x[0] in lower_dict:
-#                     for i in range(2, 10):
-#                         key_name = x[0] + ' ' + str(i)
-#                         if key_name in lower_dict:
-#                             continue
-#                         else:
-#                             lower_dict[key_name] = {x[1]: x[2]}
-#                             break
-#                 else:
-#                     lower_dict[x[0]] = {x[1]: x[2]}
-#             else:
-#                 pass
-#
-#         upper_dict[name] = lower_dict
-#
-#     return upper_dict
-
 
 '''RUNNING PROGRAMME'''
 
@@ -1236,8 +1243,4 @@ def milestone_schedule_data(latest_m_dict, last_m_dict, baseline_m_dict, project
 front)'''
 produce_word_doc()
 
-# output = []
-# for x in list_of_masters_all[0].projects:
-#     b = get_ben_totals(x)
-#     output.append(b)
 
