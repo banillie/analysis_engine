@@ -1,17 +1,11 @@
 '''
 Programme that compiles project dashboards/summary sheets.
-
 Input:
-1) four quarters worth of data
+1) Nothing for the user to input manually. when the programme run its default is to take the last four quarters
+worth of data.
 
 Output:
-1) MS word document in structure of summary sheet / dashboard - with some areas missing, see below.
-
-Supplementary programmes that need to be run to build charts for summary pages. Charts should be built and cut and paste
-into dashboards/summary sheets:
-1) project_financial_profile.py . For financial charts
-2) milestone_comparison_3_qrts_proj.py . For milestones tables
-
+1) Word document with all information e.g. narratives, tables and charts, built into it.
 '''
 
 from docx import Document
@@ -23,21 +17,17 @@ from docx.enum.text import WD_ALIGN_PARAGRAPH
 import difflib
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
-from matplotlib import rcParams
 import numpy as np
 import datetime
 from datetime import timedelta
 from textwrap import wrap
-from collections import Counter
 
 
-from analysis.engine_functions import convert_rag_text, all_milestone_data_bulk, project_time_difference, \
-    all_milestones_dict, convert_bc_stage_text \
-    #duplicate_milestone_keys
+from analysis.engine_functions import convert_rag_text, project_time_difference, all_milestones_dict, \
+    convert_bc_stage_text
 from analysis.data import list_of_masters_all, root_path, latest_cost_profiles, last_cost_profiles, \
-    baseline_1_cost_profiles, year_list, SRO_conf_key_list, SRO_conf_table_list, bc_index, p_current_milestones, \
-    p_last_milestones, first_diff_data, ipdc_date, \
-    a66, a303, crossrail, thameslink, south_west_route_capacity, sarh2, hs2_2b, rail_franchising, tru, wrlth
+    baseline_1_cost_profiles, year_list, SRO_conf_key_list, bc_index, p_current_milestones, \
+    p_last_milestones, first_diff_data, ipdc_date
 
 import os
 
@@ -190,9 +180,7 @@ def produce_word_doc():
 
     master_list = list_of_masters_all[0:4]
 
-    for project_name in [thameslink]:
-        # sarh2, south_west_route_capacity, a66, a303, crossrail, thameslink]
-        #master_list[0].projects:
+    for project_name in master_list[0].projects:
         doc = Document()
         print(project_name)
 
@@ -209,13 +197,17 @@ def produce_word_doc():
         para_1.alignment = WD_ALIGN_PARAGRAPH.RIGHT
         sro_name = list_of_masters_all[0].data[project_name]['Senior Responsible Owner (SRO)']
         if sro_name is None:
-            sro_name = 'TBC'
+            sro_name = 'tbc'
+
+        sro_email = list_of_masters_all[0].data[project_name]['Senior Responsible Owner (SRO) - Email']
+        if sro_email is None:
+            sro_email = 'email: tbc'
 
         sro_phone = list_of_masters_all[0].data[project_name]['SRO Phone No.']
         if sro_phone == None:
-            sro_phone = 'TBC'
+            sro_phone = 'phone number: tbc'
 
-        para_1.add_run('SRO: ' + str(sro_name) + ', ' + str(sro_phone)).bold = True
+        para_1.add_run('SRO: ' + str(sro_name) + ', ' + str(sro_email) + ', ' + str(sro_phone))
 
         para_2 = doc.add_paragraph()
         para_2.alignment = WD_ALIGN_PARAGRAPH.RIGHT
@@ -223,11 +215,32 @@ def produce_word_doc():
         if pd_name is None:
             pd_name = 'TBC'
 
+        pd_email = list_of_masters_all[0].data[project_name]['Project Director (PD) - Email']
+        if pd_email is None:
+            pd_email = 'email: tbc'
+
         pd_phone = list_of_masters_all[0].data[project_name]['PD Phone No.']
         if pd_phone is None:
             pd_phone = 'TBC'
 
-        para_2.add_run('PD: ' + str(pd_name) + ', ' + str(pd_phone)).bold = True
+        para_2.add_run('PD: ' + str(pd_name) + ', ' + str(pd_email) + ', ' + str(pd_phone))
+
+        para_3 = doc.add_paragraph()
+        para_3.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+        contact_name = list_of_masters_all[0].data[project_name]['Working Contact Name']
+        if contact_name is None:
+            contact_name = 'TBC'
+
+        contact_email = list_of_masters_all[0].data[project_name]['Working Contact Email']
+        if contact_email is None:
+            contact_email = 'email: tbc'
+
+        contact_phone = list_of_masters_all[0].data[project_name]['Working Contact Telephone']
+        if contact_phone is None:
+            contact_phone = 'TBC'
+
+        para_3.add_run('PfM reporting lead: ' + str(contact_name) + ', ' + str(contact_email)
+                       + ', ' + str(contact_phone))
 
         '''Start of table with DCA confidence ratings'''
         table = doc.add_table(rows=1, cols=5)
@@ -326,8 +339,7 @@ def produce_word_doc():
                            ['Is this Continency amount included within the WLC?']
 
         ob = list_of_masters_all[0].data[project_name]['Overall figure for Optimism Bias (£m)']
-        if ob is None:
-            ob = 'None'
+        #print(ob)
 
         ob_included_wlc = list_of_masters_all[0].data[project_name]['Is this Optimism Bias included within the WLC?']
         '''vfm category now'''
@@ -437,20 +449,32 @@ def produce_word_doc():
         table = doc.add_table(rows=1, cols=4)
         hdr_cells = table.rows[0].cells
         hdr_cells[0].text = 'Type of funding:'
-        hdr_cells[1].text = source_of_finance
+        hdr_cells[1].text = str(source_of_finance)
         hdr_cells[2].text = 'Contingency:'
-        hdr_cells[3].text = '£' + str(round(contingency)) + 'm'
+        if contingency is None:
+            hdr_cells[3].text = str(contingency)
+        else:
+            hdr_cells[3].text = '£' + str(round(contingency)) + 'm'
         row_cells = table.add_row().cells
         row_cells[0].text = 'Optimism Bias (OB):'
-        if ob == 'None':
-            row_cells[1].text = ob
+        if ob is None:
+            row_cells[1].text = str(ob)
         else:
-            row_cells[1].text = '£' + str(round(ob)) + 'm'
-        row_cells[2].text = 'Contigency in costs:'
-        row_cells[3].text = con_included_wlc
+            try:
+                row_cells[1].text = '£' + str(round(ob)) + 'm'
+            except TypeError:
+                row_cells[1].text = ob
+        row_cells[2].text = 'Contingency in costs:'
+        if con_included_wlc is None:
+            row_cells[3].text = 'Not reported'
+        else:
+            row_cells[3].text = con_included_wlc
         row_cells = table.add_row().cells
         row_cells[0].text = 'OB in costs:'
-        row_cells[1].text = ob_included_wlc
+        if ob_included_wlc is None:
+            row_cells[1].text = 'Not reported'
+        else:
+            row_cells[1].text = ob_included_wlc
         row_cells[2].text = ''
         row_cells[3].text = ''
 
@@ -706,8 +730,6 @@ def produce_word_doc():
         #TODO add quarter info in title
         doc.save(root_path/'output/{}_summary.docx'.format(project_name))
 
-
-
 def combine_narrtives(project_name, master, key_list):
     '''function that combines text across different keys'''
     output = ''
@@ -715,7 +737,6 @@ def combine_narrtives(project_name, master, key_list):
         output = output + str(master.data[project_name][key])
 
     return output
-
 
 def get_financial_profile(project_name, cost_type):
     '''gets project financial data'''
