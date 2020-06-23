@@ -855,8 +855,8 @@ def fin_ben_total_charts(doc,
     fig.savefig('cost_bens_overview.png')
     plt.close()  # automatically closes figure so don't need to do manually.
 
-    doc.add_picture('cost_bens_overview.png', width=Inches(8))  # to place nicely in doc
-    os.remove('/home/will/code/python/analysis_engine/project_summaries/cost_bens_overview.png')
+    doc.add_picture(root_path/'output/cost_bens_overview.png', width=Inches(8))  # to place nicely in doc
+    os.remove(root_path/'output/cost_bens_overview.png')
 
     return doc
 
@@ -927,8 +927,8 @@ def fin_profile_graph(doc,
     fig.savefig('cost_profile.png')
     plt.close()  # automatically closes figure so don't need to do manually.
 
-    doc.add_picture('cost_profile.png', width=Inches(8))  # to place nicely in doc
-    os.remove('/home/will/code/python/analysis_engine/project_summaries/cost_profile.png')
+    doc.add_picture(root_path/'output/cost_profile.png', width=Inches(8))  # to place nicely in doc
+    os.remove(root_path/'output/cost_profile.png')
 
     return doc
 
@@ -1011,8 +1011,8 @@ def milestone_swimlane_charts(doc, project_name, latest_milestone_names, latest_
     fig.savefig('schedule.png', bbox_inches='tight')
     plt.close() #automatically closes figure so don't need to do manually.
 
-    doc.add_picture('schedule.png', width=Inches(8))  # to place nicely in doc
-    os.remove('/home/will/code/python/analysis_engine/project_summaries/schedule.png')
+    doc.add_picture(root_path/'output/schedule.png', width=Inches(8))  # to place nicely in doc
+    os.remove(root_path/'output/schedule.png')
 
     return doc
 
