@@ -1,5 +1,5 @@
-from analysis.data import list_of_masters_all, bc_index, abbreviations, ipdc_date, root_path
-from analysis.engine_functions import all_milestones_dict
+from analysis.data import list_of_masters_all, bc_index, abbreviations, ipdc_date, root_path, hsmrpg
+#from analysis.engine_functions import all_milestones_dict
 import datetime
 from datetime import timedelta
 import matplotlib.pyplot as plt
@@ -8,7 +8,10 @@ import numpy as np
 from textwrap import wrap
 
 
-def group_all_milestones_dict(project_names, master_data, baseline_index, data_to_return=int):
+def group_all_milestones_dict(project_names,
+                              master_data,
+                              baseline_index,
+                              data_to_return=int):
     '''
     Function that puts project milestone data in dictionary in order of newest date first.
 
@@ -167,8 +170,11 @@ def group_milestone_schedule_data(latest_m_dict,
     return milestone_names, mile_d_l_lst, mile_d_last_lst, mile_d_bl_lst
 
 
-def milestone_swimlane_charts(latest_milestone_names, latest_milestone_dates, \
-                              last_milestone_dates, baseline_milestone_dates, graph_title):
+def milestone_swimlane_charts(latest_milestone_names,
+                              latest_milestone_dates,
+                              last_milestone_dates,
+                              baseline_milestone_dates,
+                              graph_title):
 
 
     #build scatter chart
@@ -227,8 +233,8 @@ def milestone_swimlane_charts(latest_milestone_names, latest_milestone_dates, \
     #reverse y axis so order is earliest to oldest
     ax1 = plt.gca()
     ax1.set_ylim(ax1.get_ylim()[::-1])
-    ax1.tick_params(axis='y', which='major', labelsize=7)
-    #ax1.get_yaxis().set_visible(False)
+    #ax1.tick_params(axis='y', which='major', labelsize=7)
+    ax1.get_yaxis().set_visible(False)
 
     #Add line of IPDC date, but only if in the time period
     try:
@@ -248,20 +254,33 @@ def milestone_swimlane_charts(latest_milestone_names, latest_milestone_dates, \
 
     #os.remove('schedule.png')
 
+def build_charts(latest_milestone_names,
+                 latest_milestone_dates,
+                 last_milestone_dates,
+                 baseline_milestone_dates,
+                 graph_title):
+    pass
 
-current_m = group_all_milestones_dict(list_of_masters_all[0].projects, list_of_masters_all, bc_index, 0)
-last_m = group_all_milestones_dict(list_of_masters_all[0].projects, list_of_masters_all, bc_index, 1)
-baseline_m = group_all_milestones_dict(list_of_masters_all[0].projects, list_of_masters_all, bc_index, 2)
 
-chart_data = group_milestone_schedule_data(current_m, last_m, baseline_m, 'DCO')
+p_n_list = list_of_masters_all[0].projects
+current_m = group_all_milestones_dict(p_n_list, list_of_masters_all, bc_index, 0)
+last_m = group_all_milestones_dict(p_n_list, list_of_masters_all, bc_index, 1)
+baseline_m = group_all_milestones_dict(p_n_list, list_of_masters_all, bc_index, 2)
 
-key_name = chart_data[0]
-current_m_data = chart_data[1]
-last_m_data = chart_data[2]
-baseline_m_data = chart_data[3]
+chart_data = group_milestone_schedule_data(current_m, last_m, baseline_m)
+
+key_name = np.array(chart_data[0])
+current_m_data = np.array(chart_data[1])
+last_m_data = np.array(chart_data[2])
+baseline_m_data = np.array(chart_data[3])
 
 milestone_swimlane_charts(key_name,
                           current_m_data,
                           last_m_data,
                           baseline_m_data,
-                          'hybrid')
+                          'All Milestones')
+
+#TODO style chart so hides y_axis titles if over a certain number
+#TODO style chart to only return project name if all keys are the same.
+#TODO improve search for string combos in group_milestone_schedule_data
+#TODO explore whether matplotlib output file format can be improved
