@@ -23,11 +23,10 @@ from datetime import timedelta
 from textwrap import wrap
 
 
-from analysis.engine_functions import convert_rag_text, project_time_difference, all_milestones_dict, \
-    convert_bc_stage_text
+from analysis.engine_functions import convert_rag_text, project_time_difference, convert_bc_stage_text
 from analysis.data import list_of_masters_all, root_path, latest_cost_profiles, last_cost_profiles, \
-    baseline_1_cost_profiles, year_list, SRO_conf_key_list, bc_index, p_current_milestones, \
-    p_last_milestones, first_diff_data, ipdc_date
+    baseline_1_cost_profiles, year_list, SRO_conf_key_list, p_current_milestones, bc_index, \
+    p_last_milestones, p_baseline_milestones, first_diff_data, ipdc_date, abbreviations
 
 import os
 
@@ -178,9 +177,9 @@ def set_col_widths(t, widths):
 def produce_word_doc():
     '''Function that compiles each summary sheet'''
 
-    master_list = list_of_masters_all[0:4]
+    masters = list_of_masters_all[0:4]
 
-    for project_name in master_list[0].projects:
+    for project_name in masters[0].projects:
         doc = Document()
         print(project_name)
 
@@ -255,7 +254,7 @@ def produce_word_doc():
         for x, dca_key in enumerate(SRO_conf_key_list):
             row_cells = table.add_row().cells
             row_cells[0].text = dca_key
-            for i, master in enumerate(master_list):
+            for i, master in enumerate(masters):
                 try:
                     rating = convert_rag_text(master.data[project_name][dca_key])
                     row_cells[i+1].text = rating
@@ -587,10 +586,12 @@ def produce_word_doc():
 
         '''Financial charts'''
         fin_profile_graph(doc,
+                          project_name,
                           project_profile_data_total,
                           project_profile_data_rdel,
                           project_profile_data_cdel)
         fin_ben_total_charts(doc,
+                             project_name,
                              t_spent,
                              t_profiled,
                              t_unprofiled,
@@ -608,9 +609,6 @@ def produce_word_doc():
                              total_ben)
 
         '''milestone swimlane charts'''
-        #get baseline milestone data
-        p_baseline_milestones = all_milestones_dict([project_name], list_of_masters_all[bc_index[project_name][2]])
-
         #chart of with milestone over the next two years
         m_data = milestone_schedule_data(p_current_milestones,
                                          p_last_milestones,
@@ -630,7 +628,7 @@ def produce_word_doc():
 
         no_milestones = len(m_data[0])
 
-        title = 'Project schedule two year window'
+        title = 'schedule two year window'
         if no_milestones <= 15:
             milestone_swimlane_charts(doc, project_name, np.array(final_labels), np.array(m_data[1]), np.array(m_data[2]), \
                                   np.array(m_data[3]), title)
@@ -663,7 +661,7 @@ def produce_word_doc():
         # Chart
         no_milestones = len(m_data[0])
 
-        title = 'Project total schedule'
+        title = 'total schedule'
         if no_milestones <= 20:
             milestone_swimlane_charts(doc, project_name, np.array(final_labels), np.array(m_data[1]),
                                       np.array(m_data[2]), \
@@ -752,6 +750,7 @@ def get_financial_profile(project_name, cost_type):
     return latest, last, baseline
 
 def fin_ben_total_charts(doc,
+                         project_name,
                          total_spent,
                          total_profiled,
                          total_unprofiled,
@@ -770,7 +769,7 @@ def fin_ben_total_charts(doc,
 
     fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2) #four sub plotsprint
 
-    fig.suptitle('Project costs and benefits analysis', fontweight='bold') # title
+    fig.suptitle(abbreviations[project_name] + ' costs and benefits analysis', fontweight='bold') # title
 
     #Spent, Profiled and Unprofile chart
     labels = ['Baseline', 'Last Quarter', 'Latest']
@@ -861,6 +860,7 @@ def fin_ben_total_charts(doc,
     return doc
 
 def fin_profile_graph(doc,
+                      project_name,
                       profile_data_total,
                       profile_data_rdel,
                       profile_data_cdel):
@@ -876,7 +876,7 @@ def fin_profile_graph(doc,
     latest_profile_rdel = profile_data_rdel[0]
     latest_profile_cdel = profile_data_cdel[0]
 
-    fig.suptitle('Project financial analysis', fontweight='bold') # title
+    fig.suptitle(abbreviations[project_name] + ' financial analysis', fontweight='bold') # title
 
     #plot cost change profile chart
     ax1.plot(year, baseline_profile_total, label='Baseline', linewidth=3.0, marker="o")
@@ -939,7 +939,7 @@ def milestone_swimlane_charts(doc, project_name, latest_milestone_names, latest_
 
     #build scatter chart
     fig, ax1 = plt.subplots()
-    fig.suptitle(graph_title, fontweight='bold')  # title
+    fig.suptitle(abbreviations[project_name] + ' ' + graph_title, fontweight='bold')  # title
     # set fig size
     # fig.set_figheight(6)
     # fig.set_figwidth(8)
@@ -1260,8 +1260,97 @@ def milestone_schedule_data(latest_m_dict, last_m_dict, baseline_m_dict, project
 
 '''RUNNING PROGRAMME'''
 
-'''enter into the printing function the quarter details for the output files e.g. _q4_1920 (note put underscore at 
+'''enter into the printing function the quarter details for the output files e.g. _q4_1920 (note put underscore at
 front)'''
 produce_word_doc()
 
-
+from analysis.data import list_of_masters_all, bc_index
+#
+# def project_all_milestones_dict(project_names,
+#                                 master_data,
+#                                 baseline_index,
+#                                 data_to_return=int):
+#
+#     '''
+#     Function that puts project milestone data in dictionary in order of newest date first.
+#
+#     Project_names: list of project names of interest / in range
+#     Master_data: quarter master data set
+#
+#     Dictionary is structured as {'project name': {'milestone name': datetime.date: 'notes'}}
+#
+#     '''
+#
+#     upper_dict = {}
+#
+#     for name in project_names:
+#         lower_dict = {}
+#         raw_list = []
+#         try:
+#             print(baseline_index[name][data_to_return])
+#             p_data = master_data[baseline_index[name][data_to_return]].data[name]
+#             for i in range(1, 50):
+#                 try:
+#                     try:
+#                         t = (p_data['Approval MM' + str(i)],
+#                              p_data['Approval MM' + str(i) + ' Forecast / Actual'],
+#                              p_data['Approval MM' + str(i) + ' Notes'])
+#                         raw_list.append(t)
+#                     except KeyError:
+#                         t = (p_data['Approval MM' + str(i)],
+#                              p_data['Approval MM' + str(i) + ' Forecast - Actual'],
+#                              p_data['Approval MM' + str(i) + ' Notes'])
+#                         raw_list.append(t)
+#
+#                     t = (p_data['Assurance MM' + str(i)],
+#                          p_data['Assurance MM' + str(i) + ' Forecast - Actual'],
+#                          p_data['Assurance MM' + str(i) + ' Notes'])
+#                     raw_list.append(t)
+#
+#                 except KeyError:
+#                     pass
+#
+#             for i in range(18, 67):
+#                 try:
+#                     t = (p_data['Project MM' + str(i)],
+#                          p_data['Project MM' + str(i) + ' Forecast - Actual'],
+#                          p_data['Project MM' + str(i) + ' Notes'])
+#                     raw_list.append(t)
+#                 except KeyError:
+#                     pass
+#         except (KeyError, TypeError):
+#             raw_list = []
+#
+#         #put the list in chronological order
+#         sorted_list = sorted(raw_list, key=lambda k: (k[1] is None, k[1]))
+#
+#         # loop to stop key names being the same. Not ideal as doesn't handle keys that may already have numbers as
+#         # strings at end of names. But still useful.
+#         for x in sorted_list:
+#             if x[0] is not None:
+#                 if x[0] in lower_dict:
+#                     for i in range(2, 15):
+#                         key_name = x[0] + ' ' + str(i)
+#                         if key_name in lower_dict:
+#                             continue
+#                         else:
+#                             lower_dict[key_name] = {x[1]: x[2]}
+#                             break
+#                 else:
+#                     lower_dict[x[0]] = {x[1]: x[2]}
+#             else:
+#                 pass
+#
+#         upper_dict[name] = lower_dict
+#
+#     return upper_dict
+#
+# p_current_milestones = project_all_milestones_dict(list_of_masters_all[0].projects,
+#                                            list_of_masters_all,
+#                                            bc_index, 0)
+# p_last_milestones = project_all_milestones_dict(list_of_masters_all[0].projects,
+#                                         list_of_masters_all,
+#                                         bc_index, 1)
+# p_baseline_milestones = project_all_milestones_dict(list_of_masters_all[0].projects,
+#                                         list_of_masters_all,
+#                                         bc_index, 2)
