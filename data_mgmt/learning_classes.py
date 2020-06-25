@@ -1,5 +1,7 @@
 from datamaps.api import project_data_from_master
 from analysis.engine_functions import baseline_information_bc, baseline_index
+from analysis.data import crossrail
+
 import platform, datetime
 from pathlib import Path
 
@@ -32,10 +34,27 @@ p_names = q4_1920.projects
 baseline_bc_stamp = baseline_information_bc(p_names, master_list)
 bc_index = baseline_index(baseline_bc_stamp, master_list)
 
-class MilestoneData:
-    def __init__(self, project_names, master_data_list, baseline_index, data_to_return):
+class Data:
+    def __init__(self, master_data=list):
+        self.master_data = master_data
+        self.quarter_data = ''
+        self.get_quarter_data()
+
+    def get_quarter_data(self, quarter=str):
+        for i in len(self.master_data):
+            if quarter == str(self.master_data[i].quarter):
+                self.quarter_data = self.master_data[i]
+
+        return self.quarter_data
+
+    # def get_project_names(self,):
+    #
+    # def get_bc_approvals(self, ):
+
+
+class MilestoneData(Data):
+    def __init__(self, project_names, baseline_index, data_to_return):
         self.project_names = project_names
-        self.master_data_list = master_data_list
         self.baseline_index = baseline_index
         self.data_to_return = data_to_return
         self.project_dict = {}
@@ -50,7 +69,7 @@ class MilestoneData:
             lower_dict = {}
             raw_list = []
             try:
-                p_data = self.master_data_list[self.baseline_index[name][self.data_to_return]].data[name]
+                p_data = Data.master_data[self.baseline_index[name][self.data_to_return]].data[name]
                 for i in range(1, 50):
                     try:
                         try:
@@ -114,5 +133,7 @@ class MilestoneData:
     # def get_data_for_project(self, project_name):
     #     return self.dict[project_name]
 
-m = MilestoneData(p_names, master_list, bc_index, 0)
+c = crossrail
+d = Data(master_list)
+#m = MilestoneData(p_names, bc_index, 0)
 #m.get_data_for_project("A12 Extension")
