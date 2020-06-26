@@ -1,53 +1,50 @@
-class Data:
-    def __init__(self, master_data=list):
-        self.master_data = master_data
-        self.quarter_data = ''
-        self.get_quarter_data()
-
-    def get_quarter_data(self, quarter=str):
-        for i in len(self.master_data):
-            if quarter == str(self.master_data[i].quarter):
-                self.quarter_data = self.master_data[i]
-
-        return self.quarter_data
-
-
-class MilestoneData(Data):
+class MilestoneData:
     def __init__(self, master_data, baseline_index, data_to_return):
         self.master_data = master_data
         self.baseline_index = baseline_index
         self.data_to_return = data_to_return
         self.project_dict = {}
-        #self.group_dict = {}
 
-    def get_project_dict(self, project_names):
+    def project_data(self, project_names):  # renamed to project_data
         """
-        This gets the data. Call after objection creation.
+        Given a list of project names in project_names,
+        returns a dictionary containing data for each project.
         """
+        # Provided a description of what method does, including the
+        # expected parameters and return type. NB, we use " quotes, not '
+        # quotes for docstrings like this.
 
         upper_dict = {}
 
-        for name in self.project_names:
+        for name in project_names:
             lower_dict = {}
             raw_list = []
             try:
-                p_data = self.master_data[self.baseline_index[name][self.data_to_return]].data[name]
+                p_data = self.master_data[
+                    self.baseline_index[name][self.data_to_return]
+                ].data[name]
                 for i in range(1, 50):
                     try:
                         try:
-                            t = (p_data['Approval MM' + str(i)],
-                                 p_data['Approval MM' + str(i) + ' Forecast / Actual'],
-                                 p_data['Approval MM' + str(i) + ' Notes'])
+                            t = (
+                                p_data["Approval MM" + str(i)],
+                                p_data["Approval MM" + str(i) + " Forecast / Actual"],
+                                p_data["Approval MM" + str(i) + " Notes"],
+                            )
                             raw_list.append(t)
                         except KeyError:
-                            t = (p_data['Approval MM' + str(i)],
-                                 p_data['Approval MM' + str(i) + ' Forecast - Actual'],
-                                 p_data['Approval MM' + str(i) + ' Notes'])
+                            t = (
+                                p_data["Approval MM" + str(i)],
+                                p_data["Approval MM" + str(i) + " Forecast - Actual"],
+                                p_data["Approval MM" + str(i) + " Notes"],
+                            )
                             raw_list.append(t)
 
-                        t = (p_data['Assurance MM' + str(i)],
-                             p_data['Assurance MM' + str(i) + ' Forecast - Actual'],
-                             p_data['Assurance MM' + str(i) + ' Notes'])
+                        t = (
+                            p_data["Assurance MM" + str(i)],
+                            p_data["Assurance MM" + str(i) + " Forecast - Actual"],
+                            p_data["Assurance MM" + str(i) + " Notes"],
+                        )
                         raw_list.append(t)
 
                     except KeyError:
@@ -55,14 +52,16 @@ class MilestoneData(Data):
 
                 for i in range(18, 67):
                     try:
-                        t = (p_data['Project MM' + str(i)],
-                             p_data['Project MM' + str(i) + ' Forecast - Actual'],
-                             p_data['Project MM' + str(i) + ' Notes'])
+                        t = (
+                            p_data["Project MM" + str(i)],
+                            p_data["Project MM" + str(i) + " Forecast - Actual"],
+                            p_data["Project MM" + str(i) + " Notes"],
+                        )
                         raw_list.append(t)
                     except KeyError:
                         pass
             except (KeyError, TypeError):
-                print('yes')
+                print("yes")
                 pass
 
             # put the list in chronological order
@@ -75,7 +74,7 @@ class MilestoneData(Data):
                 if x[0] is not None:
                     if x[0] in lower_dict:
                         for i in range(2, 15):
-                            key_name = x[0] + ' ' + str(i)
+                            key_name = x[0] + " " + str(i)
                             if key_name in lower_dict:
                                 continue
                             else:
