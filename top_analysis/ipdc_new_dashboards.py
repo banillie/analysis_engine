@@ -25,9 +25,9 @@ from openpyxl.styles import PatternFill, Font
 from openpyxl.styles.differential import DifferentialStyle
 from openpyxl.formatting.rule import Rule
 from analysis.data import financial_analysis_masters_list, fin_bc_index, \
-    list_of_masters_all, bc_index, root_path
+    list_of_masters_all, bc_index, root_path, ipdc_date
 from analysis.engine_functions import all_milestone_data_bulk, convert_rag_text, convert_bc_stage_text, \
-    project_time_difference, ap_p_milestone_data_bulk, bicc_date, concatenate_dates, highlight_close_dates_ipdc
+    project_time_difference, ap_p_milestone_data_bulk, concatenate_dates, highlight_close_dates_ipdc
 
 def place_in_excel(wb):
     '''

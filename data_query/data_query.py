@@ -177,8 +177,8 @@ def return_baseline_data(project_name_list, data_key_list):
 
 '''Running the programme'''
 '''Place all keys of interest as stings in to a list or use one of the imported lists from the data file'''
-data_interest = ['GMPP - IPA ID Number',
-                 'GMPP (GMPP - formally joined GMPP)']
+data_interest = ['Total Forecast',
+                 'Total BL']
 
 '''output one - all data. 
 first variable = list of project names. There are two options. 1) latest_quarter_project_names 2) all_projects_names
