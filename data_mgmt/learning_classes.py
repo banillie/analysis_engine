@@ -1,8 +1,7 @@
 from datamaps.api import project_data_from_master
 from analysis.engine_functions import baseline_information_bc, baseline_index
 from analysis.data import crossrail
-
-import platform, datetime
+import platform
 from pathlib import Path
 
 
@@ -37,31 +36,29 @@ bc_index = baseline_index(baseline_bc_stamp, master_list)
 class Data:
     def __init__(self, master_data=list):
         self.master_data = master_data
-        self.quarter_data = ''
-        self.get_quarter_data()
+        # self.quarter_data = ''
+        # self.get_quarter_data()
 
-    def get_quarter_data(self, quarter=str):
-        for i in len(self.master_data):
-            if quarter == str(self.master_data[i].quarter):
-                self.quarter_data = self.master_data[i]
-
-        return self.quarter_data
+    # def get_quarter_data(self, quarter=str):
+    #     for i in len(self.master_data):
+    #         if quarter == str(self.master_data[i].quarter):
+    #             self.quarter_data = self.master_data[i]
+    #
+    #     return self.quarter_data
 
     # def get_project_names(self,):
     #
     # def get_bc_approvals(self, ):
 
 
-class MilestoneData(Data):
-    def __init__(self, project_names, baseline_index, data_to_return):
-        self.project_names = project_names
-        self.baseline_index = baseline_index
-        self.data_to_return = data_to_return
+class MilestoneData:
+    def __init__(self, master_data):
+        self.master_data = master_data
+
+    def get_project_dict(project_names, baseline_index, data_to_return):
         self.project_dict = {}
         self.get_project_dict()
-        #self.group_dict = {}
-
-    def get_project_dict(self):
+        # self.group_dict = {}
 
         upper_dict = {}
 
@@ -69,7 +66,7 @@ class MilestoneData(Data):
             lower_dict = {}
             raw_list = []
             try:
-                p_data = Data.master_data[self.baseline_index[name][self.data_to_return]].data[name]
+                p_data = self.master_data[self.baseline_index[name][self.data_to_return]].data[name]
                 for i in range(1, 50):
                     try:
                         try:
@@ -134,6 +131,6 @@ class MilestoneData(Data):
     #     return self.dict[project_name]
 
 c = crossrail
-d = Data(master_list)
-#m = MilestoneData(p_names, bc_index, 0)
+#d = Data(master_list)
+m = MilestoneData(p_names, bc_index, 0)
 #m.get_data_for_project("A12 Extension")

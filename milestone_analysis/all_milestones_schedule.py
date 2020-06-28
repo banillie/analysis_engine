@@ -6,6 +6,8 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import numpy as np
 from textwrap import wrap
+from pptx import Presentation
+from pptx.util import Inches
 
 
 def group_all_milestones_dict(project_names,
@@ -181,8 +183,8 @@ def milestone_swimlane_charts(latest_milestone_names,
     fig, ax1 = plt.subplots()
     fig.suptitle(graph_title, fontweight='bold')  # title
     # set fig size
-    # fig.set_figheight(6)
-    # fig.set_figwidth(8)
+    fig.set_figheight(4)
+    fig.set_figwidth(8)
 
     ax1.scatter(baseline_milestone_dates, latest_milestone_names, label='Baseline')
     ax1.scatter(last_milestone_dates, latest_milestone_names, label='Last Qrt')
@@ -249,7 +251,17 @@ def milestone_swimlane_charts(latest_milestone_names,
     fig.canvas.draw()
     fig.tight_layout(rect=[0, 0.03, 1, 0.95]) #for title
 
+    # put in powerpoint
+    # fig.savefig('graph.jpg')
+    # img = 'graph.jpg'
+    # prs = Presentation()
+    # title_slide_layout = prs.slide_layouts[0]
+    # slide = prs.slides.add_slide(title_slide_layout)
+    # slide.shapes.add_picture(img, Inches(8), Inches(4), height=Inches(4))
+    # prs.save(root_path/'output/test.pptx')
+
     fig.savefig(root_path/'output/{}.png'.format(graph_title), bbox_inches='tight')
+
     #plt.close() #automatically closes figure so don't need to do manually.
 
     #os.remove('schedule.png')
