@@ -1,7 +1,9 @@
 from datamaps.api import project_data_from_master
 from analysis.engine_functions import baseline_information_bc, baseline_index
 from analysis.data import crossrail
-import platform
+from .data import MilestoneData
+
+import platform, datetime
 from pathlib import Path
 
 
@@ -32,6 +34,7 @@ p_names = q4_1920.projects
 # general baseline information
 baseline_bc_stamp = baseline_information_bc(p_names, master_list)
 bc_index = baseline_index(baseline_bc_stamp, master_list)
+
 
 class Data:
     def __init__(self, master_data=list):
@@ -134,3 +137,4 @@ c = crossrail
 #d = Data(master_list)
 m = MilestoneData(p_names, bc_index, 0)
 #m.get_data_for_project("A12 Extension")
+
