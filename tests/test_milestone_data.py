@@ -66,9 +66,9 @@ shorter and easier to read. You also do not need warnings.).
 
 Go and write some more tests!
 """
-from data_mgmt.data import MilestoneData
+from data_mgmt.data import MilestoneData, MilestoneChartData, Baselines
 from datamaps.api import project_data_from_master
-from analysis.data import root_path, bc_index
+from analysis.data import bc_index, abbreviations, list_of_masters_all, a303
 
 
 test_master = project_data_from_master("tests/resources/test_master.xlsx", 4, 2019)
@@ -77,11 +77,27 @@ master_data = [test_master]
 
 
 def test_project_names_appear_in_object_project_names_attribute():
-    m = MilestoneData(master_data, bc_index, 0)
-    project_data = m.project_data(project_names)
+    m = MilestoneData(master_data, bc_index)
+    project_data = m.project_data(project_names, 0)
     assert "Chutney Bridge.xlsm" in project_data.keys()
 
-
 def test_baseline_index():
-    m = MilestoneData(master_data, bc_index, 0)
+    m = MilestoneData(master_data, bc_index)
     assert isinstance(m.baseline_index, (dict,))
+
+def test_MilestoneChartData_group_chart_milestone_key_names_is_list():
+    m = MilestoneData(test_master, bc_index)
+    breakpoint()
+    current_m = m.group_data(project_names, 0, abbreviations)
+    last_m = m.group_data(project_names, 1, abbreviations)
+    baseline_m = m.group_data(project_names, 2, abbreviations)
+    m_chart = MilestoneChartData(current_m, last_m, baseline_m)
+    all = m_chart.group_chart()
+    assert isinstance(all[0], (list,))
+
+def test_lower_list_in_get_baseline():
+    b = Baselines(list_of_masters_all)
+    p_baseline = b.get_baseline(a303)
+
+# how do you step through unittesting
+# need more masters??
