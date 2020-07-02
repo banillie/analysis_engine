@@ -1240,20 +1240,23 @@ def milestone_schedule_data(latest_m_dict, last_m_dict, baseline_m_dict, project
                 m_d_bl = tuple(latest_m_dict[project_name][m])[0]
 
             if m_d is not None:
-                if filter_start_date <= m_d <= filter_end_date:
-                    milestone_names.append(m)
-                    mile_d_l_lst.append(m_d)
-                    if m_d_lst is not None:
-                        mile_d_last_lst.append(m_d_lst)
-                    else:
-                        mile_d_last_lst.append(m_d)
-                    if m_d_bl is not None:
-                        mile_d_bl_lst.append(m_d_bl)
-                    else:
+                try:
+                    if filter_start_date <= m_d <= filter_end_date:
+                        milestone_names.append(m)
+                        mile_d_l_lst.append(m_d)
                         if m_d_lst is not None:
-                            mile_d_bl_lst.append(m_d_lst)
+                            mile_d_last_lst.append(m_d_lst)
                         else:
-                            mile_d_bl_lst.append(m_d)
+                            mile_d_last_lst.append(m_d)
+                        if m_d_bl is not None:
+                            mile_d_bl_lst.append(m_d_bl)
+                        else:
+                            if m_d_lst is not None:
+                                mile_d_bl_lst.append(m_d_lst)
+                            else:
+                                mile_d_bl_lst.append(m_d)
+                except TypeError:
+                    print('check ' + m + ' as date give is a str. It is ' + m_d)
 
     return milestone_names, mile_d_l_lst, mile_d_last_lst, mile_d_bl_lst
 
