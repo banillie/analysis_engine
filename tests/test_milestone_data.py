@@ -68,36 +68,75 @@ Go and write some more tests!
 """
 from data_mgmt.data import MilestoneData, MilestoneChartData, Baselines
 from datamaps.api import project_data_from_master
-from analysis.data import bc_index, abbreviations, list_of_masters_all, a303
+from analysis.data import bc_index, list_of_masters_all, a303
+import pytest
 
+@pytest.fixture
+def abbreviations():
+    return {'2nd Generation UK Search and Rescue Aviation': 'SARH2',
+                 'A12 Chelmsford to A120 widening': 'A12',
+                 'A14 Cambridge to Huntingdon Improvement Scheme': 'A14',
+                 'A303 Amesbury to Berwick Down': 'A303',
+                 'A358 Taunton to Southfields Dualling': 'A358',
+                 'A417 Air Balloon': 'A417',
+                 'A428 Black Cat to Caxton Gibbet': 'A428',
+                 'A66 Full Scheme': 'A66',
+                 'Crossrail Programme': 'Crossrail',
+                 'East Coast Digital Programme': 'ECDP',
+                 'East Coast Mainline Programme': 'ECMP',
+                 'East West Rail Programme (Central Section)': 'EWR (Central)',
+                 'East West Rail Programme (Western Section)': 'EWR (Western',
+                 'Future Theory Test Service (FTTS)': 'FTTS',
+                 'Great Western Route Modernisation (GWRM) including electrification': 'GWRM',
+                 'Heathrow Expansion': 'HEP',
+                 'Hexagon': 'Hexagon',
+                 'High Speed Rail Programme (HS2)': 'HS2 Prog',
+                 'HS2 Phase 2b': 'HS2 2b',
+                 'HS2 Phase1': 'HS2 1',
+                 'HS2 Phase2a':'HS2 2a',
+                 'Integrated and Smart Ticketing - creating an account based back office': 'IST',
+                 'Intercity Express Programme': 'IEP',
+                 'Lower Thames Crossing': 'LTC',
+                 'M4 Junctions 3 to 12 Smart Motorway': 'M4',
+                 'Manchester North West Quadrant': 'MNWQ',
+                 'Midland Main Line Programme': 'MML Prog',
+                 'Midlands Rail Hub': 'Mid Rail Hub',
+                 'North Western Electrification': 'NWE',
+                 'Northern Powerhouse Rail': 'NPR',
+                 'Oxford-Cambridge Expressway': 'Ox-Cam Expressway',
+                 'Rail Franchising Programme': 'Rail Franchising',
+                 'South West Route Capacity': 'SWRC',
+                 'Thameslink Programme': 'Thameslink',
+                 'Transpennine Route Upgrade (TRU)': 'TRU',
+                 'Western Rail Link to Heathrow': 'WRlTH'}
 
 test_master = project_data_from_master("tests/resources/test_master.xlsx", 4, 2019)
 project_names = test_master.projects
 master_data = [test_master]
 
 
-def test_project_names_appear_in_object_project_names_attribute():
-    m = MilestoneData(master_data, bc_index)
-    project_data = m.project_data(project_names, 0)
-    assert "Chutney Bridge.xlsm" in project_data.keys()
+# def test_project_names_appear_in_object_project_names_attribute():
+#     m = MilestoneData(master_data, bc_index)
+#     project_data = m.project_data(project_names, 0)
+#     assert "Chutney Bridge.xlsm" in project_data.keys()
+#
+# def test_baseline_index():
+#     m = MilestoneData(master_data, bc_index)
+#     assert isinstance(m.baseline_index, (dict,))
 
-def test_baseline_index():
-    m = MilestoneData(master_data, bc_index)
-    assert isinstance(m.baseline_index, (dict,))
-
-def test_MilestoneChartData_group_chart_milestone_key_names_is_list():
-    m = MilestoneData(test_master, bc_index)
-    breakpoint()
-    current_m = m.group_data(project_names, 0, abbreviations)
-    last_m = m.group_data(project_names, 1, abbreviations)
-    baseline_m = m.group_data(project_names, 2, abbreviations)
+def test_MilestoneChartData_group_chart_milestone_key_names_is_list(abbreviations):
+    b = Baselines(list_of_masters_all, list_of_masters_all[0].projects)
+    m = MilestoneData(list_of_masters_all, b)
+    current_m = m.group_data(0, abbreviations)
+    last_m = m.group_data(1, abbreviations)
+    baseline_m = m.group_data(2, abbreviations)
     m_chart = MilestoneChartData(current_m, last_m, baseline_m)
     all = m_chart.group_chart()
     assert isinstance(all[0], (list,))
 
-def test_lower_list_in_get_baseline():
-    b = Baselines(list_of_masters_all)
-    p_baseline = b.get_baseline(a303)
+# def test_lower_list_in_get_baseline():
+#     b = Baselines(list_of_masters_all)
+#     p_baseline = b.get_baseline(a303)
 
 # how do you step through unittesting
 # need more masters??

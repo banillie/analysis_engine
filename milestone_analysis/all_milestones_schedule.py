@@ -162,18 +162,17 @@ def build_charts(latest_milestone_names,
 #get data via import of list_of_masters_all
 #get list of project names
 p_n_list = list_of_masters_all[0].projects
-p_n_list.remove(iep)
-p_n_list.remove(hs2_programme)
+# p_n_list.remove(iep)
+# p_n_list.remove(hs2_programme)
 
 #get baselines
-b = Baselines(list_of_masters_all)
-b_i = b.get_baseline_data(p_n_list) # get_baseline_data returning two things
+b = Baselines(list_of_masters_all, p_n_list)
 
 # get general milestone data
-m = MilestoneData(list_of_masters_all, baseline_index=b_i[1]) #what does baseline_index = do?
-current_m = m.group_data(p_n_list, 0, abbreviations)
-last_m = m.group_data(p_n_list, 1, abbreviations)
-baseline_m = m.group_data(p_n_list, 2, abbreviations)
+m = MilestoneData(list_of_masters_all, b)
+current_m = m.group_data(0, abbreviations)
+last_m = m.group_data(1, abbreviations)
+baseline_m = m.group_data(2, abbreviations)
 
 #get milestone chart data
 m_chart = MilestoneChartData(current_m, last_m, baseline_m)
@@ -199,7 +198,7 @@ planning = ['DCO', 'dco', 'Planning', 'planning', 'consent', 'Consent',
 ipdc = ['IPDC', 'BICC']
 
 # get filtered milestone chart data
-all = m_chart.group_chart(ipdc, start_date, end_date)
+all = m_chart.group_chart()
 
 #group_chart returns four list
 key_names = np.array(all[0])
@@ -207,13 +206,20 @@ current_m_data = np.array(all[1])
 last_m_data = np.array(all[2])
 baseline_m_data = np.array(all[3])
 
-#run the programme
-build_charts(key_names,
-             current_m_data,
-             last_m_data,
-             baseline_m_data,
-             'IPDC next two years',
-             ipdc_date)
+MilestoneCharts(key_names,
+                current_m_data,
+                last_m_data,
+                baseline_m_data,
+                'test',
+                ipdc_date)
+
+# #run the programme
+# build_charts(key_names,
+#              current_m_data,
+#              last_m_data,
+#              baseline_m_data,
+#              'IPDC next two years',
+#              ipdc_date)
 
 #TODO style chart so hides y_axis titles if over a certain number
 #TODO style chart to only return project name if all keys are the same.

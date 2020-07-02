@@ -1,12 +1,19 @@
 import datetime
+import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
+from datetime import timedelta
+from analysis.data import root_path
+import numpy as np
 
 class Baselines:
-    def __init__(self, master_data):
+    def __init__(self, master_data, project_names):
         self.master_data = master_data
-        self.baseline_info = {}
-        self.baseline_index = {}
+        self.project_names = project_names
+        self.info = {}
+        self.index = {}
+        self.get_baseline_data()
 
-    def get_baseline_data(self, project_names):
+    def get_baseline_data(self):
         """
         Given a list of project names in project_names returns
         the two dictionaries baseline_info and baseline_index
@@ -14,7 +21,7 @@ class Baselines:
         baseline_info = {}
         baseline_index = {}
 
-        for name in project_names:
+        for name in self.project_names:
             bc_list = []
             lower_list = []
             for i, master in reversed(list(enumerate(self.master_data))):
@@ -42,19 +49,19 @@ class Baselines:
             baseline_info[name] = list(reversed(lower_list))
             baseline_index[name] = list(reversed(index_list))
 
-        self.baseline_info = baseline_info
-        self.baseline_index = baseline_index
+        self.info = baseline_info
+        self.index = baseline_index
 
-        return self.baseline_info, self.baseline_index
+        #return self.baseline_info, self.baseline_index
 
 class MilestoneData:
-    def __init__(self, master_data, baseline_index):
+    def __init__(self, master_data, baseline_object):
         self.master_data = master_data
-        self.baseline_index = baseline_index
+        self.baseline = baseline_object
         self.project_dict = {}
         self.group_dict = {}
 
-    def project_data(self, project_names, data_to_return):  # renamed to project_data
+    def project_data(self, data_to_return):  # renamed to project_data
         """
         Given a list of project names in project_names, and
         integer in data_to_return it
@@ -68,13 +75,11 @@ class MilestoneData:
 
         upper_dict = {}
 
-        for name in project_names:
+        for name in self.baseline.project_names:
             lower_dict = {}
             raw_list = []
             try:
-                p_data = self.master_data[
-                    self.baseline_index[name][data_to_return]
-                ].data[name]
+                p_data = self.master_data[self.baseline.index[name][data_to_return]].data[name]
                 for i in range(1, 50):
                     try:
                         try:
@@ -141,16 +146,16 @@ class MilestoneData:
 
         return self.project_dict
 
-    def group_data(self, project_names, data_to_return, abbreviations):
+    def group_data(self, data_to_return, abbreviations):
         """
         Given a list of project names in project_names,
         returns a dictionary containing data for group of projects
         """
 
         raw_list = []
-        for name in project_names:
+        for name in self.baseline.project_names:
             try:
-                p_data = self.master_data[self.baseline_index[name][data_to_return]].data[name]
+                p_data = self.master_data[self.baseline.index[name][data_to_return]].data[name]
                 for i in range(1, 50):
                     try:
                         try:
@@ -324,15 +329,10 @@ class MilestoneCharts:
         self.baseline_milestone_dates = baseline_milestone_dates
         self.graph_title = graph_title
         self.ipdc_date = ipdc_date
+        #self.milestone_swimlane_charts()
+        self.build_charts()
 
     def milestone_swimlane_charts(self):
-
-        # can you import here?
-        import matplotlib.pyplot as plt #how does import as work?
-        import matplotlib.dates as mdates
-        from datetime import timedelta
-        from analysis.data import root_path
-
         # build scatter chart
         fig, ax1 = plt.subplots()
         fig.suptitle(self.graph_title, fontweight='bold')  # title
@@ -418,3 +418,60 @@ class MilestoneCharts:
         fig.savefig(root_path / 'output/{}.png'.format(self.graph_title), bbox_inches='tight')
 
         # plt.close() #automatically closes figure so don't need to do manually.
+
+    def build_charts(self):
+
+        # add \n to y axis labels and cut down if two long
+        # labels = ['\n'.join(wrap(l, 40)) for l in latest_milestone_names]
+        labels = self.latest_milestone_names
+        final_labels = []
+        for l in labels:
+            if len(l) > 40:
+                final_labels.append(l[:35])
+            else:
+                final_labels.append(l)
+
+        # Chart
+        no_milestones = len(self.latest_milestone_names)
+
+        if no_milestones <= 30:
+            (np.array(final_labels), np.array(self.latest_milestone_dates),
+                              np.array(self.last_milestone_dates),
+                              np.array(self.baseline_milestone_dates),
+                              self.graph_title, self.ipdc_date)
+
+        if 31 <= no_milestones <= 60:
+            half = int(no_milestones / 2)
+            MilestoneCharts(np.array(final_labels[:half]),
+                                                      np.array(self.latest_milestone_dates[:half]),
+                                                      np.array(self.last_milestone_dates[:half]),
+                                                      np.array(self.baseline_milestone_dates[:half]),
+                                                      self.graph_title, self.ipdc_date)
+            title = self.graph_title + ' cont.'
+            MilestoneCharts(np.array(final_labels[half:no_milestones]),
+                                                      np.array(self.latest_milestone_dates[half:no_milestones]),
+                                                      np.array(self.last_milestone_dates[half:no_milestones]),
+                                                      np.array(self.baseline_milestone_dates[half:no_milestones]),
+                                                      title,
+                                                      self.ipdc_date)
+
+        if 61 <= no_milestones <= 90:
+            third = int(no_milestones / 3)
+            MilestoneCharts(np.array(final_labels[:third]),
+                                                      np.array(self.latest_milestone_dates[:third]),
+                                                      np.array(self.last_milestone_dates[:third]),
+                                                      np.array(self.baseline_milestone_dates[:third]),
+                                                      self.graph_title, self.ipdc_date)
+            title = self.graph_title + ' cont. 1'
+            MilestoneCharts(np.array(final_labels[third:third * 2]),
+                                                      np.array(self.latest_milestone_dates[third:third * 2]),
+                                                      np.array(self.last_milestone_dates[third:third * 2]),
+                                                      np.array(self.baseline_milestone_dates[third:third * 2]),
+                                                      title, self.ipdc_date)
+            title = self.graph_title + ' cont. 2'
+            MilestoneCharts(np.array(final_labels[third * 2:no_milestones]),
+                            np.array(self.latest_milestone_dates[third * 2:no_milestones]),
+                            np.array(self.last_milestone_dates[third * 2:no_milestones]),
+                            np.array(self.baseline_milestone_dates[third * 2:no_milestones]),
+                            title, self.ipdc_date)
+        pass
