@@ -180,7 +180,7 @@ def produce_word_doc():
     masters = list_of_masters_all[0:4]
 
     for project_name in masters[0].projects:
-        doc = Document()
+        doc = Document(root_path/'input/summary_temp.docx')
         print(project_name)
 
         font = doc.styles['Normal'].font
@@ -994,6 +994,8 @@ def milestone_swimlane_charts(doc, project_name, latest_milestone_names, latest_
     ax1 = plt.gca()
     ax1.set_ylim(ax1.get_ylim()[::-1])
     ax1.tick_params(axis='y', which='major', labelsize=7)
+    ax1.yaxis.grid()  # horizontal lines
+    ax1.set_axisbelow(True)
 
     #Add line of IPDC date, but only if in the time period
     try:
