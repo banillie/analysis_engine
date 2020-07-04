@@ -66,7 +66,7 @@ shorter and easier to read. You also do not need warnings.).
 
 Go and write some more tests!
 """
-from data_mgmt.data import MilestoneData, MilestoneChartData, Baselines
+from data_mgmt.data import MilestoneData, MilestoneChartData, Masters
 from datamaps.api import project_data_from_master
 from analysis.data import bc_index, list_of_masters_all, a303
 import pytest
@@ -124,19 +124,20 @@ master_data = [test_master]
 #     m = MilestoneData(master_data, bc_index)
 #     assert isinstance(m.baseline_index, (dict,))
 
-def test_MilestoneChartData_group_chart_milestone_key_names_is_list(abbreviations):
-    b = Baselines(list_of_masters_all, list_of_masters_all[0].projects)
-    m = MilestoneData(list_of_masters_all, b)
-    current_m = m.group_data(0, abbreviations)
-    last_m = m.group_data(1, abbreviations)
-    baseline_m = m.group_data(2, abbreviations)
-    m_chart = MilestoneChartData(current_m, last_m, baseline_m)
-    all = m_chart.group_chart()
-    assert isinstance(all[0], (list,))
+def test_MilestoneData_project_dict_returns_dict(abbreviations):
+    mst = Masters(list_of_masters_all[1:], list_of_masters_all[1].projects)
+    m = MilestoneData(mst, abbreviations)
+    assert isinstance(m.project_current, (dict,))
 
-# def test_lower_list_in_get_baseline():
-#     b = Baselines(list_of_masters_all)
-#     p_baseline = b.get_baseline(a303)
+def test_MilestoneData_group_dict_returns_dict(abbreviations):
+    mst = Masters(list_of_masters_all[1:], list_of_masters_all[1].projects)
+    m = MilestoneData(mst, abbreviations)
+    assert isinstance(m.group_current, (dict,))
 
-# how do you step through unittesting
-# need more masters??
+def test_MilestoneChartData_group_chart_returns_list(abbreviations):
+    mst = Masters(list_of_masters_all[1:], list_of_masters_all[1].projects)
+    m = MilestoneData(mst, abbreviations)
+    mcd = MilestoneChartData(m)
+    assert isinstance(mcd.group_current_tds, (list,))
+
+
