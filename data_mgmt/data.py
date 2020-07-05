@@ -251,7 +251,7 @@ class MilestoneData:
         self.group_baseline = baseline_dict
 
 class MilestoneChartData:
-    def __init__(self, milestone_data_object, keys_of_interest=None,
+    def __init__(self, *, milestone_data_object, keys_of_interest=None,
                  keys_not_of_interest=None,
                  filter_start_date=datetime.date(2000, 1, 1),
                  filter_end_date=datetime.date(2050, 1, 1)):
@@ -278,7 +278,7 @@ class MilestoneChartData:
         td_last = []
         td_baseline = []
 
-        print(self.keys_not_of_interest)
+
         # all milestone keys and time deltas calculated this way so
         # shown in particular way in output chart
         for m in list(self.m_data.group_current.keys()):
@@ -305,23 +305,10 @@ class MilestoneChartData:
                 if m_d_current is not None:
                     if self.filter_start_date <= m_d_current <= self.filter_end_date:
                         if self.keys_of_interest is None:
-                            if self.keys_not_of_interest is None:
-                                print('ok')
-                                key_names.append(m)
-                                td_current.append(m_d_current)
-                                td_last.append(m_d_last)
-                                td_baseline.append(m_d_baseline)
-                            else:
-                                print('i here')
-                                for key in self.keys_not_of_interest:
-                                    if key in m:
-                                        pass
-                                    else:
-                                        if m not in key_names:
-                                            key_names.append(m)
-                                            td_current.append(m_d_current)
-                                            td_last.append(m_d_last)
-                                            td_baseline.append(m_d_baseline)
+                            key_names.append(m)
+                            td_current.append(m_d_current)
+                            td_last.append(m_d_last)
+                            td_baseline.append(m_d_baseline)
 
                         else:
                             for key in self.keys_of_interest:
@@ -332,10 +319,28 @@ class MilestoneChartData:
                                         td_last.append(m_d_last)
                                         td_baseline.append(m_d_baseline)
 
-        self.group_keys = key_names
-        self.group_current_tds = td_current
-        self.group_last_tds = td_last
-        self.group_baseline_tds = td_baseline
+        if self.keys_not_of_interest is not None:
+            for x in range(len(key_names)):
+                print(x, key_names[x])
+                for y in self.keys_not_of_interest:
+                    try:
+                        if y in key_names[x]:
+                            key_names[x] = None
+                            td_current[x] = None
+                            td_last[x] = None
+                            td_baseline[x] = None
+                    except TypeError:
+                        pass
+
+        key_names_final = [x for x in key_names if x is not None]
+        td_current_final = [x for x in td_current if x is not None]
+        td_last_final = [x for x in td_last if x is not None]
+        td_baseline_final = [x for x in td_baseline if x is not None]
+
+        self.group_keys = key_names_final
+        self.group_current_tds = td_current_final
+        self.group_last_tds = td_last_final
+        self.group_baseline_tds = td_baseline_final
 
 
 class MilestoneCharts:

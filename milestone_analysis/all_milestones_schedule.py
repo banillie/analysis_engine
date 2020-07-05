@@ -176,9 +176,6 @@ mst = Masters(list_of_masters_all[1:], fbc_list)
 # get general milestone data
 m = MilestoneData(mst, abbreviations)
 
-#get milestone chart data
-mcd = MilestoneChartData(m)
-
 #filtering data options for the chart
 start_date = datetime.date(2020, 6, 1)
 end_date = datetime.date(2022, 6, 30)
@@ -198,11 +195,15 @@ consultations = ['Consultation', 'consultation', 'Preferred', 'preferred',
 planning = ['DCO', 'dco', 'Planning', 'planning', 'consent', 'Consent',
             'Pre-PIN', 'Pre-OJEU']
 ipdc = ['IPDC', 'BICC']
-assurance = ['Gateway', 'SGAR', 'Red', 'Review']
+assurance = ['Gateway', 'SGAR', 'Red', 'Review',
+             'PAR']
 
 # get filtered milestone chart data
-mcd = MilestoneChartData(m, keys_of_interest=assurance, keys_not_of_interest=None,
-                         filter_start_date=start_date, filter_end_date=end_date)
+mcd = MilestoneChartData(milestone_data_object=m,
+                         keys_of_interest=None,
+                         keys_not_of_interest=assurance,
+                         filter_start_date=start_date,
+                         filter_end_date=end_date)
 
 #group_chart returns four list
 # key_names = np.array(mcd.group_keys)
