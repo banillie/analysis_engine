@@ -6,18 +6,20 @@ from analysis.data import root_path
 import numpy as np
 
 class Masters:
+
     def __init__(self, master_data, project_names):
         self.master_data = master_data
         self.project_names = project_names
         self.bl_info = {}
         self.bl_index = {}
-        self.get_baseline_data()
 
-    def get_baseline_data(self):
+    def get_baseline_data(self, meta_baseline):
         """
         Given a list of project names in project_names returns
         the two dictionaries baseline_info and baseline_index
         """
+        self.meta_baseline = meta_baseline
+
         baseline_info = {}
         baseline_index = {}
 
@@ -26,16 +28,17 @@ class Masters:
             lower_list = []
             for i, master in reversed(list(enumerate(self.master_data))):
                 if name in master.projects:
-                    approved_bc = master.data[name]['IPDC approval point']
+                    #breakpoint()
+                    approved_bc = master.data[name][self.meta_baseline]
                     quarter = str(master.quarter)
-                    if approved_bc not in bc_list:
+                    if approved_bc is 'Yes':
                         bc_list.append(approved_bc)
                         lower_list.append((approved_bc, quarter, i))
                 else:
                     pass
             for i in reversed(range(2)):
                 if name in self.master_data[i].projects:
-                    approved_bc = self.master_data[i][name]['IPDC approval point']
+                    approved_bc = self.master_data[i][name][self.meta_baseline]
                     quarter = str(self.master_data[i].quarter)
                     lower_list.append((approved_bc, quarter, i))
                 else:
@@ -51,7 +54,6 @@ class Masters:
 
         self.bl_info = baseline_info
         self.bl_index = baseline_index
-
 
 class MilestoneData:
     def __init__(self, masters_object, abbreviations):
@@ -319,9 +321,9 @@ class MilestoneChartData:
                                         td_last.append(m_d_last)
                                         td_baseline.append(m_d_baseline)
 
+        #loop to remove
         if self.keys_not_of_interest is not None:
             for x in range(len(key_names)):
-                print(x, key_names[x])
                 for y in self.keys_not_of_interest:
                     try:
                         if y in key_names[x]:
@@ -341,7 +343,6 @@ class MilestoneChartData:
         self.group_current_tds = td_current_final
         self.group_last_tds = td_last_final
         self.group_baseline_tds = td_baseline_final
-
 
 class MilestoneCharts:
     def __init__(self, latest_milestone_names, latest_milestone_dates,
@@ -499,3 +500,4 @@ class MilestoneCharts:
                             np.array(self.baseline_milestone_dates[third * 2:no_milestones]),
                             title, self.ipdc_date)
         pass
+

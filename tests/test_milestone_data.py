@@ -70,6 +70,7 @@ from data_mgmt.data import MilestoneData, MilestoneChartData, Masters
 from datamaps.api import project_data_from_master
 from analysis.data import bc_index, list_of_masters_all, a303
 import pytest
+import datetime
 
 @pytest.fixture
 def abbreviations():
@@ -110,19 +111,19 @@ def abbreviations():
                  'Transpennine Route Upgrade (TRU)': 'TRU',
                  'Western Rail Link to Heathrow': 'WRlTH'}
 
+start_date = datetime.date(2020, 6, 1)
+end_date = datetime.date(2022, 6, 30)
+
 test_master = project_data_from_master("tests/resources/test_master.xlsx", 4, 2019)
 project_names = test_master.projects
 master_data = [test_master]
 
 
-# def test_project_names_appear_in_object_project_names_attribute():
-#     m = MilestoneData(master_data, bc_index)
-#     project_data = m.project_data(project_names, 0)
-#     assert "Chutney Bridge.xlsm" in project_data.keys()
-#
-# def test_baseline_index():
-#     m = MilestoneData(master_data, bc_index)
-#     assert isinstance(m.baseline_index, (dict,))
+
+def test_Masters_get_baseline_data():
+    mst = Masters(list_of_masters_all[1:], list_of_masters_all[1].projects)
+    bl = mst.get_baseline_data('Re-baseline IPDC milestones')
+    assert isinstance(bl.bl_info, (dict,))
 
 def test_MilestoneData_project_dict_returns_dict(abbreviations):
     mst = Masters(list_of_masters_all[1:], list_of_masters_all[1].projects)
@@ -137,7 +138,26 @@ def test_MilestoneData_group_dict_returns_dict(abbreviations):
 def test_MilestoneChartData_group_chart_returns_list(abbreviations):
     mst = Masters(list_of_masters_all[1:], list_of_masters_all[1].projects)
     m = MilestoneData(mst, abbreviations)
-    mcd = MilestoneChartData(m)
+    mcd = MilestoneChartData(milestone_data_object=m)
     assert isinstance(mcd.group_current_tds, (list,))
 
+# def test_MilestoneChartData_group_chart_filter_in_works(abbreviations):
+#     mst = Masters(list_of_masters_all[1:], list_of_masters_all[1].projects)
+#     assurance = ['Gateway', 'SGAR', 'Red', 'Review']
+#     m = MilestoneData(mst, abbreviations)
+#     mcd = MilestoneChartData(m, keys_of_interest=assurance)
+#     if any("Gateway" in s for s in mcd.group_keys):
+#         assert bool(True)
+#     #assert 'SGAR' in mcd.group_keys
 
+# def test_MilestoneChartData_group_chart_filter_out_works(abbreviations):
+#     mst = Masters(list_of_masters_all[1:], list_of_masters_all[1].projects)
+#     assurance = ['Gateway', 'SGAR', 'Red', 'Review']
+#     m = MilestoneData(mst, abbreviations)
+#     mcd = MilestoneChartData(milestone_data_object=m,
+#                              keys_of_interest=None,
+#                              keys_not_of_interest=assurance,
+#                              filter_start_date=start_date,
+#                              filter_end_date=end_date)
+#     assert 'Gateway' not in mcd.group_keys
+#     assert 'SGAR' not in mcd.group_keys
