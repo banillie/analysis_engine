@@ -66,9 +66,9 @@ shorter and easier to read. You also do not need warnings.).
 
 Go and write some more tests!
 """
-from data_mgmt.data import MilestoneData, MilestoneChartData, Masters
+from data_mgmt.data import MilestoneData, MilestoneChartData, Masters, CostData
 from datamaps.api import project_data_from_master
-from analysis.data import bc_index, list_of_masters_all, a303
+from analysis.data import list_of_masters_all, a303, hs2_programme, rail_franchising
 import pytest
 import datetime
 
@@ -114,29 +114,32 @@ def abbreviations():
 start_date = datetime.date(2020, 6, 1)
 end_date = datetime.date(2022, 6, 30)
 
-test_master = project_data_from_master("tests/resources/test_master.xlsx", 4, 2019)
-project_names = test_master.projects
-master_data = [test_master]
+# test_master = project_data_from_master("tests/resources/test_master.xlsx", 4, 2019)
+# project_names = test_master.projects
+# master_data = [test_master]
 
+test_masters = list_of_masters_all[1:]
+project_names = list_of_masters_all[1].projects
+project_names.remove(hs2_programme)
+project_names.remove(rail_franchising)
 
 
 def test_Masters_get_baseline_data():
-    mst = Masters(list_of_masters_all[1:], list_of_masters_all[1].projects)
-    bl = mst.get_baseline_data('Re-baseline IPDC milestones')
-    assert isinstance(bl.bl_info, (dict,))
+    mst = Masters(test_masters, project_names, 'Re-baseline IPDC milestones')
+    assert isinstance(mst.bl_info, (dict,))
 
 def test_MilestoneData_project_dict_returns_dict(abbreviations):
-    mst = Masters(list_of_masters_all[1:], list_of_masters_all[1].projects)
+    mst = Masters(test_masters, project_names, 'Re-baseline IPDC milestones')
     m = MilestoneData(mst, abbreviations)
     assert isinstance(m.project_current, (dict,))
 
 def test_MilestoneData_group_dict_returns_dict(abbreviations):
-    mst = Masters(list_of_masters_all[1:], list_of_masters_all[1].projects)
+    mst = Masters(test_masters, project_names, 'Re-baseline IPDC milestones')
     m = MilestoneData(mst, abbreviations)
     assert isinstance(m.group_current, (dict,))
 
 def test_MilestoneChartData_group_chart_returns_list(abbreviations):
-    mst = Masters(list_of_masters_all[1:], list_of_masters_all[1].projects)
+    mst = Masters(test_masters, project_names, 'Re-baseline IPDC milestones')
     m = MilestoneData(mst, abbreviations)
     mcd = MilestoneChartData(milestone_data_object=m)
     assert isinstance(mcd.group_current_tds, (list,))
@@ -161,3 +164,8 @@ def test_MilestoneChartData_group_chart_returns_list(abbreviations):
 #                              filter_end_date=end_date)
 #     assert 'Gateway' not in mcd.group_keys
 #     assert 'SGAR' not in mcd.group_keys
+
+def test_CostData_get_financial_totals_returning_totals():
+    mst = Masters(test_masters, project_names, 'Re-baseline IPDC cost')
+    c = CostData(mst)
+    assert isinstance(c.last, (list,))

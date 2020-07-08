@@ -7,18 +7,23 @@ import numpy as np
 
 class Masters:
 
-    def __init__(self, master_data, project_names):
+    def __init__(self, master_data, project_names, meta_baseline):
         self.master_data = master_data
         self.project_names = project_names
+        self.meta_baseline = meta_baseline
         self.bl_info = {}
         self.bl_index = {}
+        self.get_baseline_data()
 
-    def get_baseline_data(self, meta_baseline):
+    def get_baseline_data(self):
+        # self.meta_baseline = meta_baseline
+        # self.bl_info = {}
+        # self.bl_index = {}
+
         """
         Given a list of project names in project_names returns
         the two dictionaries baseline_info and baseline_index
         """
-        self.meta_baseline = meta_baseline
 
         baseline_info = {}
         baseline_index = {}
@@ -28,10 +33,9 @@ class Masters:
             lower_list = []
             for i, master in reversed(list(enumerate(self.master_data))):
                 if name in master.projects:
-                    #breakpoint()
                     approved_bc = master.data[name][self.meta_baseline]
                     quarter = str(master.quarter)
-                    if approved_bc is 'Yes':
+                    if approved_bc == 'Yes':
                         bc_list.append(approved_bc)
                         lower_list.append((approved_bc, quarter, i))
                 else:
@@ -501,3 +505,86 @@ class MilestoneCharts:
                             title, self.ipdc_date)
         pass
 
+class CostData:
+    def __init__(self, masters_object):
+        self.masters = masters_object
+        # self.pre_pro_rdel_list = []
+        # self.pre_pro_cdel_list = []
+        # self.pro_rdel_list = []
+        # self.pro_cdel_list = []
+        # self.unpro_rdel_list = []
+        # self.unpro_cdel_list = []
+        self.current = []
+        self.last = []
+        self.baseline = []
+        self.get_financial_totals()
+
+    def get_financial_totals(self):
+        '''gets financial data to place into the bar chart element in the financial analysis graphs'''
+        # key_list = [('Pre-profile RDEL',
+        #              'Pre-profile CDEL'),
+        #             ('Total RDEL Forecast Total',
+        #              'Total CDEL Forecast Total WLC'),
+        #             ('Unprofiled RDEL Forecast Total',
+        #              'Unprofiled CDEL Forecast Total WLC')]
+
+        pre_pro_rdel_list = []
+        pre_pro_cdel_list = []
+        pro_rdel_list = []
+        pro_cdel_list = []
+        unpro_rdel_list = []
+        unpro_cdel_list = []
+
+        # index_1 = self.masters.bl_index[name]
+        # index_2 = index_1[0:3]
+        # index_2.reverse() # think this was reversed as matplotlib chart builds from baseline up
+
+        for i in range(3):
+            pre_pro_rdel_list = []
+            pre_pro_cdel_list = []
+            pro_rdel_list = []
+            pro_cdel_list = []
+            unpro_rdel_list = []
+            unpro_cdel_list = []
+            for name in self.masters.project_names:
+                try:
+                    pre_pro_rdel = self.masters.master_data[self.masters.bl_index[name][i]].data[name]['Pre-profile RDEL']
+                    pre_pro_cdel = self.masters.master_data[self.masters.bl_index[name][i]].data[name]['Pre-profile CDEL']
+                    pro_rdel = self.masters.master_data[self.masters.bl_index[name][i]].data[name]['Total RDEL Forecast Total']
+                    pro_cdel = self.masters.master_data[self.masters.bl_index[name][i]].data[name]['Total CDEL Forecast Total WLC']
+                    unpro_rdel = self.masters.master_data[self.masters.bl_index[name][i]].data[name]['Unprofiled RDEL Forecast Total']
+                    unpro_cdel = self.masters.master_data[self.masters.bl_index[name][i]].data[name]['Unprofiled CDEL Forecast Total WLC']
+
+                    pre_pro_rdel_list.append(pre_pro_rdel)
+                    pre_pro_cdel_list.append(pre_pro_cdel)
+                    pro_rdel_list.append(pro_rdel)
+                    pro_cdel_list.append(pro_cdel)
+                    unpro_rdel_list.append(unpro_rdel)
+                    unpro_cdel_list.append(unpro_cdel)
+
+                except TypeError:
+                    pre_pro_rdel_list.append(0)
+                    pre_pro_cdel_list.append(0)
+                    pro_rdel_list.append(0)
+                    pro_cdel_list.append(0)
+                    unpro_rdel_list.append(0)
+                    unpro_cdel_list.append(0)
+
+            total_pre_pro = sum(pre_pro_rdel_list) + sum(pre_pro_cdel_list)
+            total_unpro = sum(unpro_rdel_list) + sum(unpro_cdel_list)
+            total_pro = (sum(pro_rdel_list) + sum(pro_cdel_list)) - (total_pre_pro + total_unpro)
+
+            if i == 0:
+                self.current = [total_pre_pro, total_pro, total_unpro]
+            if i == 1:
+                self.last = [total_pre_pro, total_pro, total_unpro]
+            if i == 2:
+                self.baseline = [total_pre_pro, total_pro, total_unpro]
+
+
+        # self.pre_pro_rdel = pre_pro_rdel_listq
+        # self.pre_pro_cdel = pre_pro_cdel_list
+        # self.pro_rdel = pro_rdel_list
+        # self.pro_cdel = pro_cdel_list
+        # self.unpro_rdel = unpro_rdel_list
+        # self.unpro_cdel = unpro_cdel_list
