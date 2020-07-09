@@ -68,7 +68,7 @@ Go and write some more tests!
 """
 from data_mgmt.data import MilestoneData, MilestoneChartData, Masters, CostData
 from datamaps.api import project_data_from_master
-from analysis.data import list_of_masters_all, a303, hs2_programme, rail_franchising
+from analysis.data import list_of_masters_all, a303, hs2_programme, rail_franchising, sarh2
 import pytest
 import datetime
 
@@ -122,6 +122,7 @@ test_masters = list_of_masters_all[1:]
 project_names = list_of_masters_all[1].projects
 project_names.remove(hs2_programme)
 project_names.remove(rail_franchising)
+#project_names.remove(sarh2)
 
 
 @pytest.fixture
@@ -148,14 +149,17 @@ def test_MilestoneChartData_group_chart_returns_list(mst, abbreviations):
     mcd = MilestoneChartData(milestone_data_object=m)
     assert isinstance(mcd.group_current_tds, (list,))
 
-def test_MilestoneChartData_group_chart_filter_in_works(abbreviations):
-    mst = Masters(list_of_masters_all[1:], list_of_masters_all[1].projects)
+def test_MilestoneChartData_group_chart_filter_in_works(mst, abbreviations):
     assurance = ['Gateway', 'SGAR', 'Red', 'Review']
+    mst.get_baseline_data('Re-baseline IPDC milestones')
     m = MilestoneData(mst, abbreviations)
     mcd = MilestoneChartData(m, keys_of_interest=assurance)
-    if any("Gateway" in s for s in mcd.group_keys):
-        assert bool(True)
-    #assert 'SGAR' in mcd.group_keys
+    assert any("Gateway" in s for s in mcd.group_keys)
+    assert any("SGAR" in s for s in mcd.group_keys)
+    assert any("Red" in s for s in mcd.group_keys)
+    assert any("Review" in s for s in mcd.group_keys)
+
+
 
 # def test_MilestoneChartData_group_chart_filter_out_works(abbreviations):
 #     mst = Masters(list_of_masters_all[1:], list_of_masters_all[1].projects)
@@ -169,7 +173,8 @@ def test_MilestoneChartData_group_chart_filter_in_works(abbreviations):
 #     assert 'Gateway' not in mcd.group_keys
 #     assert 'SGAR' not in mcd.group_keys
 
-def test_CostData_get_financial_totals_returning_totals():
-    mst = Masters(test_masters, project_names, 'Re-baseline IPDC cost')
+def test_CostData_get_financial_totals_returning_totals(mst):
+    mst = Masters(test_masters, project_names)
+    mst.get_baseline_data('Re-baseline IPDC cost')
     c = CostData(mst)
     assert isinstance(c.last, (list,))

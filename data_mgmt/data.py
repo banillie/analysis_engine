@@ -307,7 +307,7 @@ class MilestoneData:
         self.group_baseline = baseline_dict
 
 class MilestoneChartData:
-    def __init__(self, *, milestone_data_object, keys_of_interest=None,
+    def __init__(self, milestone_data_object, keys_of_interest=None,
                  keys_not_of_interest=None,
                  filter_start_date=datetime.date(2000, 1, 1),
                  filter_end_date=datetime.date(2050, 1, 1)):
