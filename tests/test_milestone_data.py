@@ -178,3 +178,5 @@ def test_CostData_get_financial_totals_returning_totals(mst):
     mst.get_baseline_data('Re-baseline IPDC cost')
     c = CostData(mst)
     assert isinstance(c.last, (list,))
+
+'hello'
