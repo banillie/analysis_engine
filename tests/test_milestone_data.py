@@ -179,4 +179,3 @@ def test_CostData_get_financial_totals_returning_totals(mst):
     c = CostData(mst)
     assert isinstance(c.last, (list,))
 
-'hello'
