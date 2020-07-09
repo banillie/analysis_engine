@@ -124,23 +124,26 @@ project_names.remove(hs2_programme)
 project_names.remove(rail_franchising)
 
 
-def test_Masters_get_baseline_data():
-    mst = Masters(test_masters, project_names)
+@pytest.fixture
+def mst():
+    return Masters(test_masters, project_names)
+
+def test_Masters_get_baseline_data(mst):
     mst.get_baseline_data('Re-baseline IPDC milestones')
     assert isinstance(mst.bl_index, (dict,))
 
-def test_MilestoneData_project_dict_returns_dict(abbreviations):
-    mst = Masters(test_masters, project_names, 'Re-baseline IPDC milestones')
+def test_MilestoneData_project_dict_returns_dict(mst, abbreviations):
+    mst.get_baseline_data("Re-baseline IPDC milestones")
     m = MilestoneData(mst, abbreviations)
     assert isinstance(m.project_current, (dict,))
 
-def test_MilestoneData_group_dict_returns_dict(abbreviations):
-    mst = Masters(test_masters, project_names, 'Re-baseline IPDC milestones')
+def test_MilestoneData_group_dict_returns_dict(mst, abbreviations):
+    mst.get_baseline_data('Re-baseline IPDC milestones')
     m = MilestoneData(mst, abbreviations)
     assert isinstance(m.group_current, (dict,))
 
-def test_MilestoneChartData_group_chart_returns_list(abbreviations):
-    mst = Masters(test_masters, project_names, 'Re-baseline IPDC milestones')
+def test_MilestoneChartData_group_chart_returns_list(mst, abbreviations):
+    mst.get_baseline_data('Re-baseline IPDC milestones')
     m = MilestoneData(mst, abbreviations)
     mcd = MilestoneChartData(milestone_data_object=m)
     assert isinstance(mcd.group_current_tds, (list,))
