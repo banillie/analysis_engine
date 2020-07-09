@@ -25,8 +25,10 @@ from textwrap import wrap
 
 from analysis.engine_functions import convert_rag_text, project_time_difference, convert_bc_stage_text
 from analysis.data import list_of_masters_all, root_path, latest_cost_profiles, last_cost_profiles, \
-    baseline_1_cost_profiles, year_list, SRO_conf_key_list, p_current_milestones, bc_index, \
-    p_last_milestones, p_baseline_milestones, first_diff_data, ipdc_date, abbreviations
+    baseline_1_cost_profiles, year_list, SRO_conf_key_list, p_current_milestones, \
+    p_last_milestones, p_baseline_milestones, first_diff_data, ipdc_date, abbreviations, \
+    benefits_bl_index, costs_bl_index
+
 
 import os
 
@@ -187,13 +189,13 @@ def produce_word_doc():
         font.name = 'Arial'
         font.size = Pt(12)
 
-        heading = str(project_name)
+        heading = str(abbreviations[project_name])
         intro = doc.add_heading(str(heading), 0)
         intro.alignment = 1
         intro.bold = True
 
         para_1 = doc.add_paragraph()
-        para_1.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+        #para_1.alignment = WD_ALIGN_PARAGRAPH.RIGHT
         sro_name = list_of_masters_all[0].data[project_name]['Senior Responsible Owner (SRO)']
         if sro_name is None:
             sro_name = 'tbc'
@@ -209,7 +211,7 @@ def produce_word_doc():
         para_1.add_run('SRO: ' + str(sro_name) + ', ' + str(sro_email) + ', ' + str(sro_phone))
 
         para_2 = doc.add_paragraph()
-        para_2.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+        #para_2.alignment = WD_ALIGN_PARAGRAPH.RIGHT
         pd_name = list_of_masters_all[0].data[project_name]['Project Director (PD)']
         if pd_name is None:
             pd_name = 'TBC'
@@ -225,7 +227,7 @@ def produce_word_doc():
         para_2.add_run('PD: ' + str(pd_name) + ', ' + str(pd_email) + ', ' + str(pd_phone))
 
         para_3 = doc.add_paragraph()
-        para_3.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+        #para_3.alignment = WD_ALIGN_PARAGRAPH.RIGHT
         contact_name = list_of_masters_all[0].data[project_name]['Working Contact Name']
         if contact_name is None:
             contact_name = 'TBC'
@@ -265,7 +267,7 @@ def produce_word_doc():
         table.style = 'Table Grid'
         make_rows_bold([table.rows[0]])  # makes top of table bold.
         #make_columns_bold([table.columns[0]]) #right cells in table bold
-        column_widths = (Cm(3.5), Cm(3), Cm(3), Cm(3), Cm(3))
+        column_widths = (Cm(3.9), Cm(2.9), Cm(2.9), Cm(2.9), Cm(2.9))
         set_col_widths(table, column_widths)
 
         doc.add_paragraph()
@@ -279,10 +281,10 @@ def produce_word_doc():
         headings_list = ['SRO delivery confidence narrative',
                          'Financial cost narrative',
                          'Financial comparison with last quarter',
-                         'Financial comparison this quarter',
+                         'Financial comparison with baseline',
                          'Benefits Narrative',
                          'Benefits comparison with last quarter',
-                         'Benefits comparison this quarter',
+                         'Benefits comparison with baseline',
                          'Milestone narrative']
 
         narrative_keys_list = ['Departmental DCA Narrative',
@@ -531,7 +533,7 @@ def produce_word_doc():
         change_text_size([table.columns[0], table.columns[1], table.columns[2], table.columns[3]], 10)
         make_text_red([table.columns[1], table.columns[3]]) #make 'not reported red'
 
-        '''benefits meta data'''
+        '''vfm meta data'''
         doc.add_paragraph()
         run = doc.add_paragraph().add_run('VfM')
         font = run.font
@@ -558,7 +560,7 @@ def produce_word_doc():
         font = run.font
         font.bold = True
         font.underline = True
-        table = doc.add_table(rows=1, cols=5)
+        table = doc.add_table(rows=1, cols=4)
         hdr_cells = table.rows[0].cells
         hdr_cells[0].text = 'Total Benefits:'
         hdr_cells[1].text = '£' + str(round(total_ben[7])) + 'm'
@@ -609,39 +611,39 @@ def produce_word_doc():
                              total_ben)
 
         '''milestone swimlane charts'''
-        #chart of with milestone over the next two years
-        m_data = milestone_schedule_data(p_current_milestones,
-                                         p_last_milestones,
-                                         p_baseline_milestones,
-                                         project_name,
-                                         milestone_filter_start_date,
-                                         milestone_filter_end_date)
-
-        # add \n to y axis labels and cut down if two long
-        labels = ['\n'.join(wrap(l, 40)) for l in m_data[0]]
-        final_labels = []
-        for l in labels:
-            if len(l) > 70:
-                final_labels.append(l[:70])
-            else:
-                final_labels.append(l)
-
-        no_milestones = len(m_data[0])
-
-        title = 'schedule two year window'
-        if no_milestones <= 15:
-            milestone_swimlane_charts(doc, project_name, np.array(final_labels), np.array(m_data[1]), np.array(m_data[2]), \
-                                  np.array(m_data[3]), title)
-
-        if 16 <= no_milestones <= 35:
-            half = int(no_milestones/2)
-            milestone_swimlane_charts(doc, project_name, np.array(final_labels[:half]), np.array(m_data[1][:half]),
-                                      np.array(m_data[2][:half]), np.array(m_data[3][:half]), title)
-            title = title + ' cont.'
-            milestone_swimlane_charts(doc, project_name, np.array(final_labels[half:no_milestones]),
-                                      np.array(m_data[1][half:no_milestones]),
-                                      np.array(m_data[2][half:no_milestones]),
-                                      np.array(m_data[3][half:no_milestones]), title)
+        # #chart of with milestone over the next two years
+        # m_data = milestone_schedule_data(p_current_milestones,
+        #                                  p_last_milestones,
+        #                                  p_baseline_milestones,
+        #                                  project_name,
+        #                                  milestone_filter_start_date,
+        #                                  milestone_filter_end_date)
+        #
+        # # add \n to y axis labels and cut down if two long
+        # labels = ['\n'.join(wrap(l, 40)) for l in m_data[0]]
+        # final_labels = []
+        # for l in labels:
+        #     if len(l) > 70:
+        #         final_labels.append(l[:70])
+        #     else:
+        #         final_labels.append(l)
+        #
+        # no_milestones = len(m_data[0])
+        #
+        # title = 'schedule two year window'
+        # if no_milestones <= 15:
+        #     milestone_swimlane_charts(doc, project_name, np.array(final_labels), np.array(m_data[1]), np.array(m_data[2]), \
+        #                           np.array(m_data[3]), title)
+        #
+        # if 16 <= no_milestones <= 35:
+        #     half = int(no_milestones/2)
+        #     milestone_swimlane_charts(doc, project_name, np.array(final_labels[:half]), np.array(m_data[1][:half]),
+        #                               np.array(m_data[2][:half]), np.array(m_data[3][:half]), title)
+        #     title = title + ' cont.'
+        #     milestone_swimlane_charts(doc, project_name, np.array(final_labels[half:no_milestones]),
+        #                               np.array(m_data[1][half:no_milestones]),
+        #                               np.array(m_data[2][half:no_milestones]),
+        #                               np.array(m_data[3][half:no_milestones]), title)
 
         #chart with all milestones
         m_data = milestone_schedule_data(p_current_milestones,
@@ -941,7 +943,7 @@ def milestone_swimlane_charts(doc, project_name, latest_milestone_names, latest_
     fig, ax1 = plt.subplots()
     fig.suptitle(abbreviations[project_name] + ' ' + graph_title, fontweight='bold')  # title
     # set fig size
-    # fig.set_figheight(6)
+    # fig.set_figheight(4)
     # fig.set_figwidth(8)
 
     ax1.scatter(baseline_milestone_dates, latest_milestone_names, label='Baseline')
@@ -957,13 +959,13 @@ def milestone_swimlane_charts(doc, project_name, latest_milestone_names, latest_
     # calculate the length of the time period covered in chart. Not perfect as baseline dates can distort.
     try:
         td = (latest_milestone_dates[-1] - latest_milestone_dates[0]).days
-        if td <= 365*3:
+        if td <= 365*2:
             ax1.xaxis.set_major_locator(years)
             ax1.xaxis.set_minor_locator(months)
             ax1.xaxis.set_major_formatter(years_fmt)
             ax1.xaxis.set_minor_formatter(months_fmt)
-            plt.setp(ax1.xaxis.get_minorticklabels(), rotation=45)
-            plt.setp(ax1.xaxis.get_majorticklabels(), rotation=45, weight='bold')
+            plt.setp(ax1.xaxis.get_minorticklabels(), rotation=45, fontsize=6)
+            plt.setp(ax1.xaxis.get_majorticklabels(), rotation=45, weight='bold', fontsize=8)
             # scaling x axis
             # x axis value to no more than three months after last latest milestone date, or three months
             # before first latest milestone date. Hack, can be improved. Text highlights movements off chart.
@@ -1046,8 +1048,17 @@ def milestone_table(doc, p_baseline_milestones, project_name):
                 row_cells[2].text = plus_minus_days(b_one_value)
                 b_two_value = second_diff_data[project_name][milestone]
                 row_cells[3].text = plus_minus_days(b_two_value)
+
                 notes = p_current_milestones[project_name][milestone][milestone_date]
                 row_cells[4].text = str(notes)
+                # trying to high changes to narratuve in red text
+                # if milestone in p_last_milestones[project_name].keys():
+                #     last_milestone_date = p_last_milestones[project_name][milestone]
+                #     last_note = p_last_milestones[project_name][milestone][last_milestone_date]
+                #     row_cells[4] = compare_text_newandold(notes, last_note, doc)
+                # elif milestone not in p_last_milestones[project_name].keys():
+                #     row_cells[4].text = str(notes)
+
                 paragraph = row_cells[4].paragraphs[0]
                 run = paragraph.runs
                 font = run[0].font
@@ -1142,7 +1153,7 @@ def get_financial_totals(project_name):
     rdel_cost_list = []
     cdel_cost_list = []
 
-    index_1 = bc_index[project_name]
+    index_1 = costs_bl_index[project_name]
     index_2 = index_1[0:3]
     index_2.reverse()
     for x in index_2:
@@ -1188,7 +1199,7 @@ def get_ben_totals(project_name):
 
 
     ben_list = []
-    index_1 = bc_index[project_name]
+    index_1 = benefits_bl_index[project_name]
     index_2 = index_1[0:3]
     index_2.reverse()
     for x in index_2:
