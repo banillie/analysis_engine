@@ -125,8 +125,9 @@ project_names.remove(rail_franchising)
 
 
 def test_Masters_get_baseline_data():
-    mst = Masters(test_masters, project_names, 'Re-baseline IPDC milestones')
-    assert isinstance(mst.bl_info, (dict,))
+    mst = Masters(test_masters, project_names)
+    mst.get_baseline_data('Re-baseline IPDC milestones')
+    assert isinstance(mst.bl_index, (dict,))
 
 def test_MilestoneData_project_dict_returns_dict(abbreviations):
     mst = Masters(test_masters, project_names, 'Re-baseline IPDC milestones')
@@ -144,14 +145,14 @@ def test_MilestoneChartData_group_chart_returns_list(abbreviations):
     mcd = MilestoneChartData(milestone_data_object=m)
     assert isinstance(mcd.group_current_tds, (list,))
 
-# def test_MilestoneChartData_group_chart_filter_in_works(abbreviations):
-#     mst = Masters(list_of_masters_all[1:], list_of_masters_all[1].projects)
-#     assurance = ['Gateway', 'SGAR', 'Red', 'Review']
-#     m = MilestoneData(mst, abbreviations)
-#     mcd = MilestoneChartData(m, keys_of_interest=assurance)
-#     if any("Gateway" in s for s in mcd.group_keys):
-#         assert bool(True)
-#     #assert 'SGAR' in mcd.group_keys
+def test_MilestoneChartData_group_chart_filter_in_works(abbreviations):
+    mst = Masters(list_of_masters_all[1:], list_of_masters_all[1].projects)
+    assurance = ['Gateway', 'SGAR', 'Red', 'Review']
+    m = MilestoneData(mst, abbreviations)
+    mcd = MilestoneChartData(m, keys_of_interest=assurance)
+    if any("Gateway" in s for s in mcd.group_keys):
+        assert bool(True)
+    #assert 'SGAR' in mcd.group_keys
 
 # def test_MilestoneChartData_group_chart_filter_out_works(abbreviations):
 #     mst = Masters(list_of_masters_all[1:], list_of_masters_all[1].projects)

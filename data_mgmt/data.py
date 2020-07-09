@@ -2,21 +2,72 @@ import datetime
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from datetime import timedelta
-from analysis.data import root_path
+#from analysis.data import root_path
 import numpy as np
+from datamaps.api import project_data_from_master
+import platform
+from pathlib import Path
+
+'''file path'''
+def _platform_docs_dir() -> Path:
+    if platform.system() == "Linux":
+        return Path.home() / "Documents" / "analysis_engine"
+    if platform.system() == "Darwin":
+        return Path.home() / "Documents" / "analysis_engine"
+    else:
+        return Path.home() / "Documents" / "analysis_engine"
+
+root_path = _platform_docs_dir()
+
+'''master data'''
+def function():
+    q1_2021 = project_data_from_master(root_path/'core_data/master_1_2020.xlsx', 1, 2020)
+    q4_1920 = project_data_from_master(root_path/'core_data/master_4_2019.xlsx', 4, 2019)
+    q3_1920 = project_data_from_master(root_path/'core_data/master_3_2019.xlsx', 3, 2019)
+    q2_1920 = project_data_from_master(root_path/'core_data/master_2_2019.xlsx', 2, 2019)
+    q1_1920 = project_data_from_master(root_path/'core_data/master_1_2019.xlsx', 1, 2019)
+    q4_1819 = project_data_from_master(root_path/'core_data/master_4_2018.xlsx', 4, 2018)
+    q3_1819 = project_data_from_master(root_path/'core_data/master_3_2018.xlsx', 3, 2018)
+    q2_1819 = project_data_from_master(root_path/'core_data/master_2_2018.xlsx', 2, 2018)
+    q1_1819 = project_data_from_master(root_path/'core_data/master_1_2018.xlsx', 1, 2018)
+    q4_1718 = project_data_from_master(root_path/'core_data/master_4_2017.xlsx', 4, 2017)
+    q3_1718 = project_data_from_master(root_path/'core_data/master_3_2017.xlsx', 3, 2017)
+    q2_1718 = project_data_from_master(root_path/'core_data/master_2_2017.xlsx', 2, 2017)
+    q1_1718 = project_data_from_master(root_path/'core_data/master_1_2017.xlsx', 1, 2017)
+    q4_1617 = project_data_from_master(root_path/'core_data/master_4_2016.xlsx', 4, 2016)
+    q3_1617 = project_data_from_master(root_path/'core_data/master_3_2016.xlsx', 3, 2016)
+
+
+
+'''List of all masters'''
+list_of_masters_all = [q1_2021,
+                       q4_1920,
+                       q3_1920,
+                       q2_1920,
+                       q1_1920,
+                       q4_1819,
+                       q3_1819,
+                       q2_1819,
+                       q1_1819,
+                       q4_1718,
+                       q3_1718,
+                       q2_1718,
+                       q1_1718,
+                       q4_1617,
+                       q3_1617]
 
 class Masters:
 
-    def __init__(self, master_data, project_names, meta_baseline):
+    def __init__(self, master_data, project_names):
         self.master_data = master_data
         self.project_names = project_names
-        self.meta_baseline = meta_baseline
+        #self.meta_baseline = meta_baseline
         self.bl_info = {}
         self.bl_index = {}
-        self.get_baseline_data()
+        #self.get_baseline_data()
 
-    def get_baseline_data(self):
-        # self.meta_baseline = meta_baseline
+    def get_baseline_data(self, meta_baseline):
+        self.meta_baseline = meta_baseline
         # self.bl_info = {}
         # self.bl_index = {}
 
