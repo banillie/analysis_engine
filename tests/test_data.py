@@ -66,9 +66,8 @@ shorter and easier to read. You also do not need warnings.).
 
 Go and write some more tests!
 """
-from data_mgmt.data import MilestoneData, MilestoneChartData, Masters, CostData
-from datamaps.api import project_data_from_master
-from analysis.data import list_of_masters_all, a303, hs2_programme, rail_franchising, sarh2
+from data_mgmt.data import MilestoneData, MilestoneChartData, Masters, CostData,\
+    list_of_masters_all, hs2_programme, rail_franchising
 import pytest
 import datetime
 
@@ -130,28 +129,28 @@ def mst():
     return Masters(test_masters, project_names)
 
 def test_Masters_get_baseline_data(mst):
-    mst.get_baseline_data('Re-baseline IPDC milestones')
+    mst.baseline_data('Re-baseline IPDC milestones')
     assert isinstance(mst.bl_index, (dict,))
 
 def test_MilestoneData_project_dict_returns_dict(mst, abbreviations):
-    mst.get_baseline_data("Re-baseline IPDC milestones")
+    mst.baseline_data("Re-baseline IPDC milestones")
     m = MilestoneData(mst, abbreviations)
     assert isinstance(m.project_current, (dict,))
 
 def test_MilestoneData_group_dict_returns_dict(mst, abbreviations):
-    mst.get_baseline_data('Re-baseline IPDC milestones')
+    mst.baseline_data('Re-baseline IPDC milestones')
     m = MilestoneData(mst, abbreviations)
     assert isinstance(m.group_current, (dict,))
 
 def test_MilestoneChartData_group_chart_returns_list(mst, abbreviations):
-    mst.get_baseline_data('Re-baseline IPDC milestones')
+    mst.baseline_data('Re-baseline IPDC milestones')
     m = MilestoneData(mst, abbreviations)
     mcd = MilestoneChartData(milestone_data_object=m)
     assert isinstance(mcd.group_current_tds, (list,))
 
 def test_MilestoneChartData_group_chart_filter_in_works(mst, abbreviations):
     assurance = ['Gateway', 'SGAR', 'Red', 'Review']
-    mst.get_baseline_data('Re-baseline IPDC milestones')
+    mst.baseline_data('Re-baseline IPDC milestones')
     m = MilestoneData(mst, abbreviations)
     mcd = MilestoneChartData(m, keys_of_interest=assurance)
     assert any("Gateway" in s for s in mcd.group_keys)
@@ -159,23 +158,19 @@ def test_MilestoneChartData_group_chart_filter_in_works(mst, abbreviations):
     assert any("Red" in s for s in mcd.group_keys)
     assert any("Review" in s for s in mcd.group_keys)
 
+def test_MilestoneChartData_group_chart_filter_out_works(mst, abbreviations):
+    assurance = ['Gateway', 'SGAR', 'Red', 'Review']
+    mst.baseline_data('Re-baseline IPDC milestones')
+    m = MilestoneData(mst, abbreviations)
+    mcd = MilestoneChartData(m, keys_not_of_interest=assurance)
+    assert not any("Gateway" in s for s in mcd.group_keys)
+    assert not any("SGAR" in s for s in mcd.group_keys)
+    assert not any("Red" in s for s in mcd.group_keys)
+    assert not any("Review" in s for s in mcd.group_keys)
 
-
-# def test_MilestoneChartData_group_chart_filter_out_works(abbreviations):
-#     mst = Masters(list_of_masters_all[1:], list_of_masters_all[1].projects)
-#     assurance = ['Gateway', 'SGAR', 'Red', 'Review']
-#     m = MilestoneData(mst, abbreviations)
-#     mcd = MilestoneChartData(milestone_data_object=m,
-#                              keys_of_interest=None,
-#                              keys_not_of_interest=assurance,
-#                              filter_start_date=start_date,
-#                              filter_end_date=end_date)
-#     assert 'Gateway' not in mcd.group_keys
-#     assert 'SGAR' not in mcd.group_keys
-
-def test_CostData_get_financial_totals_returning_totals(mst):
-    mst = Masters(test_masters, project_names)
-    mst.get_baseline_data('Re-baseline IPDC cost')
+def test_CostData_cost_total_spent_returns_list(mst):
+    mst.baseline_data('Re-baseline IPDC cost')
     c = CostData(mst)
-    assert isinstance(c.last, (list,))
+    c.cost_totals(project_names)
+    assert isinstance(c.spent, (list,))
 
