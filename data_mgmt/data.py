@@ -53,9 +53,10 @@ list_of_masters_all = [q1_2021,
                        q4_1617,
                        q3_1617]
 
-'''dates for functions. python date format is Year, Month, day'''
+#ipdc date as referred to in analysis. Python date format is Year, Month, day
 ipdc_date = datetime.date(2020, 8, 10)
 
+#abbreviations. Used in analysis instead of full projects names
 abbreviations = {'2nd Generation UK Search and Rescue Aviation': 'SARH2',
                  'A12 Chelmsford to A120 widening': 'A12',
                  'A14 Cambridge to Huntingdon Improvement Scheme': 'A14',
@@ -93,14 +94,15 @@ abbreviations = {'2nd Generation UK Search and Rescue Aviation': 'SARH2',
                  'Transpennine Route Upgrade (TRU)': 'TRU',
                  'Western Rail Link to Heathrow': 'WRLtH'}
 
-'''specific project names. Useful to have them captured here so don't have to keep cutting and pasting string 
-name from excel master'''
+#project names as variables
 a12 = 'A12 Chelmsford to A120 widening'
 a14 = 'A14 Cambridge to Huntingdon Improvement Scheme'
 a303 = 'A303 Amesbury to Berwick Down'
+a385 = 'A358 Taunton to Southfields Dualling'
 a417 = 'A417 Air Balloon'
 a428 = 'A428 Black Cat to Caxton Gibbet'
 a66 = 'A66 Full Scheme'
+brighton_ml = 'Brighton Mainline Upgrade Upgrade Programme (BMUP)'
 cvs = 'Commercial Vehicle Services (CVS)'
 east_coast_digital = 'East Coast Digital Programme'
 east_coast_mainline = 'East Coast Mainline Programme'
@@ -135,6 +137,22 @@ thameslink = 'Thameslink Programme'
 tru = 'Transpennine Route Upgrade (TRU)'
 wrlth = 'Western Rail Link to Heathrow'
 
+#groups of projects
+rpe = [lower_thames_crossing,
+       a303,
+       a14,
+       a66,
+       a12,
+       m4,
+       a428,
+       a417,
+       a385,
+       ftts,
+       ist,
+       manchester_north_west_quad,
+       ox_cam_expressway]
+
+
 
 class Masters:
 
@@ -146,7 +164,7 @@ class Masters:
         self.bl_index = {}
         #self.get_baseline_data()
 
-    def get_baseline_data(self, meta_baseline):
+    def baseline_data(self, meta_baseline):
         self.meta_baseline = meta_baseline
         # self.bl_info = {}
         # self.bl_index = {}
@@ -639,40 +657,18 @@ class MilestoneCharts:
 class CostData:
     def __init__(self, masters_object):
         self.masters = masters_object
-        # self.pre_pro_rdel_list = []
-        # self.pre_pro_cdel_list = []
-        # self.pro_rdel_list = []
-        # self.pro_cdel_list = []
-        # self.unpro_rdel_list = []
-        # self.unpro_cdel_list = []
         self.cat_spent = []
         self.cat_profile = []
         self.cat_unprofiled = []
         self.spent = []
         self.profile = []
         self.unprofile = []
-        self.get_financial_totals()
+        #self.get_financial_totals()
 
-    def get_financial_totals(self):
-        '''gets financial data to place into the bar chart element in the financial analysis graphs'''
-        # key_list = [('Pre-profile RDEL',
-        #              'Pre-profile CDEL'),
-        #             ('Total RDEL Forecast Total',
-        #              'Total CDEL Forecast Total WLC'),
-        #             ('Unprofiled RDEL Forecast Total',
-        #              'Unprofiled CDEL Forecast Total WLC')]
-
-        pre_pro_rdel_list = []
-        pre_pro_cdel_list = []
-        pro_rdel_list = []
-        pro_cdel_list = []
-        unpro_rdel_list = []
-        unpro_cdel_list = []
-
-        # index_1 = self.masters.bl_index[name]
-        # index_2 = index_1[0:3]
-        # index_2.reverse() # think this was reversed as matplotlib chart builds from baseline up
-
+    def cost_totals(self, project_names):
+        """when given list of project names returns cost data lists
+        for placement in matplotlib charts"""
+        self.p_names = project_names# calling p_names to distinguish from Master class
         spent = []
         profile = []
         unprofile = []
@@ -687,7 +683,7 @@ class CostData:
             pro_cdel_list = []
             unpro_rdel_list = []
             unpro_cdel_list = []
-            for name in self.masters.project_names:
+            for name in self.p_names:
                 try:
                     pre_pro_rdel = self.masters.master_data[self.masters.bl_index[name][i]].data[name]['Pre-profile RDEL']
                     pre_pro_cdel = self.masters.master_data[self.masters.bl_index[name][i]].data[name]['Pre-profile CDEL']
@@ -731,7 +727,11 @@ class CostData:
             total_pre_pro = sum(pre_pro_rdel_list) + sum(pre_pro_cdel_list)
             total_unpro = sum(unpro_rdel_list) + sum(unpro_cdel_list)
             total_pro = (sum(pro_rdel_list) + sum(pro_cdel_list)) - (total_pre_pro + total_unpro)
+            spent.append(total_pre_pro)
+            profile.append(total_pro)
+            unprofile.append(total_unpro)
 
+            #leaving this hashed out code for now in case of use in future
             # spent = []
             # profile = []
             # unprofile = []
@@ -741,9 +741,6 @@ class CostData:
             #     self.profile = [total_pre_pro, total_pro, total_unpro]
             # if i == 2:
             #     self.unprofile = [total_pre_pro, total_pro, total_unpro]
-            spent.append(total_pre_pro)
-            profile.append(total_pro)
-            unprofile.append(total_unpro)
 
         self.cat_spent = cat_spent
         self.cat_profile = cat_profile
@@ -759,3 +756,101 @@ class CostData:
         # self.pro_cdel = pro_cdel_list
         # self.unpro_rdel = unpro_rdel_list
         # self.unpro_cdel = unpro_cdel_list
+
+class BenefitsData:
+    def __init__(self, masters_object):
+        self.masters = masters_object
+        self.achieved = []
+        self.profile = []
+        self.unprofile = []
+        self.cat_achieved = []
+        self.cat_profile = []
+        self.cat_unprofile = []
+
+    def ben_totals(self, project_names):
+        """given a list of project names returns benefit
+        data lists for placement in matplotlib charts
+        """
+        self.p_names  = project_names
+
+        ben_key_list = ['Pre-profile BEN Total',
+                        'Total BEN Forecast - Total Monetised Benefits',
+                        'Unprofiled Remainder BEN Forecast - Total Monetised Benefits']
+
+        ben_type_key_list = [('Pre-profile BEN Forecast Gov Cashable',
+                             'Pre-profile BEN Forecast Gov Non-Cashable',
+                             'Pre-profile BEN Forecast - Economic (inc Private Partner)',
+                             'Pre-profile BEN Forecast - Disbenefit UK Economic'),
+                             ('Unprofiled Remainder BEN Forecast - Gov. Cashable',
+                             'Unprofiled Remainder BEN Forecast - Gov. Non-Cashable',
+                             'Unprofiled Remainder BEN Forecast - Economic (inc Private Partner)',
+                             'Unprofiled Remainder BEN Forecast - Disbenefit UK Economic'),
+                             ('Total BEN Forecast - Gov. Cashable',
+                             'Total BEN Forecast - Gov. Non-Cashable',
+                             'Total BEN Forecast - Economic (inc Private Partner)',
+                             'Total BEN Forecast - Disbenefit UK Economic')]
+
+        achieved = []
+        profile = []
+        unprofile = []
+
+        for i in reversed(range(3)):
+            ben_achieved = []
+            ben_profile = []
+            ben_unprofile = []
+            for y in ben_key_list:
+                for name in self.p_names:
+                    try:
+                        ben = self.masters.master_data[self.masters.bl_index[name][i]].data[name][y]
+                    except TypeError:
+                        ben = 0
+
+                    if y is ben_key_list[0]:
+                        ben_achieved.append(ben)
+                    if y is ben_key_list[1]:
+                        ben_profile.append(ben)
+                    if y is ben_key_list[2]:
+                        ben_unprofile.append(ben)
+
+            achieved.append(sum(ben_achieved))
+            profile.append(sum(ben_profile) - (sum(ben_achieved) + sum(ben_unprofile)))
+            unprofile.append(sum(ben_unprofile))
+
+        # self.achieved = achieved
+        # self.profile = profile
+        # self.unprofile = unprofile
+
+        cat_achieved = []
+        cat_profile = []
+        cat_unprofile = []
+
+        for x in range(4):
+            ben_cat_achieved = []
+            ben_cat_profile = []
+            ben_cat_unprofile = []
+            for y in ben_type_key_list:
+                for name in self.p_names:
+
+                    ben = self.masters.master_data[0].data[name][y[x]]
+                    if ben is None:
+                        ben = 0
+
+                    if y is ben_type_key_list[0]:
+                        ben_cat_achieved.append(ben)
+                    if y is ben_type_key_list[1]:
+                        ben_cat_profile.append(ben)
+                    if y is ben_type_key_list[2]:
+                        ben_cat_unprofile.append(ben)
+
+            cat_achieved.append(sum(ben_cat_achieved))
+            cat_profile.append(sum(ben_cat_profile) - (sum(ben_cat_achieved) + sum(ben_cat_unprofile)))
+            cat_unprofile.append(sum(ben_cat_unprofile))
+
+        self.achieved = achieved
+        self.profile = profile
+        self.unprofile = unprofile
+        self.cat_achieved = cat_achieved
+        self.cat_profile = cat_profile
+        self.cat_unprofile = cat_unprofile
+
+
