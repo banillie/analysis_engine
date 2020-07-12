@@ -1,5 +1,5 @@
 from data_mgmt.data import list_of_masters_all, root_path, Masters, CostData, \
-    BenefitsData, hs2_programme, rail_franchising, rpe, lower_thames_crossing
+    BenefitsData, ProjectGroupName
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import numpy as np
@@ -9,16 +9,14 @@ from textwrap import wrap
 
 test_masters = list_of_masters_all[1:]
 all_projects = list_of_masters_all[1].projects
-all_projects.remove(hs2_programme)
-all_projects.remove(rail_franchising)
+all_projects.remove(ProjectGroupName.hs2_programme)
+all_projects.remove(ProjectGroupName.rail_franchising)
 
-mst = Masters(test_masters, all_projects)
+mst = Masters(test_masters, ProjectGroupName.rpe)
 mst.baseline_data('Re-baseline IPDC cost')
 costs = CostData(mst)
-costs.cost_totals([lower_thames_crossing])
-#mst.baseline_data('Re-baseline IPDC cost')
+mst.baseline_data('Re-baseline IPDC benefits')
 bens = BenefitsData(mst)
-bens.ben_totals([lower_thames_crossing])
 
 
 def cost_charts(costs_obj, bens_obj, graph_title):
@@ -27,9 +25,8 @@ def cost_charts(costs_obj, bens_obj, graph_title):
 
     #fig.suptitle(abbreviations[project_name] + ' costs and benefits analysis', fontweight='bold') # title
 
-    #Spent, Profiled and Unprofile chart
+    #Cost changes over time bar chart
     labels = ['Baseline', 'Last Quarter', 'Current']
-        #['Current', 'Last quarter', 'Baseline']
     width = 0.5
     #matplotlib requires lists to numpy arrays
     ax1.bar(labels, np.array(costs_obj.spent), width, label='Spent')
@@ -45,16 +42,12 @@ def cost_charts(costs_obj, bens_obj, graph_title):
     ax1.tick_params(axis='y', which='major', labelsize=6)
     ax1.set_title('Fig 1 - total costs change over time', loc='left', fontsize=8, fontweight='bold')
 
-    #scaling y axis
-    #y axis value setting so it takes either highest ben or cost figure
-    cost_max = max(costs_obj.profile)*3 #+ max(costs_obj.profile)/2
-    #ben_max = max(total_ben) + max(total_ben)/5
-    y_max = cost_max
-    #y_max = max([cost_max, ben_max])
+    #scaling y axis. y axis value setting so it takes either highest ben or cost figure
+    max_value = max(costs_obj.total)
+    y_max = max_value + max_value / 5
     ax1.set_ylim(0, y_max)
 
-    #rdel/cdel bar chart
-
+    #cost types/categories bar chart
     labels = ['RDEL', 'CDEL']
     width = 0.5
     ax3.bar(labels, np.array(costs_obj.cat_spent), width, label='Spent')
@@ -69,11 +62,9 @@ def cost_charts(costs_obj, bens_obj, graph_title):
     ax3.tick_params(axis='x', which='major', labelsize=6)
     ax3.tick_params(axis='y', which='major', labelsize=6)
     ax3.set_title('Fig 2 - current costs category break down', loc='left', fontsize=8, fontweight='bold')
-
-    #y_max = max(total_fin) + max(total_fin) * 1 / 5
     ax3.set_ylim(0, y_max) #scale y axis max
-    #
-    # benefits change
+
+    # benefits change over time bar chart
     labels = ['Baseline', 'Last Quarter', 'Latest']
     width = 0.5
     ax2.bar(labels, np.array(bens_obj.achieved), width, label='Delivered')
@@ -92,7 +83,7 @@ def cost_charts(costs_obj, bens_obj, graph_title):
     ax2.set_ylim(0, y_max)
 
 
-    # benefits break down
+    # benefits type/category bar chart
     labels = ['Cashable', 'Non-Cashable', 'Economic', 'Disbenefit']
     width = 0.5
     ax4.bar(labels, np.array(bens_obj.cat_achieved), width, label='Delivered')
@@ -108,7 +99,7 @@ def cost_charts(costs_obj, bens_obj, graph_title):
     ax4.tick_params(axis='y', which='major', labelsize=6)
     ax4.set_title('Fig 4 - benefits profile type', loc='left', fontsize=8, fontweight='bold')
 
-    y_min = min(-100000)
+    y_min = min(bens_obj.disbenefit)
     ax4.set_ylim(y_min, y_max)
 
     # size of chart and fit
