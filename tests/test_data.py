@@ -67,7 +67,7 @@ shorter and easier to read. You also do not need warnings.).
 Go and write some more tests!
 """
 from data_mgmt.data import MilestoneData, MilestoneChartData, Masters, CostData,\
-    list_of_masters_all, hs2_programme, rail_franchising
+    list_of_masters_all, ProjectGroupName
 import pytest
 import datetime
 
@@ -119,9 +119,8 @@ end_date = datetime.date(2022, 6, 30)
 
 test_masters = list_of_masters_all[1:]
 project_names = list_of_masters_all[1].projects
-project_names.remove(hs2_programme)
-project_names.remove(rail_franchising)
-#project_names.remove(sarh2)
+project_names.remove(ProjectGroupName.hs2_programme)
+project_names.remove(ProjectGroupName.rail_franchising)
 
 
 @pytest.fixture
@@ -168,9 +167,14 @@ def test_MilestoneChartData_group_chart_filter_out_works(mst, abbreviations):
     assert not any("Red" in s for s in mcd.group_keys)
     assert not any("Review" in s for s in mcd.group_keys)
 
-def test_CostData_cost_total_spent_returns_list(mst):
+def test_CostData_cost_total_spent_returns_lists(mst):
     mst.baseline_data('Re-baseline IPDC cost')
     c = CostData(mst)
-    c.cost_totals(project_names)
     assert isinstance(c.spent, (list,))
+    assert isinstance(c.cat_spent, (list,))
 
+def test_ProjectsGroupName_returns_a12():
+    assert ProjectGroupName.a12 == 'A12 Chelmsford to A120 widening'
+
+def test_ProjectGroupName_returns_rpe_as_list():
+    assert isinstance(ProjectGroupName.rpe, (list,))

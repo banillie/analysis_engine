@@ -94,80 +94,74 @@ abbreviations = {'2nd Generation UK Search and Rescue Aviation': 'SARH2',
                  'Transpennine Route Upgrade (TRU)': 'TRU',
                  'Western Rail Link to Heathrow': 'WRLtH'}
 
-#project names as variables
-a12 = 'A12 Chelmsford to A120 widening'
-a14 = 'A14 Cambridge to Huntingdon Improvement Scheme'
-a303 = 'A303 Amesbury to Berwick Down'
-a385 = 'A358 Taunton to Southfields Dualling'
-a417 = 'A417 Air Balloon'
-a428 = 'A428 Black Cat to Caxton Gibbet'
-a66 = 'A66 Full Scheme'
-brighton_ml = 'Brighton Mainline Upgrade Upgrade Programme (BMUP)'
-cvs = 'Commercial Vehicle Services (CVS)'
-east_coast_digital = 'East Coast Digital Programme'
-east_coast_mainline = 'East Coast Mainline Programme'
-em_franchise = 'East Midlands Franchise'
-ewr_central = 'East West Rail Programme (Central Section)'
-ewr_western = 'East West Rail Programme (Western Section)'
-ftts = 'Future Theory Test Service (FTTS)'
-heathrow_expansion = 'Heathrow Expansion'
-hexagon = 'Hexagon'
-hs2_programme = 'High Speed Rail Programme (HS2)'
-hs2_2b = 'HS2 Phase 2b'
-hs2_1 = 'HS2 Phase1'
-hs2_2a = 'HS2 Phase2a'
-ist = 'Integrated and Smart Ticketing - creating an account based back office'
-lower_thames_crossing = 'Lower Thames Crossing'
-m4 = 'M4 Junctions 3 to 12 Smart Motorway'
-manchester_north_west_quad = 'Manchester North West Quadrant'
-midland_mainline = 'Midland Main Line Programme'
-midlands_rail_hub = 'Midlands Rail Hub'
-north_of_england = 'North of England Programme'
-northern_powerhouse = 'Northern Powerhouse Rail'
-nwe = 'North Western Electrification'
-ox_cam_expressway = 'Oxford-Cambridge Expressway'
-rail_franchising = 'Rail Franchising Programme'
-west_coast_partnership = 'West Coast Partnership Franchise'
-crossrail = 'Crossrail Programme'
-gwrm = 'Great Western Route Modernisation (GWRM) including electrification'
-iep = 'Intercity Express Programme'
-sarh2 = '2nd Generation UK Search and Rescue Aviation'
-south_west_route_capacity = 'South West Route Capacity'
-thameslink = 'Thameslink Programme'
-tru = 'Transpennine Route Upgrade (TRU)'
-wrlth = 'Western Rail Link to Heathrow'
+class ProjectGroupName:
+    # project names as variables
+    a12 = 'A12 Chelmsford to A120 widening'
+    a14 = 'A14 Cambridge to Huntingdon Improvement Scheme'
+    a303 = 'A303 Amesbury to Berwick Down'
+    a385 = 'A358 Taunton to Southfields Dualling'
+    a417 = 'A417 Air Balloon'
+    a428 = 'A428 Black Cat to Caxton Gibbet'
+    a66 = 'A66 Full Scheme'
+    brighton_ml = 'Brighton Mainline Upgrade Upgrade Programme (BMUP)'
+    cvs = 'Commercial Vehicle Services (CVS)'
+    east_coast_digital = 'East Coast Digital Programme'
+    east_coast_mainline = 'East Coast Mainline Programme'
+    em_franchise = 'East Midlands Franchise'
+    ewr_central = 'East West Rail Programme (Central Section)'
+    ewr_western = 'East West Rail Programme (Western Section)'
+    ftts = 'Future Theory Test Service (FTTS)'
+    heathrow_expansion = 'Heathrow Expansion'
+    hexagon = 'Hexagon'
+    hs2_programme = 'High Speed Rail Programme (HS2)'
+    hs2_2b = 'HS2 Phase 2b'
+    hs2_1 = 'HS2 Phase1'
+    hs2_2a = 'HS2 Phase2a'
+    ist = 'Integrated and Smart Ticketing - creating an account based back office'
+    lower_thames_crossing = 'Lower Thames Crossing'
+    m4 = 'M4 Junctions 3 to 12 Smart Motorway'
+    manchester_north_west_quad = 'Manchester North West Quadrant'
+    midland_mainline = 'Midland Main Line Programme'
+    midlands_rail_hub = 'Midlands Rail Hub'
+    north_of_england = 'North of England Programme'
+    northern_powerhouse = 'Northern Powerhouse Rail'
+    nwe = 'North Western Electrification'
+    ox_cam_expressway = 'Oxford-Cambridge Expressway'
+    rail_franchising = 'Rail Franchising Programme'
+    west_coast_partnership = 'West Coast Partnership Franchise'
+    crossrail = 'Crossrail Programme'
+    gwrm = 'Great Western Route Modernisation (GWRM) including electrification'
+    iep = 'Intercity Express Programme'
+    sarh2 = '2nd Generation UK Search and Rescue Aviation'
+    south_west_route_capacity = 'South West Route Capacity'
+    thameslink = 'Thameslink Programme'
+    tru = 'Transpennine Route Upgrade (TRU)'
+    wrlth = 'Western Rail Link to Heathrow'
 
-#groups of projects
-rpe = [lower_thames_crossing,
-       a303,
-       a14,
-       a66,
-       a12,
-       m4,
-       a428,
-       a417,
-       a385,
-       ftts,
-       ist,
-       manchester_north_west_quad,
-       ox_cam_expressway]
-
-
+    #lists of projects names in groups
+    rpe = [lower_thames_crossing,
+           a303,
+           a14,
+           a66,
+           a12,
+           m4,
+           a428,
+           a417,
+           a385,
+           ftts,
+           ist,
+           manchester_north_west_quad,
+           ox_cam_expressway]
 
 class Masters:
-
     def __init__(self, master_data, project_names):
         self.master_data = master_data
         self.project_names = project_names
-        #self.meta_baseline = meta_baseline
         self.bl_info = {}
         self.bl_index = {}
-        #self.get_baseline_data()
 
     def baseline_data(self, meta_baseline):
         self.meta_baseline = meta_baseline
-        # self.bl_info = {}
-        # self.bl_index = {}
 
         """
         Given a list of project names in project_names returns
@@ -660,15 +654,14 @@ class CostData:
         self.cat_spent = []
         self.cat_profile = []
         self.cat_unprofiled = []
+        self.total = []
         self.spent = []
         self.profile = []
         self.unprofile = []
-        #self.get_financial_totals()
+        self.cost_totals()
 
-    def cost_totals(self, project_names):
-        """when given list of project names returns cost data lists
-        for placement in matplotlib charts"""
-        self.p_names = project_names# calling p_names to distinguish from Master class
+    def cost_totals(self):
+        total = []
         spent = []
         profile = []
         unprofile = []
@@ -683,7 +676,7 @@ class CostData:
             pro_cdel_list = []
             unpro_rdel_list = []
             unpro_cdel_list = []
-            for name in self.p_names:
+            for name in self.masters.project_names:
                 try:
                     pre_pro_rdel = self.masters.master_data[self.masters.bl_index[name][i]].data[name]['Pre-profile RDEL']
                     pre_pro_cdel = self.masters.master_data[self.masters.bl_index[name][i]].data[name]['Pre-profile CDEL']
@@ -727,35 +720,39 @@ class CostData:
             total_pre_pro = sum(pre_pro_rdel_list) + sum(pre_pro_cdel_list)
             total_unpro = sum(unpro_rdel_list) + sum(unpro_cdel_list)
             total_pro = (sum(pro_rdel_list) + sum(pro_cdel_list)) - (total_pre_pro + total_unpro)
+            total.append((sum(pro_rdel_list) + sum(pro_cdel_list)))
             spent.append(total_pre_pro)
             profile.append(total_pro)
             unprofile.append(total_unpro)
 
-            #leaving this hashed out code for now in case of use in future
-            # spent = []
-            # profile = []
-            # unprofile = []
-            # if i == 0:
-            #     self.spent = [total_pre_pro, total_pro, total_unpro]
-            # if i == 1:
-            #     self.profile = [total_pre_pro, total_pro, total_unpro]
-            # if i == 2:
-            #     self.unprofile = [total_pre_pro, total_pro, total_unpro]
-
         self.cat_spent = cat_spent
         self.cat_profile = cat_profile
         self.cat_unprofiled = cat_unprofiled
-
+        self.total = total
         self.spent = spent
         self.profile = profile
         self.unprofile = unprofile
 
-        # self.pre_pro_rdel = pre_pro_rdel_listq
-        # self.pre_pro_cdel = pre_pro_cdel_list
-        # self.pro_rdel = pro_rdel_list
-        # self.pro_cdel = pro_cdel_list
-        # self.unpro_rdel = unpro_rdel_list
-        # self.unpro_cdel = unpro_cdel_list
+    # def profile(self):
+    #     year_list = ['19-20',
+    #                  '20-21',
+    #                  '21-22',
+    #                  '22-23',
+    #                  '23-24',
+    #                  '24-25',
+    #                  '25-26',
+    #                  '26-27',
+    #                  '27-28',
+    #                  '28-29']
+    #     latest = []
+    #     last = []
+    #     baseline = []
+    #     for year in year_list:
+    #         baseline.append(baseline_1_cost_profiles[project_name][year + cost_type])
+    #         last.append(last_cost_profiles[project_name][year + cost_type])
+    #         latest.append(latest_cost_profiles[project_name][year + cost_type])
+    #
+    #     return latest, last, baseline
 
 class BenefitsData:
     def __init__(self, masters_object):
@@ -766,12 +763,13 @@ class BenefitsData:
         self.cat_achieved = []
         self.cat_profile = []
         self.cat_unprofile = []
+        self.disbenefit = []
+        self.ben_totals()
 
-    def ben_totals(self, project_names):
+    def ben_totals(self):
         """given a list of project names returns benefit
         data lists for placement in matplotlib charts
         """
-        self.p_names  = project_names
 
         ben_key_list = ['Pre-profile BEN Total',
                         'Total BEN Forecast - Total Monetised Benefits',
@@ -799,7 +797,7 @@ class BenefitsData:
             ben_profile = []
             ben_unprofile = []
             for y in ben_key_list:
-                for name in self.p_names:
+                for name in self.masters.project_names:
                     try:
                         ben = self.masters.master_data[self.masters.bl_index[name][i]].data[name][y]
                     except TypeError:
@@ -812,24 +810,22 @@ class BenefitsData:
                     if y is ben_key_list[2]:
                         ben_unprofile.append(ben)
 
+
             achieved.append(sum(ben_achieved))
             profile.append(sum(ben_profile) - (sum(ben_achieved) + sum(ben_unprofile)))
             unprofile.append(sum(ben_unprofile))
 
-        # self.achieved = achieved
-        # self.profile = profile
-        # self.unprofile = unprofile
-
         cat_achieved = []
         cat_profile = []
         cat_unprofile = []
+        disbenefit  = []
 
         for x in range(4):
             ben_cat_achieved = []
             ben_cat_profile = []
             ben_cat_unprofile = []
             for y in ben_type_key_list:
-                for name in self.p_names:
+                for name in self.masters.project_names:
 
                     ben = self.masters.master_data[0].data[name][y[x]]
                     if ben is None:
@@ -842,9 +838,14 @@ class BenefitsData:
                     if y is ben_type_key_list[2]:
                         ben_cat_unprofile.append(ben)
 
+                    if 'Disbenefit' in y[x]:
+                        disbenefit.append(ben)
+
+
             cat_achieved.append(sum(ben_cat_achieved))
             cat_profile.append(sum(ben_cat_profile) - (sum(ben_cat_achieved) + sum(ben_cat_unprofile)))
             cat_unprofile.append(sum(ben_cat_unprofile))
+            disbenefit.append(sum(disbenefit))
 
         self.achieved = achieved
         self.profile = profile
@@ -852,5 +853,6 @@ class BenefitsData:
         self.cat_achieved = cat_achieved
         self.cat_profile = cat_profile
         self.cat_unprofile = cat_unprofile
+        self.disbenefit = disbenefit
 
 
