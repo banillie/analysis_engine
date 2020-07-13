@@ -176,12 +176,12 @@ def set_col_widths(t, widths):
         for idx, width in enumerate(widths):
             row.cells[idx].width = width
 
-def produce_word_doc():
+def produce_word_doc(projects):
     '''Function that compiles each summary sheet'''
 
     masters = list_of_masters_all[0:4]
 
-    for project_name in masters[0].projects:
+    for project_name in projects:
         doc = Document(root_path/'input/summary_temp.docx')
         print(project_name)
 
@@ -1278,4 +1278,4 @@ def milestone_schedule_data(latest_m_dict, last_m_dict, baseline_m_dict, project
 
 '''enter into the printing function the quarter details for the output files e.g. _q4_1920 (note put underscore at
 front)'''
-produce_word_doc()
+produce_word_doc(list_of_masters_all[0].projects)
