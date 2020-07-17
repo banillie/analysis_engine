@@ -152,6 +152,25 @@ class ProjectGroupName:
            ist,
            manchester_north_west_quad,
            ox_cam_expressway]
+    fbc_stage = [hs2_1,
+           crossrail,
+           east_coast_mainline,
+           iep,
+           thameslink,
+           south_west_route_capacity,
+           hexagon,
+           gwrm,
+           nwe,
+           midland_mainline,
+           m4,
+           a14]
+
+class CheckingBLs:
+    ipdc_ap = 'IPDC approval point'
+    ipdc_m_bl = 'Re-baseline IPDC milestones'
+    ipdc_c_bl = 'Re-baseline IPDC cost'
+    ipdc_b_bl = 'Re-baseline IPDC benefits'
+    check_bls = [ipdc_ap, ipdc_m_bl, ipdc_c_bl, ipdc_b_bl]
 
 class Masters:
     def __init__(self, master_data, project_names):
@@ -658,7 +677,11 @@ class CostData:
         self.spent = []
         self.profile = []
         self.unprofile = []
+        self.current_profile = []
+        self.last_profile = []
+        self.baseline_profile = []
         self.cost_totals()
+        self.get_profile()
 
     def cost_totals(self):
         total = []
@@ -733,30 +756,57 @@ class CostData:
         self.profile = profile
         self.unprofile = unprofile
 
-    # def profile(self):
-    #     year_list = ['19-20',
-    #                  '20-21',
-    #                  '21-22',
-    #                  '22-23',
-    #                  '23-24',
-    #                  '24-25',
-    #                  '25-26',
-    #                  '26-27',
-    #                  '27-28',
-    #                  '28-29']
-    #     latest = []
-    #     last = []
-    #     baseline = []
-    #     for year in year_list:
-    #         baseline.append(baseline_1_cost_profiles[project_name][year + cost_type])
-    #         last.append(last_cost_profiles[project_name][year + cost_type])
-    #         latest.append(latest_cost_profiles[project_name][year + cost_type])
-    #
-    #     return latest, last, baseline
+    def get_profile(self):
+        year_list = ['19-20',
+                     '20-21',
+                     '21-22',
+                     '22-23',
+                     '23-24',
+                     '24-25',
+                     '25-26',
+                     '26-27',
+                     '27-28',
+                     '28-29']
+
+        cost_list = [' RDEL Forecast Total',
+                     ' CDEL Forecast Total',
+                     ' Forecast Non-Gov']
+
+        current_profile = []
+        last_profile = []
+        baseline_profile = []
+        for i in range(3):
+            profile = []
+            for year in year_list:
+                a_list = []
+                for cost_type in cost_list:
+                    data = []
+                    for name in self.masters.project_names:
+                        try:
+                            cost = self.masters.master_data[self.masters.bl_index[name][i]].data[name][year + cost_type]
+                            if cost is None:
+                                cost = 0
+                        except (KeyError, TypeError): #to handle baselines
+                            cost = 0
+                        data.append(cost)
+                    a_list.append(sum(data))
+                profile.append(sum(a_list))
+
+            if i == 0:
+                current_profile = profile
+            if i == 1:
+                last_profile = profile
+            if i == 2:
+                baseline_profile = profile
+
+        self.current_profile = current_profile
+        self.last_profile = last_profile
+        self.baseline_profile = baseline_profile
 
 class BenefitsData:
     def __init__(self, masters_object):
         self.masters = masters_object
+        self.total = []
         self.achieved = []
         self.profile = []
         self.unprofile = []
@@ -788,6 +838,7 @@ class BenefitsData:
                              'Total BEN Forecast - Economic (inc Private Partner)',
                              'Total BEN Forecast - Disbenefit UK Economic')]
 
+        total = []
         achieved = []
         profile = []
         unprofile = []
@@ -810,10 +861,10 @@ class BenefitsData:
                     if y is ben_key_list[2]:
                         ben_unprofile.append(ben)
 
-
             achieved.append(sum(ben_achieved))
             profile.append(sum(ben_profile) - (sum(ben_achieved) + sum(ben_unprofile)))
             unprofile.append(sum(ben_unprofile))
+            total.append(sum(ben_profile))
 
         cat_achieved = []
         cat_profile = []
@@ -847,6 +898,7 @@ class BenefitsData:
             cat_unprofile.append(sum(ben_cat_unprofile))
             disbenefit.append(sum(disbenefit))
 
+        self.total = total
         self.achieved = achieved
         self.profile = profile
         self.unprofile = unprofile
