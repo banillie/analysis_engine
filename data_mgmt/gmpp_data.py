@@ -15,7 +15,7 @@ IMPORTANT to note:
 '''
 
 from openpyxl import load_workbook
-from analysis.data import q4_1920, root_path
+from analysis.data import q1_2021, root_path
 from analysis.engine_functions import filter_gmpp
 
 
@@ -30,7 +30,7 @@ def create_master(gmpp_wb, master_data):
 
     for i, project_name in enumerate(gmpp_project_names):
         print(project_name)
-        ws.cell(row=1, column=6+i).value = project_name  # place project names in file
+        ws.cell(row=1, column=13+i).value = project_name  # place project names in file
 
         # for loop for placing data into the worksheet
         keys_not_found = []
@@ -38,18 +38,22 @@ def create_master(gmpp_wb, master_data):
             key = ws.cell(row=row_num, column=1).value
             # this loop places all latest raw data into the worksheet
             if key in master_data.data[project_name].keys():
-                ws.cell(row=row_num, column=6+i).value = master_data.data[project_name][key]
+                ws.cell(row=row_num, column=13+i).value = master_data.data[project_name][key]
             elif key not in master_data.data[project_name].keys():
-                keys_not_found.append(key)
+                if key is not None:
+                    keys_not_found.append(key)
 
                 # this section of the code ensures that all financial costs / benefit forecasts have a zero
                 for cost_type in zero_list:
-                    if cost_type in key:
-                        try:
-                            if master_data.data[project_name][key] is None:
-                                ws.cell(row=row_num, column=6 + i).value = 0
-                        except KeyError:
-                            keys_not_found.append(key)
+                    try:
+                        if cost_type in key:
+                            try:
+                                if master_data.data[project_name][key] is None:
+                                    ws.cell(row=row_num, column=13 + i).value = 0
+                            except KeyError:
+                                keys_not_found.append(key)
+                    except TypeError:
+                        pass
 
         # This is where loop to amend Hs2 data could be placed
 
@@ -57,8 +61,8 @@ def create_master(gmpp_wb, master_data):
 
     return gmpp_wb
 
-master_dm = load_workbook(root_path/'input/gmpp_master_dm.xlsx')
+master_dm = load_workbook(root_path/'input/new_gmpp_oscar_II_datamap IPA 2021-Q1.xlsx')
 
-run = create_master(master_dm, q4_1920)
+run = create_master(master_dm, q1_2021)
 
-run.save(root_path/'output/dft_gmpp_dataset_q4_1920.xlsx')
+run.save(root_path/'output/dft_gmpp_dataset_q1_1920.xlsx')
