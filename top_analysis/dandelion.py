@@ -8,7 +8,6 @@ Note: all master data is taken from the data file. Make sure this is up to date 
 the import statement.
 """
 
-import math
 from openpyxl import Workbook
 from analysis.data import list_of_masters_all, root_path, abbreviations
 
@@ -41,10 +40,12 @@ def dandelion_data():
             string_append = str(total)
         ws.cell(row=2 + i, column=2).value = abbreviations[project_name] + ', £' + string_append
         ws.cell(row=2 + i, column=3).value = total
+        ws.cell(row=2 + i, column=4).value = list_of_masters_all[0].data[project_name]['Departmental DCA']
 
     ws.cell(row=1, column=1).value = 'Group'
     ws.cell(row=1, column=2).value = 'Project details'
     ws.cell(row=1, column=3).value = 'WLC (forecast)'
+    ws.cell(row=1, column=4).value = 'DCA'
 
     return wb
 
