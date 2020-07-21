@@ -24,8 +24,8 @@ from openpyxl import load_workbook
 from openpyxl.styles import PatternFill, Font
 from openpyxl.styles.differential import DifferentialStyle
 from openpyxl.formatting.rule import Rule
-from analysis.data import financial_analysis_masters_list, fin_bc_index, \
-    list_of_masters_all, bc_index, root_path, ipdc_date
+from analysis.data import list_of_masters_all, root_path, ipdc_date, milestone_bl_index, \
+    costs_bl_index, benefits_bl_index, bc_index
 from analysis.engine_functions import all_milestone_data_bulk, convert_rag_text, convert_bc_stage_text, \
     project_time_difference, ap_p_milestone_data_bulk, concatenate_dates, highlight_close_dates_ipdc
 
@@ -54,20 +54,20 @@ def financial_info(wb):
         project_name = ws.cell(row=row_num, column=3).value
         if project_name in list_of_masters_all[0].projects:
             '''BC Stage'''
-            bc_stage = financial_analysis_masters_list[0].data[project_name]['IPDC approval point']
+            bc_stage = list_of_masters_all[0].data[project_name]['IPDC approval point']
             ws.cell(row=row_num, column=4).value = convert_bc_stage_text(bc_stage)
             try:
-                bc_stage_lst_qrt = financial_analysis_masters_list[1].data[project_name]['IPDC approval point']
+                bc_stage_lst_qrt = list_of_masters_all[0].data[project_name]['IPDC approval point']
                 if bc_stage != bc_stage_lst_qrt:
                     ws.cell(row=row_num, column=4).font = Font(name='Arial', size=10, color='00fc2525')
             except KeyError:
                 pass
 
             '''planning stage'''
-            plan_stage = financial_analysis_masters_list[0].data[project_name]['Project stage']
+            plan_stage = list_of_masters_all[0].data[project_name]['Project stage']
             ws.cell(row=row_num, column=5).value = plan_stage
             try:
-                plan_stage_lst_qrt = financial_analysis_masters_list[1].data[project_name]['Project stage']
+                plan_stage_lst_qrt = list_of_masters_all[1].data[project_name]['Project stage']
                 if plan_stage != plan_stage_lst_qrt:
                     ws.cell(row=row_num, column=5).font = Font(name='Arial', size=10, color='00fc2525')
             except KeyError:
@@ -75,11 +75,11 @@ def financial_info(wb):
 
 
             '''Total WLC'''
-            wlc_now = financial_analysis_masters_list[0].data[project_name]['Total Forecast']
+            wlc_now = list_of_masters_all[0].data[project_name]['Total Forecast']
             ws.cell(row=row_num, column=6).value = wlc_now
             '''WLC variance against lst quarter'''
             try:
-                wlc_lst_quarter = financial_analysis_masters_list[1].data[project_name]['Total Forecast']
+                wlc_lst_quarter = list_of_masters_all[1].data[project_name]['Total Forecast']
                 diff_lst_qrt = wlc_now - wlc_lst_quarter
                 if float(diff_lst_qrt) > 0.49 or float(diff_lst_qrt) < -0.49:
                     ws.cell(row=row_num, column=7).value = diff_lst_qrt
@@ -97,7 +97,7 @@ def financial_info(wb):
                 ws.cell(row=row_num, column=7).value = '-'
 
             '''WLC variance against baseline quarter'''
-            wlc_baseline = financial_analysis_masters_list[fin_bc_index[project_name][2]].data[project_name]['Total Forecast']
+            wlc_baseline = list_of_masters_all[costs_bl_index[project_name][2]].data[project_name]['Total Forecast']
             #print(str(project_name) + '' + str(wlc_baseline))
             try:
                 diff_bl = wlc_now - wlc_baseline
@@ -122,36 +122,36 @@ def financial_info(wb):
 
             '''Contigency'''
             ws.cell(row=row_num, column=13).value = \
-                financial_analysis_masters_list[0].data[project_name]['Overall contingency (£m)']
+                list_of_masters_all[0].data[project_name]['Overall contingency (£m)']
 
             '''OB'''
             ws.cell(row=row_num, column=14).value = \
-                financial_analysis_masters_list[0].data[project_name]['Overall figure for Optimism Bias (£m)']
+                list_of_masters_all[0].data[project_name]['Overall figure for Optimism Bias (£m)']
 
             '''financial DCA rating - this quarter'''
-            ws.cell(row=row_num, column=15).value = convert_rag_text(financial_analysis_masters_list[0].data
+            ws.cell(row=row_num, column=15).value = convert_rag_text(list_of_masters_all[0].data
                                                                      [project_name]['SRO Finance confidence'])
             '''financial DCA rating - last qrt'''
             try:
-                ws.cell(row=row_num, column=16).value = convert_rag_text(financial_analysis_masters_list[1].data
+                ws.cell(row=row_num, column=16).value = convert_rag_text(list_of_masters_all[1].data
                                                                      [project_name]['SRO Finance confidence'])
             except KeyError:
                 ws.cell(row=row_num, column=16).value = ''
             '''financial DCA rating - 2 qrts ago'''
             try:
-                ws.cell(row=row_num, column=17).value = convert_rag_text(financial_analysis_masters_list[2].data
+                ws.cell(row=row_num, column=17).value = convert_rag_text(list_of_masters_all[2].data
                                                                      [project_name]['SRO Finance confidence'])
             except KeyError:
                 ws.cell(row=row_num, column=17).value = ''
             '''financial DCA rating - 3 qrts ago'''
             try:
-                ws.cell(row=row_num, column=18).value = convert_rag_text(financial_analysis_masters_list[3].data
+                ws.cell(row=row_num, column=18).value = convert_rag_text(list_of_masters_all[3].data
                                                                      [project_name]['SRO Finance confidence'])
             except KeyError:
                 ws.cell(row=row_num, column=18).value = ''
             '''financial DCA rating - baseline'''
             ws.cell(row=row_num, column=19).value = \
-                convert_rag_text(financial_analysis_masters_list[fin_bc_index[project_name][2]].data[project_name]
+                convert_rag_text(list_of_masters_all[costs_bl_index[project_name][2]].data[project_name]
                                  ['SRO Finance confidence'])
 
     '''list of columns with conditional formatting'''
@@ -183,7 +183,7 @@ def schedule_info(wb):
     for row_num in range(2, ws.max_row + 1):
         project_name = ws.cell(row=row_num, column=3).value
         if project_name in list_of_masters_all[0].projects:
-            '''BICC approval point'''
+            '''IPDC approval point'''
             bc_stage = list_of_masters_all[0].data[project_name]['IPDC approval point']
             ws.cell(row=row_num, column=4).value = convert_bc_stage_text(bc_stage)
             try:
@@ -192,7 +192,7 @@ def schedule_info(wb):
                     ws.cell(row=row_num, column=4).font = Font(name='Arial', size=10, color='00fc2525')
             except KeyError:
                 pass
-            '''Next stage'''
+            '''stage'''
             plan_stage = list_of_masters_all[0].data[project_name]['Project stage']
             ws.cell(row=row_num, column=5).value = plan_stage
             try:
@@ -208,7 +208,7 @@ def schedule_info(wb):
                 date = tuple(current_milestones_ap_p[project_name][key])[0]
                 if date is None:
                     pass
-                elif date > bicc_date:
+                elif date > ipdc_date:
                         local_milestone_dates.append((date, x))
 
             if len(local_milestone_dates) != 0: # checks if list is empty
@@ -241,7 +241,7 @@ def schedule_info(wb):
             try:
                 current_soc = tuple(current_milestones_all[project_name]['Start of Construction/build'])[0]
                 ws.cell(row=row_num, column=10).value = current_soc
-                if current_soc < bicc_date:
+                if current_soc < ipdc_date:
                     ws.cell(row=row_num, column=10).value = 'Completed'
             except (KeyError, TypeError):
                 ws.cell(row=row_num, column=10).value = ''
@@ -266,7 +266,7 @@ def schedule_info(wb):
             try:
                 current_sop = tuple(current_milestones_all[project_name]['Start of Operation'])[0]
                 ws.cell(row=row_num, column=13).value = current_sop
-                if current_sop < bicc_date:
+                if current_sop < ipdc_date:
                     ws.cell(row=row_num, column=13).value = 'Completed'
             except (KeyError, TypeError):
                 ws.cell(row=row_num, column=13).value = ''
@@ -291,7 +291,7 @@ def schedule_info(wb):
             try:
                 foc = tuple(current_milestones_all[project_name]['Full Operations'])[0]
                 ws.cell(row=row_num, column=16).value = foc
-                if foc < bicc_date:
+                if foc < ipdc_date:
                     ws.cell(row=row_num, column=16).value = 'Completed'
                 else:
                     ws.cell(row=row_num, column=16).value = foc
@@ -362,7 +362,7 @@ def schedule_info(wb):
             '''schedule DCA rating - baseline'''
             try:
                 ws.cell(row=row_num, column=26).value = \
-                    convert_rag_text(list_of_masters_all[bc_index[project_name][2]].data[project_name]
+                    convert_rag_text(list_of_masters_all[milestone_bl_index[project_name][2]].data[project_name]
                                      ['SRO Schedule Confidence'])
             except:
                 ws.cell(row=row_num, column=26).value = ''
@@ -421,7 +421,7 @@ def benefits_info(wb):
             '''initial bcr baseline'''
             try:
                 baseline_initial_bcr = \
-                    list_of_masters_all[bc_index[project_name][2]].data[project_name]['Initial Benefits Cost Ratio (BCR)']
+                    list_of_masters_all[benefits_bl_index[project_name][2]].data[project_name]['Initial Benefits Cost Ratio (BCR)']
                 ws.cell(row=row_num, column=7).value = baseline_initial_bcr
                 if initial_bcr != baseline_initial_bcr:
                     if baseline_initial_bcr is None:
@@ -438,7 +438,7 @@ def benefits_info(wb):
             '''adjusted bcr baseline'''
             try:
                 baseline_adjusted_bcr = \
-                    list_of_masters_all[bc_index[project_name][2]].data[project_name]['Adjusted Benefits Cost Ratio (BCR)']
+                    list_of_masters_all[benefits_bl_index[project_name][2]].data[project_name]['Adjusted Benefits Cost Ratio (BCR)']
                 ws.cell(row=row_num, column=9).value = baseline_adjusted_bcr
                 if adjusted_bcr != baseline_adjusted_bcr:
                     if baseline_adjusted_bcr is None:
@@ -460,23 +460,23 @@ def benefits_info(wb):
 
             '''vfm category baseline'''
             try:
-                if list_of_masters_all[bc_index[project_name][2]].data[project_name]['VfM Category single entry'] is None:
-                    vfm_cat_baseline = str(list_of_masters_all[bc_index[project_name][2]].data[project_name][
+                if list_of_masters_all[benefits_bl_index[project_name][2]].data[project_name]['VfM Category single entry'] is None:
+                    vfm_cat_baseline = str(list_of_masters_all[benefits_bl_index[project_name][2]].data[project_name][
                                                'VfM Category lower range']) + ' - ' + \
-                                       str(list_of_masters_all[bc_index[project_name][2]].data[project_name][
+                                       str(list_of_masters_all[benefits_bl_index[project_name][2]].data[project_name][
                                                'VfM Category upper range'])
                     ws.cell(row=row_num, column=11).value = vfm_cat_baseline
                 else:
-                    vfm_cat_baseline = list_of_masters_all[bc_index[project_name[2]]].data[project_name][
+                    vfm_cat_baseline = list_of_masters_all[benefits_bl_index[project_name[2]]].data[project_name][
                         'VfM Category single entry']
                     ws.cell(row=row_num, column=11).value = vfm_cat_baseline
 
             except KeyError:
                 try:
-                    vfm_cat_baseline = list_of_masters_all[bc_index[project_name][2]].data[project_name]['VfM Category single entry']
+                    vfm_cat_baseline = list_of_masters_all[benefits_bl_index[project_name][2]].data[project_name]['VfM Category single entry']
                     ws.cell(row=row_num, column=11).value = vfm_cat_baseline
                 except KeyError:
-                    vfm_cat_baseline = list_of_masters_all[bc_index[project_name][2]].data[project_name]['VfM Category']
+                    vfm_cat_baseline = list_of_masters_all[benefits_bl_index[project_name][2]].data[project_name]['VfM Category']
                     ws.cell(row=row_num, column=11).value = vfm_cat_baseline
 
             if vfm_cat != vfm_cat_baseline:
@@ -490,7 +490,7 @@ def benefits_info(wb):
             tmb = list_of_masters_all[0].data[project_name]['Total BEN Forecast - Total Monetised Benefits']
             ws.cell(row=row_num, column=12).value = tmb
             '''tmb variance'''
-            baseline_tmb = list_of_masters_all[bc_index[project_name][2]].data[project_name]['Total BEN Forecast - Total Monetised Benefits']
+            baseline_tmb = list_of_masters_all[benefits_bl_index[project_name][2]].data[project_name]['Total BEN Forecast - Total Monetised Benefits']
             ws.cell(row=row_num, column=13).value = tmb - baseline_tmb
             try:
                 percentage_change = ((tmb - baseline_tmb) / tmb) * 100
@@ -525,7 +525,7 @@ def benefits_info(wb):
             '''benefits DCA rating - baseline'''
             try:
                 ws.cell(row=row_num, column=20).value = \
-                    convert_rag_text(list_of_masters_all[bc_index[project_name][2]].data[project_name]
+                    convert_rag_text(list_of_masters_all[benefits_bl_index[project_name][2]].data[project_name]
                                      ['SRO Benefits RAG'])
             except:
                 ws.cell(row=row_num, column=20).value = ''
@@ -563,31 +563,31 @@ def overall_info(wb):
         project_name = ws.cell(row=row_num, column=2).value
         if project_name in list_of_masters_all[0].projects:
             '''BC Stage'''
-            bc_stage = financial_analysis_masters_list[0].data[project_name]['IPDC approval point']
+            bc_stage = list_of_masters_all[0].data[project_name]['IPDC approval point']
             ws.cell(row=row_num, column=3).value = convert_bc_stage_text(bc_stage)
             try:
-                bc_stage_lst_qrt = financial_analysis_masters_list[1].data[project_name]['IPDC approval point']
+                bc_stage_lst_qrt = list_of_masters_all[1].data[project_name]['IPDC approval point']
                 if bc_stage != bc_stage_lst_qrt:
                     ws.cell(row=row_num, column=3).font = Font(name='Arial', size=10, color='00fc2525')
             except KeyError:
                 pass
 
             '''planning stage'''
-            plan_stage = financial_analysis_masters_list[0].data[project_name]['Project stage']
+            plan_stage = list_of_masters_all[0].data[project_name]['Project stage']
             ws.cell(row=row_num, column=4).value = plan_stage
             try:
-                plan_stage_lst_qrt = financial_analysis_masters_list[1].data[project_name]['Project stage']
+                plan_stage_lst_qrt = list_of_masters_all[1].data[project_name]['Project stage']
                 if plan_stage != plan_stage_lst_qrt:
                     ws.cell(row=row_num, column=4).font = Font(name='Arial', size=10, color='00fc2525')
             except KeyError:
                 pass
 
             '''Total WLC'''
-            wlc_now = financial_analysis_masters_list[0].data[project_name]['Total Forecast']
+            wlc_now = list_of_masters_all[0].data[project_name]['Total Forecast']
             ws.cell(row=row_num, column=5).value = wlc_now
             '''WLC variance against lst quarter'''
             try:
-                wlc_lst_quarter = financial_analysis_masters_list[1].data[project_name]['Total Forecast']
+                wlc_lst_quarter = list_of_masters_all[1].data[project_name]['Total Forecast']
                 diff_lst_qrt = wlc_now - wlc_lst_quarter
                 if float(diff_lst_qrt) > 0.49 or float(diff_lst_qrt) < -0.49:
                     ws.cell(row=row_num, column=6).value = diff_lst_qrt
@@ -605,7 +605,7 @@ def overall_info(wb):
                 ws.cell(row=row_num, column=6).value = '-'
 
             '''WLC variance against baseline quarter'''
-            wlc_baseline = financial_analysis_masters_list[fin_bc_index[project_name][2]].data[project_name][
+            wlc_baseline = list_of_masters_all[costs_bl_index[project_name][2]].data[project_name][
                 'Total Forecast']
             try:
                 diff_bl = wlc_now - wlc_baseline
@@ -647,11 +647,11 @@ def overall_info(wb):
             except KeyError:
                 # handles projects that have been reporting for latest quarter only
                 try:
-                    vfm_cat_last_quarter = list_of_masters_all[bc_index[project_name][2]].data[project_name][
+                    vfm_cat_last_quarter = list_of_masters_all[costs_bl_index[project_name][2]].data[project_name][
                         'VfM Category single entry']
                 except KeyError:
                     # try:
-                    vfm_cat_last_quarter = list_of_masters_all[bc_index[project_name][2]].data[project_name]['VfM Category']
+                    vfm_cat_last_quarter = list_of_masters_all[costs_bl_index[project_name][2]].data[project_name]['VfM Category']
                     # except:
                     #     vfm_cat_last_quarter = None
 
@@ -663,9 +663,9 @@ def overall_info(wb):
 
             '''full operation current date'''
             try:
-                foc = tuple(current_milestones_all[project_name]['Project End Date'])[0]
+                foc = tuple(current_milestones_all[project_name]['Full Operations'])[0]
                 ws.cell(row=row_num, column=9).value = foc
-                if foc < bicc_date:
+                if foc < ipdc_date:
                     ws.cell(row=row_num, column=9).value = 'Completed'
                 else:
                     ws.cell(row=row_num, column=9).value = foc
@@ -674,7 +674,7 @@ def overall_info(wb):
 
             '''fop against lst quarter'''
             try:
-                foc_lst_qrt_diff = first_diff_data[project_name]['Project End Date']
+                foc_lst_qrt_diff = first_diff_data[project_name]['Full Operations']
                 ws.cell(row=row_num, column=10).value = foc_lst_qrt_diff
                 if foc_lst_qrt_diff > 46:
                     ws.cell(row=row_num, column=10).font = Font(name='Arial', size=10, color='00fc2525')
@@ -682,7 +682,7 @@ def overall_info(wb):
                 ws.cell(row=row_num, column=10).value = ''
             '''fop against baseline'''
             try:
-                foc_bl_diff = second_diff_data[project_name]['Project End Date']
+                foc_bl_diff = second_diff_data[project_name]['Full Operations']
                 ws.cell(row=row_num, column=11).value = foc_bl_diff
                 if foc_bl_diff > 86:
                     ws.cell(row=row_num, column=11).font = Font(name='Arial', size=10, color='00fc2525')
@@ -695,7 +695,7 @@ def overall_info(wb):
                     (concatenate_dates(list_of_masters_all[0].data[project_name]['Last time at BICC']))
                 ws.cell(row=row_num, column=13).value = highlight_close_dates_ipdc\
                     (concatenate_dates(list_of_masters_all[0].data[project_name]['Next at BICC']))
-            except TypeError:
+            except (KeyError, TypeError):
                 print(project_name + ' last at / next at ipdc data could not be calculated. Check data.')
 
 
@@ -797,7 +797,7 @@ for project_name in list_of_masters_all[0].projects:
     current_milestones_data.update(p_current_milestones_data)
     p_last_milestones_data = all_milestone_data_bulk([project_name], list_of_masters_all[1])
     last_milestones_data.update(p_last_milestones_data)
-    p_oldest_milestones_data = all_milestone_data_bulk([project_name], list_of_masters_all[bc_index[project_name][2]])
+    p_oldest_milestones_data = all_milestone_data_bulk([project_name], list_of_masters_all[milestone_bl_index[project_name][2]])
     oldest_milestones_data.update(p_oldest_milestones_data)
 
     '''calculate time current and last quarter'''
@@ -807,8 +807,8 @@ for project_name in list_of_masters_all[0].projects:
 ''' RUNNING THE PROGRAMME '''
 
 '''ONE. Provide file path to dashboard master'''
-dashboard_master = load_workbook(root_path/'input/dashboards_master.xlsx')
+dashboard_master = load_workbook(root_path/'input/dashboards_master_q1_20_21.xlsx')
 
 '''THREE. place arguments into the place_in_excle function and provide file path for saving output wb'''
 dashboard_completed = place_in_excel(dashboard_master)
-dashboard_completed.save(root_path/'output/dashboards_q4_1920.xlsx')
+dashboard_completed.save(root_path/'output/dashboards_q1_2021.xlsx')
