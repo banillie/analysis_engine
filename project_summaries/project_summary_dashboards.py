@@ -792,6 +792,8 @@ def fin_ben_total_charts(doc,
     #y axis value setting so it takes either highest ben or cost figure
     cost_max = max(total_fin) + max(total_fin)/5
     ben_max = max(total_ben) + max(total_ben)/5
+    # print(cost_max)
+    # print(ben_max)
     y_max = max([cost_max, ben_max])
     ax1.set_ylim(0, y_max)
 
