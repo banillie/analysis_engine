@@ -692,9 +692,9 @@ def overall_info(wb):
 
             try:
                 ws.cell(row=row_num, column=12).value = highlight_close_dates_ipdc\
-                    (concatenate_dates(list_of_masters_all[0].data[project_name]['Last time at BICC']))
+                    (concatenate_dates(list_of_masters_all[0].data[project_name]['Last time at BICC'], ipdc_date))
                 ws.cell(row=row_num, column=13).value = highlight_close_dates_ipdc\
-                    (concatenate_dates(list_of_masters_all[0].data[project_name]['Next at BICC']))
+                    (concatenate_dates(list_of_masters_all[0].data[project_name]['Next at BICC'], ipdc_date))
             except (KeyError, TypeError):
                 print(project_name + ' last at / next at ipdc data could not be calculated. Check data.')
 
