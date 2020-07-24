@@ -13,18 +13,19 @@ See instructions below.
 
 from openpyxl import Workbook
 from analysis.data import cost_list, income_list, year_list, latest_cost_profiles, last_cost_profiles, \
-    baseline_1_cost_profiles, baseline_2_cost_profiles, latest_income_profiles, list_of_masters_all, \
-    last_income_profiles, baseline_1_income_profiles, baseline_2_income_profiles, dont_double_count, root_path
+    baseline_1_cost_profiles, latest_income_profiles, list_of_masters_all, \
+    last_income_profiles, baseline_1_income_profiles, dont_double_count, root_path, northern_powerhouse
 from analysis.engine_functions import filter_project_group, calculate_group_project_total
+
+dont_double_count = [northern_powerhouse]
+
 
 def place_in_excel(project_name_list):
     wb = Workbook()
 
-    financial_profile_list = ['Latest Profile', 'Last quarter profile', 'Baseline 1 Profile', 'Baseline 2 Profile']
-    cost_profile_data_list = [latest_cost_profiles, last_cost_profiles, baseline_1_cost_profiles, \
-                              baseline_2_cost_profiles]
-    income_profile_data_list = [latest_income_profiles, last_income_profiles, baseline_1_income_profiles, \
-                                baseline_2_income_profiles]
+    financial_profile_list = ['Latest Profile', 'Last quarter profile', 'Baseline 1 Profile']
+    cost_profile_data_list = [latest_cost_profiles, last_cost_profiles, baseline_1_cost_profiles]
+    income_profile_data_list = [latest_income_profiles, last_income_profiles, baseline_1_income_profiles]
 
     for p, profile in enumerate(financial_profile_list):
         '''worksheet is created for each project'''
@@ -106,4 +107,4 @@ def place_in_excel(project_name_list):
 NOTE: Default option is list of all current projects in portfolio. In majority of cases user should just run the 
 default programme'''
 output = place_in_excel(list_of_masters_all[0].projects)
-output.save(root_path/'output/portfolio_financial_profile_q4_1920.xlsx')
+output.save(root_path/'output/portfolio_financial_profile_q1_2021.xlsx')
