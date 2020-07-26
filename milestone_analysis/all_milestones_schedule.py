@@ -1,6 +1,6 @@
 from analysis.data import list_of_masters_all, abbreviations, ipdc_date, \
     root_path, hsmrpg, iep, hs2_programme, hs2_1, crossrail, east_coast_mainline, iep, \
-    thameslink, south_west_route_capacity, hexagon, gwrm, north_we, midland_mainline, a14, m4
+    thameslink, south_west_route_capacity, hexagon, gwrm, nwe, midland_mainline, a14, m4
 
 from data_mgmt.data import MilestoneData, MilestoneChartData, Masters, MilestoneCharts
 import datetime
@@ -8,8 +8,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from datetime import timedelta
-
-nwe = 'North Western Electrification'
 
 def milestone_swimlane_charts(latest_milestone_names,
                               latest_milestone_dates,
@@ -123,12 +121,12 @@ def build_charts(latest_milestone_names,
     # Chart
     no_milestones = len(latest_milestone_names)
 
-    if no_milestones <= 30:
+    if no_milestones <= 29:
         milestone_swimlane_charts(np.array(final_labels), np.array(latest_milestone_dates),
                                   np.array(last_milestone_dates),
                                   np.array(baseline_milestone_dates), graph_title, ipdc_date)
 
-    if 31 <= no_milestones <= 60:
+    if 30 <= no_milestones <= 60:
         half = int(no_milestones / 2)
         milestone_swimlane_charts(np.array(final_labels[:half]),
                                   np.array(latest_milestone_dates[:half]),
@@ -140,7 +138,7 @@ def build_charts(latest_milestone_names,
                                   np.array(last_milestone_dates[half:no_milestones]),
                                   np.array(baseline_milestone_dates[half:no_milestones]), title, ipdc_date)
 
-    if 61 <= no_milestones <= 90:
+    if 61 <= no_milestones <= 96:
         third = int(no_milestones / 3)
         milestone_swimlane_charts(np.array(final_labels[:third]),
                                   np.array(latest_milestone_dates[:third]),
@@ -166,12 +164,13 @@ def build_charts(latest_milestone_names,
 p_n_list = list_of_masters_all[1].projects
 fbc_list = [hs2_1, crossrail, east_coast_mainline, iep,
             thameslink, south_west_route_capacity, hexagon, gwrm,
-            nwe, midland_mainline, a14, m4]
+            nwe, midland_mainline, m4, a14,]
 # p_n_list.remove(iep)
 # p_n_list.remove(hs2_programme)
 
 #get master data
 mst = Masters(list_of_masters_all[1:], fbc_list)
+mst.baseline_data('Re-baseline IPDC milestones')
 
 # get general milestone data
 m = MilestoneData(mst, abbreviations)
@@ -195,32 +194,20 @@ consultations = ['Consultation', 'consultation', 'Preferred', 'preferred',
 planning = ['DCO', 'dco', 'Planning', 'planning', 'consent', 'Consent',
             'Pre-PIN', 'Pre-OJEU']
 ipdc = ['IPDC', 'BICC']
-assurance = ['Gateway', 'SGAR', 'Red', 'Review',
-             'PAR']
+remove = ['Benefits']
 
 # get filtered milestone chart data
 mcd = MilestoneChartData(milestone_data_object=m,
                          keys_of_interest=None,
-                         keys_not_of_interest=assurance,
+                         keys_not_of_interest=remove,
                          filter_start_date=start_date,
                          filter_end_date=end_date)
 
-#group_chart returns four list
-# key_names = np.array(mcd.group_keys)
-# current_m_data = np.array(mcd.group_current_tds)
-# last_m_data = np.array(mcd.group_last_tds)
-# baseline_m_data = np.array(mcd.group_baseline_tds)
-
-key_names = mcd.group_keys
-current_m_data = mcd.group_current_tds
-last_m_data = mcd.group_last_tds
-baseline_m_data = mcd.group_baseline_tds
-
-build_charts(key_names,
-             current_m_data,
-             last_m_data,
-             baseline_m_data,
-             'Post FBC projects',
+build_charts(mcd.group_keys,
+             mcd.group_current_tds,
+             mcd.group_last_tds,
+             mcd.group_baseline_tds,
+             'Post FBC projects forward look',
              ipdc_date)
 
 #TODO style chart so hides y_axis titles if over a certain number
