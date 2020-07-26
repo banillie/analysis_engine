@@ -2,14 +2,15 @@ from openpyxl import load_workbook
 from analysis.data import list_of_masters_all, root_path, red_text, a14
 
 def get_data(wb):
-    '''Function that takes data from a wb across all ws in use and places them into
-     a python dictionary
-     wb: workbook containing the data
+    '''Function that takes data from a wb across
+    all ws in use and places them into a python
+    dictionary.
+    wb: workbook containing the data
      returns and python dictionary'''
 
     bl_dict = {}
 
-    for name in (list_of_masters_all[0].projects):
+    for name in (list_of_masters_all[1].projects):
         '''worksheet is created for each project'''
         try:
             ws = wb[name[0:29]]  # opening project ws
@@ -68,13 +69,17 @@ def place_in_masters(project_list, master_wb_title_list, baseline_data):
                         if ws.cell(row=row_num, column=1).value == 'Reporting period (GMPP - Snapshot Date)':
                             quarter = ws.cell(row=row_num, column=col_num).value
                             project_bl_dict_keys = list(project_bl_dict[quarter].keys())
+                            #print(project_bl_dict_keys)
 
                     for i, dict_key in enumerate(project_bl_dict_keys):
                         for row_num in range(2, ws.max_row + 1):
                             wb_key = ws.cell(row=row_num, column=1).value
-                            if wb_key == wb_key_list[i]:
-                                ws.cell(row=row_num, column=col_num).value = project_bl_dict[quarter][dict_key]
-                                ws.cell(row=row_num, column=col_num).font = red_text
+                            try:
+                                if wb_key == wb_key_list[i]:
+                                    ws.cell(row=row_num, column=col_num).value = project_bl_dict[quarter][dict_key]
+                                    ws.cell(row=row_num, column=col_num).font = red_text
+                            except IndexError:
+                                pass
 
                 else:
                     pass
@@ -82,8 +87,10 @@ def place_in_masters(project_list, master_wb_title_list, baseline_data):
             wb.save(master)
 
 def check_keys():
-    '''small function to check if masters have the baseline keys. to delete once masters updated'''
-    for master in list_of_masters_all:
+    '''small function to check if masters have the baseline keys.
+    to delete once masters updated'''
+    for master in list_of_masters_all[1:]:
+        print(master.quarter)
         q_data = master.data[a14]
         print(q_data['Reporting period (GMPP - Snapshot Date)'])
         q_data_keys = list(q_data.keys())
@@ -121,18 +128,22 @@ master_list = [root_path/'core_data/master_4_2019.xlsx',
                root_path/'core_data/master_4_2016.xlsx',
                root_path/'core_data/master_3_2016.xlsx']
 
-bl_data_list = [root_path / 'input/baseline_info_HSMRPG_projects.xlsx',
-                    root_path / 'input/baseline_info_amis_projects.xlsx',
-                    root_path / 'input/baseline_info_FTTS.XLSX',
-                    root_path / 'input/baseline_info_HE_projects.xlsx',
-                    root_path / 'input/baseline_info_rail.xlsx']
+bl_data_list = [root_path / 'input/baseline_info_HSMRPG_projects.xlsx', #Done
+                    root_path / 'input/baseline_info_amis_projects.xlsx', #Done
+                    root_path / 'input/baseline_info_FTTS.xlsx', #Done
+                    root_path / 'input/baseline_info_HE_projects.xlsx', #Done
+                    root_path / 'input/baseline_info_rail.xlsx', #Done
+                root_path/'input/baseline_info_ECDP.xlsx', #Done
+                root_path/'input/baseline_info_smart_ticketing.xlsx'] #Done
 
-baseline_data_wb = load_workbook(root_path / 'input/baseline_info_HSMRPG_projects.xlsx')
+baseline_data_wb = load_workbook(root_path / 'input/baseline_info_smart_ticketing.xlsx')
 
 bl_data = get_data(baseline_data_wb)
 
 place_in_masters(bl_data.keys(), master_list, bl_data)
 
-#check_keys()
+check_keys()
 
-#change_quarter_string()
+change_quarter_string()
+
+
