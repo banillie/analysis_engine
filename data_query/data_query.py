@@ -16,6 +16,7 @@ key not collected (knc) = light blue grey
 
 from openpyxl import Workbook
 from analysis.data import list_of_masters_all, root_path, gen_txt_list, \
+    costs_bl_index, milestone_bl_index, benefits_bl_index, \
     gen_txt_colours, gen_fill_colours, list_column_ltrs, list_of_rag_keys, rag_txt_list_full, \
     rag_fill_colours, rag_txt_colours, salmon_fill
 from analysis.engine_functions import all_milestone_data_bulk, conditional_formatting, get_quarter_stamp
@@ -29,12 +30,17 @@ def return_data(project_name_list, data_key_list):
 
     for i, key in enumerate(data_key_list):
         '''worksheet is created for each project'''
-        ws = wb.create_sheet(key[:29], i)  # creating worksheets
-        ws.title = key[:29]  # title of worksheet
+        try:
+            ws = wb.create_sheet(key[:29], i)  # creating worksheets
+            ws.title = key[:29]
+        except ValueError:
+            if "/" in key:
+                newstr = key.replace("/", "")
+                ws = wb.create_sheet(newstr[:29], i)  # creating worksheets
+                ws.title = newstr[:29]  # title of worksheet
 
         '''list project names, groups and stage in ws'''
         for y, project_name in enumerate(project_name_list):
-
             # get project group info
             try:
                 group = list_of_masters_all[0].data[project_name]['DfT Group']
@@ -117,9 +123,16 @@ def return_baseline_data(project_name_list, data_key_list):
 
     for i, key in enumerate(data_key_list):
         '''worksheet is created for each project'''
-        ws = wb.create_sheet(key[:29], i)  # creating worksheets
-        ws.title = key[:29]  # title of worksheet
+        try:
+            ws = wb.create_sheet(key[:29], i)  # creating worksheets
+            ws.title = key[:29]
+        except ValueError:
+            if "/" in key:
+                newstr = key.replace("/", "")
+                ws = wb.create_sheet(newstr[:29], i)  # creating worksheets
+                ws.title = newstr[:29]  # title of worksheet
 
+        key_type = get_key_type(key)
         '''list project names, groups and stage in ws'''
         for y, project_name in enumerate(project_name_list):
 
@@ -134,6 +147,11 @@ def return_baseline_data(project_name_list, data_key_list):
             ws.cell(row=2 + y, column=1, value=group) # group info
             ws.cell(row=2 + y, column=2, value=project_name)  # project name returned
 
+            if key_type == 'benefits':
+                bc_index = benefits_bl_index
+            else:
+                bc_index = costs_bl_index
+
             for x in range(0, len(bc_index[project_name])):
                 index = bc_index[project_name][x]
                 try: # standard keys
@@ -143,7 +161,8 @@ def return_baseline_data(project_name_list, data_key_list):
                     else:
                         ws.cell(row=2 + y, column=3 + x, value=value)
                 except KeyError:
-                    try: # milestone keys
+                    try: # Milestones
+                        index = milestone_bl_index[project_name][x]
                         milestones = all_milestone_data_bulk([project_name], list_of_masters_all[index])
                         value = tuple(milestones[project_name][key])[0]
                         if value is None:
@@ -153,6 +172,8 @@ def return_baseline_data(project_name_list, data_key_list):
                             ws.cell(row=2 + y, column=3 + x).number_format = 'dd/mm/yy'
                     except KeyError: # exception catches both standard and milestone keys
                         ws.cell(row=2 + y, column=3 + x).value = 'knc'
+                    except IndexError:
+                        pass
                 except TypeError:
                     ws.cell(row=2 + y, column=3 + x).value = 'pnr'
 
@@ -175,11 +196,21 @@ def return_baseline_data(project_name_list, data_key_list):
 
     return wb
 
+def get_key_type(key):
+
+    bens_list = ['NPV', 'Ben', 'BCR', 'VfM', 'PVC', 'PVB', 'Ben']
+
+    for x in bens_list:
+        if x in key:
+            return 'benefits'
+        else:
+            return 'not_benefits'
+
 '''Running the programme'''
-'''Place all keys of interest as stings in to a list or use one of the imported lists from the data file'''
-data_interest = ['Adjusted Benefits Cost Ratio (BCR)',
-                 'Initial Benefits Cost Ratio (BCR)',
-                 'VfM Category single entry']
+'''Place all keys of interest as strings in to a list or use one of the imported lists from the data file'''
+data_interest = ['Project End Date',
+                 'Start of Project',
+                 'Full Operations']
 
 '''output one - all data. 
 first variable = list of project names. There are two options. 1) latest_quarter_project_names 2) all_projects_names
@@ -191,8 +222,8 @@ run_standard = return_data(list_of_masters_all[0].projects, data_interest)
 first variable = list of project names. There are two options. 1) latest_quarter_project_names 2) all_projects_names
 (which includes older projects that are not currently reporting. 
 second variable = data_interest. This name does not change. List compiled above'''
-#run_baseline = return_baseline_data(list_of_masters_all[0].projects, data_interest)
+run_baseline = return_baseline_data(list_of_masters_all[0].projects, data_interest)
 
 '''Specify name of the output document here. See general guidance re saving output files'''
-run_standard.save(root_path/'output/vfm_data_query_output.xlsx')
-#run_baseline.save(root_path/'output/data_query_output_bls.xlsx')
+run_standard.save(root_path/'output/data_query_output.xlsx')
+run_baseline.save(root_path/'output/data_query_output_bls.xlsx')
