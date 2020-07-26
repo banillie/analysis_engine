@@ -16,7 +16,7 @@ See instructions below.
 
 from openpyxl import Workbook
 from analysis.data import red_text, wlc_key, latest_cost_profiles, last_cost_profiles, \
-    baseline_1_cost_profiles, list_of_masters_all, fin_bc_index, root_path
+    baseline_1_cost_profiles, list_of_masters_all, costs_bl_index, root_path
 
 def place_complex_comparision_excel(master_data_latest, master_data_last, master_data_baseline):
     '''
@@ -172,7 +172,7 @@ def get_wlc(project_name_list, wlc_key, index):
     lower_dictionary = {}
     for project_name in project_name_list:
         try:
-            project_data = list_of_masters_all[fin_bc_index[project_name][index]].data[project_name]
+            project_data = list_of_masters_all[costs_bl_index[project_name][index]].data[project_name]
             total = project_data[wlc_key]
             lower_dictionary[project_name] = total
         except TypeError:
@@ -199,13 +199,13 @@ output_four = place_standard_comparision_excel(latest_cost_profiles, baseline_1_
 '''Valid file paths for all the below need to be provided'''
 
 '''ONE. Provide file path to where to save complex wlc breakdown'''
-output_one.save(root_path/'output/comparing_wlc_complex_q4_1920.xlsx')
+output_one.save(root_path/'output/comparing_wlc_complex_q1_2021.xlsx')
 
 '''TWO. Provide file path to where to save complex yearly cost profile breakdown'''
-output_two.save(root_path/'output/comparing_cost_profiles_complex_q4_1920.xlsx')
+output_two.save(root_path/'output/comparing_cost_profiles_complex_q1_2021.xlsx')
 
 '''THREE. Provide file path to where to save standard wlc breakdown'''
-output_three.save(root_path/'output/comparing_wlc_standard_q4_1920.xlsx')
+output_three.save(root_path/'output/comparing_wlc_standard_q1_2021.xlsx')
 
 '''FOUR. Provide file path to where to save standard yearly cost profile breakdown'''
-output_four.save(root_path/'output/comparing_cost_profiles_standard_q4_1920.xlsx')
+output_four.save(root_path/'output/comparing_cost_profiles_standard_q1_2021.xlsx')
