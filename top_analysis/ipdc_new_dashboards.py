@@ -764,7 +764,7 @@ ag_fill = PatternFill(bgColor="00a5b700")
 ar_text = Font(color="00f97b31") # text same colour as background
 ar_fill = PatternFill(bgColor="00f97b31")
 red_text = Font(color="00fc2525") # text same colour as background
-red_fill = PatternFill(bgColor="00fc2525")
+red_fill = PatternFill(bgColor="c00000")
 green_text = Font(color="0017960c") # text same colour as background
 green_fill = PatternFill(bgColor="0017960c")
 amber_text = Font(color="00fce553") # text same colour as background
