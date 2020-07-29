@@ -6,13 +6,25 @@ Code still in development but working.
 Follow instructions at end.
 '''
 
-from analysis.data import list_of_masters_all, bc_index, financial_analysis_masters_list, \
-    fin_bc_index, root_path, south_west_route_capacity, gwrm, manchester_north_west_quad, hs2_1, hs2_2a, hs2_2b, \
-    ox_cam_expressway, cvs, a428, ist, east_coast_mainline, m4, iep, wrlth, a66, ewr_western, a303
+from analysis.data import list_of_masters_all, milestone_bl_index, \
+    costs_bl_index, root_path, q1_2021, abbreviations, a14, hs2_1, gwrm, south_west_route_capacity, \
+    a358, east_coast_mainline, ewr_western, hs2_2a, thameslink, crossrail, hexagon
 from analysis.engine_functions import all_milestone_data_bulk
 from openpyxl import Workbook
 from openpyxl.chart import Series, Reference, BubbleChart
 from collections import Counter
+import datetime
+
+def get_project_by_stage(master, list_of_stages):
+
+    output = []
+    for i in master.projects:
+        for x in list_of_stages:
+            if x == master.data[i]['IPDC approval point']:
+                output.append(i)
+            else:
+                pass
+    return output
 
 def cost_v_schedule_chart(list_project_names):
 
@@ -33,7 +45,7 @@ def cost_v_schedule_chart(list_project_names):
 
     for x, tuple in enumerate(sorted_by_rag):
         project_name = tuple[0]
-        ws.cell(row=x+3, column=2).value = project_name
+        ws.cell(row=x+3, column=2).value = abbreviations[project_name]
         ws.cell(row=x+3, column=3).value = calculate_schedule_change(project_name)
         ws.cell(row=x+3, column=4).value = calculate_wlc_change(project_name)
         ws.cell(row=x+3, column=5).value = l_data.data[project_name]['Total Forecast']
@@ -108,9 +120,9 @@ def sort_by_rag(quarter_data, list_project_names):
 def calculate_wlc_change(project_name):
 
     '''Total WLC'''
-    wlc_now = financial_analysis_masters_list[0].data[project_name]['Total Forecast']
+    wlc_now = list_of_masters_all[0].data[project_name]['Total Forecast']
     '''WLC variance against baseline quarter'''
-    wlc_baseline = financial_analysis_masters_list[fin_bc_index[project_name][2]].data[project_name]['Total Forecast']
+    wlc_baseline = list_of_masters_all[costs_bl_index[project_name][2]].data[project_name]['Total Forecast']
 
     try:
         percentage_change = int(((wlc_now - wlc_baseline) / wlc_now) * 100)
@@ -127,16 +139,30 @@ def calculate_schedule_change(project_name):
     try:
         # foc_one = tuple(proj_milestones['Full Operating Capacity (FOC)'])[0]
         foc_one = tuple(proj_milestones[project_name]['Project End Date'])[0]
+        if project_name == 'Crossrail Programme':
+            foc_one = tuple(proj_milestones[project_name]['Stage 5 - Commence full Crossrail timetable'])[0]
+        if project_name == 'Thameslink Programme':
+            foc_one = tuple(proj_milestones[project_name]['Thameslink 24tph Peak Timetable'])[0]
+        if project_name == 'Hexagon':
+            foc_one = tuple(proj_milestones[project_name]['Full Operations'])[0]
+        if project_name == 'HS2 Phase2a':
+            foc_one = tuple(proj_milestones[project_name]['Start of Operation'])[0]
+        if project_name == 'A14 Cambridge to Huntingdon Improvement Scheme':
+            foc_one = tuple(proj_milestones[project_name]['Start of Operation'])[0]
+        if project_name == 'East West Rail Programme (Western Section)':
+            foc_one = tuple(proj_milestones[project_name]['Start of Construction/build'])[0]
+
         if foc_one is None:
             try:
                 foc_one = tuple(proj_milestones[project_name]['Full Operations'])[0]
             except (KeyError, TypeError):
                 foc_one = None
+
     except KeyError:
         foc_one = None
 
     '''full operation baseline date'''
-    proj_milestones_bl = all_milestone_data_bulk([project_name], list_of_masters_all[bc_index[project_name][2]])
+    proj_milestones_bl = all_milestone_data_bulk([project_name], list_of_masters_all[milestone_bl_index[project_name][2]])
 
     try:
         sop = tuple(proj_milestones_bl[project_name]['Start of Project'])[0]
@@ -146,6 +172,19 @@ def calculate_schedule_change(project_name):
     try:
         # foc_two = tuple(proj_milestones_bl['Full Operating Capacity (FOC)'])[0]
         foc_two = tuple(proj_milestones_bl[project_name]['Project End Date'])[0]
+        if project_name == 'Crossrail Programme':
+            foc_two = tuple(proj_milestones_bl[project_name]['Stage 5 - Commence full Crossrail timetable'])[0]
+        if project_name == 'Thameslink Programme':
+            foc_two = tuple(proj_milestones_bl[project_name]['Thameslink 24tph Peak Timetable'])[0]
+        if project_name == 'Hexagon':
+            foc_two = datetime.date(2020, 5, 31)
+        if project_name == 'HS2 Phase2a':
+            foc_two = tuple(proj_milestones_bl[project_name]['Start of Operation'])[0]
+        if project_name == 'A14 Cambridge to Huntingdon Improvement Scheme':
+            foc_two = tuple(proj_milestones_bl[project_name]['Start of Operation'])[0]
+        if project_name == 'East West Rail Programme (Western Section)':
+            foc_two = tuple(proj_milestones_bl[project_name]['Start of Construction/build'])[0]
+
 
         if foc_two is None:
             try:
@@ -204,7 +243,8 @@ def calculate_schedule_change_full_check(project_name, ws, x):
         ws.cell(row=x + 3, column=3).value = foc_one
 
     '''full operation baseline date'''
-    proj_milestones_bl = all_milestone_data_bulk([project_name], list_of_masters_all[bc_index[project_name][2]])
+    proj_milestones_bl = all_milestone_data_bulk([project_name],
+                                                 list_of_masters_all[milestone_bl_index[project_name][2]])
 
     try:
         sop = tuple(proj_milestones_bl[project_name]['Start of Project'])[0]
@@ -252,26 +292,14 @@ def calculate_schedule_change_full_check(project_name, ws, x):
 current_milestones_all = all_milestone_data_bulk(list_of_masters_all[0].projects,
                                                  list_of_masters_all[0])
 
-filtered_project_list = [m4,
-                         south_west_route_capacity,
-                         gwrm,
-                         manchester_north_west_quad,
-                         a66,
-                         iep,
-                         hs2_2a,
-                         hs2_2b,
-                         ox_cam_expressway,
-                         a428,
-                         a303,
-                         ist,
-                         east_coast_mainline,
-                         wrlth,
-                         ewr_western]
-
+filtered_project_list = [a14, hs2_1, gwrm, south_west_route_capacity,
+                         a358, east_coast_mainline, ewr_western, hs2_2a, thameslink, crossrail, hexagon]
 '''INSTRUCTIONS
 
 Enter project list variable into function. Recommend firstly doing so for all projects (e.g. latest_quarter_project
 _names) to identify projects of interest and then placing those projects into the filtered_project_list above '''
 
-run = cost_v_schedule_chart(list_of_masters_all[0].projects)
-run.save(root_path/'output/cost_v_schedule_unfiltered_q4_1920.xlsx')
+p_list = get_project_by_stage(q1_2021, ['Full Business Case', 'Outline Business Case'])
+
+run = cost_v_schedule_chart(filtered_project_list)
+run.save(root_path/'output/cost_v_schedule_matrix_q1_2021.xlsx')
