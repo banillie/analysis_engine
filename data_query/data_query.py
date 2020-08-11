@@ -18,7 +18,7 @@ from openpyxl import Workbook
 from analysis.data import list_of_masters_all, root_path, gen_txt_list, \
     costs_bl_index, milestone_bl_index, benefits_bl_index, \
     gen_txt_colours, gen_fill_colours, list_column_ltrs, list_of_rag_keys, rag_txt_list_full, \
-    rag_fill_colours, rag_txt_colours, salmon_fill
+    rag_fill_colours, rag_txt_colours, salmon_fill, all_project_names
 from analysis.engine_functions import all_milestone_data_bulk, conditional_formatting, get_quarter_stamp
 
 def return_data(project_name_list, data_key_list):
@@ -216,13 +216,13 @@ data_interest = ['Project End Date',
 first variable = list of project names. There are two options. 1) latest_quarter_project_names 2) all_projects_names
 (which includes older projects that are not currently reporting. 
 second variable = data_interest. This name does not change. List compiled above'''
-run_standard = return_data(list_of_masters_all[0].projects, data_interest)
+run_standard = return_data(all_project_names, data_interest)
 
 '''output two - bl data
 first variable = list of project names. There are two options. 1) latest_quarter_project_names 2) all_projects_names
 (which includes older projects that are not currently reporting. 
 second variable = data_interest. This name does not change. List compiled above'''
-run_baseline = return_baseline_data(list_of_masters_all[0].projects, data_interest)
+run_baseline = return_baseline_data(all_project_names, data_interest)
 
 '''Specify name of the output document here. See general guidance re saving output files'''
 run_standard.save(root_path/'output/data_query_output.xlsx')
