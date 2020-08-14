@@ -99,11 +99,10 @@ data_interest = ['IPDC approval point']
 # format 'quarter fy' e.g. Q1 20/21
 quarter = 'Q3 16/17'
 
-run = return_data(data_interest, quarter)
-
 # Default name for output file is s_data_query_output.
 # See general guidance re saving output files names
 # if other name to be used.
+run = return_data(data_interest, quarter)
 run.save(root_path/'output/s_data_query_output.xlsx')
 
 
