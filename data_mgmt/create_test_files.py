@@ -1,3 +1,7 @@
+"""
+code for creating and maintaining test masters
+"""
+
 from datamaps.api import project_data_from_master
 from openpyxl import load_workbook, Workbook
 import random
