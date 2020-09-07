@@ -2,13 +2,14 @@ import datetime
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from datetime import timedelta
-#from analysis.data import root_path
 import numpy as np
 from datamaps.api import project_data_from_master
 import platform
 from pathlib import Path
 
 '''file path'''
+
+
 def _platform_docs_dir() -> Path:
     if platform.system() == "Linux":
         return Path.home() / "Documents" / "analysis_engine"
@@ -17,46 +18,47 @@ def _platform_docs_dir() -> Path:
     else:
         return Path.home() / "Documents" / "analysis_engine"
 
+
 root_path = _platform_docs_dir()
 
 '''master data'''
-q1_2021 = project_data_from_master(root_path/'core_data/master_1_2020.xlsx', 1, 2020)
-q4_1920 = project_data_from_master(root_path/'core_data/master_4_2019.xlsx', 4, 2019)
-q3_1920 = project_data_from_master(root_path/'core_data/master_3_2019.xlsx', 3, 2019)
-q2_1920 = project_data_from_master(root_path/'core_data/master_2_2019.xlsx', 2, 2019)
-q1_1920 = project_data_from_master(root_path/'core_data/master_1_2019.xlsx', 1, 2019)
-q4_1819 = project_data_from_master(root_path/'core_data/master_4_2018.xlsx', 4, 2018)
-q3_1819 = project_data_from_master(root_path/'core_data/master_3_2018.xlsx', 3, 2018)
-q2_1819 = project_data_from_master(root_path/'core_data/master_2_2018.xlsx', 2, 2018)
-q1_1819 = project_data_from_master(root_path/'core_data/master_1_2018.xlsx', 1, 2018)
-q4_1718 = project_data_from_master(root_path/'core_data/master_4_2017.xlsx', 4, 2017)
-q3_1718 = project_data_from_master(root_path/'core_data/master_3_2017.xlsx', 3, 2017)
-q2_1718 = project_data_from_master(root_path/'core_data/master_2_2017.xlsx', 2, 2017)
-q1_1718 = project_data_from_master(root_path/'core_data/master_1_2017.xlsx', 1, 2017)
-q4_1617 = project_data_from_master(root_path/'core_data/master_4_2016.xlsx', 4, 2016)
-q3_1617 = project_data_from_master(root_path/'core_data/master_3_2016.xlsx', 3, 2016)
+q1_2021 = project_data_from_master(root_path / 'core_data/master_1_2020.xlsx', 1, 2020)
+q4_1920 = project_data_from_master(root_path / 'core_data/master_4_2019.xlsx', 4, 2019)
+q3_1920 = project_data_from_master(root_path / 'core_data/master_3_2019.xlsx', 3, 2019)
+q2_1920 = project_data_from_master(root_path / 'core_data/master_2_2019.xlsx', 2, 2019)
+q1_1920 = project_data_from_master(root_path / 'core_data/master_1_2019.xlsx', 1, 2019)
+q4_1819 = project_data_from_master(root_path / 'core_data/master_4_2018.xlsx', 4, 2018)
+q3_1819 = project_data_from_master(root_path / 'core_data/master_3_2018.xlsx', 3, 2018)
+q2_1819 = project_data_from_master(root_path / 'core_data/master_2_2018.xlsx', 2, 2018)
+q1_1819 = project_data_from_master(root_path / 'core_data/master_1_2018.xlsx', 1, 2018)
+q4_1718 = project_data_from_master(root_path / 'core_data/master_4_2017.xlsx', 4, 2017)
+q3_1718 = project_data_from_master(root_path / 'core_data/master_3_2017.xlsx', 3, 2017)
+q2_1718 = project_data_from_master(root_path / 'core_data/master_2_2017.xlsx', 2, 2017)
+q1_1718 = project_data_from_master(root_path / 'core_data/master_1_2017.xlsx', 1, 2017)
+q4_1617 = project_data_from_master(root_path / 'core_data/master_4_2016.xlsx', 4, 2016)
+q3_1617 = project_data_from_master(root_path / 'core_data/master_3_2016.xlsx', 3, 2016)
 
 '''List of all masters'''
-list_of_masters_all = [q1_2021,
-                       q4_1920,
-                       q3_1920,
-                       q2_1920,
-                       q1_1920,
-                       q4_1819,
-                       q3_1819,
-                       q2_1819,
-                       q1_1819,
-                       q4_1718,
-                       q3_1718,
-                       q2_1718,
-                       q1_1718,
-                       q4_1617,
-                       q3_1617]
+master_data_list = [q1_2021,
+                    q4_1920,
+                    q3_1920,
+                    q2_1920,
+                    q1_1920,
+                    q4_1819,
+                    q3_1819,
+                    q2_1819,
+                    q1_1819,
+                    q4_1718,
+                    q3_1718,
+                    q2_1718,
+                    q1_1718,
+                    q4_1617,
+                    q3_1617]
 
-#ipdc date as referred to in analysis. Python date format is Year, Month, day
-ipdc_date = datetime.date(2020, 8, 10)
+ipdc_date = datetime.date(2020, 8, 10)  # ipdc date. Python date format is Year, Month, day
+blue_line_date = datetime.date.today()  # blue line on graph date.
 
-#abbreviations. Used in analysis instead of full projects names
+# abbreviations. Used in analysis instead of full projects names
 abbreviations = {'2nd Generation UK Search and Rescue Aviation': 'SARH2',
                  'A12 Chelmsford to A120 widening': 'A12',
                  'A14 Cambridge to Huntingdon Improvement Scheme': 'A14',
@@ -64,7 +66,7 @@ abbreviations = {'2nd Generation UK Search and Rescue Aviation': 'SARH2',
                  'A358 Taunton to Southfields Dualling': 'A358',
                  'A417 Air Balloon': 'A417',
                  'A428 Black Cat to Caxton Gibbet': 'A428',
-                 'A66 Full Scheme': 'A66',
+                 'A66 Northern Trans-Pennine': 'A66',
                  'Crossrail Programme': 'Crossrail',
                  'East Coast Digital Programme': 'ECDP',
                  'East Coast Mainline Programme': 'ECMP',
@@ -77,7 +79,7 @@ abbreviations = {'2nd Generation UK Search and Rescue Aviation': 'SARH2',
                  'High Speed Rail Programme (HS2)': 'HS2 Prog',
                  'HS2 Phase 2b': 'HS2 2b',
                  'HS2 Phase1': 'HS2 1',
-                 'HS2 Phase2a':'HS2 2a',
+                 'HS2 Phase2a': 'HS2 2a',
                  'Integrated and Smart Ticketing - creating an account based back office': 'IST',
                  'Intercity Express Programme': 'IEP',
                  'Lower Thames Crossing': 'LTC',
@@ -94,7 +96,8 @@ abbreviations = {'2nd Generation UK Search and Rescue Aviation': 'SARH2',
                  'Transpennine Route Upgrade (TRU)': 'TRU',
                  'Western Rail Link to Heathrow': 'WRLtH'}
 
-class ProjectGroupName:
+
+class Projects:
     # project names as variables
     a12 = 'A12 Chelmsford to A120 widening'
     a14 = 'A14 Cambridge to Huntingdon Improvement Scheme'
@@ -102,7 +105,7 @@ class ProjectGroupName:
     a385 = 'A358 Taunton to Southfields Dualling'
     a417 = 'A417 Air Balloon'
     a428 = 'A428 Black Cat to Caxton Gibbet'
-    a66 = 'A66 Full Scheme'
+    a66 = 'A66 Northern Trans-Pennine'
     brighton_ml = 'Brighton Mainline Upgrade Upgrade Programme (BMUP)'
     cvs = 'Commercial Vehicle Services (CVS)'
     east_coast_digital = 'East Coast Digital Programme'
@@ -138,39 +141,42 @@ class ProjectGroupName:
     tru = 'Transpennine Route Upgrade (TRU)'
     wrlth = 'Western Rail Link to Heathrow'
 
-    #lists of projects names in groups
-    rpe = [lower_thames_crossing,
-           a303,
-           a14,
-           a66,
-           a12,
-           m4,
-           a428,
-           a417,
-           a385,
-           ftts,
-           ist,
-           manchester_north_west_quad,
-           ox_cam_expressway]
-    fbc_stage = [hs2_1,
-           crossrail,
-           east_coast_mainline,
-           iep,
-           thameslink,
-           south_west_route_capacity,
-           hexagon,
-           gwrm,
-           nwe,
-           midland_mainline,
-           m4,
-           a14]
+    # test masters project names
+    sot = 'Sea of Tranquility'
+    a11 = 'Apollo 11'
+    a13 = 'Apollo 13'
+    f9 = 'Falcon 9'
+    columbia = 'Columbia'
+    mars = 'Mars'
 
-class CheckingBLs:
-    ipdc_ap = 'IPDC approval point'
-    ipdc_m_bl = 'Re-baseline IPDC milestones'
-    ipdc_c_bl = 'Re-baseline IPDC cost'
-    ipdc_b_bl = 'Re-baseline IPDC benefits'
-    check_bls = [ipdc_ap, ipdc_m_bl, ipdc_c_bl, ipdc_b_bl]
+    # lists of projects names in groups
+    he = [lower_thames_crossing,
+          a303,
+          a14,
+          a66,
+          a12,
+          m4,
+          a428,
+          a417,
+          a385]
+
+    hs2 = [hs2_1, hs2_2a, hs2_2b]
+    hsmrpg = [hs2_1, hs2_2a, hs2_2b, ewr_central, ewr_western,
+              hexagon, northern_powerhouse]
+
+    fbc_stage = [hs2_1,
+                 crossrail,
+                 east_coast_mainline,
+                 iep,
+                 thameslink,
+                 south_west_route_capacity,
+                 hexagon,
+                 gwrm,
+                 nwe,
+                 midland_mainline,
+                 m4,
+                 a14]
+
 
 class Masters:
     def __init__(self, master_data, project_names):
@@ -179,12 +185,13 @@ class Masters:
         self.bl_info = {}
         self.bl_index = {}
 
-    def baseline_data(self, meta_baseline):
-        self.meta_baseline = meta_baseline
+    def baseline_data(self, baseline_type):
+        self.meta_baseline = baseline_type
 
         """
-        Given a list of project names in project_names returns
-        the two dictionaries baseline_info and baseline_index
+        Returns the two dictionaries baseline_info 
+        and baseline_index when provided with baseline_type
+        for all projects within created master class
         """
 
         baseline_info = {}
@@ -221,6 +228,7 @@ class Masters:
         self.bl_info = baseline_info
         self.bl_index = baseline_index
 
+
 class MilestoneData:
     def __init__(self, masters_object, abbreviations):
         self.masters = masters_object
@@ -228,9 +236,17 @@ class MilestoneData:
         self.project_current = {}
         self.project_last = {}
         self.project_baseline = {}
+        self.project_baseline_two = {}
         self.group_current = {}
         self.group_last = {}
         self.group_baseline = {}
+        self.group_baseline_two = {}
+        self.project_choronological_list_current = []
+        self.project_choronological_list_last = []
+        self.project_choronological_list_baseline = []
+        self.group_choronological_list_current = []
+        self.group_choronological_list_last = []
+        self.group_choronological_list_baseline = []
         self.project_data()
         self.group_data()
 
@@ -242,9 +258,13 @@ class MilestoneData:
         current_dict = {}
         last_dict = {}
         baseline_dict = {}
+        baseline_dict_two = {}
+        sorted_current = []
+        sorted_last = []
+        sorted_baseline = []
 
         for name in self.masters.project_names:
-            for ind in self.masters.bl_index[name][:3]: # limit to three for now
+            for ind in self.masters.bl_index[name][:4]:  # limit to four for now
                 lower_dict = {}
                 raw_list = []
                 try:
@@ -311,14 +331,23 @@ class MilestoneData:
 
                 if self.masters.bl_index[name].index(ind) == 0:
                     current_dict[name] = lower_dict
+                    sorted_current = sorted_list
                 if self.masters.bl_index[name].index(ind) == 1:
                     last_dict[name] = lower_dict
+                    sorted_last = sorted_list
                 if self.masters.bl_index[name].index(ind) == 2:
                     baseline_dict[name] = lower_dict
+                    sorted_baseline = sorted_list
+                if self.masters.bl_index[name].index(ind) == 3:
+                    baseline_dict_two[name] = lower_dict
 
         self.project_current = current_dict
         self.project_last = last_dict
         self.project_baseline = baseline_dict
+        self.project_baseline_two = baseline_dict_two
+        self.project_choronological_list_current = sorted_current
+        self.project_choronological_list_last = sorted_last
+        self.project_choronological_list_baseline = sorted_baseline
 
     def group_data(self):
         """
@@ -329,8 +358,12 @@ class MilestoneData:
         current_dict = {}
         last_dict = {}
         baseline_dict = {}
+        baseline_dict_two = {}
+        sorted_current = []
+        sorted_last = []
+        sorted_baseline = []
 
-        for num in range(0, 3):
+        for num in range(0, 4):
             raw_list = []
             for name in self.masters.project_names:
                 try:
@@ -380,16 +413,13 @@ class MilestoneData:
                                 raw_list.append(t)
                         except KeyError:
                             pass
-                except (KeyError, TypeError):
+                except (KeyError, TypeError, IndexError):
                     pass
 
-            # put the list in chronological order
-            sorted_list = sorted(raw_list, key=lambda k: (k[1] is None, k[1]))
+            sorted_list = sorted(raw_list, key=lambda k: (k[1] is None, k[1]))  # put the list in chronological order
 
-            # loop to stop key names being the same.
-            # Not ideal as doesn't handle keys that may
-            # already have numbers as strings at end of
-            # names. But still useful.
+            """loop to stop key names being the same. Not ideal as doesn't handle keys that may
+            already have numbers as strings at end of names. But still useful."""
 
             output_dict = {}
             for x in sorted_list:
@@ -409,14 +439,24 @@ class MilestoneData:
 
             if num == 0:
                 current_dict = output_dict
+                sorted_current = sorted_list
             if num == 1:
                 last_dict = output_dict
+                sorted_last = sorted_list
             if num == 2:
                 baseline_dict = output_dict
+                sorted_baseline = sorted_list
+            if num == 3:
+                baseline_dict_two = output_dict
 
         self.group_current = current_dict
         self.group_last = last_dict
         self.group_baseline = baseline_dict
+        self.group_baseline_two = baseline_dict_two
+        self.group_choronological_list_current = sorted_current
+        self.group_choronological_list_last = sorted_last
+        self.group_choronological_list_baseline = sorted_baseline
+
 
 class MilestoneChartData:
     def __init__(self, milestone_data_object, keys_of_interest=None,
@@ -432,6 +472,7 @@ class MilestoneChartData:
         self.group_current_tds = []
         self.group_last_tds = []
         self.group_baseline_tds = []
+        self.group_baseline_tds_two = []
         self.group_chart()
 
     def group_chart(self):
@@ -445,7 +486,7 @@ class MilestoneChartData:
         td_current = []
         td_last = []
         td_baseline = []
-
+        td_baseline_two = []
 
         # all milestone keys and time deltas calculated this way so
         # shown in particular way in output chart
@@ -470,6 +511,13 @@ class MilestoneChartData:
                 else:
                     m_d_baseline = tuple(self.m_data.group_current[m])[0]
 
+                if m in list(self.m_data.group_baseline_two.keys()):
+                    m_d_baseline_two = tuple(self.m_data.group_baseline_two[m])[0]
+                    if m_d_baseline_two is None:
+                        m_d_baseline_two = tuple(self.m_data.group_current[m])[0]
+                else:
+                    m_d_baseline_two = tuple(self.m_data.group_current[m])[0]
+
                 if m_d_current is not None:
                     if self.filter_start_date <= m_d_current <= self.filter_end_date:
                         if self.keys_of_interest is None:
@@ -477,17 +525,19 @@ class MilestoneChartData:
                             td_current.append(m_d_current)
                             td_last.append(m_d_last)
                             td_baseline.append(m_d_baseline)
+                            td_baseline_two.append(m_d_baseline_two)
 
                         else:
                             for key in self.keys_of_interest:
                                 if key in m:
-                                    if m not in key_names: # prevent repeats
+                                    if m not in key_names:  # prevent repeats
                                         key_names.append(m)
                                         td_current.append(m_d_current)
                                         td_last.append(m_d_last)
                                         td_baseline.append(m_d_baseline)
+                                        td_baseline_two.append(m_d_baseline_two)
 
-        #loop to remove
+        # loop to remove
         if self.keys_not_of_interest is not None:
             for x in range(len(key_names)):
                 for y in self.keys_not_of_interest:
@@ -497,6 +547,7 @@ class MilestoneChartData:
                             td_current[x] = None
                             td_last[x] = None
                             td_baseline[x] = None
+                            td_baseline_two[x] = None
                     except TypeError:
                         pass
 
@@ -504,11 +555,100 @@ class MilestoneChartData:
         td_current_final = [x for x in td_current if x is not None]
         td_last_final = [x for x in td_last if x is not None]
         td_baseline_final = [x for x in td_baseline if x is not None]
+        td_baseline_two_final = [x for x in td_baseline_two if x is not None]
 
         self.group_keys = key_names_final
         self.group_current_tds = td_current_final
         self.group_last_tds = td_last_final
         self.group_baseline_tds = td_baseline_final
+        self.group_baseline_tds_two = td_baseline_two_final
+
+
+class CombiningData:
+    def __init__(self, wb, pfm_milestone_data):
+        self.wb = wb
+        self.pfm_milestone_data = pfm_milestone_data
+        # self.project_current = {}
+        # self.project_last = {}
+        # self.project_baseline = {}
+        # self.project_baseline_two = {}
+        self.group_current = {}
+        self.group_last = {}
+        self.group_baseline = {}
+        self.group_baseline_two = {}
+        self.combined_tuple_list_forecast = []
+        self.combined_tuple_list_baseline = []
+        self.combine_mi_pfm_data()
+
+    def combine_mi_pfm_data(self):
+        """coverts data from MI system into usable format for graph out puts
+        """
+        ws = self.wb.active
+
+        mi_milestone_name_list = []  # handles duplicates
+        mi_tuple_list_forecast = []
+        mi_tuple_list_baseline = []
+        for r in range(4, ws.max_row + 1):
+            mi_milestone_key_name_raw = ws.cell(row=r, column=3).value
+            mi_milestone_key_name = 'MI, ' + mi_milestone_key_name_raw
+            forecast_date = ws.cell(row=r, column=8).value
+            baseline_date = ws.cell(row=r, column=9).value
+            notes = ws.cell(row=r, column=10).value
+            if mi_milestone_key_name not in mi_milestone_name_list:
+                mi_milestone_name_list.append(mi_milestone_key_name)
+                mi_tuple_list_forecast.append((mi_milestone_key_name, forecast_date.date(), notes))
+                mi_tuple_list_baseline.append((mi_milestone_key_name, baseline_date.date(), notes))
+                # milestone_dict_forecast[mi_milestone_key_name] = {forecast_date.date(): notes}
+                # milestone_dict_baseline[mi_milestone_key_name] = {baseline_date.date(): notes}
+            else:
+                for i in range(2, 15):  # alters duplicates by adding number to end of key
+                    mi_altered_milestone_key_name = mi_milestone_key_name + ' ' + str(i)
+                    if mi_altered_milestone_key_name in mi_milestone_name_list:
+                        continue
+                    else:
+                        mi_tuple_list_forecast.append((mi_altered_milestone_key_name, forecast_date.date(), notes))
+                        mi_tuple_list_baseline.append((mi_altered_milestone_key_name, baseline_date.date(), notes))
+                        # milestone_dict_forecast[mi_altered_milestone_key_name] = {forecast_date.date(): notes}
+                        # milestone_dict_baseline[mi_altered_milestone_key_name] = {baseline_date.date(): notes}
+                        mi_milestone_name_list.append(mi_altered_milestone_key_name)
+                        break
+
+        mi_tuple_list_forecast = sorted(mi_tuple_list_forecast,
+                                        key=lambda k: (k[1] is None, k[1]))  # put the list in chronological order
+        mi_tuple_list_baseline = sorted(mi_tuple_list_baseline,
+                                        key=lambda k: (k[1] is None, k[1]))  # put the list in chronological order
+
+        pfm_tuple_list_forecast = []
+        pfm_tuple_list_baseline = []
+        for data in self.pfm_milestone_data.group_choronological_list_current:
+            pfm_tuple_list_forecast.append(('PfM, ' + data[0], data[1], data[2]))
+        for data in self.pfm_milestone_data.group_choronological_list_baseline:
+            pfm_tuple_list_baseline.append(('PfM, ' + data[0], data[1], data[2]))
+
+        combined_tuple_list_forecast = mi_tuple_list_forecast + pfm_tuple_list_forecast
+        combined_tuple_list_baseline = mi_tuple_list_baseline + pfm_tuple_list_baseline
+
+        combined_tuple_list_forecast = sorted(combined_tuple_list_forecast,
+                                              key=lambda k: (k[1] is None, k[1]))  # put the list in chronological order
+        combined_tuple_list_baseline = sorted(combined_tuple_list_baseline,
+                                              key=lambda k: (k[1] is None, k[1]))  # put the list in chronological order
+
+        milestone_dict_forecast = {}
+        for x in combined_tuple_list_forecast:
+            if x[0] is not None:
+                milestone_dict_forecast[x[0]] = {x[1]: x[2]}
+        milestone_dict_baseline = {}
+        for x in combined_tuple_list_baseline:
+            if x[0] is not None:
+                milestone_dict_baseline[x[0]] = {x[1]: x[2]}
+
+        self.group_current = milestone_dict_forecast
+        self.group_last = {}
+        self.group_baseline = milestone_dict_baseline
+        self.group_baseline_two = {}
+        self.combined_tuple_list_forecast = combined_tuple_list_forecast
+        self.combined_tuple_list_baseline = combined_tuple_list_baseline
+
 
 class MilestoneCharts:
     def __init__(self, latest_milestone_names, latest_milestone_dates,
@@ -520,7 +660,7 @@ class MilestoneCharts:
         self.baseline_milestone_dates = baseline_milestone_dates
         self.graph_title = graph_title
         self.ipdc_date = ipdc_date
-        #self.milestone_swimlane_charts()
+        # self.milestone_swimlane_charts()
         self.build_charts()
 
     def milestone_swimlane_charts(self):
@@ -627,38 +767,38 @@ class MilestoneCharts:
 
         if no_milestones <= 30:
             (np.array(final_labels), np.array(self.latest_milestone_dates),
-                              np.array(self.last_milestone_dates),
-                              np.array(self.baseline_milestone_dates),
-                              self.graph_title, self.ipdc_date)
+             np.array(self.last_milestone_dates),
+             np.array(self.baseline_milestone_dates),
+             self.graph_title, self.ipdc_date)
 
         if 31 <= no_milestones <= 60:
             half = int(no_milestones / 2)
             MilestoneCharts(np.array(final_labels[:half]),
-                                                      np.array(self.latest_milestone_dates[:half]),
-                                                      np.array(self.last_milestone_dates[:half]),
-                                                      np.array(self.baseline_milestone_dates[:half]),
-                                                      self.graph_title, self.ipdc_date)
+                            np.array(self.latest_milestone_dates[:half]),
+                            np.array(self.last_milestone_dates[:half]),
+                            np.array(self.baseline_milestone_dates[:half]),
+                            self.graph_title, self.ipdc_date)
             title = self.graph_title + ' cont.'
             MilestoneCharts(np.array(final_labels[half:no_milestones]),
-                                                      np.array(self.latest_milestone_dates[half:no_milestones]),
-                                                      np.array(self.last_milestone_dates[half:no_milestones]),
-                                                      np.array(self.baseline_milestone_dates[half:no_milestones]),
-                                                      title,
-                                                      self.ipdc_date)
+                            np.array(self.latest_milestone_dates[half:no_milestones]),
+                            np.array(self.last_milestone_dates[half:no_milestones]),
+                            np.array(self.baseline_milestone_dates[half:no_milestones]),
+                            title,
+                            self.ipdc_date)
 
         if 61 <= no_milestones <= 90:
             third = int(no_milestones / 3)
             MilestoneCharts(np.array(final_labels[:third]),
-                                                      np.array(self.latest_milestone_dates[:third]),
-                                                      np.array(self.last_milestone_dates[:third]),
-                                                      np.array(self.baseline_milestone_dates[:third]),
-                                                      self.graph_title, self.ipdc_date)
+                            np.array(self.latest_milestone_dates[:third]),
+                            np.array(self.last_milestone_dates[:third]),
+                            np.array(self.baseline_milestone_dates[:third]),
+                            self.graph_title, self.ipdc_date)
             title = self.graph_title + ' cont. 1'
             MilestoneCharts(np.array(final_labels[third:third * 2]),
-                                                      np.array(self.latest_milestone_dates[third:third * 2]),
-                                                      np.array(self.last_milestone_dates[third:third * 2]),
-                                                      np.array(self.baseline_milestone_dates[third:third * 2]),
-                                                      title, self.ipdc_date)
+                            np.array(self.latest_milestone_dates[third:third * 2]),
+                            np.array(self.last_milestone_dates[third:third * 2]),
+                            np.array(self.baseline_milestone_dates[third:third * 2]),
+                            title, self.ipdc_date)
             title = self.graph_title + ' cont. 2'
             MilestoneCharts(np.array(final_labels[third * 2:no_milestones]),
                             np.array(self.latest_milestone_dates[third * 2:no_milestones]),
@@ -666,6 +806,7 @@ class MilestoneCharts:
                             np.array(self.baseline_milestone_dates[third * 2:no_milestones]),
                             title, self.ipdc_date)
         pass
+
 
 class CostData:
     def __init__(self, masters_object):
@@ -692,58 +833,91 @@ class CostData:
         cat_profile = []
         cat_unprofiled = []
 
-        for i in reversed(range(3)): # reversed for matplotlib chart design
+        for i in reversed(range(3)):  # reversed for matplotlib chart design
             pre_pro_rdel_list = []
             pre_pro_cdel_list = []
+            pre_pro_ngov_list = []
             pro_rdel_list = []
             pro_cdel_list = []
+            pro_ngov_list = []
             unpro_rdel_list = []
             unpro_cdel_list = []
+            unpro_ngov_list = []
             for name in self.masters.project_names:
                 try:
-                    pre_pro_rdel = self.masters.master_data[self.masters.bl_index[name][i]].data[name]['Pre-profile RDEL']
-                    pre_pro_cdel = self.masters.master_data[self.masters.bl_index[name][i]].data[name]['Pre-profile CDEL']
-                    pro_rdel = self.masters.master_data[self.masters.bl_index[name][i]].data[name]['Total RDEL Forecast Total']
-                    pro_cdel = self.masters.master_data[self.masters.bl_index[name][i]].data[name]['Total CDEL Forecast Total WLC']
-                    unpro_rdel = self.masters.master_data[self.masters.bl_index[name][i]].data[name]['Unprofiled RDEL Forecast Total']
-                    unpro_cdel = self.masters.master_data[self.masters.bl_index[name][i]].data[name]['Unprofiled CDEL Forecast Total WLC']
-
+                    pre_pro_rdel = self.masters.master_data[self.masters.bl_index[name][i]].data[name][
+                        'Pre-profile RDEL']
+                    pre_pro_cdel = self.masters.master_data[self.masters.bl_index[name][i]].data[name][
+                        'Pre-profile CDEL']
+                    pre_pro_ngov = self.masters.master_data[self.masters.bl_index[name][i]].data[name][
+                        'Pre 19-20 Forecast Non-Gov']
+                    if pre_pro_ngov is None:
+                        pre_pro_ngov = 0
+                    pro_rdel = self.masters.master_data[self.masters.bl_index[name][i]].data[name][
+                        'Total RDEL Forecast Total']
+                    pro_cdel = self.masters.master_data[self.masters.bl_index[name][i]].data[name][
+                        'Total CDEL Forecast Total WLC']
+                    pro_ngov = self.masters.master_data[self.masters.bl_index[name][i]].data[name][
+                        'Non-Gov Total Forecast']
+                    if pro_ngov is None:
+                        pro_ngov = 0
+                    unpro_rdel = self.masters.master_data[self.masters.bl_index[name][i]].data[name][
+                        'Unprofiled RDEL Forecast Total']
+                    unpro_cdel = self.masters.master_data[self.masters.bl_index[name][i]].data[name][
+                        'Unprofiled CDEL Forecast Total WLC']
+                    unpro_ngov = self.masters.master_data[self.masters.bl_index[name][i]].data[name][
+                        'Unprofiled Forecast Non-Gov']
+                    if unpro_ngov is None:
+                        unpro_ngov = 0
                     pre_pro_rdel_list.append(pre_pro_rdel)
                     pre_pro_cdel_list.append(pre_pro_cdel)
+                    pre_pro_ngov_list.append(pre_pro_ngov)
                     pro_rdel_list.append(pro_rdel)
                     pro_cdel_list.append(pro_cdel)
+                    pro_ngov_list.append(pro_ngov)
                     unpro_rdel_list.append(unpro_rdel)
                     unpro_cdel_list.append(unpro_cdel)
+                    unpro_ngov_list.append(unpro_ngov)
 
-                except TypeError:
+                except (TypeError, KeyError):  # KeyError temporary
                     pre_pro_rdel_list.append(0)
                     pre_pro_cdel_list.append(0)
+                    pre_pro_ngov_list.append(0)
                     pro_rdel_list.append(0)
                     pro_cdel_list.append(0)
+                    pro_ngov_list.append(0)
                     unpro_rdel_list.append(0)
                     unpro_cdel_list.append(0)
+                    unpro_ngov_list.append(0)
 
             total_rdel_pre_pro = sum(pre_pro_rdel_list)
             total_cdel_pre_pro = sum(pre_pro_cdel_list)
+            total_ngov_pre_pro = sum(pre_pro_ngov_list)
             total_rdel_pro = sum(pro_rdel_list)
             total_cdel_pro = sum(pro_cdel_list)
+            total_ngov_pro = sum(pro_ngov_list)
             total_rdel_unpro = sum(unpro_rdel_list)
             total_cdel_unpro = sum(unpro_cdel_list)
+            total_ngov_unpro = sum(unpro_ngov_list)
 
             if i == 0:
                 cat_spent.append(total_rdel_pre_pro)
                 cat_spent.append(total_cdel_pre_pro)
+                cat_spent.append(total_ngov_pre_pro)
                 rdel_pro = total_rdel_pro - (total_rdel_pre_pro + total_rdel_unpro)
                 cdel_pro = total_cdel_pro - (total_cdel_pre_pro + total_cdel_unpro)
+                ngov_pro = total_ngov_pro - (total_ngov_pre_pro + total_ngov_unpro)
                 cat_profile.append(rdel_pro)
                 cat_profile.append(cdel_pro)
+                cat_profile.append(ngov_pro)
                 cat_unprofiled.append(total_rdel_unpro)
                 cat_unprofiled.append(total_cdel_unpro)
+                cat_unprofiled.append(total_ngov_unpro)
 
-            total_pre_pro = sum(pre_pro_rdel_list) + sum(pre_pro_cdel_list)
-            total_unpro = sum(unpro_rdel_list) + sum(unpro_cdel_list)
-            total_pro = (sum(pro_rdel_list) + sum(pro_cdel_list)) - (total_pre_pro + total_unpro)
-            total.append((sum(pro_rdel_list) + sum(pro_cdel_list)))
+            total_pre_pro = sum(pre_pro_rdel_list) + sum(pre_pro_cdel_list) + sum(pre_pro_ngov_list)
+            total_unpro = sum(unpro_rdel_list) + sum(unpro_cdel_list) + sum(unpro_ngov_list)
+            total_pro = (sum(pro_rdel_list) + sum(pro_cdel_list) + sum(pro_ngov_list)) - (total_pre_pro + total_unpro)
+            total.append((sum(pro_rdel_list) + sum(pro_cdel_list)) + sum(pro_ngov_list))
             spent.append(total_pre_pro)
             profile.append(total_pro)
             unprofile.append(total_unpro)
@@ -757,8 +931,7 @@ class CostData:
         self.unprofile = unprofile
 
     def get_profile(self):
-        year_list = ['19-20',
-                     '20-21',
+        year_list = ['20-21',
                      '21-22',
                      '22-23',
                      '23-24',
@@ -786,7 +959,7 @@ class CostData:
                             cost = self.masters.master_data[self.masters.bl_index[name][i]].data[name][year + cost_type]
                             if cost is None:
                                 cost = 0
-                        except (KeyError, TypeError): #to handle baselines
+                        except (KeyError, TypeError):  # to handle baselines
                             cost = 0
                         data.append(cost)
                     a_list.append(sum(data))
@@ -802,6 +975,7 @@ class CostData:
         self.current_profile = current_profile
         self.last_profile = last_profile
         self.baseline_profile = baseline_profile
+
 
 class BenefitsData:
     def __init__(self, masters_object):
@@ -826,17 +1000,17 @@ class BenefitsData:
                         'Unprofiled Remainder BEN Forecast - Total Monetised Benefits']
 
         ben_type_key_list = [('Pre-profile BEN Forecast Gov Cashable',
-                             'Pre-profile BEN Forecast Gov Non-Cashable',
-                             'Pre-profile BEN Forecast - Economic (inc Private Partner)',
-                             'Pre-profile BEN Forecast - Disbenefit UK Economic'),
+                              'Pre-profile BEN Forecast Gov Non-Cashable',
+                              'Pre-profile BEN Forecast - Economic (inc Private Partner)',
+                              'Pre-profile BEN Forecast - Disbenefit UK Economic'),
                              ('Unprofiled Remainder BEN Forecast - Gov. Cashable',
-                             'Unprofiled Remainder BEN Forecast - Gov. Non-Cashable',
-                             'Unprofiled Remainder BEN Forecast - Economic (inc Private Partner)',
-                             'Unprofiled Remainder BEN Forecast - Disbenefit UK Economic'),
+                              'Unprofiled Remainder BEN Forecast - Gov. Non-Cashable',
+                              'Unprofiled Remainder BEN Forecast - Economic (inc Private Partner)',
+                              'Unprofiled Remainder BEN Forecast - Disbenefit UK Economic'),
                              ('Total BEN Forecast - Gov. Cashable',
-                             'Total BEN Forecast - Gov. Non-Cashable',
-                             'Total BEN Forecast - Economic (inc Private Partner)',
-                             'Total BEN Forecast - Disbenefit UK Economic')]
+                              'Total BEN Forecast - Gov. Non-Cashable',
+                              'Total BEN Forecast - Economic (inc Private Partner)',
+                              'Total BEN Forecast - Disbenefit UK Economic')]
 
         total = []
         achieved = []
@@ -869,7 +1043,7 @@ class BenefitsData:
         cat_achieved = []
         cat_profile = []
         cat_unprofile = []
-        disbenefit  = []
+        disbenefit = []
 
         for x in range(4):
             ben_cat_achieved = []
@@ -892,7 +1066,6 @@ class BenefitsData:
                     if 'Disbenefit' in y[x]:
                         disbenefit.append(ben)
 
-
             cat_achieved.append(sum(ben_cat_achieved))
             cat_profile.append(sum(ben_cat_profile) - (sum(ben_cat_achieved) + sum(ben_cat_unprofile)))
             cat_unprofile.append(sum(ben_cat_unprofile))
@@ -906,5 +1079,4 @@ class BenefitsData:
         self.cat_profile = cat_profile
         self.cat_unprofile = cat_unprofile
         self.disbenefit = disbenefit
-
 
