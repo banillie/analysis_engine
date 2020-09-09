@@ -1,127 +1,63 @@
-'''
-
-This programme calculates the time difference between reported milestones
-
-Output document:
-1) one excel workbook contain all project milestone information.
-
-See instructions below.
-
-Note: all master data is taken from the data file. Make sure this is up to date and that all relevant data is in
-the import statement.
-
-'''
+"""
+Transfers MilestoneData object into an excel wb. Wb includes calculation
+of time differences between milestone dates at current, last and
+baseline quarter.
+"""
 
 from openpyxl import Workbook
-from analysis.engine_functions import project_time_difference, all_milestones_dict
-from analysis.data import list_of_masters_all, root_path, bc_index, p_current_milestones, p_last_milestones
+from data_mgmt.data import MilestoneData, MilestoneChartData, \
+    Masters, Projects, master_data_list, root_path, blue_line_date, \
+    abbreviations, CombinedData
 
-def put_into_wb_all(project_name_list, t_data, td_data, td_data_two, wb):
-    '''
-
-    Function that places all data into excel wb for this programme
-
-    project_name_list: list of project to return data for
-    t_data: dictionary containing milestone data for projects.
-    dictionary structure is {'project name': {'milestone name': datetime.date: 'notes'}}
-    td_data: dictionary containing time_delta milestone data for projects.
-    dictionary structure is {'project name': {'milestone name': 'time delta info'}}
-    td_data_two: dictionary containing second time_delta data for projects.
-    same structure as for td_data.
-    wb: blank excel wb
-
-    '''
-
+def put_into_wb_all(milestone_data_object):
+    wb = Workbook()
     ws = wb.active
 
     row_num = 2
-    for project_name in project_name_list:
-        for i, milestone in enumerate(td_data[project_name].keys()):
+    for project_name in milestone_data_object.project_current.keys():
+        for i, milestone in enumerate(milestone_data_object.project_current_p_project[project_name].keys()):
             ws.cell(row=row_num + i, column=1).value = project_name
             ws.cell(row=row_num + i, column=2).value = milestone
             try:
-                milestone_date = tuple(t_data[project_name][milestone])[0]
+                milestone_date = tuple(milestone_data_object.project_current_p_project[project_name][milestone])[0]
                 ws.cell(row=row_num + i, column=3).value = milestone_date
                 ws.cell(row=row_num + i, column=3).number_format = 'dd/mm/yy'
             except KeyError:
-                ws.cell(row=row_num + i, column=3).value = 0
+                ws.cell(row=row_num + i, column=3).value = ''
 
             try:
-                value = td_data[project_name][milestone]
-                ws.cell(row=row_num + i, column=4).value = value
-            except KeyError:
-                ws.cell(row=row_num + i, column=4).value = 0
+                last_date = tuple(milestone_data_object.project_last_p_project[project_name][milestone])[0]
+                ws.cell(row=row_num + i, column=4).value = (milestone_date - last_date).days
+            except (KeyError, TypeError):
+                ws.cell(row=row_num + i, column=4).value = ''
 
             try:
-                value = td_data_two[project_name][milestone]
-                ws.cell(row=row_num + i, column=5).value = value
-            except KeyError:
-                ws.cell(row=row_num + i, column=5).value = 0
+                baseline_date = tuple(milestone_data_object.project_baseline_p_project[project_name][milestone])[0]
+                ws.cell(row=row_num + i, column=5).value = (milestone_date - baseline_date).days
+            except (KeyError, TypeError):
+                ws.cell(row=row_num + i, column=5).value = ''
 
             try:
-                milestone_date = tuple(t_data[project_name][milestone])[0]
-                ws.cell(row=row_num + i, column=6).value = t_data[project_name][milestone][milestone_date]  # provides notes
+                notes = milestone_data_object.project_current_p_project[project_name][milestone][milestone_date]
+                ws.cell(row=row_num + i, column=7).value = notes
             except (IndexError, KeyError):
-                ws.cell(row=row_num + i, column=6).value = 0
+                ws.cell(row=row_num + i, column=7).value = ''
 
-        row_num = row_num + len(td_data[project_name])
+        row_num = row_num + len(milestone_data_object.project_current_p_project[project_name].keys())
 
     ws.cell(row=1, column=1).value = 'Project'
     ws.cell(row=1, column=2).value = 'Milestone'
     ws.cell(row=1, column=3).value = 'Date'
-    ws.cell(row=1, column=4).value = '3/m change (days)'
-    ws.cell(row=1, column=5).value = 'Baseline change (days)'
-    ws.cell(row=1, column=6).value = 'Notes'
+    ws.cell(row=1, column=4).value = '3/m change'
+    ws.cell(row=1, column=5).value = 'Baseline change (current)'
+   # ws.cell(row=1, column=6).value = 'Baseline change (last)'
+    ws.cell(row=1, column=7).value = 'Notes'
 
     return wb
 
-def run_milestone_comparator(function, project_name_list, masters_list):
+mst = Masters(master_data_list, Projects.current_list)  # get master data and specify projects
+mst.baseline_data('Re-baseline IPDC milestones')  # get baseline information of interest
+milestone_data = MilestoneData(mst, abbreviations)  # get milestone data
 
-    '''
-    Function that runs this programme.
-
-    function: The type of milestone you wish to analysis can be specified through choosing all_milestone_data_bulk,
-    ap_p_milestone_data_bulk, or assurance_milestone_data_bulk functions, all available from engine_function import
-    statement above.
-    project_name_list: list of project to return data for
-    masters_list: list of masters containing quarter information
-    date_of_interest: the date after which project milestones should be returned.
-
-    '''
-
-
-    wb = Workbook()
-
-    '''gather mini-dictionaries for each quarter'''
-
-    oldest_milestones_data = {}
-    for project_name in project_name_list:
-        print(project_name)
-        p_oldest_milestones_data = function([project_name], masters_list[bc_index[project_name][2]])
-        oldest_milestones_data.update(p_oldest_milestones_data)
-
-    '''calculate time current and last quarter'''
-    first_diff_data = project_time_difference(p_current_milestones, p_last_milestones)
-    second_diff_data = project_time_difference(p_current_milestones, oldest_milestones_data)
-
-    run = put_into_wb_all(project_name_list, p_current_milestones, first_diff_data, second_diff_data, wb)
-
-    return run
-
-''' RUNNING PROGRAMME '''
-
-'''choose the type of variables that you would like to place in run_milestone_comparator function. Arguments 
-are placed in this order. 
-
-1. function: The type of milestone you wish to analysis can be specified through choosing all_milestone_data_bulk, 
-ap_p_milestone_data_bulk, or assurance_milestone_data_bulk functions, all available from engine_function import 
-statement above. 
-2. project_name_list: list of project to return data for
-3. masters_list: list of masters containing quarter information
- 
-'''
-run = run_milestone_comparator(all_milestones_dict, list_of_masters_all[0].projects,
-                               list_of_masters_all)
-
-'''specify file path to output document'''
-run.save(root_path/'output/portfolio_milestones_readout.xlsx')
+run = put_into_wb_all(milestone_data)
+run.save(root_path/"output/all_delivery_milestones_q1_20_21.xlsx")
