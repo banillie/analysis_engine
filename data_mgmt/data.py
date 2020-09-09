@@ -7,10 +7,8 @@ from datamaps.api import project_data_from_master
 import platform
 from pathlib import Path
 
-'''file path'''
-
-
 def _platform_docs_dir() -> Path:
+    #  Cross plaform file path handling
     if platform.system() == "Linux":
         return Path.home() / "Documents" / "analysis_engine"
     if platform.system() == "Darwin":
@@ -54,6 +52,7 @@ master_data_list = [q1_2021,
                     q1_1718,
                     q4_1617,
                     q3_1617]
+
 
 ipdc_date = datetime.date(2020, 8, 10)  # ipdc date. Python date format is Year, Month, day
 blue_line_date = datetime.date.today()  # blue line on graph date.
@@ -150,6 +149,8 @@ class Projects:
     mars = 'Mars'
 
     # lists of projects names in groups
+    current_list = master_data_list[0].projects
+
     he = [lower_thames_crossing,
           a303,
           a14,
@@ -247,8 +248,13 @@ class MilestoneData:
         self.group_choronological_list_current = []
         self.group_choronological_list_last = []
         self.group_choronological_list_baseline = []
+        self.project_current_p_project = {}
+        self.project_last_p_project = {}
+        self.project_baseline_p_project = {}
+        self.project_baseline_two_p_project = {}
         self.project_data()
         self.group_data()
+        self.project_data_p_project()
 
     def project_data(self):  # renamed to project_data
         """
@@ -457,6 +463,78 @@ class MilestoneData:
         self.group_choronological_list_last = sorted_last
         self.group_choronological_list_baseline = sorted_baseline
 
+    def project_data_p_project(self):  # renamed to project_data
+        """
+        creates three dictionaries
+        """
+
+        current_dict = {}
+        last_dict = {}
+        baseline_dict = {}
+        baseline_dict_two = {}
+        # sorted_current = []
+        # sorted_last = []
+        # sorted_baseline = []
+
+        for name in self.masters.project_names:
+            for ind in self.masters.bl_index[name][:4]:  # limit to four for now
+                lower_dict = {}
+                raw_list = []
+                try:
+                    p_data = self.masters.master_data[ind].data[name]
+                    for i in range(18, 67):
+                        try:
+                            t = (
+                                p_data["Project MM" + str(i)],
+                                p_data["Project MM" + str(i) + " Forecast - Actual"],
+                                p_data["Project MM" + str(i) + " Notes"],
+                            )
+                            raw_list.append(t)
+                        except KeyError:
+                            pass
+                except (KeyError, TypeError):
+                    pass
+
+                # put the list in chronological order
+                sorted_list = sorted(raw_list, key=lambda k: (k[1] is None, k[1]))
+
+                # loop to stop key names being the same. Not ideal as doesn't handle keys that may already have numbers as
+                # strings at end of names. But still useful.
+                for x in sorted_list:
+                    if x[0] is not None:
+                        if x[0] in lower_dict:
+                            for y in range(2, 15):
+                                key_name = x[0] + " " + str(y)
+                                if key_name in lower_dict:
+                                    continue
+                                else:
+                                    lower_dict[key_name] = {x[1]: x[2]}
+                                    break
+                        else:
+                            lower_dict[x[0]] = {x[1]: x[2]}
+                    else:
+                        pass
+
+                if self.masters.bl_index[name].index(ind) == 0:
+                    current_dict[name] = lower_dict
+                    #sorted_current = sorted_list
+                if self.masters.bl_index[name].index(ind) == 1:
+                    last_dict[name] = lower_dict
+                    #sorted_last = sorted_list
+                if self.masters.bl_index[name].index(ind) == 2:
+                    baseline_dict[name] = lower_dict
+                    #sorted_baseline = sorted_list
+                if self.masters.bl_index[name].index(ind) == 3:
+                    baseline_dict_two[name] = lower_dict
+
+        self.project_current_p_project = current_dict
+        self.project_last_p_project = last_dict
+        self.project_baseline_p_project = baseline_dict
+        self.project_baseline_two_p_project = baseline_dict_two
+        # self.project_choronological_list_current = sorted_current
+        # self.project_choronological_list_last = sorted_last
+        # self.project_choronological_list_baseline = sorted_baseline
+
 
 class MilestoneChartData:
     def __init__(self, milestone_data_object, keys_of_interest=None,
@@ -564,7 +642,7 @@ class MilestoneChartData:
         self.group_baseline_tds_two = td_baseline_two_final
 
 
-class CombiningData:
+class CombinedData:
     def __init__(self, wb, pfm_milestone_data):
         self.wb = wb
         self.pfm_milestone_data = pfm_milestone_data
@@ -581,7 +659,8 @@ class CombiningData:
         self.combine_mi_pfm_data()
 
     def combine_mi_pfm_data(self):
-        """coverts data from MI system into usable format for graph out puts
+        """
+        coverts data from MI system into usable format for graphical outputs
         """
         ws = self.wb.active
 
@@ -598,8 +677,6 @@ class CombiningData:
                 mi_milestone_name_list.append(mi_milestone_key_name)
                 mi_tuple_list_forecast.append((mi_milestone_key_name, forecast_date.date(), notes))
                 mi_tuple_list_baseline.append((mi_milestone_key_name, baseline_date.date(), notes))
-                # milestone_dict_forecast[mi_milestone_key_name] = {forecast_date.date(): notes}
-                # milestone_dict_baseline[mi_milestone_key_name] = {baseline_date.date(): notes}
             else:
                 for i in range(2, 15):  # alters duplicates by adding number to end of key
                     mi_altered_milestone_key_name = mi_milestone_key_name + ' ' + str(i)
@@ -608,8 +685,6 @@ class CombiningData:
                     else:
                         mi_tuple_list_forecast.append((mi_altered_milestone_key_name, forecast_date.date(), notes))
                         mi_tuple_list_baseline.append((mi_altered_milestone_key_name, baseline_date.date(), notes))
-                        # milestone_dict_forecast[mi_altered_milestone_key_name] = {forecast_date.date(): notes}
-                        # milestone_dict_baseline[mi_altered_milestone_key_name] = {baseline_date.date(): notes}
                         mi_milestone_name_list.append(mi_altered_milestone_key_name)
                         break
 
