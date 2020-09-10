@@ -11,11 +11,11 @@ from datamaps.api import project_data_from_master
 start_date = datetime.date(2020, 6, 1)
 end_date = datetime.date(2022, 6, 30)
 
-test_master_one = project_data_from_master("/home/will/code/python/analysis_engine/tests/resources/test_master_4_2016.xlsx", 4, 2016)
-test_master_two = project_data_from_master("/home/will/code/python/analysis_engine/tests/resources/test_master_4_2017.xlsx", 4, 2017)
-test_master_three = project_data_from_master("/home/will/code/python/analysis_engine/tests/resources/test_master_4_2018.xlsx", 4, 2018)
-test_master_four = project_data_from_master("/home/will/code/python/analysis_engine/tests/resources/test_master_4_2017.xlsx", 4, 2019)
-test_master_data = [test_master_one, test_master_two, test_master_three, test_master_four]
+# test_master_one = project_data_from_master("/home/will/code/python/analysis_engine/tests/resources/test_master_4_2016.xlsx", 4, 2016)
+# test_master_two = project_data_from_master("/home/will/code/python/analysis_engine/tests/resources/test_master_4_2017.xlsx", 4, 2017)
+# test_master_three = project_data_from_master("/home/will/code/python/analysis_engine/tests/resources/test_master_4_2018.xlsx", 4, 2018)
+# test_master_four = project_data_from_master("/home/will/code/python/analysis_engine/tests/resources/test_master_4_2019.xlsx", 4, 2019)
+# test_master_data = [test_master_one, test_master_two, test_master_three, test_master_fou
 
 
 @pytest.fixture
@@ -27,9 +27,18 @@ def abbreviations():
             'Columbia': 'Columbia',
             'Mars': 'Mars'}
 
-@pytest.fixture
+
+@pytest.fixture(scope="module")
 def mst():
-    return Masters(test_master_data, test_master_four.projects)
+    test_master_data = [project_data_from_master("/home/will/code/python/"
+                                                 "analysis_engine/tests/resources/test_master_4_2016.xlsx", 4, 2016),
+                        project_data_from_master("/home/will/code/python/"
+                                                 "analysis_engine/tests/resources/test_master_4_2017.xlsx", 4, 2017),
+                        project_data_from_master("/home/will/code/python/"
+                                                 "analysis_engine/tests/resources/test_master_4_2018.xlsx", 4, 2018),
+                        project_data_from_master("/home/will/code/python/"
+                                                 "analysis_engine/tests/resources/test_master_4_2019.xlsx", 4, 2019)]
+    return Masters(test_master_data, test_master_data[0].projects)
 
 
 def test_Masters_get_baseline_data(mst):
