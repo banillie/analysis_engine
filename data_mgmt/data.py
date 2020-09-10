@@ -248,18 +248,16 @@ class MilestoneData:
         self.group_choronological_list_current = []
         self.group_choronological_list_last = []
         self.group_choronological_list_baseline = []
-        self.project_current_p_project = {}
-        self.project_last_p_project = {}
-        self.project_baseline_p_project = {}
-        self.project_baseline_two_p_project = {}
-        self.project_data()
-        self.group_data()
-        self.project_data_p_project()
+        # self.project_data()
+        # self.group_data()
 
-    def project_data(self):  # renamed to project_data
+    def project_data(self, milestone_type):  # renamed to project_data
         """
-        creates three dictionaries
+        Creates project milestone dictionaries for current, last, and
+        baselines when provided with a milestone_type for all
+        projects within a MilestoneData type.
         """
+        self.milestone_type = milestone_type
 
         current_dict = {}
         last_dict = {}
@@ -269,83 +267,136 @@ class MilestoneData:
         sorted_last = []
         sorted_baseline = []
 
-        for name in self.masters.project_names:
-            for ind in self.masters.bl_index[name][:4]:  # limit to four for now
-                lower_dict = {}
-                raw_list = []
-                try:
-                    p_data = self.masters.master_data[ind].data[name]
-                    for i in range(1, 50):
-                        try:
+        if self.milestone_type == 'All':
+            for name in self.masters.project_names:
+                for ind in self.masters.bl_index[name][:4]:  # limit to four for now
+                    lower_dict = {}
+                    raw_list = []
+                    try:
+                        p_data = self.masters.master_data[ind].data[name]
+                        for i in range(1, 50):
+                            try:
+                                try:
+                                    t = (
+                                        p_data["Approval MM" + str(i)],
+                                        p_data["Approval MM" + str(i) + " Forecast / Actual"],
+                                        p_data["Approval MM" + str(i) + " Notes"],
+                                    )
+                                    raw_list.append(t)
+                                except KeyError:
+                                    t = (
+                                        p_data["Approval MM" + str(i)],
+                                        p_data["Approval MM" + str(i) + " Forecast - Actual"],
+                                        p_data["Approval MM" + str(i) + " Notes"],
+                                    )
+                                    raw_list.append(t)
+
+                                t = (
+                                    p_data["Assurance MM" + str(i)],
+                                    p_data["Assurance MM" + str(i) + " Forecast - Actual"],
+                                    p_data["Assurance MM" + str(i) + " Notes"],
+                                )
+                                raw_list.append(t)
+
+                            except KeyError:
+                                pass
+
+                        for i in range(18, 67):
                             try:
                                 t = (
-                                    p_data["Approval MM" + str(i)],
-                                    p_data["Approval MM" + str(i) + " Forecast / Actual"],
-                                    p_data["Approval MM" + str(i) + " Notes"],
+                                    p_data["Project MM" + str(i)],
+                                    p_data["Project MM" + str(i) + " Forecast - Actual"],
+                                    p_data["Project MM" + str(i) + " Notes"],
                                 )
                                 raw_list.append(t)
                             except KeyError:
-                                t = (
-                                    p_data["Approval MM" + str(i)],
-                                    p_data["Approval MM" + str(i) + " Forecast - Actual"],
-                                    p_data["Approval MM" + str(i) + " Notes"],
-                                )
-                                raw_list.append(t)
-
-                            t = (
-                                p_data["Assurance MM" + str(i)],
-                                p_data["Assurance MM" + str(i) + " Forecast - Actual"],
-                                p_data["Assurance MM" + str(i) + " Notes"],
-                            )
-                            raw_list.append(t)
-
-                        except KeyError:
-                            pass
-
-                    for i in range(18, 67):
-                        try:
-                            t = (
-                                p_data["Project MM" + str(i)],
-                                p_data["Project MM" + str(i) + " Forecast - Actual"],
-                                p_data["Project MM" + str(i) + " Notes"],
-                            )
-                            raw_list.append(t)
-                        except KeyError:
-                            pass
-                except (KeyError, TypeError):
-                    pass
-
-                # put the list in chronological order
-                sorted_list = sorted(raw_list, key=lambda k: (k[1] is None, k[1]))
-
-                # loop to stop key names being the same. Not ideal as doesn't handle keys that may already have numbers as
-                # strings at end of names. But still useful.
-                for x in sorted_list:
-                    if x[0] is not None:
-                        if x[0] in lower_dict:
-                            for y in range(2, 15):
-                                key_name = x[0] + " " + str(y)
-                                if key_name in lower_dict:
-                                    continue
-                                else:
-                                    lower_dict[key_name] = {x[1]: x[2]}
-                                    break
-                        else:
-                            lower_dict[x[0]] = {x[1]: x[2]}
-                    else:
+                                pass
+                    except (KeyError, TypeError):
                         pass
 
-                if self.masters.bl_index[name].index(ind) == 0:
-                    current_dict[name] = lower_dict
-                    sorted_current = sorted_list
-                if self.masters.bl_index[name].index(ind) == 1:
-                    last_dict[name] = lower_dict
-                    sorted_last = sorted_list
-                if self.masters.bl_index[name].index(ind) == 2:
-                    baseline_dict[name] = lower_dict
-                    sorted_baseline = sorted_list
-                if self.masters.bl_index[name].index(ind) == 3:
-                    baseline_dict_two[name] = lower_dict
+                    # put the list in chronological order
+                    sorted_list = sorted(raw_list, key=lambda k: (k[1] is None, k[1]))
+
+                    # loop to stop key names being the same. Not ideal as doesn't handle keys that may already have numbers as
+                    # strings at end of names. But still useful.
+                    for x in sorted_list:
+                        if x[0] is not None:
+                            if x[0] in lower_dict:
+                                for y in range(2, 15):
+                                    key_name = x[0] + " " + str(y)
+                                    if key_name in lower_dict:
+                                        continue
+                                    else:
+                                        lower_dict[key_name] = {x[1]: x[2]}
+                                        break
+                            else:
+                                lower_dict[x[0]] = {x[1]: x[2]}
+                        else:
+                            pass
+
+                    if self.masters.bl_index[name].index(ind) == 0:
+                        current_dict[name] = lower_dict
+                        sorted_current = sorted_list
+                    if self.masters.bl_index[name].index(ind) == 1:
+                        last_dict[name] = lower_dict
+                        sorted_last = sorted_list
+                    if self.masters.bl_index[name].index(ind) == 2:
+                        baseline_dict[name] = lower_dict
+                        sorted_baseline = sorted_list
+                    if self.masters.bl_index[name].index(ind) == 3:
+                        baseline_dict_two[name] = lower_dict
+
+        if self.milestone_type == 'Delivery':
+            for name in self.masters.project_names:
+                for ind in self.masters.bl_index[name][:4]:  # limit to four for now
+                    lower_dict = {}
+                    raw_list = []
+                    try:
+                        p_data = self.masters.master_data[ind].data[name]
+                        for i in range(18, 67):
+                            try:
+                                t = (
+                                    p_data["Project MM" + str(i)],
+                                    p_data["Project MM" + str(i) + " Forecast - Actual"],
+                                    p_data["Project MM" + str(i) + " Notes"],
+                                )
+                                raw_list.append(t)
+                            except KeyError:
+                                pass
+                    except (KeyError, TypeError):
+                        pass
+
+                    # put the list in chronological order
+                    sorted_list = sorted(raw_list, key=lambda k: (k[1] is None, k[1]))
+
+                    # loop to stop key names being the same. Not ideal as doesn't handle keys that may already have numbers as
+                    # strings at end of names. But still useful.
+                    for x in sorted_list:
+                        if x[0] is not None:
+                            if x[0] in lower_dict:
+                                for y in range(2, 15):
+                                    key_name = x[0] + " " + str(y)
+                                    if key_name in lower_dict:
+                                        continue
+                                    else:
+                                        lower_dict[key_name] = {x[1]: x[2]}
+                                        break
+                            else:
+                                lower_dict[x[0]] = {x[1]: x[2]}
+                        else:
+                            pass
+
+                    if self.masters.bl_index[name].index(ind) == 0:
+                        current_dict[name] = lower_dict
+                        # sorted_current = sorted_list
+                    if self.masters.bl_index[name].index(ind) == 1:
+                        last_dict[name] = lower_dict
+                        # sorted_last = sorted_list
+                    if self.masters.bl_index[name].index(ind) == 2:
+                        baseline_dict[name] = lower_dict
+                        # sorted_baseline = sorted_list
+                    if self.masters.bl_index[name].index(ind) == 3:
+                        baseline_dict_two[name] = lower_dict
 
         self.project_current = current_dict
         self.project_last = last_dict
@@ -355,11 +406,13 @@ class MilestoneData:
         self.project_choronological_list_last = sorted_last
         self.project_choronological_list_baseline = sorted_baseline
 
-    def group_data(self):
+    def group_data(self, milestone_type):
         """
-        Given a list of project names in project_names,
-        returns a dictionary containing data for group of projects
+        Creates group milestone dictionaries for current, last, and
+        baselines when provided with a milestone_type for all
+        projects within a MilestoneData type.
         """
+        self.milestone_type = milestone_type
 
         current_dict = {}
         last_dict = {}
@@ -369,91 +422,92 @@ class MilestoneData:
         sorted_last = []
         sorted_baseline = []
 
-        for num in range(0, 4):
-            raw_list = []
-            for name in self.masters.project_names:
-                try:
-                    p_data = self.masters.master_data[self.masters.bl_index[name][num]].data[name]
-                    for i in range(1, 50):
-                        try:
+        if self.milestone_type == 'All':
+            for num in range(0, 4):
+                raw_list = []
+                for name in self.masters.project_names:
+                    try:
+                        p_data = self.masters.master_data[self.masters.bl_index[name][num]].data[name]
+                        for i in range(1, 50):
                             try:
-                                if p_data['Approval MM' + str(i)] is None:
+                                try:
+                                    if p_data['Approval MM' + str(i)] is None:
+                                        pass
+                                    else:
+                                        key_name = self.abbreviations[name] + ', ' + p_data['Approval MM' + str(i)]
+                                        t = (key_name,
+                                             p_data['Approval MM' + str(i) + ' Forecast / Actual'],
+                                             p_data['Approval MM' + str(i) + ' Notes'])
+                                        raw_list.append(t)
+                                except KeyError:
+                                    if p_data['Approval MM' + str(i)] is None:
+                                        pass
+                                    else:
+                                        key_name = self.abbreviations[name] + ', ' + p_data['Approval MM' + str(i)]
+                                        t = (key_name,
+                                             p_data['Approval MM' + str(i) + ' Forecast - Actual'],
+                                             p_data['Approval MM' + str(i) + ' Notes'])
+                                        raw_list.append(t)
+
+                                if p_data['Assurance MM' + str(i)] is None:
                                     pass
                                 else:
-                                    key_name = self.abbreviations[name] + ', ' + p_data['Approval MM' + str(i)]
+                                    key_name = self.abbreviations[name] + ', ' + p_data['Assurance MM' + str(i)]
                                     t = (key_name,
-                                         p_data['Approval MM' + str(i) + ' Forecast / Actual'],
-                                         p_data['Approval MM' + str(i) + ' Notes'])
+                                         p_data['Assurance MM' + str(i) + ' Forecast - Actual'],
+                                         p_data['Assurance MM' + str(i) + ' Notes'])
+                                    raw_list.append(t)
+
+                            except KeyError:
+                                pass
+
+                        for i in range(18, 67):
+                            try:
+                                if p_data['Project MM' + str(i)] is None:
+                                    pass
+                                else:
+                                    key_name = self.abbreviations[name] + ', ' + p_data['Project MM' + str(i)]
+                                    t = (key_name,
+                                         p_data['Project MM' + str(i) + ' Forecast - Actual'],
+                                         p_data['Project MM' + str(i) + ' Notes'])
                                     raw_list.append(t)
                             except KeyError:
-                                if p_data['Approval MM' + str(i)] is None:
-                                    pass
+                                pass
+                    except (KeyError, TypeError, IndexError):
+                        pass
+
+                sorted_list = sorted(raw_list, key=lambda k: (k[1] is None, k[1]))  # put the list in chronological order
+
+                """loop to stop key names being the same. Not ideal as doesn't handle keys that may
+                already have numbers as strings at end of names. But still useful."""
+
+                output_dict = {}
+                for x in sorted_list:
+                    if x[0] is not None:
+                        if x[0] in output_dict:
+                            for i in range(2, 15):
+                                key_name = x[0] + ' ' + str(i)
+                                if key_name in output_dict:
+                                    continue
                                 else:
-                                    key_name = self.abbreviations[name] + ', ' + p_data['Approval MM' + str(i)]
-                                    t = (key_name,
-                                         p_data['Approval MM' + str(i) + ' Forecast - Actual'],
-                                         p_data['Approval MM' + str(i) + ' Notes'])
-                                    raw_list.append(t)
-
-                            if p_data['Assurance MM' + str(i)] is None:
-                                pass
-                            else:
-                                key_name = self.abbreviations[name] + ', ' + p_data['Assurance MM' + str(i)]
-                                t = (key_name,
-                                     p_data['Assurance MM' + str(i) + ' Forecast - Actual'],
-                                     p_data['Assurance MM' + str(i) + ' Notes'])
-                                raw_list.append(t)
-
-                        except KeyError:
-                            pass
-
-                    for i in range(18, 67):
-                        try:
-                            if p_data['Project MM' + str(i)] is None:
-                                pass
-                            else:
-                                key_name = self.abbreviations[name] + ', ' + p_data['Project MM' + str(i)]
-                                t = (key_name,
-                                     p_data['Project MM' + str(i) + ' Forecast - Actual'],
-                                     p_data['Project MM' + str(i) + ' Notes'])
-                                raw_list.append(t)
-                        except KeyError:
-                            pass
-                except (KeyError, TypeError, IndexError):
-                    pass
-
-            sorted_list = sorted(raw_list, key=lambda k: (k[1] is None, k[1]))  # put the list in chronological order
-
-            """loop to stop key names being the same. Not ideal as doesn't handle keys that may
-            already have numbers as strings at end of names. But still useful."""
-
-            output_dict = {}
-            for x in sorted_list:
-                if x[0] is not None:
-                    if x[0] in output_dict:
-                        for i in range(2, 15):
-                            key_name = x[0] + ' ' + str(i)
-                            if key_name in output_dict:
-                                continue
-                            else:
-                                output_dict[key_name] = {x[1]: x[2]}
-                                break
+                                    output_dict[key_name] = {x[1]: x[2]}
+                                    break
+                        else:
+                            output_dict[x[0]] = {x[1]: x[2]}
                     else:
-                        output_dict[x[0]] = {x[1]: x[2]}
-                else:
-                    pass
+                        pass
 
-            if num == 0:
-                current_dict = output_dict
-                sorted_current = sorted_list
-            if num == 1:
-                last_dict = output_dict
-                sorted_last = sorted_list
-            if num == 2:
-                baseline_dict = output_dict
-                sorted_baseline = sorted_list
-            if num == 3:
-                baseline_dict_two = output_dict
+                if num == 0:
+                    current_dict = output_dict
+                    sorted_current = sorted_list
+                if num == 1:
+                    last_dict = output_dict
+                    sorted_last = sorted_list
+                if num == 2:
+                    baseline_dict = output_dict
+                    sorted_baseline = sorted_list
+                if num == 3:
+                    baseline_dict_two = output_dict
 
         self.group_current = current_dict
         self.group_last = last_dict
@@ -462,78 +516,6 @@ class MilestoneData:
         self.group_choronological_list_current = sorted_current
         self.group_choronological_list_last = sorted_last
         self.group_choronological_list_baseline = sorted_baseline
-
-    def project_data_p_project(self):  # renamed to project_data
-        """
-        creates three dictionaries
-        """
-
-        current_dict = {}
-        last_dict = {}
-        baseline_dict = {}
-        baseline_dict_two = {}
-        # sorted_current = []
-        # sorted_last = []
-        # sorted_baseline = []
-
-        for name in self.masters.project_names:
-            for ind in self.masters.bl_index[name][:4]:  # limit to four for now
-                lower_dict = {}
-                raw_list = []
-                try:
-                    p_data = self.masters.master_data[ind].data[name]
-                    for i in range(18, 67):
-                        try:
-                            t = (
-                                p_data["Project MM" + str(i)],
-                                p_data["Project MM" + str(i) + " Forecast - Actual"],
-                                p_data["Project MM" + str(i) + " Notes"],
-                            )
-                            raw_list.append(t)
-                        except KeyError:
-                            pass
-                except (KeyError, TypeError):
-                    pass
-
-                # put the list in chronological order
-                sorted_list = sorted(raw_list, key=lambda k: (k[1] is None, k[1]))
-
-                # loop to stop key names being the same. Not ideal as doesn't handle keys that may already have numbers as
-                # strings at end of names. But still useful.
-                for x in sorted_list:
-                    if x[0] is not None:
-                        if x[0] in lower_dict:
-                            for y in range(2, 15):
-                                key_name = x[0] + " " + str(y)
-                                if key_name in lower_dict:
-                                    continue
-                                else:
-                                    lower_dict[key_name] = {x[1]: x[2]}
-                                    break
-                        else:
-                            lower_dict[x[0]] = {x[1]: x[2]}
-                    else:
-                        pass
-
-                if self.masters.bl_index[name].index(ind) == 0:
-                    current_dict[name] = lower_dict
-                    #sorted_current = sorted_list
-                if self.masters.bl_index[name].index(ind) == 1:
-                    last_dict[name] = lower_dict
-                    #sorted_last = sorted_list
-                if self.masters.bl_index[name].index(ind) == 2:
-                    baseline_dict[name] = lower_dict
-                    #sorted_baseline = sorted_list
-                if self.masters.bl_index[name].index(ind) == 3:
-                    baseline_dict_two[name] = lower_dict
-
-        self.project_current_p_project = current_dict
-        self.project_last_p_project = last_dict
-        self.project_baseline_p_project = baseline_dict
-        self.project_baseline_two_p_project = baseline_dict_two
-        # self.project_choronological_list_current = sorted_current
-        # self.project_choronological_list_last = sorted_last
-        # self.project_choronological_list_baseline = sorted_baseline
 
 
 class MilestoneChartData:
