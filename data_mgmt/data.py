@@ -19,39 +19,29 @@ def _platform_docs_dir() -> Path:
 
 root_path = _platform_docs_dir()
 
-'''master data'''
-# q1_2021 = project_data_from_master(root_path / 'core_data/master_1_2020.xlsx', 1, 2020)
-# q4_1920 = project_data_from_master(root_path / 'core_data/master_4_2019.xlsx', 4, 2019)
-# q3_1920 = project_data_from_master(root_path / 'core_data/master_3_2019.xlsx', 3, 2019)
-# q2_1920 = project_data_from_master(root_path / 'core_data/master_2_2019.xlsx', 2, 2019)
-# q1_1920 = project_data_from_master(root_path / 'core_data/master_1_2019.xlsx', 1, 2019)
-# q4_1819 = project_data_from_master(root_path / 'core_data/master_4_2018.xlsx', 4, 2018)
-# q3_1819 = project_data_from_master(root_path / 'core_data/master_3_2018.xlsx', 3, 2018)
-# q2_1819 = project_data_from_master(root_path / 'core_data/master_2_2018.xlsx', 2, 2018)
-# q1_1819 = project_data_from_master(root_path / 'core_data/master_1_2018.xlsx', 1, 2018)
-# q4_1718 = project_data_from_master(root_path / 'core_data/master_4_2017.xlsx', 4, 2017)
-# q3_1718 = project_data_from_master(root_path / 'core_data/master_3_2017.xlsx', 3, 2017)
-# q2_1718 = project_data_from_master(root_path / 'core_data/master_2_2017.xlsx', 2, 2017)
-# q1_1718 = project_data_from_master(root_path / 'core_data/master_1_2017.xlsx', 1, 2017)
-# q4_1617 = project_data_from_master(root_path / 'core_data/master_4_2016.xlsx', 4, 2016)
-# q3_1617 = project_data_from_master(root_path / 'core_data/master_3_2016.xlsx', 3, 2016)
-#
-# '''List of all masters'''
-# master_data_list = [q1_2021,
-#                     q4_1920,
-#                     q3_1920,
-#                     q2_1920,
-#                     q1_1920,
-#                     q4_1819,
-#                     q3_1819,
-#                     q2_1819,
-#                     q1_1819,
-#                     q4_1718,
-#                     q3_1718,
-#                     q2_1718,
-#                     q1_1718,
-#                     q4_1617,
-#                     q3_1617]
+def get_master_data():
+    master_data_list = [project_data_from_master(root_path / 'core_data/master_1_2020.xlsx', 1, 2020),
+                        project_data_from_master(root_path / 'core_data/master_4_2019.xlsx', 4, 2019),
+                        project_data_from_master(root_path / 'core_data/master_3_2019.xlsx', 3, 2019),
+                        project_data_from_master(root_path / 'core_data/master_2_2019.xlsx', 2, 2019),
+                        project_data_from_master(root_path / 'core_data/master_1_2019.xlsx', 1, 2019),
+                        project_data_from_master(root_path / 'core_data/master_4_2018.xlsx', 4, 2018),
+                        project_data_from_master(root_path / 'core_data/master_3_2018.xlsx', 3, 2018),
+                        project_data_from_master(root_path / 'core_data/master_2_2018.xlsx', 2, 2018),
+                        project_data_from_master(root_path / 'core_data/master_1_2018.xlsx', 1, 2018),
+                        project_data_from_master(root_path / 'core_data/master_4_2017.xlsx', 4, 2017),
+                        project_data_from_master(root_path / 'core_data/master_3_2017.xlsx', 3, 2017),
+                        project_data_from_master(root_path / 'core_data/master_2_2017.xlsx', 2, 2017),
+                        project_data_from_master(root_path / 'core_data/master_1_2017.xlsx', 1, 2017),
+                        project_data_from_master(root_path / 'core_data/master_4_2016.xlsx', 4, 2016),
+                        project_data_from_master(root_path / 'core_data/master_3_2016.xlsx', 3, 2016)]
+
+    return master_data_list
+
+
+def get_current_project_names():
+    master = project_data_from_master(root_path / 'core_data/master_1_2020.xlsx', 1, 2020)
+    return master.projects
 
 
 ipdc_date = datetime.date(2020, 8, 10)  # ipdc date. Python date format is Year, Month, day
