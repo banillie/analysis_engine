@@ -1,6 +1,5 @@
-from data_mgmt.data import list_of_masters_all, root_path, Masters, CostData, \
-    BenefitsData
-from data_mgmt import Projects
+from data_mgmt.data import master_data_list, root_path, Masters, CostData, \
+    BenefitsData, Project
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import numpy as np
@@ -8,13 +7,8 @@ import datetime
 from datetime import timedelta
 from textwrap import wrap
 
-test_masters = list_of_masters_all
-all_projects = list_of_masters_all[0].projects
-#all_projects.remove(ProjectGroupName.hs2_programme)
-# all_projects.remove(Projects.hs2_1)
-# all_projects.remove(Projects.hs2_2a)
-# all_projects.remove(Projects.hs2_2b)
-#all_projects.remove(ProjectGroupName.tru)
+test_masters = master_data_list
+all_projects = master_data_list[0].projects
 
 year_list = ['20-21',
              '21-22',
