@@ -6,23 +6,23 @@ from datamaps.api import project_data_from_master
 from openpyxl import load_workbook, Workbook
 import random
 
-test_master_one = project_data_from_master("/home/will/"
-                                           "code/python/analysis_engine/"
-                                           "tests/resources/test_master_4_2016.xlsx", 4, 2016)
-test_master_two = project_data_from_master("/home/will/code/python/analysis_engine/"
-                                           "tests/resources"
-                                           "/test_master_4_2017.xlsx", 4, 2017)
-test_master_three = project_data_from_master("/home/will/code/python/analysis_engine/"
-                                             "tests/resources"
-                                             "/test_master_4_2018.xlsx", 4, 2018)
-test_master_four = project_data_from_master("/home/will/code/python/analysis_engine/"
-                                            "tests/resources"
-                                            "/test_master_4_2019.xlsx", 4, 2019)
-
-test_master_data_list = [test_master_one,
-                         test_master_two,
-                         test_master_three,
-                         test_master_four]
+# test_master_one = project_data_from_master("/home/will/"
+#                                            "code/python/analysis_engine/"
+#                                            "tests/resources/test_master_4_2016.xlsx", 4, 2016)
+# test_master_two = project_data_from_master("/home/will/code/python/analysis_engine/"
+#                                            "tests/resources"
+#                                            "/test_master_4_2017.xlsx", 4, 2017)
+# test_master_three = project_data_from_master("/home/will/code/python/analysis_engine/"
+#                                              "tests/resources"
+#                                              "/test_master_4_2018.xlsx", 4, 2018)
+# test_master_four = project_data_from_master("/home/will/code/python/analysis_engine/"
+#                                             "tests/resources"
+#                                             "/test_master_4_2019.xlsx", 4, 2019)
+#
+# test_master_data_list = [test_master_one,
+#                          test_master_two,
+#                          test_master_three,
+#                          test_master_four]
 
 test_wb_one = load_workbook("/home/will/"
                             "code/python/analysis_engine/"
