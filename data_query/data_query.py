@@ -208,9 +208,7 @@ def get_key_type(key):
 
 '''Running the programme'''
 '''Place all keys of interest as strings in to a list or use one of the imported lists from the data file'''
-data_interest = ['Project End Date',
-                 'Start of Project',
-                 'Full Operations']
+data_interest = ['Start of Construction/build']
 
 '''output one - all data. 
 first variable = list of project names. There are two options. 1) latest_quarter_project_names 2) all_projects_names
