@@ -93,17 +93,25 @@ def return_data(data_key_list, quarter_master):
 
 # Place all keys of interest as stings in to a list
 # or use one of the imported lists from the data file
-data_interest = ['IPDC approval point']
+data_interest = ['IPDC approval point',
+                 'Total Forecast',
+                 'SOBC - IPDC Approval',
+                 'OBC - IPDC Approval',
+                 'FBC - IPDC Approval',
+                 'Start of Construction/build',
+                 'Start of Operation',
+                 'Full Operations',
+                 'Project End Date']
 
 # Specify which quarter to take the data from
 # format 'quarter fy' e.g. Q1 20/21
-quarter = 'Q3 16/17'
+quarter = 'Q1 20/21'
 
 # Default name for output file is s_data_query_output.
 # See general guidance re saving output files names
 # if other name to be used.
 run = return_data(data_interest, quarter)
-run.save(root_path/'output/s_data_query_output.xlsx')
+run.save(root_path/'output/supply_chain_data_query_output.xlsx')
 
 
 
