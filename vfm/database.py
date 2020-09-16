@@ -7,8 +7,8 @@ def create_connect_db(db_name):
 
 
 #  create a new table in vfm db.
-def create_vfm_table(conn, insert_quarter):
-    # conn = sqlite3.connect(db_name + '.db')
+def create_vfm_table(db_name, insert_quarter):
+    conn = sqlite3.connect(db_name + '.db')
     c = conn.cursor()
 
     c.execute("""CREATE TABLE '{quarter}'
@@ -64,7 +64,8 @@ def get_quarter_values(vfm_list, quarter):
 
 #  insert many values into vfm db.
 #  To be further abstracted for all dbs.
-def insert_many_vfm_db(conn, quarter, vfm_list):
+def insert_many_vfm_db(db_name, quarter, vfm_list):
+    conn = sqlite3.connect(db_name + '.db')
     c = conn.cursor()
     c.executemany("INSERT INTO '{table}' VALUES (?,?,?,?,?,?,?,?)".format(table=quarter), vfm_list)
     conn.commit()
