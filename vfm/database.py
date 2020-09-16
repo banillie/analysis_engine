@@ -5,6 +5,7 @@ def create_connect_db(db_name):
     conn = sqlite3.connect(db_name + '.db')
     return conn
 
+
 #  create a new table in vfm db.
 def create_vfm_table(conn, insert_quarter):
     # conn = sqlite3.connect(db_name + '.db')
@@ -22,6 +23,7 @@ def create_vfm_table(conn, insert_quarter):
 
     conn.commit()
     conn.close()
+
 
 #  gets vfm data values from master data in excel wbs.
 def get_vfm_values(masters):
@@ -60,10 +62,47 @@ def get_quarter_values(vfm_list, quarter):
     return output_list
 
 
+#  insert many values into vfm db.
+#  To be further abstracted for all dbs.
 def insert_many_vfm_db(conn, quarter, vfm_list):
     c = conn.cursor()
     c.executemany("INSERT INTO '{table}' VALUES (?,?,?,?,?,?,?,?)".format(table=quarter), vfm_list)
-    #c.executemany('INSERT INTO q4_1920 VALUES (?,?,?,?,?,?,?,?)', vfm_q4_1920)
+    conn.commit()
+    conn.close()
+
+
+#  returns a list of project names
+def get_project_names(db_name, quarter):
+    conn = sqlite3.connect(db_name + '.db')
+    conn.row_factory = lambda cursor, row: row[0]
+    c = conn.cursor()
+    names = c.execute("SELECT project_name FROM '{table}'".format(table=quarter)).fetchall()
+    conn.commit()
+    conn.close()
+    return names
+
+
+#  Converts a db into a python dictionary when give a db and qrt list.
+def convert_db_python_dict(db_name, quarter_list):
+    conn = sqlite3.connect(db_name + '.db')
+
+    # This is the important part, here we are setting row_factory property of
+    # connection object to sqlite3.Row(sqlite3.Row is an implementation of
+    # row_factory)
+    conn.row_factory = sqlite3.Row
+    c = conn.cursor()
+    output_dict = {}
+    for quarter in quarter_list:
+        inner_dict = {}
+        project_names = get_project_names(db_name, quarter)
+        for project in project_names:
+            c.execute("select * from '{table}' WHERE project_name = '{p}'".format(table=quarter, p=project))
+            result = [dict(row) for row in c.fetchall()][0]  # [0] there as output is dict in a list
+            inner_dict[project] = result
+
+        output_dict[quarter] = inner_dict
 
     conn.commit()
     conn.close()
+
+    return output_dict
