@@ -175,33 +175,64 @@ def compile_data_pure_db(db_name, project_names, key_list, column_index):
     return wb
 
 
-#  METHOD USES ALL PYTHON DICTIONARIES
-master_data = get_master_data()
-current_project_name_list = get_current_project_names()
+def compile_vfm_cat_data_db(masters, cat_list):
+    wb = Workbook()
+    ws = wb.active
 
-run = compile_data(master_data, current_project_name_list)
-run.save(root_path / "output/vfm_data_output_dict_way.xlsx")
+    for row, cat in enumerate(cat_list):
+        i = row + 2  # has to start with row 1 in excel. data entered into second row
+        counter = 0
+        for col, m in enumerate(masters):
+            project_name = list(masters[m].keys())
+            for p in project_name:
+                if masters[m][p]['vfm_cat_single'] == cat:
+                    counter += 1
+
+            ws.cell(row=i, column=1+col).value = counter
+
+        ws.cell(row=i, column=1).value = cat
+
+        return wb
+
+
+#  METHOD USES ALL PYTHON DICTIONARIES
+# master_data = get_master_data()
+# current_project_name_list = get_current_project_names()
+#
+# run = compile_data(master_data, current_project_name_list)
+# run.save(root_path / "output/vfm_data_output_dict_way.xlsx")
 
 #  METHOD USES SQLITE DB AND PYTHON DICTIONARIES
-q_list = ['q1_2021', 'q4_1920']
-master_dict = convert_db_python_dict('vfm', q_list)
-project_names = get_project_names('vfm', 'q1_2021')
-
-run = compile_data_db(master_dict, project_names)
-run.save(root_path / "output/vfm_data_output_db_dict_way.xlsx")
+# q_list = ['q1_2021', 'q4_1920']
+# master_dict = convert_db_python_dict('vfm', q_list)
+# project_names = get_project_names('vfm', 'q1_2021')
+#
+# run = compile_data_db(master_dict, project_names)
+# run.save(root_path / "output/vfm_data_output_db_dict_way.xlsx")
 
 
 #  METHOD USES SQLTE DB ONLY
-vfm_key_list = ['project_name text',
-                'project_group text',
-                'npv real',
-                'adjusted_bcr real',
-                'initial_bcr real',
-                'vfm_cat_single text',
-                'pvc real',
-                'pvb real']
-p_names = get_project_names('vfm', 'q1_2021')
-c_index = [(3, 4), (5, 6), (7, 8), (9, 10), (11, 12), (13, 14), (15, 16)] # column index
+# vfm_key_list = ['project_name text',
+#                 'project_group text',
+#                 'npv real',
+#                 'adjusted_bcr real',
+#                 'initial_bcr real',
+#                 'vfm_cat_single text',
+#                 'pvc real',
+#                 'pvb real']
+# p_names = get_project_names('vfm', 'q1_2021')
+# c_index = [(3, 4), (5, 6), (7, 8), (9, 10), (11, 12), (13, 14), (15, 16)] # column index
+#
+# run = compile_data_pure_db('vfm', p_names, vfm_key_list, c_index)
+# run.save(root_path / "output/vfm_data_output_db_way.xlsx")
 
-run = compile_data_pure_db('vfm', p_names, vfm_key_list, c_index)
-run.save(root_path / "output/vfm_data_output_db_way.xlsx")
+
+#  COMPILE VFM CAT DATA
+
+ordered_cat_list = ['Poor', 'Low', 'Medium', 'High', 'Very High',
+                    'Very High and Financially Positive', 'Economically Positive']
+q_list = ['q1_2021', 'q4_1920']
+master_data = convert_db_python_dict('vfm', q_list)
+project_names = get_project_names('vfm', 'q1_2021')
+run = compile_vfm_cat_data_db(master_data, ordered_cat_list)
+run.save(root_path / "output/vfm_cat_count.xlsx")
