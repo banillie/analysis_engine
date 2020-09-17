@@ -26,6 +26,13 @@ def query_db(db_name, key, quarter):
 
 
 def vfm_matplotlib_graph(labels, current_qrt, last_qrt):
+    #  Need to split this strings over two lines on x axis
+    for n, i in enumerate(labels):
+        if i == 'Very High and Financially Positive':
+            labels[n] = 'Very High and \n Financially Positive'
+        if i == 'Economically Positive':
+            labels[n] = 'Economically \n Positive'
+
     x = np.arange(len(labels))  # the label locations
     width = 0.35  # the width of the bars
 
@@ -38,6 +45,8 @@ def vfm_matplotlib_graph(labels, current_qrt, last_qrt):
     ax.set_title('Projects by VfM Category')
     ax.set_xticks(x)
     ax.set_xticklabels(labels)
+    # Rotate the tick labels and set their alignment.
+    #plt.setp(ax.get_xticklabels(), alignment=)
     ax.legend()
 
     def autolabel(rects):
@@ -69,7 +78,8 @@ def get_vfm_cat_numbers(cat_list, qrt_dict):
     return result
 
 
-ordered_cat_list = ['Poor', 'Low', 'Medium', 'High', 'Very High', 'Very High and Financially Positive']
+ordered_cat_list = ['Poor', 'Low', 'Medium', 'High', 'Very High',
+                    'Very High and Financially Positive', 'Economically Positive']
 cat_data_q1_2021 = query_db('vfm', 'vfm_cat_single', 'q1_2021')
 cat_data_q4_1920 = query_db('vfm', 'vfm_cat_single', 'q4_1920')
 q1_counter = Counter(cat_data_q1_2021)
