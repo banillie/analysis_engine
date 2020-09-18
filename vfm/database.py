@@ -24,6 +24,67 @@ def create_vfm_table(db_name, insert_quarter):
     conn.commit()
     conn.close()
 
+#  create a new table in vfm db.
+def create_db(db_name):
+    conn = sqlite3.connect(db_name + '.db')
+    c = conn.cursor()
+    c.execute("""
+    DROP TABLE IF EXISTS quarter;
+    """)
+    c.execute("""
+    DROP TABLE IF EXISTS project_group;
+    """)
+    c.execute("""
+    DROP TABLE IF EXISTS project;
+    """)
+    c.execute("""
+    DROP TABLE IF EXISTS milestone_type;
+    """)
+    c.execute("""
+    DROP TABLE IF EXISTS milestone;
+    """)
+
+    c.execute("""CREATE TABLE 'quarter'
+            (id integer primary key, 
+            name text,
+            quarter_number integer)""")
+
+    c.execute("""CREATE TABLE 'project_group'
+                (id integer primary key,
+                name text)""")
+
+    c.execute("""CREATE TABLE 'project'
+            (id integer primary key,
+            quarter_id integer,
+            group_id integer,
+            project_name text,
+            FOREIGN KEY(quarter_id) REFERENCES quarter(id)
+            FOREIGN KEY(group_id) REFERENCES project_group(id))""")
+
+    c.execute("""CREATE TABLE 'milestone_type'
+            (id integer primary key,
+            type text,
+            description text)""")
+
+    c.execute("""CREATE TABLE 'milestone'
+            (id integer primary key,
+            milestone_type_id text,
+            project_id integer,
+            gov_type text,
+            ver_no real,
+            orig_baseline text,
+            forecast_actual text,
+            variance real,
+            status text,
+            notes text,
+            FOREIGN KEY(project_id) REFERENCES project(id)
+            FOREIGN KEY(milestone_type_id) REFERENCES milestone_type(id)
+            )""")
+
+    conn.commit()
+    conn.close()
+
+
 
 #  gets vfm data values from master data in excel wbs.
 def get_vfm_values(masters):
