@@ -6,6 +6,7 @@ from data_mgmt.data import get_master_data, get_current_project_names, root_path
 from vfm.database import convert_db_python_dict, get_project_names
 import sqlite3
 
+
 #  Places data in excel wb. Using python dictionary structure.
 def compile_data(masters, project_name_list):
     wb = Workbook()
@@ -156,7 +157,7 @@ def compile_data_pure_db(db_name, project_names, key_list, column_index):
             c.execute("SELECT {key} FROM q1_2021 WHERE "
                       "project_name = '{pn}'".format(key=key, pn=str(project_name)))
             vfm_db_q1_2021 = c.fetchone()
-            #print(vfm_db_q1_2021[0])
+            # print(vfm_db_q1_2021[0])
             try:
                 ws.cell(row=row, column=column_index[x][0]).value = vfm_db_q1_2021[0]
             except TypeError:
@@ -175,24 +176,128 @@ def compile_data_pure_db(db_name, project_names, key_list, column_index):
     return wb
 
 
+#  places vfm category figures into excel wb
 def compile_vfm_cat_data_db(masters, cat_list):
     wb = Workbook()
     ws = wb.active
 
     for row, cat in enumerate(cat_list):
         i = row + 2  # has to start with row 1 in excel. data entered into second row
-        counter = 0
         for col, m in enumerate(masters):
+            counter = 0
+            total_projects = 0
             project_name = list(masters[m].keys())
             for p in project_name:
                 if masters[m][p]['vfm_cat_single'] == cat:
                     counter += 1
+                total_projects += 1
 
-            ws.cell(row=i, column=1+col).value = counter
+            ws.cell(row=1, column=2 + col).value = m  # values entered from col 2 onwards
+            ws.cell(row=i, column=2 + col).value = counter  # values entered from col 2 onwards
+            ws.cell(row=len(cat_list) + 3, column=2 + col).value = total_projects
 
-        ws.cell(row=i, column=1).value = cat
+        if cat is not None:
+            ws.cell(row=i, column=1).value = cat
+        else:
+            ws.cell(row=i, column=1).value = 'None'
 
-        return wb
+        ws.cell(row=len(cat_list) + 3, column=1).value = 'Total'
+
+    return wb
+
+
+def calculate_pvc(masters, cat_list):
+    wb = Workbook()
+    ws = wb.active
+
+    row = 2
+    for x, cat in enumerate(cat_list):
+        for i, m in enumerate(masters):
+            total = 0
+            projects = (masters[m].keys())
+            for p in projects:
+                if masters[m][p]['vfm_cat_single'] == cat:
+                    value = masters[m][p]['pvc']
+                    if value is not None:
+                        total += value
+                    else:
+                        pass
+                else:
+                    pass
+
+            ws.cell(row=row + x, column=i + 2).value = total
+            ws.cell(row=1, column=i + 2).value = m
+        ws.cell(row=row + x, column=1).value = cat
+
+    row = 10
+    for i, m in enumerate(masters):
+        hs2_total = 0
+        total = 0
+        other_total = 0
+        projects = list(masters[m].keys())
+
+        for p in projects:
+            value = masters[m][p]['pvc']
+            if value is not None:
+                total += value
+                if 'HS2 P' in p:
+                    hs2_total += value
+                else:
+                    other_total += value
+            else:
+                pass
+
+        ws.cell(row=row + 2, column=i + 2).value = hs2_total
+        ws.cell(row=row + 3, column=i + 2).value = other_total
+        ws.cell(row=row + 4, column=i + 2).value = total
+        ws.cell(row=row + 1, column=i + 2).value = m
+
+    ws.cell(row=row + 2, column=1).value = 'HS2'
+    ws.cell(row=row + 3, column=1).value = 'Other'
+    ws.cell(row=row + 4, column=1).value = 'Total'
+
+    row = 16
+
+    for i, m in enumerate(masters):
+        high_total = 0
+        poor_total = 0
+        high_total_no_hs2 = 0
+        poor_total_no_hs2 = 0
+        projects = list(masters[m].keys())
+
+        try:
+            projects.remove('High Speed Rail Programme (HS2)') # stop double counting
+        except ValueError:
+            pass
+
+        for cat in cat_list:
+            for p in projects:
+                if masters[m][p]['vfm_cat_single'] == cat:
+                    value = masters[m][p]['pvc']
+                    if value is not None:
+                        if cat in ['Poor', 'Low', 'Medium']:
+                            poor_total += value
+                            if 'HS2 P' not in p:
+                                poor_total_no_hs2 += value
+                        if cat in ['High', 'Very High']:
+                            high_total += value
+                            if 'HS2 P' not in p:
+                                high_total_no_hs2 += value
+                    else:
+                        pass
+
+        ws.cell(row=row + 2, column=i + 2).value = poor_total
+        ws.cell(row=row + 3, column=i + 2).value = poor_total_no_hs2
+        ws.cell(row=row + 4, column=i + 2).value = high_total
+        ws.cell(row=row + 5, column=i + 2).value = high_total_no_hs2
+        ws.cell(row=row + 1, column=i + 2).value = m
+
+    ws.cell(row=row + 2, column=1).value = 'total poor-medium'
+    ws.cell(row=row + 3, column=1).value = 'poor-medium excluding hs2'
+    ws.cell(row=row + 4, column=1).value = 'total high-very high'
+    ws.cell(row=row + 5, column=1).value = 'high-very high excluding hs2'
+
+    return wb
 
 
 #  METHOD USES ALL PYTHON DICTIONARIES
@@ -228,11 +333,13 @@ def compile_vfm_cat_data_db(masters, cat_list):
 
 
 #  COMPILE VFM CAT DATA
-
 ordered_cat_list = ['Poor', 'Low', 'Medium', 'High', 'Very High',
-                    'Very High and Financially Positive', 'Economically Positive']
+                    'Very High and Financially Positive', 'Economically Positive',
+                    None]
 q_list = ['q1_2021', 'q4_1920']
 master_data = convert_db_python_dict('vfm', q_list)
 project_names = get_project_names('vfm', 'q1_2021')
-run = compile_vfm_cat_data_db(master_data, ordered_cat_list)
-run.save(root_path / "output/vfm_cat_count.xlsx")
+# run = compile_vfm_cat_data_db(master_data, ordered_cat_list)
+# run.save(root_path / "output/vfm_cat_count.xlsx")
+run = calculate_pvc(master_data, ordered_cat_list)
+run.save(root_path / "output/pvc_count.xlsx")
