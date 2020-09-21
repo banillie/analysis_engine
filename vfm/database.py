@@ -133,6 +133,20 @@ def insert_many_vfm_db(db_name, quarter, vfm_list):
     conn.close()
 
 
+#  for querying db in python
+def query_db(db_path, key, quarter):
+    conn = sqlite3.connect(db_path)
+    conn.row_factory = lambda cursor, row: row[0]
+    c = conn.cursor()
+    c.execute("SELECT {key} FROM {table}".format(key=key, table=quarter))
+    result = c.fetchall()
+
+    conn.commit()
+    conn.close()
+
+    return result
+
+
 #  returns a list of project names
 def get_project_names(db_path, quarter):
     conn = sqlite3.connect(db_path)
