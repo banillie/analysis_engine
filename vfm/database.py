@@ -134,8 +134,8 @@ def insert_many_vfm_db(db_name, quarter, vfm_list):
 
 
 #  returns a list of project names
-def get_project_names(db_name, quarter):
-    conn = sqlite3.connect(db_name + '.db')
+def get_project_names(db_path, quarter):
+    conn = sqlite3.connect(db_path)
     conn.row_factory = lambda cursor, row: row[0]
     c = conn.cursor()
     names = c.execute("SELECT project_name FROM '{table}'".format(table=quarter)).fetchall()
@@ -145,8 +145,8 @@ def get_project_names(db_name, quarter):
 
 
 #  Converts a db into a python dictionary when give a db and qrt list.
-def convert_db_python_dict(db_name, quarter_list):
-    conn = sqlite3.connect(db_name + '.db')
+def convert_db_python_dict(db_path, quarter_list):
+    conn = sqlite3.connect(db_path)
 
     # This is the important part, here we are setting row_factory property of
     # connection object to sqlite3.Row(sqlite3.Row is an implementation of
@@ -156,7 +156,7 @@ def convert_db_python_dict(db_name, quarter_list):
     output_dict = {}
     for quarter in quarter_list:
         inner_dict = {}
-        project_names = get_project_names(db_name, quarter)
+        project_names = get_project_names(db_path, quarter)
         for project in project_names:
             c.execute("select * from '{table}' WHERE project_name = '{p}'".format(table=quarter, p=project))
             result = [dict(row) for row in c.fetchall()][0]  # [0] there as output is dict in a list
