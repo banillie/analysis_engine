@@ -1127,3 +1127,47 @@ class BenefitsData:
         self.cat_unprofile = cat_unprofile
         self.disbenefit = disbenefit
 
+
+# for compiling vfm data in matplotlib chart
+def vfm_matplotlib_graph(labels, current_qrt, last_qrt, title):
+    #  Need to split this strings over two lines on x axis
+    for n, i in enumerate(labels):
+        if i == 'Very High and Financially Positive':
+            labels[n] = 'Very High and \n Financially Positive'
+        if i == 'Economically Positive':
+            labels[n] = 'Economically \n Positive'
+
+    x = np.arange(len(labels))  # the label locations
+    width = 0.35  # the width of the bars
+
+    fig, ax = plt.subplots()
+    rects_one = ax.bar(x - width / 2, current_qrt, width, label='This quarter')
+    rects_two = ax.bar(x + width / 2, last_qrt, width, label='Last quarter')
+
+    # Add some text for labels, title and custom x-axis tick labels, etc.
+    #ax.set_ylabel('Number')
+    ax.set_title(title)
+    ax.set_xticks(x)
+    ax.set_xticklabels(labels)
+    # Rotate the tick labels and set their alignment.
+    #plt.setp(ax.get_xticklabels(), alignment=)
+    ax.legend()
+
+    def autolabel(rects):
+        """Attach a text label above each bar in *rects*, displaying its height."""
+        for rect in rects:
+            height = rect.get_height()
+            ax.annotate('{}'.format(height),
+                        xy=(rect.get_x() + rect.get_width() / 2, height),
+                        xytext=(0, 3),  # 3 points vertical offset
+                        textcoords="offset points",
+                        ha='center', va='bottom')
+
+    autolabel(rects_one)
+    autolabel(rects_two)
+
+    fig.tight_layout()
+
+    fig.savefig(root_path / 'output/{}.png'.format(title), bbox_inches='tight')
+
+    plt.show()
