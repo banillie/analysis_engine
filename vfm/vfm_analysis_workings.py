@@ -358,17 +358,16 @@ def calculate_pvc(wb, masters, cat_list, start_row):
 # run.save(root_path / "output/vfm_data_output_dict_way.xlsx")
 
 #  METHOD USES SQLITE DB AND PYTHON DICTIONARIES
-q_list = ['q1_2021', 'q4_1920']
-db_path = root_path / "core_data/vfm.db"
-#db_path = "/home/will/Documents/analysis_engine/core_data/vfm.db"
-master_dict = convert_db_python_dict(db_path, q_list)
-project_names = get_project_names(db_path, 'q1_2021')
-ordered_cat_list = ['Poor', 'Low', 'Medium', 'High', 'Very High',
-                    'Very High and Financially Positive', 'Economically Positive',
-                    None]
-run = compile_data_db(master_dict, project_names, ordered_cat_list)
-run.save(root_path / "output/vfm_data_output_db_dict_way.xlsx")
-
+# q_list = ['q1_2021', 'q4_1920']
+# db_path = root_path / "core_data/vfm.db"
+# master_dict = convert_db_python_dict(db_path, q_list)
+# project_names = get_project_names(db_path, 'q1_2021')
+# ordered_cat_list = ['Poor', 'Low', 'Medium', 'High', 'Very High',
+#                     'Very High and Financially Positive', 'Economically Positive',
+#                     None]
+# run = compile_data_db(master_dict, project_names, ordered_cat_list)
+# run.save(root_path / "output/vfm_data_output_db_dict_way.xlsx")
+#
 
 #  METHOD USES SQLTE DB ONLY
 # vfm_key_list = ['project_name text',
