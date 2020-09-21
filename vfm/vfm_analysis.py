@@ -2,9 +2,10 @@
 #  db options are the fastest.
 
 from openpyxl import Workbook
-from data_mgmt.data import get_master_data, get_current_project_names, root_path
+from data_mgmt.data import root_path
 from vfm.database import convert_db_python_dict, get_project_names
 import sqlite3
+from vfm.vfm_graph import vfm_matplotlib_graph
 
 
 #  Places data in excel wb. Using python dictionary structure.
@@ -80,7 +81,7 @@ def compile_data(masters, project_name_list):
 
 
 #  Places data in excel wb. Using python dictionary structure via sqlite db
-def compile_data_db(masters, project_name_list):
+def compile_data_db(masters, project_name_list, cat_list):
     wb = Workbook()
     ws = wb.active
 
@@ -138,6 +139,9 @@ def compile_data_db(masters, project_name_list):
     ws.cell(row=1, column=13).value = 'PVB'
     ws.cell(row=1, column=14).value = 'PVB lst qrt'
 
+    compile_vfm_cat_data_db(wb, masters, cat_list, 36)
+    calculate_pvc(wb, masters, cat_list, 48)
+
     return wb
 
 
@@ -177,12 +181,14 @@ def compile_data_pure_db(db_name, project_names, key_list, column_index):
 
 
 #  places vfm category figures into excel wb
-def compile_vfm_cat_data_db(masters, cat_list):
-    wb = Workbook()
+def compile_vfm_cat_data_db(wb, masters, cat_list, start_row):
+    #wb = Workbook()
     ws = wb.active
 
-    for row, cat in enumerate(cat_list):
-        i = row + 2  # has to start with row 1 in excel. data entered into second row
+    latest_qrt_graph = []
+    lst_qrt_graph = []
+    row = start_row + 1
+    for x, cat in enumerate(cat_list):
         for col, m in enumerate(masters):
             counter = 0
             total_projects = 0
@@ -192,25 +198,36 @@ def compile_vfm_cat_data_db(masters, cat_list):
                     counter += 1
                 total_projects += 1
 
-            ws.cell(row=1, column=2 + col).value = m  # values entered from col 2 onwards
-            ws.cell(row=i, column=2 + col).value = counter  # values entered from col 2 onwards
-            ws.cell(row=len(cat_list) + 3, column=2 + col).value = total_projects
+            ws.cell(row=start_row, column=2 + col).value = m  # values entered from col 2 onwards
+            ws.cell(row=row+x, column=2 + col).value = counter  # values entered from col 2 onwards
+
+            ws.cell(row=start_row + len(cat_list) + 1, column=2 + col).value = total_projects
+
+            #  for the graph
+            if col == 0:
+                latest_qrt_graph.append(counter)
+            if col == 1:
+                lst_qrt_graph.append(counter)
 
         if cat is not None:
-            ws.cell(row=i, column=1).value = cat
+            ws.cell(row=row + x, column=1).value = cat
         else:
-            ws.cell(row=i, column=1).value = 'None'
+            ws.cell(row=row + x, column=1).value = 'None'
 
-        ws.cell(row=len(cat_list) + 3, column=1).value = 'Total'
+    ws.cell(row=start_row + len(cat_list) + 1, column=1).value = 'Total'
+
+    vfm_matplotlib_graph(cat_list, latest_qrt_graph, lst_qrt_graph, 'Projects by VfM category')
 
     return wb
 
 
-def calculate_pvc(masters, cat_list):
-    wb = Workbook()
+def calculate_pvc(wb, masters, cat_list, start_row):
+    #wb = Workbook()
     ws = wb.active
 
-    row = 2
+    latest_qrt_graph = []
+    lst_qrt_graph = []
+    row = start_row + 1
     for x, cat in enumerate(cat_list):
         for i, m in enumerate(masters):
             total = 0
@@ -226,10 +243,24 @@ def calculate_pvc(masters, cat_list):
                     pass
 
             ws.cell(row=row + x, column=i + 2).value = total
-            ws.cell(row=1, column=i + 2).value = m
-        ws.cell(row=row + x, column=1).value = cat
+            ws.cell(row=start_row, column=i + 2).value = m
 
-    row = 10
+            #  for the graph
+            if i == 0:
+                latest_qrt_graph.append(int(total))
+            if i == 1:
+                lst_qrt_graph.append(int(total))
+
+        if cat is not None:
+            ws.cell(row=row + x, column=1).value = cat
+        else:
+            ws.cell(row=row + x, column=1).value = 'None'
+
+    vfm_matplotlib_graph(cat_list, latest_qrt_graph, lst_qrt_graph, 'Projects PVC by VfM category')
+
+    # latest_qrt_graph = []
+    # lst_qrt_graph = []
+    row = start_row + 10
     for i, m in enumerate(masters):
         hs2_total = 0
         total = 0
@@ -247,6 +278,11 @@ def calculate_pvc(masters, cat_list):
             else:
                 pass
 
+        if i == 0:
+            latest_qrt_graph = [int(hs2_total), int(other_total), int(total)]
+        if i == 1:
+            lst_qrt_graph = [int(hs2_total), int(other_total), int(total)]
+
         ws.cell(row=row + 2, column=i + 2).value = hs2_total
         ws.cell(row=row + 3, column=i + 2).value = other_total
         ws.cell(row=row + 4, column=i + 2).value = total
@@ -256,8 +292,10 @@ def calculate_pvc(masters, cat_list):
     ws.cell(row=row + 3, column=1).value = 'Other'
     ws.cell(row=row + 4, column=1).value = 'Total'
 
-    row = 16
+    vfm_matplotlib_graph(['HS2', 'Other', 'Total'], latest_qrt_graph,
+                         lst_qrt_graph, 'PVC HS2 and all other projects')
 
+    row = start_row + 16
     for i, m in enumerate(masters):
         high_total = 0
         poor_total = 0
@@ -286,6 +324,13 @@ def calculate_pvc(masters, cat_list):
                     else:
                         pass
 
+        if i == 0:
+            latest_qrt_graph = [int(poor_total), int(poor_total_no_hs2),
+                                int(high_total), int(high_total_no_hs2)]
+        if i == 1:
+            lst_qrt_graph = [int(poor_total), int(poor_total_no_hs2),
+                             int(high_total), int(high_total_no_hs2)]
+
         ws.cell(row=row + 2, column=i + 2).value = poor_total
         ws.cell(row=row + 3, column=i + 2).value = poor_total_no_hs2
         ws.cell(row=row + 4, column=i + 2).value = high_total
@@ -296,6 +341,11 @@ def calculate_pvc(masters, cat_list):
     ws.cell(row=row + 3, column=1).value = 'poor-medium excluding hs2'
     ws.cell(row=row + 4, column=1).value = 'total high-very high'
     ws.cell(row=row + 5, column=1).value = 'high-very high excluding hs2'
+
+    chart_list = ['total poor-medium', 'poor-medium excluding hs2',
+                  'total high-very high', 'high-very high excluding hs2']
+    vfm_matplotlib_graph(chart_list, latest_qrt_graph,
+                         lst_qrt_graph, 'Proportion of PVC')
 
     return wb
 
@@ -308,12 +358,16 @@ def calculate_pvc(masters, cat_list):
 # run.save(root_path / "output/vfm_data_output_dict_way.xlsx")
 
 #  METHOD USES SQLITE DB AND PYTHON DICTIONARIES
-# q_list = ['q1_2021', 'q4_1920']
-# master_dict = convert_db_python_dict('vfm', q_list)
-# project_names = get_project_names('vfm', 'q1_2021')
-#
-# run = compile_data_db(master_dict, project_names)
-# run.save(root_path / "output/vfm_data_output_db_dict_way.xlsx")
+q_list = ['q1_2021', 'q4_1920']
+db_path = root_path / "core_data/vfm.db"
+#db_path = "/home/will/Documents/analysis_engine/core_data/vfm.db"
+master_dict = convert_db_python_dict(db_path, q_list)
+project_names = get_project_names(db_path, 'q1_2021')
+ordered_cat_list = ['Poor', 'Low', 'Medium', 'High', 'Very High',
+                    'Very High and Financially Positive', 'Economically Positive',
+                    None]
+run = compile_data_db(master_dict, project_names, ordered_cat_list)
+run.save(root_path / "output/vfm_data_output_db_dict_way.xlsx")
 
 
 #  METHOD USES SQLTE DB ONLY
@@ -333,13 +387,13 @@ def calculate_pvc(masters, cat_list):
 
 
 #  COMPILE VFM CAT DATA
-ordered_cat_list = ['Poor', 'Low', 'Medium', 'High', 'Very High',
-                    'Very High and Financially Positive', 'Economically Positive',
-                    None]
-q_list = ['q1_2021', 'q4_1920']
-master_data = convert_db_python_dict('vfm', q_list)
-project_names = get_project_names('vfm', 'q1_2021')
-# run = compile_vfm_cat_data_db(master_data, ordered_cat_list)
-# run.save(root_path / "output/vfm_cat_count.xlsx")
-run = calculate_pvc(master_data, ordered_cat_list)
-run.save(root_path / "output/pvc_count.xlsx")
+# ordered_cat_list = ['Poor', 'Low', 'Medium', 'High', 'Very High',
+#                     'Very High and Financially Positive', 'Economically Positive',
+#                     None]
+# q_list = ['q1_2021', 'q4_1920']
+# master_data = convert_db_python_dict('vfm', q_list)
+# project_names = get_project_names('vfm', 'q1_2021')
+# # run = compile_vfm_cat_data_db(master_data, ordered_cat_list)
+# # run.save(root_path / "output/vfm_cat_count.xlsx")
+# run = calculate_pvc(master_data, ordered_cat_list)
+# run.save(root_path / "output/pvc_count.xlsx")
