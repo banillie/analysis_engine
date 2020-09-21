@@ -5,7 +5,7 @@ from openpyxl import Workbook
 from data_mgmt.data import root_path
 from vfm.database import convert_db_python_dict, get_project_names
 import sqlite3
-from vfm.vfm_graph import vfm_matplotlib_graph
+from data_mgmt.data import vfm_matplotlib_graph
 
 
 #  Places data in excel wb. Using python dictionary structure.
