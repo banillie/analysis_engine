@@ -31,13 +31,13 @@ def import_master_to_db(db_path, master_path):
     m = project_data_from_master(master_path, 4, 2016)
     conn = sqlite3.connect(db_path)
     c = conn.cursor()
-    c.execute("INSERT INTO quarter VALUES (1, '{q}', '{q_int}')".
+    c.execute("INSERT INTO quarter VALUES ('{q}', '{q_int}')".
               format(q=m.quarter, q_int=m.quarter.quarter))
     for pi, project in enumerate(m.projects):
-        c.execute("INSERT INTO project_group VALUES ('{n}', '{pg}')".
+        c.execute("INSERT INTO project_group VALUES ('{pg}')".
                   format(n=pi, pg=m.data[project]['DfT Group']))
-        c.execute("INSERT INTO project VALUES ('{n}', 1, '{pg}', '{p}')".
-            format(n=pi, pg=m.data[project]['DfT Group'], p=project))
+        c.execute("INSERT INTO project VALUES ('{q}', '{pg}', '{p}')".
+            format(q=m.quarter, pg=m.data[project]['DfT Group'], p=project))
 
     conn.commit()
 
@@ -64,30 +64,25 @@ def create_db(db_path):
     """)
 
     c.execute("""CREATE TABLE 'quarter'
-            (id integer primary key autoincrement, 
-            name text,
+            (name text,
             quarter_number integer)""")
 
     c.execute("""CREATE TABLE 'project_group'
-                (id integer primary key,
-                name text)""")
+                (name text)""")
 
     c.execute("""CREATE TABLE 'project'
-            (id integer primary key,
-            quarter_id integer,
+            (quarter_id integer,
             group_id integer,
             project_name text,
             FOREIGN KEY(quarter_id) REFERENCES quarter(id)
             FOREIGN KEY(group_id) REFERENCES project_group(id))""")
 
     c.execute("""CREATE TABLE 'milestone_type'
-            (id integer primary key,
-            type text,
+            (type text,
             description text)""")
 
     c.execute("""CREATE TABLE 'milestone'
-            (id integer primary key,
-            milestone_type_id text,
+            (milestone_type_id text,
             project_id integer,
             gov_type text,
             ver_no real,
