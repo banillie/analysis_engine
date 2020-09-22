@@ -1,13 +1,10 @@
-from vfm.database import create_db
-import os
+import sqlite3
+from vfm.database import import_master_to_db
+
 
 #  test that dB is created.
-def test_create_db():
-    create_db('db_test')
-    import sqlite3
-    CWD_PATH = os.getcwd()
-    db_path = os.path.join(CWD_PATH, "db_test.db")
-    conn = sqlite3.connect(db_path)
+def test_create_db(db):
+    conn = sqlite3.connect(db)
     c = conn.cursor()
     c.execute("INSERT INTO quarter VALUES (1, 'test_quarter', 1)")
     conn.commit()
@@ -15,4 +12,14 @@ def test_create_db():
         SELECT count(*) FROM 'quarter'
         """)
     assert c.fetchall() == [(1,)]
-    os.remove(db_path) #  delete db
+
+
+def test_import_master_to_db(db, master_path):
+    import_master_to_db(db, master_path)
+    conn = sqlite3.connect(db)
+    c = conn.cursor()
+    c.execute("""SELECT count(*) FROM project""")
+    assert c.fetchall() == [(5,)]
+
+
+
