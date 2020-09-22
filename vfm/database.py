@@ -1,4 +1,5 @@
 import sqlite3
+from datamaps.api import project_data_from_master
 
 
 def create_connect_db(db_name):
@@ -24,9 +25,27 @@ def create_vfm_table(db_name, insert_quarter):
     conn.commit()
     conn.close()
 
-#  create a new table in vfm db.
-def create_db(db_name):
-    conn = sqlite3.connect(db_name + '.db')
+
+#  put master data into dB via python dictionary.
+def import_master_to_db(db_path, master_path):
+    m = project_data_from_master(master_path, 4, 2016)
+    conn = sqlite3.connect(db_path)
+    c = conn.cursor()
+    c.execute("INSERT INTO quarter VALUES (1, '{q}', '{q_int}')".
+              format(q=m.quarter, q_int=m.quarter.quarter))
+    for pi, project in enumerate(m.projects):
+        c.execute("INSERT INTO project_group VALUES ('{n}', '{pg}')".
+                  format(n=pi, pg=m.data[project]['DfT Group']))
+        c.execute("INSERT INTO project VALUES ('{n}', 1, '{pg}', '{p}')".
+            format(n=pi, pg=m.data[project]['DfT Group'], p=project))
+
+    conn.commit()
+
+
+
+#  create master dB.
+def create_db(db_path):
+    conn = sqlite3.connect(db_path)
     c = conn.cursor()
     c.execute("""
     DROP TABLE IF EXISTS quarter;
@@ -45,7 +64,7 @@ def create_db(db_name):
     """)
 
     c.execute("""CREATE TABLE 'quarter'
-            (id integer primary key, 
+            (id integer primary key autoincrement, 
             name text,
             quarter_number integer)""")
 
