@@ -19,7 +19,7 @@ def test_import_master_to_db(db, master_path):
     conn = sqlite3.connect(db)
     c = conn.cursor()
     c.execute("""SELECT count(*) FROM project""")
-    assert c.fetchall() == [(5,)]
+    assert c.fetchall() == [(6,)]
 
 
 
