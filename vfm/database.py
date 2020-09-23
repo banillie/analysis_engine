@@ -1,5 +1,6 @@
 import sqlite3
 from datamaps.api import project_data_from_master
+import re
 
 
 def create_connect_db(db_name):
@@ -28,19 +29,41 @@ def create_vfm_table(db_name, insert_quarter):
 
 #  put master data into dB via python dictionary.
 def import_master_to_db(db_path, master_path):
-    m = project_data_from_master(master_path, 4, 2016)
+    m = project_data_from_master(master_path, 4, 2019)
     conn = sqlite3.connect(db_path)
     c = conn.cursor()
     c.execute("INSERT INTO quarter VALUES ('{q}', '{q_int}')".
               format(q=m.quarter, q_int=m.quarter.quarter))
-    for pi, project in enumerate(m.projects):
+    for project in m.projects:
         c.execute("INSERT INTO project_group VALUES ('{pg}')".
-                  format(n=pi, pg=m.data[project]['DfT Group']))
-        c.execute("INSERT INTO project VALUES ('{q}', '{pg}', '{p}')".
-            format(q=m.quarter, pg=m.data[project]['DfT Group'], p=project))
+                  format(pg=m.data[project]['DfT Group']))
+        c.execute("INSERT INTO project VALUES ('{q}', "
+                  "'{pg}', '{pi}', '{p}')".format(
+                    q=m.quarter,
+                    pg=m.data[project]['DfT Group'],
+                    pi=m.data[project]['DFT ID Number'],
+                    p=project))
+        for i in range(1, 2):
+            m_type = "Approval MM" + str(i)
+            if m_type in list(m.data[project].keys()):
+                c.execute("INSERT INTO milestone_type VALUES ('Approval', 'BLAH BLAH')")
+                c.execute(
+                    f"""INSERT INTO milestone VALUES (
+                    'Approval', 
+                    '{m.data[project]['DFT ID Number']}',
+                    '{project}', '{m.data[project]["Approval MM" + str(i)]}', 
+                    '{m.data[project]["Approval MM" + str(i) + " Gov Type"]}',
+                    '{m.data[project]["Approval MM" + str(i) + " Ver No"]}', 
+                    '{m.data[project]["Approval MM" + str(i) + " Original Baseline"]}', 
+                    '{m.data[project]["Approval MM" + str(i) + " Forecast / Actual"]}', 
+                    '{m.data[project]["Approval MM" + str(i) + " Variance"]}', 
+                    '{m.data[project]["Approval MM" + str(i) + " Status"]}', 
+                    'Blah')""")
+                    #  next lines fails with operation error, which appears to be linked
+                    #  to there being an apostrophy in the text.
+                    # '{(m.data[project]["Approval MM" + str(i) + " Notes"])}')""")
 
     conn.commit()
-
 
 
 #  create master dB.
@@ -73,7 +96,8 @@ def create_db(db_path):
     c.execute("""CREATE TABLE 'project'
             (quarter_id integer,
             group_id integer,
-            project_name text,
+            project_id integer,
+            name text,
             FOREIGN KEY(quarter_id) REFERENCES quarter(id)
             FOREIGN KEY(group_id) REFERENCES project_group(id))""")
 
@@ -84,6 +108,8 @@ def create_db(db_path):
     c.execute("""CREATE TABLE 'milestone'
             (milestone_type_id text,
             project_id integer,
+            project_name text,
+            name text,
             gov_type text,
             ver_no real,
             orig_baseline text,
@@ -91,13 +117,13 @@ def create_db(db_path):
             variance real,
             status text,
             notes text,
-            FOREIGN KEY(project_id) REFERENCES project(id)
+            FOREIGN KEY(project_id) REFERENCES project(quarter_id)
             FOREIGN KEY(milestone_type_id) REFERENCES milestone_type(id)
+            FOREIGN KEY(project_name) REFERENCES project(name)
             )""")
 
     conn.commit()
     conn.close()
-
 
 
 #  gets vfm data values from master data in excel wbs.
