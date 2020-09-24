@@ -53,6 +53,7 @@ def import_master_to_db(db_path, master_path):
                 c.execute(
                     f"""INSERT INTO milestone VALUES (
                     'Approval', 
+                    '{m.quarter}',
                     '{m.data[project]['DFT ID Number']}',
                     '{project}', '{m.data[project]["Approval MM" + str(i)]}', 
                     '{m.data[project]["Approval MM" + str(i) + " Gov Type"]}',
@@ -94,11 +95,11 @@ def create_db(db_path):
                 (name text)""")
 
     c.execute("""CREATE TABLE 'project'
-            (quarter_id integer,
+            (quarter_id text,
             group_id integer,
             project_id integer,
             name text,
-            FOREIGN KEY(quarter_id) REFERENCES quarter(id)
+            FOREIGN KEY(quarter_id) REFERENCES quarter(name)
             FOREIGN KEY(group_id) REFERENCES project_group(id))""")
 
     c.execute("""CREATE TABLE 'milestone_type'
@@ -107,6 +108,7 @@ def create_db(db_path):
 
     c.execute("""CREATE TABLE 'milestone'
             (milestone_type_id text,
+            quarter_id text,
             project_id integer,
             project_name text,
             name text,
@@ -117,6 +119,7 @@ def create_db(db_path):
             variance real,
             status text,
             notes text,
+            FOREIGN KEY(quarter_id) REFERENCES quarter(name),
             FOREIGN KEY(project_id) REFERENCES project(quarter_id)
             FOREIGN KEY(milestone_type_id) REFERENCES milestone_type(id)
             FOREIGN KEY(project_name) REFERENCES project(name)
