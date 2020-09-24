@@ -47,7 +47,7 @@ def import_master_to_db(db_path, master_path):
         for i in range(1, 2):
             m_type = "Approval MM" + str(i)
             if m_type in list(m.data[project].keys()):
-                #  note string amended to remove ' and replace with `
+                #  note string amended to remove ' and replace with ''
                 n = m.data[project]["Approval MM" + str(i) + " Notes"]
                 note = n.replace("'", "''")
                 c.execute(
