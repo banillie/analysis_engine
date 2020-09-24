@@ -34,6 +34,7 @@ def import_master_to_db(db_path, master_path):
     c = conn.cursor()
     c.execute("INSERT INTO quarter VALUES ('{q}', '{q_int}')".
               format(q=m.quarter, q_int=m.quarter.quarter))
+    c.execute("INSERT INTO milestone_type VALUES ('Approval', 'BLAH BLAH')")
     for project in m.projects:
         c.execute("INSERT INTO project_group VALUES ('{pg}')".
                   format(pg=m.data[project]['DfT Group']))
@@ -46,7 +47,9 @@ def import_master_to_db(db_path, master_path):
         for i in range(1, 2):
             m_type = "Approval MM" + str(i)
             if m_type in list(m.data[project].keys()):
-                c.execute("INSERT INTO milestone_type VALUES ('Approval', 'BLAH BLAH')")
+                #  note string amended to remove ' and replace with `
+                n = m.data[project]["Approval MM" + str(i) + " Notes"]
+                note = n.replace("'", "`")
                 c.execute(
                     f"""INSERT INTO milestone VALUES (
                     'Approval', 
@@ -58,10 +61,7 @@ def import_master_to_db(db_path, master_path):
                     '{m.data[project]["Approval MM" + str(i) + " Forecast / Actual"]}', 
                     '{m.data[project]["Approval MM" + str(i) + " Variance"]}', 
                     '{m.data[project]["Approval MM" + str(i) + " Status"]}', 
-                    'Blah')""")
-                    #  next lines fails with operation error, which appears to be linked
-                    #  to there being an apostrophy in the text.
-                    # '{(m.data[project]["Approval MM" + str(i) + " Notes"])}')""")
+                    '{note}')""")
 
     conn.commit()
 
