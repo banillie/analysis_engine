@@ -49,7 +49,7 @@ def import_master_to_db(db_path, master_path):
             if m_type in list(m.data[project].keys()):
                 #  note string amended to remove ' and replace with `
                 n = m.data[project]["Approval MM" + str(i) + " Notes"]
-                note = n.replace("'", "`")
+                note = n.replace("'", "''")
                 c.execute(
                     f"""INSERT INTO milestone VALUES (
                     'Approval', 

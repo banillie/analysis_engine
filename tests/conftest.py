@@ -22,6 +22,11 @@ def master_path():
 
 
 @pytest.fixture
+def master_path_apostrophe():
+    return os.path.join(os.getcwd(), "resources/" 
+           "one_row_master.xlsx")
+
+@pytest.fixture
 def abbreviations():
     return {'Sea of Tranquility': 'SoT',
             'Apollo 11': 'A11',

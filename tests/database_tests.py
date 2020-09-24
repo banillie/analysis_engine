@@ -21,5 +21,10 @@ def test_import_master_to_db(db, master_path):
     c.execute("""SELECT count(*) FROM project""")
     assert c.fetchall() == [(6,)]
 
-
-
+def test_apostrophe_in_text(db, master_path):
+    import_master_to_db(db, master_path)
+    conn = sqlite3.connect(db)
+    c = conn.cursor()
+    c.execute("""SELECT notes FROM milestone WHERE project_name = 'Apollo 11'""")
+    assert ("Don't you know an apparition is just a cheap date. " \
+           "What have you been drinking these days") in c.fetchall()[0][0]
