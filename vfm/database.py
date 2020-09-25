@@ -28,41 +28,43 @@ def create_vfm_table(db_name, insert_quarter):
 
 
 #  put master data into dB via python dictionary.
-def import_master_to_db(db_path, master_path):
+def import_master_to_db(db_path: str, master_path: str) -> None:
+    """this function puts master data into a dB via a python dictionary
+    """
     m = project_data_from_master(master_path, 4, 2019)
     conn = sqlite3.connect(db_path)
+    conn.execute("PRAGMA foreign_keys = 1")
     c = conn.cursor()
-    c.execute("INSERT INTO quarter VALUES ('{q}', '{q_int}')".
-              format(q=m.quarter, q_int=m.quarter.quarter))
-    c.execute("INSERT INTO milestone_type VALUES ('Approval', 'BLAH BLAH')")
+    c.execute(f"INSERT INTO quarter (quarter_id, quarter_number) VALUES ("
+              f"'{m.quarter}', '{m.quarter.quarter}')")
+    group_list = [("Rail Group", "BLAH"), ("HSMRPG", "BLAH"), ("RPE", "BLAH"), ("AMIS", "BLAH")]
+    c.executemany("INSERT INTO project_group (group_id, description) VALUES (?,?)", group_list)
+    milestone_type_list = [("Approval", "BLAH"), ("Assurance", "BLAH"), ("Project", "BLAH")]
+    c.executemany("INSERT INTO milestone_type (type, description) VALUES (?,?)", milestone_type_list)
     for project in m.projects:
-        c.execute("INSERT INTO project_group VALUES ('{pg}')".
-                  format(pg=m.data[project]['DfT Group']))
-        c.execute("INSERT INTO project VALUES ('{q}', "
-                  "'{pg}', '{pi}', '{p}')".format(
-                    q=m.quarter,
-                    pg=m.data[project]['DfT Group'],
-                    pi=m.data[project]['DFT ID Number'],
-                    p=project))
+        c.execute(f"INSERT INTO project (quarter_id, group_id, project_id, name) VALUES ("
+                  f"1, 1, '{m.data[project]['DFT ID Number']}', '{project}')")
         for i in range(1, 2):
             m_type = "Approval MM" + str(i)
             if m_type in list(m.data[project].keys()):
                 #  note string amended to remove ' and replace with ''
                 n = m.data[project]["Approval MM" + str(i) + " Notes"]
                 note = n.replace("'", "''")
+                #  question. does {} need '{}' around them? In what instances.
                 c.execute(
-                    f"""INSERT INTO milestone VALUES (
-                    'Approval', 
-                    '{m.quarter}',
-                    '{m.data[project]['DFT ID Number']}',
-                    '{project}', '{m.data[project]["Approval MM" + str(i)]}', 
-                    '{m.data[project]["Approval MM" + str(i) + " Gov Type"]}',
-                    '{m.data[project]["Approval MM" + str(i) + " Ver No"]}', 
-                    '{m.data[project]["Approval MM" + str(i) + " Original Baseline"]}', 
-                    '{m.data[project]["Approval MM" + str(i) + " Forecast / Actual"]}', 
-                    '{m.data[project]["Approval MM" + str(i) + " Variance"]}', 
-                    '{m.data[project]["Approval MM" + str(i) + " Status"]}', 
-                    '{note}')""")
+                    f"INSERT INTO milestone (milestone_type_id, quarter_id, project_id, name,"
+                    f"gov_type, ver_no, orig_baseline, forecast_actual, variance, status, notes) "
+                    f"VALUES (1, 1, 1, "
+                    # f"'{m.quarter}', "
+                    # f"'{project}', "
+                    f"'{m.data[project]['Approval MM'+ str(i)]}', "
+                    f"'{m.data[project]['Approval MM' + str(i) + ' Gov Type']}',"
+                    f"'{m.data[project]['Approval MM' + str(i) + ' Ver No']}', "
+                    f"'{m.data[project]['Approval MM' + str(i) + ' Original Baseline']}',"
+                    f"'{m.data[project]['Approval MM' + str(i) + ' Forecast / Actual']}',"
+                    f"'{m.data[project]['Approval MM' + str(i) + ' Variance']}',"
+                    f"'{m.data[project]['Approval MM' + str(i) + ' Status']}',"
+                    f"'{note}')")
 
     conn.commit()
 
@@ -87,30 +89,35 @@ def create_db(db_path):
     DROP TABLE IF EXISTS milestone;
     """)
 
-    c.execute("""CREATE TABLE 'quarter'
-            (name text,
+    c.execute("""CREATE TABLE quarter
+            (id INTEGER PRIMARY KEY,
+            quarter_id text,
             quarter_number integer)""")
 
-    c.execute("""CREATE TABLE 'project_group'
-                (name text)""")
+    c.execute("""CREATE TABLE project_group
+                (id INTEGER PRIMARY KEY,
+                group_id text, 
+                description text)""")
 
-    c.execute("""CREATE TABLE 'project'
-            (quarter_id text,
+    c.execute("""CREATE TABLE project
+            (id INTEGER PRIMARY KEY,
+            quarter_id text,
             group_id integer,
             project_id integer,
             name text,
-            FOREIGN KEY(quarter_id) REFERENCES quarter(name)
+            FOREIGN KEY(quarter_id) REFERENCES quarter(id)
             FOREIGN KEY(group_id) REFERENCES project_group(id))""")
 
     c.execute("""CREATE TABLE 'milestone_type'
-            (type text,
+            (id INTEGER PRIMARY KEY,
+            type text,
             description text)""")
 
     c.execute("""CREATE TABLE 'milestone'
-            (milestone_type_id text,
-            quarter_id text,
+            (id INTEGER PRIMARY KEY,
+            milestone_type_id integer,
+            quarter_id integer,
             project_id integer,
-            project_name text,
             name text,
             gov_type text,
             ver_no real,
@@ -119,10 +126,9 @@ def create_db(db_path):
             variance real,
             status text,
             notes text,
-            FOREIGN KEY(quarter_id) REFERENCES quarter(name),
-            FOREIGN KEY(project_id) REFERENCES project(quarter_id)
+            FOREIGN KEY(quarter_id) REFERENCES quarter(id),
+            FOREIGN KEY(project_id) REFERENCES project(id)
             FOREIGN KEY(milestone_type_id) REFERENCES milestone_type(id)
-            FOREIGN KEY(project_name) REFERENCES project(name)
             )""")
 
     conn.commit()

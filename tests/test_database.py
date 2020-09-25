@@ -11,7 +11,7 @@ def get_cursor(db, master_path):
 def test_create_db(db):
     conn = sqlite3.connect(db)
     c = conn.cursor()
-    c.execute("INSERT INTO quarter VALUES ('test_quarter', 1)")
+    c.execute("INSERT INTO quarter (quarter_id, quarter_number) VALUES ('test_quarter', 1)")
     conn.commit()
     c.execute("""
         SELECT count(*) FROM 'quarter'
@@ -30,3 +30,9 @@ def test_apostrophe_in_text(db, master_path):
     c.execute("""SELECT notes FROM milestone WHERE project_name = 'Apollo 11'""")
     assert ("Don't you know an apparition is just a cheap date. " \
            "What have you been drinking these days") in c.fetchall()[0][0]
+
+
+def test_insert_data_with_foreign_keys(db, master_path):
+    c = get_cursor(db, master_path)
+    c.execute("""SELECT quarter_id, group_id FROM project WHERE name = 'Apollo 11'""")
+    assert c.fetchall() == [('1', 1)]
