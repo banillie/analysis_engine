@@ -27,9 +27,10 @@ def create_vfm_table(db_name, insert_quarter):
     conn.close()
 
 
-#  put master data into dB via python dictionary.
+
 def import_master_to_db(db_path: str, master_path: str) -> None:
-    """this function puts master data into a dB via a python dictionary
+    """
+    this function puts master data into a dB via a python dictionary
     """
     m = project_data_from_master(master_path, 4, 2019)
     conn = sqlite3.connect(db_path)
@@ -43,7 +44,8 @@ def import_master_to_db(db_path: str, master_path: str) -> None:
     c.executemany("INSERT INTO milestone_type (type, description) VALUES (?,?)", milestone_type_list)
     for project in m.projects:
         c.execute(f"INSERT INTO project (quarter_id, group_id, project_id, name) VALUES ("
-                  f"1, 1, '{m.data[project]['DFT ID Number']}', '{project}')")
+                  f"'{m.quarter}', 'Rail Group', "
+                  f"'{m.data[project]['DFT ID Number']}', '{project}')")
         for i in range(1, 2):
             m_type = "Approval MM" + str(i)
             if m_type in list(m.data[project].keys()):
@@ -52,11 +54,10 @@ def import_master_to_db(db_path: str, master_path: str) -> None:
                 note = n.replace("'", "''")
                 #  question. does {} need '{}' around them? In what instances.
                 c.execute(
-                    f"INSERT INTO milestone (milestone_type_id, quarter_id, project_id, name,"
-                    f"gov_type, ver_no, orig_baseline, forecast_actual, variance, status, notes) "
-                    f"VALUES (1, 1, 1, "
-                    # f"'{m.quarter}', "
-                    # f"'{project}', "
+                    f"INSERT INTO milestone (milestone_type_id, quarter_id, project_id, project_name, "
+                    f"name, gov_type, ver_no, orig_baseline, forecast_actual, variance, status, notes) "
+                    f"VALUES ('Approval', '{m.quarter}', "
+                    f"'{m.data[project]['DFT ID Number']}', '{project}', "
                     f"'{m.data[project]['Approval MM'+ str(i)]}', "
                     f"'{m.data[project]['Approval MM' + str(i) + ' Gov Type']}',"
                     f"'{m.data[project]['Approval MM' + str(i) + ' Ver No']}', "
@@ -94,30 +95,43 @@ def create_db(db_path):
             quarter_id text,
             quarter_number integer)""")
 
+    c.execute("""CREATE UNIQUE INDEX i1 ON quarter
+            (quarter_id)""")
+
     c.execute("""CREATE TABLE project_group
                 (id INTEGER PRIMARY KEY,
                 group_id text, 
                 description text)""")
 
+    c.execute("""CREATE UNIQUE INDEX i2 ON project_group
+                (group_id)""")
+
     c.execute("""CREATE TABLE project
             (id INTEGER PRIMARY KEY,
             quarter_id text,
-            group_id integer,
+            group_id text,
             project_id integer,
             name text,
-            FOREIGN KEY(quarter_id) REFERENCES quarter(id)
-            FOREIGN KEY(group_id) REFERENCES project_group(id))""")
+            FOREIGN KEY(quarter_id) REFERENCES quarter(quarter_id)
+            FOREIGN KEY(group_id) REFERENCES project_group(group_id))""")
+
+    c.execute("""CREATE UNIQUE INDEX i3 ON project
+                (project_id, name)""")
 
     c.execute("""CREATE TABLE 'milestone_type'
             (id INTEGER PRIMARY KEY,
             type text,
             description text)""")
 
+    c.execute("""CREATE UNIQUE INDEX i4 ON milestone_type
+                (type)""")
+
     c.execute("""CREATE TABLE 'milestone'
             (id INTEGER PRIMARY KEY,
             milestone_type_id integer,
             quarter_id integer,
             project_id integer,
+            project_name text,
             name text,
             gov_type text,
             ver_no real,
@@ -126,9 +140,9 @@ def create_db(db_path):
             variance real,
             status text,
             notes text,
-            FOREIGN KEY(quarter_id) REFERENCES quarter(id),
-            FOREIGN KEY(project_id) REFERENCES project(id)
-            FOREIGN KEY(milestone_type_id) REFERENCES milestone_type(id)
+            FOREIGN KEY(quarter_id) REFERENCES quarter(quarter_id),
+            FOREIGN KEY(project_id, project_name) REFERENCES project(project_id, name),
+            FOREIGN KEY(milestone_type_id) REFERENCES milestone_type(type)
             )""")
 
     conn.commit()
