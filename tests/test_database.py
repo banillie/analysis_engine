@@ -49,3 +49,11 @@ def test_insert_milestone_data_with_foreign_keys(db, master_path):
     c.execute("""SELECT milestone_type_id, quarter_id, project_id FROM milestone WHERE project_name = 'Apollo 11' 
         and milestone_type_id = 'Assurance'""")
     assert c.fetchall() == [('Assurance', 'Q4 19/20', 2)]
+
+
+def test_sqlite_select_commands_across_tables(db, master_path):
+    c = get_cursor(db, master_path)
+    c.execute(
+        """select milestone.name from milestone, project where 
+        milestone.project_name = project.name and project.group_id = 'AMIS'""")
+    assert c.fetchall() == [('Earth Command',), ('Inverted Cosmonauts',), ('Sputnik Sea',), ('Team Magma',)]
