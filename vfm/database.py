@@ -3,6 +3,29 @@ from datamaps.api import project_data_from_master
 import re
 
 
+#  what's the best method of integration this into code. Could as a variable but starts making
+#  variable list long and untidy. Doesn't need to be a variable as doesn't change at local level.
+def project_id_numbers(project_name: str) -> int:
+    id_dict = {'Sea of Tranquility': 1,
+               'Apollo 11': 2,
+               'Apollo 13': 3,
+               'Falcon 9': 4,
+               'Columbia': 5,
+               'Mars': 6}
+
+    return id_dict[project_name]
+
+#  same question as for project_id_numbers
+def project_group_ref(project_name: str) -> str:
+    group_dict = {'Sea of Tranquility': "Rail Group",
+               'Apollo 11': "HSMRPG",
+               'Apollo 13': "RPE",
+               'Falcon 9': "AMIS",
+               'Columbia': "AMIS",
+               'Mars': "Rail Group"}
+
+    return group_dict[project_name]
+
 def create_connect_db(db_name):
     conn = sqlite3.connect(db_name + '.db')
     return conn
@@ -27,7 +50,6 @@ def create_vfm_table(db_name, insert_quarter):
     conn.close()
 
 
-
 def import_master_to_db(db_path: str, master_path: str) -> None:
     """
     this function puts master data into a dB via a python dictionary
@@ -44,8 +66,8 @@ def import_master_to_db(db_path: str, master_path: str) -> None:
     c.executemany("INSERT INTO milestone_type (type, description) VALUES (?,?)", milestone_type_list)
     for project in m.projects:
         c.execute(f"INSERT INTO project (quarter_id, group_id, project_id, name) VALUES ("
-                  f"'{m.quarter}', 'Rail Group', "
-                  f"'{m.data[project]['DFT ID Number']}', '{project}')")
+                  f"'{m.quarter}', '{project_group_ref(project)}', "
+                  f"'{project_id_numbers(project)}', '{project}')")
         for i in range(1, 2):
             m_type = "Approval MM" + str(i)
             if m_type in list(m.data[project].keys()):
@@ -57,8 +79,8 @@ def import_master_to_db(db_path: str, master_path: str) -> None:
                     f"INSERT INTO milestone (milestone_type_id, quarter_id, project_id, project_name, "
                     f"name, gov_type, ver_no, orig_baseline, forecast_actual, variance, status, notes) "
                     f"VALUES ('Approval', '{m.quarter}', "
-                    f"'{m.data[project]['DFT ID Number']}', '{project}', "
-                    f"'{m.data[project]['Approval MM'+ str(i)]}', "
+                    f"'{project_id_numbers(project)}', '{project}', "
+                    f"'{m.data[project]['Approval MM' + str(i)]}', "
                     f"'{m.data[project]['Approval MM' + str(i) + ' Gov Type']}',"
                     f"'{m.data[project]['Approval MM' + str(i) + ' Ver No']}', "
                     f"'{m.data[project]['Approval MM' + str(i) + ' Original Baseline']}',"
