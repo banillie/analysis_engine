@@ -43,5 +43,9 @@ def test_insert_quarter_data_with_foreign_keys(db, master_path):
 
 def test_insert_milestone_data_with_foreign_keys(db, master_path):
     c = get_cursor(db, master_path)
-    c.execute("""SELECT milestone_type_id, quarter_id, project_id FROM milestone WHERE project_name = 'Apollo 11'""")
+    c.execute("""SELECT milestone_type_id, quarter_id, project_id FROM milestone WHERE project_name = 'Apollo 11' 
+    and milestone_type_id = 'Approval'""")
     assert c.fetchall() == [('Approval', 'Q4 19/20', 2)]
+    c.execute("""SELECT milestone_type_id, quarter_id, project_id FROM milestone WHERE project_name = 'Apollo 11' 
+        and milestone_type_id = 'Assurance'""")
+    assert c.fetchall() == [('Assurance', 'Q4 19/20', 2)]

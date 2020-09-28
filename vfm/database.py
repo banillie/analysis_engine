@@ -68,16 +68,17 @@ def import_master_to_db(db_path: str, master_path: str) -> None:
         c.execute(f"INSERT INTO project (quarter_id, group_id, project_id, name) VALUES ("
                   f"'{m.quarter}', '{project_group_ref(project)}', "
                   f"'{project_id_numbers(project)}', '{project}')")
-        for i in range(1, 2):
-            m_type = "Approval MM" + str(i)
-            if m_type in list(m.data[project].keys()):
+        for i in range(1, 50):
+            m_type_as = "Approval MM" + str(i)
+            if m_type_as in list(m.data[project].keys()):
                 #  note string amended to remove ' and replace with ''
                 n = m.data[project]["Approval MM" + str(i) + " Notes"]
                 note = n.replace("'", "''")
                 #  question. does {} need '{}' around them? In what instances.
                 c.execute(
                     f"INSERT INTO milestone (milestone_type_id, quarter_id, project_id, project_name, "
-                    f"name, gov_type, ver_no, orig_baseline, forecast_actual, variance, status, notes) "
+                    f"name, gov_type, ver_no, orig_baseline, forecast_actual, variance, status, notes,"
+                    f"lod) "
                     f"VALUES ('Approval', '{m.quarter}', "
                     f"'{project_id_numbers(project)}', '{project}', "
                     f"'{m.data[project]['Approval MM' + str(i)]}', "
@@ -87,7 +88,29 @@ def import_master_to_db(db_path: str, master_path: str) -> None:
                     f"'{m.data[project]['Approval MM' + str(i) + ' Forecast / Actual']}',"
                     f"'{m.data[project]['Approval MM' + str(i) + ' Variance']}',"
                     f"'{m.data[project]['Approval MM' + str(i) + ' Status']}',"
-                    f"'{note}')")
+                    f"'{note}', 'None')")
+
+            m_type_as = "Assurance MM" + str(i)
+            if m_type_as in list(m.data[project].keys()):
+                #  note string amended to remove ' and replace with ''
+                n = m.data[project]["Assurance MM" + str(i) + " Notes"]
+                note = n.replace("'", "''")
+                #  question. does {} need '{}' around them? In what instances.
+                c.execute(
+                    f"INSERT INTO milestone (milestone_type_id, quarter_id, project_id, project_name, "
+                    f"name, gov_type, ver_no, orig_baseline, forecast_actual, variance, status, notes,"
+                    f"lod) "
+                    f"VALUES ('Assurance', '{m.quarter}', "
+                    f"'{project_id_numbers(project)}', '{project}', "
+                    f"'{m.data[project]['Assurance MM' + str(i)]}', "
+                    f"'None',"
+                    f"'None', "
+                    f"'{m.data[project]['Assurance MM' + str(i) + ' Original Baseline']}',"
+                    f"'{m.data[project]['Assurance MM' + str(i) + ' Forecast - Actual']}',"
+                    f"'{m.data[project]['Assurance MM' + str(i) + ' Variance']}',"
+                    f"'{m.data[project]['Assurance MM' + str(i) + ' Status']}',"
+                    f"'{note}', '{m.data[project]['Assurance MM' + str(i) + ' LoD']}')")
+
 
     conn.commit()
 
@@ -162,6 +185,7 @@ def create_db(db_path):
             variance real,
             status text,
             notes text,
+            lod text,
             FOREIGN KEY(quarter_id) REFERENCES quarter(quarter_id),
             FOREIGN KEY(project_id, project_name) REFERENCES project(project_id, name),
             FOREIGN KEY(milestone_type_id) REFERENCES milestone_type(type)
