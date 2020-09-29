@@ -41,8 +41,8 @@ def test_apostrophe_in_text(db, master_path):
 
 def test_insert_quarter_data_with_foreign_keys(db, master_path):
     c = get_cursor(db, master_path)
-    c.execute("""SELECT quarter_id, group_name FROM project WHERE name = 'Apollo 11'""")
-    assert c.fetchall() == [('Q4 19/20', 'HSMRPG')]
+    c.execute("""SELECT group_name FROM project WHERE name = 'Apollo 11'""")
+    assert c.fetchall() == [('HSMRPG',)]
 
 
 def test_insert_milestone_data_with_foreign_keys(db, master_path):
