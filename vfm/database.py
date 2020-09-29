@@ -15,16 +15,18 @@ def project_id_numbers(project_name: str) -> int:
 
     return id_dict[project_name]
 
+
 #  same question as for project_id_numbers
 def project_group_ref(project_name: str) -> str:
     group_dict = {'Sea of Tranquility': "Rail Group",
-               'Apollo 11': "HSMRPG",
-               'Apollo 13': "RPE",
-               'Falcon 9': "AMIS",
-               'Columbia': "AMIS",
-               'Mars': "Rail Group"}
+                  'Apollo 11': "HSMRPG",
+                  'Apollo 13': "RPE",
+                  'Falcon 9': "AMIS",
+                  'Columbia': "AMIS",
+                  'Mars': "Rail Group"}
 
     return group_dict[project_name]
+
 
 def create_connect_db(db_name):
     conn = sqlite3.connect(db_name + '.db')
@@ -58,8 +60,7 @@ def import_master_to_db(db_path: str, master_path: str) -> None:
     conn = sqlite3.connect(db_path)
     conn.execute("PRAGMA foreign_keys = 1")
     c = conn.cursor()
-    c.execute(f"INSERT INTO quarter (quarter_id, quarter_number) VALUES ("
-              f"'{m.quarter}', '{m.quarter.quarter}')")
+
     #  insert group types
     group_list = ["Rail Group", "HSMRPG", "RPE", "AMIS"]
     for g in group_list:
@@ -69,78 +70,94 @@ def import_master_to_db(db_path: str, master_path: str) -> None:
     for t in milestone_type_list:
         c.execute(f"INSERT INTO milestone_type (type) VALUES ('{t}')")
 
-    for project in m.projects:
+    import_quarter_to_master_db(m, c)
+
+    import_milestone_to_master_db(m, c)
+
+    conn.commit()
+
+
+def import_quarter_to_master_db(master: dict, c) -> None:
+    """
+    this function places quarter data into the dB.
+    """
+    c.execute(f"INSERT INTO quarter (quarter_id, quarter_number) VALUES ("
+              f"'{master.quarter}', '{master.quarter.quarter}')")
+
+
+def import_milestone_to_master_db(master: dict, c) -> None:
+    """
+    this function places milestone data into the dB.
+    """
+    for project in master.projects:
         c.execute(f"INSERT INTO project (quarter_id, group_name, project_id, name) VALUES ("
-                  f"'{m.quarter}', '{project_group_ref(project)}', "
+                  f"'{master.quarter}', '{project_group_ref(project)}', "
                   f"'{project_id_numbers(project)}', '{project}')")
         for i in range(1, 50):
             #  Approval milestones
             m_type_as = "Approval MM" + str(i)
-            if m_type_as in list(m.data[project].keys()):
+            if m_type_as in list(master.data[project].keys()):
                 #  note string amended to remove ' and replace with ''
-                n = m.data[project]["Approval MM" + str(i) + " Notes"]
+                n = master.data[project]["Approval MM" + str(i) + " Notes"]
                 note = n.replace("'", "''")
                 #  question. does {} need '{}' around them? In what instances.
                 c.execute(
                     f"INSERT INTO milestone (milestone_type, quarter_id, project_id, project_name, "
                     f"name, gov_type, ver_no, orig_baseline, forecast_actual, variance, status, notes,"
                     f"lod, crit_path) "
-                    f"VALUES ('Approval', '{m.quarter}', "
+                    f"VALUES ('Approval', '{master.quarter}', "
                     f"'{project_id_numbers(project)}', '{project}', "
-                    f"'{m.data[project]['Approval MM' + str(i)]}', "
-                    f"'{m.data[project]['Approval MM' + str(i) + ' Gov Type']}',"
-                    f"'{m.data[project]['Approval MM' + str(i) + ' Ver No']}', "
-                    f"'{m.data[project]['Approval MM' + str(i) + ' Original Baseline']}',"
-                    f"'{m.data[project]['Approval MM' + str(i) + ' Forecast / Actual']}',"
-                    f"'{m.data[project]['Approval MM' + str(i) + ' Variance']}',"
-                    f"'{m.data[project]['Approval MM' + str(i) + ' Status']}',"
+                    f"'{master.data[project]['Approval MM' + str(i)]}', "
+                    f"'{master.data[project]['Approval MM' + str(i) + ' Gov Type']}',"
+                    f"'{master.data[project]['Approval MM' + str(i) + ' Ver No']}', "
+                    f"'{master.data[project]['Approval MM' + str(i) + ' Original Baseline']}',"
+                    f"'{master.data[project]['Approval MM' + str(i) + ' Forecast / Actual']}',"
+                    f"'{master.data[project]['Approval MM' + str(i) + ' Variance']}',"
+                    f"'{master.data[project]['Approval MM' + str(i) + ' Status']}',"
                     f"'{note}', 'None', 'None')")
             #  Assurance milestones
             m_type_as = "Assurance MM" + str(i)
-            if m_type_as in list(m.data[project].keys()):
+            if m_type_as in list(master.data[project].keys()):
                 #  note string amended to remove ' and replace with ''
-                n = m.data[project]["Assurance MM" + str(i) + " Notes"]
+                n = master.data[project]["Assurance MM" + str(i) + " Notes"]
                 note = n.replace("'", "''")
                 #  question. does {} need '{}' around them? In what instances.
                 c.execute(
                     f"INSERT INTO milestone (milestone_type, quarter_id, project_id, project_name, "
                     f"name, gov_type, ver_no, orig_baseline, forecast_actual, variance, status, notes,"
                     f"lod, crit_path) "
-                    f"VALUES ('Assurance', '{m.quarter}', "
+                    f"VALUES ('Assurance', '{master.quarter}', "
                     f"'{project_id_numbers(project)}', '{project}', "
-                    f"'{m.data[project]['Assurance MM' + str(i)]}', "
+                    f"'{master.data[project]['Assurance MM' + str(i)]}', "
                     f"'None',"
                     f"'None', "
-                    f"'{m.data[project]['Assurance MM' + str(i) + ' Original Baseline']}',"
-                    f"'{m.data[project]['Assurance MM' + str(i) + ' Forecast - Actual']}',"
-                    f"'{m.data[project]['Assurance MM' + str(i) + ' Variance']}',"
-                    f"'{m.data[project]['Assurance MM' + str(i) + ' Status']}',"
-                    f"'{note}', '{m.data[project]['Assurance MM' + str(i) + ' LoD']}', 'None')")
-
+                    f"'{master.data[project]['Assurance MM' + str(i) + ' Original Baseline']}',"
+                    f"'{master.data[project]['Assurance MM' + str(i) + ' Forecast - Actual']}',"
+                    f"'{master.data[project]['Assurance MM' + str(i) + ' Variance']}',"
+                    f"'{master.data[project]['Assurance MM' + str(i) + ' Status']}',"
+                    f"'{note}', '{master.data[project]['Assurance MM' + str(i) + ' LoD']}', 'None')")
+            #  Approval milestones
             m_type_as = "Project MM" + str(i)
-            if m_type_as in list(m.data[project].keys()):
+            if m_type_as in list(master.data[project].keys()):
                 #  note string amended to remove ' and replace with ''
-                n = m.data[project]["Project MM" + str(i) + " Notes"]
+                n = master.data[project]["Project MM" + str(i) + " Notes"]
                 note = n.replace("'", "''")
                 #  question. does {} need '{}' around them? In what instances.
                 c.execute(
                     f"INSERT INTO milestone (milestone_type, quarter_id, project_id, project_name, "
                     f"name, gov_type, ver_no, orig_baseline, forecast_actual, variance, status, notes,"
                     f"lod, crit_path) "
-                    f"VALUES ('Project', '{m.quarter}', "
+                    f"VALUES ('Project', '{master.quarter}', "
                     f"'{project_id_numbers(project)}', '{project}', "
-                    f"'{m.data[project]['Project MM' + str(i)]}', "
+                    f"'{master.data[project]['Project MM' + str(i)]}', "
                     f"'None',"
                     f"'None', "
-                    f"'{m.data[project]['Project MM' + str(i) + ' Original Baseline']}',"
-                    f"'{m.data[project]['Project MM' + str(i) + ' Forecast - Actual']}',"
-                    f"'{m.data[project]['Project MM' + str(i) + ' Variance']}',"
-                    f"'{m.data[project]['Project MM' + str(i) + ' Status']}',"
+                    f"'{master.data[project]['Project MM' + str(i) + ' Original Baseline']}',"
+                    f"'{master.data[project]['Project MM' + str(i) + ' Forecast - Actual']}',"
+                    f"'{master.data[project]['Project MM' + str(i) + ' Variance']}',"
+                    f"'{master.data[project]['Project MM' + str(i) + ' Status']}',"
                     f"'{note}', 'None',"
-                    f"'{m.data[project]['Project MM' + str(i) + ' CP']}')")
-
-
-    conn.commit()
+                    f"'{master.data[project]['Project MM' + str(i) + ' CP']}')")
 
 
 #  create master dB.
