@@ -1,6 +1,6 @@
 import sqlite3
 from datamaps.api import project_data_from_master
-import re
+from typing import Dict
 
 
 #  what's the best method of integration this into code. Could as a variable but starts making
@@ -70,6 +70,8 @@ def import_master_to_db(db_path: str, master_path: str) -> None:
     for t in milestone_type_list:
         c.execute(f"INSERT INTO milestone_type (type) VALUES ('{t}')")
 
+    import_project_to_master_db(m, c)
+
     import_quarter_to_master_db(m, c)
 
     import_milestone_to_master_db(m, c)
@@ -77,7 +79,7 @@ def import_master_to_db(db_path: str, master_path: str) -> None:
     conn.commit()
 
 
-def import_quarter_to_master_db(master: dict, c) -> None:
+def import_quarter_to_master_db(master: Dict[str, str], c) -> None:
     """
     this function places quarter data into the dB.
     """
@@ -85,14 +87,21 @@ def import_quarter_to_master_db(master: dict, c) -> None:
               f"'{master.quarter}', '{master.quarter.quarter}')")
 
 
-def import_milestone_to_master_db(master: dict, c) -> None:
+def import_project_to_master_db(master: Dict[str, str], c) -> None:
+    """
+    this function places project data into the dB.
+    """
+    for project in master.projects:
+        c.execute(f"INSERT INTO project (group_name, project_id, name) VALUES ("
+        f"'{project_group_ref(project)}', "
+        f"'{project_id_numbers(project)}', '{project}')")
+
+
+def import_milestone_to_master_db(master: Dict[str, str], c) -> None:
     """
     this function places milestone data into the dB.
     """
     for project in master.projects:
-        c.execute(f"INSERT INTO project (quarter_id, group_name, project_id, name) VALUES ("
-                  f"'{master.quarter}', '{project_group_ref(project)}', "
-                  f"'{project_id_numbers(project)}', '{project}')")
         for i in range(1, 50):
             #  Approval milestones
             m_type_as = "Approval MM" + str(i)
@@ -197,11 +206,9 @@ def create_db(db_path):
 
     c.execute("""CREATE TABLE project
             (id INTEGER PRIMARY KEY,
-            quarter_id text,
             group_name text,
             project_id integer,
             name text,
-            FOREIGN KEY(quarter_id) REFERENCES quarter(quarter_id)
             FOREIGN KEY(group_name) REFERENCES dft_group(name))""")
 
     c.execute("""CREATE UNIQUE INDEX i3 ON project
