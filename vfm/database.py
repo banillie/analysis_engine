@@ -60,10 +60,15 @@ def import_master_to_db(db_path: str, master_path: str) -> None:
     c = conn.cursor()
     c.execute(f"INSERT INTO quarter (quarter_id, quarter_number) VALUES ("
               f"'{m.quarter}', '{m.quarter.quarter}')")
-    group_list = [("Rail Group", "BLAH"), ("HSMRPG", "BLAH"), ("RPE", "BLAH"), ("AMIS", "BLAH")]
-    c.executemany("INSERT INTO dft_group (name, description) VALUES (?,?)", group_list)
-    milestone_type_list = [("Approval", "BLAH"), ("Assurance", "BLAH"), ("Project", "BLAH")]
-    c.executemany("INSERT INTO milestone_type (type, description) VALUES (?,?)", milestone_type_list)
+    #  insert group types
+    group_list = ["Rail Group", "HSMRPG", "RPE", "AMIS"]
+    for g in group_list:
+        c.execute(f"INSERT INTO dft_group (name) VALUES ('{g}')")
+    #  insert milestone types
+    milestone_type_list = ["Approval", "Assurance", "Project"]
+    for t in milestone_type_list:
+        c.execute(f"INSERT INTO milestone_type (type) VALUES ('{t}')")
+
     for project in m.projects:
         c.execute(f"INSERT INTO project (quarter_id, group_name, project_id, name) VALUES ("
                   f"'{m.quarter}', '{project_group_ref(project)}', "
@@ -79,7 +84,7 @@ def import_master_to_db(db_path: str, master_path: str) -> None:
                 c.execute(
                     f"INSERT INTO milestone (milestone_type, quarter_id, project_id, project_name, "
                     f"name, gov_type, ver_no, orig_baseline, forecast_actual, variance, status, notes,"
-                    f"lod) "
+                    f"lod, crit_path) "
                     f"VALUES ('Approval', '{m.quarter}', "
                     f"'{project_id_numbers(project)}', '{project}', "
                     f"'{m.data[project]['Approval MM' + str(i)]}', "
@@ -89,7 +94,7 @@ def import_master_to_db(db_path: str, master_path: str) -> None:
                     f"'{m.data[project]['Approval MM' + str(i) + ' Forecast / Actual']}',"
                     f"'{m.data[project]['Approval MM' + str(i) + ' Variance']}',"
                     f"'{m.data[project]['Approval MM' + str(i) + ' Status']}',"
-                    f"'{note}', 'None')")
+                    f"'{note}', 'None', 'None')")
             #  Assurance milestones
             m_type_as = "Assurance MM" + str(i)
             if m_type_as in list(m.data[project].keys()):
@@ -100,7 +105,7 @@ def import_master_to_db(db_path: str, master_path: str) -> None:
                 c.execute(
                     f"INSERT INTO milestone (milestone_type, quarter_id, project_id, project_name, "
                     f"name, gov_type, ver_no, orig_baseline, forecast_actual, variance, status, notes,"
-                    f"lod) "
+                    f"lod, crit_path) "
                     f"VALUES ('Assurance', '{m.quarter}', "
                     f"'{project_id_numbers(project)}', '{project}', "
                     f"'{m.data[project]['Assurance MM' + str(i)]}', "
@@ -110,7 +115,29 @@ def import_master_to_db(db_path: str, master_path: str) -> None:
                     f"'{m.data[project]['Assurance MM' + str(i) + ' Forecast - Actual']}',"
                     f"'{m.data[project]['Assurance MM' + str(i) + ' Variance']}',"
                     f"'{m.data[project]['Assurance MM' + str(i) + ' Status']}',"
-                    f"'{note}', '{m.data[project]['Assurance MM' + str(i) + ' LoD']}')")
+                    f"'{note}', '{m.data[project]['Assurance MM' + str(i) + ' LoD']}', 'None')")
+
+            m_type_as = "Project MM" + str(i)
+            if m_type_as in list(m.data[project].keys()):
+                #  note string amended to remove ' and replace with ''
+                n = m.data[project]["Project MM" + str(i) + " Notes"]
+                note = n.replace("'", "''")
+                #  question. does {} need '{}' around them? In what instances.
+                c.execute(
+                    f"INSERT INTO milestone (milestone_type, quarter_id, project_id, project_name, "
+                    f"name, gov_type, ver_no, orig_baseline, forecast_actual, variance, status, notes,"
+                    f"lod, crit_path) "
+                    f"VALUES ('Project', '{m.quarter}', "
+                    f"'{project_id_numbers(project)}', '{project}', "
+                    f"'{m.data[project]['Project MM' + str(i)]}', "
+                    f"'None',"
+                    f"'None', "
+                    f"'{m.data[project]['Project MM' + str(i) + ' Original Baseline']}',"
+                    f"'{m.data[project]['Project MM' + str(i) + ' Forecast - Actual']}',"
+                    f"'{m.data[project]['Project MM' + str(i) + ' Variance']}',"
+                    f"'{m.data[project]['Project MM' + str(i) + ' Status']}',"
+                    f"'{note}', 'None',"
+                    f"'{m.data[project]['Project MM' + str(i) + ' CP']}')")
 
 
     conn.commit()
@@ -146,8 +173,7 @@ def create_db(db_path):
 
     c.execute("""CREATE TABLE dft_group
             (id INTEGER PRIMARY KEY,
-            name text, 
-            description text)""")
+            name text)""")
 
     c.execute("""CREATE UNIQUE INDEX i2 ON dft_group
                 (name)""")
@@ -164,17 +190,16 @@ def create_db(db_path):
     c.execute("""CREATE UNIQUE INDEX i3 ON project
                 (project_id, name)""")
 
-    c.execute("""CREATE TABLE 'milestone_type'
+    c.execute("""CREATE TABLE milestone_type
             (id INTEGER PRIMARY KEY,
-            type text,
-            description text)""")
+            type text)""")
 
     c.execute("""CREATE UNIQUE INDEX i4 ON milestone_type
                 (type)""")
 
-    c.execute("""CREATE TABLE 'milestone'
+    c.execute("""CREATE TABLE milestone
             (id INTEGER PRIMARY KEY,
-            milestone_type integer,
+            milestone_type text,
             quarter_id integer,
             project_id integer,
             project_name text,
@@ -187,6 +212,7 @@ def create_db(db_path):
             status text,
             notes text,
             lod text,
+            crit_path text,
             FOREIGN KEY(quarter_id) REFERENCES quarter(quarter_id),
             FOREIGN KEY(project_id, project_name) REFERENCES project(project_id, name),
             FOREIGN KEY(milestone_type) REFERENCES milestone_type(type)

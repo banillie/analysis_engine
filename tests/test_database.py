@@ -2,8 +2,6 @@ import sqlite3
 from vfm.database import import_master_to_db
 
 
-
-
 def get_cursor(db, master_path):
     import_master_to_db(db, master_path)
     conn = sqlite3.connect(db)
@@ -26,6 +24,12 @@ def test_import_master_to_db(db, master_path):
     c = get_cursor(db, master_path)
     c.execute("""SELECT count(*) FROM project""")
     assert c.fetchall() == [(6,)]
+
+
+def test_insert_list_of_single_values_into_dft_group(db, master_path):
+    c = get_cursor(db, master_path)
+    c.execute("""SELECT * FROM dft_group""")
+    assert c.fetchall() == [(1, 'Rail Group'), (2, 'HSMRPG'), (3, 'RPE'), (4, 'AMIS')]
 
 
 def test_apostrophe_in_text(db, master_path):
@@ -55,5 +59,16 @@ def test_sqlite_select_commands_across_tables(db, master_path):
     c = get_cursor(db, master_path)
     c.execute(
         """select milestone.name from milestone, project where 
-        milestone.project_name = project.name and project.group_name = 'AMIS'""")
-    assert c.fetchall() == [('Earth Command',), ('Inverted Cosmonauts',), ('Sputnik Sea',), ('Team Magma',)]
+        milestone.project_name = project.name and project.group_name = 'AMIS'
+        and milestone.milestone_type = 'Approval'""")
+    assert c.fetchall() == [('Earth Command',), ('Sputnik Sea',)]
+    c.execute(
+        """select milestone.name from milestone, project where 
+        milestone.project_name = project.name and project.group_name = 'AMIS'
+        and milestone.milestone_type = 'Assurance'""")
+    assert c.fetchall() == [('Inverted Cosmonauts',), ('Team Magma',)]
+    c.execute(
+        """select milestone.name from milestone, project where 
+        milestone.project_name = project.name and project.group_name = 'AMIS'
+        and milestone.milestone_type = 'Project'""")
+    assert c.fetchall() == [('Standard A',), ('Standard A',)]
