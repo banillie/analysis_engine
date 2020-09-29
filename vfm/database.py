@@ -61,14 +61,15 @@ def import_master_to_db(db_path: str, master_path: str) -> None:
     c.execute(f"INSERT INTO quarter (quarter_id, quarter_number) VALUES ("
               f"'{m.quarter}', '{m.quarter.quarter}')")
     group_list = [("Rail Group", "BLAH"), ("HSMRPG", "BLAH"), ("RPE", "BLAH"), ("AMIS", "BLAH")]
-    c.executemany("INSERT INTO project_group (group_id, description) VALUES (?,?)", group_list)
+    c.executemany("INSERT INTO dft_group (name, description) VALUES (?,?)", group_list)
     milestone_type_list = [("Approval", "BLAH"), ("Assurance", "BLAH"), ("Project", "BLAH")]
     c.executemany("INSERT INTO milestone_type (type, description) VALUES (?,?)", milestone_type_list)
     for project in m.projects:
-        c.execute(f"INSERT INTO project (quarter_id, group_id, project_id, name) VALUES ("
+        c.execute(f"INSERT INTO project (quarter_id, group_name, project_id, name) VALUES ("
                   f"'{m.quarter}', '{project_group_ref(project)}', "
                   f"'{project_id_numbers(project)}', '{project}')")
         for i in range(1, 50):
+            #  Approval milestones
             m_type_as = "Approval MM" + str(i)
             if m_type_as in list(m.data[project].keys()):
                 #  note string amended to remove ' and replace with ''
@@ -76,7 +77,7 @@ def import_master_to_db(db_path: str, master_path: str) -> None:
                 note = n.replace("'", "''")
                 #  question. does {} need '{}' around them? In what instances.
                 c.execute(
-                    f"INSERT INTO milestone (milestone_type_id, quarter_id, project_id, project_name, "
+                    f"INSERT INTO milestone (milestone_type, quarter_id, project_id, project_name, "
                     f"name, gov_type, ver_no, orig_baseline, forecast_actual, variance, status, notes,"
                     f"lod) "
                     f"VALUES ('Approval', '{m.quarter}', "
@@ -89,7 +90,7 @@ def import_master_to_db(db_path: str, master_path: str) -> None:
                     f"'{m.data[project]['Approval MM' + str(i) + ' Variance']}',"
                     f"'{m.data[project]['Approval MM' + str(i) + ' Status']}',"
                     f"'{note}', 'None')")
-
+            #  Assurance milestones
             m_type_as = "Assurance MM" + str(i)
             if m_type_as in list(m.data[project].keys()):
                 #  note string amended to remove ' and replace with ''
@@ -97,7 +98,7 @@ def import_master_to_db(db_path: str, master_path: str) -> None:
                 note = n.replace("'", "''")
                 #  question. does {} need '{}' around them? In what instances.
                 c.execute(
-                    f"INSERT INTO milestone (milestone_type_id, quarter_id, project_id, project_name, "
+                    f"INSERT INTO milestone (milestone_type, quarter_id, project_id, project_name, "
                     f"name, gov_type, ver_no, orig_baseline, forecast_actual, variance, status, notes,"
                     f"lod) "
                     f"VALUES ('Assurance', '{m.quarter}', "
@@ -123,7 +124,7 @@ def create_db(db_path):
     DROP TABLE IF EXISTS quarter;
     """)
     c.execute("""
-    DROP TABLE IF EXISTS project_group;
+    DROP TABLE IF EXISTS dft_group;
     """)
     c.execute("""
     DROP TABLE IF EXISTS project;
@@ -143,22 +144,22 @@ def create_db(db_path):
     c.execute("""CREATE UNIQUE INDEX i1 ON quarter
             (quarter_id)""")
 
-    c.execute("""CREATE TABLE project_group
-                (id INTEGER PRIMARY KEY,
-                group_id text, 
-                description text)""")
+    c.execute("""CREATE TABLE dft_group
+            (id INTEGER PRIMARY KEY,
+            name text, 
+            description text)""")
 
-    c.execute("""CREATE UNIQUE INDEX i2 ON project_group
-                (group_id)""")
+    c.execute("""CREATE UNIQUE INDEX i2 ON dft_group
+                (name)""")
 
     c.execute("""CREATE TABLE project
             (id INTEGER PRIMARY KEY,
             quarter_id text,
-            group_id text,
+            group_name text,
             project_id integer,
             name text,
             FOREIGN KEY(quarter_id) REFERENCES quarter(quarter_id)
-            FOREIGN KEY(group_id) REFERENCES project_group(group_id))""")
+            FOREIGN KEY(group_name) REFERENCES dft_group(name))""")
 
     c.execute("""CREATE UNIQUE INDEX i3 ON project
                 (project_id, name)""")
@@ -173,7 +174,7 @@ def create_db(db_path):
 
     c.execute("""CREATE TABLE 'milestone'
             (id INTEGER PRIMARY KEY,
-            milestone_type_id integer,
+            milestone_type integer,
             quarter_id integer,
             project_id integer,
             project_name text,
@@ -188,7 +189,7 @@ def create_db(db_path):
             lod text,
             FOREIGN KEY(quarter_id) REFERENCES quarter(quarter_id),
             FOREIGN KEY(project_id, project_name) REFERENCES project(project_id, name),
-            FOREIGN KEY(milestone_type_id) REFERENCES milestone_type(type)
+            FOREIGN KEY(milestone_type) REFERENCES milestone_type(type)
             )""")
 
     conn.commit()

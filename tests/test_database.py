@@ -37,17 +37,17 @@ def test_apostrophe_in_text(db, master_path):
 
 def test_insert_quarter_data_with_foreign_keys(db, master_path):
     c = get_cursor(db, master_path)
-    c.execute("""SELECT quarter_id, group_id FROM project WHERE name = 'Apollo 11'""")
+    c.execute("""SELECT quarter_id, group_name FROM project WHERE name = 'Apollo 11'""")
     assert c.fetchall() == [('Q4 19/20', 'HSMRPG')]
 
 
 def test_insert_milestone_data_with_foreign_keys(db, master_path):
     c = get_cursor(db, master_path)
-    c.execute("""SELECT milestone_type_id, quarter_id, project_id FROM milestone WHERE project_name = 'Apollo 11' 
-    and milestone_type_id = 'Approval'""")
+    c.execute("""SELECT milestone_type, quarter_id, project_id FROM milestone WHERE project_name = 'Apollo 11' 
+    and milestone_type = 'Approval'""")
     assert c.fetchall() == [('Approval', 'Q4 19/20', 2)]
-    c.execute("""SELECT milestone_type_id, quarter_id, project_id FROM milestone WHERE project_name = 'Apollo 11' 
-        and milestone_type_id = 'Assurance'""")
+    c.execute("""SELECT milestone_type, quarter_id, project_id FROM milestone WHERE project_name = 'Apollo 11' 
+        and milestone_type = 'Assurance'""")
     assert c.fetchall() == [('Assurance', 'Q4 19/20', 2)]
 
 
@@ -55,5 +55,5 @@ def test_sqlite_select_commands_across_tables(db, master_path):
     c = get_cursor(db, master_path)
     c.execute(
         """select milestone.name from milestone, project where 
-        milestone.project_name = project.name and project.group_id = 'AMIS'""")
+        milestone.project_name = project.name and project.group_name = 'AMIS'""")
     assert c.fetchall() == [('Earth Command',), ('Inverted Cosmonauts',), ('Sputnik Sea',), ('Team Magma',)]
