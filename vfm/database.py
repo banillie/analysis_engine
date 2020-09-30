@@ -4,7 +4,7 @@ from typing import Dict
 
 
 #  what's the best method of integration this into code. Could as a variable but starts making
-#  variable list long and untidy. Doesn't need to be a variable as doesn't change at local level.
+#  variable list long and untidy. Does it need to be a variable as doesn't change at local level.
 def project_id_numbers(project_name: str) -> int:
     id_dict = {'Sea of Tranquility': 1,
                'Apollo 11': 2,
@@ -33,25 +33,6 @@ def create_connect_db(db_name):
     return conn
 
 
-#  create a new table in vfm db.
-def create_vfm_table(db_name, insert_quarter):
-    conn = sqlite3.connect(db_name + '.db')
-    c = conn.cursor()
-
-    c.execute("""CREATE TABLE '{quarter}'
-            (project_name text,
-            project_group text,
-            npv real,
-            adjusted_bcr real,
-            initial_bcr real,
-            vfm_cat_single text,
-            pvc real,
-            pvb real)""".format(quarter=insert_quarter))
-
-    conn.commit()
-    conn.close()
-
-
 def import_master_to_db(db_path: str, masters: list) -> None:
     """
     this function puts master data into a dB via a python dictionary
@@ -73,9 +54,11 @@ def import_master_to_db(db_path: str, masters: list) -> None:
     for m in masters:
         import_project_to_master_db(m, conn)
 
-    # import_quarter_to_master_db(m, c)
-    #
-    # import_milestone_to_master_db(m, c)
+    for m in masters:
+        import_quarter_to_master_db(m, c)
+
+    for m in masters:
+        import_milestone_to_master_db(m, c)
 
     conn.commit()
 
@@ -127,7 +110,7 @@ def import_milestone_to_master_db(master: Dict[str, str], c) -> None:
                     f"name, gov_type, ver_no, orig_baseline, forecast_actual, variance, status, notes,"
                     f"lod, crit_path) "
                     f"VALUES ('Approval', '{master.quarter}', "
-                    f"'{project_id_numbers(project)}', '{project}', "
+                    f"'{master.data[project]['DFT ID Number']}', '{project}', "
                     f"'{master.data[project]['Approval MM' + str(i)]}', "
                     f"'{master.data[project]['Approval MM' + str(i) + ' Gov Type']}',"
                     f"'{master.data[project]['Approval MM' + str(i) + ' Ver No']}', "
@@ -148,7 +131,7 @@ def import_milestone_to_master_db(master: Dict[str, str], c) -> None:
                     f"name, gov_type, ver_no, orig_baseline, forecast_actual, variance, status, notes,"
                     f"lod, crit_path) "
                     f"VALUES ('Assurance', '{master.quarter}', "
-                    f"'{project_id_numbers(project)}', '{project}', "
+                    f"'{master.data[project]['DFT ID Number']}', '{project}', "
                     f"'{master.data[project]['Assurance MM' + str(i)]}', "
                     f"'None',"
                     f"'None', "
@@ -169,7 +152,7 @@ def import_milestone_to_master_db(master: Dict[str, str], c) -> None:
                     f"name, gov_type, ver_no, orig_baseline, forecast_actual, variance, status, notes,"
                     f"lod, crit_path) "
                     f"VALUES ('Project', '{master.quarter}', "
-                    f"'{project_id_numbers(project)}', '{project}', "
+                    f"'{master.data[project]['DFT ID Number']}', '{project}', "
                     f"'{master.data[project]['Project MM' + str(i)]}', "
                     f"'None',"
                     f"'None', "
@@ -258,6 +241,26 @@ def create_db(db_path):
     conn.commit()
     conn.close()
 
+
+
+
+#  create a new table in vfm db.
+def create_vfm_table(db_name, insert_quarter):
+    conn = sqlite3.connect(db_name + '.db')
+    c = conn.cursor()
+
+    c.execute("""CREATE TABLE '{quarter}'
+            (project_name text,
+            project_group text,
+            npv real,
+            adjusted_bcr real,
+            initial_bcr real,
+            vfm_cat_single text,
+            pvc real,
+            pvb real)""".format(quarter=insert_quarter))
+
+    conn.commit()
+    conn.close()
 
 #  gets vfm data values from master data in excel wbs.
 def get_vfm_values(masters):
