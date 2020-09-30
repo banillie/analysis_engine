@@ -52,11 +52,11 @@ def create_vfm_table(db_name, insert_quarter):
     conn.close()
 
 
-def import_master_to_db(db_path: str, master_path: str) -> None:
+def import_master_to_db(db_path: str, masters: list) -> None:
     """
     this function puts master data into a dB via a python dictionary
     """
-    m = project_data_from_master(master_path, 4, 2019)
+    # m = project_data_from_master(master_path, 4, 2019)
     conn = sqlite3.connect(db_path)
     conn.execute("PRAGMA foreign_keys = 1")
     c = conn.cursor()
@@ -70,11 +70,12 @@ def import_master_to_db(db_path: str, master_path: str) -> None:
     for t in milestone_type_list:
         c.execute(f"INSERT INTO milestone_type (type) VALUES ('{t}')")
 
-    import_project_to_master_db(m, c)
+    for m in masters:
+        import_project_to_master_db(m, conn)
 
-    import_quarter_to_master_db(m, c)
-
-    import_milestone_to_master_db(m, c)
+    # import_quarter_to_master_db(m, c)
+    #
+    # import_milestone_to_master_db(m, c)
 
     conn.commit()
 
@@ -87,14 +88,25 @@ def import_quarter_to_master_db(master: Dict[str, str], c) -> None:
               f"'{master.quarter}', '{master.quarter.quarter}')")
 
 
-def import_project_to_master_db(master: Dict[str, str], c) -> None:
+def import_project_to_master_db(master: Dict[str, str], conn) -> None:
     """
     this function places project data into the dB.
     """
+    conn.row_factory = lambda cursor, row: row[0]
+    c = conn.cursor()
+    c.execute("""SELECT project_id FROM project""")
+    try:
+        project_id_list = c.fetchall()
+    except IndexError:
+        project_id_list = []
+
     for project in master.projects:
-        c.execute(f"INSERT INTO project (group_name, project_id, name) VALUES ("
-        f"'{project_group_ref(project)}', "
-        f"'{project_id_numbers(project)}', '{project}')")
+        id = master.data[project]['DFT ID Number']
+        if id not in project_id_list:
+            c.execute(f"INSERT INTO project (group_name, project_id, name) "
+                      f"VALUES ("
+                      f"'{project_group_ref(project)}', "
+                      f"'{master.data[project]['DFT ID Number']}', '{project}')")
 
 
 def import_milestone_to_master_db(master: Dict[str, str], c) -> None:
@@ -102,7 +114,7 @@ def import_milestone_to_master_db(master: Dict[str, str], c) -> None:
     this function places milestone data into the dB.
     """
     for project in master.projects:
-        for i in range(1, 50):
+        for i in range(1, 68):
             #  Approval milestones
             m_type_as = "Approval MM" + str(i)
             if m_type_as in list(master.data[project].keys()):
@@ -209,6 +221,7 @@ def create_db(db_path):
             group_name text,
             project_id integer,
             name text,
+            UNIQUE (project_id, name),
             FOREIGN KEY(group_name) REFERENCES dft_group(name))""")
 
     c.execute("""CREATE UNIQUE INDEX i3 ON project

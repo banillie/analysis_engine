@@ -16,9 +16,9 @@ def db():
 
 
 @pytest.fixture
-def master_path():
-    return os.path.join(os.getcwd(), "resources/" 
-           "milestones_test_master_4_2019.xlsx")
+def one_master():
+    return [project_data_from_master(os.path.join(os.getcwd(), "resources/" 
+           "milestones_test_master_4_2019.xlsx"), 4, 2019)]
 
 
 @pytest.fixture
@@ -35,7 +35,6 @@ def abbreviations():
             'Columbia': 'Columbia',
             'Mars': 'Mars'}
 
-# group of masters
 @pytest.fixture()
 def mst():
     test_master_data = [
@@ -45,3 +44,14 @@ def mst():
         "cut_down_master_4_2017.xlsx"), 4, 2017)
         ]
     return test_master_data
+
+@pytest.fixture()
+def milestone_masters():
+    test_master_data = [
+        project_data_from_master(os.path.join(os.getcwd(), "resources/" 
+           "milestones_test_master_4_2019.xlsx"), 4, 2019),
+        project_data_from_master(os.path.join(os.getcwd(), "resources/" 
+           "milestones_test_master_4_2018.xlsx"), 4, 2018)
+    ]
+    return test_master_data
+
