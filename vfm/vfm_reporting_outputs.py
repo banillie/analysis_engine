@@ -1,7 +1,7 @@
 #  code of running and compiling vfm data analysis each quarter.
 
 from data_mgmt.data import root_path
-from vfm.database import convert_db_python_dict, get_project_names
+from database.database import convert_db_python_dict, get_project_names
 from vfm.vfm_analysis_workings import compile_data_db
 
 q_list = ['q1_2021', 'q4_1920']

@@ -2,7 +2,7 @@ import os
 
 import pytest
 
-from vfm.database import create_db
+from database.database import create_db
 
 from datamaps.api import project_data_from_master
 

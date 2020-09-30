@@ -1,5 +1,5 @@
 import sqlite3
-from vfm.database import import_master_to_db
+from database.database import import_master_to_db
 
 #  refactor. don't need milestone_master as an argument
 def get_cursor(db, milestone_masters):

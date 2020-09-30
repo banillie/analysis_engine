@@ -2,8 +2,6 @@
 #  db options are the fastest.
 
 from openpyxl import Workbook
-from data_mgmt.data import root_path
-from vfm.database import convert_db_python_dict, get_project_names
 import sqlite3
 from data_mgmt.data import vfm_matplotlib_graph
 

@@ -1,6 +1,6 @@
 #  code for creating/connecting to vfm database and adding data.
 
-from vfm.database import get_vfm_values, get_quarter_values, \
+from database.database import get_vfm_values, get_quarter_values, \
     create_vfm_table, insert_many_vfm_db
 from data_mgmt.data import get_master_data
 

@@ -1,10 +1,8 @@
 #  Builds a vfm category type bar chart output in matplotlib
 
 from collections import Counter
-import matplotlib.pyplot as plt
-import numpy as np
 from data_mgmt.data import root_path, vfm_matplotlib_graph
-from vfm.database import query_db
+from database.database import query_db
 
 #  gets the number of projects reporting each category.
 def get_vfm_cat_numbers(cat_list, qrt_dict):
