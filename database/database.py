@@ -52,7 +52,7 @@ def import_master_to_db(db_path: str, masters: list) -> None:
         c.execute(f"INSERT INTO milestone_type (type) VALUES ('{t}')")
 
     for m in masters:
-        import_project_to_master_db(m, conn)
+        import_project_to_master_db(m, c)
 
     for m in masters:
         import_quarter_to_master_db(m, c)
@@ -71,25 +71,18 @@ def import_quarter_to_master_db(master: Dict[str, str], c) -> None:
               f"'{master.quarter}', '{master.quarter.quarter}')")
 
 
-def import_project_to_master_db(master: Dict[str, str], conn) -> None:
+def import_project_to_master_db(master: Dict[str, str], c) -> None:
     """
     this function places project data into the dB.
     """
-    conn.row_factory = lambda cursor, row: row[0]
-    c = conn.cursor()
-    c.execute("""SELECT project_id FROM project""")
-    try:
-        project_id_list = c.fetchall()
-    except IndexError:
-        project_id_list = []
-
     for project in master.projects:
-        id = master.data[project]['DFT ID Number']
-        if id not in project_id_list:
+        try:
             c.execute(f"INSERT INTO project (group_name, project_id, name) "
                       f"VALUES ("
                       f"'{project_group_ref(project)}', "
                       f"'{master.data[project]['DFT ID Number']}', '{project}')")
+        except sqlite3.IntegrityError:
+            pass
 
 
 def import_milestone_to_master_db(master: Dict[str, str], c) -> None:

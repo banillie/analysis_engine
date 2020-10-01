@@ -1,4 +1,5 @@
 import sqlite3
+import pytest
 from database.database import import_master_to_db
 
 #  refactor. don't need milestone_master as an argument
@@ -77,3 +78,14 @@ def test_more_than_one_quarter_master_project_names(db, milestone_masters):
     c = get_cursor(db, milestone_masters)
     c.execute("""SELECT * FROM project WHERE name = 'Mars'""")
     assert c.fetchall() == [(1, 'Rail Group', 'D6', 'Mars'),]
+
+def test_throws_unqiue_acception(db, milestone_masters):
+    c = get_cursor(db, milestone_masters)
+    with pytest.raises(sqlite3.IntegrityError):
+        c.execute("INSERT INTO project (group_name, project_id, name) "
+                  "VALUES ('Rail Group', 'D6', 'Mars')")
+        c.execute("INSERT INTO project (group_name, project_id, name) "
+                  "VALUES ('Rail Group', 'D6', 'Jupiter')")
+        c.execute("INSERT INTO project (group_name, project_id, name) "
+                  "VALUES ('Rail Group', 'E6', 'Mars')")
+
