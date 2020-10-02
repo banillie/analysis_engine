@@ -86,6 +86,40 @@ def import_project_to_master_db(master: Dict[str, str], c, project_id: dict) -> 
 
 
 def import_milestone_to_master_db(master: Dict[str, str], c, project_id: dict) -> None:
+
+    #  small helper function to handle milestone note text placed in dB
+    def alter_note_text(n_int: int, m_type: str):
+        try:
+            n = master.data[project][m_type + " MM" + str(n_int) + " Notes"]
+        except KeyError:
+            n = None   #  handling required Q4 16/17 master missing Approval MM16 Notes
+
+        if n is None:
+            return ""
+        else:
+            try:
+                return n.replace("'", "''")
+            except TypeError:
+                print("Check the milestone note for " + project + " milestone " +
+                      master.data[project][m_type + " MM" + str(n_int)] + " in " + str(master.quarter) +
+                      " as the following incorrect value is being given; " +
+                      str(master.data[project][m_type + " MM" + str(n_int) + " Notes"]))
+                return ""
+
+    def alter_m_key_text(m_int: int, m_type: str):
+        m_key = master.data[project][m_type + " MM" + str(m_int)]
+        if m_key is None:
+            return ""
+        else:
+            return m_key.replace("'", "''")
+
+    #  small helper function to handle inconsistent key name in excel master
+    def approval_date_handling(m_int: int):
+        try:
+            return master.data[project]['Approval MM' + str(m_int) + ' Forecast / Actual']
+        except KeyError:
+            return master.data[project]['Approval MM' + str(m_int) + ' Forecast - Actual']
+
     """
     this function places milestone data into the dB.
     """
@@ -94,64 +128,104 @@ def import_milestone_to_master_db(master: Dict[str, str], c, project_id: dict) -
             #  Approval milestones
             m_type_as = "Approval MM" + str(i)
             if m_type_as in list(master.data[project].keys()):
-                #  note string amended to remove ' and replace with ''
-                n = master.data[project]["Approval MM" + str(i) + " Notes"]
-                note = n.replace("'", "''")
+                note = alter_note_text(i, "Approval") #  note string amended to handle apostrophes
+                date = approval_date_handling(i)
+                key = alter_m_key_text(i, "Approval") #  milestone key name amended to handle apostrophes
+                #  these keys are not present in all masters
+                try:
+                    gov_type = master.data[project]['Approval MM' + str(i) + ' Gov Type']
+                    ver_no = master.data[project]['Approval MM' + str(i) + ' Ver No']
+                    variance = master.data[project]['Approval MM' + str(i) + ' Variance']
+                    status = master.data[project]['Approval MM' + str(i) + ' Status']
+                except KeyError:
+                    gov_type = 'None'
+                    ver_no = 'None'
+                    variance = 'None'
+                    status = 'None'
                 c.execute(
                     f"INSERT INTO milestone (milestone_type, quarter_id, project_id, project_name, "
                     f"name, gov_type, ver_no, orig_baseline, forecast_actual, variance, status, notes,"
-                    f"lod, crit_path) "
+                    f"lod, crit_path, dca) "
                     f"VALUES ('Approval', '{master.quarter}', "
                     f"'{project_id.data[project]['ID Number']}', '{project}', "
-                    f"'{master.data[project]['Approval MM' + str(i)]}', "
-                    f"'{master.data[project]['Approval MM' + str(i) + ' Gov Type']}',"
-                    f"'{master.data[project]['Approval MM' + str(i) + ' Ver No']}', "
+                    f"'{key}', "
+                    f"'{gov_type}',"
+                    f"'{ver_no}', "
                     f"'{master.data[project]['Approval MM' + str(i) + ' Original Baseline']}',"
-                    f"'{master.data[project]['Approval MM' + str(i) + ' Forecast / Actual']}',"
-                    f"'{master.data[project]['Approval MM' + str(i) + ' Variance']}',"
-                    f"'{master.data[project]['Approval MM' + str(i) + ' Status']}',"
-                    f"'{note}', 'None', 'None')")
+                    f"'{date}',"
+                    f"'{variance}',"
+                    f"'{status}',"
+                    f"'{note}', 'None', 'None', 'None')")
             #  Assurance milestones
             m_type_as = "Assurance MM" + str(i)
             if m_type_as in list(master.data[project].keys()):
                 #  note string amended to remove ' and replace with ''
-                n = master.data[project]["Assurance MM" + str(i) + " Notes"]
-                note = n.replace("'", "''")
+                note = alter_note_text(i, "Assurance")
+                key = alter_m_key_text(i, "Assurance")
+                #  these keys are not present in all masters
+                try:
+                    variance = master.data[project]['Approval MM' + str(i) + ' Variance']
+                    status = master.data[project]['Approval MM' + str(i) + ' Status']
+                    lod = master.data[project]['Assurance MM' + str(i) + ' LoD']
+                except KeyError:
+                    variance = 'None'
+                    status = 'None'
+                    lod = 'None'
+                #  don't know which masters that have assurance dca ratings.
+                try:
+                    dca = master.data[project]['Assurance MM' + str(i) + ' DCA']
+                except KeyError:
+                    dca = 'None'
                 c.execute(
                     f"INSERT INTO milestone (milestone_type, quarter_id, project_id, project_name, "
                     f"name, gov_type, ver_no, orig_baseline, forecast_actual, variance, status, notes,"
-                    f"lod, crit_path) "
+                    f"lod, crit_path, dca) "
                     f"VALUES ('Assurance', '{master.quarter}', "
                     f"'{project_id.data[project]['ID Number']}', '{project}', "
-                    f"'{master.data[project]['Assurance MM' + str(i)]}', "
+                    f"'{key}', "
                     f"'None',"
                     f"'None', "
                     f"'{master.data[project]['Assurance MM' + str(i) + ' Original Baseline']}',"
                     f"'{master.data[project]['Assurance MM' + str(i) + ' Forecast - Actual']}',"
-                    f"'{master.data[project]['Assurance MM' + str(i) + ' Variance']}',"
-                    f"'{master.data[project]['Assurance MM' + str(i) + ' Status']}',"
-                    f"'{note}', '{master.data[project]['Assurance MM' + str(i) + ' LoD']}', 'None')")
+                    f"'{variance}',"
+                    f"'{status}',"
+                    f"'{note}', '{lod}', 'None', '{dca}')")
             #  Approval milestones
             m_type_as = "Project MM" + str(i)
             if m_type_as in list(master.data[project].keys()):
                 #  note string amended to remove ' and replace with ''
-                n = master.data[project]["Project MM" + str(i) + " Notes"]
-                note = n.replace("'", "''")
-                c.execute(
-                    f"INSERT INTO milestone (milestone_type, quarter_id, project_id, project_name, "
-                    f"name, gov_type, ver_no, orig_baseline, forecast_actual, variance, status, notes,"
-                    f"lod, crit_path) "
-                    f"VALUES ('Project', '{master.quarter}', "
-                    f"'{project_id.data[project]['ID Number']}', '{project}', "
-                    f"'{master.data[project]['Project MM' + str(i)]}', "
-                    f"'None',"
-                    f"'None', "
-                    f"'{master.data[project]['Project MM' + str(i) + ' Original Baseline']}',"
-                    f"'{master.data[project]['Project MM' + str(i) + ' Forecast - Actual']}',"
-                    f"'{master.data[project]['Project MM' + str(i) + ' Variance']}',"
-                    f"'{master.data[project]['Project MM' + str(i) + ' Status']}',"
-                    f"'{note}', 'None',"
-                    f"'{master.data[project]['Project MM' + str(i) + ' CP']}')")
+                note = alter_note_text(i, "Project")
+                key = alter_m_key_text(i, "Project")
+                try:
+                    variance = master.data[project]['Project MM' + str(i) + ' Variance']
+                    status = master.data[project]['Project MM' + str(i) + ' Status']
+                    cp = master.data[project]['Project MM' + str(i) + ' CP']
+                except KeyError:
+                    variance = 'None'
+                    status = 'None'
+                    cp = 'None'
+                try:
+                    c.execute(
+                        f"INSERT INTO milestone (milestone_type, quarter_id, project_id, project_name, "
+                        f"name, gov_type, ver_no, orig_baseline, forecast_actual, variance, status, notes,"
+                        f"lod, crit_path, dca) "
+                        f"VALUES ('Project', '{master.quarter}', "
+                        f"'{project_id.data[project]['ID Number']}', '{project}', "
+                        f"'{key}', "
+                        f"'None',"
+                        f"'None', "
+                        f"'{master.data[project]['Project MM' + str(i) + ' Original Baseline']}',"
+                        f"'{master.data[project]['Project MM' + str(i) + ' Forecast - Actual']}',"
+                        f"'{variance}',"
+                        f"'{status}',"
+                        f"'{note}', 'None',"
+                        f"'{cp}', 'None')")
+                except sqlite3.OperationalError:
+                    print("Incorrect data needs checking and amending in " + str(master.quarter) +
+                          " for " + project + " milestone key name " + key)
+                    pass
+                except KeyError:
+                    print(str(master.quarter) + " has a redundant Project MM17 which needs to be removed")
 
 
 #  create master dB.
@@ -222,6 +296,7 @@ def create_db(db_path):
             status text,
             notes text,
             lod text,
+            dca text,
             crit_path text,
             FOREIGN KEY(quarter_id) REFERENCES quarter(quarter_id),
             FOREIGN KEY(project_id, project_name) REFERENCES project(project_id, name),

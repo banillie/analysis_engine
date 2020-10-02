@@ -16,13 +16,15 @@
 #
 
 
-from data_mgmt.data import get_master_data
+from data_mgmt.data import get_master_data, root_path
 from database.database import create_db, import_master_to_db
 import os
+from datamaps.api import project_data_from_master
 
 db_path = os.path.join(os.getcwd(), "live.db")
 create_db(db_path)
 
 all_m = get_master_data()
+groups_ids = project_data_from_master(root_path / 'core_data/project_group_id_no.xlsx', 1, 2099)
 
-import_master_to_db(db_path, all_m)
+import_master_to_db(db_path, all_m, groups_ids)
