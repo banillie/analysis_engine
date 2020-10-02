@@ -33,7 +33,7 @@ def create_connect_db(db_name):
     return conn
 
 
-def import_master_to_db(db_path: str, masters: list) -> None:
+def import_master_to_db(db_path: str, masters: list, project_id: dict) -> None:
     """
     this function puts master data into a dB via a python dictionary
     """
@@ -52,13 +52,13 @@ def import_master_to_db(db_path: str, masters: list) -> None:
         c.execute(f"INSERT INTO milestone_type (type) VALUES ('{t}')")
 
     for m in masters:
-        import_project_to_master_db(m, c)
+        import_project_to_master_db(m, c, project_id)
 
     for m in masters:
         import_quarter_to_master_db(m, c)
 
     for m in masters:
-        import_milestone_to_master_db(m, c)
+        import_milestone_to_master_db(m, c, project_id)
 
     conn.commit()
 
@@ -71,7 +71,7 @@ def import_quarter_to_master_db(master: Dict[str, str], c) -> None:
               f"'{master.quarter}', '{master.quarter.quarter}')")
 
 
-def import_project_to_master_db(master: Dict[str, str], c) -> None:
+def import_project_to_master_db(master: Dict[str, str], c, project_id: dict) -> None:
     """
     this function places project data into the dB.
     """
@@ -79,13 +79,13 @@ def import_project_to_master_db(master: Dict[str, str], c) -> None:
         try:
             c.execute(f"INSERT INTO project (group_name, project_id, name) "
                       f"VALUES ("
-                      f"'{project_group_ref(project)}', "
-                      f"'{master.data[project]['DFT ID Number']}', '{project}')")
+                      f"'{project_id.data[project]['Group']}', "
+                      f"'{project_id.data[project]['ID Number']}', '{project}')")
         except sqlite3.IntegrityError:
             pass
 
 
-def import_milestone_to_master_db(master: Dict[str, str], c) -> None:
+def import_milestone_to_master_db(master: Dict[str, str], c, project_id: dict) -> None:
     """
     this function places milestone data into the dB.
     """
@@ -97,13 +97,12 @@ def import_milestone_to_master_db(master: Dict[str, str], c) -> None:
                 #  note string amended to remove ' and replace with ''
                 n = master.data[project]["Approval MM" + str(i) + " Notes"]
                 note = n.replace("'", "''")
-                #  question. does {} need '{}' around them? In what instances.
                 c.execute(
                     f"INSERT INTO milestone (milestone_type, quarter_id, project_id, project_name, "
                     f"name, gov_type, ver_no, orig_baseline, forecast_actual, variance, status, notes,"
                     f"lod, crit_path) "
                     f"VALUES ('Approval', '{master.quarter}', "
-                    f"'{master.data[project]['DFT ID Number']}', '{project}', "
+                    f"'{project_id.data[project]['ID Number']}', '{project}', "
                     f"'{master.data[project]['Approval MM' + str(i)]}', "
                     f"'{master.data[project]['Approval MM' + str(i) + ' Gov Type']}',"
                     f"'{master.data[project]['Approval MM' + str(i) + ' Ver No']}', "
@@ -118,13 +117,12 @@ def import_milestone_to_master_db(master: Dict[str, str], c) -> None:
                 #  note string amended to remove ' and replace with ''
                 n = master.data[project]["Assurance MM" + str(i) + " Notes"]
                 note = n.replace("'", "''")
-                #  question. does {} need '{}' around them? In what instances.
                 c.execute(
                     f"INSERT INTO milestone (milestone_type, quarter_id, project_id, project_name, "
                     f"name, gov_type, ver_no, orig_baseline, forecast_actual, variance, status, notes,"
                     f"lod, crit_path) "
                     f"VALUES ('Assurance', '{master.quarter}', "
-                    f"'{master.data[project]['DFT ID Number']}', '{project}', "
+                    f"'{project_id.data[project]['ID Number']}', '{project}', "
                     f"'{master.data[project]['Assurance MM' + str(i)]}', "
                     f"'None',"
                     f"'None', "
@@ -139,13 +137,12 @@ def import_milestone_to_master_db(master: Dict[str, str], c) -> None:
                 #  note string amended to remove ' and replace with ''
                 n = master.data[project]["Project MM" + str(i) + " Notes"]
                 note = n.replace("'", "''")
-                #  question. does {} need '{}' around them? In what instances.
                 c.execute(
                     f"INSERT INTO milestone (milestone_type, quarter_id, project_id, project_name, "
                     f"name, gov_type, ver_no, orig_baseline, forecast_actual, variance, status, notes,"
                     f"lod, crit_path) "
                     f"VALUES ('Project', '{master.quarter}', "
-                    f"'{master.data[project]['DFT ID Number']}', '{project}', "
+                    f"'{project_id.data[project]['ID Number']}', '{project}', "
                     f"'{master.data[project]['Project MM' + str(i)]}', "
                     f"'None',"
                     f"'None', "
