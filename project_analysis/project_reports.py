@@ -28,6 +28,7 @@ from analysis.data import list_of_masters_all, root_path, latest_cost_profiles, 
     baseline_1_cost_profiles, year_list, SRO_conf_key_list, p_current_milestones, \
     p_last_milestones, p_baseline_milestones, first_diff_data, ipdc_date, abbreviations, \
     benefits_bl_index, costs_bl_index
+from data_mgmt.data import Projects
 
 
 import os
@@ -1280,4 +1281,4 @@ def milestone_schedule_data(latest_m_dict, last_m_dict, baseline_m_dict, project
 
 '''enter into the printing function the quarter details for the output files e.g. _q4_1920 (note put underscore at
 front)'''
-produce_word_doc(list_of_masters_all[0].projects)
+produce_word_doc([Projects.a303])
