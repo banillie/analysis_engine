@@ -172,16 +172,16 @@ class Projects:
 
 
 #  list of different baseline types. hold at global level?
-baseline_types = ["Re-baseline this quarter",
-                  "Re-baseline ALB/Programme milestones",
-                  "Re-baseline ALB/Programme cost",
-                  "Re-baseline ALB/Programme benefits",
-                  "Re-baseline IPDC milestones",
-                  "Re-baseline IPDC cost",
-                  "Re-baseline IPDC benefits",
-                  "Re-baseline HMT milestones",
-                  "Re-baseline HMT cost",
-                  "Re-baseline HMT benefits"]
+baseline_types = {"Re-baseline this quarter" : "quarter",
+                  "Re-baseline ALB/Programme milestones" : "programme_milestones",
+                  "Re-baseline ALB/Programme cost" : "programme_costs",
+                  "Re-baseline ALB/Programme benefits" : "programme_benefits",
+                  "Re-baseline IPDC milestones" : "ipdc_milestones",
+                  "Re-baseline IPDC cost" : "ipdc_costs",
+                  "Re-baseline IPDC benefits" : "ipdc_benefits",
+                  "Re-baseline HMT milestones" : "hmt_milestones",
+                  "Re-baseline HMT cost" : "hmt_costs",
+                  "Re-baseline HMT benefits" : "hmt_benefits"}
 
 
 class Masters:
@@ -202,7 +202,7 @@ class Masters:
         baseline_info = {}
         baseline_index = {}
 
-        for b_type in baseline_types:
+        for b_type in list(baseline_types.keys()):
             project_baseline_info = {}
             project_baseline_index = {}
             for name in self.project_names:
@@ -233,8 +233,8 @@ class Masters:
                 project_baseline_info[name] = list(reversed(lower_list))
                 project_baseline_index[name] = list(reversed(index_list))
 
-            baseline_info[b_type] = project_baseline_info
-            baseline_index[b_type] = project_baseline_index
+            baseline_info[baseline_types[b_type]] = project_baseline_info
+            baseline_index[baseline_types[b_type]] = project_baseline_index
 
         self.bl_info = baseline_info
         self.bl_index = baseline_index
