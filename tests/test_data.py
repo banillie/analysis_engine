@@ -11,20 +11,23 @@ from datamaps.api import project_data_from_master
 start_date = datetime.date(2020, 6, 1)
 end_date = datetime.date(2022, 6, 30)
 
-def test_Masters_class(mst):
-    #  Test creation of master class
-    m = Masters(mst, mst[0].projects)
-    assert isinstance(m.master_data, (list,))
+def test_creation_of_Masters_class(basic_master, abbreviations):
+    projects = list(abbreviations.keys())
+    master = Masters(basic_master, projects)
+    assert isinstance(master.master_data, (list,))
+    assert master.project_names == ['Sea of Tranquility', 'Apollo 11', 'Apollo 13', 'Falcon 9', 'Columbia', 'Mars']
 
-def test_Masters_get_baseline_data(mst):
-    #  Test creation of baseline info in master class
-    m = Masters(mst, mst[0].projects)
-    m.baseline_data('Re-baseline IPDC milestones')
-    assert isinstance(m.bl_index, (dict,))
+def test_getting_baseline_data_from_Masters(basic_master, abbreviations):
+    projects = list(abbreviations.keys())
+    master = Masters(basic_master, projects)
+    master.baseline_data('Re-baseline IPDC milestones')
+    assert isinstance(master.bl_index, (dict,))
+    assert master.bl_index['Sea of Tranquility'] == [0, 1]
+    assert master.bl_index['Apollo 11'] == [0, 1, 2]
 
 
-def test_MilestoneData_project_dict_returns_dict(mst, abbreviations):
-    m = Masters(mst, mst[0].projects)
+def test_MilestoneData_project_dict_returns_dict(basic_master, abbreviations):
+    m = Masters(basic_master, basic_master[0].projects)
     m.baseline_data("Re-baseline IPDC milestones")
     m = MilestoneData(m, abbreviations)
     assert isinstance(m.project_current, (dict,))

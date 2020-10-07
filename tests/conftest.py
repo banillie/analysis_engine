@@ -38,12 +38,15 @@ def abbreviations():
 
 
 @pytest.fixture()
-def mst():
+def basic_master():
     test_master_data = [
         project_data_from_master(os.path.join(os.getcwd(), "resources/"
                                                            "cut_down_master_4_2016.xlsx"), 4, 2016),
         project_data_from_master(os.path.join(os.getcwd(), "resources/"
-                                                           "cut_down_master_4_2017.xlsx"), 4, 2017)
+                                                           "cut_down_master_4_2017.xlsx"), 4, 2017),
+        project_data_from_master(os.path.join(os.getcwd(), "resources/"
+                                                           "cut_down_master_4_2018.xlsx"), 4, 2018)
+
     ]
     return test_master_data
 
