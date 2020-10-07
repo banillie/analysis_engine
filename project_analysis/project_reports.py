@@ -1281,4 +1281,4 @@ def milestone_schedule_data(latest_m_dict, last_m_dict, baseline_m_dict, project
 
 '''enter into the printing function the quarter details for the output files e.g. _q4_1920 (note put underscore at
 front)'''
-produce_word_doc([Projects.a303])
+produce_word_doc(list_of_masters_all[0].projects)

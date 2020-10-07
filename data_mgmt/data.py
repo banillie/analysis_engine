@@ -63,6 +63,9 @@ abbreviations = {'2nd Generation UK Search and Rescue Aviation': 'SARH2',
                  'East Coast Mainline Programme': 'ECMP',
                  'East West Rail Programme (Central Section)': 'EWR (Central)',
                  'East West Rail Programme (Western Section)': 'EWR (Western)',
+                 "East West Rail Configuration State 1": "EWR Config 1",
+                 "East West Rail Configuration State 2": "EWR Config 2",
+                 "East West Rail Configuration State 3": "EWR Config 3",
                  'Future Theory Test Service (FTTS)': 'FTTS',
                  'Great Western Route Modernisation (GWRM) including electrification': 'GWRM',
                  'Heathrow Expansion': 'HEP',
@@ -104,6 +107,9 @@ class Projects:
     em_franchise = 'East Midlands Franchise'
     ewr_central = 'East West Rail Programme (Central Section)'
     ewr_western = 'East West Rail Programme (Western Section)'
+    ewr_config1 = "East West Rail Configuration State 1"
+    ewr_config2 = "East West Rail Configuration State 2"
+    ewr_config3 = "East West Rail Configuration State 3"
     ftts = 'Future Theory Test Service (FTTS)'
     heathrow_expansion = 'Heathrow Expansion'
     hexagon = 'Hexagon'
@@ -156,6 +162,7 @@ class Projects:
     hs2 = [hs2_1, hs2_2a, hs2_2b]
     hsmrpg = [hs2_1, hs2_2a, hs2_2b, ewr_central, ewr_western,
               hexagon, northern_powerhouse]
+    ewr = [ewr_config1, ewr_config2, ewr_config3]
 
     fbc_stage = [hs2_1,
                  crossrail,

@@ -63,5 +63,16 @@ def milestone_masters():
 
 
 @pytest.fixture()
+def diff_milestone_types():
+    master = [
+        project_data_from_master(os.path.join(os.getcwd(), "resources/"
+                                                           "diff_milestone_data_formats_master_2_2020.xlsx"), 2, 2020),
+        project_data_from_master(os.path.join(os.getcwd(), "resources/"
+                                                           "diff_milestone_data_formats_master_1_2020.xlsx"), 1, 2020)
+    ]
+    return master
+
+
+@pytest.fixture()
 def project_group_id():
     return project_data_from_master(os.path.join(os.getcwd(), "resources/test_project_group_id_no.xlsx"), 1, 2099)
