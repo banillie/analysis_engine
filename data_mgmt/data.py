@@ -7,6 +7,7 @@ from datamaps.api import project_data_from_master
 import platform
 from pathlib import Path
 
+
 def _platform_docs_dir() -> Path:
     #  Cross plaform file path handling
     if platform.system() == "Linux":
@@ -18,6 +19,7 @@ def _platform_docs_dir() -> Path:
 
 
 root_path = _platform_docs_dir()
+
 
 def get_master_data():
     master_data_list = [project_data_from_master(root_path / 'core_data/master_1_2020.xlsx', 1, 2020),
@@ -169,52 +171,70 @@ class Projects:
                  a14]
 
 
+#  list of different baseline types. hold at global level?
+baseline_types = ["Re-baseline this quarter",
+                  "Re-baseline ALB/Programme milestones",
+                  "Re-baseline ALB/Programme cost",
+                  "Re-baseline ALB/Programme benefits",
+                  "Re-baseline IPDC milestones",
+                  "Re-baseline IPDC cost",
+                  "Re-baseline IPDC benefits",
+                  "Re-baseline HMT milestones",
+                  "Re-baseline HMT cost",
+                  "Re-baseline HMT benefits"]
+
+
 class Masters:
-    def __init__(self, master_data, project_names):
+    def __init__(self, master_data: dict, project_names: list):  # what output statement would go here?
         self.master_data = master_data
         self.project_names = project_names
         self.bl_info = {}
         self.bl_index = {}
 
-    def baseline_data(self, baseline_type):
-        self.meta_baseline = baseline_type
+    def baseline_data(self):
 
         """
         Returns the two dictionaries baseline_info 
-        and baseline_index when provided with baseline_type
-        for all projects within created master class
+        and baseline_index for all projects for all
+        baseline types
         """
 
         baseline_info = {}
         baseline_index = {}
 
-        for name in self.project_names:
-            bc_list = []
-            lower_list = []
-            for i, master in reversed(list(enumerate(self.master_data))):
-                if name in master.projects:
-                    approved_bc = master.data[name][self.meta_baseline]
-                    quarter = str(master.quarter)
-                    if approved_bc == 'Yes':
-                        bc_list.append(approved_bc)
+        for b_type in baseline_types:
+            project_baseline_info = {}
+            project_baseline_index = {}
+            for name in self.project_names:
+                bc_list = []
+                lower_list = []
+                for i, master in reversed(list(enumerate(self.master_data))):
+                    if name in master.projects:
+                        approved_bc = master.data[name][b_type]
+                        quarter = str(master.quarter)
+                        if approved_bc == 'Yes':
+                            bc_list.append(approved_bc)
+                            lower_list.append((approved_bc, quarter, i))
+                    else:
+                        pass
+                for i in reversed(range(2)):
+                    if name in self.master_data[i].projects:
+                        approved_bc = self.master_data[i][name][b_type]
+                        quarter = str(self.master_data[i].quarter)
                         lower_list.append((approved_bc, quarter, i))
-                else:
-                    pass
-            for i in reversed(range(2)):
-                if name in self.master_data[i].projects:
-                    approved_bc = self.master_data[i][name][self.meta_baseline]
-                    quarter = str(self.master_data[i].quarter)
-                    lower_list.append((approved_bc, quarter, i))
-                else:
-                    quarter = str(self.master_data[i].quarter)
-                    lower_list.append((None, quarter, None))
+                    else:
+                        quarter = str(self.master_data[i].quarter)
+                        lower_list.append((None, quarter, None))
 
-            index_list = []
-            for x in lower_list:
-                index_list.append(x[2])
+                index_list = []
+                for x in lower_list:
+                    index_list.append(x[2])
 
-            baseline_info[name] = list(reversed(lower_list))
-            baseline_index[name] = list(reversed(index_list))
+                project_baseline_info[name] = list(reversed(lower_list))
+                project_baseline_index[name] = list(reversed(index_list))
+
+            baseline_info[b_type] = project_baseline_info
+            baseline_index[b_type] = project_baseline_index
 
         self.bl_info = baseline_info
         self.bl_index = baseline_index
@@ -466,7 +486,8 @@ class MilestoneData:
                     except (KeyError, TypeError, IndexError):
                         pass
 
-                sorted_list = sorted(raw_list, key=lambda k: (k[1] is None, k[1]))  # put the list in chronological order
+                sorted_list = sorted(raw_list,
+                                     key=lambda k: (k[1] is None, k[1]))  # put the list in chronological order
 
                 """loop to stop key names being the same. Not ideal as doesn't handle keys that may
                 already have numbers as strings at end of names. But still useful."""
@@ -1145,12 +1166,12 @@ def vfm_matplotlib_graph(labels, current_qrt, last_qrt, title):
     rects_two = ax.bar(x + width / 2, last_qrt, width, label='Last quarter')
 
     # Add some text for labels, title and custom x-axis tick labels, etc.
-    #ax.set_ylabel('Number')
+    # ax.set_ylabel('Number')
     ax.set_title(title)
     ax.set_xticks(x)
     ax.set_xticklabels(labels)
     # Rotate the tick labels and set their alignment.
-    #plt.setp(ax.get_xticklabels(), alignment=)
+    # plt.setp(ax.get_xticklabels(), alignment=)
     ax.legend()
 
     def autolabel(rects):

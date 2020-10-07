@@ -20,10 +20,10 @@ def test_creation_of_Masters_class(basic_master, abbreviations):
 def test_getting_baseline_data_from_Masters(basic_master, abbreviations):
     projects = list(abbreviations.keys())
     master = Masters(basic_master, projects)
-    master.baseline_data('Re-baseline IPDC milestones')
+    master.baseline_data()
     assert isinstance(master.bl_index, (dict,))
-    assert master.bl_index['Sea of Tranquility'] == [0, 1]
-    assert master.bl_index['Apollo 11'] == [0, 1, 2]
+    assert master.bl_index["Re-baseline IPDC milestones"]["Sea of Tranquility"] == [0, 1]
+    assert master.bl_index["Re-baseline IPDC cost"]["Apollo 11"] == [0, 1, 2]
 
 
 def test_MilestoneData_project_dict_returns_dict(basic_master, abbreviations):
