@@ -197,6 +197,7 @@ class Masters:
         self.project_names = project_names
         self.bl_info = {}
         self.bl_index = {}
+        self.baseline_data()
 
     def baseline_data(self):
 
