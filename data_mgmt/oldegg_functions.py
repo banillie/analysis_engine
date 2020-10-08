@@ -10,7 +10,7 @@ NOTE. Python date format is (YYYY,MM,DD)
 '''
 
 import random
-import datetime
+from datetime import datetime
 from collections import Counter
 from openpyxl.styles import Font, PatternFill
 from openpyxl.styles.differential import DifferentialStyle
@@ -18,11 +18,11 @@ from openpyxl.formatting import Rule
 import difflib
 from docx.shared import RGBColor
 
+
 def project_all_milestones_dict(project_names,
                                 master_data,
                                 baseline_index,
                                 data_to_return=int):
-
     '''
     Function that puts project milestone data in dictionary in order of newest date first.
 
@@ -42,19 +42,32 @@ def project_all_milestones_dict(project_names,
             p_data = master_data[baseline_index[name][data_to_return]].data[name]
             for i in range(1, 50):
                 try:
+                    m_date = p_data['Approval MM' + str(i) + ' Forecast / Actual']
+                    if type(m_date) == str:
+                        m_date = datetime.strptime(m_date, "%d/%m/%Y").date()
                     t = (p_data['Approval MM' + str(i)],
-                         p_data['Approval MM' + str(i) + ' Forecast / Actual'],
+                         m_date,
                          p_data['Approval MM' + str(i) + ' Notes'])
                     raw_list.append(t)
                 except KeyError:
-                    t = (p_data['Approval MM' + str(i)],
-                         p_data['Approval MM' + str(i) + ' Forecast - Actual'],
-                         p_data['Approval MM' + str(i) + ' Notes'])
-                    raw_list.append(t)
+                    try:
+                        m_date = p_data['Approval MM' + str(i) + ' Forecast - Actual']
+                        if type(m_date) == str:
+                            m_date = datetime.strptime(m_date, "%d/%m/%Y").date()
+                        t = (p_data['Approval MM' + str(i)],
+                             m_date,
+                             p_data['Approval MM' + str(i) + ' Notes'])
+                        raw_list.append(t)
+                    except KeyError:
+                        pass
 
+            for i in range(1, 50):
                 try:
+                    m_date = p_data['Assurance MM' + str(i) + ' Forecast - Actual']
+                    if type(m_date) == str:
+                        m_date = datetime.strptime(m_date, "%d/%m/%Y").date()
                     t = (p_data['Assurance MM' + str(i)],
-                         p_data['Assurance MM' + str(i) + ' Forecast - Actual'],
+                         m_date,
                          p_data['Assurance MM' + str(i) + ' Notes'])
                     raw_list.append(t)
                 except KeyError:
@@ -62,18 +75,23 @@ def project_all_milestones_dict(project_names,
 
             for i in range(18, 67):
                 try:
+                    m_date = p_data['Project MM' + str(i) + ' Forecast - Actual']
+                    if type(m_date) == str:
+                        m_date = datetime.strptime(m_date, "%d/%m/%Y").date()
                     t = (p_data['Project MM' + str(i)],
-                         p_data['Project MM' + str(i) + ' Forecast - Actual'],
+                         m_date,
                          p_data['Project MM' + str(i) + ' Notes'])
                     raw_list.append(t)
                 except KeyError:
                     pass
-        except (KeyError, TypeError):
+
+        except (KeyError, TypeError): #  further testing required to understand this exception handling.
             pass
+
         except IndexError:
             print('warning ' + name + ' does not have complete baseline index list')
 
-        #put the list in chronological order
+        # put the list in chronological order
         sorted_list = sorted(raw_list, key=lambda k: (k[1] is None, k[1]))
 
         # loop to stop key names being the same. Not ideal as doesn't handle keys that may already have numbers as
@@ -97,6 +115,7 @@ def project_all_milestones_dict(project_names,
 
     return upper_dict
 
+
 def project_time_difference(proj_m_data_1, proj_m_data_2):
     """Function that calculates time different between milestone dates"""
     upper_dictionary = {}
@@ -116,11 +135,12 @@ def project_time_difference(proj_m_data_1, proj_m_data_2):
                     else:
                         td_dict[milestone] = time_delta
                 except (KeyError, TypeError):
-                    td_dict[milestone] = 'Not reported' # not reported that quarter
+                    td_dict[milestone] = 'Not reported'  # not reported that quarter
 
         upper_dictionary[proj_name] = td_dict
 
     return upper_dictionary
+
 
 def filter_gmpp(master):
     project_list = []
@@ -130,8 +150,8 @@ def filter_gmpp(master):
 
     return project_list
 
-def convert_rag_text(dca_rating):
 
+def convert_rag_text(dca_rating):
     if dca_rating == 'Green':
         return 'G'
     elif dca_rating == 'Amber/Green':
@@ -144,6 +164,7 @@ def convert_rag_text(dca_rating):
         return 'R'
     else:
         return ''
+
 
 def filter_project_group(master_data, group):
     '''
@@ -167,6 +188,7 @@ def filter_project_group(master_data, group):
 
     return output_list
 
+
 def get_all_project_names(masters_list):
     '''
     function returns list of all projects across multiple dictionaries
@@ -184,6 +206,7 @@ def get_all_project_names(masters_list):
 
     return output_list
 
+
 def get_quarter_stamp(masters_list):
     '''
     Function used to specify the quarter being reported.
@@ -198,6 +221,7 @@ def get_quarter_stamp(masters_list):
         output_list.append(quarter_stamp)
 
     return output_list
+
 
 def concatenate_dates(date, bicc_date):
     '''
@@ -305,6 +329,7 @@ def concatenate_dates(date, bicc_date):
     else:
         return ('None')
 
+
 def up_or_down(latest_dca, last_dca):
     '''
     function that calculates if confidence has increased or decreased
@@ -339,6 +364,7 @@ def up_or_down(latest_dca, last_dca):
         else:
             return (int(1))
 
+
 def convert_bc_stage_text(bc_stage):
     '''
     function that converts bc stage.
@@ -357,6 +383,7 @@ def convert_bc_stage_text(bc_stage):
     else:
         return bc_stage
 
+
 def combine_narrtives(project_name, master_data, key_list):
     '''
     Function that combines narratives across keys
@@ -370,6 +397,7 @@ def combine_narrtives(project_name, master_data, key_list):
         output = output + str(master_data[project_name][key])
 
     return output
+
 
 def baseline_information_bc(project_list, masters_list):
     '''
@@ -387,7 +415,7 @@ def baseline_information_bc(project_list, masters_list):
                 approved_bc = master.data[project_name]['IPDC approval point']
                 quarter = master.data[project_name]['Reporting period (GMPP - Snapshot Date)']
                 try:
-                    previous_approved_bc = masters_list[i+1].data[project_name]['IPDC approval point']
+                    previous_approved_bc = masters_list[i + 1].data[project_name]['IPDC approval point']
                     if approved_bc != previous_approved_bc:
                         lower_list.append((approved_bc, quarter, i))
                 except IndexError:
@@ -400,6 +428,7 @@ def baseline_information_bc(project_list, masters_list):
         output[project_name] = lower_list
 
     return output
+
 
 def baseline_information(project_list, masters_list, data_baseline):
     '''
@@ -428,6 +457,7 @@ def baseline_information(project_list, masters_list, data_baseline):
         output[project_name] = lower_list
 
     return output
+
 
 def baseline_index(baseline_data, master_list):
     '''
@@ -463,6 +493,7 @@ def baseline_index(baseline_data, master_list):
 
     return output
 
+
 def get_project_cost_profile(project_name_list, q_masters_data_list, cost_list, year_list, bc_index, index):
     '''
     Function that gets projects project cost information and returns it in a python dictionary format.
@@ -484,7 +515,7 @@ def get_project_cost_profile(project_name_list, q_masters_data_list, cost_list, 
         for year in year_list:
             try:
                 project_data = q_masters_data_list[bc_index[project_name][index]].data[project_name]
-            except (IndexError, TypeError): #TypeError deals with None Types.
+            except (IndexError, TypeError):  # TypeError deals with None Types.
                 project_data = q_masters_data_list[bc_index[project_name][-1]].data[project_name]
 
             try:
@@ -512,6 +543,7 @@ def get_project_cost_profile(project_name_list, q_masters_data_list, cost_list, 
 
     return upper_dictionary
 
+
 def get_project_income_profile(project_name_list, q_masters_data_list, income_list, year_list, bc_index, index):
     '''
     Function that gets projects project income information and returns it in a python dictionary format.
@@ -531,7 +563,7 @@ def get_project_income_profile(project_name_list, q_masters_data_list, income_li
         for year in year_list:
             try:
                 project_data = q_masters_data_list[bc_index[project_name][index]].data[project_name]
-            except (IndexError, TypeError): #TypeError deals with None Types
+            except (IndexError, TypeError):  # TypeError deals with None Types
                 project_data = q_masters_data_list[bc_index[project_name][-1]].data[project_name]
 
             try:
@@ -547,6 +579,7 @@ def get_project_income_profile(project_name_list, q_masters_data_list, income_li
         upper_dictionary[project_name] = lower_dictionary
 
     return upper_dictionary
+
 
 def calculate_group_project_total(project_name_list, master_data, project_name_no_count_list, type_list, year_list):
     '''
@@ -576,6 +609,7 @@ def calculate_group_project_total(project_name_list, master_data, project_name_n
 
     return output
 
+
 def grey_conditional_formatting(ws):
     '''
     function applies grey conditional formatting for 'Not Reporting'.
@@ -599,9 +633,9 @@ def grey_conditional_formatting(ws):
 
     return ws
 
+
 def conditional_formatting(ws, list_columns, list_conditional_text, list_text_colours, list_background_colours,
                            row_start, row_end):
-
     for column in list_columns:
         for i, txt in enumerate(list_conditional_text):
             text = list_text_colours[i]
@@ -613,6 +647,7 @@ def conditional_formatting(ws, list_columns, list_conditional_text, list_text_co
             ws.conditional_formatting.add(column + row_start + ':' + column + row_end, rule)
 
     return ws
+
 
 def compare_text_newandold(text_1, text_2, doc):
     '''
@@ -668,5 +703,3 @@ def compare_text_newandold(text_1, text_2, doc):
                 y.add_run(diff[i][1:])
 
     return doc
-
-
