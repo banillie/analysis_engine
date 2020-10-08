@@ -1180,50 +1180,6 @@ def get_financial_totals(project_name):
 
     return total_cost_list, rdel_cost_list, cdel_cost_list
 
-def get_ben_totals(project_name):
-    '''gets benefits data to place into the bar chart element in the financial analysis graphs'''
-
-    ben_change_key_list = ['Pre-profile BEN Total',
-                           'Total BEN Forecast - Total Monetised Benefits',
-                           'Unprofiled Remainder BEN Forecast - Total Monetised Benefits']
-
-    ben_type_key_list = ['Pre-profile BEN Forecast Gov Cashable',
-                  'Pre-profile BEN Forecast Gov Non-Cashable',
-                  'Pre-profile BEN Forecast - Economic (inc Private Partner)',
-                  'Pre-profile BEN Forecast - Disbenefit UK Economic',
-                  'Unprofiled Remainder BEN Forecast - Gov. Cashable',
-                  'Unprofiled Remainder BEN Forecast - Gov. Non-Cashable',
-                  'Unprofiled Remainder BEN Forecast - Economic (inc Private Partner)',
-                  'Unprofiled Remainder BEN Forecast - Disbenefit UK Economic',
-                  'Total BEN Forecast - Gov. Cashable',
-                  'Total BEN Forecast - Gov. Non-Cashable',
-                  'Total BEN Forecast - Economic (inc Private Partner)',
-                  'Total BEN Forecast - Disbenefit UK Economic']
-
-
-    ben_list = []
-    index_1 = benefits_bl_index[project_name]
-    index_2 = index_1[0:3]
-    index_2.reverse()
-    for x in index_2:
-        if x is not None:
-            for y in ben_change_key_list:
-                ben = list_of_masters_all[x].data[project_name][y]
-                ben_list.append(ben)
-        else:
-            for i in range(len(ben_change_key_list)):
-                ben = 0
-                ben_list.append(ben)
-
-    ben_type_list = []
-    for y in ben_type_key_list:
-        ben = list_of_masters_all[0].data[project_name][y]
-        if ben is not None:
-            ben_type_list.append(ben)
-        else:
-            ben_type_list.append(0)
-
-    return ben_list, ben_type_list
 
 def milestone_schedule_data(latest_m_dict, last_m_dict, baseline_m_dict, project_name,
                                      filter_start_date = datetime.date(2000, 1, 1),

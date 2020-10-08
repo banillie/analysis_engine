@@ -6,6 +6,8 @@ from database.database import create_db
 
 from datamaps.api import project_data_from_master
 
+from project_analysis.p_reports import open_word_doc
+
 
 @pytest.fixture
 def db():
@@ -13,6 +15,15 @@ def db():
     create_db(db_path)
     yield db_path
     os.remove(db_path)  # delete db
+
+
+@pytest.fixture
+def word_doc():
+    wd_path = os.path.join(os.getcwd(), "resources/summary_temp.docx")
+    doc = open_word_doc(wd_path)
+    yield doc
+    os.remove("summary_temp_altered.docx")
+
 
 
 @pytest.fixture
@@ -69,6 +80,16 @@ def diff_milestone_types():
                                                            "diff_milestone_data_formats_master_2_2020.xlsx"), 2, 2020),
         project_data_from_master(os.path.join(os.getcwd(), "resources/"
                                                            "diff_milestone_data_formats_master_1_2020.xlsx"), 1, 2020)
+    ]
+    return master
+
+@pytest.fixture()
+def benefits_master():
+    master = [
+        project_data_from_master(os.path.join(os.getcwd(), "resources/"
+                                                           "benefits_master_test_2_2020.xlsx"), 2, 2020),
+        project_data_from_master(os.path.join(os.getcwd(), "resources/"
+                                                           "benefits_master_test_1_2020.xlsx"), 1, 2020)
     ]
     return master
 

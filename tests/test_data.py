@@ -2,20 +2,29 @@
 Tests for analysis_engine
 """
 
-from data_mgmt.data import MilestoneData, MilestoneChartData, Masters, CostData, \
-    Projects
-import pytest
+from data_mgmt.data import MilestoneData, Masters
 import datetime
-from datamaps.api import project_data_from_master
+
 
 start_date = datetime.date(2020, 6, 1)
 end_date = datetime.date(2022, 6, 30)
+
+
+def test_open_word_doc(word_doc):
+    word_doc.add_paragraph("Because i'm still in love with you I want to see you dance again,"
+                           "because i'm still in love with you on this harvest moon")
+    word_doc.save("summary_temp_altered.docx")
+
+
+# def test_word_doc_heading(word_doc):
+#     pass
 
 def test_creation_of_Masters_class(basic_master, abbreviations):
     projects = list(abbreviations.keys())
     master = Masters(basic_master, projects)
     assert isinstance(master.master_data, (list,))
     assert master.project_names == ['Sea of Tranquility', 'Apollo 11', 'Apollo 13', 'Falcon 9', 'Columbia', 'Mars']
+
 
 def test_getting_baseline_data_from_Masters(basic_master, abbreviations):
     projects = list(abbreviations.keys())
@@ -25,12 +34,6 @@ def test_getting_baseline_data_from_Masters(basic_master, abbreviations):
     assert master.bl_index["ipdc_milestones"]["Sea of Tranquility"] == [0, 1]
     assert master.bl_index["ipdc_costs"]["Apollo 11"] == [0, 1, 2]
 
-
-def test_MilestoneData_project_dict_returns_dict(basic_master, abbreviations):
-    m = Masters(basic_master, basic_master[0].projects)
-    m.baseline_data("Re-baseline IPDC milestones")
-    m = MilestoneData(m, abbreviations)
-    assert isinstance(m.project_current, (dict,))
 #
 #
 # def test_MilestoneData_group_dict_returns_dict(mst, abbreviations):

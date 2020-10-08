@@ -448,7 +448,7 @@ def baseline_information(project_list, masters_list, data_baseline):
             if project_name in master.projects:
                 try:
                     approved_bc = master.data[project_name][data_baseline]
-                    quarter = master.data[project_name]['Reporting period (GMPP - Snapshot Date)']
+                    quarter = str(master.quarter)
                     if approved_bc == 'Yes':
                         lower_list.append((approved_bc, quarter, i))
                 except KeyError:
@@ -703,3 +703,49 @@ def compare_text_newandold(text_1, text_2, doc):
                 y.add_run(diff[i][1:])
 
     return doc
+
+
+def get_ben_totals(project_name, benefits_bl_index, list_of_masters_all):
+    '''gets benefits data to place into the bar chart element in the financial analysis graphs'''
+
+    ben_change_key_list = ['Pre-profile BEN Total',
+                           "Total BEN Forecast - Total Monetised Benefits",
+                           'Unprofiled Remainder BEN Forecast - Total Monetised Benefits']
+
+    ben_type_key_list = ['Pre-profile BEN Forecast Gov Cashable',
+                  'Pre-profile BEN Forecast Gov Non-Cashable',
+                  'Pre-profile BEN Forecast - Economic (inc Private Partner)',
+                  'Pre-profile BEN Forecast - Disbenefit UK Economic',
+                  'Unprofiled Remainder BEN Forecast - Gov. Cashable',
+                  'Unprofiled Remainder BEN Forecast - Gov. Non-Cashable',
+                  'Unprofiled Remainder BEN Forecast - Economic (inc Private Partner)',
+                  'Unprofiled Remainder BEN Forecast - Disbenefit UK Economic',
+                  'Total BEN Forecast - Gov. Cashable',
+                  'Total BEN Forecast - Gov. Non-Cashable',
+                  'Total BEN Forecast - Economic (inc Private Partner)',
+                  'Total BEN Forecast - Disbenefit UK Economic']
+
+
+    ben_list = []
+    index_1 = benefits_bl_index[project_name]
+    index_2 = index_1[0:3]
+    index_2.reverse()
+    for x in index_2:
+        if x is not None:
+            for y in ben_change_key_list:
+                ben = list_of_masters_all[x].data[project_name][y]
+                ben_list.append(ben)
+        else:
+            for i in range(len(ben_change_key_list)):
+                ben = 0
+                ben_list.append(ben)
+
+    ben_type_list = []
+    for y in ben_type_key_list:
+        ben = list_of_masters_all[0].data[project_name][y]
+        if ben is not None:
+            ben_type_list.append(ben)
+        else:
+            ben_type_list.append(0)
+
+    return ben_list, ben_type_list
