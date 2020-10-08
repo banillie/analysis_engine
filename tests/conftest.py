@@ -22,7 +22,7 @@ def word_doc():
     wd_path = os.path.join(os.getcwd(), "resources/summary_temp.docx")
     doc = open_word_doc(wd_path)
     yield doc
-    os.remove("summary_temp_altered.docx")
+    os.remove("resources/summary_temp_altered.docx")
 
 
 

@@ -4,6 +4,7 @@ Tests for analysis_engine
 
 from data_mgmt.data import MilestoneData, Masters
 import datetime
+import docx
 
 
 start_date = datetime.date(2020, 6, 1)
@@ -11,9 +12,12 @@ end_date = datetime.date(2022, 6, 30)
 
 
 def test_open_word_doc(word_doc):
-    word_doc.add_paragraph("Because i'm still in love with you I want to see you dance again,"
+    word_doc.add_paragraph("Because i'm still in love with you I want to see you dance again, "
                            "because i'm still in love with you on this harvest moon")
-    word_doc.save("summary_temp_altered.docx")
+    word_doc.save("resources/summary_temp_altered.docx")
+    var = word_doc.paragraphs[1].text
+    assert "Because i'm still in love with you I want to see you dance again, " \
+           "because i'm still in love with you on this harvest moon" == var
 
 
 # def test_word_doc_heading(word_doc):
@@ -29,7 +33,6 @@ def test_creation_of_Masters_class(basic_master, abbreviations):
 def test_getting_baseline_data_from_Masters(basic_master, abbreviations):
     projects = list(abbreviations.keys())
     master = Masters(basic_master, projects)
-    master.baseline_data()
     assert isinstance(master.bl_index, (dict,))
     assert master.bl_index["ipdc_milestones"]["Sea of Tranquility"] == [0, 1]
     assert master.bl_index["ipdc_costs"]["Apollo 11"] == [0, 1, 2]
