@@ -21,6 +21,7 @@ import numpy as np
 import datetime
 from datetime import timedelta
 from textwrap import wrap
+from data_mgmt.data import Projects
 
 
 from analysis.engine_functions import convert_rag_text, project_time_difference, convert_bc_stage_text
@@ -28,10 +29,11 @@ from analysis.data import list_of_masters_all, root_path, latest_cost_profiles, 
     baseline_1_cost_profiles, year_list, SRO_conf_key_list, p_current_milestones, \
     p_last_milestones, p_baseline_milestones, first_diff_data, ipdc_date, abbreviations, \
     benefits_bl_index, costs_bl_index
-from data_mgmt.data import Projects
 
 
 import os
+
+from data_mgmt.oldegg_functions import spent_calculation
 
 milestone_filter_start_date = ipdc_date - timedelta(days=30*6)
 milestone_filter_end_date = ipdc_date + timedelta(days=545)
@@ -423,7 +425,8 @@ def produce_word_doc(projects):
         hdr_cells[0].text = 'WLC:'
         hdr_cells[1].text = '£' + str(round(total_fin[7])) + 'm'
         hdr_cells[2].text = 'Spent:'
-        hdr_cells[3].text = '£' + str(round(total_fin[6])) + 'm'
+        spent = spent_calculation(list_of_masters_all[0], project_name)
+        hdr_cells[3].text = '£' + str(round(spent)) + 'm'
         row_cells = table.add_row().cells
         row_cells[0].text = 'RDEL Total:'
         row_cells[1].text = '£' + str(round(rdel_fin[7])) + 'm'
@@ -1233,8 +1236,53 @@ def milestone_schedule_data(latest_m_dict, last_m_dict, baseline_m_dict, project
     return milestone_names, mile_d_l_lst, mile_d_last_lst, mile_d_bl_lst
 
 
+def get_ben_totals(project_name):
+    '''gets benefits data to place into the bar chart element in the financial analysis graphs'''
+
+    ben_change_key_list = ['Pre-profile BEN Total',
+                           "Total BEN Forecast - Total Monetised Benefits",
+                           'Unprofiled Remainder BEN Forecast - Total Monetised Benefits']
+
+    ben_type_key_list = ['Pre-profile BEN Forecast Gov Cashable',
+                  'Pre-profile BEN Forecast Gov Non-Cashable',
+                  'Pre-profile BEN Forecast - Economic (inc Private Partner)',
+                  'Pre-profile BEN Forecast - Disbenefit UK Economic',
+                  'Unprofiled Remainder BEN Forecast - Gov. Cashable',
+                  'Unprofiled Remainder BEN Forecast - Gov. Non-Cashable',
+                  'Unprofiled Remainder BEN Forecast - Economic (inc Private Partner)',
+                  'Unprofiled Remainder BEN Forecast - Disbenefit UK Economic',
+                  'Total BEN Forecast - Gov. Cashable',
+                  'Total BEN Forecast - Gov. Non-Cashable',
+                  'Total BEN Forecast - Economic (inc Private Partner)',
+                  'Total BEN Forecast - Disbenefit UK Economic']
+
+
+    ben_list = []
+    index_1 = benefits_bl_index[project_name]
+    index_2 = index_1[0:3]
+    index_2.reverse()
+    for x in index_2:
+        if x is not None:
+            for y in ben_change_key_list:
+                ben = list_of_masters_all[x].data[project_name][y]
+                ben_list.append(ben)
+        else:
+            for i in range(len(ben_change_key_list)):
+                ben = 0
+                ben_list.append(ben)
+
+    ben_type_list = []
+    for y in ben_type_key_list:
+        ben = list_of_masters_all[0].data[project_name][y]
+        if ben is not None:
+            ben_type_list.append(ben)
+        else:
+            ben_type_list.append(0)
+
+    return ben_list, ben_type_list
+
 '''RUNNING PROGRAMME'''
 
 '''enter into the printing function the quarter details for the output files e.g. _q4_1920 (note put underscore at
 front)'''
-produce_word_doc(list_of_masters_all[0].projects)
+produce_word_doc([Projects.a14])

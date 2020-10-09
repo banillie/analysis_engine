@@ -2,9 +2,11 @@
 Tests for analysis_engine
 """
 
-from data_mgmt.data import MilestoneData, Masters
+from data_mgmt.data import MilestoneData, Masters, current_projects
 import datetime
-import docx
+
+from data_mgmt.oldegg_functions import spent_calculation
+from project_analysis.p_reports import wd_heading, key_contacts
 
 
 start_date = datetime.date(2020, 6, 1)
@@ -20,24 +22,42 @@ def test_open_word_doc(word_doc):
            "because i'm still in love with you on this harvest moon" == var
 
 
-# def test_word_doc_heading(word_doc):
-#     pass
+def test_word_doc_heading(word_doc, project_info):
+    wd_heading(word_doc, project_info, 'Apollo 11')
+    word_doc.save("resources/summary_temp_altered.docx")
 
-def test_creation_of_Masters_class(basic_master, abbreviations):
-    projects = list(abbreviations.keys())
+
+def test_list_of_current_projects(project_info):
+    live_projects = current_projects(project_info)
+    assert live_projects == ['Sea of Tranquility', 'Apollo 11', 'Apollo 13', 'Falcon 9']
+
+
+def test_word_doc_contacts(word_doc, project_info, contact_master):
+    live_projects = current_projects(project_info)
+    master = Masters(contact_master, live_projects)
+    key_contacts(word_doc, master, 'Apollo 13')
+    word_doc.save("resources/summary_temp_altered.docx")
+
+
+def test_creation_of_Masters_class(basic_master, project_info):
+    projects = list(project_info.keys())
     master = Masters(basic_master, projects)
     assert isinstance(master.master_data, (list,))
     assert master.project_names == ['Sea of Tranquility', 'Apollo 11', 'Apollo 13', 'Falcon 9', 'Columbia', 'Mars']
 
 
-def test_getting_baseline_data_from_Masters(basic_master, abbreviations):
-    projects = list(abbreviations.keys())
+def test_getting_baseline_data_from_Masters(basic_master, project_info):
+    projects = list(project_info.keys())
     master = Masters(basic_master, projects)
     assert isinstance(master.bl_index, (dict,))
     assert master.bl_index["ipdc_milestones"]["Sea of Tranquility"] == [0, 1]
     assert master.bl_index["ipdc_costs"]["Apollo 11"] == [0, 1, 2]
 
-#
+
+def test_calculating_spent(spent_master):
+    spent = spent_calculation(spent_master, "Sea of Tranquility")
+    assert spent == 439.9
+
 #
 # def test_MilestoneData_group_dict_returns_dict(mst, abbreviations):
 #     mst.baseline_data('Re-baseline IPDC milestones')

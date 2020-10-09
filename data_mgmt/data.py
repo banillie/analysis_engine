@@ -191,6 +191,16 @@ baseline_types = {"Re-baseline this quarter" : "quarter",
                   "Re-baseline HMT benefits" : "hmt_benefits"}
 
 
+def current_projects(project_data):
+    """Gets list of current projects"""
+    output_list = []
+    for p in project_data.projects:
+        if project_data.data[p]['Status'] == 'Live':
+            output_list.append(p)
+
+    return output_list
+
+
 class Masters:
     def __init__(self, master_data: dict, project_names: list):  # what output statement would go here?
         self.master_data = master_data

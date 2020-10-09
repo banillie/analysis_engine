@@ -21,9 +21,21 @@ def db():
 def word_doc():
     wd_path = os.path.join(os.getcwd(), "resources/summary_temp.docx")
     doc = open_word_doc(wd_path)
-    yield doc
-    os.remove("resources/summary_temp_altered.docx")
+    return doc
+    # yield doc
+    # os.remove("resources/summary_temp_altered.docx")
 
+
+@pytest.fixture
+def contact_master():
+    return [project_data_from_master(os.path.join(os.getcwd(), "resources/"
+                                                               "contact_info_master_3_2019.xlsx"), 3, 2019),
+            project_data_from_master(os.path.join(os.getcwd(), "resources/"
+                                                               "contact_info_master_4_2019.xlsx"), 4, 2019)]
+
+@pytest.fixture
+def spent_master():
+    return project_data_from_master(os.path.join(os.getcwd(), "resources/spent_data_master_2_2020.xlsx"), 2, 2020)
 
 
 @pytest.fixture
@@ -39,13 +51,9 @@ def master_path_apostrophe():
 
 
 @pytest.fixture
-def abbreviations():
-    return {'Sea of Tranquility': 'SoT',
-            'Apollo 11': 'A11',
-            'Apollo 13': 'A13',
-            'Falcon 9': 'F9',
-            'Columbia': 'Columbia',
-            'Mars': 'Mars'}
+def project_info():
+    return project_data_from_master(os.path.join(os.getcwd(), "resources/"
+                                                              "test_project_group_id_no.xlsx"), 1, 2099)
 
 
 @pytest.fixture()
@@ -82,6 +90,7 @@ def diff_milestone_types():
                                                            "diff_milestone_data_formats_master_1_2020.xlsx"), 1, 2020)
     ]
     return master
+
 
 @pytest.fixture()
 def benefits_master():
