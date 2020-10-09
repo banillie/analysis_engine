@@ -40,14 +40,14 @@ def test_word_doc_contacts(word_doc, project_info, contact_master):
 
 
 def test_creation_of_Masters_class(basic_master, project_info):
-    projects = list(project_info.keys())
+    projects = list(project_info.projects)
     master = Masters(basic_master, projects)
     assert isinstance(master.master_data, (list,))
-    assert master.project_names == ['Sea of Tranquility', 'Apollo 11', 'Apollo 13', 'Falcon 9', 'Columbia', 'Mars']
+    assert master.project_names == ['Mars', 'Sea of Tranquility', 'Apollo 11', 'Apollo 13', 'Falcon 9', 'Columbia']
 
 
 def test_getting_baseline_data_from_Masters(basic_master, project_info):
-    projects = list(project_info.keys())
+    projects = list(project_info.projects)
     master = Masters(basic_master, projects)
     assert isinstance(master.bl_index, (dict,))
     assert master.bl_index["ipdc_milestones"]["Sea of Tranquility"] == [0, 1]
