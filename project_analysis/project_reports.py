@@ -1285,4 +1285,4 @@ def get_ben_totals(project_name):
 
 '''enter into the printing function the quarter details for the output files e.g. _q4_1920 (note put underscore at
 front)'''
-produce_word_doc([Projects.a14])
+produce_word_doc(list_of_masters_all[0])
