@@ -3,8 +3,9 @@ New code for compiling individual project reports.
 """
 
 from docx import Document
-from docx.shared import Pt
-from data_mgmt.oldegg_functions import convert_rag_text, cell_colouring
+from docx.shared import Pt, Cm, RGBColor
+from data_mgmt.oldegg_functions import convert_rag_text, cell_colouring, make_rows_bold, set_col_widths, \
+    compare_text_newandold
 
 from data_mgmt.data import root_path, SRO_conf_key_list
 
@@ -75,7 +76,7 @@ def key_contacts(doc, master, project):
 
 
 def dca_table(doc, master, project):
-    """creates SRO confidence table"""
+    """Creates SRO confidence table"""
     table = doc.add_table(rows=1, cols=5)
     hdr_cells = table.rows[0].cells
     hdr_cells[0].text = 'Delivery confidence'
@@ -94,3 +95,48 @@ def dca_table(doc, master, project):
                 cell_colouring(row_cells[i + 1], rating)
             except (KeyError, TypeError):
                 row_cells[i + 1].text = "N/A"
+
+    table.style = 'Table Grid'
+    make_rows_bold([table.rows[0]])  # makes top of table bold.
+    # make_columns_bold([table.columns[0]]) #right cells in table bold
+    column_widths = (Cm(3.9), Cm(2.9), Cm(2.9), Cm(2.9), Cm(2.9))
+    set_col_widths(table, column_widths)
+
+def dca_narratives(doc, master, project):
+    """Places all narratives into document and checks for differences between
+    current and last quarter"""
+
+    doc.add_paragraph()
+    p = doc.add_paragraph()
+    text = '*Red text highlights changes in narratives from last quarter'
+    p.add_run(text).font.color.rgb = RGBColor(255, 0, 0)
+
+    headings_list = ['SRO delivery confidence narrative',
+                     'Financial cost narrative',
+                     'Financial comparison with last quarter',
+                     'Financial comparison with baseline',
+                     'Benefits Narrative',
+                     'Benefits comparison with last quarter',
+                     'Benefits comparison with baseline',
+                     'Milestone narrative']
+
+    narrative_keys_list = ['Departmental DCA Narrative',
+                           'Project Costs Narrative',
+                           'Cost comparison with last quarters cost narrative',
+                           'Cost comparison within this quarters cost narrative',
+                           'Benefits Narrative',
+                           'Ben comparison with last quarters cost - narrative',
+                           'Ben comparison within this quarters cost - narrative',
+                           'Milestone Commentary']
+
+    for x in range(len(headings_list)):
+        doc.add_paragraph().add_run(str(headings_list[x])).bold = True
+        text_one = str(master.master_data[0].data[project][narrative_keys_list[x]])
+        try:
+            text_two = str(master.master_data[1].data[project][narrative_keys_list[x]])
+        except KeyError:
+            text_two = text_one
+
+        # There are two options here for comparing text. Have left this for now.
+        # compare_text_showall(dca_a, dca_b, doc)
+        compare_text_newandold(text_one, text_two, doc)

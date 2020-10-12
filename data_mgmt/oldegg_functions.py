@@ -21,12 +21,71 @@ import difflib
 from docx.shared import RGBColor
 
 
+def compare_text_newandold(text_1: str, text_2: str, doc):
+    """
+    This function places text into word document highlighting in red
+    new text (against what was reported the previous quarter. It is old
+    and could probably benefit from some refactoring.
+    text_1: latest text. string.
+    text_2: last text. string
+    doc: word doc
+    """
+
+    comp = difflib.Differ()
+    diff = list(comp.compare(text_2.split(), text_1.split()))
+    new_text = diff
+    y = doc.add_paragraph()
+    y.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
+
+    for i in range(0, len(diff)):
+        f = len(diff) - 1
+        if i < f:
+            a = i - 1
+        else:
+            a = i
+
+        if diff[i][0:3] == '  |':
+            j = i + 1
+            if diff[i][0:3] and diff[a][0:3] == '  |':
+                y = doc.add_paragraph()
+            else:
+                pass
+        elif diff[i][0:3] == '+ |':
+            if diff[i][0:3] and diff[a][0:3] == '+ |':
+                y = doc.add_paragraph()
+            else:
+                pass
+        elif diff[i][0:3] == '- |':
+            pass
+        elif diff[i][0:3] == '  -':
+            y = doc.add_paragraph()
+            g = diff[i][2]
+            y.add_run(g)
+        elif diff[i][0:3] == '  •':
+            y = doc.add_paragraph()
+            g = diff[i][2]
+            y.add_run(g)
+        elif diff[i][0] == '+':
+            w = len(diff[i])
+            g = diff[i][1:w]
+            y.add_run(g).font.color.rgb = RGBColor(255, 0, 0)
+        elif diff[i][0] == '-':
+            pass
+        elif diff[i][0] == '?':
+            pass
+        else:
+            if diff[i] != '+ |':
+                y.add_run(diff[i][1:])
+
+    return doc
+
+
 def cell_colouring(cell, colour):
-    '''
-    Function that handles cell colouring
+    """
+    Function that handles cell colouring for word documents.
     cell: cell reference
     color: colour reference
-    '''
+    """
 
     try:
         if colour == 'R':
@@ -45,6 +104,21 @@ def cell_colouring(cell, colour):
     except TypeError:
         pass
 
+
+def make_rows_bold(rows: list):
+    """This function makes text bold in a list of row numbers for a word document"""
+    for row in rows:
+        for cell in row.cells:
+            for paragraph in cell.paragraphs:
+                for run in paragraph.runs:
+                    run.font.bold = True
+
+
+def set_col_widths(table, widths):
+    """This function sets the width of table in a word document"""
+    for row in table.rows:
+        for idx, width in enumerate(widths):
+            row.cells[idx].width = width
 
 
 def project_all_milestones_dict(project_names,

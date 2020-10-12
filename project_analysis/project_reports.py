@@ -118,13 +118,15 @@ def compare_text_showall(text_1, text_2, doc):
 
     return doc
 
-def compare_text_newandold(text_1, text_2, doc):
-    '''
-    function that places text into doc highlighting new and old text
+def compare_text_newandold(text_1: str, text_2: str, doc):
+    """
+    This function places text into word document highlighting in red
+    new text (against what was reported the previous quarter. It is old
+    and could probably benefit from some refactoring.
     text_1: latest text. string.
     text_2: last text. string
     doc: word doc
-    '''
+    """
 
     comp = difflib.Differ()
     diff = list(comp.compare(text_2.split(), text_1.split()))
@@ -175,6 +177,7 @@ def compare_text_newandold(text_1, text_2, doc):
     return doc
 
 def set_col_widths(t, widths):
+    """This function sets the width of table in a word document"""
     for row in t.rows:
         for idx, width in enumerate(widths):
             row.cells[idx].width = width
@@ -1101,8 +1104,8 @@ def milestone_table(doc, p_baseline_milestones, project_name):
 
     return doc
 
-def make_rows_bold(rows=list):
-    '''Makes text bold in specified row'''
+def make_rows_bold(rows: list):
+    """This function makes text bold in a list of row numbers for a word document"""
     for row in rows:
         for cell in row.cells:
             for paragraph in cell.paragraphs:
