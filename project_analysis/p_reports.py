@@ -3,10 +3,10 @@ New code for compiling individual project reports.
 """
 
 from docx import Document
-from datamaps.api import project_data_from_master
 from docx.shared import Pt
+from data_mgmt.oldegg_functions import convert_rag_text, cell_colouring
 
-from data_mgmt.data import root_path
+from data_mgmt.data import root_path, SRO_conf_key_list
 
 
 # project_info = project_data_from_master(root_path / "core_data/project_info.xlsx", 1, 2099)
@@ -71,8 +71,26 @@ def key_contacts(doc, master, project):
         contact_phone = 'TBC'
 
     doc.add_paragraph('PfM reporting lead: ' + str(contact_name) + ', ' + str(contact_email)
-                + ', ' + str(contact_phone))
+                      + ', ' + str(contact_phone))
 
 
 def dca_table(doc, master, project):
     """creates SRO confidence table"""
+    table = doc.add_table(rows=1, cols=5)
+    hdr_cells = table.rows[0].cells
+    hdr_cells[0].text = 'Delivery confidence'
+    hdr_cells[1].text = 'This quarter'
+    hdr_cells[2].text = str(master.master_data[1].quarter)
+    hdr_cells[3].text = str(master.master_data[2].quarter)
+    hdr_cells[4].text = str(master.master_data[3].quarter)
+
+    for x, dca_key in enumerate(SRO_conf_key_list):
+        row_cells = table.add_row().cells
+        row_cells[0].text = dca_key
+        for i, m in enumerate(master.master_data):
+            try:
+                rating = convert_rag_text(m.data[project][dca_key])
+                row_cells[i + 1].text = rating
+                cell_colouring(row_cells[i + 1], rating)
+            except (KeyError, TypeError):
+                row_cells[i + 1].text = "N/A"

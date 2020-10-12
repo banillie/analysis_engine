@@ -6,7 +6,7 @@ from data_mgmt.data import MilestoneData, Masters, current_projects
 import datetime
 
 from data_mgmt.oldegg_functions import spent_calculation
-from project_analysis.p_reports import wd_heading, key_contacts
+from project_analysis.p_reports import wd_heading, key_contacts, dca_table
 
 
 start_date = datetime.date(2020, 6, 1)
@@ -36,6 +36,13 @@ def test_word_doc_contacts(word_doc, project_info, contact_master):
     live_projects = current_projects(project_info)
     master = Masters(contact_master, live_projects)
     key_contacts(word_doc, master, 'Apollo 13')
+    word_doc.save("resources/summary_temp_altered.docx")
+
+
+def test_word_doc_dca_table(word_doc, project_info, dca_masters):
+    live_projects = current_projects(project_info)
+    master = Masters(dca_masters, live_projects)
+    dca_table(word_doc, master, 'Falcon 9')
     word_doc.save("resources/summary_temp_altered.docx")
 
 

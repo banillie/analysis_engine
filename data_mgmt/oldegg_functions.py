@@ -1,4 +1,6 @@
 """place for storing all master templates"""
+from docx.oxml import parse_xml
+from docx.oxml.ns import nsdecls
 
 '''
 
@@ -17,6 +19,32 @@ from openpyxl.styles.differential import DifferentialStyle
 from openpyxl.formatting import Rule
 import difflib
 from docx.shared import RGBColor
+
+
+def cell_colouring(cell, colour):
+    '''
+    Function that handles cell colouring
+    cell: cell reference
+    color: colour reference
+    '''
+
+    try:
+        if colour == 'R':
+            colour = parse_xml(r'<w:shd {} w:fill="cb1f00"/>'.format(nsdecls('w')))
+        elif colour == 'A/R':
+            colour = parse_xml(r'<w:shd {} w:fill="f97b31"/>'.format(nsdecls('w')))
+        elif colour == 'A':
+            colour = parse_xml(r'<w:shd {} w:fill="fce553"/>'.format(nsdecls('w')))
+        elif colour == 'A/G':
+            colour = parse_xml(r'<w:shd {} w:fill="a5b700"/>'.format(nsdecls('w')))
+        elif colour == 'G':
+            colour = parse_xml(r'<w:shd {} w:fill="17960c"/>'.format(nsdecls('w')))
+
+        cell._tc.get_or_add_tcPr().append(colour)
+
+    except TypeError:
+        pass
+
 
 
 def project_all_milestones_dict(project_names,

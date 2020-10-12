@@ -106,3 +106,11 @@ def benefits_master():
 @pytest.fixture()
 def project_group_id():
     return project_data_from_master(os.path.join(os.getcwd(), "resources/test_project_group_id_no.xlsx"), 1, 2099)
+
+
+@pytest.fixture()
+def dca_masters():
+    return [project_data_from_master(os.path.join(os.getcwd(), "resources/test_master_4_2019_dcas.xlsx"), 1, 2099),
+            project_data_from_master(os.path.join(os.getcwd(), "resources/test_master_4_2018_dcas.xlsx"), 1, 2098),
+            project_data_from_master(os.path.join(os.getcwd(), "resources/test_master_4_2017_dcas.xlsx"), 1, 2097),
+            project_data_from_master(os.path.join(os.getcwd(), "resources/test_master_4_2016_dcas.xlsx"), 1, 2096)]

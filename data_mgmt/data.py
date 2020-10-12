@@ -45,6 +45,10 @@ def get_current_project_names():
     master = project_data_from_master(root_path / 'core_data/master_1_2020.xlsx', 1, 2020)
     return master.projects
 
+# for project summary pages
+SRO_conf_table_list = ['SRO DCA', 'Finance DCA', 'Benefits DCA', 'Resourcing DCA', 'Schedule DCA']
+SRO_conf_key_list = ['Departmental DCA', 'SRO Finance confidence', 'SRO Benefits RAG', 'Overall Resource DCA - Now',
+                     'SRO Schedule Confidence']
 
 ipdc_date = datetime.date(2020, 8, 10)  # ipdc date. Python date format is Year, Month, day
 blue_line_date = datetime.date.today()  # blue line on graph date.
