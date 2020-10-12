@@ -45,6 +45,7 @@ def get_current_project_names():
     master = project_data_from_master(root_path / 'core_data/master_1_2020.xlsx', 1, 2020)
     return master.projects
 
+
 # for project summary pages
 SRO_conf_table_list = ['SRO DCA', 'Finance DCA', 'Benefits DCA', 'Resourcing DCA', 'Schedule DCA']
 SRO_conf_key_list = ['Departmental DCA', 'SRO Finance confidence', 'SRO Benefits RAG', 'Overall Resource DCA - Now',
@@ -183,16 +184,16 @@ class Projects:
 
 
 #  list of different baseline types. hold at global level?
-baseline_types = {"Re-baseline this quarter" : "quarter",
-                  "Re-baseline ALB/Programme milestones" : "programme_milestones",
-                  "Re-baseline ALB/Programme cost" : "programme_costs",
-                  "Re-baseline ALB/Programme benefits" : "programme_benefits",
-                  "Re-baseline IPDC milestones" : "ipdc_milestones",
-                  "Re-baseline IPDC cost" : "ipdc_costs",
-                  "Re-baseline IPDC benefits" : "ipdc_benefits",
-                  "Re-baseline HMT milestones" : "hmt_milestones",
-                  "Re-baseline HMT cost" : "hmt_costs",
-                  "Re-baseline HMT benefits" : "hmt_benefits"}
+baseline_types = {"Re-baseline this quarter": "quarter",
+                  "Re-baseline ALB/Programme milestones": "programme_milestones",
+                  "Re-baseline ALB/Programme cost": "programme_costs",
+                  "Re-baseline ALB/Programme benefits": "programme_benefits",
+                  "Re-baseline IPDC milestones": "ipdc_milestones",
+                  "Re-baseline IPDC cost": "ipdc_costs",
+                  "Re-baseline IPDC benefits": "ipdc_benefits",
+                  "Re-baseline HMT milestones": "hmt_milestones",
+                  "Re-baseline HMT cost": "hmt_costs",
+                  "Re-baseline HMT benefits": "hmt_benefits"}
 
 
 def current_projects(project_data):
@@ -899,8 +900,8 @@ class MilestoneCharts:
 
 
 class CostData:
-    def __init__(self, masters_object):
-        self.masters = masters_object
+    def __init__(self, master: classmethod):
+        self.master = master
         self.cat_spent = []
         self.cat_profile = []
         self.cat_unprofiled = []
@@ -911,8 +912,11 @@ class CostData:
         self.current_profile = []
         self.last_profile = []
         self.baseline_profile = []
-        self.cost_totals()
-        self.get_profile()
+        self.current_profile_project = []
+        self.last_profile_project = []
+        self.baseline_profile_project = []
+        # self.cost_totals()
+        # self.get_profile()
 
     def cost_totals(self):
         total = []
@@ -933,29 +937,29 @@ class CostData:
             unpro_rdel_list = []
             unpro_cdel_list = []
             unpro_ngov_list = []
-            for name in self.masters.project_names:
+            for name in self.master.project_names:
                 try:
-                    pre_pro_rdel = self.masters.master_data[self.masters.bl_index[name][i]].data[name][
+                    pre_pro_rdel = self.master.master_data[self.master.bl_index[name][i]].data[name][
                         'Pre-profile RDEL']
-                    pre_pro_cdel = self.masters.master_data[self.masters.bl_index[name][i]].data[name][
+                    pre_pro_cdel = self.master.master_data[self.master.bl_index[name][i]].data[name][
                         'Pre-profile CDEL']
-                    pre_pro_ngov = self.masters.master_data[self.masters.bl_index[name][i]].data[name][
+                    pre_pro_ngov = self.master.master_data[self.master.bl_index[name][i]].data[name][
                         'Pre 19-20 Forecast Non-Gov']
                     if pre_pro_ngov is None:
                         pre_pro_ngov = 0
-                    pro_rdel = self.masters.master_data[self.masters.bl_index[name][i]].data[name][
+                    pro_rdel = self.master.master_data[self.master.bl_index[name][i]].data[name][
                         'Total RDEL Forecast Total']
-                    pro_cdel = self.masters.master_data[self.masters.bl_index[name][i]].data[name][
+                    pro_cdel = self.master.master_data[self.master.bl_index[name][i]].data[name][
                         'Total CDEL Forecast Total WLC']
-                    pro_ngov = self.masters.master_data[self.masters.bl_index[name][i]].data[name][
+                    pro_ngov = self.master.master_data[self.master.bl_index[name][i]].data[name][
                         'Non-Gov Total Forecast']
                     if pro_ngov is None:
                         pro_ngov = 0
-                    unpro_rdel = self.masters.master_data[self.masters.bl_index[name][i]].data[name][
+                    unpro_rdel = self.master.master_data[self.master.bl_index[name][i]].data[name][
                         'Unprofiled RDEL Forecast Total']
-                    unpro_cdel = self.masters.master_data[self.masters.bl_index[name][i]].data[name][
+                    unpro_cdel = self.master.master_data[self.master.bl_index[name][i]].data[name][
                         'Unprofiled CDEL Forecast Total WLC']
-                    unpro_ngov = self.masters.master_data[self.masters.bl_index[name][i]].data[name][
+                    unpro_ngov = self.master.master_data[self.master.bl_index[name][i]].data[name][
                         'Unprofiled Forecast Non-Gov']
                     if unpro_ngov is None:
                         unpro_ngov = 0
@@ -1020,7 +1024,7 @@ class CostData:
         self.profile = profile
         self.unprofile = unprofile
 
-    def get_profile(self):
+    def get_profile_all(self):
         year_list = ['20-21',
                      '21-22',
                      '22-23',
@@ -1044,9 +1048,9 @@ class CostData:
                 a_list = []
                 for cost_type in cost_list:
                     data = []
-                    for name in self.masters.project_names:
+                    for name in self.master.project_names:
                         try:
-                            cost = self.masters.master_data[self.masters.bl_index[name][i]].data[name][year + cost_type]
+                            cost = self.master.master_data[self.master.bl_index[name][i]].data[name][year + cost_type]
                             if cost is None:
                                 cost = 0
                         except (KeyError, TypeError):  # to handle baselines
@@ -1065,6 +1069,46 @@ class CostData:
         self.current_profile = current_profile
         self.last_profile = last_profile
         self.baseline_profile = baseline_profile
+
+    def get_profile_project(self, project_name: str, baseline: str) -> list:
+        self.project_name = project_name
+        self.baseline = baseline
+
+        year_list = ['20-21', '21-22', '22-23', '23-24', '24-25', '25-26', '26-27', '27-28', '28-29']
+
+        cost_list = [' RDEL Forecast Total', ' CDEL Forecast Total', ' Forecast Non-Gov']
+
+        current_profile = []
+        last_profile = []
+        baseline_profile = []
+
+        cost_bl_index = self.master.bl_index[baseline][self.project_name]
+        for i in range(3):
+            profile = []
+            for year in year_list:
+                a_list = []
+                for cost_type in cost_list:
+                    data = []
+                    # try:
+                    cost = self.master.master_data[cost_bl_index[i]].data[self.project_name][year + cost_type]
+                    if cost is None:
+                        cost = 0
+                    # except IndexError:  # to handle baselines
+                    #     cost = 0
+                    data.append(cost)
+                a_list.append(sum(data))
+            profile.append(sum(a_list))
+
+            if i == 0:
+                current_profile = profile
+            if i == 1:
+                last_profile = profile
+            if i == 2:
+                baseline_profile = profile
+
+        self.current_profile_project = current_profile
+        self.last_profile_project = last_profile
+        self.baseline_profile_project = baseline_profile
 
 
 class BenefitsData:

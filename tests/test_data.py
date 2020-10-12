@@ -2,7 +2,7 @@
 Tests for analysis_engine
 """
 
-from data_mgmt.data import MilestoneData, Masters, current_projects
+from data_mgmt.data import MilestoneData, Masters, current_projects, CostData
 import datetime
 
 from data_mgmt.oldegg_functions import spent_calculation
@@ -53,6 +53,14 @@ def test_word_doc_dca_narratives(word_doc, project_info, dca_masters):
     word_doc.save("resources/summary_temp_altered.docx")
 
 
+def test_get_cost_profile(costs_masters, project_info):
+    live_projects = current_projects(project_info)
+    master = Masters(costs_masters, live_projects)
+    costs = CostData(master)
+    costs.get_profile_project('Columbia', 'ipdc_costs')
+    costs.current_profile_project == []
+
+
 def test_creation_of_Masters_class(basic_master, project_info):
     projects = list(project_info.projects)
     master = Masters(basic_master, projects)
@@ -63,9 +71,11 @@ def test_creation_of_Masters_class(basic_master, project_info):
 def test_getting_baseline_data_from_Masters(basic_master, project_info):
     projects = list(project_info.projects)
     master = Masters(basic_master, projects)
+    master.baseline_data()
     assert isinstance(master.bl_index, (dict,))
     assert master.bl_index["ipdc_milestones"]["Sea of Tranquility"] == [0, 1]
     assert master.bl_index["ipdc_costs"]["Apollo 11"] == [0, 1, 2]
+    assert master.bl_index["ipdc_costs"]["Columbia"] == [0, 1, 2]
 
 
 def test_calculating_spent(spent_master):
