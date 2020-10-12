@@ -807,8 +807,8 @@ for project_name in list_of_masters_all[0].projects:
 ''' RUNNING THE PROGRAMME '''
 
 '''ONE. Provide file path to dashboard master'''
-dashboard_master = load_workbook(root_path/'input/dashboards_master_q1_20_21.xlsx')
+dashboard_master = load_workbook(root_path/'input/dashboards_master_q2_20_21.xlsx')
 
-'''THREE. place arguments into the place_in_excle function and provide file path for saving output wb'''
+'''THREE. place arguments into the place_in_excel function and provide file path for saving output wb'''
 dashboard_completed = place_in_excel(dashboard_master)
-dashboard_completed.save(root_path/'output/dashboards_q1_2021_populated.xlsx')
+dashboard_completed.save(root_path/'output/dashboards_q2_2021_populated.xlsx')
