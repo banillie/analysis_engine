@@ -209,7 +209,7 @@ def schedule_info(wb):
                 if date is None:
                     pass
                 elif date > ipdc_date:
-                        local_milestone_dates.append((date, x))
+                    local_milestone_dates.append((date, x))
 
             if len(local_milestone_dates) != 0: # checks if list is empty
                 try:
