@@ -2,15 +2,28 @@
 Tests for analysis_engine
 """
 
-from data_mgmt.data import MilestoneData, Masters, current_projects, CostData
+from data_mgmt.data import MilestoneData, Masters, current_projects, CostData, cost_profile_graph
 import datetime
 
 from data_mgmt.oldegg_functions import spent_calculation
 from project_analysis.p_reports import wd_heading, key_contacts, dca_table, dca_narratives
 
 
-start_date = datetime.date(2020, 6, 1)
-end_date = datetime.date(2022, 6, 30)
+def test_creation_of_Masters_class(basic_master, project_info):
+    projects = list(project_info.projects)
+    master = Masters(basic_master, projects)
+    assert isinstance(master.master_data, (list,))
+    assert master.project_names == ['Mars', 'Sea of Tranquility', 'Apollo 11', 'Apollo 13', 'Falcon 9', 'Columbia']
+
+
+def test_getting_baseline_data_from_Masters(basic_master, project_info):
+    projects = list(project_info.projects)
+    master = Masters(basic_master, projects)
+    master.baseline_data()
+    assert isinstance(master.bl_index, (dict,))
+    assert master.bl_index["ipdc_milestones"]["Sea of Tranquility"] == [0, 1]
+    assert master.bl_index["ipdc_costs"]["Apollo 11"] == [0, 1, 2]
+    assert master.bl_index["ipdc_costs"]["Columbia"] == [0, 1, 2]
 
 
 def test_open_word_doc(word_doc):
@@ -66,21 +79,12 @@ def test_get_cost_profile(costs_masters, project_info):
     assert costs.ngov_profile_project == [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 
 
-def test_creation_of_Masters_class(basic_master, project_info):
-    projects = list(project_info.projects)
-    master = Masters(basic_master, projects)
-    assert isinstance(master.master_data, (list,))
-    assert master.project_names == ['Mars', 'Sea of Tranquility', 'Apollo 11', 'Apollo 13', 'Falcon 9', 'Columbia']
-
-
-def test_getting_baseline_data_from_Masters(basic_master, project_info):
-    projects = list(project_info.projects)
-    master = Masters(basic_master, projects)
-    master.baseline_data()
-    assert isinstance(master.bl_index, (dict,))
-    assert master.bl_index["ipdc_milestones"]["Sea of Tranquility"] == [0, 1]
-    assert master.bl_index["ipdc_costs"]["Apollo 11"] == [0, 1, 2]
-    assert master.bl_index["ipdc_costs"]["Columbia"] == [0, 1, 2]
+def test_project_cost_profile_chart(costs_masters, project_info):
+    live_projects = current_projects(project_info)
+    master = Masters(costs_masters, live_projects)
+    costs = CostData(master)
+    costs.get_profile_project('Falcon 9', 'ipdc_costs')
+    cost_profile_graph(costs)
 
 
 def test_calculating_spent(spent_master):

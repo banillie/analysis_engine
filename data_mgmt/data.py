@@ -1289,3 +1289,72 @@ def vfm_matplotlib_graph(labels, current_qrt, last_qrt, title):
     fig.savefig(root_path / 'output/{}.png'.format(title), bbox_inches='tight')
 
     plt.show()
+
+
+def cost_profile_graph(cost_master):
+
+    fig, (ax1, ax2) = plt.subplots(2) # two subplots for this chart
+
+    '''cost profile charts'''
+    year_list = ['17-18', '18-19', '19-20', '20-21', '21-22', '22-23',
+                 '23-24', '24-25', '25-26', '26-27', '27-28', '28-29']
+
+    fig.suptitle(cost_master.project_name + ' financial analysis', fontweight='bold') # title
+
+    # Overall cost profile chart
+    try: # try statement handles the project having no baseline profile.
+        ax1.plot(year_list, np.array(cost_master.baseline_profile_one_project), label='Baseline', linewidth=3.0, marker="o")
+    except ValueError:
+        pass
+    ax1.plot(year_list, np.array(cost_master.last_profile_project), label='Last quarter', linewidth=3.0, marker="o")
+    ax1.plot(year_list, np.array(cost_master.current_profile_project), label='Latest', linewidth=3.0, marker="o")
+
+    # Chart styling
+    ax1.tick_params(axis='x', which='major', labelsize=6, rotation=45)
+    ax1.set_ylabel('Cost (£m)')
+    ylab1 = ax1.yaxis.get_label()
+    ylab1.set_style('italic')
+    ylab1.set_size(8)
+    ax1.grid(color='grey', linestyle='-', linewidth=0.2)
+    ax1.legend(prop={'size': 6})
+    ax1.set_title('Fig 1 - cost profile changes', loc='left', fontsize=8, fontweight='bold')
+
+    # scaling y axis
+    # y axis value setting so it takes highest cost profile yeah
+    # all = profile_data_total[0] + profile_data_total[1] + profile_data_total[2]
+    # y_max = max(all) + max(all) * 1 / 5
+    # ax1.set_ylim(0, y_max)
+
+    # plot rdel/cdel chart data
+    # ax2.plot(year, latest_profile_cdel, label='CDEL', linewidth=3.0, marker="o")
+    # ax2.plot(year, latest_profile_rdel, label='RDEL', linewidth=3.0, marker="o")
+
+    #rdel/cdel profile chart styling
+    # ax2.tick_params(axis='x', which='major', labelsize=6, rotation=45)
+    # ax2.set_xlabel('Financial Years')
+    # ax2.set_ylabel('Cost (£m)')
+    # xlab2 = ax2.xaxis.get_label()
+    # ylab2 = ax2.yaxis.get_label()
+    # xlab2.set_style('italic')
+    # xlab2.set_size(8)
+    # ylab2.set_style('italic')
+    # ylab2.set_size(8)
+    # ax2.grid(color='grey', linestyle='-', linewidth=0.2)
+    # ax2.legend(prop={'size': 6})
+
+    # ax2.set_ylim(0, y_max)
+    #
+    # ax2.set_title('Fig 2 - cost profile spend type', loc='left', fontsize=8, fontweight='bold')
+
+    # size of chart and fit
+    fig.canvas.draw()
+    fig.tight_layout(rect=[0, 0.03, 1, 0.95])  # for title
+
+    #fig.savefig('cost_profile.png')
+    plt.show()
+    #plt.close()  # automatically closes figure so don't need to do manually.
+
+    # doc.add_picture('cost_profile.png', width=Inches(8))  # to place nicely in doc
+    # os.remove('cost_profile.png')
+
+    return fig
