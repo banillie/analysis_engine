@@ -102,6 +102,7 @@ def dca_table(doc, master, project):
     column_widths = (Cm(3.9), Cm(2.9), Cm(2.9), Cm(2.9), Cm(2.9))
     set_col_widths(table, column_widths)
 
+
 def dca_narratives(doc, master, project):
     """Places all narratives into document and checks for differences between
     current and last quarter"""

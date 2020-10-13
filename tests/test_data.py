@@ -57,9 +57,10 @@ def test_get_cost_profile(costs_masters, project_info):
     live_projects = current_projects(project_info)
     master = Masters(costs_masters, live_projects)
     costs = CostData(master)
-    costs.get_profile_project('Columbia', 'ipdc_costs')
-    costs.current_profile_project == []
-
+    costs.get_profile_project('Falcon 9', 'ipdc_costs')
+    assert costs.current_profile_project == [0, 0, 177.49, 245, 411.3, 443.2, 728.1, 1046.6, 1441, 1315, 395.84, 0]
+    assert costs.last_profile_project == [0, 78.4, 165, 216.1, 323.95, 825.71, 909.19, 1216.59, 1141.08, 706.25, 0, 0]
+    assert costs.baseline_profile_one_project == []
 
 def test_creation_of_Masters_class(basic_master, project_info):
     projects = list(project_info.projects)

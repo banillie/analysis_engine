@@ -914,7 +914,8 @@ class CostData:
         self.baseline_profile = []
         self.current_profile_project = []
         self.last_profile_project = []
-        self.baseline_profile_project = []
+        self.baseline_profile_one_project = []
+        self.baseline_profile_two_project = []
         # self.cost_totals()
         # self.get_profile()
 
@@ -1074,41 +1075,46 @@ class CostData:
         self.project_name = project_name
         self.baseline = baseline
 
-        year_list = ['20-21', '21-22', '22-23', '23-24', '24-25', '25-26', '26-27', '27-28', '28-29']
+        # year_list to be expanded out to 2040 or however far it goes now.
+        year_list = ['17-18', '18-19', '19-20', '20-21', '21-22', '22-23',
+                     '23-24', '24-25', '25-26', '26-27', '27-28', '28-29']
 
         cost_list = [' RDEL Forecast Total', ' CDEL Forecast Total', ' Forecast Non-Gov']
 
         current_profile = []
         last_profile = []
-        baseline_profile = []
+        baseline_profile_one = []
+        baseline_profile_two = []
 
         cost_bl_index = self.master.bl_index[baseline][self.project_name]
-        for i in range(3):
-            profile = []
+        for i in range(len(cost_bl_index)):
+            yearly_profile = []
             for year in year_list:
-                a_list = []
+                cost_total = 0
                 for cost_type in cost_list:
-                    data = []
-                    # try:
-                    cost = self.master.master_data[cost_bl_index[i]].data[self.project_name][year + cost_type]
-                    if cost is None:
+                    try:
+                        cost = self.master.master_data[cost_bl_index[i]].data[self.project_name][year + cost_type]
+                        if cost is None:
+                            cost = 0
+                        cost_total += cost
+                    except KeyError:  # to handle data across different financial years
                         cost = 0
-                    # except IndexError:  # to handle baselines
-                    #     cost = 0
-                    data.append(cost)
-                a_list.append(sum(data))
-            profile.append(sum(a_list))
+                        cost_total += cost
+                yearly_profile.append(cost_total)
 
             if i == 0:
-                current_profile = profile
+                current_profile = yearly_profile
             if i == 1:
-                last_profile = profile
+                last_profile = yearly_profile
             if i == 2:
-                baseline_profile = profile
+                baseline_profile_one = yearly_profile
+            if i == 3:
+                baseline_profile_two = yearly_profile
 
         self.current_profile_project = current_profile
         self.last_profile_project = last_profile
-        self.baseline_profile_project = baseline_profile
+        self.baseline_profile_one_project = baseline_profile_one
+        self.baseline_profile_two_project = baseline_profile_two
 
 
 class BenefitsData:
