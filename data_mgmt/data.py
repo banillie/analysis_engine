@@ -916,6 +916,9 @@ class CostData:
         self.last_profile_project = []
         self.baseline_profile_one_project = []
         self.baseline_profile_two_project = []
+        self.rdel_profile_project = []
+        self.cdel_profile_project = []
+        self.ngov_profile_project = []
         # self.cost_totals()
         # self.get_profile()
 
@@ -1085,10 +1088,16 @@ class CostData:
         last_profile = []
         baseline_profile_one = []
         baseline_profile_two = []
+        rdel_current_profile = []
+        cdel_current_profile = []
+        ngov_current_profile = []
 
         cost_bl_index = self.master.bl_index[baseline][self.project_name]
         for i in range(len(cost_bl_index)):
             yearly_profile = []
+            rdel_yearly_profile = []
+            cdel_yearly_profile = []
+            ngov_yearly_profile = []
             for year in year_list:
                 cost_total = 0
                 for cost_type in cost_list:
@@ -1100,10 +1109,23 @@ class CostData:
                     except KeyError:  # to handle data across different financial years
                         cost = 0
                         cost_total += cost
+                    if cost_type == ' RDEL Forecast Total':
+                        rdel_total = cost
+                    if cost_type == ' CDEL Forecast Total':
+                        cdel_total = cost
+                    if cost_type == ' Forecast Non-Gov':
+                        ngov_total = cost
+
                 yearly_profile.append(cost_total)
+                rdel_yearly_profile.append(rdel_total)
+                cdel_yearly_profile.append(cdel_total)
+                ngov_yearly_profile.append(ngov_total)
 
             if i == 0:
                 current_profile = yearly_profile
+                rdel_current_profile = rdel_yearly_profile
+                cdel_current_profile = cdel_yearly_profile
+                ngov_current_profile = ngov_yearly_profile
             if i == 1:
                 last_profile = yearly_profile
             if i == 2:
@@ -1115,6 +1137,9 @@ class CostData:
         self.last_profile_project = last_profile
         self.baseline_profile_one_project = baseline_profile_one
         self.baseline_profile_two_project = baseline_profile_two
+        self.rdel_profile_project = rdel_current_profile
+        self.cdel_profile_project = cdel_current_profile
+        self.ngov_profile_project = ngov_current_profile
 
 
 class BenefitsData:
