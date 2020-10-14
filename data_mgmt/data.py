@@ -22,7 +22,8 @@ root_path = _platform_docs_dir()
 
 
 def get_master_data():
-    master_data_list = [project_data_from_master(root_path / 'core_data/master_1_2020.xlsx', 1, 2020),
+    master_data_list = [project_data_from_master(root_path / 'core_data/master_2_2020.xlsx', 2, 2020),
+                        project_data_from_master(root_path / 'core_data/master_1_2020.xlsx', 1, 2020),
                         project_data_from_master(root_path / 'core_data/master_4_2019.xlsx', 4, 2019),
                         project_data_from_master(root_path / 'core_data/master_3_2019.xlsx', 3, 2019),
                         project_data_from_master(root_path / 'core_data/master_2_2019.xlsx', 2, 2019),
@@ -42,7 +43,7 @@ def get_master_data():
 
 
 def get_current_project_names():
-    master = project_data_from_master(root_path / 'core_data/master_1_2020.xlsx', 1, 2020)
+    master = project_data_from_master(root_path / 'core_data/master_2_2020.xlsx', 2, 2020)
     return master.projects
 
 
