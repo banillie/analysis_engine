@@ -6,7 +6,7 @@ from data_mgmt.data import MilestoneData, Masters, current_projects, CostData, c
 import datetime
 
 from data_mgmt.oldegg_functions import spent_calculation
-from project_analysis.p_reports import wd_heading, key_contacts, dca_table, dca_narratives
+from project_analysis.p_reports import wd_heading, key_contacts, dca_table, dca_narratives, year_cost_profile_chart
 
 
 def test_creation_of_Masters_class(basic_master, project_info):
@@ -86,6 +86,14 @@ def test_project_cost_profile_chart(costs_masters, project_info):
     costs.get_profile_project('Falcon 9', 'ipdc_costs')
     cost_profile_graph(costs)
 
+
+def test_project_cost_profile_chart_into_word_doc(word_doc, costs_masters):
+    live_projects = ['Falcon 9', 'Columbia', 'Apollo 13']
+    master = Masters(costs_masters, live_projects)
+    costs = CostData(master)
+    costs.get_profile_project('Falcon 9', 'ipdc_costs')
+    year_cost_profile_chart(word_doc, costs)
+    word_doc.save("resources/summary_temp_altered.docx")
 
 def test_calculating_spent(spent_master):
     spent = spent_calculation(spent_master, "Sea of Tranquility")

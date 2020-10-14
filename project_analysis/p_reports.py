@@ -1,13 +1,16 @@
 """
 New code for compiling individual project reports.
 """
+import os
 
 from docx import Document
-from docx.shared import Pt, Cm, RGBColor
+from docx.shared import Pt, Cm, RGBColor, Inches
+from docx.enum.section import WD_SECTION_START, WD_ORIENT
+from docx.enum.text import WD_ALIGN_PARAGRAPH
 from data_mgmt.oldegg_functions import convert_rag_text, cell_colouring, make_rows_bold, set_col_widths, \
     compare_text_newandold
 
-from data_mgmt.data import root_path, SRO_conf_key_list
+from data_mgmt.data import root_path, SRO_conf_key_list, cost_profile_graph
 
 
 # project_info = project_data_from_master(root_path / "core_data/project_info.xlsx", 1, 2099)
@@ -141,3 +144,25 @@ def dca_narratives(doc, master, project):
         # There are two options here for comparing text. Have left this for now.
         # compare_text_showall(dca_a, dca_b, doc)
         compare_text_newandold(text_one, text_two, doc)
+
+
+def year_cost_profile_chart(doc, master):
+    """Places line graph cost profile into word document"""
+
+    new_section = doc.add_section(WD_SECTION_START.NEW_PAGE)  # new page
+    # change to landscape
+    new_width, new_height = new_section.page_height, new_section.page_width
+    new_section.orientation = WD_ORIENT.LANDSCAPE
+    new_section.page_width = new_width
+    new_section.page_height = new_height
+
+    fig = cost_profile_graph(master)
+
+    # Size and shape of figure.
+    fig.canvas.draw()
+    fig.tight_layout(rect=[0, 0.03, 1, 0.95])  # for title
+
+    # Place fig in word doc.
+    fig.savefig('cost_profile.png')
+    doc.add_picture('cost_profile.png', width=Inches(8))  # to place nicely in doc
+    os.remove('cost_profile.png')
