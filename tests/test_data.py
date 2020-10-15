@@ -128,6 +128,8 @@ def test_get_group_cost_profile_chart(costs_masters, project_info):
     group_cost_profile_graph(costs, 'Group Test')
 
 
+# def test_compile_project_report(word_doc, project_info, )
+
 
 # def test_MilestoneData_group_dict_returns_dict(mst, abbreviations):
 #     mst.baseline_data('Re-baseline IPDC milestones')

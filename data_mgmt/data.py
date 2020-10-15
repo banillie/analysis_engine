@@ -47,6 +47,8 @@ def get_current_project_names():
     return master.projects
 
 
+project_information = project_data_from_master(root_path / "core_data/project_info.xlsx", 1, 2020)
+
 # for project summary pages
 SRO_conf_table_list = ['SRO DCA', 'Finance DCA', 'Benefits DCA', 'Resourcing DCA', 'Schedule DCA']
 SRO_conf_key_list = ['Departmental DCA', 'SRO Finance confidence', 'SRO Benefits RAG', 'Overall Resource DCA - Now',
@@ -233,8 +235,11 @@ class Masters:
                 lower_list = []
                 for i, master in reversed(list(enumerate(self.master_data))):
                     if name in master.projects:
-                        approved_bc = master.data[name][b_type]
-                        quarter = str(master.quarter)
+                        try:
+                            approved_bc = master.data[name][b_type]
+                            quarter = str(master.quarter)
+                        except KeyError: #  exception handling in here because data keys across masters are not consistent.
+                            print(str(b_type) + ' key not present in ' + str(master.quarter))
                         if approved_bc == 'Yes':
                             bc_list.append(approved_bc)
                             lower_list.append((approved_bc, quarter, i))
@@ -1163,7 +1168,6 @@ class CostData:
         self.rdel_profile = rdel_current_profile
         self.cdel_profile = cdel_current_profile
         self.ngov_profile = ngov_current_profile
-
 
     def get_profile_project(self, project_name: str, baseline: str) -> list:
         """Returns several lists which contain different cost profiles for a given project"""

@@ -10,10 +10,9 @@ from docx.enum.text import WD_ALIGN_PARAGRAPH
 from data_mgmt.oldegg_functions import convert_rag_text, cell_colouring, make_rows_bold, set_col_widths, \
     compare_text_newandold
 
-from data_mgmt.data import root_path, SRO_conf_key_list, project_cost_profile_graph
+from data_mgmt.data import root_path, SRO_conf_key_list, project_cost_profile_graph, CostData, project_information, \
+    get_master_data, Masters, current_projects
 
-
-# project_info = project_data_from_master(root_path / "core_data/project_info.xlsx", 1, 2099)
 
 def open_word_doc(wd_path: str):
     """Function stores an empty word doc as a variable"""
@@ -91,7 +90,7 @@ def dca_table(doc, master, project):
     for x, dca_key in enumerate(SRO_conf_key_list):
         row_cells = table.add_row().cells
         row_cells[0].text = dca_key
-        for i, m in enumerate(master.master_data):
+        for i, m in enumerate(master.master_data[:4]):  # last four masters taken
             try:
                 rating = convert_rag_text(m.data[project][dca_key])
                 row_cells[i + 1].text = rating
@@ -146,7 +145,7 @@ def dca_narratives(doc, master, project):
         compare_text_newandold(text_one, text_two, doc)
 
 
-def year_cost_profile_chart(doc, master):
+def year_cost_profile_chart(doc, cost_master):
     """Places line graph cost profile into word document"""
 
     new_section = doc.add_section(WD_SECTION_START.NEW_PAGE)  # new page
@@ -156,7 +155,7 @@ def year_cost_profile_chart(doc, master):
     new_section.page_width = new_width
     new_section.page_height = new_height
 
-    fig = project_cost_profile_graph(master)
+    fig = project_cost_profile_graph(cost_master)
 
     # Size and shape of figure.
     fig.canvas.draw()
@@ -166,3 +165,24 @@ def year_cost_profile_chart(doc, master):
     fig.savefig('cost_profile.png')
     doc.add_picture('cost_profile.png', width=Inches(8))  # to place nicely in doc
     os.remove('cost_profile.png')
+
+
+def compile_report(doc, project_info, master, project):
+    wd_heading(doc, project_info, project)
+    key_contacts(doc, master, project)
+    dca_table(doc, master, project)
+    dca_narratives(doc, master, project)
+    costs = CostData(master)
+    costs.get_profile_project(project, 'ipdc_costs')
+    year_cost_profile_chart(doc, costs)
+    return doc
+
+
+wd_path = root_path / "input/summary_temp.docx"
+report_doc = open_word_doc(wd_path)
+live_projects = current_projects(project_information)
+master_data = get_master_data()
+master = Masters(master_data, ["Crossrail Programme"])
+
+output = compile_report(report_doc, project_information, master, "Crossrail Programme")
+output.save(root_path / "output/crossrail_report_test.docx")
