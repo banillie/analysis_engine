@@ -2,7 +2,8 @@
 Tests for analysis_engine
 """
 
-from data_mgmt.data import MilestoneData, Masters, current_projects, CostData, cost_profile_graph
+from data_mgmt.data import MilestoneData, Masters, current_projects, CostData, project_cost_profile_graph, \
+    group_cost_profile_graph
 import datetime
 
 from data_mgmt.oldegg_functions import spent_calculation
@@ -24,6 +25,11 @@ def test_getting_baseline_data_from_Masters(basic_master, project_info):
     assert master.bl_index["ipdc_milestones"]["Sea of Tranquility"] == [0, 1]
     assert master.bl_index["ipdc_costs"]["Apollo 11"] == [0, 1, 2]
     assert master.bl_index["ipdc_costs"]["Columbia"] == [0, 1, 2]
+
+
+def test_calculating_spent(spent_master):
+    spent = spent_calculation(spent_master, "Sea of Tranquility")
+    assert spent == 439.9
 
 
 def test_open_word_doc(word_doc):
@@ -66,14 +72,14 @@ def test_word_doc_dca_narratives(word_doc, project_info, dca_masters):
     word_doc.save("resources/summary_temp_altered.docx")
 
 
-def test_get_cost_profile(costs_masters, project_info):
+def test_get_project_cost_profile(costs_masters, project_info):
     live_projects = current_projects(project_info)
     master = Masters(costs_masters, live_projects)
     costs = CostData(master)
     costs.get_profile_project('Falcon 9', 'ipdc_costs')
     assert costs.current_profile_project == [0, 0, 177.49, 245, 411.3, 443.2, 728.1, 1046.6, 1441, 1315, 395.84, 0]
     assert costs.last_profile_project == [0, 78.4, 165, 216.1, 323.95, 825.71, 909.19, 1216.59, 1141.08, 706.25, 0, 0]
-    assert costs.baseline_profile_one_project == []
+    assert costs.baseline_profile_one_project == [0, 78.4, 165, 216.1, 323.95, 825.71, 909.19, 1216.59, 1141.08, 706.25, 0, 0]
     assert costs.rdel_profile_project == [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     assert costs.cdel_profile_project == [0, 0, 177.49, 245, 411.3, 443.2, 728.1, 1046.6, 1441, 1315, 395.84, 0]
     assert costs.ngov_profile_project == [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
@@ -84,10 +90,10 @@ def test_project_cost_profile_chart(costs_masters, project_info):
     master = Masters(costs_masters, live_projects)
     costs = CostData(master)
     costs.get_profile_project('Falcon 9', 'ipdc_costs')
-    cost_profile_graph(costs)
+    project_cost_profile_graph(costs)
 
 
-def test_project_cost_profile_chart_into_word_doc(word_doc, costs_masters):
+def test_project_cost_profile_chart_into_word_doc_one(word_doc, costs_masters):
     live_projects = ['Falcon 9', 'Columbia', 'Apollo 13']
     master = Masters(costs_masters, live_projects)
     costs = CostData(master)
@@ -95,11 +101,34 @@ def test_project_cost_profile_chart_into_word_doc(word_doc, costs_masters):
     year_cost_profile_chart(word_doc, costs)
     word_doc.save("resources/summary_temp_altered.docx")
 
-def test_calculating_spent(spent_master):
-    spent = spent_calculation(spent_master, "Sea of Tranquility")
-    assert spent == 439.9
 
-#
+def test_project_cost_profile_chart_into_word_doc_many(word_doc, costs_masters):
+    live_projects = ['Falcon 9', 'Columbia', 'Apollo 13']
+    master = Masters(costs_masters, live_projects)
+    costs = CostData(master)
+    for p in live_projects:
+        costs.get_profile_project(p, 'ipdc_costs')
+        year_cost_profile_chart(word_doc, costs)
+        word_doc.save("resources/summary_temp_altered.docx")
+
+
+def test_get_group_cost_profile(costs_masters, project_info):
+    live_projects = ['Falcon 9', 'Columbia', 'Apollo 13']
+    master = Masters(costs_masters, live_projects)
+    costs = CostData(master)
+    costs.get_profile_all('ipdc_costs')
+    assert costs.current_profile == [0, 0, 230, 266, 412, 444, 729, 1047, 1442, 1316, 396, 1]
+
+
+def test_get_group_cost_profile_chart(costs_masters, project_info):
+    live_projects = ['Falcon 9', 'Columbia', 'Apollo 13']
+    master = Masters(costs_masters, live_projects)
+    costs = CostData(master)
+    costs.get_profile_all('ipdc_costs')
+    group_cost_profile_graph(costs, 'Group Test')
+
+
+
 # def test_MilestoneData_group_dict_returns_dict(mst, abbreviations):
 #     mst.baseline_data('Re-baseline IPDC milestones')
 #     m = MilestoneData(mst, abbreviations)

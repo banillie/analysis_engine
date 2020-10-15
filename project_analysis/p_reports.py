@@ -10,7 +10,7 @@ from docx.enum.text import WD_ALIGN_PARAGRAPH
 from data_mgmt.oldegg_functions import convert_rag_text, cell_colouring, make_rows_bold, set_col_widths, \
     compare_text_newandold
 
-from data_mgmt.data import root_path, SRO_conf_key_list, cost_profile_graph
+from data_mgmt.data import root_path, SRO_conf_key_list, project_cost_profile_graph
 
 
 # project_info = project_data_from_master(root_path / "core_data/project_info.xlsx", 1, 2099)
@@ -156,7 +156,7 @@ def year_cost_profile_chart(doc, master):
     new_section.page_width = new_width
     new_section.page_height = new_height
 
-    fig = cost_profile_graph(master)
+    fig = project_cost_profile_graph(master)
 
     # Size and shape of figure.
     fig.canvas.draw()

@@ -218,8 +218,7 @@ class Masters:
     def baseline_data(self):
 
         """
-        Returns the two dictionaries baseline_info 
-        and baseline_index for all projects for all
+        Returns the two dictionaries baseline_info and baseline_index for all projects for all
         baseline types
         """
 
@@ -901,7 +900,7 @@ class MilestoneCharts:
 
 
 class CostData:
-    def __init__(self, master: classmethod):
+    def __init__(self, master: object):
         self.master = master
         self.cat_spent = []
         self.cat_profile = []
@@ -912,7 +911,11 @@ class CostData:
         self.unprofile = []
         self.current_profile = []
         self.last_profile = []
-        self.baseline_profile = []
+        self.baseline_profile_one = []
+        self.baseline_profile_two = []
+        self.rdel_profile = []
+        self.cdel_profile = []
+        self.ngov_profile = []
         self.current_profile_project = []
         self.last_profile_project = []
         self.baseline_profile_one_project = []
@@ -1029,7 +1032,7 @@ class CostData:
         self.profile = profile
         self.unprofile = unprofile
 
-    def get_profile_all(self):
+    def get_profile_all_old(self):
         year_list = ['20-21',
                      '21-22',
                      '22-23',
@@ -1075,7 +1078,95 @@ class CostData:
         self.last_profile = last_profile
         self.baseline_profile = baseline_profile
 
+    def get_profile_all(self, baseline: str) -> list:
+        """Returns several lists which contain the sum of different cost profiles for the group of project
+        contained with the master"""
+        self.baseline = baseline
+
+        # year_list to be expanded out to 2040 or however far it goes now.
+        year_list = ['17-18', '18-19', '19-20', '20-21', '21-22', '22-23',
+                     '23-24', '24-25', '25-26', '26-27', '27-28', '28-29']
+
+        cost_list = [' RDEL Forecast Total', ' CDEL Forecast Total', ' Forecast Non-Gov']
+
+        current_profile = []
+        last_profile = []
+        baseline_profile_one = []
+        baseline_profile_two = []
+        rdel_current_profile = []
+        cdel_current_profile = []
+        ngov_current_profile = []
+
+        for i in range(3):
+            yearly_profile = []
+            rdel_yearly_profile = []
+            cdel_yearly_profile = []
+            ngov_yearly_profile = []
+            for year in year_list:
+                cost_total = 0
+                rdel_total = 0
+                cdel_total = 0
+                ngov_total = 0
+                for cost_type in cost_list:
+                    for project in self.master.project_names:
+                        project_bl_index = self.master.bl_index[baseline][project]
+                        try:
+                            cost = self.master.master_data[project_bl_index[i]].data[project][year + cost_type]
+                            if cost is None:
+                                cost = 0
+                            cost_total += cost
+                        except KeyError:  # to handle like for likeness comparison between current and last quarter.
+                            # work also required on the data set so that the year key doesn't throw a key error due
+                            # to all years not be present in all masters. This is why there as a messy extra step below.
+                            p_master_data_keys = self.master.master_data[project_bl_index[i]].data[project]
+                            concatenated_key = year + cost_type
+                            if concatenated_key in p_master_data_keys:
+                                print("NOTE: " + str(project) + " was not part of the portfolio last quarter. This "
+                                      "means current quarter and last quarter cost profiles cannot be compared as like"
+                                      "for like unless " + str(project) + " is removed from this group.")
+                            cost = 0
+                            cost_total += cost
+                        except IndexError:  # to handle projects lacking baseline indexes. This requires changes to the data.
+                            print(str(project) + " has no " + str(self.baseline) + " baseline. All projects must have at least"
+                                 "one baseline point. Even if this is only the point at which it entered the portfolio"
+                                 ". Therefore this programme is stopping until a baseline index is provided")
+                            #  The programme should stop here but for some reason isn't.
+
+                        if cost_type == ' RDEL Forecast Total':
+                            rdel_total += cost
+                        if cost_type == ' CDEL Forecast Total':
+                            cdel_total += cost
+                        if cost_type == ' Forecast Non-Gov':
+                            ngov_total += cost
+
+                yearly_profile.append(round(cost_total))
+                rdel_yearly_profile.append(round(rdel_total))
+                cdel_yearly_profile.append(round(cdel_total))
+                ngov_yearly_profile.append(round(ngov_total))
+
+            if i == 0:
+                current_profile = yearly_profile
+                rdel_current_profile = rdel_yearly_profile
+                cdel_current_profile = cdel_yearly_profile
+                ngov_current_profile = ngov_yearly_profile
+            if i == 1:
+                last_profile = yearly_profile
+            if i == 2:
+                baseline_profile_one = yearly_profile
+            if i == 3:
+                baseline_profile_two = yearly_profile
+
+        self.current_profile = current_profile
+        self.last_profile = last_profile
+        self.baseline_profile_one = baseline_profile_one
+        self.baseline_profile_two = baseline_profile_two
+        self.rdel_profile = rdel_current_profile
+        self.cdel_profile = cdel_current_profile
+        self.ngov_profile = ngov_current_profile
+
+
     def get_profile_project(self, project_name: str, baseline: str) -> list:
+        """Returns several lists which contain different cost profiles for a given project"""
         self.project_name = project_name
         self.baseline = baseline
 
@@ -1292,7 +1383,7 @@ def vfm_matplotlib_graph(labels, current_qrt, last_qrt, title):
     plt.show()
 
 
-def cost_profile_graph(cost_master: object):
+def project_cost_profile_graph(cost_master: object):
     """Compiles a matplotlib line chart for cost profile contained within cost_master class.
     It creates two plots. First plot shows overall profile in current, last quarters anb
     baseline form. Second plot shows rdel, cdel, and 'non-gov' cost profile"""
@@ -1303,7 +1394,7 @@ def cost_profile_graph(cost_master: object):
     year_list = ['17-18', '18-19', '19-20', '20-21', '21-22', '22-23',
                  '23-24', '24-25', '25-26', '26-27', '27-28', '28-29']
 
-    fig.suptitle(cost_master.project_name + ' Cost Profile', fontweight='bold')  # title
+    fig.suptitle(str(cost_master.project_name) + ' Cost Profile', fontweight='bold')  # title
 
     # Overall cost profile chart
     try:  # try statement handles the project having no baseline profile.
@@ -1342,17 +1433,65 @@ def cost_profile_graph(cost_master: object):
     ylab2.set_size(8)
     ax2.grid(color='grey', linestyle='-', linewidth=0.2)
     ax2.legend(prop={'size': 6})
-    ax2.set_title('Fig 2 - cost profile spend type', loc='left', fontsize=8, fontweight='bold')
+    ax2.set_title('Fig 2 - current cost type profile', loc='left', fontsize=8, fontweight='bold')
 
-    # size of chart and fit
-    # fig.canvas.draw()
-    # fig.tight_layout(rect=[0, 0.03, 1, 0.95])  # for title
+    fig.show()
 
-    # fig.savefig('cost_profile.png')
-    #plt.show()
-    # plt.close()  # automatically closes figure so don't need to do manually.
+    return fig
 
-    # doc.add_picture('cost_profile.png', width=Inches(8))  # to place nicely in doc
-    # os.remove('cost_profile.png')
+
+def group_cost_profile_graph(cost_master: object, title: str):
+    """Compiles a matplotlib line chart for costs of all projects contained within cost_master class.
+    As as default last quarters profile is not included. It creates two plots. First plot shows overall
+    profile in current, last quarters anb baseline form. Second plot shows rdel, cdel, and 'non-gov' cost profile"""
+
+    fig, (ax1, ax2) = plt.subplots(2)  # two subplots for this chart
+
+    '''cost profile charts'''
+    year_list = ['17-18', '18-19', '19-20', '20-21', '21-22', '22-23',
+                 '23-24', '24-25', '25-26', '26-27', '27-28', '28-29']
+
+    fig.suptitle(title + ' Cost Profile', fontweight='bold')  # title
+
+    # Overall cost profile chart
+    try:  # try statement handles the project having no baseline profile.
+        ax1.plot(year_list, np.array(cost_master.baseline_profile_one), label='Baseline', linewidth=3.0,
+                 marker="o")
+    except ValueError:
+        pass
+    #ax1.plot(year_list, np.array(cost_master.last_profile), label='Last quarter', linewidth=3.0, marker="o")
+    ax1.plot(year_list, np.array(cost_master.current_profile), label='Latest', linewidth=3.0, marker="o")
+
+    # Chart styling
+    ax1.tick_params(axis='x', which='major', labelsize=6, rotation=45)
+    ax1.set_ylabel('Cost (£m)')
+    ylab1 = ax1.yaxis.get_label()
+    ylab1.set_style('italic')
+    ylab1.set_size(8)
+    ax1.grid(color='grey', linestyle='-', linewidth=0.2)
+    ax1.legend(prop={'size': 6})
+    ax1.set_title('Fig 1 - cost profile changes', loc='left', fontsize=8, fontweight='bold')
+
+    # plot rdel/cdel chart data
+    if sum(cost_master.ngov_profile) != 0:  # if statement as most projects don't have ngov cost.
+        ax2.plot(year_list, np.array(cost_master.ngov_profile), label='Non-Gov', linewidth=3.0, marker="o")
+    ax2.plot(year_list, np.array(cost_master.cdel_profile), label='CDEL', linewidth=3.0, marker="o")
+    ax2.plot(year_list, np.array(cost_master.rdel_profile), label='RDEL', linewidth=3.0, marker="o")
+
+    # rdel/cdel profile chart styling
+    ax2.tick_params(axis='x', which='major', labelsize=6, rotation=45)
+    ax2.set_xlabel('Financial Years')
+    ax2.set_ylabel('Cost (£m)')
+    xlab2 = ax2.xaxis.get_label()
+    ylab2 = ax2.yaxis.get_label()
+    xlab2.set_style('italic')
+    xlab2.set_size(8)
+    ylab2.set_style('italic')
+    ylab2.set_size(8)
+    ax2.grid(color='grey', linestyle='-', linewidth=0.2)
+    ax2.legend(prop={'size': 6})
+    ax2.set_title('Fig 2 - current cost type profile', loc='left', fontsize=8, fontweight='bold')
+
+    plt.show()
 
     return fig
