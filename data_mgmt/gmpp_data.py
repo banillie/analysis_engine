@@ -1,18 +1,18 @@
 """
+This programme creates a master spreadsheet to share with IPA for gmpp reporting and the populating of individual
+gmpp reporting templates.
 
-This programme creates a master spreadsheet to share with IPA for gmpp reporting. The 'master' print out is then
-shared with the IPA which runs an excel macro to populate individual gmpp reporting templates.
+Documents required to run the programme are:
+1) the latest dft quarter_master spreadsheet (i.e. the quarter that is being reported). Entered via file path at 94.
+2) the gmpp datamap (make sure you have the latest version). Entered via file path at 98.
 
-Documents required to run the programme are set out below.
-
-Documents required are:
-1) the gmpp datamap (make sure you have the latest/final version).
-2) The latest quarter DfT_master spreadsheet (i.e. the quarter that is being reported).
-
-IMPORTANT to note:
-- Handling of Hs2 data currently not done by this programme.
-
+Once you have provide these documents run the programme and it will produce two documents in the output folder,
+which are:
+1) gmpp_dataset[quarter_name].xlsx. This contains all the output data for sharing with IPA.
+2) no_match_dft_gmpp_dataset.xlsx. If there are any keys which the programme could not match these will be
+recorded in this document. This is useful for checking if data has transferred properly.
 """
+
 from datetime import date
 from typing import Dict, Union
 
@@ -46,7 +46,6 @@ def create_master(
         ws.cell(
             row=2, column=7 + i
         ).value = project_name  # place project names in file twice. this time against project/programme name
-
 
         keys_not_found = []
         for row_num in range(2, ws.max_row + 1):  # for loop for placing data into the worksheet
@@ -94,6 +93,7 @@ def create_master(
         "/", "_"
     )
     gmpp_wb.save(root_path / 'output/gmpp_dataset_{}.xlsx'.format(quarter))
+
 
 # place file path to quarter master here:
 quarter_master = project_data_from_master(
