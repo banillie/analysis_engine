@@ -1,5 +1,5 @@
 from data_mgmt.data import MilestoneData, MilestoneChartData, \
-    Masters, Projects, master_data_list, root_path, blue_line_date, \
+    Master, Projects, master_data_list, root_path, blue_line_date, \
     abbreviations, CombinedData
 import datetime
 import numpy as np
@@ -191,7 +191,7 @@ def build_charts(latest_milestone_names,
 
 
 """Get data"""
-mst = Masters(master_data_list[1:], Projects.hsmrpg)  # get master data and specify projects
+mst = Master(master_data_list[1:], Projects.hsmrpg)  # get master data and specify projects
 mst.baseline_data('Re-baseline IPDC milestones')  # get baseline information of interest
 milestone_data = MilestoneData(mst, abbreviations)  # get milestone data
 

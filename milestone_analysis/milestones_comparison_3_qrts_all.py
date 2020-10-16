@@ -5,7 +5,7 @@ baseline quarter.
 """
 
 from openpyxl import Workbook
-from data_mgmt.data import MilestoneData, Masters, Projects, \
+from data_mgmt.data import MilestoneData, Master, Projects, \
     get_master_data, abbreviations, root_path, get_current_project_names
 
 def put_into_wb_all(milestone_data_object):
@@ -57,7 +57,7 @@ def put_into_wb_all(milestone_data_object):
 master_data = get_master_data()
 current_project_name_list = get_current_project_names()
 
-mst = Masters(master_data, current_project_name_list)  # get Master object and specify projects of interest
+mst = Master(master_data, current_project_name_list)  # get Master object and specify projects of interest
 mst.baseline_data('Re-baseline IPDC milestones')  # place baseline information of interest into master object
 milestone_data = MilestoneData(mst, abbreviations)  # create MilestoneData object
 milestone_data.project_data('Delivery')  # place type of milestone data of interest into MilestoneData object

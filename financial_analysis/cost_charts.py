@@ -1,4 +1,4 @@
-from data_mgmt.data import master_data_list, root_path, Masters, CostData, \
+from data_mgmt.data import master_data_list, root_path, Master, CostData, \
     BenefitsData, Project
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
@@ -20,7 +20,7 @@ year_list = ['20-21',
              '27-28',
              '28-29']
 
-mst = Masters(test_masters, all_projects)
+mst = Master(test_masters, all_projects)
 mst.baseline_data('Re-baseline IPDC cost')
 costs = CostData(mst)
 mst.baseline_data('Re-baseline IPDC benefits')

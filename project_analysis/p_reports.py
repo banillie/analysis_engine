@@ -2,6 +2,8 @@
 New code for compiling individual project reports.
 """
 import os
+from datetime import date
+from typing import Dict, Union
 
 from docx import Document
 from docx.shared import Pt, Cm, RGBColor, Inches
@@ -11,7 +13,7 @@ from data_mgmt.oldegg_functions import convert_rag_text, cell_colouring, make_ro
     compare_text_newandold
 
 from data_mgmt.data import root_path, SRO_conf_key_list, project_cost_profile_graph, CostData, project_information, \
-    get_master_data, Masters, current_projects
+    get_master_data, Master, current_projects
 
 
 def open_word_doc(wd_path: str):
@@ -19,7 +21,7 @@ def open_word_doc(wd_path: str):
     return Document(wd_path)
 
 
-def wd_heading(doc, project_info, project):
+def wd_heading(doc: Document, project_info, project):
     """Function adds header to word doc"""
     font = doc.styles['Normal'].font
     font.name = 'Arial'
@@ -31,7 +33,7 @@ def wd_heading(doc, project_info, project):
     intro.bold = True
 
 
-def key_contacts(doc, master, project):
+def key_contacts(doc, master: Master, project):
     """Function adds key contact details"""
     sro_name = master.master_data[0].data[project]['Senior Responsible Owner (SRO)']
     if sro_name is None:
@@ -77,7 +79,7 @@ def key_contacts(doc, master, project):
                       + ', ' + str(contact_phone))
 
 
-def dca_table(doc, master, project):
+def dca_table(doc, master: Master, project):
     """Creates SRO confidence table"""
     table = doc.add_table(rows=1, cols=5)
     hdr_cells = table.rows[0].cells
@@ -167,7 +169,7 @@ def year_cost_profile_chart(doc, cost_master):
     os.remove('cost_profile.png')
 
 
-def compile_report(doc, project_info, master, project):
+def compile_report(doc: Document, project_info: Dict[str, Union[str, int, date, float]], master, project) -> Document:
     wd_heading(doc, project_info, project)
     key_contacts(doc, master, project)
     dca_table(doc, master, project)
@@ -182,7 +184,7 @@ wd_path = root_path / "input/summary_temp.docx"
 report_doc = open_word_doc(wd_path)
 live_projects = current_projects(project_information)
 master_data = get_master_data()
-master = Masters(master_data, ["Crossrail Programme"])
+m = Master(master_data, ["Crossrail Programme"])
 
-output = compile_report(report_doc, project_information, master, "Crossrail Programme")
+output = compile_report(report_doc, project_information, m, "Crossrail Programme")
 output.save(root_path / "output/crossrail_report_test.docx")

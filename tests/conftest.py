@@ -1,11 +1,9 @@
 import os
 
 import pytest
-
-from database.database import create_db
-
 from datamaps.api import project_data_from_master
 
+from database.database import create_db
 from project_analysis.p_reports import open_word_doc
 
 
@@ -22,8 +20,6 @@ def word_doc():
     wd_path = os.path.join(os.getcwd(), "resources/summary_temp.docx")
     doc = open_word_doc(wd_path)
     return doc
-    # yield doc
-    # os.remove("resources/summary_temp_altered.docx")
 
 
 @pytest.fixture
@@ -32,6 +28,7 @@ def contact_master():
                                                                "contact_info_master_3_2019.xlsx"), 3, 2019),
             project_data_from_master(os.path.join(os.getcwd(), "resources/"
                                                                "contact_info_master_4_2019.xlsx"), 4, 2019)]
+
 
 @pytest.fixture
 def spent_master():

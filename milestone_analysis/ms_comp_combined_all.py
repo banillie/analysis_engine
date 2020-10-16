@@ -8,11 +8,11 @@ from openpyxl import Workbook, load_workbook
 #     p_current_milestones, p_last_milestones, p_baseline_milestones, \
 #     p_baseline_milestones_two
 from data_mgmt.data import MilestoneData, MilestoneChartData, \
-    Masters, Projects, master_data_list, root_path, blue_line_date, \
+    Master, Projects, master_data_list, root_path, blue_line_date, \
     abbreviations, CombinedData
 
 
-mst = Masters(master_data_list[1:], Projects.hsmrpg)  # get master data and specify projects
+mst = Master(master_data_list[1:], Projects.hsmrpg)  # get master data and specify projects
 mst.baseline_data('Re-baseline IPDC milestones')  # get baseline information of interest
 milestone_data = MilestoneData(mst, abbreviations)  # get milestone data
 
