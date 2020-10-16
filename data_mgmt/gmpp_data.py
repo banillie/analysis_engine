@@ -1,4 +1,4 @@
-'''
+"""
 
 This programme creates a master spreadsheet to share with IPA for gmpp reporting. The 'master' print out is then
 shared with the IPA which runs an excel macro to populate individual gmpp reporting templates.
@@ -12,57 +12,94 @@ Documents required are:
 IMPORTANT to note:
 - Handling of Hs2 data currently not done by this programme.
 
-'''
+"""
+from datetime import date
+from typing import Dict, Union
 
-from openpyxl import load_workbook
-from analysis.data import q1_2021, root_path
+from openpyxl import load_workbook, Workbook, workbook
 from analysis.engine_functions import filter_gmpp
 
+from data_mgmt.data import root_path
+from datamaps.api import project_data_from_master
 
-def create_master(gmpp_wb, master_data):
+
+def create_master(
+        gmpp_wb: workbook, master: Dict[str, Union[str, int, date, float]]
+) -> None:
     ws = gmpp_wb.active
 
-    type_list = ['RDEL', 'CDEL', 'Non-Gov', 'Income'] # list of cost types. used to amend Hs2 data
-    zero_list = ['RDEL', 'CDEL', 'Non-Gov', 'Income', 'BEN'] # list of cost/ben types. used to remove none value entries
+    keys_relating_to_costs = [
+        "RDEL",
+        "CDEL",
+        "Non-Gov",
+        "Income",
+        "BEN",
+    ]  # list of cost/ben types. used to remove none value entries
 
-    # this section filters out only gmpp project names. Subsequent list is then used to populate ws
-    gmpp_project_names = filter_gmpp(master_data)
+    gmpp_project_names = filter_gmpp(master)  # gets gmpp project names
 
     for i, project_name in enumerate(gmpp_project_names):
-        print(project_name)
-        ws.cell(row=1, column=13+i).value = project_name  # place project names in file
+        print(project_name)  # to show progress of programme.
+        ws.cell(
+            row=1, column=7 + i
+        ).value = project_name  # place project names in file.
+        ws.cell(
+            row=2, column=7 + i
+        ).value = project_name  # place project names in file twice. this time against project/programme name
 
-        # for loop for placing data into the worksheet
+
         keys_not_found = []
-        for row_num in range(2, ws.max_row+1):
+        for row_num in range(2, ws.max_row + 1):  # for loop for placing data into the worksheet
             key = ws.cell(row=row_num, column=1).value
-            # this loop places all latest raw data into the worksheet
-            if key in master_data.data[project_name].keys():
-                ws.cell(row=row_num, column=13+i).value = master_data.data[project_name][key]
-            elif key not in master_data.data[project_name].keys():
-                if key is not None:
-                    keys_not_found.append(key)
-
-                # this section of the code ensures that all financial costs / benefit forecasts have a zero
-                for cost_type in zero_list:
+            if key is not None:  # remove None types
+                try:
+                    if (
+                            key != "Project/Programme Name"
+                    ):  # this key will not be excel document.
+                        ws.cell(row=row_num, column=7 + i).value = master.data[
+                            project_name
+                        ][key]
+                        for cost_type in keys_relating_to_costs:
+                            if cost_type in key:
+                                if master.data[project_name][key] is None:
+                                    ws.cell(row=row_num, column=7 + i).value = 0
+                except KeyError:
                     try:
-                        if cost_type in key:
-                            try:
-                                if master_data.data[project_name][key] is None:
-                                    ws.cell(row=row_num, column=13 + i).value = 0
-                            except KeyError:
-                                keys_not_found.append(key)
-                    except TypeError:
-                        pass
+                        key_altered = key.replace(
+                            ",", ""
+                        )  # This handles key names in excel document have comma's which are not
+                        # present in the python dictionary
+                        ws.cell(row=row_num, column=7 + i).value = master.data[
+                            project_name
+                        ][key_altered]
+                        for cost_type in keys_relating_to_costs:
+                            if cost_type in key_altered:
+                                if master.data[project_name][key_altered] is None:
+                                    ws.cell(row=row_num, column=7 + i).value = 0
+                    except KeyError:
+                        keys_not_found.append(key)
 
-        # This is where loop to amend Hs2 data could be placed
+    wb_keys_not_found = Workbook()
+    ws = wb_keys_not_found.active
+    for x, key in enumerate(keys_not_found):
+        ws.cell(row=x + 2, column=1).value = key
 
-    print(keys_not_found)
+    ws.cell(
+        row=1, column=1
+    ).value = "Keys with no match between DfT datamap and GMPP datamap."
+    wb_keys_not_found.save(root_path / 'output/no_match_dft_gmpp_datamaps.xlsx')
 
-    return gmpp_wb
+    quarter = str(quarter_master.quarter)
+    quarter = quarter.replace(
+        "/", "_"
+    )
+    gmpp_wb.save(root_path / 'output/gmpp_dataset_{}.xlsx'.format(quarter))
 
-master_dm = load_workbook(root_path/'input/new_gmpp_oscar_II_datamap IPA 2021-Q1.xlsx')
+# place file path to quarter master here:
+quarter_master = project_data_from_master(
+    root_path / "core_data/master_2_2020.xlsx", 2, 2020
+)
+# place file path to gmpp datamap here:
+master_dm = load_workbook(root_path / "input/new_gmpp_oscar_II_datamap_master_v3.xlsx")
 
-run = create_master(master_dm, q1_2021)
-
-run.save(root_path/'output/dft_gmpp_dataset_q1_1920.xlsx')
+create_master(master_dm, quarter_master)
