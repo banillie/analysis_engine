@@ -199,13 +199,13 @@ output_four = place_standard_comparision_excel(latest_cost_profiles, baseline_1_
 '''Valid file paths for all the below need to be provided'''
 
 '''ONE. Provide file path to where to save complex wlc breakdown'''
-output_one.save(root_path/'output/comparing_wlc_complex_q1_2021.xlsx')
+output_one.save(root_path/'output/comparing_wlc_complex_q2_2021.xlsx')
 
 '''TWO. Provide file path to where to save complex yearly cost profile breakdown'''
-output_two.save(root_path/'output/comparing_cost_profiles_complex_q1_2021.xlsx')
+output_two.save(root_path/'output/comparing_cost_profiles_complex_q2_2021.xlsx')
 
 '''THREE. Provide file path to where to save standard wlc breakdown'''
-output_three.save(root_path/'output/comparing_wlc_standard_q1_2021.xlsx')
+output_three.save(root_path/'output/comparing_wlc_standard_q2_2021.xlsx')
 
 '''FOUR. Provide file path to where to save standard yearly cost profile breakdown'''
-output_four.save(root_path/'output/comparing_cost_profiles_standard_q1_2021.xlsx')
+output_four.save(root_path/'output/comparing_cost_profiles_standard_q2_2021.xlsx')
