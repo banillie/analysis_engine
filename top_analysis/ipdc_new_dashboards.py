@@ -499,7 +499,11 @@ def benefits_info(wb):
             except ZeroDivisionError:
                 pass
 
-            '''in year benefits'''
+            # In year benefits
+            iyb = list_of_masters_all[0].data[project_name]["BEN Forecast In-Year"]
+            ws.cell(row=row_num, column=14).value = iyb
+            # No iyb variance yet as this key only present in Q2 2021 master.
+
 
             '''benefits DCA rating - this quarter'''
             ws.cell(row=row_num, column=16).value = convert_rag_text(list_of_masters_all[0].data
