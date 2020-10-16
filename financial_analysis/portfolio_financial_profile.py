@@ -17,7 +17,7 @@ from analysis.data import cost_list, income_list, year_list, latest_cost_profile
     last_income_profiles, baseline_1_income_profiles, dont_double_count, root_path, northern_powerhouse
 from analysis.engine_functions import filter_project_group, calculate_group_project_total
 
-dont_double_count = [northern_powerhouse]
+dont_double_count = []
 
 
 def place_in_excel(project_name_list):
@@ -107,4 +107,4 @@ def place_in_excel(project_name_list):
 NOTE: Default option is list of all current projects in portfolio. In majority of cases user should just run the 
 default programme'''
 output = place_in_excel(list_of_masters_all[0].projects)
-output.save(root_path/'output/portfolio_financial_profile_q1_2021.xlsx')
+output.save(root_path/'output/portfolio_financial_profile_q2_2021.xlsx')
