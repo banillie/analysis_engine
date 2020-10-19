@@ -1,4 +1,6 @@
 import datetime
+import difflib
+import os
 from typing import List, Dict, Union
 
 import matplotlib.pyplot as plt
@@ -8,6 +10,12 @@ import numpy as np
 from datamaps.api import project_data_from_master
 import platform
 from pathlib import Path
+
+from docx import Document, table
+from docx.enum.section import WD_SECTION_START, WD_ORIENTATION
+from docx.oxml import parse_xml
+from docx.oxml.ns import nsdecls
+from docx.shared import Pt, Cm, RGBColor, Inches
 
 
 def _platform_docs_dir() -> Path:
@@ -52,10 +60,10 @@ def get_current_project_names():
     )
     return master.projects
 
-
-project_information = project_data_from_master(
+def get_project_information():
+    return project_data_from_master(
     root_path / "core_data/project_info.xlsx", 1, 2020
-)
+    )
 
 # for project summary pages
 SRO_conf_table_list = [
@@ -1717,7 +1725,7 @@ def project_cost_profile_graph(cost_master: object):
         "Fig 2 - current cost type profile", loc="left", fontsize=8, fontweight="bold"
     )
 
-    fig.show()
+    #plt.show()
 
     return fig
 
@@ -1822,3 +1830,262 @@ def spent_calculation(master: Dict[str, Union[str, date, int, float]], project: 
         total += master.data[project][k]
 
     return total
+
+
+def open_word_doc(wd_path: str) -> Document:
+    """Function stores an empty word doc as a variable"""
+    return Document(wd_path)
+
+
+def wd_heading(doc: Document, project_info: Dict[str, str], project_name: str) -> None:
+    """Function adds header to word doc"""
+    font = doc.styles['Normal'].font
+    font.name = 'Arial'
+    font.size = Pt(12)
+
+    heading = str(project_info.data[project_name]['Abbreviations'])
+    intro = doc.add_heading(str(heading), 0)
+    intro.alignment = 1
+    intro.bold = True
+
+
+def key_contacts(doc: Document, master: Master, project_name: str) -> None:
+    """Function adds key contact details"""
+    sro_name = master.master_data[0].data[project_name]['Senior Responsible Owner (SRO)']
+    if sro_name is None:
+        sro_name = 'tbc'
+
+    sro_email = master.master_data[0].data[project_name]['Senior Responsible Owner (SRO) - Email']
+    if sro_email is None:
+        sro_email = 'email: tbc'
+
+    sro_phone = master.master_data[0].data[project_name]['SRO Phone No.']
+    if sro_phone == None:
+        sro_phone = 'phone number: tbc'
+
+    doc.add_paragraph('SRO: ' + str(sro_name) + ', ' + str(sro_email) + ', ' + str(sro_phone))
+
+    pd_name = master.master_data[0].data[project_name]['Project Director (PD)']
+    if pd_name is None:
+        pd_name = 'TBC'
+
+    pd_email = master.master_data[0].data[project_name]['Project Director (PD) - Email']
+    if pd_email is None:
+        pd_email = 'email: tbc'
+
+    pd_phone = master.master_data[0].data[project_name]['PD Phone No.']
+    if pd_phone is None:
+        pd_phone = 'TBC'
+
+    doc.add_paragraph('PD: ' + str(pd_name) + ', ' + str(pd_email) + ', ' + str(pd_phone))
+
+    contact_name = master.master_data[0].data[project_name]['Working Contact Name']
+    if contact_name is None:
+        contact_name = 'TBC'
+
+    contact_email = master.master_data[0].data[project_name]['Working Contact Email']
+    if contact_email is None:
+        contact_email = 'email: tbc'
+
+    contact_phone = master.master_data[0].data[project_name]['Working Contact Telephone']
+    if contact_phone is None:
+        contact_phone = 'TBC'
+
+    doc.add_paragraph('PfM reporting lead: ' + str(contact_name) + ', ' + str(contact_email)
+                      + ', ' + str(contact_phone))
+
+
+def dca_table(doc: Document, master: Master, project_name: str) -> None:
+    """Creates SRO confidence table"""
+    w_table = doc.add_table(rows=1, cols=5)
+    hdr_cells = w_table.rows[0].cells
+    hdr_cells[0].text = 'Delivery confidence'
+    hdr_cells[1].text = 'This quarter'
+    hdr_cells[2].text = str(master.master_data[1].quarter)
+    hdr_cells[3].text = str(master.master_data[2].quarter)
+    hdr_cells[4].text = str(master.master_data[3].quarter)
+
+    for x, dca_key in enumerate(SRO_conf_key_list):
+        row_cells = w_table.add_row().cells
+        row_cells[0].text = dca_key
+        for i, m in enumerate(master.master_data[:4]):  # last four masters taken
+            try:
+                rating = convert_rag_text(m.data[project_name][dca_key])
+                row_cells[i + 1].text = rating
+                cell_colouring(row_cells[i + 1], rating)
+            except (KeyError, TypeError):
+                row_cells[i + 1].text = "N/A"
+
+    w_table.style = 'Table Grid'
+    make_rows_bold([w_table.rows[0]])  # makes top of table bold.
+    # make_columns_bold([table.columns[0]]) #right cells in table bold
+    column_widths = (Cm(3.9), Cm(2.9), Cm(2.9), Cm(2.9), Cm(2.9))
+    set_col_widths(w_table, column_widths)
+
+
+def dca_narratives(doc: Document, master: Master, project_name: str) -> None:
+    """Places all narratives into document and checks for differences between
+    current and last quarter"""
+
+    doc.add_paragraph()
+    p = doc.add_paragraph()
+    text = '*Red text highlights changes in narratives from last quarter'
+    p.add_run(text).font.color.rgb = RGBColor(255, 0, 0)
+
+    headings_list = ['SRO delivery confidence narrative',
+                     'Financial cost narrative',
+                     'Financial comparison with last quarter',
+                     'Financial comparison with baseline',
+                     'Benefits Narrative',
+                     'Benefits comparison with last quarter',
+                     'Benefits comparison with baseline',
+                     'Milestone narrative']
+
+    narrative_keys_list = ['Departmental DCA Narrative',
+                           'Project Costs Narrative',
+                           'Cost comparison with last quarters cost narrative',
+                           'Cost comparison within this quarters cost narrative',
+                           'Benefits Narrative',
+                           'Ben comparison with last quarters cost - narrative',
+                           'Ben comparison within this quarters cost - narrative',
+                           'Milestone Commentary']
+
+    for x in range(len(headings_list)):
+        doc.add_paragraph().add_run(str(headings_list[x])).bold = True
+        text_one = str(master.master_data[0].data[project_name][narrative_keys_list[x]])
+        try:
+            text_two = str(master.master_data[1].data[project_name][narrative_keys_list[x]])
+        except KeyError:
+            text_two = text_one
+
+        # There are two options here for comparing text. Have left this for now.
+        # compare_text_showall(dca_a, dca_b, doc)
+        compare_text_new_and_old(text_one, text_two, doc)
+
+
+def year_cost_profile_chart(doc: Document, cost_master: CostData) -> None:
+    """Places line graph cost profile into word document"""
+
+    new_section = doc.add_section(WD_SECTION_START.NEW_PAGE)  # new page
+    # change to landscape
+    new_width, new_height = new_section.page_height, new_section.page_width
+    new_section.orientation = WD_ORIENTATION.LANDSCAPE
+    new_section.page_width = new_width
+    new_section.page_height = new_height
+
+    fig = project_cost_profile_graph(cost_master)
+
+    # Size and shape of figure.
+    fig.canvas.draw()
+    fig.tight_layout(rect=[0, 0.03, 1, 0.95])  # for title
+
+    # Place fig in word doc.
+    fig.show()
+    fig.savefig('cost_profile.png')
+    doc.add_picture('cost_profile.png', width=Inches(8))  # to place nicely in doc
+    os.remove('cost_profile.png')
+
+
+def convert_rag_text(dca_rating: str) -> None:
+    """Converts RAG name into a acronym"""
+
+    if dca_rating == 'Green':
+        return 'G'
+    elif dca_rating == 'Amber/Green':
+        return 'A/G'
+    elif dca_rating == 'Amber':
+        return 'A'
+    elif dca_rating == 'Amber/Red':
+        return 'A/R'
+    elif dca_rating == 'Red':
+        return 'R'
+    else:
+        return ''
+
+
+def cell_colouring(word_table_cell: table.Table.cell, colour: str) -> None:
+    """Function that handles cell colouring for word documents"""
+
+    try:
+        if colour == 'R':
+            colour = parse_xml(r'<w:shd {} w:fill="cb1f00"/>'.format(nsdecls('w')))
+        elif colour == 'A/R':
+            colour = parse_xml(r'<w:shd {} w:fill="f97b31"/>'.format(nsdecls('w')))
+        elif colour == 'A':
+            colour = parse_xml(r'<w:shd {} w:fill="fce553"/>'.format(nsdecls('w')))
+        elif colour == 'A/G':
+            colour = parse_xml(r'<w:shd {} w:fill="a5b700"/>'.format(nsdecls('w')))
+        elif colour == 'G':
+            colour = parse_xml(r'<w:shd {} w:fill="17960c"/>'.format(nsdecls('w')))
+
+        word_table_cell._tc.get_or_add_tcPr().append(colour)
+
+    except TypeError:
+        pass
+
+
+def make_rows_bold(rows: list) -> None:
+    """This function makes text bold in a list of row numbers for a word document"""
+    for row in rows:
+        for cell in row.cells:
+            for paragraph in cell.paragraphs:
+                for run in paragraph.runs:
+                    run.font.bold = True
+
+
+def set_col_widths(word_table: table, widths: list) -> None:
+    """This function sets the width of table in a word document"""
+    for row in word_table.rows:
+        for idx, width in enumerate(widths):
+            row.cells[idx].width = width
+
+
+def compare_text_new_and_old(text_1: str, text_2: str, doc: Document) -> None:
+    """compares two sets of text and highlights differences in red text."""
+
+    comp = difflib.Differ()
+    diff = list(comp.compare(text_2.split(), text_1.split()))
+    new_text = diff
+    y = doc.add_paragraph()
+
+    for i in range(0, len(diff)):
+        f = len(diff) - 1
+        if i < f:
+            a = i - 1
+        else:
+            a = i
+
+        if diff[i][0:3] == '  |':
+            j = i + 1
+            if diff[i][0:3] and diff[a][0:3] == '  |':
+                y = doc.add_paragraph()
+            else:
+                pass
+        elif diff[i][0:3] == '+ |':
+            if diff[i][0:3] and diff[a][0:3] == '+ |':
+                y = doc.add_paragraph()
+            else:
+                pass
+        elif diff[i][0:3] == '- |':
+            pass
+        elif diff[i][0:3] == '  -':
+            y = doc.add_paragraph()
+            g = diff[i][2]
+            y.add_run(g)
+        elif diff[i][0:3] == '  •':
+            y = doc.add_paragraph()
+            g = diff[i][2]
+            y.add_run(g)
+        elif diff[i][0] == '+':
+            w = len(diff[i])
+            g = diff[i][1:w]
+            y.add_run(g).font.color.rgb = RGBColor(255, 0, 0)
+        elif diff[i][0] == '-':
+            pass
+        elif diff[i][0] == '?':
+            pass
+        else:
+            if diff[i] != '+ |':
+                y.add_run(diff[i][1:])
+
+

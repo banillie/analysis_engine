@@ -2,12 +2,12 @@
 Tests for analysis_engine
 """
 
-from data_mgmt.data import MilestoneData, Master, current_projects, CostData, project_cost_profile_graph, \
-    group_cost_profile_graph
+from data_mgmt.data import MilestoneData, Master, current_projects, CostData, spent_calculation, wd_heading, \
+    key_contacts, dca_table, dca_narratives, project_cost_profile_graph, year_cost_profile_chart
 import datetime
 
-from data_mgmt.oldegg_functions import spent_calculation
-from project_analysis.p_reports import wd_heading, key_contacts, dca_table, dca_narratives, year_cost_profile_chart
+# from data_mgmt.oldegg_functions import spent_calculation
+# from project_analysis.p_reports import wd_heading, key_contacts, dca_table, dca_narratives, year_cost_profile_chart
 
 
 def test_creation_of_Masters_class(basic_master, project_info):
