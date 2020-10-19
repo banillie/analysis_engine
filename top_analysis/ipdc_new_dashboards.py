@@ -172,10 +172,10 @@ def financial_info(wb):
             rule.formula = [for_rule_formula]
             ws.conditional_formatting.add('' + column + '5:' + column + '60', rule)
 
-    for row_num in range(2, ws.max_row + 1):
-        for col_num in range(5, ws.max_column+1):
-            if ws.cell(row=row_num, column=col_num).value == 0:
-                ws.cell(row=row_num, column=col_num).value = '-'
+    # for row_num in range(2, ws.max_row + 1):
+    #     for col_num in range(5, ws.max_column+1):
+    #         if ws.cell(row=row_num, column=col_num).value == 0:
+    #             ws.cell(row=row_num, column=col_num).value = '-'
 
 
     return wb
@@ -426,7 +426,10 @@ def benefits_info(wb):
             try:
                 baseline_initial_bcr = \
                     list_of_masters_all[benefits_bl_index[project_name][2]].data[project_name]['Initial Benefits Cost Ratio (BCR)']
-                ws.cell(row=row_num, column=7).value = baseline_initial_bcr
+                if baseline_initial_bcr != 0:
+                    ws.cell(row=row_num, column=7).value = baseline_initial_bcr
+                else:
+                    ws.cell(row=row_num, column=7).value = ''
                 if initial_bcr != baseline_initial_bcr:
                     if baseline_initial_bcr is None:
                         pass
@@ -443,11 +446,12 @@ def benefits_info(wb):
             try:
                 baseline_adjusted_bcr = \
                     list_of_masters_all[benefits_bl_index[project_name][2]].data[project_name]['Adjusted Benefits Cost Ratio (BCR)']
-                ws.cell(row=row_num, column=9).value = baseline_adjusted_bcr
+                if baseline_adjusted_bcr != 0:
+                    ws.cell(row=row_num, column=9).value = baseline_adjusted_bcr
+                else:
+                    ws.cell(row=row_num, column=9).value = ''
                 if adjusted_bcr != baseline_adjusted_bcr:
-                    if baseline_adjusted_bcr is None:
-                        pass
-                    else:
+                    if baseline_adjusted_bcr is not None:
                         ws.cell(row=row_num, column=8).font = Font(name='Arial', size=10, color='00fc2525')
                         ws.cell(row=row_num, column=9).font = Font(name='Arial', size=10, color='00fc2525')
             except TypeError:
@@ -495,7 +499,10 @@ def benefits_info(wb):
             ws.cell(row=row_num, column=12).value = tmb
             '''tmb variance'''
             baseline_tmb = list_of_masters_all[benefits_bl_index[project_name][2]].data[project_name]['Total BEN Forecast - Total Monetised Benefits']
-            ws.cell(row=row_num, column=13).value = tmb - baseline_tmb
+            tmb_variance = tmb - baseline_tmb
+            ws.cell(row=row_num, column=13).value = tmb_variance
+            if tmb_variance == 0:
+                ws.cell(row=row_num, column=13).value = '-'
             try:
                 percentage_change = ((tmb - baseline_tmb) / tmb) * 100
                 if percentage_change > 5 or percentage_change < -5:
@@ -557,10 +564,10 @@ def benefits_info(wb):
                 rule.formula = [for_rule_formula]
                 ws.conditional_formatting.add('' + column + '5:' + column + '60', rule)
 
-    for row_num in range(2, ws.max_row + 1):
-        for col_num in range(5, ws.max_column+1):
-            if ws.cell(row=row_num, column=col_num).value == 0:
-                ws.cell(row=row_num, column=col_num).value = '-'
+    # for row_num in range(2, ws.max_row + 1):
+    #     for col_num in range(5, ws.max_column+1):
+    #         if ws.cell(row=row_num, column=col_num).value == 0:
+    #             ws.cell(row=row_num, column=col_num).value = '-'
 
     return wb
 
