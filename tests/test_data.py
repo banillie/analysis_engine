@@ -114,7 +114,7 @@ def test_project_cost_profile_chart_into_word_doc_many(word_doc, costs_masters, 
 
 
 def test_get_group_cost_profile(costs_masters, project_info):
-    live_projects = ['Falcon 9', 'Columbia', 'Apollo 13']
+    live_projects = current_projects(project_info)
     master = Master(costs_masters, live_projects)
     costs = CostData(master)
     costs.get_profile_all('ipdc_costs')
@@ -122,15 +122,19 @@ def test_get_group_cost_profile(costs_masters, project_info):
 
 
 def test_get_group_cost_profile_chart(costs_masters, project_info):
-    live_projects = ['Falcon 9', 'Columbia', 'Apollo 13']
+    live_projects = current_projects(project_info)
     master = Master(costs_masters, live_projects)
     costs = CostData(master)
     costs.get_profile_all('ipdc_costs')
     group_cost_profile_graph(costs, 'Group Test')
 
 
-# def test_compile_project_report(word_doc, project_info, )
-
+def test_get_total_cost_calculations_for_project(costs_masters, project_info):
+    live_projects = current_projects(project_info)
+    master = Master(costs_masters, live_projects)
+    costs = CostData(master)
+    costs.get_cost_totals_project('Falcon 9', 'ipdc_costs')
+    assert costs.spent == [188.2, 109.8, 109.8]
 
 # def test_MilestoneData_group_dict_returns_dict(mst, abbreviations):
 #     mst.baseline_data('Re-baseline IPDC milestones')

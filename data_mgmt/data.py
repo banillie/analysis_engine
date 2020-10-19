@@ -1097,12 +1097,11 @@ class CostData:
     def __init__(self, master: Master):
         self.master = master
         self.cat_spent = []
-        self.cat_profile = []
+        self.cat_profiled = []
         self.cat_unprofiled = []
-        self.total = []
         self.spent = []
-        self.profile = []
-        self.unprofile = []
+        self.profiled = []
+        self.unprofiled = []
         self.current_profile = []
         self.last_profile = []
         self.baseline_profile_one = []
@@ -1120,7 +1119,65 @@ class CostData:
         # self.cost_totals()
         # self.get_profile()
 
-    def cost_totals(self):
+    def get_cost_totals_project(self, project_name: str, baseline: str) -> list:
+        """Returns total sum of cost profiles"""
+        self.project_name = project_name
+        self.baseline = baseline
+
+        key_list = [('Pre-profile RDEL',
+                     'Pre-profile CDEL'),
+                    ('Total RDEL Forecast Total',
+                     'Total CDEL Forecast Total WLC'),
+                    ('Unprofiled RDEL Forecast Total',
+                     'Unprofiled CDEL Forecast Total WLC')]
+
+        spent = []
+        profiled = []
+        unprofiled = []
+        cat_spent = []
+        cat_profiled = []
+        cat_unprofiled = []
+
+        cost_bl_index = self.master.bl_index[baseline][self.project_name]
+
+        for i in range(len(cost_bl_index)):
+            for x, key in enumerate(key_list):
+                try:
+                    rdel = self.master.master_data[cost_bl_index[i]].data[self.project_name][key[0]]
+                    cdel = self.master.master_data[cost_bl_index[i]].data[self.project_name][key[1]]
+                    total = rdel + cdel
+                except TypeError:  # handle None types
+                    rdel = 0
+                    cdel = 0
+                    total = 0
+
+                if x == 0:
+                    spent.append(total)
+                if x == 1:
+                    profiled.append(total)
+                if x == 2:
+                    unprofiled.append(total)
+
+                if i == 0:
+                    if x == 0:
+                        cat_spent.append(rdel)
+                        cat_spent.append(cdel)
+                    if x == 1:
+                        cat_profiled.append(rdel)
+                        cat_profiled.append(cdel)
+                    if x == 2:
+                        cat_unprofiled.append(rdel)
+                        cat_unprofiled.append(cdel)
+
+        self.cat_spent = cat_spent
+        self.cat_profiled = cat_profiled
+        self.cat_unprofiled = cat_unprofiled
+        self.spent = spent
+        self.profiled = profiled
+        self.unprofiled = unprofiled
+
+
+    def cost_totals_old(self):
         total = []
         spent = []
         profile = []
@@ -2104,6 +2161,9 @@ def compare_text_new_and_old(text_1: str, text_2: str, doc: Document) -> None:
         else:
             if diff[i] != '+ |':
                 y.add_run(diff[i][1:])
+
+
+
 
 
 def make_file_friendly(quarter_str: str) -> str:
