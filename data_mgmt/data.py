@@ -60,20 +60,21 @@ def get_current_project_names():
     )
     return master.projects
 
+
 def get_project_information():
     return project_data_from_master(
     root_path / "core_data/project_info.xlsx", 1, 2020
     )
 
 # for project summary pages
-SRO_conf_table_list = [
+SRO_CONF_TABLE_LIST = [
     "SRO DCA",
     "Finance DCA",
     "Benefits DCA",
     "Resourcing DCA",
     "Schedule DCA",
 ]
-SRO_conf_key_list = [
+SRO_CONF_KEY_LIST = [
     "Departmental DCA",
     "SRO Finance confidence",
     "SRO Benefits RAG",
@@ -81,7 +82,7 @@ SRO_conf_key_list = [
     "SRO Schedule Confidence",
 ]
 
-ipdc_date = datetime.date(
+IPDC_DATE = datetime.date(
     2020, 8, 10
 )  # ipdc date. Python date format is Year, Month, day
 blue_line_date = datetime.date.today()  # blue line on graph date.
@@ -1415,6 +1416,8 @@ class CostData:
         cdel_current_profile = []
         ngov_current_profile = []
 
+        missing_project = []
+
         cost_bl_index = self.master.bl_index[baseline][self.project_name]
         for i in range(len(cost_bl_index)):
             yearly_profile = []
@@ -1434,6 +1437,14 @@ class CostData:
                     except KeyError:  # to handle data across different financial years
                         cost = 0
                         cost_total += cost
+                    except TypeError:
+                        if i == 0:
+                            cost = 0
+                            missing_project.append(str(project_name))  # to handle project being not live
+                            pass
+                        if i == 1:
+                            cost = 0  # to handle project not being in portfolio last quarter
+                            break
                     if cost_type == " RDEL Forecast Total":
                         rdel_total = cost
                     if cost_type == " CDEL Forecast Total":
@@ -1457,6 +1468,11 @@ class CostData:
                 baseline_profile_one = yearly_profile
             if i == 3:
                 baseline_profile_two = yearly_profile
+
+        missing_project = list(set(missing_project))
+        if len(missing_project) is not 0:
+            print(str(project_name) + " is not a 'live' project this quarter. "
+                                      "Check project information document and amend accordingly.")
 
         self.current_profile_project = current_profile
         self.last_profile_project = last_profile
@@ -1633,7 +1649,7 @@ def vfm_matplotlib_graph(labels, current_qrt, last_qrt, title):
     plt.show()
 
 
-def project_cost_profile_graph(cost_master: object):
+def project_cost_profile_graph(cost_master: CostData) -> plt.figure:
     """Compiles a matplotlib line chart for cost profile contained within cost_master class.
     It creates two plots. First plot shows overall profile in current, last quarters anb
     baseline form. Second plot shows rdel, cdel, and 'non-gov' cost profile"""
@@ -1646,7 +1662,7 @@ def project_cost_profile_graph(cost_master: object):
     )  # title
 
     # Overall cost profile chart
-    try:  # try statement handles the project having no baseline profile.
+    try:  # handling for projects requiring a baseline
         ax1.plot(
             YEAR_LIST,
             np.array(cost_master.baseline_profile_one_project),
@@ -1655,14 +1671,16 @@ def project_cost_profile_graph(cost_master: object):
             marker="o",
         )
     except ValueError:
-        pass
-    ax1.plot(
-        YEAR_LIST,
-        np.array(cost_master.last_profile_project),
-        label="Last quarter",
-        linewidth=3.0,
-        marker="o",
-    )
+        print(str(cost_master.project_name) + " has no baseline information. Check that a baseline "
+                                              "point is being provided")
+    if sum(cost_master.last_profile_project) != 0:  #  handling for projects not reporting last quarter.
+        ax1.plot(
+            YEAR_LIST,
+            np.array(cost_master.last_profile_project),
+            label="Last quarter",
+            linewidth=3.0,
+            marker="o",
+        )
     ax1.plot(
         YEAR_LIST,
         np.array(cost_master.current_profile_project),
@@ -1724,8 +1742,6 @@ def project_cost_profile_graph(cost_master: object):
     ax2.set_title(
         "Fig 2 - current cost type profile", loc="left", fontsize=8, fontweight="bold"
     )
-
-    #plt.show()
 
     return fig
 
@@ -1905,7 +1921,7 @@ def dca_table(doc: Document, master: Master, project_name: str) -> None:
     hdr_cells[3].text = str(master.master_data[2].quarter)
     hdr_cells[4].text = str(master.master_data[3].quarter)
 
-    for x, dca_key in enumerate(SRO_conf_key_list):
+    for x, dca_key in enumerate(SRO_CONF_KEY_LIST):
         row_cells = w_table.add_row().cells
         row_cells[0].text = dca_key
         for i, m in enumerate(master.master_data[:4]):  # last four masters taken
@@ -1980,7 +1996,7 @@ def year_cost_profile_chart(doc: Document, cost_master: CostData) -> None:
     fig.tight_layout(rect=[0, 0.03, 1, 0.95])  # for title
 
     # Place fig in word doc.
-    fig.show()
+    #plt.show()
     fig.savefig('cost_profile.png')
     doc.add_picture('cost_profile.png', width=Inches(8))  # to place nicely in doc
     os.remove('cost_profile.png')

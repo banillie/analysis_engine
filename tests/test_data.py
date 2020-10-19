@@ -3,7 +3,8 @@ Tests for analysis_engine
 """
 
 from data_mgmt.data import MilestoneData, Master, current_projects, CostData, spent_calculation, wd_heading, \
-    key_contacts, dca_table, dca_narratives, project_cost_profile_graph, year_cost_profile_chart
+    key_contacts, dca_table, dca_narratives, project_cost_profile_graph, year_cost_profile_chart, \
+    group_cost_profile_graph
 import datetime
 
 # from data_mgmt.oldegg_functions import spent_calculation
@@ -93,8 +94,8 @@ def test_project_cost_profile_chart(costs_masters, project_info):
     project_cost_profile_graph(costs)
 
 
-def test_project_cost_profile_chart_into_word_doc_one(word_doc, costs_masters):
-    live_projects = ['Falcon 9', 'Columbia', 'Apollo 13']
+def test_project_cost_profile_chart_into_word_doc_one(word_doc, costs_masters, project_info):
+    live_projects = current_projects(project_info)
     master = Master(costs_masters, live_projects)
     costs = CostData(master)
     costs.get_profile_project('Falcon 9', 'ipdc_costs')
@@ -102,8 +103,8 @@ def test_project_cost_profile_chart_into_word_doc_one(word_doc, costs_masters):
     word_doc.save("resources/summary_temp_altered.docx")
 
 
-def test_project_cost_profile_chart_into_word_doc_many(word_doc, costs_masters):
-    live_projects = ['Falcon 9', 'Columbia', 'Apollo 13']
+def test_project_cost_profile_chart_into_word_doc_many(word_doc, costs_masters, project_info):
+    live_projects = current_projects(project_info)
     master = Master(costs_masters, live_projects)
     costs = CostData(master)
     for p in live_projects:
