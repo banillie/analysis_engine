@@ -1,6 +1,7 @@
 import datetime
 import difflib
 import os
+import re
 from typing import List, Dict, Union
 
 import matplotlib.pyplot as plt
@@ -2105,3 +2106,8 @@ def compare_text_new_and_old(text_1: str, text_2: str, doc: Document) -> None:
                 y.add_run(diff[i][1:])
 
 
+def make_file_friendly(quarter_str: str) -> str:
+    """Converts datamaps.api project_data_from_master quarter data into a string to use when
+    saving output files. Courtesy of M Lemon."""
+    regex = r"Q(\d) (\d+)\/(\d+)"
+    return re.sub(regex, r"Q\1_\2_\3", quarter_str)
