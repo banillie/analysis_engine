@@ -134,7 +134,9 @@ def test_get_total_cost_calculations_for_project(costs_masters, project_info):
     master = Master(costs_masters, live_projects)
     costs = CostData(master)
     costs.get_cost_totals_project('Falcon 9', 'ipdc_costs')
-    assert costs.spent == [188.2, 109.8, 109.8]
+    assert costs.spent == [188, 110, 110]
+    assert costs.profiled == [6204, 5582, 5582]
+    assert costs.unprofiled == [0, 0, 0]
 
 # def test_MilestoneData_group_dict_returns_dict(mst, abbreviations):
 #     mst.baseline_data('Re-baseline IPDC milestones')

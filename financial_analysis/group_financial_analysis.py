@@ -1,7 +1,8 @@
-from data_mgmt.data import Master, CostData, group_cost_profile_graph, current_projects, project_information, \
-    get_master_data
+from data_mgmt.data import Master, CostData, group_cost_profile_graph, current_projects, \
+    get_master_data, get_project_information
 
-live_projects = current_projects(project_information)
+
+live_projects = current_projects(get_project_information())
 master_data = get_master_data()
 master = Master(master_data, live_projects)
 costs = CostData(master)
