@@ -1158,9 +1158,9 @@ class CostData:
                 if x == 0:
                     try:  # handling for spend to date figures which are not present in all masters
                         rdel_std = self.master.master_data[cost_bl_index[i]].data[self.project_name][
-                                             '20-21 RDEL STD one off new costs']
+                            '20-21 RDEL STD one off new costs']
                         cdel_std = self.master.master_data[cost_bl_index[i]].data[self.project_name][
-                                             '20-21 CDEL STD one off new costs']
+                            '20-21 CDEL STD one off new costs']
                         spent_total = round(total + rdel_std + cdel_std)
                         spent.append(spent_total)
                     except KeyError:
@@ -1686,7 +1686,6 @@ class BenefitsData:
         self.disbenefit = disbenefit
 
 
-# for compiling vfm data in matplotlib chart
 def vfm_matplotlib_graph(labels, current_qrt, last_qrt, title):
     #  Need to split this strings over two lines on x axis
     for n, i in enumerate(labels):
@@ -2195,3 +2194,102 @@ def make_file_friendly(quarter_str: str) -> str:
     saving output files. Courtesy of M Lemon."""
     regex = r"Q(\d) (\d+)\/(\d+)"
     return re.sub(regex, r"Q\1_\2_\3", quarter_str)
+
+
+def total_costs_benefits_bar_chart(cost_master: CostData) -> plt.figure:
+    fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2)  # four sub plots
+
+    fig.suptitle(str(cost_master.project_name) + ' costs and benefits analysis', fontweight='bold')  # title
+
+    # Spent, Profiled and Unprofiled chart
+    labels = ['Latest', 'Last Quarter', 'Baseline']
+    width = 0.5
+    ax1.bar(labels, np.array(cost_master.spent), width, label='Spent')
+    ax1.bar(labels, np.array(cost_master.profiled), width, bottom=np.array(cost_master.spent), label='Profiled')
+    ax1.bar(labels, np.array(cost_master.unprofiled), width, bottom=np.array(cost_master.spent) + np.array(cost_master.profiled), label='Unprofiled')
+    ax1.legend(prop={'size': 6})
+    ax1.set_ylabel('Cost (£m)')
+    ylab1 = ax1.yaxis.get_label()
+    ylab1.set_style('italic')
+    ylab1.set_size(8)
+    ax1.tick_params(axis='x', which='major', labelsize=6)
+    ax1.tick_params(axis='y', which='major', labelsize=6)
+    ax1.set_title('Fig 1 - Total costs: change over time', loc='left', fontsize=8, fontweight='bold')
+
+    # scaling y axis
+    # y axis value setting so it takes either highest ben or cost figure
+    # cost_max = max(total_fin) + max(total_fin)/5
+    # ben_max = max(total_ben) + max(total_ben)/5
+    # print(cost_max)
+    # print(ben_max)
+    # y_max = max([cost_max, ben_max])
+    # ax1.set_ylim(0, y_max)
+
+    # rdel/cdel totals bar chart
+    labels = ['RDEL', 'CDEL']
+    width = 0.5
+    ax3.bar(labels, np.array(cost_master.cat_spent), width, label='Spent')
+    ax3.bar(labels, np.array(cost_master.cat_profiled), width, bottom=np.array(cost_master.cat_spent), label='Profiled')
+    ax3.bar(labels, np.array(cost_master.cat_unprofiled), width, bottom=np.array(cost_master.cat_spent) + np.array(cost_master.cat_profiled),
+            label='Unprofiled')
+    ax3.legend(prop={'size': 6})
+    ax3.set_ylabel('Costs (£m)')
+    ylab3 = ax3.yaxis.get_label()
+    ylab3.set_style('italic')
+    ylab3.set_size(8)
+    ax3.tick_params(axis='x', which='major', labelsize=6)
+    ax3.tick_params(axis='y', which='major', labelsize=6)
+    ax3.set_title('Fig 2 - wlc cost type break down', loc='left', fontsize=8, fontweight='bold')
+
+    # #y_max = max(total_fin) + max(total_fin) * 1 / 5
+    # ax3.set_ylim(0, y_max) #scale y axis max
+
+    # benefits change
+    # labels = ['Baseline', 'Last Quarter', 'Latest']
+    # width = 0.5
+    # ax2.bar(labels, delivered_ben, width, label='Delivered')
+    # ax2.bar(labels, profiled_ben, width, bottom=delivered_ben, label='Profiled')
+    # ax2.bar(labels, unprofiled_ben, width, bottom=delivered_ben + profiled_ben, label='Unprofiled')
+    # ax2.legend(prop={'size': 6})
+    # ax2.set_ylabel('Benefits (£m)')
+    # ylab2 = ax2.yaxis.get_label()
+    # ylab2.set_style('italic')
+    # ylab2.set_size(8)
+    # ax2.tick_params(axis='x', which='major', labelsize=6)
+    # ax2.tick_params(axis='y', which='major', labelsize=6)
+    # ax2.set_title('Fig 3 - ben total change over time', loc='left', fontsize=8, fontweight='bold')
+    #
+    # ax2.set_ylim(0, y_max)
+    #
+    # # benefits break down
+    # labels = ['Cashable', 'Non-Cashable', 'Economic', 'Disbenefit']
+    # width = 0.5
+    # ax4.bar(labels, type_delivered_ben, width, label='Delivered')
+    # ax4.bar(labels, type_profiled_ben, width, bottom=type_delivered_ben, label='Profiled')
+    # ax4.bar(labels, type_unprofiled_ben, width, bottom=type_delivered_ben + type_profiled_ben, label='Unprofiled')
+    # ax4.legend(prop={'size': 6})
+    # ax4.set_ylabel('Benefits (£m)')
+    # ylab4 = ax4.yaxis.get_label()
+    # ylab4.set_style('italic')
+    # ylab4.set_size(8)
+    # ax4.tick_params(axis='x', which='major', labelsize=6)
+    # ax4.tick_params(axis='y', which='major', labelsize=6)
+    # ax4.set_title('Fig 4 - benefits profile type', loc='left', fontsize=8, fontweight='bold')
+    #
+    # y_min = min(type_disbenefit_ben)
+    # ax4.set_ylim(y_min, y_max)
+
+    # size of chart and fit
+    # fig.canvas.draw()
+    # fig.tight_layout(rect=[0, 0.03, 1, 0.95])  # for title
+
+    # fig.savefig('cost_bens_overview.png')
+    # plt.show()
+    # plt.close()  # automatically closes figure so don't need to do manually.
+    #
+    # doc.add_picture('cost_bens_overview.png', width=Inches(8))  # to place nicely in doc
+    # os.remove('cost_bens_overview.png')
+
+    plt.show()
+
+    return fig

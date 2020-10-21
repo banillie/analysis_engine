@@ -4,7 +4,7 @@ Tests for analysis_engine
 
 from data_mgmt.data import MilestoneData, Master, current_projects, CostData, spent_calculation, wd_heading, \
     key_contacts, dca_table, dca_narratives, project_cost_profile_graph, year_cost_profile_chart, \
-    group_cost_profile_graph
+    group_cost_profile_graph, total_costs_benefits_bar_chart
 import datetime
 
 # from data_mgmt.oldegg_functions import spent_calculation
@@ -137,6 +137,14 @@ def test_get_total_cost_calculations_for_project(costs_masters, project_info):
     assert costs.spent == [188, 110, 110]
     assert costs.profiled == [6204, 5582, 5582]
     assert costs.unprofiled == [0, 0, 0]
+
+def test_get_total_costs_benefits_bar_chart(costs_masters, project_info):
+    live_projects = current_projects(project_info)
+    master = Master(costs_masters, live_projects)
+    costs = CostData(master)
+    costs.get_cost_totals_project('Falcon 9', 'ipdc_costs')
+    total_costs_benefits_bar_chart(costs)
+
 
 # def test_MilestoneData_group_dict_returns_dict(mst, abbreviations):
 #     mst.baseline_data('Re-baseline IPDC milestones')
