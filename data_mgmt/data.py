@@ -55,13 +55,6 @@ def get_master_data():
     return master_data_list
 
 
-def get_current_project_names():
-    master = project_data_from_master(
-        root_path / "core_data/master_2_2020.xlsx", 2, 2020
-    )
-    return master.projects
-
-
 def get_project_information():
     return project_data_from_master(
         root_path / "core_data/project_info.xlsx", 1, 2020
@@ -253,30 +246,29 @@ YEAR_LIST = [
 COST_LIST = [" RDEL Forecast Total", " CDEL Forecast Total", " Forecast Non-Gov"]
 
 
-def current_projects(project_data):
-    """Gets list of current/live projects from the project information wb"""
-    output_list = []
-    for p in project_data.projects:
-        if project_data.data[p]["Status"] == "Live":
-            output_list.append(p)
-
-    return output_list
+# def current_projects(project_data):
+#     """Gets list of current/live projects from the project information wb"""
+#     output_list = []
+#     for p in project_data.projects:
+#         if project_data.data[p]["Status"] == "Live":
+#             output_list.append(p)
+#
+#     return output_list
 
 
 class Master:
     def __init__(
             self,
             master_data: List[Dict[str, Union[str, int, date, float]]],
-            project_names: list,
     ) -> None:
         self.master_data = master_data
-        self.project_names = project_names
+        self.project_names = self.get_current_projects()
+        self.current_projects = []
         self.bl_info = {}
         self.bl_index = {}
         self.baseline_data()
 
-    def baseline_data(self):
-
+    def baseline_data(self) -> dict:
         """
         Returns the two dictionaries baseline_info and baseline_index for all projects for all
         baseline types
@@ -328,6 +320,10 @@ class Master:
 
         self.bl_info = baseline_info
         self.bl_index = baseline_index
+
+    def get_current_projects(self) -> list:
+        """Returns a list of all the project names in the latest master"""
+        return self.master_data[0].projects
 
 
 class MilestoneData:
@@ -2197,6 +2193,7 @@ def make_file_friendly(quarter_str: str) -> str:
 
 
 def total_costs_benefits_bar_chart(cost_master: CostData) -> plt.figure:
+    """compiles a matplotlib bar chart which shows total project costs"""
     fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2)  # four sub plots
 
     fig.suptitle(str(cost_master.project_name) + ' costs and benefits analysis', fontweight='bold')  # title
@@ -2206,7 +2203,8 @@ def total_costs_benefits_bar_chart(cost_master: CostData) -> plt.figure:
     width = 0.5
     ax1.bar(labels, np.array(cost_master.spent), width, label='Spent')
     ax1.bar(labels, np.array(cost_master.profiled), width, bottom=np.array(cost_master.spent), label='Profiled')
-    ax1.bar(labels, np.array(cost_master.unprofiled), width, bottom=np.array(cost_master.spent) + np.array(cost_master.profiled), label='Unprofiled')
+    ax1.bar(labels, np.array(cost_master.unprofiled), width,
+            bottom=np.array(cost_master.spent) + np.array(cost_master.profiled), label='Unprofiled')
     ax1.legend(prop={'size': 6})
     ax1.set_ylabel('Cost (£m)')
     ylab1 = ax1.yaxis.get_label()
@@ -2230,7 +2228,8 @@ def total_costs_benefits_bar_chart(cost_master: CostData) -> plt.figure:
     width = 0.5
     ax3.bar(labels, np.array(cost_master.cat_spent), width, label='Spent')
     ax3.bar(labels, np.array(cost_master.cat_profiled), width, bottom=np.array(cost_master.cat_spent), label='Profiled')
-    ax3.bar(labels, np.array(cost_master.cat_unprofiled), width, bottom=np.array(cost_master.cat_spent) + np.array(cost_master.cat_profiled),
+    ax3.bar(labels, np.array(cost_master.cat_unprofiled), width,
+            bottom=np.array(cost_master.cat_spent) + np.array(cost_master.cat_profiled),
             label='Unprofiled')
     ax3.legend(prop={'size': 6})
     ax3.set_ylabel('Costs (£m)')
@@ -2293,3 +2292,20 @@ def total_costs_benefits_bar_chart(cost_master: CostData) -> plt.figure:
     plt.show()
 
     return fig
+
+
+def check_baselines(master: Master) -> None:
+    """checks that projects have the correct baseline information and that
+    if that are tagged as live they are present in latest master"""
+
+    for v in BASELINE_TYPES.values():
+        for p in master.project_names:
+            baselines = master.bl_index[v][p]
+            if len(baselines) <= 2:
+                print(p + " does not have a baseline point for " + v + " this could cause the programme to"
+                                                                       " crash. Therefore the programme is stopping. Please amend the data for " + p + " so that"
+                                                                                                                                                       " it has at least one baseline point for " + v)
+                break
+        else:
+            continue
+        break

@@ -2,9 +2,9 @@
 Tests for analysis_engine
 """
 
-from data_mgmt.data import MilestoneData, Master, current_projects, CostData, spent_calculation, wd_heading, \
+from data_mgmt.data import MilestoneData, Master, CostData, spent_calculation, wd_heading, \
     key_contacts, dca_table, dca_narratives, project_cost_profile_graph, year_cost_profile_chart, \
-    group_cost_profile_graph, total_costs_benefits_bar_chart
+    group_cost_profile_graph, total_costs_benefits_bar_chart, check_baselines
 import datetime
 
 # from data_mgmt.oldegg_functions import spent_calculation
@@ -26,6 +26,17 @@ def test_getting_baseline_data_from_Masters(basic_master, project_info):
     assert master.bl_index["ipdc_milestones"]["Sea of Tranquility"] == [0, 1]
     assert master.bl_index["ipdc_costs"]["Apollo 11"] == [0, 1, 2]
     assert master.bl_index["ipdc_costs"]["Columbia"] == [0, 1, 2]
+
+
+def test_get_current_project_names(basic_master):
+    master = Master(basic_master)
+    assert master.project_names == ['Sea of Tranquility', 'Apollo 11', 'Apollo 13', 'Falcon 9', 'Columbia']
+
+
+def test_checking_baseline_data(basic_master):
+    master = Master(basic_master)
+    master.baseline_data()
+    check_baselines(master)
 
 
 def test_calculating_spent(spent_master):
