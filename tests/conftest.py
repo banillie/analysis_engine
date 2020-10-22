@@ -3,7 +3,7 @@ import os
 import pytest
 from datamaps.api import project_data_from_master
 
-# from data_mgmt.data import open_word_doc
+from data_mgmt.data import open_word_doc
 from database.database import create_db
 
 
@@ -53,6 +53,12 @@ def project_info():
                                                               "test_project_group_id_no.xlsx"), 1, 2099)
 
 
+@pytest.fixture
+def project_info_incorrect():
+    return project_data_from_master(os.path.join(os.getcwd(), "resources/"
+                                                              "test_project_group_id_no_incorrect.xlsx"), 1, 2099)
+
+
 @pytest.fixture()
 def basic_master():
     test_master_data = [
@@ -62,6 +68,18 @@ def basic_master():
                                                            "cut_down_master_4_2017.xlsx"), 4, 2017),
         project_data_from_master(os.path.join(os.getcwd(), "resources/"
                                                            "cut_down_master_4_2018.xlsx"), 4, 2018)
+
+    ]
+    return test_master_data
+
+
+@pytest.fixture()
+def basic_master_wrong_baselines():
+    test_master_data = [
+        project_data_from_master(os.path.join(os.getcwd(), "resources/"
+                                                           "cut_down_master_4_2017_incorrect_baselines.xlsx"), 4, 2017),
+        project_data_from_master(os.path.join(os.getcwd(), "resources/"
+                                                           "cut_down_master_4_2018_incorrect_baselines.xlsx"), 4, 2018)
 
     ]
     return test_master_data

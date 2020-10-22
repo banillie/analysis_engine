@@ -15,7 +15,7 @@ def test_creation_of_Masters_class(basic_master, project_info):
     projects = list(project_info.projects)
     master = Master(basic_master, projects)
     assert isinstance(master.master_data, (list,))
-    assert master.project_names == ['Mars', 'Sea of Tranquility', 'Apollo 11', 'Apollo 13', 'Falcon 9', 'Columbia']
+    assert master.current_projects == ['Mars', 'Sea of Tranquility', 'Apollo 11', 'Apollo 13', 'Falcon 9', 'Columbia']
 
 
 def test_getting_baseline_data_from_Masters(basic_master, project_info):
@@ -28,15 +28,20 @@ def test_getting_baseline_data_from_Masters(basic_master, project_info):
     assert master.bl_index["ipdc_costs"]["Columbia"] == [0, 1, 2]
 
 
-def test_get_current_project_names(basic_master):
-    master = Master(basic_master)
-    assert master.project_names == ['Sea of Tranquility', 'Apollo 11', 'Apollo 13', 'Falcon 9', 'Columbia']
+def test_get_current_project_names(basic_master, project_info):
+    master = Master(basic_master, project_info)
+    assert master.current_projects == ['Sea of Tranquility', 'Apollo 11', 'Apollo 13', 'Falcon 9', 'Columbia']
 
 
-def test_checking_baseline_data(basic_master):
-    master = Master(basic_master)
-    master.baseline_data()
-    check_baselines(master)
+def test_projects_in_project_names(basic_master, project_info_incorrect):
+    Master(basic_master, project_info_incorrect)
+    # assert error message
+
+
+def test_checking_baseline_data(basic_master_wrong_baselines, project_info):
+    master = Master(basic_master_wrong_baselines, project_info)
+    master.check_baselines()
+    # assert expected error message
 
 
 def test_calculating_spent(spent_master):
