@@ -32,7 +32,7 @@ def _platform_docs_dir() -> Path:
 root_path = _platform_docs_dir()
 
 
-def get_master_data() -> list:  # how specify a list of dictionaries?
+def get_master_data() -> List[Dict[str, Union[str, int, date, float]]]:  # how specify a list of dictionaries?
     """Returns a list of dictionaries each containing quarter data"""
     master_data_list = [
         project_data_from_master(root_path / "core_data/master_2_2020.xlsx", 2, 2020),
@@ -336,7 +336,7 @@ class Master:
     def check_baselines(self) -> None:
         """checks that projects have the correct baseline information. stops the
         programme if baselines are missing"""
-
+        # work through best way to stop the programme.
         for v in BASELINE_TYPES.values():
             for p in self.current_projects:
                 baselines = self.bl_index[v][p]
@@ -350,7 +350,6 @@ class Master:
                         "Please amend the data for " + p + " so that "
                         " it has at least one baseline point for " + v
                     )
-                    break
             else:
                 continue
             break
@@ -1449,23 +1448,7 @@ class CostData:
                             if cost is None:
                                 cost = 0
                             cost_total += cost
-                        except KeyError:  # to handle like for likeness comparison between current and last quarter.
-                            # work also required on the data set so that the year key doesn't throw a key error due
-                            # to all years not be present in all masters. This is why there as a messy extra step below.
-                            p_master_data_keys = self.master.master_data[
-                                project_bl_index[i]
-                            ].data[project]
-                            concatenated_key = year + cost_type
-                            if concatenated_key in p_master_data_keys:
-                                print(
-                                    "NOTE: "
-                                    + str(project)
-                                    + " was not part of the portfolio last quarter. This "
-                                    "means current quarter and last quarter cost profiles cannot be compared as like"
-                                    "for like unless "
-                                    + str(project)
-                                    + " is removed from this group."
-                                )
+                        except KeyError:  # to handle data across different financial years
                             cost = 0
                             cost_total += cost
                         except TypeError:  # Handles projects not present in the previous quarter
@@ -1502,11 +1485,11 @@ class CostData:
         missing_projects = list(set(missing_projects))  # if TypeError raised above
         if len(missing_projects) is not 0:
             print(
-                "NOTE: "
+                "NOTE: The following project(s) were not part of the portfolio last quarter "
                 + str(missing_projects)
-                + " was not part of the portfolio last quarter. This "
-                "means current quarter and last quarter cost profiles cannot be compared as like"
-                "for like unless they are removed from this group."
+                + " this means current quarter and last quarter cost profiles are not like for like."
+                " If you would like a like for like comparison between current and last quarter"
+                  " remove this project(s) from the master group."
             )
 
         self.current_profile = current_profile
@@ -1754,7 +1737,7 @@ def vfm_matplotlib_graph(labels, current_qrt, last_qrt, title):
 
 
 def project_cost_profile_graph(cost_master: CostData) -> plt.figure:
-    """Compiles a matplotlib line chart for cost profile contained within cost_master class.
+    """Compiles a matplotlib line chart for PROJECT cost profile contained within cost_master class.
     It creates two plots. First plot shows overall profile in current, last quarters anb
     baseline form. Second plot shows rdel, cdel, and 'non-gov' cost profile"""
 
@@ -1781,7 +1764,7 @@ def project_cost_profile_graph(cost_master: CostData) -> plt.figure:
             linewidth=3.0,
             marker="o",
         )
-    except TypeError:
+    except ValueError:
         pass
     ax1.plot(
         YEAR_LIST,
@@ -1852,7 +1835,7 @@ def project_cost_profile_graph(cost_master: CostData) -> plt.figure:
 
 
 def group_cost_profile_graph(cost_master: object, title: str):
-    """Compiles a matplotlib line chart for costs of all projects contained within cost_master class.
+    """Compiles a matplotlib line chart for costs of GROUP of projects contained within cost_master class.
     As as default last quarters profile is not included. It creates two plots. First plot shows overall
     profile in current, last quarters anb baseline form. Second plot shows rdel, cdel, and 'non-gov' cost profile"""
 
@@ -1862,20 +1845,30 @@ def group_cost_profile_graph(cost_master: object, title: str):
     fig.suptitle(title + " Cost Profile", fontweight="bold")  # title
 
     # Overall cost profile chart
-    ax1.plot(
-        YEAR_LIST,
-        np.array(cost_master.baseline_profile_one),  # baseline profile
-        label="Baseline",
-        linewidth=3.0,
-        marker="o",
-    )
-    ax1.plot(
-        YEAR_LIST,
-        np.array(cost_master.last_profile),  # last quarter profile
-        label="Last quarter",
-        linewidth=3.0,
-        marker="o",
-    )
+    if (
+        sum(cost_master.baseline_profile_one) != 0
+    ):  # handling in the event that group of projects have no baseline profile.
+        ax1.plot(
+            YEAR_LIST,
+            np.array(cost_master.baseline_profile_one),  # baseline profile
+            label="Baseline",
+            linewidth=3.0,
+            marker="o",
+        )
+    else:
+        pass
+    if (
+        sum(cost_master.last_profile) != 0
+    ):  # handling in the event that group of projects have no last quarter profile
+        ax1.plot(
+            YEAR_LIST,
+            np.array(cost_master.last_profile),  # last quarter profile
+            label="Last quarter",
+            linewidth=3.0,
+            marker="o",
+        )
+    else:
+        pass
     ax1.plot(
         YEAR_LIST,
         np.array(cost_master.current_profile),  # current profile

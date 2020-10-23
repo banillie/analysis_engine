@@ -87,16 +87,14 @@ def test_get_project_cost_profile(costs_masters, project_info):
 
 
 def test_project_cost_profile_chart(costs_masters, project_info):
-    live_projects = current_projects(project_info)
-    master = Master(costs_masters, live_projects)
+    master = Master(costs_masters, project_info)
     costs = CostData(master)
     costs.get_profile_project('Falcon 9', 'ipdc_costs')
     project_cost_profile_graph(costs)
 
 
 def test_project_cost_profile_chart_into_word_doc_one(word_doc, costs_masters, project_info):
-    live_projects = current_projects(project_info)
-    master = Master(costs_masters, live_projects)
+    master = Master(costs_masters, project_info)
     costs = CostData(master)
     costs.get_profile_project('Falcon 9', 'ipdc_costs')
     year_cost_profile_chart(word_doc, costs)
@@ -104,34 +102,34 @@ def test_project_cost_profile_chart_into_word_doc_one(word_doc, costs_masters, p
 
 
 def test_project_cost_profile_chart_into_word_doc_many(word_doc, costs_masters, project_info):
-    live_projects = current_projects(project_info)
-    master = Master(costs_masters, live_projects)
+    master = Master(costs_masters, project_info)
+    master.check_baselines()
     costs = CostData(master)
-    for p in live_projects:
+    for p in master.current_projects:
         costs.get_profile_project(p, 'ipdc_costs')
         year_cost_profile_chart(word_doc, costs)
         word_doc.save("resources/summary_temp_altered.docx")
 
 
 def test_get_group_cost_profile(costs_masters, project_info):
-    live_projects = current_projects(project_info)
-    master = Master(costs_masters, live_projects)
+    master = Master(costs_masters, project_info)
+    master.check_baselines()
     costs = CostData(master)
     costs.get_profile_all('ipdc_costs')
-    assert costs.current_profile == [0, 0, 230, 266, 412, 444, 729, 1047, 1442, 1316, 396, 1]
+    assert costs.current_profile == [0, 0, 265, 266, 412, 444, 729, 1047, 1442, 1316, 396, 1]
 
 
 def test_get_group_cost_profile_chart(costs_masters, project_info):
-    live_projects = current_projects(project_info)
-    master = Master(costs_masters, live_projects)
+    master = Master(costs_masters, project_info)
+    master.check_baselines()
     costs = CostData(master)
     costs.get_profile_all('ipdc_costs')
     group_cost_profile_graph(costs, 'Group Test')
 
 
 def test_get_total_cost_calculations_for_project(costs_masters, project_info):
-    live_projects = current_projects(project_info)
-    master = Master(costs_masters, live_projects)
+    master = Master(costs_masters, project_info)
+    master.check_baselines()
     costs = CostData(master)
     costs.get_cost_totals_project('Falcon 9', 'ipdc_costs')
     assert costs.spent == [188, 110, 110]
@@ -139,8 +137,8 @@ def test_get_total_cost_calculations_for_project(costs_masters, project_info):
     assert costs.unprofiled == [0, 0, 0]
 
 def test_get_total_costs_benefits_bar_chart(costs_masters, project_info):
-    live_projects = current_projects(project_info)
-    master = Master(costs_masters, live_projects)
+    master = Master(costs_masters, project_info)
+    master.check_baselines()
     costs = CostData(master)
     costs.get_cost_totals_project('Falcon 9', 'ipdc_costs')
     total_costs_benefits_bar_chart(costs)
