@@ -32,7 +32,8 @@ def _platform_docs_dir() -> Path:
 root_path = _platform_docs_dir()
 
 
-def get_master_data():
+def get_master_data() -> list:  # how specify a list of dictionaries?
+    """Returns a list of dictionaries each containing quarter data"""
     master_data_list = [
         project_data_from_master(root_path / "core_data/master_2_2020.xlsx", 2, 2020),
         project_data_from_master(root_path / "core_data/master_1_2020.xlsx", 1, 2020),
@@ -54,6 +55,10 @@ def get_master_data():
 
     return master_data_list
 
+
+def get_project_information() -> Dict[str, Union[str, int]]:
+    """Returns dictionary containing all project meta data"""
+    return project_data_from_master(root_path / "core_data/project_info.xlsx", 2, 2020)
 
 # for project summary pages
 SRO_CONF_TABLE_LIST = [
@@ -238,16 +243,6 @@ YEAR_LIST = [
 ]
 
 COST_LIST = [" RDEL Forecast Total", " CDEL Forecast Total", " Forecast Non-Gov"]
-
-
-# def current_projects(project_data):
-#     """Gets list of current/live projects from the project information wb"""
-#     output_list = []
-#     for p in project_data.projects:
-#         if project_data.data[p]["Status"] == "Live":
-#             output_list.append(p)
-#
-#     return output_list
 
 
 class Master:
@@ -1154,12 +1149,12 @@ class CostData:
     def get_cost_totals_project(self, project_name: str, baseline: str) -> list:
         """Returns lists containing the sum total of project costs, sliced in different
         ways. Cumbersome for loop used at the moment, but is the least cumbersome loop
-        for now."""
+        I could design!"""
 
         self.project_name = project_name
         self.baseline = baseline
 
-        key_list = [
+        BAR_CHART_TOTAL_KEYS = [
             ("Pre-profile RDEL", "Pre-profile CDEL"),
             ("Total RDEL Forecast Total", "Total CDEL Forecast Total WLC"),
             ("Unprofiled RDEL Forecast Total", "Unprofiled CDEL Forecast Total WLC"),
@@ -1175,7 +1170,7 @@ class CostData:
         cost_bl_index = self.master.bl_index[baseline][self.project_name]
 
         for i in range(len(cost_bl_index)):
-            for x, key in enumerate(key_list):
+            for x, key in enumerate(BAR_CHART_TOTAL_KEYS):
                 try:
                     rdel = round(
                         self.master.master_data[cost_bl_index[i]].data[
@@ -1188,7 +1183,7 @@ class CostData:
                         ][key[1]]
                     )
                     total = round(rdel + cdel)
-                except TypeError:  # handle None types
+                except TypeError:  # handle None types, which are present if project not reporting last quarter.
                     rdel = 0
                     cdel = 0
                     total = 0
@@ -1246,178 +1241,178 @@ class CostData:
         self.profiled = f_profiled
         self.unprofiled = unprofiled
 
-    def cost_totals_old(self):
-        total = []
-        spent = []
-        profile = []
-        unprofile = []
-        cat_spent = []
-        cat_profile = []
-        cat_unprofiled = []
-
-        for i in reversed(range(3)):  # reversed for matplotlib chart design
-            pre_pro_rdel_list = []
-            pre_pro_cdel_list = []
-            pre_pro_ngov_list = []
-            pro_rdel_list = []
-            pro_cdel_list = []
-            pro_ngov_list = []
-            unpro_rdel_list = []
-            unpro_cdel_list = []
-            unpro_ngov_list = []
-            for name in self.master.current_projects:
-                try:
-                    pre_pro_rdel = self.master.master_data[
-                        self.master.bl_index[name][i]
-                    ].data[name]["Pre-profile RDEL"]
-                    pre_pro_cdel = self.master.master_data[
-                        self.master.bl_index[name][i]
-                    ].data[name]["Pre-profile CDEL"]
-                    pre_pro_ngov = self.master.master_data[
-                        self.master.bl_index[name][i]
-                    ].data[name]["Pre 19-20 Forecast Non-Gov"]
-                    if pre_pro_ngov is None:
-                        pre_pro_ngov = 0
-                    pro_rdel = self.master.master_data[
-                        self.master.bl_index[name][i]
-                    ].data[name]["Total RDEL Forecast Total"]
-                    pro_cdel = self.master.master_data[
-                        self.master.bl_index[name][i]
-                    ].data[name]["Total CDEL Forecast Total WLC"]
-                    pro_ngov = self.master.master_data[
-                        self.master.bl_index[name][i]
-                    ].data[name]["Non-Gov Total Forecast"]
-                    if pro_ngov is None:
-                        pro_ngov = 0
-                    unpro_rdel = self.master.master_data[
-                        self.master.bl_index[name][i]
-                    ].data[name]["Unprofiled RDEL Forecast Total"]
-                    unpro_cdel = self.master.master_data[
-                        self.master.bl_index[name][i]
-                    ].data[name]["Unprofiled CDEL Forecast Total WLC"]
-                    unpro_ngov = self.master.master_data[
-                        self.master.bl_index[name][i]
-                    ].data[name]["Unprofiled Forecast Non-Gov"]
-                    if unpro_ngov is None:
-                        unpro_ngov = 0
-                    pre_pro_rdel_list.append(pre_pro_rdel)
-                    pre_pro_cdel_list.append(pre_pro_cdel)
-                    pre_pro_ngov_list.append(pre_pro_ngov)
-                    pro_rdel_list.append(pro_rdel)
-                    pro_cdel_list.append(pro_cdel)
-                    pro_ngov_list.append(pro_ngov)
-                    unpro_rdel_list.append(unpro_rdel)
-                    unpro_cdel_list.append(unpro_cdel)
-                    unpro_ngov_list.append(unpro_ngov)
-
-                except (TypeError, KeyError):  # KeyError temporary
-                    pre_pro_rdel_list.append(0)
-                    pre_pro_cdel_list.append(0)
-                    pre_pro_ngov_list.append(0)
-                    pro_rdel_list.append(0)
-                    pro_cdel_list.append(0)
-                    pro_ngov_list.append(0)
-                    unpro_rdel_list.append(0)
-                    unpro_cdel_list.append(0)
-                    unpro_ngov_list.append(0)
-
-            total_rdel_pre_pro = sum(pre_pro_rdel_list)
-            total_cdel_pre_pro = sum(pre_pro_cdel_list)
-            total_ngov_pre_pro = sum(pre_pro_ngov_list)
-            total_rdel_pro = sum(pro_rdel_list)
-            total_cdel_pro = sum(pro_cdel_list)
-            total_ngov_pro = sum(pro_ngov_list)
-            total_rdel_unpro = sum(unpro_rdel_list)
-            total_cdel_unpro = sum(unpro_cdel_list)
-            total_ngov_unpro = sum(unpro_ngov_list)
-
-            if i == 0:
-                cat_spent.append(total_rdel_pre_pro)
-                cat_spent.append(total_cdel_pre_pro)
-                cat_spent.append(total_ngov_pre_pro)
-                rdel_pro = total_rdel_pro - (total_rdel_pre_pro + total_rdel_unpro)
-                cdel_pro = total_cdel_pro - (total_cdel_pre_pro + total_cdel_unpro)
-                ngov_pro = total_ngov_pro - (total_ngov_pre_pro + total_ngov_unpro)
-                cat_profile.append(rdel_pro)
-                cat_profile.append(cdel_pro)
-                cat_profile.append(ngov_pro)
-                cat_unprofiled.append(total_rdel_unpro)
-                cat_unprofiled.append(total_cdel_unpro)
-                cat_unprofiled.append(total_ngov_unpro)
-
-            total_pre_pro = (
-                sum(pre_pro_rdel_list) + sum(pre_pro_cdel_list) + sum(pre_pro_ngov_list)
-            )
-            total_unpro = (
-                sum(unpro_rdel_list) + sum(unpro_cdel_list) + sum(unpro_ngov_list)
-            )
-            total_pro = (
-                sum(pro_rdel_list) + sum(pro_cdel_list) + sum(pro_ngov_list)
-            ) - (total_pre_pro + total_unpro)
-            total.append((sum(pro_rdel_list) + sum(pro_cdel_list)) + sum(pro_ngov_list))
-            spent.append(total_pre_pro)
-            profile.append(total_pro)
-            unprofile.append(total_unpro)
-
-        self.cat_spent = cat_spent
-        self.cat_profile = cat_profile
-        self.cat_unprofiled = cat_unprofiled
-        self.total = total
-        self.spent = spent
-        self.profile = profile
-        self.unprofile = unprofile
-
-    def get_profile_all_old(self):
-        year_list = [
-            "20-21",
-            "21-22",
-            "22-23",
-            "23-24",
-            "24-25",
-            "25-26",
-            "26-27",
-            "27-28",
-            "28-29",
-        ]
-
-        cost_list = [
-            " RDEL Forecast Total",
-            " CDEL Forecast Total",
-            " Forecast Non-Gov",
-        ]
-
-        current_profile = []
-        last_profile = []
-        baseline_profile = []
-        for i in range(3):
-            profile = []
-            for year in year_list:
-                a_list = []
-                for cost_type in cost_list:
-                    data = []
-                    for name in self.master.current_projects:
-                        try:
-                            cost = self.master.master_data[
-                                self.master.bl_index[name][i]
-                            ].data[name][year + cost_type]
-                            if cost is None:
-                                cost = 0
-                        except (KeyError, TypeError):  # to handle baselines
-                            cost = 0
-                        data.append(cost)
-                    a_list.append(sum(data))
-                profile.append(sum(a_list))
-
-            if i == 0:
-                current_profile = profile
-            if i == 1:
-                last_profile = profile
-            if i == 2:
-                baseline_profile = profile
-
-        self.current_profile = current_profile
-        self.last_profile = last_profile
-        self.baseline_profile = baseline_profile
+    # def cost_totals_old(self):
+    #     total = []
+    #     spent = []
+    #     profile = []
+    #     unprofile = []
+    #     cat_spent = []
+    #     cat_profile = []
+    #     cat_unprofiled = []
+    #
+    #     for i in reversed(range(3)):  # reversed for matplotlib chart design
+    #         pre_pro_rdel_list = []
+    #         pre_pro_cdel_list = []
+    #         pre_pro_ngov_list = []
+    #         pro_rdel_list = []
+    #         pro_cdel_list = []
+    #         pro_ngov_list = []
+    #         unpro_rdel_list = []
+    #         unpro_cdel_list = []
+    #         unpro_ngov_list = []
+    #         for name in self.master.current_projects:
+    #             try:
+    #                 pre_pro_rdel = self.master.master_data[
+    #                     self.master.bl_index[name][i]
+    #                 ].data[name]["Pre-profile RDEL"]
+    #                 pre_pro_cdel = self.master.master_data[
+    #                     self.master.bl_index[name][i]
+    #                 ].data[name]["Pre-profile CDEL"]
+    #                 pre_pro_ngov = self.master.master_data[
+    #                     self.master.bl_index[name][i]
+    #                 ].data[name]["Pre 19-20 Forecast Non-Gov"]
+    #                 if pre_pro_ngov is None:
+    #                     pre_pro_ngov = 0
+    #                 pro_rdel = self.master.master_data[
+    #                     self.master.bl_index[name][i]
+    #                 ].data[name]["Total RDEL Forecast Total"]
+    #                 pro_cdel = self.master.master_data[
+    #                     self.master.bl_index[name][i]
+    #                 ].data[name]["Total CDEL Forecast Total WLC"]
+    #                 pro_ngov = self.master.master_data[
+    #                     self.master.bl_index[name][i]
+    #                 ].data[name]["Non-Gov Total Forecast"]
+    #                 if pro_ngov is None:
+    #                     pro_ngov = 0
+    #                 unpro_rdel = self.master.master_data[
+    #                     self.master.bl_index[name][i]
+    #                 ].data[name]["Unprofiled RDEL Forecast Total"]
+    #                 unpro_cdel = self.master.master_data[
+    #                     self.master.bl_index[name][i]
+    #                 ].data[name]["Unprofiled CDEL Forecast Total WLC"]
+    #                 unpro_ngov = self.master.master_data[
+    #                     self.master.bl_index[name][i]
+    #                 ].data[name]["Unprofiled Forecast Non-Gov"]
+    #                 if unpro_ngov is None:
+    #                     unpro_ngov = 0
+    #                 pre_pro_rdel_list.append(pre_pro_rdel)
+    #                 pre_pro_cdel_list.append(pre_pro_cdel)
+    #                 pre_pro_ngov_list.append(pre_pro_ngov)
+    #                 pro_rdel_list.append(pro_rdel)
+    #                 pro_cdel_list.append(pro_cdel)
+    #                 pro_ngov_list.append(pro_ngov)
+    #                 unpro_rdel_list.append(unpro_rdel)
+    #                 unpro_cdel_list.append(unpro_cdel)
+    #                 unpro_ngov_list.append(unpro_ngov)
+    #
+    #             except (TypeError, KeyError):  # KeyError temporary
+    #                 pre_pro_rdel_list.append(0)
+    #                 pre_pro_cdel_list.append(0)
+    #                 pre_pro_ngov_list.append(0)
+    #                 pro_rdel_list.append(0)
+    #                 pro_cdel_list.append(0)
+    #                 pro_ngov_list.append(0)
+    #                 unpro_rdel_list.append(0)
+    #                 unpro_cdel_list.append(0)
+    #                 unpro_ngov_list.append(0)
+    #
+    #         total_rdel_pre_pro = sum(pre_pro_rdel_list)
+    #         total_cdel_pre_pro = sum(pre_pro_cdel_list)
+    #         total_ngov_pre_pro = sum(pre_pro_ngov_list)
+    #         total_rdel_pro = sum(pro_rdel_list)
+    #         total_cdel_pro = sum(pro_cdel_list)
+    #         total_ngov_pro = sum(pro_ngov_list)
+    #         total_rdel_unpro = sum(unpro_rdel_list)
+    #         total_cdel_unpro = sum(unpro_cdel_list)
+    #         total_ngov_unpro = sum(unpro_ngov_list)
+    #
+    #         if i == 0:
+    #             cat_spent.append(total_rdel_pre_pro)
+    #             cat_spent.append(total_cdel_pre_pro)
+    #             cat_spent.append(total_ngov_pre_pro)
+    #             rdel_pro = total_rdel_pro - (total_rdel_pre_pro + total_rdel_unpro)
+    #             cdel_pro = total_cdel_pro - (total_cdel_pre_pro + total_cdel_unpro)
+    #             ngov_pro = total_ngov_pro - (total_ngov_pre_pro + total_ngov_unpro)
+    #             cat_profile.append(rdel_pro)
+    #             cat_profile.append(cdel_pro)
+    #             cat_profile.append(ngov_pro)
+    #             cat_unprofiled.append(total_rdel_unpro)
+    #             cat_unprofiled.append(total_cdel_unpro)
+    #             cat_unprofiled.append(total_ngov_unpro)
+    #
+    #         total_pre_pro = (
+    #             sum(pre_pro_rdel_list) + sum(pre_pro_cdel_list) + sum(pre_pro_ngov_list)
+    #         )
+    #         total_unpro = (
+    #             sum(unpro_rdel_list) + sum(unpro_cdel_list) + sum(unpro_ngov_list)
+    #         )
+    #         total_pro = (
+    #             sum(pro_rdel_list) + sum(pro_cdel_list) + sum(pro_ngov_list)
+    #         ) - (total_pre_pro + total_unpro)
+    #         total.append((sum(pro_rdel_list) + sum(pro_cdel_list)) + sum(pro_ngov_list))
+    #         spent.append(total_pre_pro)
+    #         profile.append(total_pro)
+    #         unprofile.append(total_unpro)
+    #
+    #     self.cat_spent = cat_spent
+    #     self.cat_profile = cat_profile
+    #     self.cat_unprofiled = cat_unprofiled
+    #     self.total = total
+    #     self.spent = spent
+    #     self.profile = profile
+    #     self.unprofile = unprofile
+    #
+    # def get_profile_all_old(self):
+    #     year_list = [
+    #         "20-21",
+    #         "21-22",
+    #         "22-23",
+    #         "23-24",
+    #         "24-25",
+    #         "25-26",
+    #         "26-27",
+    #         "27-28",
+    #         "28-29",
+    #     ]
+    #
+    #     cost_list = [
+    #         " RDEL Forecast Total",
+    #         " CDEL Forecast Total",
+    #         " Forecast Non-Gov",
+    #     ]
+    #
+    #     current_profile = []
+    #     last_profile = []
+    #     baseline_profile = []
+    #     for i in range(3):
+    #         profile = []
+    #         for year in year_list:
+    #             a_list = []
+    #             for cost_type in cost_list:
+    #                 data = []
+    #                 for name in self.master.current_projects:
+    #                     try:
+    #                         cost = self.master.master_data[
+    #                             self.master.bl_index[name][i]
+    #                         ].data[name][year + cost_type]
+    #                         if cost is None:
+    #                             cost = 0
+    #                     except (KeyError, TypeError):  # to handle baselines
+    #                         cost = 0
+    #                     data.append(cost)
+    #                 a_list.append(sum(data))
+    #             profile.append(sum(a_list))
+    #
+    #         if i == 0:
+    #             current_profile = profile
+    #         if i == 1:
+    #             last_profile = profile
+    #         if i == 2:
+    #             baseline_profile = profile
+    #
+    #     self.current_profile = current_profile
+    #     self.last_profile = last_profile
+    #     self.baseline_profile = baseline_profile
 
     def get_profile_all(self, baseline: str) -> None:
         """Returns several lists which contain the sum of different cost profiles for the group of project
@@ -1473,16 +1468,6 @@ class CostData:
                                 )
                             cost = 0
                             cost_total += cost
-                        except IndexError:  # to handle projects lacking baseline indexes. This requires changes to the data.
-                            print(
-                                str(project)
-                                + " has no "
-                                + str(self.baseline)
-                                + " baseline. All projects must have at least"
-                                "one baseline point. Even if this is only the point at which it entered the portfolio"
-                                ". Therefore this programme is stopping until a baseline index is provided"
-                            )
-                            #  The programme should stop here but for some reason isn't.
                         except TypeError:  # Handles projects not present in the previous quarter
                             missing_projects.append(
                                 str(project)
@@ -1545,8 +1530,6 @@ class CostData:
         cdel_current_profile = []
         ngov_current_profile = []
 
-        missing_project = []
-
         cost_bl_index = self.master.bl_index[baseline][self.project_name]
         for i in range(len(cost_bl_index)):
             yearly_profile = []
@@ -1566,15 +1549,11 @@ class CostData:
                     except KeyError:  # to handle data across different financial years
                         cost = 0
                         cost_total += cost
-                    except TypeError:
-                        if i == 0:
-                            cost = 0
-                            missing_project.append(
-                                str(project_name)
-                            )  # to handle project being not live
-                            pass
+                    except TypeError:  # handle None types, which are present if project not reporting last quarter.
                         if i == 1:
-                            cost = 0  # to handle project not being in portfolio last quarter
+                            cost_total = None
+                            print("NOTE: " + project_name + " was not reporting last quarter so no last"
+                                " quarter profile so no last quarter profile will be provided")
                             break
                     if cost_type == " RDEL Forecast Total":
                         rdel_total = cost
@@ -1599,13 +1578,6 @@ class CostData:
                 baseline_profile_one = yearly_profile
             if i == 3:
                 baseline_profile_two = yearly_profile
-
-        missing_project = list(set(missing_project))
-        if len(missing_project) is not 0:
-            print(
-                str(project_name) + " is not a 'live' project this quarter. "
-                "Check project information document and amend accordingly."
-            )
 
         self.current_profile_project = current_profile
         self.last_profile_project = last_profile
@@ -1794,23 +1766,14 @@ def project_cost_profile_graph(cost_master: CostData) -> plt.figure:
     )  # title
 
     # Overall cost profile chart
-    try:  # handling for projects requiring a baseline
-        ax1.plot(
-            YEAR_LIST,
-            np.array(cost_master.baseline_profile_one_project),
-            label="Baseline",
-            linewidth=3.0,
-            marker="o",
-        )
-    except ValueError:
-        print(
-            str(cost_master.project_name)
-            + " has no baseline information. Check that a baseline "
-            "point is being provided"
-        )
-    if (
-        sum(cost_master.last_profile_project) != 0
-    ):  # handling for projects not reporting last quarter.
+    ax1.plot(
+        YEAR_LIST,
+        np.array(cost_master.baseline_profile_one_project),
+        label="Baseline",
+        linewidth=3.0,
+        marker="o",
+    )
+    try:  # handling for None type, which is present if project not reporting last quarter.
         ax1.plot(
             YEAR_LIST,
             np.array(cost_master.last_profile_project),
@@ -1818,6 +1781,8 @@ def project_cost_profile_graph(cost_master: CostData) -> plt.figure:
             linewidth=3.0,
             marker="o",
         )
+    except TypeError:
+        pass
     ax1.plot(
         YEAR_LIST,
         np.array(cost_master.current_profile_project),
@@ -1856,13 +1821,16 @@ def project_cost_profile_graph(cost_master: CostData) -> plt.figure:
         linewidth=3.0,
         marker="o",
     )
-    ax2.plot(
-        YEAR_LIST,
-        np.array(cost_master.rdel_profile_project),
-        label="RDEL",
-        linewidth=3.0,
-        marker="o",
-    )
+    if (
+        sum(cost_master.rdel_profile_project) != 0
+    ):  # if statement as lots of projects do not have rdel costs
+        ax2.plot(
+            YEAR_LIST,
+            np.array(cost_master.rdel_profile_project),
+            label="RDEL",
+            linewidth=3.0,
+            marker="o",
+        )
 
     # rdel/cdel profile chart styling
     ax2.tick_params(axis="x", which="major", labelsize=6, rotation=45)
@@ -1997,13 +1965,13 @@ def open_word_doc(wd_path: str) -> Document:
     return Document(wd_path)
 
 
-def wd_heading(doc: Document, project_info: Dict[str, str], project_name: str) -> None:
+def wd_heading(doc: Document, project_info: Dict[str, Union[str, int]], project_name: str) -> None:
     """Function adds header to word doc"""
     font = doc.styles["Normal"].font
     font.name = "Arial"
     font.size = Pt(12)
 
-    heading = str(project_info.data[project_name]["Abbreviations"])
+    heading = str(project_info.data[project_name]["Abbreviations"])  # integrate into master
     intro = doc.add_heading(str(heading), 0)
     intro.alignment = 1
     intro.bold = True

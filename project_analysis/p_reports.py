@@ -7,7 +7,7 @@ from typing import Dict, Union
 
 from docx import Document
 from data_mgmt.data import root_path, SRO_CONF_KEY_LIST, project_cost_profile_graph, CostData, \
-    get_project_information, get_master_data, Master, current_projects, open_word_doc, wd_heading, key_contacts, \
+    get_master_data, Master, open_word_doc, wd_heading, key_contacts, get_project_information, \
     dca_table, dca_narratives, year_cost_profile_chart
 
 
@@ -24,10 +24,7 @@ def compile_report(doc: Document, project_info: Dict[str, Union[str, int, date, 
 
 wd_path = root_path / "input/summary_temp.docx"
 report_doc = open_word_doc(wd_path)
-project_information = get_project_information()
-live_projects = current_projects(project_information)
-master_data = get_master_data()
-m = Master(master_data, live_projects)
+m = Master(get_master_data(), get_project_information())
 
-output = compile_report(report_doc, project_information, m, "East West Rail Configuration State 1")
+output = compile_report(report_doc, get_project_information(), m, "East West Rail Configuration State 1")
 output.save(root_path / "output/ewr_cs1_report_test.docx")

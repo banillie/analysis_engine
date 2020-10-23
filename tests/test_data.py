@@ -2,26 +2,18 @@
 Tests for analysis_engine
 """
 
-from data_mgmt.data import MilestoneData, Master, CostData, spent_calculation, wd_heading, \
+from data_mgmt.data import Master, CostData, spent_calculation, wd_heading, \
     key_contacts, dca_table, dca_narratives, project_cost_profile_graph, year_cost_profile_chart, \
-    group_cost_profile_graph, total_costs_benefits_bar_chart, check_baselines
-import datetime
-
-# from data_mgmt.oldegg_functions import spent_calculation
-# from project_analysis.p_reports import wd_heading, key_contacts, dca_table, dca_narratives, year_cost_profile_chart
+    group_cost_profile_graph, total_costs_benefits_bar_chart
 
 
 def test_creation_of_Masters_class(basic_master, project_info):
-    projects = list(project_info.projects)
-    master = Master(basic_master, projects)
+    master = Master(basic_master, project_info)
     assert isinstance(master.master_data, (list,))
-    assert master.current_projects == ['Mars', 'Sea of Tranquility', 'Apollo 11', 'Apollo 13', 'Falcon 9', 'Columbia']
 
 
 def test_getting_baseline_data_from_Masters(basic_master, project_info):
-    projects = list(project_info.projects)
-    master = Master(basic_master, projects)
-    master.baseline_data()
+    master = Master(basic_master, project_info)
     assert isinstance(master.bl_index, (dict,))
     assert master.bl_index["ipdc_milestones"]["Sea of Tranquility"] == [0, 1]
     assert master.bl_index["ipdc_costs"]["Apollo 11"] == [0, 1, 2]
@@ -33,7 +25,7 @@ def test_get_current_project_names(basic_master, project_info):
     assert master.current_projects == ['Sea of Tranquility', 'Apollo 11', 'Apollo 13', 'Falcon 9', 'Columbia']
 
 
-def test_projects_in_project_names(basic_master, project_info_incorrect):
+def test_check_projects_in_project_info(basic_master, project_info_incorrect):
     Master(basic_master, project_info_incorrect)
     # assert error message
 
@@ -63,35 +55,27 @@ def test_word_doc_heading(word_doc, project_info):
     word_doc.save("resources/summary_temp_altered.docx")
 
 
-def test_list_of_current_projects(project_info):
-    live_projects = current_projects(project_info)
-    assert live_projects == ['Sea of Tranquility', 'Apollo 11', 'Apollo 13', 'Falcon 9']
-
-
 def test_word_doc_contacts(word_doc, project_info, contact_master):
-    live_projects = current_projects(project_info)
-    master = Master(contact_master, live_projects)
+    master = Master(contact_master, project_info)
     key_contacts(word_doc, master, 'Apollo 13')
     word_doc.save("resources/summary_temp_altered.docx")
 
 
 def test_word_doc_dca_table(word_doc, project_info, dca_masters):
-    live_projects = current_projects(project_info)
-    master = Master(dca_masters, live_projects)
+    master = Master(dca_masters, project_info)
     dca_table(word_doc, master, 'Falcon 9')
     word_doc.save("resources/summary_temp_altered.docx")
 
 
 def test_word_doc_dca_narratives(word_doc, project_info, dca_masters):
-    live_projects = current_projects(project_info)
-    master = Master(dca_masters, live_projects)
+    master = Master(dca_masters, project_info)
     dca_narratives(word_doc, master, 'Falcon 9')
     word_doc.save("resources/summary_temp_altered.docx")
 
 
 def test_get_project_cost_profile(costs_masters, project_info):
-    live_projects = current_projects(project_info)
-    master = Master(costs_masters, live_projects)
+    master = Master(costs_masters, project_info)
+    master.check_baselines()
     costs = CostData(master)
     costs.get_profile_project('Falcon 9', 'ipdc_costs')
     assert costs.current_profile_project == [0, 0, 177.49, 245, 411.3, 443.2, 728.1, 1046.6, 1441, 1315, 395.84, 0]
