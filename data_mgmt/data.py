@@ -1154,9 +1154,9 @@ class CostData:
         self.baseline = baseline
 
         BAR_CHART_TOTAL_KEYS = [
-            ("Pre-profile RDEL", "Pre-profile CDEL"),
-            ("Total RDEL Forecast Total", "Total CDEL Forecast Total WLC"),
-            ("Unprofiled RDEL Forecast Total", "Unprofiled CDEL Forecast Total WLC"),
+            ("Pre-profile RDEL", "Pre-profile CDEL", "Pre-profile non-gov"),
+            ("Total RDEL Forecast Total", "Total CDEL Forecast Total", "Non-Gov Total Forecast"),
+            ("Unprofiled RDEL Forecast Total", "Unprofiled CDEL Forecast Total", "Non-Gov Total Forecast"),
         ]
 
         spent = []
@@ -1181,7 +1181,12 @@ class CostData:
                             self.project_name
                         ][key[1]]
                     )
-                    total = round(rdel + cdel)
+                    ngov = round(
+                        self.master.master_data[cost_bl_index[i]].data[
+                            self.project_name
+                        ][key[2]]
+                    )
+                    total = round(rdel + cdel + ngov)
                 except TypeError:  # handle None types, which are present if project not reporting last quarter.
                     rdel = 0
                     cdel = 0
@@ -1195,7 +1200,10 @@ class CostData:
                         cdel_std = self.master.master_data[cost_bl_index[i]].data[
                             self.project_name
                         ]["20-21 CDEL STD one off new costs"]
-                        spent_total = round(total + rdel_std + cdel_std)
+                        ngov_std = self.master.master_data[cost_bl_index[i]].data[
+                            self.project_name
+                        ]["20-21 CDEL STD Non Gov costs"]
+                        spent_total = round(total + rdel_std + cdel_std + ngov_std)
                         spent.append(spent_total)
                     except KeyError:
                         spent.append(total)
@@ -1213,19 +1221,27 @@ class CostData:
                             cdel_std = self.master.master_data[cost_bl_index[i]].data[
                                 self.project_name
                             ]["20-21 CDEL STD one off new costs"]
+                            ngov_std = self.master.master_data[cost_bl_index[i]].data[
+                                self.project_name
+                            ]["20-21 CDEL STD Non Gov costs"]
                             rdel_spent = round(rdel + rdel_std)
                             cdel_spent = round(cdel + cdel_std)
+                            ngov_spent = round(ngov + ngov_std)
                             cat_spent.append(rdel_spent)
                             cat_spent.append(cdel_spent)
+                            cat_spent.append(ngov_spent)
                         except KeyError:
                             cat_spent.append(rdel)
                             cat_spent.append(cdel)
+                            cat_spent.append(ngov)
                     if x == 1:
                         cat_profiled.append(rdel)
                         cat_profiled.append(cdel)
+                        cat_profiled.append(ngov)
                     if x == 2:
                         cat_unprofiled.append(rdel)
                         cat_unprofiled.append(cdel)
+                        cat_unprofiled.append(ngov)
 
         # profiled amount is calculated via total profiled minus the sum of spent and unprofiled
         f_profiled = []
@@ -1786,7 +1802,7 @@ def project_cost_profile_graph(cost_master: CostData) -> plt.figure:
         "Fig 1 - cost profile changes", loc="left", fontsize=8, fontweight="bold"
     )
 
-    # plot rdel/cdel chart data
+    # plot rdel, cdel, ngov chart data
     if (
         sum(cost_master.ngov_profile_project) != 0
     ):  # if statement as most projects don't have ngov cost.
@@ -1889,7 +1905,7 @@ def group_cost_profile_graph(cost_master: object, title: str):
         "Fig 1 - cost profile changes", loc="left", fontsize=8, fontweight="bold"
     )
 
-    # plot rdel/cdel chart data
+    # plot rdel, cdel, non-gov chart data
     if (
         sum(cost_master.ngov_profile) != 0
     ):  # if statement as most projects don't have ngov cost.
@@ -2289,10 +2305,14 @@ def total_costs_benefits_bar_chart(cost_master: CostData) -> plt.figure:
     # y_max = max([cost_max, ben_max])
     # ax1.set_ylim(0, y_max)
 
-    # rdel/cdel totals bar chart
-    labels = ["RDEL", "CDEL"]
+    # rdel, cdel and ngov totals bar chart
+    labels = ["RDEL", "CDEL", "Non Gov"]
     width = 0.5
-    ax3.bar(labels, np.array(cost_master.cat_spent), width, label="Spent")
+    ax3.bar(
+        labels,
+        np.array(cost_master.cat_spent),
+        width,
+        label="Spent")
     ax3.bar(
         labels,
         np.array(cost_master.cat_profiled),

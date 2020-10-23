@@ -140,7 +140,7 @@ def test_get_total_costs_benefits_bar_chart(costs_masters, project_info):
     master = Master(costs_masters, project_info)
     master.check_baselines()
     costs = CostData(master)
-    costs.get_cost_totals_project('Falcon 9', 'ipdc_costs')
+    costs.get_cost_totals_project('Apollo 13', 'ipdc_costs')
     total_costs_benefits_bar_chart(costs)
 
 
