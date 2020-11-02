@@ -3,3 +3,4 @@
 __pycache__
 live.db
 data_mgmt/create_test_files.py
+data_mgmt/change_cost_keys.py

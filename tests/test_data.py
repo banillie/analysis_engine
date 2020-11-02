@@ -116,7 +116,7 @@ def test_get_group_cost_profile(costs_masters, project_info):
     master.check_baselines()
     costs = CostData(master)
     costs.get_profile_all('ipdc_costs')
-    assert costs.current_profile == [0, 0, 265, 266, 412, 444, 729, 1047, 1442, 1316, 396, 1]
+    assert costs.current_profile == [0, 0, 265, 266, 412, 444, 729, 1047, 2441, 3316, 396, 1]
 
 
 def test_get_group_cost_profile_chart(costs_masters, project_info):
