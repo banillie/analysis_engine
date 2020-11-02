@@ -1154,9 +1154,9 @@ class CostData:
         self.baseline = baseline
 
         BAR_CHART_TOTAL_KEYS = [
-            ("Pre-profile RDEL", "Pre-profile CDEL", "Pre-profile non-gov"),
-            ("Total RDEL Forecast Total", "Total CDEL Forecast Total", "Non-Gov Total Forecast"),
-            ("Unprofiled RDEL Forecast Total", "Unprofiled CDEL Forecast Total", "Non-Gov Total Forecast"),
+            ("Pre-profile RDEL", "Pre-profile CDEL Forecast one off new costs", "Pre-profile Forecast Non-Gov"),
+            ("Total RDEL Forecast Total", "Total CDEL Forecast one off new costs", "Non-Gov Total Forecast"),
+            ("Unprofiled RDEL Forecast Total", "Unprofiled CDEL Forecast one off new costs", "Non-Gov Total Forecast"),
         ]
 
         spent = []
