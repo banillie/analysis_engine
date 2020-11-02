@@ -5,6 +5,7 @@ code for creating and maintaining test masters
 from datamaps.api import project_data_from_master
 from openpyxl import load_workbook, Workbook
 import random
+from data_mgmt.data import root_path
 
 # test_master_one = project_data_from_master("/home/will/"
 #                                            "code/python/analysis_engine/"
@@ -15,28 +16,33 @@ import random
 # test_master_three = project_data_from_master("/home/will/code/python/analysis_engine/"
 #                                              "tests/resources"
 #                                              "/test_master_4_2018.xlsx", 4, 2018)
+#
+#
 # test_master_four = project_data_from_master("/home/will/code/python/analysis_engine/"
 #                                             "tests/resources"
 #                                             "/test_master_4_2019.xlsx", 4, 2019)
-#
-# test_master_data_list = [test_master_one,
-#                          test_master_two,
-#                          test_master_three,
-#                          test_master_four]
 
-test_wb_one = load_workbook("/home/will/"
-                            "code/python/analysis_engine/"
-                            "tests/resources/test_master_4_2016.xlsx")
-test_wb_two = load_workbook("/home/will/code/python/analysis_engine/"
-                            "tests/resources"
-                            "/test_master_4_2017.xlsx")
-test_wb_three = load_workbook("/home/will/code/python/analysis_engine/"
-                              "tests/resources"
-                              "/test_master_4_2018.xlsx")
-test_wb_four = load_workbook("/home/will/code/python/analysis_engine/"
+test_master_five = project_data_from_master("/home/will/code/python/analysis_engine/"
+                                            "tests/resources"
+                                            "/test_master_1_2020.xlsx", 1, 2020)
+
+test_master_data_list = [test_master_five]
+
+# test_wb_one = load_workbook("/home/will/"
+#                             "code/python/analysis_engine/"
+#                             "tests/resources/test_master_4_2016.xlsx")
+# test_wb_two = load_workbook("/home/will/code/python/analysis_engine/"
+#                             "tests/resources"
+#                             "/test_master_4_2017.xlsx")
+# test_wb_three = load_workbook("/home/will/code/python/analysis_engine/"
+#                               "tests/resources"
+#                               "/test_master_4_2018.xlsx")
+# test_wb_four = load_workbook("/home/will/code/python/analysis_engine/"
+#                              "tests/resources"
+#                              "/test_master_4_2019.xlsx")
+test_wb_five = load_workbook("/home/will/code/python/analysis_engine/"
                              "tests/resources"
-                             "/test_master_4_2019.xlsx")
-
+                             "/test_master_1_2020.xlsx")
 
 def get_excel_data_in_list(wb):
     """
@@ -248,17 +254,22 @@ def altering_test_masters_milestones(wb, project_name, codename_dict):
 
 
 """Load list of random keys into a list"""
-# random_key_wb = load_workbook("/home/will/Documents/analysis_engine/output/random_keys_for_test_masters.xlsx")
+# random_key_wb = load_workbook("/home/will/Documents/analysis_engine/code_resources/tests/random_keys_for_test_masters"
+#                               ".xlsx")
 # random_key_list = get_excel_data_in_list(random_key_wb)
 """Place the random data into the wb"""
-# insert_random = insert_random_text_milestone_notes(test_wb_one, random_key_wb)
-# insert_random.save("/home/will/code/python/analysis_engine/tests/resources/test_master_4_2016.xlsx")
+# insert_random = insert_random_text_milestone_notes(test_wb_five, random_key_wb)
+# insert_random.save("/home/will/code/python/analysis_engine/tests/resources/test_master_1_2020.xlsx")
 """Load list of altered key names into a list"""
-# altered_key_wb = load_workbook("/home/will/Documents/analysis_engine/output/altered_keys_for_test_masters.xlsx")
+# altered_key_wb = load_workbook("/home/will/Documents/analysis_engine/code_resources/tests/"
+#                                "altered_keys_for_test_masters.xlsx")
 # altered_key_list = get_excel_data_in_list(altered_key_wb)
 """Place the altered data into the wb"""
-# run = altering_test_masters(test_wb_two, altered_key_list, test_master_four)
-# run.save("/home/will/code/python/analysis_engine/tests/resources/test_master_4_2017.xlsx")
+project_code_names = load_workbook("/home/will/Documents/analysis_engine/code_resources/tests"
+                                   "/project_test_masters_codenames.xlsx")
+project_code_names_dict = put_codenames_in_dict(project_code_names)
+# run = altering_test_masters(test_wb_five, altered_key_list, test_master_four, project_code_names_dict)
+# run.save("/home/will/code/python/analysis_engine/tests/resources/test_master_1_2020.xlsx")
 
 """Generate milestone code names and put them in excel file"""
 #TODO adapt this part for next time. Only need to generate codenames for new milestones
@@ -267,80 +278,28 @@ def altering_test_masters_milestones(wb, project_name, codename_dict):
 # codename_milestones_dict = gen_random_milestone_names(milestone_list)
 # """save milestones in excel file as persistent record"""
 # save_milestone_code_names = put_codenames_in_excel(codename_milestones_dict)
-# save_milestone_code_names.save("/home/will/Documents/analysis_engine/output/sarh2_codenames.xlsx")
+# save_milestone_code_names.save("/home/will/Documents/analysis_engine/code_resources/tests/sarh2_codenames_2.xlsx")
 
 """Put milestone code names into a dictionary"""
-# ltc_codename_wb = load_workbook(root_path / 'output/ltc_codenames.xlsx')
+# ltc_codename_wb = load_workbook(root_path / 'code_resources/tests/ltc_codenames.xlsx')
 # ltc_codename_dict = put_codenames_in_dict(ltc_codename_wb)
-# a14_codename_wb = load_workbook(root_path / 'output/a14_codenames.xlsx')
+# a14_codename_wb = load_workbook(root_path / 'code_resources/tests/a14_codenames.xlsx')
 # a14_codename_dict = put_codenames_in_dict(a14_codename_wb)
-# ewr_codename_wb = load_workbook(root_path / 'output/ewr_codenames.xlsx')
+# ewr_codename_wb = load_workbook(root_path / 'code_resources/tests/ewr_codenames.xlsx')
 # ewr_codename_dict = put_codenames_in_dict(ewr_codename_wb)
-# iep_codename_wb = load_workbook(root_path / 'output/iep_codenames.xlsx')
+# iep_codename_wb = load_workbook(root_path / 'code_resources/tests/iep_codenames.xlsx')
 # iep_codename_dict = put_codenames_in_dict(iep_codename_wb)
-# swrc_codename_wb = load_workbook(root_path / 'output/swrc_codenames.xlsx')
+# swrc_codename_wb = load_workbook(root_path / 'code_resources/tests/swrc_codenames.xlsx')
 # swrc_codename_dict = put_codenames_in_dict(swrc_codename_wb)
-# sarh2_codename_wb = load_workbook("/home/will/Documents/analysis_engine/output/sarh2_codenames.xlsx")
-# sarh2_codename_dict = put_codenames_in_dict(sarh2_codename_wb)
+sarh2_codename_wb = load_workbook(root_path / "code_resources/tests/sarh2_codenames_2.xlsx")
+sarh2_codename_dict = put_codenames_in_dict(sarh2_codename_wb)
 
 """Put code names into masters"""
-# alter_milestones = altering_test_masters_milestones(test_wb_four, 'Mars', sarh2_codename_dict)
-# alter_milestones.save("/home/will/code/python/analysis_engine/"
-#                       "tests/resources"
-#                       "/test_master_4_2019.xlsx")
+alter_milestones = altering_test_masters_milestones(test_wb_five, 'Mars', sarh2_codename_dict)
+alter_milestones.save("/home/will/code/python/analysis_engine/"
+                      "tests/resources"
+                      "/test_master_1_2020.xlsx")
 
-# OLD TO DELETE
-# def altered_keys(master_dict):
-#     """
-#     provides list of all keys that have been altered. As marked in the master wb/dictionary.
-#     """
-#     keys = []
-#     for x in master_dict.data['Changed'].keys():
-#         if master_dict.data['Changed'][x] == 'Yes':
-#             keys.append(x)
-#     return keys
-
-
-# master_one_altered_keys = altered_keys(test_master_one)
-# master_four_altered_keys = altered_keys(test_master_four)
-
-# def random_keys(master_dict):
-#     """
-#     provides a list of all keys that required random text. As marked in the master/dict
-#     """
-#     keys = []
-#     for x in master_dict.data['Random text'].keys():
-#         if master_dict.data['Random text'][x] == 'Yes':
-#             keys.append(x)
-#     return keys
-#
-# master_four_random_keys = random_keys(test_master_four)
-
-# def put_random_keys_in_excel(key_list):
-#     wb = Workbook()
-#
-#     ws = wb.active
-#
-#     for i, key in enumerate(key_list):
-#         ws.cell(row=i + 1, column=1).value = key
-#
-#     wb.save('/home/will/Documents/analysis_engine/output/altered_keys_for_test_masters.xlsx')
-#
-# put_random_keys_in_excel(master_four_altered_keys)
-
-
-#
-#
-# alter = altering_test_masters(test_two)
-#
-# alter.save("/home/will/code/python/analysis_engine/"
-#            "tests/resources/test_master_4_2019.xlsx")
-
-#
-
-#
-
-#
 
 
 

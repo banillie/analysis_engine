@@ -2,3 +2,4 @@
 .venv/
 __pycache__
 live.db
+data_mgmt/create_test_files.py
