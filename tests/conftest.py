@@ -133,5 +133,5 @@ def dca_masters():
 
 @pytest.fixture()
 def costs_masters():
-    return [project_data_from_master(os.path.join(os.getcwd(), "resources/cost_test_master_4_2019.xlsx"), 4, 2019),
-            project_data_from_master(os.path.join(os.getcwd(), "resources/cost_test_master_4_2018.xlsx"), 4, 2018)]
+    return [project_data_from_master(os.path.join(os.getcwd(), "resources/cost_test_master_1_2020.xlsx"), 1, 2020),
+        project_data_from_master(os.path.join(os.getcwd(), "resources/cost_test_master_4_2019.xlsx"), 4, 2019)]
