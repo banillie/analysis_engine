@@ -27,4 +27,4 @@ report_doc = open_word_doc(wd_path)
 m = Master(get_master_data(), get_project_information())
 
 output = compile_report(report_doc, get_project_information(), m, Projects.crossrail)
-output.save(root_path / "output/crossrail_report_test.docx")
+output.save(root_path / "output/crossrail_report_tests.docx")
