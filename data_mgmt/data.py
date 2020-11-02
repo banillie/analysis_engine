@@ -242,8 +242,12 @@ YEAR_LIST = [
     "28-29",
 ]
 
-COST_LIST = [" RDEL Forecast Total", " CDEL Forecast Total", " Forecast Non-Gov"]
-
+COST_LIST = [" RDEL Forecast Total", " CDEL Forecast one off new costs", " Forecast Non-Gov"]
+BAR_CHART_TOTAL_KEYS = [
+            ("Pre-profile RDEL", "Pre-profile CDEL Forecast one off new costs", "Pre-profile Forecast Non-Gov"),
+            ("Total RDEL Forecast Total", "Total CDEL Forecast one off new costs", "Non-Gov Total Forecast"),
+            ("Unprofiled RDEL Forecast Total", "Unprofiled CDEL Forecast one off new costs", "Non-Gov Total Forecast"),
+        ]
 
 class Master:
     def __init__(
@@ -1153,12 +1157,6 @@ class CostData:
         self.project_name = project_name
         self.baseline = baseline
 
-        BAR_CHART_TOTAL_KEYS = [
-            ("Pre-profile RDEL", "Pre-profile CDEL Forecast one off new costs", "Pre-profile Forecast Non-Gov"),
-            ("Total RDEL Forecast Total", "Total CDEL Forecast one off new costs", "Non-Gov Total Forecast"),
-            ("Unprofiled RDEL Forecast Total", "Unprofiled CDEL Forecast one off new costs", "Non-Gov Total Forecast"),
-        ]
-
         spent = []
         profiled = []
         unprofiled = []
@@ -1556,7 +1554,7 @@ class CostData:
                             break
                     if cost_type == " RDEL Forecast Total":
                         rdel_total = cost
-                    if cost_type == " CDEL Forecast Total":
+                    if cost_type == " CDEL Forecast one off new costs":
                         cdel_total = cost
                     if cost_type == " Forecast Non-Gov":
                         ngov_total = cost
