@@ -8,35 +8,19 @@ from typing import Dict
 from openpyxl import load_workbook
 from openpyxl.workbook import workbook
 
-from data_mgmt.data import root_path, YEAR_LIST
+from data_mgmt.data import YEAR_LIST
 
 from datamaps.api import project_data_from_master
 
-key_change_master = load_workbook(root_path / "core_data/data_mgmt/key_change_log.xlsx")
 
-test_id_master = "/home/will/code/python/analysis_engine/tests/resources/test_project_group_id_no.xlsx"
-
-test_cost_masters_list = ["/home/will/code/python/analysis_engine/tests/resources/cost_test_master_1_2020.xlsx",
-                          "/home/will/code/python/analysis_engine/tests/resources/cost_test_master_4_2019.xlsx",
-                          "/home/will/code/python/analysis_engine/tests/resources/cost_test_master_4_2018.xlsx"]
-
-test_masters_list = ["/home/will/code/python/analysis_engine/tests/resources/test_master_1_2020.xlsx",
-                     "/home/will/code/python/analysis_engine/tests/resources/test_master_4_2019.xlsx",
-                     "/home/will/code/python/analysis_engine/tests/resources/test_master_4_2018.xlsx",
-                     "/home/will/code/python/analysis_engine/tests/resources/test_master_4_2017.xlsx"]
-
-datamap_list = []
-
-all_files = [test_masters_list, test_cost_masters_list]
-
-
-def put_keys_in_dict(wb: workbook) -> Dict[str, str]:
+def put_key_change_master_into_dict(key_change_file: typing.TextIO) -> Dict[str, str]:
     """
     places key information i.e. keys old and new names from wb into a python dictionary
     """
+    wb = load_workbook(key_change_file)
     ws = wb.active
-    output_dict = {}
 
+    output_dict = {}
     for x in range(1, ws.max_row + 1):
         key = ws.cell(row=x, column=1).value
         codename = ws.cell(row=x, column=2).value
@@ -45,42 +29,39 @@ def put_keys_in_dict(wb: workbook) -> Dict[str, str]:
     return output_dict
 
 
-def alter_master_keys(file: typing.TextIO, keys_dict: Dict[str, str]) -> workbook:
+def alter_wb_master_file_key_names(master_file: typing.TextIO, key_change_dict: Dict[str, str]) -> workbook:
     """
-    places milestone altered key names, in altered key names in dictionary, into master.
+    places altered key names, from the key change master dictionary, into master wb(s).
     """
-    wb = load_workbook(file)
+    wb = load_workbook(master_file)
     ws = wb.active
 
     for row_num in range(2, ws.max_row + 1):
-        for key in keys_dict.keys():  # changes stored in the altered key change log wb
+        for key in key_change_dict.keys():  # changes stored in the altered key change log wb
             if ws.cell(row=row_num, column=1).value == key:
                 ws.cell(row=row_num, column=1).value = \
-                    keys_dict[key]
+                    key_change_dict[key]
         for year in YEAR_LIST:  # changes to yearly profile keys
             if ws.cell(row=row_num, column=1).value == year + " CDEL Forecast Total":
                 ws.cell(row=row_num, column=1).value = year + " CDEL Forecast one off new costs"
 
-    return wb
+    return wb.save(master_file)
 
 
-def run_change_keys() -> None:
+def run_change_keys(master_files_list: list, key_dict: Dict[str, str]) -> None:
     """
     runs code which replaces old key names with new names in master excel workbooks.
     """
-    key_change_dict = put_keys_in_dict(key_change_master)
-    for file_set in all_files:
-        for f in file_set:
-            changed_wb = alter_master_keys(f, key_change_dict)
-            changed_wb.save(f)
+    for f in master_files_list:
+        alter_wb_master_file_key_names(f, key_dict)
 
 
-def get_older_data(master_file: typing.TextIO, id_file: typing.TextIO) -> None:
+def get_old_fy_cost_data(master_file: typing.TextIO, project_id_wb: typing.TextIO) -> None:
     """
     Gets all old financial data across quarters and places into project id document.
     """
-    master = project_data_from_master(master_file, 2, 2020)
-    wb = load_workbook(id_file)
+    master = project_data_from_master(master_file, 1, 2010)  # random year specified as not in use
+    wb = load_workbook(project_id_wb)
     ws = wb.active
 
     for i in range(1, ws.max_column + 1):
@@ -93,19 +74,19 @@ def get_older_data(master_file: typing.TextIO, id_file: typing.TextIO) -> None:
             except KeyError:  # project might not be present in quarter
                 pass
 
-    wb.save(id_file)
+    wb.save(project_id_wb)
 
 
-def run_get_old_data(id_master) -> None:
-    for f in test_masters_list:
-        get_older_data(f, id_master)
+def run_get_old_fy_data(master_files_list: list, project_id_wb: typing.TextIO) -> None:
+    for f in master_files_list:
+        get_old_fy_cost_data(f, project_id_wb)
 
 
-def place_old_data_in_master(master_file: typing.TextIO, id_file: typing.TextIO) -> None:
+def place_old_fy_data_into_master_wb(master_file: typing.TextIO, project_id_wb: typing.TextIO) -> None:
     """
-    Gets all old financial data across quarters and places into project id document.
+    places all old financial year data into master files.
     """
-    id_master = project_data_from_master(id_file, 2, 2020)
+    id_master = project_data_from_master(project_id_wb, 2, 2020)  # random year specify as not used
     wb = load_workbook(master_file)
     ws = wb.active
 
@@ -121,11 +102,10 @@ def place_old_data_in_master(master_file: typing.TextIO, id_file: typing.TextIO)
 
     wb.save(master_file)
 
-def run_place_old_data_in_master(id_master) -> None:
-    for f in test_cost_masters_list:
-        place_old_data_in_master(f, id_master)
+
+def run_place_old_fy_data_into_masters(master_files_list: list, project_id_wb: typing.TextIO) -> None:
+    for f in master_files_list:
+        place_old_fy_data_into_master_wb(f, project_id_wb)
 
 
-# run_get_old_data(test_id_master)
-# run_change_keys()
-run_place_old_data_in_master(test_id_master)
+

@@ -2,6 +2,7 @@ import datetime
 import difflib
 import os
 import re
+import typing
 from typing import List, Dict, Union
 
 import matplotlib.pyplot as plt
@@ -54,6 +55,18 @@ def get_master_data() -> List[Dict[str, Union[str, int, date, float]]]:  # how s
     ]
 
     return master_data_list
+
+
+def get_master_data_file_paths():
+    pass
+
+
+def get_datamap_file_paths():
+    pass
+
+
+def get_key_change_log_file_path() -> typing.TextIO:
+    return root_path / "core_data/data_mgmt/key_change_log.xlsx"
 
 
 def get_project_information() -> Dict[str, Union[str, int]]:

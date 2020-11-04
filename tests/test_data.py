@@ -1,7 +1,8 @@
 """
 Tests for analysis_engine
 """
-
+from data_mgmt.change_cost_keys import put_key_change_master_into_dict, run_change_keys, run_get_old_fy_data, \
+    run_place_old_fy_data_into_masters
 from data_mgmt.data import Master, CostData, spent_calculation, wd_heading, \
     key_contacts, dca_table, dca_narratives, project_cost_profile_graph, year_cost_profile_chart, \
     group_cost_profile_graph, total_costs_benefits_bar_chart
@@ -186,6 +187,27 @@ def test_get_total_costs_benefits_bar_chart(costs_masters, project_info):
     costs = CostData(master)
     costs.get_cost_totals_project('Apollo 13', 'ipdc_costs')
     total_costs_benefits_bar_chart(costs)
+
+
+def test_put_change_keys_into_a_dict(change_log):
+    keys_dict = put_key_change_master_into_dict(change_log)
+    assert isinstance(keys_dict, (dict,))
+
+
+def test_altering_master_wb_file_key_names(change_log, list_cost_masters_files, list_test_masters_files):
+    keys_dict = put_key_change_master_into_dict(change_log)
+    run_change_keys(list_cost_masters_files, keys_dict)
+    run_change_keys(list_test_masters_files, keys_dict)
+
+
+def test_get_old_fy_cost_data(list_test_masters_files, project_group_id_path):
+    run_get_old_fy_data(list_test_masters_files, project_group_id_path)
+
+
+def test_placing_old_fy_cost_data_into_master_wbs(list_cost_masters_files, project_group_id_path):
+    run_place_old_fy_data_into_masters(list_cost_masters_files, project_group_id_path)
+
+
 
 
 # def test_MilestoneData_group_dict_returns_dict(mst, abbreviations):
