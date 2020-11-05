@@ -5,7 +5,7 @@ from data_mgmt.change_cost_keys import put_key_change_master_into_dict, run_chan
     run_place_old_fy_data_into_masters
 from data_mgmt.data import Master, CostData, spent_calculation, wd_heading, \
     key_contacts, dca_table, dca_narratives, project_cost_profile_graph, year_cost_profile_chart, \
-    group_cost_profile_graph, total_costs_benefits_bar_chart
+    group_cost_profile_graph, total_costs_benefits_bar_chart_project, total_costs_benefits_bar_chart_group
 
 
 def test_creation_of_Masters_class(basic_master, project_info):
@@ -160,7 +160,7 @@ def test_get_group_cost_profile(costs_masters, project_info):
     master = Master(costs_masters, project_info)
     master.check_baselines()
     costs = CostData(master)
-    costs.get_profile_all('ipdc_costs')
+    costs.get_profile_group('ipdc_costs')
     # assert costs.current_profile == [0, 0, 265, 266, 412, 444, 729, 1047, 2441, 3316, 396, 1]
 
 
@@ -168,7 +168,7 @@ def test_get_group_cost_profile_chart(costs_masters, project_info):
     master = Master(costs_masters, project_info)
     master.check_baselines()
     costs = CostData(master)
-    costs.get_profile_all('ipdc_costs')
+    costs.get_profile_group('ipdc_costs')
     group_cost_profile_graph(costs, 'Group Test')
 
 
@@ -186,7 +186,22 @@ def test_get_project_total_costs_benefits_bar_chart(costs_masters, project_info)
     master.check_baselines()
     costs = CostData(master)
     costs.get_cost_totals_project('Apollo 13', 'ipdc_costs')
-    total_costs_benefits_bar_chart(costs)
+    total_costs_benefits_bar_chart_project(costs)
+
+def test_get_group_total_cost_calculations(costs_masters, project_info):
+    master = Master(costs_masters, project_info)
+    master.check_baselines()
+    costs = CostData(master)
+    costs.get_cost_totals_group('ipdc_costs')
+    assert costs.spent == [468, 2210, 2210]
+
+
+def test_get_group_total_cost_and_bens_chart(costs_masters, project_info):
+    master = Master(costs_masters, project_info)
+    master.check_baselines()
+    costs = CostData(master)
+    costs.get_cost_totals_group('ipdc_costs')
+    total_costs_benefits_bar_chart_group(costs)
 
 
 def test_put_change_keys_into_a_dict(change_log):

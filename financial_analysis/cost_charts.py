@@ -37,10 +37,10 @@ def cost_charts(costs_obj, bens_obj, graph_title):
     labels = ['Baseline', 'Last Quarter', 'Current']
     width = 0.5
     #matplotlib requires lists to numpy arrays
-    ax1.bar(labels, np.array(costs_obj.spent), width, label='Spent')
-    ax1.bar(labels, np.array(costs_obj.profile), width, bottom=np.array(costs_obj.spent), label='Profiled')
+    ax1.bar(labels, np.array(costs_obj.spent_project), width, label='Spent')
+    ax1.bar(labels, np.array(costs_obj.profile), width, bottom=np.array(costs_obj.spent_project), label='Profiled')
     ax1.bar(labels, np.array(costs_obj.unprofile), width,
-            bottom=np.array(costs_obj.spent) + np.array(costs_obj.profile), label='Unprofiled')
+            bottom=np.array(costs_obj.spent_project) + np.array(costs_obj.profile), label='Unprofiled')
     ax1.legend(prop={'size': 6})
     ax1.set_ylabel('Cost (£m)')
     ylab1 = ax1.yaxis.get_label()
@@ -58,10 +58,10 @@ def cost_charts(costs_obj, bens_obj, graph_title):
     #cost types/categories bar chart
     labels = ['RDEL', 'CDEL']
     width = 0.5
-    ax3.bar(labels, np.array(costs_obj.cat_spent), width, label='Spent')
-    ax3.bar(labels, np.array(costs_obj.cat_profile), width, bottom=np.array(costs_obj.cat_spent), label='Profiled')
-    ax3.bar(labels, np.array(costs_obj.cat_unprofiled), width,
-            bottom=np.array(costs_obj.cat_spent) + np.array(costs_obj.cat_profile), label='Unprofiled')
+    ax3.bar(labels, np.array(costs_obj.cat_spent_project), width, label='Spent')
+    ax3.bar(labels, np.array(costs_obj.cat_profile), width, bottom=np.array(costs_obj.cat_spent_project), label='Profiled')
+    ax3.bar(labels, np.array(costs_obj.cat_unprofiled_project), width,
+            bottom=np.array(costs_obj.cat_spent_project) + np.array(costs_obj.cat_profile), label='Unprofiled')
     ax3.legend(prop={'size': 6})
     ax3.set_ylabel('Costs (£m)')
     ylab3 = ax3.yaxis.get_label()
