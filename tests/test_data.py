@@ -172,7 +172,7 @@ def test_get_group_cost_profile_chart(costs_masters, project_info):
     group_cost_profile_graph(costs, 'Group Test')
 
 
-def test_get_total_cost_calculations_for_project(costs_masters, project_info):
+def test_get_project_total_cost_calculations_for_project(costs_masters, project_info):
     master = Master(costs_masters, project_info)
     master.check_baselines()
     costs = CostData(master)
@@ -181,7 +181,7 @@ def test_get_total_cost_calculations_for_project(costs_masters, project_info):
     # assert costs.profiled == [6204, 5582, 5582]
     # assert costs.unprofiled == [0, 0, 0]
 
-def test_get_total_costs_benefits_bar_chart(costs_masters, project_info):
+def test_get_project_total_costs_benefits_bar_chart(costs_masters, project_info):
     master = Master(costs_masters, project_info)
     master.check_baselines()
     costs = CostData(master)

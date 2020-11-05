@@ -1182,6 +1182,18 @@ class CostData:
         self.project_name = project_name
         self.baseline = baseline
 
+        def calculate_profiled(p: List[int], s: List[int], unpro: List[int]) -> list:
+            """small helper function to calculate the proper profiled amount. This is necessary as
+            other wise 'profiled' would actually be the total figure.
+            p = profiled list
+            s = spent list
+            unpro = unprofiled list"""
+            f_profiled = []
+            for y, amount in enumerate(p):
+                t = amount - (s[y] + unpro[y])
+                f_profiled.append(t)
+            return f_profiled
+
         spent = []
         profiled = []
         unprofiled = []
@@ -1213,6 +1225,7 @@ class CostData:
                 except TypeError:  # handle None types, which are present if project not reporting last quarter.
                     rdel = 0
                     cdel = 0
+                    ngov = 0
                     total = 0
 
                 if x == 0:
@@ -1266,17 +1279,15 @@ class CostData:
                         cat_unprofiled.append(cdel)
                         cat_unprofiled.append(ngov)
 
-        # profiled amount is calculated via total profiled minus the sum of spent and unprofiled
-        f_profiled = []
-        for y, amount in enumerate(profiled):
-            f_total = amount - (spent[y] + unprofiled[y])
-            f_profiled.append(f_total)
+            final_cat_profiled = calculate_profiled(cat_profiled, cat_spent, cat_unprofiled)
+
+        all_profiled = calculate_profiled(profiled, spent, unprofiled)
 
         self.cat_spent = cat_spent
-        self.cat_profiled = cat_profiled
+        self.cat_profiled = final_cat_profiled
         self.cat_unprofiled = cat_unprofiled
         self.spent = spent
-        self.profiled = f_profiled
+        self.profiled = all_profiled
         self.unprofiled = unprofiled
 
     # def cost_totals_old(self):
