@@ -57,7 +57,7 @@ def get_master_data() -> List[Dict[str, Union[str, int, date, float]]]:  # how s
     return master_data_list
 
 
-def get_master_data_file_paths():
+def get_master_data_file_paths() -> List[typing.TextIO]:
     file_list = [
         root_path / "core_data/master_2_2020.xlsx",
         root_path / "core_data/master_1_2020.xlsx",
@@ -90,11 +90,12 @@ def get_key_change_log_file_path() -> typing.TextIO:
 
 def get_project_information() -> Dict[str, Union[str, int]]:
     """Returns dictionary containing all project meta data"""
-    return project_data_from_master(root_path / "core_data/project_info.xlsx", 2, 2020)
+    return project_data_from_master(root_path / "core_data/other/project_info.xlsx", 2, 2020)
 
 
 def get_project_information_file_path() -> typing.TextIO:
-    return root_path / "core_data/project_info.xlsx"
+    return root_path / "core_data/other/project_info.xlsx"
+
 
 # for project summary pages
 SRO_CONF_TABLE_LIST = [
@@ -292,9 +293,10 @@ YEAR_LIST = [
 
 COST_LIST = [" RDEL Forecast Total", " CDEL Forecast one off new costs", " Forecast Non-Gov"]
 BAR_CHART_TOTAL_KEYS = [
-    ("Pre-profile RDEL Forecast one off new costs", "Pre-profile CDEL Forecast one off new costs", "Pre-profile Forecast Non-Gov"),
+    ("Pre-profile RDEL Forecast one off new costs", "Pre-profile CDEL Forecast one off new costs",
+     "Pre-profile Forecast Non-Gov"),
     ("Total RDEL Forecast Total", "Total CDEL Forecast one off new costs", "Non-Gov Total Forecast"),
-    ("Unprofiled RDEL Forecast Total", "Unprofiled CDEL Forecast one off new costs", "Non-Gov Total Forecast"),
+    ("Unprofiled RDEL Forecast Total", "Unprofiled CDEL Forecast one off new costs", "Unprofiled Forecast Non-Gov"),
 ]
 
 
@@ -1202,6 +1204,8 @@ class CostData:
         self.rdel_profile_project = []
         self.cdel_profile_project = []
         self.ngov_profile_project = []
+        self.y_scale_max = []
+        self.y_scale_max_project = []
         # self.cost_totals()
         # self.get_profile()
 
@@ -1209,7 +1213,6 @@ class CostData:
         """Returns lists containing the sum total of group (of projects) costs,
         sliced in different ways. Cumbersome for loop used at the moment, but
         is the least cumbersome loop I could design!"""
-
         self.baseline = baseline
 
         # where to store this function. need it at a global level for CostData Class
@@ -1313,15 +1316,11 @@ class CostData:
                         ngov_std = self.master.master_data[cost_bl_index[i]].data[
                             project
                         ]["20-21 CDEL STD Non Gov costs"]
-
                         std_list = [rdel_std, cdel_std, ngov_std]  # converts none types to zero
                         for s, std in enumerate(std_list):
                             if std is None:
                                 std_list[s] = 0
-
-                        group_total = round(total + sum(std_list))
-                        spent.append(group_total)
-
+                        spent.append(round(group_total + sum(std_list)))
                     except (KeyError, TypeError):  # Note.TypeError here as projects may have no baseline
                         spent.append(group_total)
                 if x == 1:  # profiled
@@ -1342,6 +1341,7 @@ class CostData:
         self.spent = spent
         self.profiled = all_profiled
         self.unprofiled = unprofiled
+        self.y_scale_max = max(profiled)
 
     def get_cost_totals_project(self, project_name: str, baseline: str) -> list:
         """Returns lists containing the sum total of project costs, sliced in different
@@ -1375,7 +1375,7 @@ class CostData:
 
         for i in range(len(cost_bl_index)):
             for x, key in enumerate(BAR_CHART_TOTAL_KEYS):
-                try:   # TODO handle none types
+                try:  # TODO handle none types
                     rdel = round(
                         self.master.master_data[cost_bl_index[i]].data[
                             self.project_name
@@ -1456,9 +1456,10 @@ class CostData:
         self.cat_spent_project = cat_spent
         self.cat_profiled_project = final_cat_profiled
         self.cat_unprofiled_project = cat_unprofiled
-        self.spent_project = spent
-        self.profiled_project = all_profiled
-        self.unprofiled_project = unprofiled
+        self.spent_project = spent[:3]  # only returning three for now
+        self.profiled_project = all_profiled[:3]
+        self.unprofiled_project = unprofiled[:3]
+        self.y_scale_max_project = max(profiled)  # necessary for matplotlib y axis scaling
 
     def get_profile_group(self, baseline: str) -> None:
         """Returns several lists which contain the sum of different cost profiles for the group of project
@@ -2288,6 +2289,7 @@ def make_file_friendly(quarter_str: str) -> str:
 
 def total_costs_benefits_bar_chart_project(cost_master: CostData) -> plt.figure:
     """compiles a matplotlib bar chart which shows total project costs"""
+
     fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2)  # four sub plots
 
     fig.suptitle(
@@ -2328,49 +2330,45 @@ def total_costs_benefits_bar_chart_project(cost_master: CostData) -> plt.figure:
     )
 
     # scaling y axis
-    # y axis value setting so it takes either highest ben or cost figure
-    # cost_max = max(total_fin) + max(total_fin)/5
-    # ben_max = max(total_ben) + max(total_ben)/5
-    # print(cost_max)
-    # print(ben_max)
-    # y_max = max([cost_max, ben_max])
-    # ax1.set_ylim(0, y_max)
+    # axis value set to takes either highest ben or cost whole life figure.
+    y_max = cost_master.y_scale_max_project + percentage(5, cost_master.y_scale_max_project)
+    ax1.set_ylim(0, y_max)
 
     # rdel, cdel and ngov totals bar chart
     labels = ["RDEL", "CDEL", "Non Gov"]
     width = 0.5
-    ax3.bar(
+    ax2.bar(
         labels,
         np.array(cost_master.cat_spent_project),
         width,
-        label="Spent")
-    ax3.bar(
+        label="Spent",
+    )
+    ax2.bar(
         labels,
         np.array(cost_master.cat_profiled_project),
         width,
         bottom=np.array(cost_master.cat_spent_project),
         label="Profiled",
     )
-    ax3.bar(
+    ax2.bar(
         labels,
         np.array(cost_master.cat_unprofiled_project),
         width,
         bottom=np.array(cost_master.cat_spent_project) + np.array(cost_master.cat_profiled_project),
         label="Unprofiled",
     )
-    ax3.legend(prop={"size": 6})
-    ax3.set_ylabel("Costs (£m)")
-    ylab3 = ax3.yaxis.get_label()
-    ylab3.set_style("italic")
-    ylab3.set_size(8)
-    ax3.tick_params(axis="x", which="major", labelsize=6)
-    ax3.tick_params(axis="y", which="major", labelsize=6)
-    ax3.set_title(
+    ax2.legend(prop={"size": 6})
+    ax2.set_ylabel("Costs (£m)")
+    ylab2 = ax2.yaxis.get_label()
+    ylab2.set_style("italic")
+    ylab2.set_size(8)
+    ax2.tick_params(axis="x", which="major", labelsize=6)
+    ax2.tick_params(axis="y", which="major", labelsize=6)
+    ax2.set_title(
         "Fig 2 - wlc cost type break down", loc="left", fontsize=8, fontweight="bold"
     )
 
-    # #y_max = max(total_fin) + max(total_fin) * 1 / 5
-    # ax3.set_ylim(0, y_max) #scale y axis max
+    ax2.set_ylim(0, y_max)  # scale y axis max
 
     # benefits change
     # labels = ['Baseline', 'Last Quarter', 'Latest']
@@ -2466,48 +2464,43 @@ def total_costs_benefits_bar_chart_group(cost_master: CostData) -> plt.figure:
 
     # scaling y axis
     # y axis value setting so it takes either highest ben or cost figure
-    # cost_max = max(total_fin) + max(total_fin)/5
-    # ben_max = max(total_ben) + max(total_ben)/5
-    # print(cost_max)
-    # print(ben_max)
-    # y_max = max([cost_max, ben_max])
-    # ax1.set_ylim(0, y_max)
+    y_max = cost_master.y_scale_max + percentage(5, cost_master.y_scale_max)
+    ax1.set_ylim(0, y_max)
 
     # rdel, cdel and ngov totals bar chart
     labels = ["RDEL", "CDEL", "Non Gov"]
     width = 0.5
-    ax3.bar(
+    ax2.bar(
         labels,
         np.array(cost_master.cat_spent),
         width,
         label="Spent")
-    ax3.bar(
+    ax2.bar(
         labels,
         np.array(cost_master.cat_profiled),
         width,
         bottom=np.array(cost_master.cat_spent),
         label="Profiled",
     )
-    ax3.bar(
+    ax2.bar(
         labels,
         np.array(cost_master.cat_unprofiled),
         width,
         bottom=np.array(cost_master.cat_spent) + np.array(cost_master.cat_profiled),
         label="Unprofiled",
     )
-    ax3.legend(prop={"size": 6})
-    ax3.set_ylabel("Costs (£m)")
-    ylab3 = ax3.yaxis.get_label()
+    ax2.legend(prop={"size": 6})
+    ax2.set_ylabel("Costs (£m)")
+    ylab3 = ax2.yaxis.get_label()
     ylab3.set_style("italic")
     ylab3.set_size(8)
-    ax3.tick_params(axis="x", which="major", labelsize=6)
-    ax3.tick_params(axis="y", which="major", labelsize=6)
-    ax3.set_title(
+    ax2.tick_params(axis="x", which="major", labelsize=6)
+    ax2.tick_params(axis="y", which="major", labelsize=6)
+    ax2.set_title(
         "Fig 2 - wlc cost type break down", loc="left", fontsize=8, fontweight="bold"
     )
 
-    # #y_max = max(total_fin) + max(total_fin) * 1 / 5
-    # ax3.set_ylim(0, y_max) #scale y axis max
+    ax2.set_ylim(0, y_max)  # scale y axis max
 
     # benefits change
     # labels = ['Baseline', 'Last Quarter', 'Latest']
@@ -2581,3 +2574,7 @@ def check_baselines(master: Master) -> None:
         else:
             continue
         break
+
+
+def percentage(percent: int, whole: float) -> int:
+    return round((percent * whole) / 100.0)

@@ -79,7 +79,7 @@ def get_old_fy_cost_data(master_file: typing.TextIO, project_id_wb: typing.TextI
 
 
 def run_get_old_fy_data(master_files_list: list, project_id_wb: typing.TextIO) -> None:
-    for f in master_files_list:
+    for f in reversed(master_files_list):  # reversed so it gets the latest data in masters
         get_old_fy_cost_data(f, project_id_wb)
 
 
@@ -111,6 +111,6 @@ def run_place_old_fy_data_into_masters(master_files_list: list, project_id_wb: t
 
 keys_dict = put_key_change_master_into_dict(get_key_change_log_file_path())
 run_change_keys(get_master_data_file_paths(), keys_dict)
-run_get_old_fy_data(get_master_data_file_paths(), get_project_information_file_path())
-run_place_old_fy_data_into_masters(get_master_data_file_paths(), get_project_information_file_path())
+# run_get_old_fy_data(get_master_data_file_paths(), get_project_information_file_path())
+# run_place_old_fy_data_into_masters(get_master_data_file_paths(), get_project_information_file_path())
 
