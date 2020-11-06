@@ -58,7 +58,26 @@ def get_master_data() -> List[Dict[str, Union[str, int, date, float]]]:  # how s
 
 
 def get_master_data_file_paths():
-    pass
+    file_list = [
+        root_path / "core_data/master_2_2020.xlsx",
+        root_path / "core_data/master_1_2020.xlsx",
+        root_path / "core_data/master_4_2019.xlsx",
+        root_path / "core_data/master_3_2019.xlsx",
+        root_path / "core_data/master_2_2019.xlsx",
+        root_path / "core_data/master_1_2019.xlsx",
+        root_path / "core_data/master_4_2018.xlsx",
+        root_path / "core_data/master_3_2018.xlsx",
+        root_path / "core_data/master_2_2018.xlsx",
+        root_path / "core_data/master_1_2018.xlsx",
+        root_path / "core_data/master_4_2017.xlsx",
+        root_path / "core_data/master_3_2017.xlsx",
+        root_path / "core_data/master_2_2017.xlsx",
+        root_path / "core_data/master_1_2017.xlsx",
+        root_path / "core_data/master_4_2016.xlsx",
+        root_path / "core_data/master_3_2016.xlsx",
+    ]
+
+    return file_list
 
 
 def get_datamap_file_paths():
@@ -73,6 +92,9 @@ def get_project_information() -> Dict[str, Union[str, int]]:
     """Returns dictionary containing all project meta data"""
     return project_data_from_master(root_path / "core_data/project_info.xlsx", 2, 2020)
 
+
+def get_project_information_file_path() -> typing.TextIO:
+    return root_path / "core_data/project_info.xlsx"
 
 # for project summary pages
 SRO_CONF_TABLE_LIST = [
@@ -270,7 +292,7 @@ YEAR_LIST = [
 
 COST_LIST = [" RDEL Forecast Total", " CDEL Forecast one off new costs", " Forecast Non-Gov"]
 BAR_CHART_TOTAL_KEYS = [
-    ("Pre-profile RDEL", "Pre-profile CDEL Forecast one off new costs", "Pre-profile Forecast Non-Gov"),
+    ("Pre-profile RDEL Forecast one off new costs", "Pre-profile CDEL Forecast one off new costs", "Pre-profile Forecast Non-Gov"),
     ("Total RDEL Forecast Total", "Total CDEL Forecast one off new costs", "Non-Gov Total Forecast"),
     ("Unprofiled RDEL Forecast Total", "Unprofiled CDEL Forecast one off new costs", "Non-Gov Total Forecast"),
 ]
@@ -1483,11 +1505,11 @@ class CostData:
                             cost = 0
                             cost_total += cost
 
-                        if cost_type == " RDEL Forecast Total":
+                        if cost_type == COST_LIST[0]:  # rdel
                             rdel_total += cost
-                        if cost_type == " CDEL Forecast Total":
+                        if cost_type == COST_LIST[1]:  # cdel
                             cdel_total += cost
-                        if cost_type == " Forecast Non-Gov":
+                        if cost_type == COST_LIST[2]:  # ngov
                             ngov_total += cost
 
                 yearly_profile.append(round(cost_total))
@@ -1563,11 +1585,11 @@ class CostData:
                             print("NOTE: " + project_name + " was not reporting last quarter so no last"
                                                             " quarter profile so no last quarter profile will be provided")
                             break
-                    if cost_type == " RDEL Forecast Total":
+                    if cost_type == COST_LIST[0]:  # rdel
                         rdel_total = cost
-                    if cost_type == " CDEL Forecast one off new costs":
+                    if cost_type == COST_LIST[1]:  # cdel
                         cdel_total = cost
-                    if cost_type == " Forecast Non-Gov":
+                    if cost_type == COST_LIST[2]:  # ngov
                         ngov_total = cost
 
                 yearly_profile.append(cost_total)

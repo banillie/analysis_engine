@@ -8,7 +8,8 @@ from typing import Dict
 from openpyxl import load_workbook
 from openpyxl.workbook import workbook
 
-from data_mgmt.data import YEAR_LIST, get_key_change_log_file_path, get_master_data_file_paths, get_project_information
+from data_mgmt.data import YEAR_LIST, get_key_change_log_file_path, get_master_data_file_paths, get_project_information, \
+    get_project_information_file_path
 
 from datamaps.api import project_data_from_master
 
@@ -108,8 +109,8 @@ def run_place_old_fy_data_into_masters(master_files_list: list, project_id_wb: t
         place_old_fy_data_into_master_wb(f, project_id_wb)
 
 
-# keys_dict = put_key_change_master_into_dict(get_key_change_log_file_path())
-# run_change_keys(get_master_data_file_paths(), keys_dict)
-# run_get_old_fy_data(get_master_data_file_paths(), get_project_information())
-# run_place_old_fy_data_into_masters(get_master_data_file_paths(), get_project_information())
+keys_dict = put_key_change_master_into_dict(get_key_change_log_file_path())
+run_change_keys(get_master_data_file_paths(), keys_dict)
+run_get_old_fy_data(get_master_data_file_paths(), get_project_information_file_path())
+run_place_old_fy_data_into_masters(get_master_data_file_paths(), get_project_information_file_path())
 
