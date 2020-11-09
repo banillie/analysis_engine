@@ -1,8 +1,8 @@
 """
 Tests for analysis_engine
 """
-from data_mgmt.change_cost_keys import put_key_change_master_into_dict, run_change_keys, run_get_old_fy_data, \
-    run_place_old_fy_data_into_masters
+from data_mgmt.change_wb_master_keys import put_key_change_master_into_dict, run_change_keys
+from data_mgmt.old_costs import run_get_old_fy_data, run_place_old_fy_data_into_masters
 from data_mgmt.data import Master, CostData, spent_calculation, wd_heading, \
     key_contacts, dca_table, dca_narratives, project_cost_profile_graph, year_cost_profile_chart, \
     group_cost_profile_graph, total_costs_benefits_bar_chart_project, total_costs_benefits_bar_chart_group

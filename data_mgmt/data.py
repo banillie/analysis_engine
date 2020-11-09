@@ -80,12 +80,56 @@ def get_master_data_file_paths() -> List[typing.TextIO]:
     return file_list
 
 
+def get_master_data_file_paths_fy_16_17() -> List[typing.TextIO]:
+    file_list = [
+        root_path / "core_data/master_4_2016.xlsx",
+        root_path / "core_data/master_3_2016.xlsx",
+    ]
+    return file_list
+
+
+def get_master_data_file_paths_fy_17_18() -> List[typing.TextIO]:
+    file_list = [
+        root_path / "core_data/master_4_2017.xlsx",
+        root_path / "core_data/master_3_2017.xlsx",
+        root_path / "core_data/master_2_2017.xlsx",
+        root_path / "core_data/master_1_2017.xlsx",
+    ]
+    return file_list
+
+
+def get_master_data_file_paths_fy_18_19() -> List[typing.TextIO]:
+    file_list = [
+        root_path / "core_data/master_4_2018.xlsx",
+        root_path / "core_data/master_3_2018.xlsx",
+        root_path / "core_data/master_2_2018.xlsx",
+        root_path / "core_data/master_1_2018.xlsx",
+    ]
+    return file_list
+
+
+def get_master_data_file_paths_fy_19_20() -> List[typing.TextIO]:
+    file_list = [
+        root_path / "core_data/master_4_2019.xlsx",
+        root_path / "core_data/master_3_2019.xlsx",
+        root_path / "core_data/master_2_2019.xlsx",
+        root_path / "core_data/master_1_2019.xlsx",
+    ]
+
+    return file_list
+
+
+def get_master_data_file_paths_fy_20_21() -> List[typing.TextIO]:
+    file_list = [
+        root_path / "core_data/master_2_2020.xlsx",
+        root_path / "core_data/master_1_2020.xlsx",
+    ]
+
+    return file_list
+
+
 def get_datamap_file_paths():
     pass
-
-
-def get_key_change_log_file_path() -> typing.TextIO:
-    return root_path / "core_data/data_mgmt/key_change_log.xlsx"
 
 
 def get_project_information() -> Dict[str, Union[str, int]]:
