@@ -137,7 +137,7 @@ def get_datamap_file_paths():
 
 def get_project_information() -> Dict[str, Union[str, int]]:
     """Returns dictionary containing all project meta data"""
-    return project_data_from_master(root_path / "core_data/other/project_info.xlsx", 2, 2020)
+    return project_data_from_master(root_path / "core_data/data_mgmt/project_info.xlsx", 2, 2020)
 
 
 def get_project_information_file_path() -> typing.TextIO:
@@ -1281,10 +1281,11 @@ class CostData:
         # self.cost_totals()
         # self.get_profile()
 
-    def get_cost_totals_group(self, baseline: str) -> list:
+    def get_cost_totals_group(self, group: List[str], baseline: str) -> list:
         """Returns lists containing the sum total of group (of projects) costs,
         sliced in different ways. Cumbersome for loop used at the moment, but
         is the least cumbersome loop I could design!"""
+        self.group = group
         self.baseline = baseline
 
         # where to store this function. need it at a global level for CostData Class
@@ -1316,7 +1317,7 @@ class CostData:
         for i in range(3):
             for x, key in enumerate(COST_TYPE_KEY_LIST):
                 group_total = 0
-                for project_name in self.master.current_projects:
+                for project_name in self.group:
                     cost_bl_index = self.master.bl_index[baseline][project_name]
                     try:
                         rdel = self.master.master_data[cost_bl_index[i]].data[
@@ -1728,10 +1729,11 @@ class BenefitsData:
         self.y_scale_max_project = 0
         self.y_scale_min_project = 0
 
-    def get_ben_totals_group(self, baseline: str) -> list:
+    def get_ben_totals_group(self, group: List[str], baseline: str) -> list:
         """Returns lists containing the sum total of group (of projects) benefits,
         sliced in different ways. Cumbersome for loop used at the moment, but
         is the least cumbersome loop I could design!"""
+        self.group = group
         self.baseline = baseline
 
         delivered = []
@@ -1766,7 +1768,7 @@ class BenefitsData:
         for i in range(3):
             for x, key in enumerate(BEN_TYPE_KEY_LIST):
                 group_total = 0
-                for project in self.master.current_projects:
+                for project in self.group:
                     ben_bl_index = self.master.bl_index[baseline][project]
                     try:
                         cash = round(
@@ -2740,7 +2742,8 @@ def total_costs_benefits_bar_chart_group(cost_master: CostData, ben_master: Bene
     ax4.tick_params(axis='y', which='major', labelsize=6)
     ax4.set_title('Fig 4 - benefits profile type', loc='left', fontsize=8, fontweight='bold')
 
-    ax4.set_ylim(ben_master.y_scale_min, y_max)
+    y_min = ben_master.y_scale_min + percentage(5, ben_master.y_scale_min)
+    ax4.set_ylim(y_min, y_max)  # TODO look at the min scaling
 
     # size of chart and fit
     # fig.canvas.draw()
