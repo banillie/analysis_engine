@@ -186,8 +186,10 @@ def test_get_project_total_costs_benefits_bar_chart(costs_masters, project_info)
     master = Master(costs_masters, project_info)
     master.check_baselines()
     costs = CostData(master)
-    costs.get_cost_totals_project('Apollo 13', 'ipdc_costs')
-    total_costs_benefits_bar_chart_project(costs)
+    benefits = BenefitsData(master)
+    costs.get_cost_totals_project('Mars', 'ipdc_costs')
+    benefits.get_ben_totals_project('Mars', 'ipdc_costs')
+    total_costs_benefits_bar_chart_project(costs, benefits)
 
 
 def test_get_group_total_cost_calculations(costs_masters, project_info):
@@ -232,55 +234,14 @@ def test_getting_benefits_profile_for_a_group(costs_masters, project_info):
     master.check_baselines()
     ben = BenefitsData(master)
     ben.get_ben_totals_group('ipdc_benefits')
-    assert ben.spent == [0, 0, 0]
+    assert ben.delivered == [0, 0, 0]
     assert ben.profiled == [-43659, -20608, -64227]
     assert ben.unprofiled == [53823, 39836, 83455]
 
-# def test_MilestoneData_group_dict_returns_dict(mst, abbreviations):
-#     mst.baseline_data('Re-baseline IPDC milestones')
-#     m = MilestoneData(mst, abbreviations)
-#     assert isinstance(m.group_current, (dict,))
-#
-#
-# def test_MilestoneChartData_group_chart_returns_list(mst, abbreviations):
-#     mst.baseline_data('Re-baseline IPDC milestones')
-#     m = MilestoneData(mst, abbreviations)
-#     mcd = MilestoneChartData(milestone_data_object=m)
-#     assert isinstance(mcd.group_current_tds, (list,))
-#
-#
-# def test_MilestoneChartData_group_chart_filter_in_works(mst, abbreviations):
-#     assurance = ['Gateway', 'SGAR', 'Red', 'Review']
-#     mst.baseline_data('Re-baseline IPDC milestones')
-#     m = MilestoneData(mst, abbreviations)
-#     mcd = MilestoneChartData(m, keys_of_interest=assurance)
-#     assert any("Gateway" in s for s in mcd.group_keys)
-#     assert any("SGAR" in s for s in mcd.group_keys)
-#     assert any("Red" in s for s in mcd.group_keys)
-#     assert any("Review" in s for s in mcd.group_keys)
-#
-#
-# def test_MilestoneChartData_group_chart_filter_out_works(mst, abbreviations):
-#     assurance = ['Gateway', 'SGAR', 'Red', 'Review']
-#     mst.baseline_data('Re-baseline IPDC milestones')
-#     m = MilestoneData(mst, abbreviations)
-#     mcd = MilestoneChartData(m, keys_not_of_interest=assurance)
-#     assert not any("Gateway" in s for s in mcd.group_keys)
-#     assert not any("SGAR" in s for s in mcd.group_keys)
-#     assert not any("Red" in s for s in mcd.group_keys)
-#     assert not any("Review" in s for s in mcd.group_keys)
-#
-#
-# def test_CostData_cost_total_spent_returns_lists(mst):
-#     mst.baseline_data('Re-baseline IPDC cost')
-#     c = CostData(mst)
-#     assert isinstance(c.spent, (list,))
-#     assert isinstance(c.cat_spent, (list,))
-#
-#
-# def test_ProjectsGroupName_returns_a12():
-#     assert Projects.a12 == 'A12 Chelmsford to A120 widening'
-#
-#
-# def test_ProjectGroupName_returns_rpe_as_list():
-#     assert isinstance(Projects.rpe, (list,))
+
+def test_getting_benefits_profile_for_a_project(costs_masters, project_info):
+    master = Master(costs_masters, project_info)
+    master.check_baselines()
+    ben = BenefitsData(master)
+    ben.get_ben_totals_project('Falcon 9', 'ipdc_benefits')
+    assert ben.profiled_project == [-200, 240, 240]

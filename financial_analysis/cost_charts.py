@@ -9,7 +9,6 @@ from data_mgmt.data import Master, CostData, get_master_data, get_project_inform
 master = Master(get_master_data(), get_project_information())
 master.check_baselines()
 costs = CostData(master)
-costs = CostData(master)
 bens = BenefitsData(master)
 costs.get_cost_totals_group('ipdc_costs')
 bens.get_ben_totals_group('ipdc_benefits')
