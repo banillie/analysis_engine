@@ -1,11 +1,11 @@
 """
 Tests for analysis_engine
 """
-from data_mgmt.change_wb_master_keys import put_key_change_master_into_dict, run_change_keys
-from data_mgmt.old_costs import run_get_old_fy_data, run_place_old_fy_data_into_masters
 from data_mgmt.data import Master, CostData, spent_calculation, wd_heading, \
     key_contacts, dca_table, dca_narratives, project_cost_profile_graph, year_cost_profile_chart, \
-    group_cost_profile_graph, total_costs_benefits_bar_chart_project, total_costs_benefits_bar_chart_group
+    group_cost_profile_graph, total_costs_benefits_bar_chart_project, total_costs_benefits_bar_chart_group, \
+    run_get_old_fy_data, run_place_old_fy_data_into_masters, put_key_change_master_into_dict, run_change_keys, \
+    BenefitsData
 
 
 def test_creation_of_Masters_class(basic_master, project_info):
@@ -181,12 +181,14 @@ def test_get_project_total_cost_calculations_for_project(costs_masters, project_
     # assert costs.profiled == [6204, 5582, 5582]
     # assert costs.unprofiled == [0, 0, 0]
 
+
 def test_get_project_total_costs_benefits_bar_chart(costs_masters, project_info):
     master = Master(costs_masters, project_info)
     master.check_baselines()
     costs = CostData(master)
     costs.get_cost_totals_project('Apollo 13', 'ipdc_costs')
     total_costs_benefits_bar_chart_project(costs)
+
 
 def test_get_group_total_cost_calculations(costs_masters, project_info):
     master = Master(costs_masters, project_info)
@@ -200,8 +202,10 @@ def test_get_group_total_cost_and_bens_chart(costs_masters, project_info):
     master = Master(costs_masters, project_info)
     master.check_baselines()
     costs = CostData(master)
+    bens = BenefitsData(master)
     costs.get_cost_totals_group('ipdc_costs')
-    total_costs_benefits_bar_chart_group(costs)
+    bens.get_ben_totals_group('ipdc_benefits')
+    total_costs_benefits_bar_chart_group(costs, bens, 'Total Group')
 
 
 def test_put_change_keys_into_a_dict(change_log):
@@ -223,7 +227,14 @@ def test_placing_old_fy_cost_data_into_master_wbs(list_cost_masters_files, proje
     run_place_old_fy_data_into_masters(list_cost_masters_files, project_group_id_path)
 
 
-
+def test_getting_benefits_profile_for_a_group(costs_masters, project_info):
+    master = Master(costs_masters, project_info)
+    master.check_baselines()
+    ben = BenefitsData(master)
+    ben.get_ben_totals_group('ipdc_benefits')
+    assert ben.spent == [0, 0, 0]
+    assert ben.profiled == [-43659, -20608, -64227]
+    assert ben.unprofiled == [53823, 39836, 83455]
 
 # def test_MilestoneData_group_dict_returns_dict(mst, abbreviations):
 #     mst.baseline_data('Re-baseline IPDC milestones')

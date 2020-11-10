@@ -13,11 +13,14 @@ from datamaps.api import project_data_from_master
 import platform
 from pathlib import Path
 
+from datamaps.api.api import project_data_from_master_api
 from docx import Document, table
 from docx.enum.section import WD_SECTION_START, WD_ORIENTATION
 from docx.oxml import parse_xml
 from docx.oxml.ns import nsdecls
 from docx.shared import Pt, Cm, RGBColor, Inches
+from openpyxl import load_workbook
+from openpyxl.workbook import workbook
 
 
 def _platform_docs_dir() -> Path:
@@ -335,12 +338,37 @@ YEAR_LIST = [
     "39-40"
 ]
 
-COST_LIST = [" RDEL Forecast Total", " CDEL Forecast one off new costs", " Forecast Non-Gov"]
-BAR_CHART_TOTAL_KEYS = [
+COST_KEY_LIST = [" RDEL Forecast Total", " CDEL Forecast one off new costs", " Forecast Non-Gov"]
+COST_TYPE_KEY_LIST = [
     ("Pre-profile RDEL Forecast one off new costs", "Pre-profile CDEL Forecast one off new costs",
      "Pre-profile Forecast Non-Gov"),
     ("Total RDEL Forecast Total", "Total CDEL Forecast one off new costs", "Non-Gov Total Forecast"),
     ("Unprofiled RDEL Forecast Total", "Unprofiled CDEL Forecast one off new costs", "Unprofiled Forecast Non-Gov"),
+]
+BEN_KEY_LIST = [
+    "Pre-profile BEN Total",
+    "Total BEN Forecast - Total Monetised Benefits",
+    "Unprofiled Remainder BEN Forecast - Total Monetised Benefits",
+]
+BEN_TYPE_KEY_LIST = [
+    (
+        "Pre-profile BEN Forecast Gov Cashable",
+        "Pre-profile BEN Forecast Gov Non-Cashable",
+        "Pre-profile BEN Forecast - Economic (inc Private Partner)",
+        "Pre-profile BEN Forecast - Disbenefit UK Economic",
+    ),
+    (
+        "Total BEN Forecast - Gov. Cashable",
+        "Total BEN Forecast - Gov. Non-Cashable",
+        "Total BEN Forecast - Economic (inc Private Partner)",
+        "Total BEN Forecast - Disbenefit UK Economic",
+    ),
+    (
+        "Unprofiled Remainder BEN Forecast - Gov. Cashable",
+        "Unprofiled Remainder BEN Forecast - Gov. Non-Cashable",
+        "Unprofiled Remainder BEN Forecast - Economic (inc Private Partner)",
+        "Unprofiled Remainder BEN Forecast - Disbenefit UK Economic",
+    )
 ]
 
 
@@ -1248,8 +1276,8 @@ class CostData:
         self.rdel_profile_project = []
         self.cdel_profile_project = []
         self.ngov_profile_project = []
-        self.y_scale_max = []
-        self.y_scale_max_project = []
+        self.y_scale_max = 0
+        self.y_scale_max_project = 0
         # self.cost_totals()
         # self.get_profile()
 
@@ -1286,7 +1314,7 @@ class CostData:
         group_ngov_unprofiled = 0
 
         for i in range(3):
-            for x, key in enumerate(BAR_CHART_TOTAL_KEYS):
+            for x, key in enumerate(COST_TYPE_KEY_LIST):
                 group_total = 0
                 for project in self.master.current_projects:
                     cost_bl_index = self.master.bl_index[baseline][project]
@@ -1418,7 +1446,7 @@ class CostData:
         cost_bl_index = self.master.bl_index[baseline][self.project_name]
 
         for i in range(len(cost_bl_index)):
-            for x, key in enumerate(BAR_CHART_TOTAL_KEYS):
+            for x, key in enumerate(COST_TYPE_KEY_LIST):
                 try:  # TODO handle none types
                     rdel = round(
                         self.master.master_data[cost_bl_index[i]].data[
@@ -1530,7 +1558,7 @@ class CostData:
                 rdel_total = 0
                 cdel_total = 0
                 ngov_total = 0
-                for cost_type in COST_LIST:
+                for cost_type in COST_KEY_LIST:
                     for project in self.master.current_projects:
                         project_bl_index = self.master.bl_index[baseline][project]
                         try:
@@ -1550,11 +1578,11 @@ class CostData:
                             cost = 0
                             cost_total += cost
 
-                        if cost_type == COST_LIST[0]:  # rdel
+                        if cost_type == COST_KEY_LIST[0]:  # rdel
                             rdel_total += cost
-                        if cost_type == COST_LIST[1]:  # cdel
+                        if cost_type == COST_KEY_LIST[1]:  # cdel
                             cdel_total += cost
-                        if cost_type == COST_LIST[2]:  # ngov
+                        if cost_type == COST_KEY_LIST[2]:  # ngov
                             ngov_total += cost
 
                 yearly_profile.append(round(cost_total))
@@ -1613,7 +1641,7 @@ class CostData:
             ngov_yearly_profile = []
             for year in YEAR_LIST:
                 cost_total = 0
-                for cost_type in COST_LIST:
+                for cost_type in COST_KEY_LIST:
                     try:
                         cost = self.master.master_data[cost_bl_index[i]].data[
                             self.project_name
@@ -1630,11 +1658,11 @@ class CostData:
                             print("NOTE: " + project_name + " was not reporting last quarter so no last"
                                                             " quarter profile so no last quarter profile will be provided")
                             break
-                    if cost_type == COST_LIST[0]:  # rdel
+                    if cost_type == COST_KEY_LIST[0]:  # rdel
                         rdel_total = cost
-                    if cost_type == COST_LIST[1]:  # cdel
+                    if cost_type == COST_KEY_LIST[1]:  # cdel
                         cdel_total = cost
-                    if cost_type == COST_LIST[2]:  # ngov
+                    if cost_type == COST_KEY_LIST[2]:  # ngov
                         ngov_total = cost
 
                 yearly_profile.append(cost_total)
@@ -1664,121 +1692,133 @@ class CostData:
 
 
 class BenefitsData:
-    def __init__(self, masters_object):
-        self.masters = masters_object
-        self.total = []
-        self.achieved = []
-        self.profile = []
-        self.unprofile = []
-        self.cat_achieved = []
-        self.cat_profile = []
-        self.cat_unprofile = []
-        self.disbenefit = []
-        self.ben_totals()
+    def __init__(self, master: Master):
+        self.master = master
+        self.cat_spent = []
+        self.cat_profiled = []
+        self.cat_unprofiled = []
+        self.spent = []
+        self.profiled = []
+        self.unprofiled = []
+        self.cat_spent_project = []
+        self.cat_profiled_project = []
+        self.cat_unprofiled_project = []
+        self.spent_project = []
+        self.profiled_project = []
+        self.unprofiled_project = []
+        self.y_scale_max = 0
+        self.y_scale_min = 0
 
-    def ben_totals(self):
-        """given a list of project names returns benefit
-        data lists for placement in matplotlib charts
-        """
+    def get_ben_totals_group(self, baseline: str) -> list:
+        """Returns lists containing the sum total of group (of projects) benefits,
+        sliced in different ways. Cumbersome for loop used at the moment, but
+        is the least cumbersome loop I could design!"""
+        self.baseline = baseline
+        delivered = []
+        profiled = []
+        unprofiled = []
+        group_cash_dev = 0
+        group_uncash_dev = 0
+        group_economic_dev = 0
+        group_disben_dev = 0
+        group_cash_profiled = 0
+        group_uncash_profiled = 0
+        group_economic_profiled = 0
+        group_disben_profiled = 0
+        group_cash_unprofiled = 0
+        group_uncash_unprofiled = 0
+        group_economic_unprofiled = 0
+        group_disben_unprofiled = 0
 
-        ben_key_list = [
-            "Pre-profile BEN Total",
-            "Total BEN Forecast - Total Monetised Benefits",
-            "Unprofiled Remainder BEN Forecast - Total Monetised Benefits",
-        ]
+        # where to store this function. need it at a global level for CostData Class
+        def calculate_profiled(p: List[int], s: List[int], unpro: List[int]) -> list:
+            """small helper function to calculate the proper profiled amount. This is necessary as
+            other wise 'profiled' would actually be the total figure.
+            p = profiled list
+            s = spent list
+            unpro = unprofiled list"""
+            f_profiled = []
+            for y, amount in enumerate(p):
+                t = amount - (s[y] + unpro[y])
+                f_profiled.append(t)
+            return f_profiled
 
-        ben_type_key_list = [
-            (
-                "Pre-profile BEN Forecast Gov Cashable",
-                "Pre-profile BEN Forecast Gov Non-Cashable",
-                "Pre-profile BEN Forecast - Economic (inc Private Partner)",
-                "Pre-profile BEN Forecast - Disbenefit UK Economic",
-            ),
-            (
-                "Unprofiled Remainder BEN Forecast - Gov. Cashable",
-                "Unprofiled Remainder BEN Forecast - Gov. Non-Cashable",
-                "Unprofiled Remainder BEN Forecast - Economic (inc Private Partner)",
-                "Unprofiled Remainder BEN Forecast - Disbenefit UK Economic",
-            ),
-            (
-                "Total BEN Forecast - Gov. Cashable",
-                "Total BEN Forecast - Gov. Non-Cashable",
-                "Total BEN Forecast - Economic (inc Private Partner)",
-                "Total BEN Forecast - Disbenefit UK Economic",
-            ),
-        ]
-
-        total = []
-        achieved = []
-        profile = []
-        unprofile = []
-
-        for i in reversed(range(3)):
-            ben_achieved = []
-            ben_profile = []
-            ben_unprofile = []
-            for y in ben_key_list:
-                for name in self.masters.current_projects:
+        for i in range(3):
+            for x, key in enumerate(BEN_TYPE_KEY_LIST):
+                group_total = 0
+                for project in self.master.current_projects:
+                    ben_bl_index = self.master.bl_index[baseline][project]
                     try:
-                        ben = self.masters.master_data[
-                            self.masters.bl_index[name][i]
-                        ].data[name][y]
-                    except TypeError:
-                        ben = 0
+                        cash = round(
+                            self.master.master_data[ben_bl_index[i]].data[
+                                project
+                            ][key[0]]
+                        )
+                        uncash = round(
+                            self.master.master_data[ben_bl_index[i]].data[
+                                project
+                            ][key[1]]
+                        )
+                        economic = round(
+                            self.master.master_data[ben_bl_index[i]].data[
+                                project
+                            ][key[2]]
+                        )
+                        disben = round(
+                            self.master.master_data[ben_bl_index[i]].data[
+                                project
+                            ][key[3]]
+                        )
 
-                    if y is ben_key_list[0]:
-                        ben_achieved.append(ben)
-                    if y is ben_key_list[1]:
-                        ben_profile.append(ben)
-                    if y is ben_key_list[2]:
-                        ben_unprofile.append(ben)
+                        total = round(cash + uncash + economic + disben)
+                        group_total += total
+                    except TypeError:  # handle None types, which are present if project not reporting last quarter.
+                        cash = 0
+                        uncash = 0
+                        economic = 0
+                        disben = 0
+                        total = 0
+                        group_total += total
 
-            achieved.append(sum(ben_achieved))
-            profile.append(sum(ben_profile) - (sum(ben_achieved) + sum(ben_unprofile)))
-            unprofile.append(sum(ben_unprofile))
-            total.append(sum(ben_profile))
+                    if i == 0:  # current quarter
+                        if x == 0:  # spent
+                            group_cash_dev += cash
+                            group_uncash_dev += uncash
+                            group_economic_dev += economic
+                            group_disben_dev += disben
+                        if x == 1:  # profiled
+                            group_cash_profiled += cash
+                            group_uncash_profiled += uncash
+                            group_economic_profiled += economic
+                            group_disben_profiled += disben
+                        if x == 2:  # unprofiled
+                            group_cash_unprofiled += cash
+                            group_uncash_unprofiled += uncash
+                            group_economic_unprofiled += economic
+                            group_disben_unprofiled += disben
 
-        cat_achieved = []
-        cat_profile = []
-        cat_unprofile = []
-        disbenefit = []
+                if x == 0:  # spent
+                    delivered.append(group_total)
+                if x == 1:  # profiled
+                    profiled.append(group_total)
+                if x == 2:  # unprofiled
+                    unprofiled.append(group_total)
 
-        for x in range(4):
-            ben_cat_achieved = []
-            ben_cat_profile = []
-            ben_cat_unprofile = []
-            for y in ben_type_key_list:
-                for name in self.masters.current_projects:
+        cat_spent = [group_cash_dev, group_uncash_dev, group_economic_dev, group_disben_dev]
+        cat_profiled = [group_cash_profiled, group_uncash_profiled, group_economic_profiled, group_disben_profiled]
+        cat_unprofiled = [group_cash_unprofiled, group_uncash_unprofiled, group_economic_unprofiled,
+                          group_disben_unprofiled]
+        final_cat_profiled = calculate_profiled(cat_profiled, cat_spent, cat_unprofiled)
+        all_profiled = calculate_profiled(profiled, delivered, unprofiled)
 
-                    ben = self.masters.master_data[0].data[name][y[x]]
-                    if ben is None:
-                        ben = 0
-
-                    if y is ben_type_key_list[0]:
-                        ben_cat_achieved.append(ben)
-                    if y is ben_type_key_list[1]:
-                        ben_cat_profile.append(ben)
-                    if y is ben_type_key_list[2]:
-                        ben_cat_unprofile.append(ben)
-
-                    if "Disbenefit" in y[x]:
-                        disbenefit.append(ben)
-
-            cat_achieved.append(sum(ben_cat_achieved))
-            cat_profile.append(
-                sum(ben_cat_profile) - (sum(ben_cat_achieved) + sum(ben_cat_unprofile))
-            )
-            cat_unprofile.append(sum(ben_cat_unprofile))
-            disbenefit.append(sum(disbenefit))
-
-        self.total = total
-        self.achieved = achieved
-        self.profile = profile
-        self.unprofile = unprofile
-        self.cat_achieved = cat_achieved
-        self.cat_profile = cat_profile
-        self.cat_unprofile = cat_unprofile
-        self.disbenefit = disbenefit
+        self.cat_spent = cat_spent
+        self.cat_profiled = final_cat_profiled
+        self.cat_unprofiled = cat_unprofiled
+        self.spent = delivered
+        self.profiled = all_profiled
+        self.unprofiled = unprofiled
+        self.y_scale_max = max(profiled)
+        self.y_scale_min = min([group_disben_dev, group_disben_profiled, group_disben_unprofiled])
 
 
 def vfm_matplotlib_graph(labels, current_qrt, last_qrt, title):
@@ -2465,16 +2505,21 @@ def total_costs_benefits_bar_chart_project(cost_master: CostData) -> plt.figure:
     return fig
 
 
-def total_costs_benefits_bar_chart_group(cost_master: CostData) -> plt.figure:
+def total_costs_benefits_bar_chart_group(cost_master: CostData, ben_master: BenefitsData, title: str) -> plt.figure:
     """compiles a matplotlib bar chart which shows total project costs"""
     fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2)  # four sub plots
 
     fig.suptitle(
-        "Group costs and benefits analysis",  # have option for providing chart name
+        title,
         fontweight="bold",
     )  # title
 
-    # Spent, Profiled and Unprofiled chart
+    # Y AXIS SCALE MAX
+    highest_int = max([cost_master.y_scale_max, ben_master.y_scale_max])
+    y_max = highest_int + percentage(5, highest_int)
+    ax1.set_ylim(0, y_max)
+
+    # COST SPENT, PROFILED AND UNPROFILED
     labels = ["Latest", "Last Quarter", "Baseline"]
     width = 0.5
     ax1.bar(labels, np.array(cost_master.spent), width, label="Spent")
@@ -2506,12 +2551,7 @@ def total_costs_benefits_bar_chart_group(cost_master: CostData) -> plt.figure:
         fontweight="bold",
     )
 
-    # scaling y axis
-    # y axis value setting so it takes either highest ben or cost figure
-    y_max = cost_master.y_scale_max + percentage(5, cost_master.y_scale_max)
-    ax1.set_ylim(0, y_max)
-
-    # rdel, cdel and ngov totals bar chart
+    # RDEL, CDEL AND NON-GOV TOTALS BAR CHART
     labels = ["RDEL", "CDEL", "Non Gov"]
     width = 0.5
     ax2.bar(
@@ -2546,40 +2586,41 @@ def total_costs_benefits_bar_chart_group(cost_master: CostData) -> plt.figure:
 
     ax2.set_ylim(0, y_max)  # scale y axis max
 
-    # benefits change
-    # labels = ['Baseline', 'Last Quarter', 'Latest']
-    # width = 0.5
-    # ax2.bar(labels, delivered_ben, width, label='Delivered')
-    # ax2.bar(labels, profiled_ben, width, bottom=delivered_ben, label='Profiled')
-    # ax2.bar(labels, unprofiled_ben, width, bottom=delivered_ben + profiled_ben, label='Unprofiled')
-    # ax2.legend(prop={'size': 6})
-    # ax2.set_ylabel('Benefits (£m)')
-    # ylab2 = ax2.yaxis.get_label()
-    # ylab2.set_style('italic')
-    # ylab2.set_size(8)
-    # ax2.tick_params(axis='x', which='major', labelsize=6)
-    # ax2.tick_params(axis='y', which='major', labelsize=6)
-    # ax2.set_title('Fig 3 - ben total change over time', loc='left', fontsize=8, fontweight='bold')
-    #
-    # ax2.set_ylim(0, y_max)
-    #
-    # # benefits break down
-    # labels = ['Cashable', 'Non-Cashable', 'Economic', 'Disbenefit']
-    # width = 0.5
-    # ax4.bar(labels, type_delivered_ben, width, label='Delivered')
-    # ax4.bar(labels, type_profiled_ben, width, bottom=type_delivered_ben, label='Profiled')
-    # ax4.bar(labels, type_unprofiled_ben, width, bottom=type_delivered_ben + type_profiled_ben, label='Unprofiled')
-    # ax4.legend(prop={'size': 6})
-    # ax4.set_ylabel('Benefits (£m)')
-    # ylab4 = ax4.yaxis.get_label()
-    # ylab4.set_style('italic')
-    # ylab4.set_size(8)
-    # ax4.tick_params(axis='x', which='major', labelsize=6)
-    # ax4.tick_params(axis='y', which='major', labelsize=6)
-    # ax4.set_title('Fig 4 - benefits profile type', loc='left', fontsize=8, fontweight='bold')
-    #
-    # y_min = min(type_disbenefit_ben)
-    # ax4.set_ylim(y_min, y_max)
+    # BENEFITS SPENT, PROFILED AND UNPROFILED
+    labels = ["Latest", "Last Quarter", "Baseline"]
+    width = 0.5
+    ax3.bar(labels, np.array(ben_master.spent), width, label='Delivered')
+    ax3.bar(labels, np.array(ben_master.profiled), width, bottom=np.array(ben_master.spent), label='Profiled')
+    ax3.bar(labels, np.array(ben_master.unprofiled), width,
+            bottom=np.array(ben_master.spent) + np.array(ben_master.profiled), label='Unprofiled')
+    ax3.legend(prop={'size': 6})
+    ax3.set_ylabel('Benefits (£m)')
+    ylab3 = ax3.yaxis.get_label()
+    ylab3.set_style('italic')
+    ylab3.set_size(8)
+    ax3.tick_params(axis='x', which='major', labelsize=6)
+    ax3.tick_params(axis='y', which='major', labelsize=6)
+    ax3.set_title('Fig 3 - ben total change over time', loc='left', fontsize=8, fontweight='bold')
+
+    ax3.set_ylim(0, y_max)
+
+    # BENEFITS CASHABLE, NON-CASHABLE, ECONOMIC, DISBENEFIT BAR CHART
+    labels = ['Cashable', 'Non-Cashable', 'Economic', 'Disbenefit']
+    width = 0.5
+    ax4.bar(labels, np.array(ben_master.cat_spent), width, label='Delivered')
+    ax4.bar(labels, np.array(ben_master.cat_profiled), width, bottom=np.array(ben_master.cat_spent), label='Profiled')
+    ax4.bar(labels, np.array(ben_master.cat_unprofiled), width,
+            bottom=np.array(ben_master.cat_spent) + np.array(ben_master.cat_profiled), label='Unprofiled')
+    ax4.legend(prop={'size': 6})
+    ax4.set_ylabel('Benefits (£m)')
+    ylab4 = ax4.yaxis.get_label()
+    ylab4.set_style('italic')
+    ylab4.set_size(8)
+    ax4.tick_params(axis='x', which='major', labelsize=6)
+    ax4.tick_params(axis='y', which='major', labelsize=6)
+    ax4.set_title('Fig 4 - benefits profile type', loc='left', fontsize=8, fontweight='bold')
+
+    ax4.set_ylim(ben_master.y_scale_min, y_max)
 
     # size of chart and fit
     # fig.canvas.draw()
@@ -2622,3 +2663,98 @@ def check_baselines(master: Master) -> None:
 
 def percentage(percent: int, whole: float) -> int:
     return round((percent * whole) / 100.0)
+
+
+def get_old_fy_cost_data(master_file: typing.TextIO, project_id_wb: typing.TextIO) -> None:
+    """
+    Gets all old financial data from a specified master and places into project id document.
+    """
+    master = project_data_from_master(master_file, 1, 2010)  # random year specified as not in use
+    wb = load_workbook(project_id_wb)
+    ws = wb.active
+
+    for i in range(1, ws.max_column + 1):
+        project_name = ws.cell(row=1, column=1 + i).value
+        for row_num in range(2, ws.max_row + 1):
+            key = ws.cell(row=row_num, column=1).value
+            try:
+                if key in master.data[project_name].keys():
+                    ws.cell(row=row_num, column=1 + i).value = master.data[project_name][key]
+            except KeyError:  # project might not be present in quarter
+                pass
+
+    wb.save(project_id_wb)
+
+
+def run_get_old_fy_data(master_files_list: list, project_id_wb: typing.TextIO) -> None:
+    for f in reversed(master_files_list):  # reversed so it gets the latest data in masters
+        get_old_fy_cost_data(f, project_id_wb)
+
+
+def place_old_fy_data_into_master_wb(master_file: typing.TextIO, project_id_wb: typing.TextIO) -> None:
+    """
+    places all old financial year data into master files.
+    """
+    id_master = project_data_from_master(project_id_wb, 2, 2020)  # random year specify as not used
+    wb = load_workbook(master_file)
+    ws = wb.active
+
+    for i in range(1, ws.max_column + 1):
+        project_name = ws.cell(row=1, column=1 + i).value
+        for row_num in range(2, ws.max_row + 1):
+            key = ws.cell(row=row_num, column=1).value
+            try:
+                if key in id_master.data[project_name].keys():
+                    ws.cell(row=row_num, column=1 + i).value = id_master.data[project_name][key]
+            except KeyError:  # project might not be present in quarter
+                pass
+
+    wb.save(master_file)
+
+
+def run_place_old_fy_data_into_masters(master_files_list: list, project_id_wb: typing.TextIO) -> None:
+    for f in master_files_list:
+        place_old_fy_data_into_master_wb(f, project_id_wb)
+
+
+def put_key_change_master_into_dict(key_change_file: typing.TextIO) -> Dict[str, str]:
+    """
+    places key information i.e. keys old and new names from wb into a python dictionary
+    """
+    wb = load_workbook(key_change_file)
+    ws = wb.active
+
+    output_dict = {}
+    for x in range(1, ws.max_row + 1):
+        key = ws.cell(row=x, column=1).value
+        codename = ws.cell(row=x, column=2).value
+        output_dict[key] = codename
+
+    return output_dict
+
+
+def alter_wb_master_file_key_names(master_file: typing.TextIO, key_change_dict: Dict[str, str]) -> workbook:
+    """
+    places altered key names, from the key change master dictionary, into master wb(s).
+    """
+    wb = load_workbook(master_file)
+    ws = wb.active
+
+    for row_num in range(2, ws.max_row + 1):
+        for key in key_change_dict.keys():  # changes stored in the altered key change log wb
+            if ws.cell(row=row_num, column=1).value == key:
+                ws.cell(row=row_num, column=1).value = \
+                    key_change_dict[key]
+        for year in YEAR_LIST:  # changes to yearly profile keys
+            if ws.cell(row=row_num, column=1).value == year + " CDEL Forecast Total":
+                ws.cell(row=row_num, column=1).value = year + " CDEL Forecast one off new costs"
+
+    return wb.save(master_file)
+
+
+def run_change_keys(master_files_list: list, key_dict: Dict[str, str]) -> None:
+    """
+    runs code which replaces old key names with new names in master excel workbooks.
+    """
+    for f in master_files_list:
+        alter_wb_master_file_key_names(f, key_dict)
