@@ -222,7 +222,7 @@ class Projects:
     a417 = "A417 Air Balloon"
     a428 = "A428 Black Cat to Caxton Gibbet"
     a66 = "A66 Northern Trans-Pennine"
-    brighton_ml = "Brighton Mainline Upgrade Upgrade Programme (BMUP)"
+    brighton_ml = "Brighton Mainline Upgrade Programme"
     cvs = "Commercial Vehicle Services (CVS)"
     east_coast_digital = "East Coast Digital Programme"
     east_coast_mainline = "East Coast Mainline Programme"
@@ -257,7 +257,7 @@ class Projects:
     sarh2 = "2nd Generation UK Search and Rescue Aviation"
     south_west_route_capacity = "South West Route Capacity"
     thameslink = "Thameslink Programme"
-    tru = "Transpennine Route Upgrade (TRU)"
+    tru = "Transpennine Route Upgrade"
     wrlth = "Western Rail Link to Heathrow"
 
     # test masters project names
@@ -270,17 +270,21 @@ class Projects:
 
     # lists of projects names in groups
     he = [lower_thames_crossing, a303, a14, a66, a12, m4, a428, a417, a385]
+    rail = [crossrail, thameslink, iep, east_coast_mainline, east_coast_digital, midland_mainline, nwe,
+            south_west_route_capacity, brighton_ml, midlands_rail_hub, gwrm, tru, wrlth]
     hs2 = [hs2_1, hs2_2a, hs2_2b]
     hsmrpg = [
         hs2_1,
         hs2_2a,
         hs2_2b,
-        ewr_central,
-        ewr_western,
+        ewr_config1,
+        ewr_config2,
+        ewr_config3,
         hexagon,
         northern_powerhouse,
     ]
     ewr = [ewr_config1, ewr_config2, ewr_config3]
+    dvsa = [ftts, ist]
     all_not_hs2 = [
         "2nd Generation UK Search and Rescue Aviation",
         "A12 Chelmsford to A120 widening",
@@ -314,7 +318,6 @@ class Projects:
         "Transpennine Route Upgrade",
         "Western Rail Link to Heathrow",
     ]
-
     fbc_stage = [
         hs2_1,
         crossrail,
@@ -1330,7 +1333,7 @@ class CostData:
         # self.cost_totals()
         # self.get_profile()
 
-    def get_cost_totals_group(self, group: List[str], baseline: str) -> list:
+    def get_cost_totals_group(self, group: List[str], baseline: str) -> None:
         """Returns lists containing the sum total of group (of projects) costs,
         sliced in different ways. Cumbersome for loop used at the moment, but
         is the least cumbersome loop I could design!"""
@@ -1479,7 +1482,7 @@ class CostData:
         self.unprofiled = unprofiled
         self.y_scale_max = max(profiled)
 
-    def get_cost_totals_project(self, project_name: str, baseline: str) -> list:
+    def get_cost_totals_project(self, project_name: str, baseline: str) -> None:
         """Returns lists containing the sum total of project costs, sliced in different
         ways. Cumbersome for loop used at the moment, but is the least cumbersome loop
         I could design!"""
@@ -1617,9 +1620,10 @@ class CostData:
             profiled
         )  # necessary for matplotlib y axis scaling
 
-    def get_profile_group(self, baseline: str) -> None:
+    def get_profile_group(self, group: List[str], baseline: str) -> None:
         """Returns several lists which contain the sum of different cost profiles for the group of project
         contained with the master"""
+        self.group = group
         self.baseline = baseline
 
         current_profile = []
@@ -1643,11 +1647,11 @@ class CostData:
                 cdel_total = 0
                 ngov_total = 0
                 for cost_type in COST_KEY_LIST:
-                    for project in self.master.current_projects:
-                        project_bl_index = self.master.bl_index[baseline][project]
+                    for project_name in self.group:
+                        project_bl_index = self.master.bl_index[baseline][project_name]
                         try:
                             cost = self.master.master_data[project_bl_index[i]].data[
-                                project
+                                project_name
                             ][year + cost_type]
                             if cost is None:
                                 cost = 0
@@ -1657,7 +1661,7 @@ class CostData:
                             cost_total += cost
                         except TypeError:  # Handles projects not present in the previous quarter
                             missing_projects.append(
-                                str(project)
+                                str(project_name)
                             )  # projects added here. message is below.
                             cost = 0
                             cost_total += cost
@@ -1704,7 +1708,7 @@ class CostData:
         self.cdel_profile = cdel_current_profile
         self.ngov_profile = ngov_current_profile
 
-    def get_profile_project(self, project_name: str, baseline: str) -> list:
+    def get_profile_project(self, project_name: str, baseline: str) -> None:
         """Returns several lists which contain different cost profiles for a given project"""
         self.project_name = project_name
         self.baseline = baseline
@@ -1798,6 +1802,9 @@ class BenefitsData:
         self.y_scale_min = 0
         self.y_scale_max_project = 0
         self.y_scale_min_project = 0
+        self.economic_max = 0
+        self.economic_max_project = 0
+
 
     def get_ben_totals_group(self, group: List[str], baseline: str) -> list:
         """Returns lists containing the sum total of group (of projects) benefits,
@@ -1927,6 +1934,9 @@ class BenefitsData:
         self.y_scale_min = min(
             [group_disben_dev, group_disben_profiled, group_disben_unprofiled]
         )
+        self.economic_max = max(
+            [group_economic_dev, group_economic_unprofiled, group_economic_profiled]
+        )
 
     def get_ben_totals_project(self, project_name: str, baseline: str) -> list:
         """Returns lists containing the sum total of project benefits, sliced in different
@@ -2031,6 +2041,9 @@ class BenefitsData:
         self.y_scale_min_project = min(
             [cat_profiled[-1], cat_dev[-1], cat_unprofiled[-1]]
         )  # last of each list is disbenefit
+        self.economic_max_project = max(
+            [cat_profiled[-2], cat_dev[-2], cat_profiled[-2]]
+        )  # second last of each is economic
 
 
 def vfm_matplotlib_graph(labels, current_qrt, last_qrt, title):
@@ -2738,7 +2751,11 @@ def total_costs_benefits_bar_chart_project(
         "Fig 4 - benefits profile type", loc="left", fontsize=8, fontweight="bold"
     )
 
-    ax4.set_ylim(ben_master.y_scale_min_project, y_max)
+    y_min = ben_master.y_scale_min_project + percentage(40, ben_master.y_scale_min_project)
+    if ben_master.economic_max_project > y_max:
+        ax4.set_ylim(y_min, y_max)
+    else:
+        ax4.set_ylim(y_min, y_max)  # possible for economic benefits figure to be the largest
 
     # size of chart and fit
     # fig.canvas.draw()
@@ -2895,8 +2912,11 @@ def total_costs_benefits_bar_chart_group(
         "Fig 4 - benefits profile type", loc="left", fontsize=8, fontweight="bold"
     )
 
-    y_min = ben_master.y_scale_min + percentage(5, ben_master.y_scale_min)
-    ax4.set_ylim(y_min, y_max)  # TODO look at the min scaling
+    y_min = ben_master.y_scale_min + percentage(40, ben_master.y_scale_min)
+    if ben_master.economic_max > y_max:
+        ax4.set_ylim(y_min, y_max)
+    else:
+        ax4.set_ylim(y_min, y_max)  # possible for economic benefits figure to be the largest
 
     # size of chart and fit
     # fig.canvas.draw()
