@@ -1308,12 +1308,6 @@ class CostData:
         self.spent = []
         self.profiled = []
         self.unprofiled = []
-        self.cat_spent_project = []
-        self.cat_profiled_project = []
-        self.cat_unprofiled_project = []
-        self.spent_project = []
-        self.profiled_project = []
-        self.unprofiled_project = []
         self.current_profile = []
         self.last_profile = []
         self.baseline_profile_one = []
@@ -1321,19 +1315,10 @@ class CostData:
         self.rdel_profile = []
         self.cdel_profile = []
         self.ngov_profile = []
-        self.current_profile_project = []
-        self.last_profile_project = []
-        self.baseline_profile_one_project = []
-        self.baseline_profile_two_project = []
-        self.rdel_profile_project = []
-        self.cdel_profile_project = []
-        self.ngov_profile_project = []
         self.y_scale_max = 0
-        self.y_scale_max_project = 0
-        # self.cost_totals()
-        # self.get_profile()
+        self.entity = []
 
-    def get_cost_totals_group(self, group: List[str], baseline: str) -> None:
+    def get_cost_totals(self, group: List[str] or str, baseline: str) -> None:
         """Returns lists containing the sum total of group (of projects) costs,
         sliced in different ways. Cumbersome for loop used at the moment, but
         is the least cumbersome loop I could design!"""
@@ -1366,10 +1351,12 @@ class CostData:
         group_cdel_unprofiled = 0
         group_ngov_unprofiled = 0
 
+        group = string_conversion(self.group)
+
         for i in range(3):
             for x, key in enumerate(COST_TYPE_KEY_LIST):
                 group_total = 0
-                for project_name in self.group:
+                for project_name in group:
                     cost_bl_index = self.master.bl_index[baseline][project_name]
                     try:
                         rdel = self.master.master_data[cost_bl_index[i]].data[
@@ -1481,146 +1468,9 @@ class CostData:
         self.profiled = all_profiled
         self.unprofiled = unprofiled
         self.y_scale_max = max(profiled)
+        self.entity = group
 
-    def get_cost_totals_project(self, project_name: str, baseline: str) -> None:
-        """Returns lists containing the sum total of project costs, sliced in different
-        ways. Cumbersome for loop used at the moment, but is the least cumbersome loop
-        I could design!"""
-
-        self.project_name = project_name
-        self.baseline = baseline
-
-        # where to store this function. need it at a global level for CostData Class
-        def calculate_profiled(p: List[int], s: List[int], unpro: List[int]) -> list:
-            """small helper function to calculate the proper profiled amount. This is necessary as
-            other wise 'profiled' would actually be the total figure.
-            p = profiled list
-            s = spent list
-            unpro = unprofiled list"""
-            f_profiled = []
-            for y, amount in enumerate(p):
-                t = amount - (s[y] + unpro[y])
-                f_profiled.append(t)
-            return f_profiled
-
-        spent = []
-        profiled = []
-        unprofiled = []
-        cat_spent = []
-        cat_profiled = []
-        cat_unprofiled = []
-
-        cost_bl_index = self.master.bl_index[baseline][self.project_name]
-
-        for i in range(len(cost_bl_index)):
-            for x, key in enumerate(COST_TYPE_KEY_LIST):
-                try:
-                    rdel = self.master.master_data[cost_bl_index[i]].data[project_name][
-                        key[0]
-                    ]
-                    if rdel is None:
-                        rdel = 0
-
-                    cdel = self.master.master_data[cost_bl_index[i]].data[project_name][
-                        key[1]
-                    ]
-                    if cdel is None:
-                        cdel = 0
-
-                    ngov = self.master.master_data[cost_bl_index[i]].data[project_name][
-                        key[2]
-                    ]
-                    if ngov is None:
-                        ngov = 0
-                    total = round(rdel + cdel + ngov)
-                except TypeError:  # handle None types, which are present if project not reporting last quarter.
-                    rdel = 0
-                    cdel = 0
-                    ngov = 0
-                    total = 0
-
-                if x == 0:
-                    try:  # handling for spend to date figures which are not present in all masters
-                        rdel_std = self.master.master_data[cost_bl_index[i]].data[
-                            self.project_name
-                        ]["20-21 RDEL STD one off new costs"]
-                        cdel_std = self.master.master_data[cost_bl_index[i]].data[
-                            self.project_name
-                        ]["20-21 CDEL STD one off new costs"]
-                        ngov_std = self.master.master_data[cost_bl_index[i]].data[
-                            self.project_name
-                        ]["20-21 CDEL STD Non Gov costs"]
-                        std_list = [
-                            rdel_std,
-                            cdel_std,
-                            ngov_std,
-                        ]  # converts none types to zero
-                        for s, std in enumerate(std_list):
-                            if std is None:
-                                std_list[s] = 0
-                        spent_total = round(total + sum(std_list))
-                        spent.append(spent_total)
-                    except (KeyError, TypeError):
-                        spent.append(total)
-                if x == 1:
-                    profiled.append(total)
-                if x == 2:
-                    unprofiled.append(total)
-
-                if i == 0:
-                    if x == 0:
-                        try:  # handling for spend to date figures which are not present in all masters
-                            rdel_std = self.master.master_data[cost_bl_index[i]].data[
-                                self.project_name
-                            ]["20-21 RDEL STD one off new costs"]
-                            if rdel_std is None:
-                                rdel_std = 0
-                            cdel_std = self.master.master_data[cost_bl_index[i]].data[
-                                self.project_name
-                            ]["20-21 CDEL STD one off new costs"]
-                            if cdel_std is None:
-                                cdel_std = 0
-
-                            ngov_std = self.master.master_data[cost_bl_index[i]].data[
-                                self.project_name
-                            ]["20-21 CDEL STD Non Gov costs"]
-                            if ngov_std is None:
-                                ngov_std = 0
-
-                            rdel_spent = round(rdel + rdel_std)
-                            cdel_spent = round(cdel + cdel_std)
-                            ngov_spent = round(ngov + ngov_std)
-                            cat_spent.append(rdel_spent)
-                            cat_spent.append(cdel_spent)
-                            cat_spent.append(ngov_spent)
-                        except KeyError:
-                            cat_spent.append(rdel)
-                            cat_spent.append(cdel)
-                            cat_spent.append(ngov)
-                    if x == 1:
-                        cat_profiled.append(rdel)
-                        cat_profiled.append(cdel)
-                        cat_profiled.append(ngov)
-                    if x == 2:
-                        cat_unprofiled.append(rdel)
-                        cat_unprofiled.append(cdel)
-                        cat_unprofiled.append(ngov)
-
-        final_cat_profiled = calculate_profiled(cat_profiled, cat_spent, cat_unprofiled)
-
-        all_profiled = calculate_profiled(profiled, spent, unprofiled)
-
-        self.cat_spent_project = cat_spent
-        self.cat_profiled_project = final_cat_profiled
-        self.cat_unprofiled_project = cat_unprofiled
-        self.spent_project = spent[:3]  # only returning three for now
-        self.profiled_project = all_profiled[:3]
-        self.unprofiled_project = unprofiled[:3]
-        self.y_scale_max_project = max(
-            profiled
-        )  # necessary for matplotlib y axis scaling
-
-    def get_profile_group(self, group: List[str], baseline: str) -> None:
+    def get_cost_profile(self, group: List[str] or str, baseline: str) -> None:
         """Returns several lists which contain the sum of different cost profiles for the group of project
         contained with the master"""
         self.group = group
@@ -1633,8 +1483,9 @@ class CostData:
         rdel_current_profile = []
         cdel_current_profile = []
         ngov_current_profile = []
-
         missing_projects = []
+
+        group = string_conversion(self.group)
 
         for i in range(3):
             yearly_profile = []
@@ -1647,7 +1498,7 @@ class CostData:
                 cdel_total = 0
                 ngov_total = 0
                 for cost_type in COST_KEY_LIST:
-                    for project_name in self.group:
+                    for project_name in group:
                         project_bl_index = self.master.bl_index[baseline][project_name]
                         try:
                             cost = self.master.master_data[project_bl_index[i]].data[
@@ -1707,80 +1558,7 @@ class CostData:
         self.rdel_profile = rdel_current_profile
         self.cdel_profile = cdel_current_profile
         self.ngov_profile = ngov_current_profile
-
-    def get_profile_project(self, project_name: str, baseline: str) -> None:
-        """Returns several lists which contain different cost profiles for a given project"""
-        self.project_name = project_name
-        self.baseline = baseline
-
-        current_profile = []
-        last_profile = []
-        baseline_profile_one = []
-        baseline_profile_two = []
-        rdel_current_profile = []
-        cdel_current_profile = []
-        ngov_current_profile = []
-
-        cost_bl_index = self.master.bl_index[baseline][self.project_name]
-        for i in range(len(cost_bl_index)):
-            yearly_profile = []
-            rdel_yearly_profile = []
-            cdel_yearly_profile = []
-            ngov_yearly_profile = []
-            for year in YEAR_LIST:
-                cost_total = 0
-                for cost_type in COST_KEY_LIST:
-                    try:
-                        cost = self.master.master_data[cost_bl_index[i]].data[
-                            self.project_name
-                        ][year + cost_type]
-                        if cost is None:
-                            cost = 0
-                        cost_total += cost
-                    except KeyError:  # to handle data across different financial years
-                        cost = 0
-                        cost_total += cost
-                    except TypeError:  # handle None types, which are present if project not reporting last quarter.
-                        if i == 1:
-                            cost_total = None
-                            print(
-                                "NOTE: "
-                                + project_name
-                                + " was not reporting last quarter so no last"
-                                " quarter profile so no last quarter profile will be provided"
-                            )
-                            break
-                    if cost_type == COST_KEY_LIST[0]:  # rdel
-                        rdel_total = cost
-                    if cost_type == COST_KEY_LIST[1]:  # cdel
-                        cdel_total = cost
-                    if cost_type == COST_KEY_LIST[2]:  # ngov
-                        ngov_total = cost
-
-                yearly_profile.append(cost_total)
-                rdel_yearly_profile.append(rdel_total)
-                cdel_yearly_profile.append(cdel_total)
-                ngov_yearly_profile.append(ngov_total)
-
-            if i == 0:
-                current_profile = yearly_profile
-                rdel_current_profile = rdel_yearly_profile
-                cdel_current_profile = cdel_yearly_profile
-                ngov_current_profile = ngov_yearly_profile
-            if i == 1:
-                last_profile = yearly_profile
-            if i == 2:
-                baseline_profile_one = yearly_profile
-            if i == 3:
-                baseline_profile_two = yearly_profile
-
-        self.current_profile_project = current_profile
-        self.last_profile_project = last_profile
-        self.baseline_profile_one_project = baseline_profile_one
-        self.baseline_profile_two_project = baseline_profile_two
-        self.rdel_profile_project = rdel_current_profile
-        self.cdel_profile_project = cdel_current_profile
-        self.ngov_profile_project = ngov_current_profile
+        self.entity = group
 
 
 class BenefitsData:
@@ -1792,21 +1570,11 @@ class BenefitsData:
         self.delivered = []
         self.profiled = []
         self.unprofiled = []
-        self.cat_delivered_project = []
-        self.cat_profiled_project = []
-        self.cat_unprofiled_project = []
-        self.delivered_project = []
-        self.profiled_project = []
-        self.unprofiled_project = []
         self.y_scale_max = 0
         self.y_scale_min = 0
-        self.y_scale_max_project = 0
-        self.y_scale_min_project = 0
         self.economic_max = 0
-        self.economic_max_project = 0
 
-
-    def get_ben_totals_group(self, group: List[str], baseline: str) -> list:
+    def get_ben_totals(self, group: List[str] or str, baseline: str) -> None:
         """Returns lists containing the sum total of group (of projects) benefits,
         sliced in different ways. Cumbersome for loop used at the moment, but
         is the least cumbersome loop I could design!"""
@@ -1829,6 +1597,8 @@ class BenefitsData:
         group_economic_unprofiled = 0
         group_disben_unprofiled = 0
 
+        group = string_conversion(self.group)
+
         # where to store this function. need it at a global level for CostData Class
         def calculate_profiled(p: List[int], s: List[int], unpro: List[int]) -> list:
             """small helper function to calculate the proper profiled amount. This is necessary as
@@ -1845,7 +1615,7 @@ class BenefitsData:
         for i in range(3):
             for x, key in enumerate(BEN_TYPE_KEY_LIST):
                 group_total = 0
-                for project in self.group:
+                for project in group:
                     ben_bl_index = self.master.bl_index[baseline][project]
                     try:
                         cash = round(
@@ -1938,113 +1708,6 @@ class BenefitsData:
             [group_economic_dev, group_economic_unprofiled, group_economic_profiled]
         )
 
-    def get_ben_totals_project(self, project_name: str, baseline: str) -> list:
-        """Returns lists containing the sum total of project benefits, sliced in different
-        ways. Cumbersome for loop used at the moment, but is the least cumbersome loop
-        I could design!"""
-
-        self.project_name = project_name
-        self.baseline = baseline
-
-        # where to store this function. need it at a global level for CostData Class
-        def calculate_profiled(p: List[int], s: List[int], unpro: List[int]) -> list:
-            """small helper function to calculate the proper profiled amount. This is necessary as
-            other wise 'profiled' would actually be the total figure.
-            p = profiled list
-            s = spent list
-            unpro = unprofiled list"""
-            f_profiled = []
-            for y, amount in enumerate(p):
-                t = amount - (s[y] + unpro[y])
-                f_profiled.append(t)
-            return f_profiled
-
-        delivered = []
-        profiled = []
-        unprofiled = []
-        cat_dev = []
-        cat_profiled = []
-        cat_unprofiled = []
-
-        bens_bl_index = self.master.bl_index[baseline][self.project_name]
-
-        for i in range(len(bens_bl_index)):
-            for x, key in enumerate(BEN_TYPE_KEY_LIST):
-                try:
-                    cash = round(
-                        self.master.master_data[bens_bl_index[i]].data[
-                            self.project_name
-                        ][key[0]]
-                    )
-                    uncash = round(
-                        self.master.master_data[bens_bl_index[i]].data[
-                            self.project_name
-                        ][key[1]]
-                    )
-                    economic = round(
-                        self.master.master_data[bens_bl_index[i]].data[
-                            self.project_name
-                        ][key[2]]
-                    )
-                    disben = round(
-                        self.master.master_data[bens_bl_index[i]].data[
-                            self.project_name
-                        ][key[3]]
-                    )
-                    total = round(cash + uncash + economic + disben)
-                except TypeError:  # handle None types, which are present if project not reporting last quarter.
-                    cash = 0
-                    uncash = 0
-                    economic = 0
-                    disben = 0
-                    total = 0
-
-                if x == 0:
-                    delivered.append(total)
-                if x == 1:
-                    profiled.append(total)
-                if x == 2:
-                    unprofiled.append(total)
-
-                if i == 0:
-                    if x == 0:
-                        cat_dev.append(cash)
-                        cat_dev.append(uncash)
-                        cat_dev.append(economic)
-                        cat_dev.append(disben)
-                    if x == 1:
-                        cat_profiled.append(cash)
-                        cat_profiled.append(uncash)
-                        cat_profiled.append(economic)
-                        cat_profiled.append(disben)
-                    if x == 2:
-                        cat_unprofiled.append(cash)
-                        cat_unprofiled.append(uncash)
-                        cat_unprofiled.append(economic)
-                        cat_unprofiled.append(disben)
-
-            final_cat_profiled = calculate_profiled(
-                cat_profiled, cat_dev, cat_unprofiled
-            )
-
-        all_profiled = calculate_profiled(profiled, delivered, unprofiled)
-
-        self.cat_delivered_project = cat_dev
-        self.cat_profiled_project = final_cat_profiled
-        self.cat_unprofiled_project = cat_unprofiled
-        self.delivered_project = delivered[:3]  # only returning three for now
-        self.profiled_project = all_profiled[:3]
-        self.unprofiled_project = unprofiled[:3]
-        self.y_scale_max_project = max(
-            profiled
-        )  # necessary for matplotlib y axis scaling
-        self.y_scale_min_project = min(
-            [cat_profiled[-1], cat_dev[-1], cat_unprofiled[-1]]
-        )  # last of each list is disbenefit
-        self.economic_max_project = max(
-            [cat_profiled[-2], cat_dev[-2], cat_profiled[-2]]
-        )  # second last of each is economic
-
 
 def vfm_matplotlib_graph(labels, current_qrt, last_qrt, title):
     #  Need to split this strings over two lines on x axis
@@ -2093,105 +1756,7 @@ def vfm_matplotlib_graph(labels, current_qrt, last_qrt, title):
     plt.show()
 
 
-def project_cost_profile_graph(cost_master: CostData) -> plt.figure:
-    """Compiles a matplotlib line chart for PROJECT cost profile contained within cost_master class.
-    It creates two plots. First plot shows overall profile in current, last quarters anb
-    baseline form. Second plot shows rdel, cdel, and 'non-gov' cost profile"""
-
-    fig, (ax1, ax2) = plt.subplots(2)  # two subplots for this chart
-
-    """cost profile charts"""
-    fig.suptitle(
-        str(cost_master.project_name) + " Cost Profile", fontweight="bold"
-    )  # title
-
-    # Overall cost profile chart
-    ax1.plot(
-        YEAR_LIST,
-        np.array(cost_master.baseline_profile_one_project),
-        label="Baseline",
-        linewidth=3.0,
-        marker="o",
-    )
-    try:  # handling for None type, which is present if project not reporting last quarter.
-        ax1.plot(
-            YEAR_LIST,
-            np.array(cost_master.last_profile_project),
-            label="Last quarter",
-            linewidth=3.0,
-            marker="o",
-        )
-    except ValueError:
-        pass
-    ax1.plot(
-        YEAR_LIST,
-        np.array(cost_master.current_profile_project),
-        label="Latest",
-        linewidth=3.0,
-        marker="o",
-    )
-
-    # Chart styling
-    ax1.tick_params(axis="x", which="major", labelsize=6, rotation=45)
-    ax1.set_ylabel("Cost (£m)")
-    ylab1 = ax1.yaxis.get_label()
-    ylab1.set_style("italic")
-    ylab1.set_size(8)
-    ax1.grid(color="grey", linestyle="-", linewidth=0.2)
-    ax1.legend(prop={"size": 6})
-    ax1.set_title(
-        "Fig 1 - cost profile changes", loc="left", fontsize=8, fontweight="bold"
-    )
-
-    # plot rdel, cdel, ngov chart data
-    if (
-        sum(cost_master.ngov_profile_project) != 0
-    ):  # if statement as most projects don't have ngov cost.
-        ax2.plot(
-            YEAR_LIST,
-            np.array(cost_master.ngov_profile_project),
-            label="Non-Gov",
-            linewidth=3.0,
-            marker="o",
-        )
-    ax2.plot(
-        YEAR_LIST,
-        np.array(cost_master.cdel_profile_project),
-        label="CDEL",
-        linewidth=3.0,
-        marker="o",
-    )
-    if (
-        sum(cost_master.rdel_profile_project) != 0
-    ):  # if statement as lots of projects do not have rdel costs
-        ax2.plot(
-            YEAR_LIST,
-            np.array(cost_master.rdel_profile_project),
-            label="RDEL",
-            linewidth=3.0,
-            marker="o",
-        )
-
-    # rdel/cdel profile chart styling
-    ax2.tick_params(axis="x", which="major", labelsize=6, rotation=45)
-    ax2.set_xlabel("Financial Years")
-    ax2.set_ylabel("Cost (£m)")
-    xlab2 = ax2.xaxis.get_label()
-    ylab2 = ax2.yaxis.get_label()
-    xlab2.set_style("italic")
-    xlab2.set_size(8)
-    ylab2.set_style("italic")
-    ylab2.set_size(8)
-    ax2.grid(color="grey", linestyle="-", linewidth=0.2)
-    ax2.legend(prop={"size": 6})
-    ax2.set_title(
-        "Fig 2 - current cost type profile", loc="left", fontsize=8, fontweight="bold"
-    )
-
-    return fig
-
-
-def group_cost_profile_graph(cost_master: object, title: str):
+def cost_profile_graph(cost_master: CostData, *args: None or str):
     """Compiles a matplotlib line chart for costs of GROUP of projects contained within cost_master class.
     As as default last quarters profile is not included. It creates two plots. First plot shows overall
     profile in current, last quarters anb baseline form. Second plot shows rdel, cdel, and 'non-gov' cost profile"""
@@ -2199,7 +1764,10 @@ def group_cost_profile_graph(cost_master: object, title: str):
     fig, (ax1, ax2) = plt.subplots(2)  # two subplots for this chart
 
     """cost profile charts"""
-    fig.suptitle(title + " Cost Profile", fontweight="bold")  # title
+    if len(cost_master.entity) == 1:
+        fig.suptitle(cost_master.entity[0] + " Cost Profile", fontweight="bold")
+    else:
+        fig.suptitle(str(args) + " Cost Profile", fontweight="bold")  # title
 
     # Overall cost profile chart
     if (
@@ -2467,7 +2035,7 @@ def dca_narratives(doc: Document, master: Master, project_name: str) -> None:
         compare_text_new_and_old(text_one, text_two, doc)
 
 
-def year_cost_profile_chart(doc: Document, cost_master: CostData) -> None:
+def put_matplotlib_fig_into_word(doc: Document, fig) -> None:
     """Places line graph cost profile into word document"""
 
     new_section = doc.add_section(WD_SECTION_START.NEW_PAGE)  # new page
@@ -2477,14 +2045,11 @@ def year_cost_profile_chart(doc: Document, cost_master: CostData) -> None:
     new_section.page_width = new_width
     new_section.page_height = new_height
 
-    fig = project_cost_profile_graph(cost_master)
-
     # Size and shape of figure.
-    fig.canvas.draw()
-    fig.tight_layout(rect=[0, 0.03, 1, 0.95])  # for title
+    # fig.canvas.draw()
+    # fig.tight_layout(rect=[0, 0.03, 1, 0.95])  # for title
 
     # Place fig in word doc.
-    # plt.show()
     fig.savefig("cost_profile.png")
     doc.add_picture("cost_profile.png", width=Inches(8))  # to place nicely in doc
     os.remove("cost_profile.png")
@@ -2600,189 +2165,16 @@ def make_file_friendly(quarter_str: str) -> str:
     return re.sub(regex, r"Q\1_\2_\3", quarter_str)
 
 
-def total_costs_benefits_bar_chart_project(
-    cost_master: CostData, ben_master: BenefitsData
+def total_costs_benefits_bar_chart(
+    cost_master: CostData, ben_master: BenefitsData, *args: None or str
 ) -> plt.figure:
     """compiles a matplotlib bar chart which shows total project costs"""
-
     fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2)  # four sub plots
 
-    fig.suptitle(
-        str(cost_master.project_name) + " costs and benefits analysis",
-        fontweight="bold",
-    )  # title
-
-    # Y AXIS SCALE MAX
-    highest_int = max([cost_master.y_scale_max_project, ben_master.y_scale_max_project])
-    y_max = highest_int + percentage(5, highest_int)
-    ax1.set_ylim(0, y_max)
-
-    # Spent, Profiled and Unprofiled chart
-    labels = ["Latest", "Last Quarter", "Baseline"]
-    width = 0.5
-    ax1.bar(labels, np.array(cost_master.spent_project), width, label="Spent")
-    ax1.bar(
-        labels,
-        np.array(cost_master.profiled_project),
-        width,
-        bottom=np.array(cost_master.spent_project),
-        label="Profiled",
-    )
-    ax1.bar(
-        labels,
-        np.array(cost_master.unprofiled_project),
-        width,
-        bottom=np.array(cost_master.spent_project)
-        + np.array(cost_master.profiled_project),
-        label="Unprofiled",
-    )
-    ax1.legend(prop={"size": 6})
-    ax1.set_ylabel("Cost (£m)")
-    ylab1 = ax1.yaxis.get_label()
-    ylab1.set_style("italic")
-    ylab1.set_size(8)
-    ax1.tick_params(axis="x", which="major", labelsize=6)
-    ax1.tick_params(axis="y", which="major", labelsize=6)
-    ax1.set_title(
-        "Fig 1 - Total costs: change over time",
-        loc="left",
-        fontsize=8,
-        fontweight="bold",
-    )
-
-    # rdel, cdel and ngov totals bar chart
-    labels = ["RDEL", "CDEL", "Non Gov"]
-    width = 0.5
-    ax2.bar(
-        labels,
-        np.array(cost_master.cat_spent_project),
-        width,
-        label="Spent",
-    )
-    ax2.bar(
-        labels,
-        np.array(cost_master.cat_profiled_project),
-        width,
-        bottom=np.array(cost_master.cat_spent_project),
-        label="Profiled",
-    )
-    ax2.bar(
-        labels,
-        np.array(cost_master.cat_unprofiled_project),
-        width,
-        bottom=np.array(cost_master.cat_spent_project)
-        + np.array(cost_master.cat_profiled_project),
-        label="Unprofiled",
-    )
-    ax2.legend(prop={"size": 6})
-    ax2.set_ylabel("Costs (£m)")
-    ylab2 = ax2.yaxis.get_label()
-    ylab2.set_style("italic")
-    ylab2.set_size(8)
-    ax2.tick_params(axis="x", which="major", labelsize=6)
-    ax2.tick_params(axis="y", which="major", labelsize=6)
-    ax2.set_title(
-        "Fig 2 - wlc cost type break down", loc="left", fontsize=8, fontweight="bold"
-    )
-
-    ax2.set_ylim(0, y_max)  # scale y axis max
-
-    # BENEFITS SPENT, PROFILED AND UNPROFILED
-    labels = ["Latest", "Last Quarter", "Baseline"]
-    width = 0.5
-    ax3.bar(labels, np.array(ben_master.delivered_project), width, label="Delivered")
-    ax3.bar(
-        labels,
-        np.array(ben_master.profiled_project),
-        width,
-        bottom=np.array(ben_master.delivered_project),
-        label="Profiled",
-    )
-    ax3.bar(
-        labels,
-        np.array(ben_master.unprofiled_project),
-        width,
-        bottom=np.array(ben_master.delivered_project)
-        + np.array(ben_master.profiled_project),
-        label="Unprofiled",
-    )
-    ax3.legend(prop={"size": 6})
-    ax3.set_ylabel("Benefits (£m)")
-    ylab3 = ax3.yaxis.get_label()
-    ylab3.set_style("italic")
-    ylab3.set_size(8)
-    ax3.tick_params(axis="x", which="major", labelsize=6)
-    ax3.tick_params(axis="y", which="major", labelsize=6)
-    ax3.set_title(
-        "Fig 3 - ben total change over time", loc="left", fontsize=8, fontweight="bold"
-    )
-
-    ax3.set_ylim(0, y_max)
-
-    # BENEFITS CASHABLE, NON-CASHABLE, ECONOMIC, DISBENEFIT BAR CHART
-    labels = ["Cashable", "Non-Cashable", "Economic", "Disbenefit"]
-    width = 0.5
-    ax4.bar(
-        labels, np.array(ben_master.cat_delivered_project), width, label="Delivered"
-    )
-    ax4.bar(
-        labels,
-        np.array(ben_master.cat_profiled_project),
-        width,
-        bottom=np.array(ben_master.cat_delivered_project),
-        label="Profiled",
-    )
-    ax4.bar(
-        labels,
-        np.array(ben_master.cat_unprofiled_project),
-        width,
-        bottom=np.array(ben_master.cat_delivered_project)
-        + np.array(ben_master.cat_profiled_project),
-        label="Unprofiled",
-    )
-    ax4.legend(prop={"size": 6})
-    ax4.set_ylabel("Benefits (£m)")
-    ylab4 = ax4.yaxis.get_label()
-    ylab4.set_style("italic")
-    ylab4.set_size(8)
-    ax4.tick_params(axis="x", which="major", labelsize=6)
-    ax4.tick_params(axis="y", which="major", labelsize=6)
-    ax4.set_title(
-        "Fig 4 - benefits profile type", loc="left", fontsize=8, fontweight="bold"
-    )
-
-    y_min = ben_master.y_scale_min_project + percentage(40, ben_master.y_scale_min_project)
-    if ben_master.economic_max_project > y_max:
-        ax4.set_ylim(y_min, y_max)
+    if len(cost_master.entity) == 1:
+        fig.suptitle(cost_master.entity[0] + " Cost Profile", fontweight="bold")
     else:
-        ax4.set_ylim(y_min, y_max)  # possible for economic benefits figure to be the largest
-
-    # size of chart and fit
-    # fig.canvas.draw()
-    # fig.tight_layout(rect=[0, 0.03, 1, 0.95])  # for title
-
-    # fig.savefig('cost_bens_overview.png')
-    # plt.show()
-    # plt.close()  # automatically closes figure so don't need to do manually.
-    #
-    # doc.add_picture('cost_bens_overview.png', width=Inches(8))  # to place nicely in doc
-    # os.remove('cost_bens_overview.png')
-
-    plt.show()
-
-    return fig
-
-
-def total_costs_benefits_bar_chart_group(
-    cost_master: CostData, ben_master: BenefitsData, title: str
-) -> plt.figure:
-    """compiles a matplotlib bar chart which shows total project costs"""
-    fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2)  # four sub plots
-
-    fig.suptitle(
-        title,
-        fontweight="bold",
-    )  # title
+        fig.suptitle(args[0] + " Cost Profile", fontweight="bold")  # title
 
     # Y AXIS SCALE MAX
     highest_int = max([cost_master.y_scale_max, ben_master.y_scale_max])
@@ -3075,3 +2467,10 @@ def run_change_keys(master_files_list: list, key_dict: Dict[str, str]) -> None:
     """
     for f in master_files_list:
         alter_wb_master_file_key_names(f, key_dict)
+
+
+def string_conversion(name):
+    if isinstance(name, str):
+        return [name]
+    else:
+        return name

@@ -8,7 +8,7 @@ from typing import Dict, Union
 from docx import Document
 from data_mgmt.data import root_path, CostData, Projects,\
     get_master_data, Master, open_word_doc, wd_heading, key_contacts, get_project_information, \
-    dca_table, dca_narratives, year_cost_profile_chart
+    dca_table, dca_narratives, put_matplotlib_fig_into_word
 
 
 def compile_report(doc: Document, project_info: Dict[str, Union[str, int, date, float]], master: Master, project_name: str) -> Document:
@@ -18,7 +18,7 @@ def compile_report(doc: Document, project_info: Dict[str, Union[str, int, date, 
     dca_narratives(doc, master, project_name)
     costs = CostData(master)
     costs.get_profile_project(project_name, 'ipdc_costs')
-    year_cost_profile_chart(doc, costs)
+    put_matplotlib_fig_into_word(doc, costs)
     return doc
 
 

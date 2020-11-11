@@ -129,6 +129,10 @@ def project_group_id_path():
 
 
 @pytest.fixture()
+def project_old_fy_path():
+    return os.path.join(os.getcwd(), "resources/test_project_old_fy_data.xlsx")
+
+@pytest.fixture()
 def dca_masters():
     return [project_data_from_master(os.path.join(os.getcwd(), "resources/test_master_4_2019_dcas.xlsx"), 1, 2099),
             project_data_from_master(os.path.join(os.getcwd(), "resources/test_master_4_2018_dcas.xlsx"), 1, 2098),
@@ -150,8 +154,6 @@ def change_log():
 @pytest.fixture()
 def list_cost_masters_files():
     return [
-        os.path.join(os.getcwd(), "resources/cost_test_master_1_2020.xlsx"),
-        os.path.join(os.getcwd(), "resources/cost_test_master_4_2019.xlsx"),
         os.path.join(os.getcwd(), "resources/cost_test_master_4_2018.xlsx")
     ]
 
