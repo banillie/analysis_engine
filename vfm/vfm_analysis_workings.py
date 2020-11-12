@@ -3,7 +3,7 @@
 
 from openpyxl import Workbook
 import sqlite3
-from data_mgmt.data import vfm_matplotlib_graph
+from data_mgmt.data import vfm_matplotlib_graph, make_file_friendly
 
 
 #  Places data in excel wb. Using python dictionary structure.
@@ -63,8 +63,8 @@ def compile_data(masters, project_name_list, cat_list):
     ws.cell(row=1, column=13).value = 'PVB'
     ws.cell(row=1, column=14).value = 'PVB lst qrt'
 
-    compile_vfm_cat_data_db(wb, masters, cat_list, 36)
-    calculate_pvc(wb, masters, cat_list, 48)
+    compile_vfm_cat_data_db(wb, masters, cat_list, 38)
+    calculate_pvc(wb, masters, cat_list, 50)
 
     return wb
 
@@ -234,7 +234,7 @@ def calculate_pvc(wb, masters, cat_list, start_row):
                     pass
 
             ws.cell(row=row + x, column=m + 2).value = total
-            ws.cell(row=start_row, column=m + 2).value = m
+            ws.cell(row=start_row, column=m + 2).value = str(master.quarter)
 
             #  for the graph
             if m == 0:
@@ -252,7 +252,7 @@ def calculate_pvc(wb, masters, cat_list, start_row):
     # latest_qrt_graph = []
     # lst_qrt_graph = []
     row = start_row + 10
-    for m, master in enumerate(masters):
+    for m, master in enumerate(masters[0:2]):
         hs2_total = 0
         total = 0
         other_total = 0
@@ -280,7 +280,7 @@ def calculate_pvc(wb, masters, cat_list, start_row):
         ws.cell(row=row + 2, column=m + 2).value = hs2_total
         ws.cell(row=row + 3, column=m + 2).value = other_total
         ws.cell(row=row + 4, column=m + 2).value = total
-        ws.cell(row=row + 1, column=m + 2).value = m
+        ws.cell(row=row + 1, column=m + 2).value = str(master.quarter)
 
     ws.cell(row=row + 2, column=1).value = 'HS2'
     ws.cell(row=row + 3, column=1).value = 'Other'
@@ -290,7 +290,7 @@ def calculate_pvc(wb, masters, cat_list, start_row):
                          lst_qrt_graph, 'PVC HS2 and all other projects')
 
     row = start_row + 16
-    for m, master in enumerate(masters):
+    for m, master in enumerate(masters[0:2]):
         high_total = 0
         poor_total = 0
         high_total_no_hs2 = 0
@@ -332,7 +332,7 @@ def calculate_pvc(wb, masters, cat_list, start_row):
         ws.cell(row=row + 3, column=m + 2).value = poor_total_no_hs2
         ws.cell(row=row + 4, column=m + 2).value = high_total
         ws.cell(row=row + 5, column=m + 2).value = high_total_no_hs2
-        ws.cell(row=row + 1, column=m + 2).value = m
+        ws.cell(row=row + 1, column=m + 2).value = str(master.quarter)
 
     ws.cell(row=row + 2, column=1).value = 'total poor-medium'
     ws.cell(row=row + 3, column=1).value = 'poor-medium excluding hs2'

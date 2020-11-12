@@ -1309,8 +1309,8 @@ class CostData:
         self.profiled = []
         self.unprofiled = []
         self.current_profile = []
-        self.last_profile = []
         self.baseline_profile_one = []
+        self.baseline_profile_two = []
         self.baseline_profile_two = []
         self.rdel_profile = []
         self.cdel_profile = []
@@ -1487,7 +1487,7 @@ class CostData:
 
         group = string_conversion(self.group)
 
-        for i in range(3):
+        for i in range(4):
             yearly_profile = []
             rdel_yearly_profile = []
             cdel_yearly_profile = []
@@ -1516,6 +1516,19 @@ class CostData:
                             )  # projects added here. message is below.
                             cost = 0
                             cost_total += cost
+                        except IndexError:  # Handles project baseline index
+                            if i == 3:
+                                try:
+                                    cost = self.master.master_data[project_bl_index[2]].data[
+                                        project_name
+                                    ][year + cost_type]
+                                    if cost is None:
+                                        cost = 0
+                                    cost_total += cost
+                                except KeyError:  # to handle data across different financial years
+                                    cost = 0
+                                    cost_total += cost
+
 
                         if cost_type == COST_KEY_LIST[0]:  # rdel
                             rdel_total += cost
@@ -1552,8 +1565,8 @@ class CostData:
             )
 
         self.current_profile = current_profile
-        self.last_profile = last_profile
-        self.baseline_profile_one = baseline_profile_one
+        self.baseline_profile_one = last_profile
+        self.baseline_profile_two = baseline_profile_one
         self.baseline_profile_two = baseline_profile_two
         self.rdel_profile = rdel_current_profile
         self.cdel_profile = cdel_current_profile
@@ -1771,11 +1784,11 @@ def cost_profile_graph(cost_master: CostData, *args: None or str):
 
     # Overall cost profile chart
     if (
-        sum(cost_master.baseline_profile_one) != 0
+        sum(cost_master.baseline_profile_two) != 0
     ):  # handling in the event that group of projects have no baseline profile.
         ax1.plot(
             YEAR_LIST,
-            np.array(cost_master.baseline_profile_one),  # baseline profile
+            np.array(cost_master.baseline_profile_two),  # baseline profile
             label="Baseline",
             linewidth=3.0,
             marker="o",
@@ -1783,12 +1796,117 @@ def cost_profile_graph(cost_master: CostData, *args: None or str):
     else:
         pass
     if (
-        sum(cost_master.last_profile) != 0
+        sum(cost_master.baseline_profile_one) != 0
     ):  # handling in the event that group of projects have no last quarter profile
         ax1.plot(
             YEAR_LIST,
-            np.array(cost_master.last_profile),  # last quarter profile
+            np.array(cost_master.baseline_profile_one),  # last quarter profile
             label="Last quarter",
+            linewidth=3.0,
+            marker="o",
+        )
+    else:
+        pass
+    ax1.plot(
+        YEAR_LIST,
+        np.array(cost_master.current_profile),  # current profile
+        label="Latest",
+        linewidth=3.0,
+        marker="o",
+    )
+
+    # Chart styling
+    ax1.tick_params(axis="x", which="major", labelsize=6, rotation=45)
+    ax1.set_ylabel("Cost (£m)")
+    ylab1 = ax1.yaxis.get_label()
+    ylab1.set_style("italic")
+    ylab1.set_size(8)
+    ax1.grid(color="grey", linestyle="-", linewidth=0.2)
+    ax1.legend(prop={"size": 6})
+    ax1.set_title(
+        "Fig 1 - cost profile changes", loc="left", fontsize=8, fontweight="bold"
+    )
+
+    # plot rdel, cdel, non-gov chart data
+    if (
+        sum(cost_master.ngov_profile) != 0
+    ):  # if statement as most projects don't have ngov cost.
+        ax2.plot(
+            YEAR_LIST,
+            np.array(cost_master.ngov_profile),
+            label="Non-Gov",
+            linewidth=3.0,
+            marker="o",
+        )
+    ax2.plot(
+        YEAR_LIST,
+        np.array(cost_master.cdel_profile),
+        label="CDEL",
+        linewidth=3.0,
+        marker="o",
+    )
+    ax2.plot(
+        YEAR_LIST,
+        np.array(cost_master.rdel_profile),
+        label="RDEL",
+        linewidth=3.0,
+        marker="o",
+    )
+
+    # rdel/cdel profile chart styling
+    ax2.tick_params(axis="x", which="major", labelsize=6, rotation=45)
+    ax2.set_xlabel("Financial Years")
+    ax2.set_ylabel("Cost (£m)")
+    xlab2 = ax2.xaxis.get_label()
+    ylab2 = ax2.yaxis.get_label()
+    xlab2.set_style("italic")
+    xlab2.set_size(8)
+    ylab2.set_style("italic")
+    ylab2.set_size(8)
+    ax2.grid(color="grey", linestyle="-", linewidth=0.2)
+    ax2.legend(prop={"size": 6})
+    ax2.set_title(
+        "Fig 2 - current cost type profile", loc="left", fontsize=8, fontweight="bold"
+    )
+
+    plt.show()
+
+    return fig
+
+
+def cost_profile_baseline_graph(cost_master: CostData, *args: None or str):
+    """Compiles a matplotlib line chart for costs of GROUP of projects contained within cost_master class.
+    As as default last quarters profile is not included. It creates two plots. First plot shows overall
+    profile in current, last quarters anb baseline form. Second plot shows rdel, cdel, and 'non-gov' cost profile"""
+
+    fig, (ax1, ax2) = plt.subplots(2)  # two subplots for this chart
+
+    """cost profile charts"""
+    if len(cost_master.entity) == 1:
+        fig.suptitle(cost_master.entity[0] + " Cost Profile", fontweight="bold")
+    else:
+        fig.suptitle(args[0] + " Cost Profile", fontweight="bold")  # title
+
+    # Overall cost profile chart
+    if (
+        sum(cost_master.baseline_profile_two) != 0
+    ):  # handling in the event that group of projects have no baseline profile.
+        ax1.plot(
+            YEAR_LIST,
+            np.array(cost_master.baseline_profile_two),  # baseline profile
+            label="Baseline 2",
+            linewidth=3.0,
+            marker="o",
+        )
+    else:
+        pass
+    if (
+        sum(cost_master.baseline_profile_one) != 0
+    ):  # handling in the event that group of projects have no last quarter profile
+        ax1.plot(
+            YEAR_LIST,
+            np.array(cost_master.baseline_profile_one),  # last quarter profile
+            label="Baseline 1",
             linewidth=3.0,
             marker="o",
         )
@@ -1865,15 +1983,20 @@ def spent_calculation(
     master: Dict[str, Union[str, date, int, float]], project: str
 ) -> int:
     keys = [
-        "Pre-profile RDEL",
+        "Pre-profile RDEL Forecast one off new costs",
         "20-21 RDEL STD Total",
-        "Pre-profile CDEL",
+        "Pre-profile CDEL Forecast one off new costs",
         "20-21 CDEL STD Total",
+        "Pre-profile Forecast Non-Gov",
+        "20-21 CDEL STD Non Gov costs"
     ]
 
     total = 0
     for k in keys:
-        total += master.data[project][k]
+        try:
+            total += master.data[project][k]
+        except TypeError:  # None types
+            pass
 
     return total
 
