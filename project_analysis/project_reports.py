@@ -21,8 +21,7 @@ import numpy as np
 import datetime
 from datetime import timedelta
 from textwrap import wrap
-from data_mgmt.data import Projects
-
+from data_mgmt.data import Projects, string_conversion
 
 from analysis.engine_functions import convert_rag_text, project_time_difference, convert_bc_stage_text
 from analysis.data import list_of_masters_all, root_path, latest_cost_profiles, last_cost_profiles, \
@@ -33,7 +32,7 @@ from analysis.data import list_of_masters_all, root_path, latest_cost_profiles, 
 
 import os
 
-from data_mgmt.oldegg_functions import spent_calculation
+from data_mgmt.data import spent_calculation
 
 milestone_filter_start_date = ipdc_date - timedelta(days=30*6)
 milestone_filter_end_date = ipdc_date + timedelta(days=545)
@@ -186,6 +185,8 @@ def produce_word_doc(projects):
     '''Function that compiles each summary sheet'''
 
     masters = list_of_masters_all[0:4]
+
+    projects = string_conversion(projects)
 
     for project_name in projects:
         doc = Document(root_path/'input/summary_temp.docx')
@@ -1151,12 +1152,24 @@ def plus_minus_days(change_value):
 
 def get_financial_totals(project_name):
     '''gets financial data to place into the bar chart element in the financial analysis graphs'''
-    key_list = [('Pre-profile RDEL',
-                'Pre-profile CDEL'),
-                ('Total RDEL Forecast Total',
-                 'Total CDEL Forecast Total WLC'),
-                ('Unprofiled RDEL Forecast Total',
-                 'Unprofiled CDEL Forecast Total WLC')]
+    key_list = [
+    (
+        "Pre-profile RDEL Forecast one off new costs",
+        "Pre-profile CDEL Forecast one off new costs",
+        "Pre-profile Forecast Non-Gov",
+    ),
+    (
+        "Total RDEL Forecast Total",
+        "Total CDEL Forecast one off new costs",
+        "Non-Gov Total Forecast",
+    ),
+    (
+        "Unprofiled RDEL Forecast Total",
+        "Unprofiled CDEL Forecast one off new costs",
+        "Unprofiled Forecast Non-Gov",
+    ),
+]
+
 
     total_cost_list = []
     rdel_cost_list = []
@@ -1288,4 +1301,4 @@ def get_ben_totals(project_name):
 
 '''enter into the printing function the quarter details for the output files e.g. _q4_1920 (note put underscore at
 front)'''
-produce_word_doc(list_of_masters_all[0].projects)
+produce_word_doc(Projects.a417)

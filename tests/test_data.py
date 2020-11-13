@@ -1,33 +1,35 @@
 """
 Tests for analysis_engine
 """
+import os
+
 from data_mgmt.data import Master, CostData, spent_calculation, wd_heading, \
     key_contacts, dca_table, dca_narratives, put_matplotlib_fig_into_word, \
     cost_profile_graph, total_costs_benefits_bar_chart, \
     run_get_old_fy_data, run_place_old_fy_data_into_masters, put_key_change_master_into_dict, run_change_keys, \
-    BenefitsData
+    BenefitsData, compare_masters, get_gmpp_projects
 
 
-def test_creation_of_Masters_class(basic_master, project_info):
-    master = Master(basic_master, project_info)
+def test_creation_of_Masters_class(basic_masters_dicts, project_info):
+    master = Master(basic_masters_dicts, project_info)
     assert isinstance(master.master_data, (list,))
 
 
-def test_getting_baseline_data_from_Masters(basic_master, project_info):
-    master = Master(basic_master, project_info)
+def test_getting_baseline_data_from_Masters(basic_masters_dicts, project_info):
+    master = Master(basic_masters_dicts, project_info)
     assert isinstance(master.bl_index, (dict,))
     assert master.bl_index["ipdc_milestones"]["Sea of Tranquility"] == [0, 1]
     assert master.bl_index["ipdc_costs"]["Apollo 11"] == [0, 1, 2]
     assert master.bl_index["ipdc_costs"]["Columbia"] == [0, 1, 2]
 
 
-def test_get_current_project_names(basic_master, project_info):
-    master = Master(basic_master, project_info)
+def test_get_current_project_names(basic_masters_dicts, project_info):
+    master = Master(basic_masters_dicts, project_info)
     assert master.current_projects == ['Sea of Tranquility', 'Apollo 11', 'Apollo 13', 'Falcon 9', 'Columbia']
 
 
-def test_check_projects_in_project_info(basic_master, project_info_incorrect):
-    Master(basic_master, project_info_incorrect)
+def test_check_projects_in_project_info(basic_masters_dicts, project_info_incorrect):
+    Master(basic_masters_dicts, project_info_incorrect)
     # assert error message
 
 
@@ -211,3 +213,14 @@ def test_getting_benefits_profile_for_a_project(costs_masters, project_info):
     ben = BenefitsData(master)
     ben.get_ben_totals('Falcon 9', 'ipdc_benefits')
     assert ben.profiled == [-200, 240, 240]
+
+
+def test_compare_changes_between_masters(basic_masters_file_paths, project_info):
+    gmpp_list = get_gmpp_projects(project_info)
+    wb = compare_masters(basic_masters_file_paths, gmpp_list)
+    wb.save(os.path.join(os.getcwd(), "resources/cut_down_master_compared.xlsx"))
+
+
+def test_get_gmpp_projects(project_info):
+    gmpp_list = get_gmpp_projects(project_info)
+    assert gmpp_list == ['Sea of Tranquility']

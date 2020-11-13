@@ -60,7 +60,7 @@ def project_info_incorrect():
 
 
 @pytest.fixture()
-def basic_master():
+def basic_masters_dicts():
     test_master_data = [
         project_data_from_master(os.path.join(os.getcwd(), "resources/"
                                                            "cut_down_master_4_2016.xlsx"), 4, 2016),
@@ -71,6 +71,19 @@ def basic_master():
 
     ]
     return test_master_data
+
+
+@pytest.fixture()
+def basic_masters_file_paths():
+    file_paths = [
+        os.path.join(os.getcwd(), "resources/"
+                                  "cut_down_master_4_2016.xlsx"),
+        os.path.join(os.getcwd(), "resources/"
+                                  "cut_down_master_4_2017.xlsx"),
+        os.path.join(os.getcwd(), "resources/"
+                                  "cut_down_master_4_2018.xlsx"),
+    ]
+    return file_paths
 
 
 @pytest.fixture()
@@ -132,6 +145,7 @@ def project_group_id_path():
 def project_old_fy_path():
     return os.path.join(os.getcwd(), "resources/test_project_old_fy_data.xlsx")
 
+
 @pytest.fixture()
 def dca_masters():
     return [project_data_from_master(os.path.join(os.getcwd(), "resources/test_master_4_2019_dcas.xlsx"), 1, 2099),
@@ -143,7 +157,7 @@ def dca_masters():
 @pytest.fixture()
 def costs_masters():
     return [project_data_from_master(os.path.join(os.getcwd(), "resources/cost_test_master_1_2020.xlsx"), 1, 2020),
-        project_data_from_master(os.path.join(os.getcwd(), "resources/cost_test_master_4_2019.xlsx"), 4, 2019)]
+            project_data_from_master(os.path.join(os.getcwd(), "resources/cost_test_master_4_2019.xlsx"), 4, 2019)]
 
 
 @pytest.fixture()

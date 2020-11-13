@@ -11,7 +11,7 @@ costs = CostData(master)
 benefits = BenefitsData(master)
 
 
-def run_totals(project, *args):
+def interactive_totals(project, *args):
     costs.get_cost_totals(project, 'ipdc_costs')
     benefits.get_ben_totals(project, 'ipdc_benefits')
     if args == ():
@@ -20,7 +20,7 @@ def run_totals(project, *args):
         total_costs_benefits_bar_chart(costs, benefits, args[0])
 
 
-def run_standard_profile(project, *args):
+def interactive_standard_profile(project, *args):
     costs.get_cost_profile(project, 'ipdc_costs')
     if args == ():
         cost_profile_graph(costs)
@@ -28,7 +28,7 @@ def run_standard_profile(project, *args):
         cost_profile_graph(costs, args[0])
 
 
-def run_baseline_profile(project, *args):
+def interactive_baseline_profile(project, *args):
     costs.get_cost_profile(project, 'ipdc_costs')
     if args == ():
         cost_profile_baseline_graph(costs)
