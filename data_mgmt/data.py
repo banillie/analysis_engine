@@ -273,14 +273,6 @@ class Projects:
     tru = "Transpennine Route Upgrade"
     wrlth = "Western Rail Link to Heathrow"
 
-    # test masters project names
-    sot = "Sea of Tranquility"
-    a11 = "Apollo 11"
-    a13 = "Apollo 13"
-    f9 = "Falcon 9"
-    columbia = "Columbia"
-    mars = "Mars"
-
     # lists of projects names in groups
     he = [lower_thames_crossing, a303, a14, a66, a12, m4, a428, a417, a385]
     rail = [crossrail, thameslink, iep, east_coast_mainline, east_coast_digital, midland_mainline, nwe,
@@ -344,7 +336,26 @@ class Projects:
         midland_mainline,
         m4,
         a14,
+        ewr_config1
     ]
+    obc_stage = [lower_thames_crossing,
+                 hs2_2a,
+                 tru,
+                 east_coast_digital,
+                 a303,
+                 a12,
+                 a428,
+                 a417,
+                 a385,
+                 ftts]
+    sobc_stage = [hs2_2b,
+                  brighton_ml,
+                  ewr_config3,
+                  sarh2,
+                  midlands_rail_hub,
+                  wrlth,
+                  a66,
+                  ewr_config2]
 
 
 #  list of different baseline types. hold at global level?
@@ -395,7 +406,7 @@ COST_KEY_LIST = [
 ]
 COST_TYPE_KEY_LIST = [
     (
-        "Pre-profile RDEL Forecast one off new costs",
+        "Pre-profile RDEL",
         "Pre-profile CDEL Forecast one off new costs",
         "Pre-profile Forecast Non-Gov",
     ),
@@ -435,6 +446,9 @@ BEN_TYPE_KEY_LIST = [
         "Unprofiled Remainder BEN Forecast - Disbenefit UK Economic",
     ),
 ]
+
+# Matplotlib file formats
+FILE_FORMATS = ['eps', 'jpeg', 'jpg', 'pdf', 'png', 'ps', 'raw', 'rgba', 'svg', 'svgz', 'tif', 'tiff']
 
 
 def calculate_profiled(p: List[int], s: List[int], unpro: List[int]) -> list:
@@ -1334,6 +1348,7 @@ class CostData:
         self.profiled = []
         self.unprofiled = []
         self.current_profile = []
+        self.last_profile = []
         self.baseline_profile_one = []
         self.baseline_profile_two = []
         self.baseline_profile_three = []
@@ -1602,8 +1617,8 @@ class CostData:
             )
 
         self.current_profile = current_profile
-        self.baseline_profile_one = last_profile
-        self.baseline_profile_two = baseline_profile_one
+        self.last_profile = last_profile
+        self.baseline_profile_one = baseline_profile_one
         self.baseline_profile_two = baseline_profile_two
         self.baseline_profile_three = baseline_profile_three
         self.rdel_profile = rdel_current_profile
@@ -1807,26 +1822,35 @@ def vfm_matplotlib_graph(labels, current_qrt, last_qrt, title):
     plt.show()
 
 
-def cost_profile_graph(cost_master: CostData, *args: Tuple[Optional[str]]):
+def set_figure_size(graph_type):
+    if graph_type == "half horizontal":
+        return 11.69, 4.10
+
+
+def cost_profile_graph(fig_size: str, cost_master: CostData, *args: Tuple[Optional[str]]):
     """Compiles a matplotlib line chart for costs of GROUP of projects contained within cost_master class.
     As as default last quarters profile is not included. It creates two plots. First plot shows overall
     profile in current, last quarters anb baseline form. Second plot shows rdel, cdel, and 'non-gov' cost profile"""
 
     fig, (ax1, ax2) = plt.subplots(2)  # two subplots for this chart
+    fig.set_size_inches(set_figure_size(fig_size))
 
     """cost profile charts"""
     if len(cost_master.entity) == 1:
         fig.suptitle(cost_master.entity[0] + " Cost Profile", fontweight="bold")
     else:
-        fig.suptitle(args[0] + " Cost Profile", fontweight="bold")  # title
+        try:
+            fig.suptitle(args[0] + " Cost Profile", fontweight="bold")  # title
+        except IndexError:
+            print('You need to provide a title for this chart')
 
     # Overall cost profile chart
     if (
-            sum(cost_master.baseline_profile_two) != 0
+            sum(cost_master.baseline_profile_one) != 0
     ):  # handling in the event that group of projects have no baseline profile.
         ax1.plot(
             YEAR_LIST,
-            np.array(cost_master.baseline_profile_two),  # baseline profile
+            np.array(cost_master.baseline_profile_one),  # baseline profile
             label="Baseline",
             linewidth=3.0,
             marker="o",
@@ -1834,11 +1858,11 @@ def cost_profile_graph(cost_master: CostData, *args: Tuple[Optional[str]]):
     else:
         pass
     if (
-            sum(cost_master.baseline_profile_one) != 0
+            sum(cost_master.last_profile) != 0
     ):  # handling in the event that group of projects have no last quarter profile
         ax1.plot(
             YEAR_LIST,
-            np.array(cost_master.baseline_profile_one),  # last quarter profile
+            np.array(cost_master.last_profile),  # last quarter profile
             label="Last quarter",
             linewidth=3.0,
             marker="o",
@@ -1906,6 +1930,8 @@ def cost_profile_graph(cost_master: CostData, *args: Tuple[Optional[str]]):
     ax2.set_title(
         "Fig 2 - current cost type profile", loc="left", fontsize=8, fontweight="bold"
     )
+
+    fig.tight_layout(rect=[0, 0.03, 1, 0.95])  # size/fit of chart
 
     plt.show()
 
@@ -2212,21 +2238,22 @@ def dca_narratives(doc: Document, master: Master, project_name: str) -> None:
 def put_matplotlib_fig_into_word(doc: Document, fig) -> None:
     """Places line graph cost profile into word document"""
 
-    new_section = doc.add_section(WD_SECTION_START.NEW_PAGE)  # new page
-    # change to landscape
-    new_width, new_height = new_section.page_height, new_section.page_width
-    new_section.orientation = WD_ORIENTATION.LANDSCAPE
-    new_section.page_width = new_width
-    new_section.page_height = new_height
+    # TODO modulise change page orientation
+    # new_section = doc.add_section(WD_SECTION_START.NEW_PAGE)  # new page
+    # # change to landscape
+    # new_width, new_height = new_section.page_height, new_section.page_width
+    # new_section.orientation = WD_ORIENTATION.LANDSCAPE
+    # new_section.page_width = new_width
+    # new_section.page_height = new_height
 
-    # Size and shape of figure.
-    # fig.canvas.draw()
-    # fig.tight_layout(rect=[0, 0.03, 1, 0.95])  # for title
+    # fig.canvas.draw()  # for scaling
+    fig.tight_layout(rect=[0, 0.03, 1, 0.95])  # for title
 
     # Place fig in word doc.
     fig.savefig("cost_profile.png")
     doc.add_picture("cost_profile.png", width=Inches(8))  # to place nicely in doc
     os.remove("cost_profile.png")
+    plt.close()  # automatically closes figure so don't need to do manually.
 
 
 def convert_rag_text(dca_rating: str) -> None:
@@ -2340,15 +2367,16 @@ def make_file_friendly(quarter_str: str) -> str:
 
 
 def total_costs_benefits_bar_chart(
-        cost_master: CostData, ben_master: BenefitsData, *args: None or str
+        fig_size: plt.figure, cost_master: CostData, ben_master: BenefitsData, *args: Tuple[Optional[str]]
 ) -> plt.figure:
     """compiles a matplotlib bar chart which shows total project costs"""
     fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2)  # four sub plots
+    fig.set_size_inches(set_figure_size(fig_size))
 
     if len(cost_master.entity) == 1:
-        fig.suptitle(cost_master.entity[0] + " Cost Profile", fontweight="bold")
+        fig.suptitle(cost_master.entity[0] + " Cost and Benefits Profile", fontweight="bold")
     else:
-        fig.suptitle(args[0] + " Cost Profile", fontweight="bold")  # title
+        fig.suptitle(args[0] + " Cost and Benefits Profile", fontweight="bold")  # title
 
     # Y AXIS SCALE MAX
     highest_int = max([cost_master.y_scale_max, ben_master.y_scale_max])
@@ -2484,18 +2512,9 @@ def total_costs_benefits_bar_chart(
     else:
         ax4.set_ylim(y_min, y_max)  # possible for economic benefits figure to be the largest
 
-    # size of chart and fit
-    # fig.canvas.draw()
-    # fig.tight_layout(rect=[0, 0.03, 1, 0.95])  # for title
+    fig.tight_layout(rect=[0, 0.03, 1, 0.95])  # size/fit of chart
 
-    # fig.savefig('cost_bens_overview.png')
-    # plt.show()
-    # plt.close()  # automatically closes figure so don't need to do manually.
-    #
-    # doc.add_picture('cost_bens_overview.png', width=Inches(8))  # to place nicely in doc
-    # os.remove('cost_bens_overview.png')
-
-    plt.show()
+    plt.show()  # doesn't seem to do anything
 
     return fig
 
@@ -2681,8 +2700,8 @@ def compare_masters(files: List[typing.TextIO], projects: List[str] or str) -> w
                         pass
                     else:
                         ws.cell(row=row_num, column=column_num).fill = PatternFill(start_color='ffba00',
-                                                                      end_color='ffba00',
-                                                                      fill_type='solid')
+                                                                                   end_color='ffba00',
+                                                                                   fill_type='solid')
                         project_count.append(project_name)
                         change_count += 1
                 except KeyError:
@@ -2692,8 +2711,8 @@ def compare_masters(files: List[typing.TextIO], projects: List[str] or str) -> w
                                                                           fill_type='solid')
                     else:  # key error due to project not being present.
                         ws.cell(row=1, column=column_num).fill = PatternFill(start_color='ffba00',
-                                                                          end_color='ffba00',
-                                                                          fill_type='solid')
+                                                                             end_color='ffba00',
+                                                                             fill_type='solid')
     # separate lop to calculate this
     for row_num in range(2, ws.max_row + 1):
         key = ws.cell(row=row_num, column=1).value
@@ -2715,4 +2734,25 @@ def compare_masters(files: List[typing.TextIO], projects: List[str] or str) -> w
     return wb
 
 
+def totals_chart(fig: plt.figure, costs: CostData, benefits: BenefitsData, project: str or List[str],
+                 *args: Tuple[Optional[str]]):
+    """Small function to hold together code to create and save a total_costs_benefits_bar_chart"""
+    costs.get_cost_totals(project, 'ipdc_costs')
+    benefits.get_ben_totals(project, 'ipdc_benefits')
+    if args == ():
+        f = total_costs_benefits_bar_chart(fig, costs, benefits)
+        f.savefig(root_path / "output/{}_profile.png".format(costs.entity[0]))
+    else:
+        f = total_costs_benefits_bar_chart(fig, costs, benefits, args[0])
+        f.savefig(root_path / "output/{}_profile.png".format(str(args[0])))
 
+
+def standard_profile(fig: plt.figure, costs: CostData, project: str or List[str], *args: Tuple[Optional[str]]):
+    """Small function to hold together code to create and save a cost_profile_graph"""
+    costs.get_cost_profile(project, 'ipdc_costs')
+    if args == ():
+        f = cost_profile_graph(fig, costs)
+        f.savefig(root_path / "output/{}_profile.png".format(costs.entity[0]))
+    else:
+        f = cost_profile_graph(fig, costs, args[0])
+        f.savefig(root_path / "output/{}_profile.png".format(str(args[0])))

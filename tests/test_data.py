@@ -7,7 +7,17 @@ from data_mgmt.data import Master, CostData, spent_calculation, wd_heading, \
     key_contacts, dca_table, dca_narratives, put_matplotlib_fig_into_word, \
     cost_profile_graph, total_costs_benefits_bar_chart, \
     run_get_old_fy_data, run_place_old_fy_data_into_masters, put_key_change_master_into_dict, run_change_keys, \
-    BenefitsData, compare_masters, get_gmpp_projects
+    BenefitsData, compare_masters, get_gmpp_projects, standard_profile, totals_chart
+
+# test masters project names
+
+sot = "Sea of Tranquility"
+a11 = "Apollo 11"
+a13 = "Apollo 13"
+f9 = "Falcon 9"
+columbia = "Columbia"
+mars = "Mars"
+group = [sot, a13, f9, columbia, mars]
 
 
 def test_creation_of_Masters_class(basic_masters_dicts, project_info):
@@ -224,3 +234,20 @@ def test_compare_changes_between_masters(basic_masters_file_paths, project_info)
 def test_get_gmpp_projects(project_info):
     gmpp_list = get_gmpp_projects(project_info)
     assert gmpp_list == ['Sea of Tranquility']
+
+
+def test_saving_cost_profile_graph_files(costs_masters, project_info):
+    master = Master(costs_masters, project_info)
+    costs = CostData(master)
+    fig_style = "half horizontal"
+    standard_profile(fig_style, costs, sot)
+    standard_profile(fig_style, costs, group, 'Python')
+
+
+def test_saving_total_cost_benefit_graph_files(costs_masters, project_info):
+    master = Master(costs_masters, project_info)
+    costs = CostData(master)
+    benefits = BenefitsData(master)
+    fig_style = "half horizontal"
+    totals_chart(fig_style, costs, benefits, a13)
+    totals_chart(fig_style, costs, benefits, group, 'Matplotlib')
