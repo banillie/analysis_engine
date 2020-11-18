@@ -275,8 +275,21 @@ class Projects:
 
     # lists of projects names in groups
     he = [lower_thames_crossing, a303, a14, a66, a12, m4, a428, a417, a385]
-    rail = [crossrail, thameslink, iep, east_coast_mainline, east_coast_digital, midland_mainline, nwe,
-            south_west_route_capacity, brighton_ml, midlands_rail_hub, gwrm, tru, wrlth]
+    rail = [
+        crossrail,
+        thameslink,
+        iep,
+        east_coast_mainline,
+        east_coast_digital,
+        midland_mainline,
+        nwe,
+        south_west_route_capacity,
+        brighton_ml,
+        midlands_rail_hub,
+        gwrm,
+        tru,
+        wrlth,
+    ]
     hs2 = [hs2_1, hs2_2a, hs2_2b]
     hsmrpg = [
         hs2_1,
@@ -336,26 +349,30 @@ class Projects:
         midland_mainline,
         m4,
         a14,
-        ewr_config1
+        ewr_config1,
     ]
-    obc_stage = [lower_thames_crossing,
-                 hs2_2a,
-                 tru,
-                 east_coast_digital,
-                 a303,
-                 a12,
-                 a428,
-                 a417,
-                 a385,
-                 ftts]
-    sobc_stage = [hs2_2b,
-                  brighton_ml,
-                  ewr_config3,
-                  sarh2,
-                  midlands_rail_hub,
-                  wrlth,
-                  a66,
-                  ewr_config2]
+    obc_stage = [
+        lower_thames_crossing,
+        hs2_2a,
+        tru,
+        east_coast_digital,
+        a303,
+        a12,
+        a428,
+        a417,
+        a385,
+        ftts,
+    ]
+    sobc_stage = [
+        hs2_2b,
+        brighton_ml,
+        ewr_config3,
+        sarh2,
+        midlands_rail_hub,
+        wrlth,
+        a66,
+        ewr_config2,
+    ]
 
 
 #  list of different baseline types. hold at global level?
@@ -448,7 +465,20 @@ BEN_TYPE_KEY_LIST = [
 ]
 
 # Matplotlib file formats
-FILE_FORMATS = ['eps', 'jpeg', 'jpg', 'pdf', 'png', 'ps', 'raw', 'rgba', 'svg', 'svgz', 'tif', 'tiff']
+FILE_FORMATS = [
+    "eps",
+    "jpeg",
+    "jpg",
+    "pdf",
+    "png",
+    "ps",
+    "raw",
+    "rgba",
+    "svg",
+    "svgz",
+    "tif",
+    "tiff",
+]
 
 
 def calculate_profiled(p: List[int], s: List[int], unpro: List[int]) -> list:
@@ -466,9 +496,9 @@ def calculate_profiled(p: List[int], s: List[int], unpro: List[int]) -> list:
 
 class Master:
     def __init__(
-            self,
-            master_data: List[Dict[str, Union[str, int, date, float]]],
-            project_information: Dict[str, Union[str, int]],
+        self,
+        master_data: List[Dict[str, Union[str, int, date, float]]],
+        project_information: Dict[str, Union[str, int]],
     ) -> None:
         self.master_data = master_data
         self.project_information = project_information
@@ -544,7 +574,7 @@ class Master:
                 print(
                     p
                     + " is not in the projects information document. Project names must be identical "
-                      " in both documents. Programme stopping. Please amend."
+                    " in both documents. Programme stopping. Please amend."
                 )
                 break
             else:
@@ -565,9 +595,9 @@ class Master:
                         + " does not have a baseline point for "
                         + v
                         + " this could cause the programme to "
-                          "crash. Therefore the programme is stopping. "
-                          "Please amend the data for " + p + " so that "
-                                                             " it has at least one baseline point for " + v
+                        "crash. Therefore the programme is stopping. "
+                        "Please amend the data for " + p + " so that "
+                        " it has at least one baseline point for " + v
                     )
             else:
                 continue
@@ -627,7 +657,7 @@ class MilestoneData:
                                             "Approval MM"
                                             + str(i)
                                             + " Forecast / Actual"
-                                            ],
+                                        ],
                                         p_data["Approval MM" + str(i) + " Notes"],
                                     )
                                     raw_list.append(t)
@@ -638,7 +668,7 @@ class MilestoneData:
                                             "Approval MM"
                                             + str(i)
                                             + " Forecast - Actual"
-                                            ],
+                                        ],
                                         p_data["Approval MM" + str(i) + " Notes"],
                                     )
                                     raw_list.append(t)
@@ -647,7 +677,7 @@ class MilestoneData:
                                     p_data["Assurance MM" + str(i)],
                                     p_data[
                                         "Assurance MM" + str(i) + " Forecast - Actual"
-                                        ],
+                                    ],
                                     p_data["Assurance MM" + str(i) + " Notes"],
                                 )
                                 raw_list.append(t)
@@ -661,7 +691,7 @@ class MilestoneData:
                                     p_data["Project MM" + str(i)],
                                     p_data[
                                         "Project MM" + str(i) + " Forecast - Actual"
-                                        ],
+                                    ],
                                     p_data["Project MM" + str(i) + " Notes"],
                                 )
                                 raw_list.append(t)
@@ -715,7 +745,7 @@ class MilestoneData:
                                     p_data["Project MM" + str(i)],
                                     p_data[
                                         "Project MM" + str(i) + " Forecast - Actual"
-                                        ],
+                                    ],
                                     p_data["Project MM" + str(i) + " Notes"],
                                 )
                                 raw_list.append(t)
@@ -795,9 +825,9 @@ class MilestoneData:
                                         pass
                                     else:
                                         key_name = (
-                                                self.abbreviations[name]
-                                                + ", "
-                                                + p_data["Approval MM" + str(i)]
+                                            self.abbreviations[name]
+                                            + ", "
+                                            + p_data["Approval MM" + str(i)]
                                         )
                                         t = (
                                             key_name,
@@ -805,7 +835,7 @@ class MilestoneData:
                                                 "Approval MM"
                                                 + str(i)
                                                 + " Forecast / Actual"
-                                                ],
+                                            ],
                                             p_data["Approval MM" + str(i) + " Notes"],
                                         )
                                         raw_list.append(t)
@@ -814,9 +844,9 @@ class MilestoneData:
                                         pass
                                     else:
                                         key_name = (
-                                                self.abbreviations[name]
-                                                + ", "
-                                                + p_data["Approval MM" + str(i)]
+                                            self.abbreviations[name]
+                                            + ", "
+                                            + p_data["Approval MM" + str(i)]
                                         )
                                         t = (
                                             key_name,
@@ -824,7 +854,7 @@ class MilestoneData:
                                                 "Approval MM"
                                                 + str(i)
                                                 + " Forecast - Actual"
-                                                ],
+                                            ],
                                             p_data["Approval MM" + str(i) + " Notes"],
                                         )
                                         raw_list.append(t)
@@ -833,9 +863,9 @@ class MilestoneData:
                                     pass
                                 else:
                                     key_name = (
-                                            self.abbreviations[name]
-                                            + ", "
-                                            + p_data["Assurance MM" + str(i)]
+                                        self.abbreviations[name]
+                                        + ", "
+                                        + p_data["Assurance MM" + str(i)]
                                     )
                                     t = (
                                         key_name,
@@ -843,7 +873,7 @@ class MilestoneData:
                                             "Assurance MM"
                                             + str(i)
                                             + " Forecast - Actual"
-                                            ],
+                                        ],
                                         p_data["Assurance MM" + str(i) + " Notes"],
                                     )
                                     raw_list.append(t)
@@ -857,15 +887,15 @@ class MilestoneData:
                                     pass
                                 else:
                                     key_name = (
-                                            self.abbreviations[name]
-                                            + ", "
-                                            + p_data["Project MM" + str(i)]
+                                        self.abbreviations[name]
+                                        + ", "
+                                        + p_data["Project MM" + str(i)]
                                     )
                                     t = (
                                         key_name,
                                         p_data[
                                             "Project MM" + str(i) + " Forecast - Actual"
-                                            ],
+                                        ],
                                         p_data["Project MM" + str(i) + " Notes"],
                                     )
                                     raw_list.append(t)
@@ -920,12 +950,12 @@ class MilestoneData:
 
 class MilestoneChartData:
     def __init__(
-            self,
-            milestone_data_object,
-            keys_of_interest=None,
-            keys_not_of_interest=None,
-            filter_start_date=datetime.date(2000, 1, 1),
-            filter_end_date=datetime.date(2050, 1, 1),
+        self,
+        milestone_data_object,
+        keys_of_interest=None,
+        keys_not_of_interest=None,
+        filter_start_date=datetime.date(2000, 1, 1),
+        filter_end_date=datetime.date(2050, 1, 1),
     ):
         self.m_data = milestone_data_object
         self.keys_of_interest = keys_of_interest
@@ -956,7 +986,7 @@ class MilestoneChartData:
         # shown in particular way in output chart
         for m in list(self.m_data.group_current.keys()):
             if (
-                    "Project - Business Case End Date" in m
+                "Project - Business Case End Date" in m
             ):  # filter out as dates not helpful
                 pass
             else:
@@ -1071,7 +1101,7 @@ class CombinedData:
                 )
             else:
                 for i in range(
-                        2, 15
+                    2, 15
                 ):  # alters duplicates by adding number to end of key
                     mi_altered_milestone_key_name = mi_milestone_key_name + " " + str(i)
                     if mi_altered_milestone_key_name in mi_milestone_name_list:
@@ -1129,13 +1159,13 @@ class CombinedData:
 
 class MilestoneCharts:
     def __init__(
-            self,
-            latest_milestone_names,
-            latest_milestone_dates,
-            last_milestone_dates,
-            baseline_milestone_dates,
-            graph_title,
-            ipdc_date,
+        self,
+        latest_milestone_names,
+        latest_milestone_dates,
+        last_milestone_dates,
+        baseline_milestone_dates,
+        graph_title,
+        ipdc_date,
     ):
         self.latest_milestone_names = latest_milestone_names
         self.latest_milestone_dates = latest_milestone_dates
@@ -1236,9 +1266,9 @@ class MilestoneCharts:
         # Add line of IPDC date, but only if in the time period
         try:
             if (
-                    self.latest_milestone_dates[0]
-                    <= self.ipdc_date
-                    <= self.latest_milestone_dates[-1]
+                self.latest_milestone_dates[0]
+                <= self.ipdc_date
+                <= self.latest_milestone_dates[-1]
             ):
                 plt.axvline(self.ipdc_date)
                 plt.figtext(
@@ -1319,19 +1349,19 @@ class MilestoneCharts:
             )
             title = self.graph_title + " cont. 1"
             MilestoneCharts(
-                np.array(final_labels[third: third * 2]),
-                np.array(self.latest_milestone_dates[third: third * 2]),
-                np.array(self.last_milestone_dates[third: third * 2]),
-                np.array(self.baseline_milestone_dates[third: third * 2]),
+                np.array(final_labels[third : third * 2]),
+                np.array(self.latest_milestone_dates[third : third * 2]),
+                np.array(self.last_milestone_dates[third : third * 2]),
+                np.array(self.baseline_milestone_dates[third : third * 2]),
                 title,
                 self.ipdc_date,
             )
             title = self.graph_title + " cont. 2"
             MilestoneCharts(
-                np.array(final_labels[third * 2: no_milestones]),
-                np.array(self.latest_milestone_dates[third * 2: no_milestones]),
-                np.array(self.last_milestone_dates[third * 2: no_milestones]),
-                np.array(self.baseline_milestone_dates[third * 2: no_milestones]),
+                np.array(final_labels[third * 2 : no_milestones]),
+                np.array(self.latest_milestone_dates[third * 2 : no_milestones]),
+                np.array(self.last_milestone_dates[third * 2 : no_milestones]),
+                np.array(self.baseline_milestone_dates[third * 2 : no_milestones]),
                 title,
                 self.ipdc_date,
             )
@@ -1468,8 +1498,8 @@ class CostData:
                                 std_list[s] = 0
                         spent.append(round(group_total + sum(std_list)))
                     except (
-                            KeyError,
-                            TypeError,
+                        KeyError,
+                        TypeError,
                     ):  # Note. TypeError here as projects may have no baseline
                         spent.append(group_total)
                 if x == 1:  # profiled
@@ -1548,9 +1578,9 @@ class CostData:
                             # TODO improve this loop
                             if i == 3:
                                 try:
-                                    cost = self.master.master_data[project_bl_index[2]].data[
-                                        project_name
-                                    ][year + cost_type]
+                                    cost = self.master.master_data[
+                                        project_bl_index[2]
+                                    ].data[project_name][year + cost_type]
                                     if cost is None:
                                         cost = 0
                                     cost_total += cost
@@ -1559,9 +1589,9 @@ class CostData:
                                     cost_total += cost
                             if i == 4:
                                 try:
-                                    cost = self.master.master_data[project_bl_index[3]].data[
-                                        project_name
-                                    ][year + cost_type]
+                                    cost = self.master.master_data[
+                                        project_bl_index[3]
+                                    ].data[project_name][year + cost_type]
                                     if cost is None:
                                         cost = 0
                                     cost_total += cost
@@ -1570,9 +1600,9 @@ class CostData:
                                     cost_total += cost
                                 except IndexError:
                                     try:
-                                        cost = self.master.master_data[project_bl_index[2]].data[
-                                            project_name
-                                        ][year + cost_type]
+                                        cost = self.master.master_data[
+                                            project_bl_index[2]
+                                        ].data[project_name][year + cost_type]
                                         if cost is None:
                                             cost = 0
                                         cost_total += cost
@@ -1612,8 +1642,8 @@ class CostData:
                 "NOTE: The following project(s) were not part of the portfolio last quarter "
                 + str(missing_projects)
                 + " this means current quarter and last quarter cost profiles are not like for like."
-                  " If you would like a like for like comparison between current and last quarter"
-                  " remove this project(s) from the master group."
+                " If you would like a like for like comparison between current and last quarter"
+                " remove this project(s) from the master group."
             )
 
         self.current_profile = current_profile
@@ -1827,7 +1857,9 @@ def set_figure_size(graph_type):
         return 11.69, 4.10
 
 
-def cost_profile_graph(fig_size: str, cost_master: CostData, *args: Tuple[Optional[str]]):
+def cost_profile_graph(
+    fig_size: str, cost_master: CostData, *args: Tuple[Optional[str]]
+):
     """Compiles a matplotlib line chart for costs of GROUP of projects contained within cost_master class.
     As as default last quarters profile is not included. It creates two plots. First plot shows overall
     profile in current, last quarters anb baseline form. Second plot shows rdel, cdel, and 'non-gov' cost profile"""
@@ -1842,11 +1874,11 @@ def cost_profile_graph(fig_size: str, cost_master: CostData, *args: Tuple[Option
         try:
             fig.suptitle(args[0] + " Cost Profile", fontweight="bold")  # title
         except IndexError:
-            print('You need to provide a title for this chart')
+            print("You need to provide a title for this chart")
 
     # Overall cost profile chart
     if (
-            sum(cost_master.baseline_profile_one) != 0
+        sum(cost_master.baseline_profile_one) != 0
     ):  # handling in the event that group of projects have no baseline profile.
         ax1.plot(
             YEAR_LIST,
@@ -1858,7 +1890,7 @@ def cost_profile_graph(fig_size: str, cost_master: CostData, *args: Tuple[Option
     else:
         pass
     if (
-            sum(cost_master.last_profile) != 0
+        sum(cost_master.last_profile) != 0
     ):  # handling in the event that group of projects have no last quarter profile
         ax1.plot(
             YEAR_LIST,
@@ -1891,7 +1923,7 @@ def cost_profile_graph(fig_size: str, cost_master: CostData, *args: Tuple[Option
 
     # plot rdel, cdel, non-gov chart data
     if (
-            sum(cost_master.ngov_profile) != 0
+        sum(cost_master.ngov_profile) != 0
     ):  # if statement as most projects don't have ngov cost.
         ax2.plot(
             YEAR_LIST,
@@ -1954,7 +1986,7 @@ def cost_profile_baseline_graph(cost_master: CostData, *args: Tuple[Optional[str
 
     # Overall cost profile chart
     if (
-            sum(cost_master.baseline_profile_three) != 0
+        sum(cost_master.baseline_profile_three) != 0
     ):  # handling in the event that group of projects have no baseline profile.
         ax1.plot(
             YEAR_LIST,
@@ -1966,7 +1998,7 @@ def cost_profile_baseline_graph(cost_master: CostData, *args: Tuple[Optional[str
     else:
         pass
     if (
-            sum(cost_master.baseline_profile_two) != 0
+        sum(cost_master.baseline_profile_two) != 0
     ):  # handling in the event that group of projects have no baseline profile.
         ax1.plot(
             YEAR_LIST,
@@ -1978,7 +2010,7 @@ def cost_profile_baseline_graph(cost_master: CostData, *args: Tuple[Optional[str
     else:
         pass
     if (
-            sum(cost_master.baseline_profile_one) != 0
+        sum(cost_master.baseline_profile_one) != 0
     ):  # handling in the event that group of projects have no last quarter profile
         ax1.plot(
             YEAR_LIST,
@@ -2011,7 +2043,7 @@ def cost_profile_baseline_graph(cost_master: CostData, *args: Tuple[Optional[str
 
     # plot rdel, cdel, non-gov chart data
     if (
-            sum(cost_master.ngov_profile) != 0
+        sum(cost_master.ngov_profile) != 0
     ):  # if statement as most projects don't have ngov cost.
         ax2.plot(
             YEAR_LIST,
@@ -2057,7 +2089,7 @@ def cost_profile_baseline_graph(cost_master: CostData, *args: Tuple[Optional[str
 
 
 def spent_calculation(
-        master: Dict[str, Union[str, date, int, float]], project: str
+    master: Dict[str, Union[str, date, int, float]], project: str
 ) -> int:
     keys = [
         "Pre-profile RDEL Forecast one off new costs",
@@ -2065,7 +2097,7 @@ def spent_calculation(
         "Pre-profile CDEL Forecast one off new costs",
         "20-21 CDEL STD Total",
         "Pre-profile Forecast Non-Gov",
-        "20-21 CDEL STD Non Gov costs"
+        "20-21 CDEL STD Non Gov costs",
     ]
 
     total = 0
@@ -2084,7 +2116,7 @@ def open_word_doc(wd_path: str) -> Document:
 
 
 def wd_heading(
-        doc: Document, project_info: Dict[str, Union[str, int]], project_name: str
+    doc: Document, project_info: Dict[str, Union[str, int]], project_name: str
 ) -> None:
     """Function adds header to word doc"""
     font = doc.styles["Normal"].font
@@ -2367,14 +2399,19 @@ def make_file_friendly(quarter_str: str) -> str:
 
 
 def total_costs_benefits_bar_chart(
-        fig_size: plt.figure, cost_master: CostData, ben_master: BenefitsData, *args: Tuple[Optional[str]]
+    fig_size: plt.figure,
+    cost_master: CostData,
+    ben_master: BenefitsData,
+    *args: Tuple[Optional[str]]
 ) -> plt.figure:
     """compiles a matplotlib bar chart which shows total project costs"""
     fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2)  # four sub plots
     fig.set_size_inches(set_figure_size(fig_size))
 
     if len(cost_master.entity) == 1:
-        fig.suptitle(cost_master.entity[0] + " Cost and Benefits Profile", fontweight="bold")
+        fig.suptitle(
+            cost_master.entity[0] + " Cost and Benefits Profile", fontweight="bold"
+        )
     else:
         fig.suptitle(args[0] + " Cost and Benefits Profile", fontweight="bold")  # title
 
@@ -2510,7 +2547,9 @@ def total_costs_benefits_bar_chart(
     if ben_master.economic_max > y_max:
         ax4.set_ylim(y_min, y_max)
     else:
-        ax4.set_ylim(y_min, y_max)  # possible for economic benefits figure to be the largest
+        ax4.set_ylim(
+            y_min, y_max
+        )  # possible for economic benefits figure to be the largest
 
     fig.tight_layout(rect=[0, 0.03, 1, 0.95])  # size/fit of chart
 
@@ -2532,9 +2571,9 @@ def check_baselines(master: Master) -> None:
                     + " does not have a baseline point for "
                     + v
                     + " this could cause the programme to"
-                      "crash. Therefore the programme is stopping. "
-                      "Please amend the data for " + p + " so that "
-                                                         " it has at least one baseline point for " + v
+                    "crash. Therefore the programme is stopping. "
+                    "Please amend the data for " + p + " so that "
+                    " it has at least one baseline point for " + v
                 )
                 break
         else:
@@ -2547,7 +2586,7 @@ def percentage(percent: int, whole: float) -> int:
 
 
 def get_old_fy_cost_data(
-        master_file: typing.TextIO, project_id_wb: typing.TextIO
+    master_file: typing.TextIO, project_id_wb: typing.TextIO
 ) -> None:
     """
     Gets all old financial data from a specified master and places into project id document.
@@ -2575,13 +2614,13 @@ def get_old_fy_cost_data(
 
 def run_get_old_fy_data(master_files_list: list, project_id_wb: typing.TextIO) -> None:
     for f in reversed(
-            master_files_list
+        master_files_list
     ):  # reversed so it gets the latest data in masters
         get_old_fy_cost_data(f, project_id_wb)
 
 
 def place_old_fy_data_into_master_wb(
-        master_file: typing.TextIO, project_id_wb: typing.TextIO
+    master_file: typing.TextIO, project_id_wb: typing.TextIO
 ) -> None:
     """
     places all old financial year data into master files.
@@ -2608,7 +2647,7 @@ def place_old_fy_data_into_master_wb(
 
 
 def run_place_old_fy_data_into_masters(
-        master_files_list: list, project_id_wb: typing.TextIO
+    master_files_list: list, project_id_wb: typing.TextIO
 ) -> None:
     for f in master_files_list:
         place_old_fy_data_into_master_wb(f, project_id_wb)
@@ -2631,7 +2670,7 @@ def put_key_change_master_into_dict(key_change_file: typing.TextIO) -> Dict[str,
 
 
 def alter_wb_master_file_key_names(
-        master_file: typing.TextIO, key_change_dict: Dict[str, str]
+    master_file: typing.TextIO, key_change_dict: Dict[str, str]
 ) -> workbook:
     """
     places altered key names, from the key change master dictionary, into master wb(s).
@@ -2641,14 +2680,14 @@ def alter_wb_master_file_key_names(
 
     for row_num in range(2, ws.max_row + 1):
         for (
-                key
+            key
         ) in key_change_dict.keys():  # changes stored in the altered key change log wb
             if ws.cell(row=row_num, column=1).value == key:
                 ws.cell(row=row_num, column=1).value = key_change_dict[key]
         for year in YEAR_LIST:  # changes to yearly profile keys
             if ws.cell(row=row_num, column=1).value == year + " CDEL Forecast Total":
                 ws.cell(row=row_num, column=1).value = (
-                        year + " CDEL Forecast one off new costs"
+                    year + " CDEL Forecast one off new costs"
                 )
 
     return wb.save(master_file)
@@ -2699,20 +2738,22 @@ def compare_masters(files: List[typing.TextIO], projects: List[str] or str) -> w
                     if wb_value == dict_value:
                         pass
                     else:
-                        ws.cell(row=row_num, column=column_num).fill = PatternFill(start_color='ffba00',
-                                                                                   end_color='ffba00',
-                                                                                   fill_type='solid')
+                        ws.cell(row=row_num, column=column_num).fill = PatternFill(
+                            start_color="ffba00", end_color="ffba00", fill_type="solid"
+                        )
                         project_count.append(project_name)
                         change_count += 1
                 except KeyError:
-                    if project_name in last_master.projects:  # key error due to key not being present.
-                        ws.cell(row=row_num, column=1).fill = PatternFill(start_color='ffba00',
-                                                                          end_color='ffba00',
-                                                                          fill_type='solid')
+                    if (
+                        project_name in last_master.projects
+                    ):  # key error due to key not being present.
+                        ws.cell(row=row_num, column=1).fill = PatternFill(
+                            start_color="ffba00", end_color="ffba00", fill_type="solid"
+                        )
                     else:  # key error due to project not being present.
-                        ws.cell(row=1, column=column_num).fill = PatternFill(start_color='ffba00',
-                                                                             end_color='ffba00',
-                                                                             fill_type='solid')
+                        ws.cell(row=1, column=column_num).fill = PatternFill(
+                            start_color="ffba00", end_color="ffba00", fill_type="solid"
+                        )
     # separate lop to calculate this
     for row_num in range(2, ws.max_row + 1):
         key = ws.cell(row=row_num, column=1).value
@@ -2721,9 +2762,9 @@ def compare_masters(files: List[typing.TextIO], projects: List[str] or str) -> w
 
     count_ws = wb.create_sheet("Count", 1)
 
-    count_ws.cell(row=1, column=1).value = 'No of changes'
+    count_ws.cell(row=1, column=1).value = "No of changes"
     count_ws.cell(row=1, column=2).value = change_count
-    count_ws.cell(row=2, column=1).value = 'No of new keys'
+    count_ws.cell(row=2, column=1).value = "No of new keys"
     count_ws.cell(row=2, column=2).value = new_key_count
 
     project_count = Counter(project_count)
@@ -2734,11 +2775,16 @@ def compare_masters(files: List[typing.TextIO], projects: List[str] or str) -> w
     return wb
 
 
-def totals_chart(fig: plt.figure, costs: CostData, benefits: BenefitsData, project: str or List[str],
-                 *args: Tuple[Optional[str]]):
+def totals_chart(
+    fig: plt.figure,
+    costs: CostData,
+    benefits: BenefitsData,
+    project: str or List[str],
+    *args: Tuple[Optional[str]]
+):
     """Small function to hold together code to create and save a total_costs_benefits_bar_chart"""
-    costs.get_cost_totals(project, 'ipdc_costs')
-    benefits.get_ben_totals(project, 'ipdc_benefits')
+    costs.get_cost_totals(project, "ipdc_costs")
+    benefits.get_ben_totals(project, "ipdc_benefits")
     if args == ():
         f = total_costs_benefits_bar_chart(fig, costs, benefits)
         f.savefig(root_path / "output/{}_profile.png".format(costs.entity[0]))
@@ -2747,9 +2793,14 @@ def totals_chart(fig: plt.figure, costs: CostData, benefits: BenefitsData, proje
         f.savefig(root_path / "output/{}_profile.png".format(str(args[0])))
 
 
-def standard_profile(fig: plt.figure, costs: CostData, project: str or List[str], *args: Tuple[Optional[str]]):
+def standard_profile(
+    fig: plt.figure,
+    costs: CostData,
+    project: str or List[str],
+    *args: Tuple[Optional[str]]
+):
     """Small function to hold together code to create and save a cost_profile_graph"""
-    costs.get_cost_profile(project, 'ipdc_costs')
+    costs.get_cost_profile(project, "ipdc_costs")
     if args == ():
         f = cost_profile_graph(fig, costs)
         f.savefig(root_path / "output/{}_profile.png".format(costs.entity[0]))
