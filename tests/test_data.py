@@ -7,7 +7,8 @@ from data_mgmt.data import Master, CostData, spent_calculation, wd_heading, \
     key_contacts, dca_table, dca_narratives, put_matplotlib_fig_into_word, \
     cost_profile_graph, total_costs_benefits_bar_chart, \
     run_get_old_fy_data, run_place_old_fy_data_into_masters, put_key_change_master_into_dict, run_change_keys, \
-    BenefitsData, compare_masters, get_gmpp_projects, standard_profile, totals_chart
+    BenefitsData, compare_masters, get_gmpp_projects, standard_profile, totals_chart, change_word_doc_landscape, \
+    FIGURE_STYLE
 
 # test masters project names
 
@@ -98,16 +99,34 @@ def test_project_cost_profile_chart(costs_masters, project_info):
     master = Master(costs_masters, project_info)
     costs = CostData(master)
     costs.get_cost_profile('Falcon 9', 'ipdc_costs')
-    cost_profile_graph(costs, 'Falcon 9')
+    cost_profile_graph(FIGURE_STYLE[2], costs, 'Falcon 9')
 
 
 def test_project_cost_profile_chart_into_word_doc_one(word_doc, costs_masters, project_info):
     master = Master(costs_masters, project_info)
     costs = CostData(master)
     costs.get_cost_profile('Falcon 9', 'ipdc_costs')
-    graph = cost_profile_graph(costs)
+    fig_style = "half horizontal"
+    graph = cost_profile_graph(fig_style, costs)
     put_matplotlib_fig_into_word(word_doc, graph)
     word_doc.save("resources/summary_temp_altered.docx")
+
+
+def test_total_cost_profile_chart_into_word_doc_one(word_doc, costs_masters, project_info):
+    master = Master(costs_masters, project_info)
+    costs = CostData(master)
+    benefits = BenefitsData(master)
+    costs.get_cost_totals('Falcon 9', "ipdc_costs")
+    benefits.get_ben_totals('Falcon 9', "ipdc_benefits")
+    fig_size = FIGURE_STYLE[2]
+    graph = total_costs_benefits_bar_chart(fig_size, costs, benefits)
+    put_matplotlib_fig_into_word(word_doc, graph)
+    word_doc.save("resources/summary_temp_altered.docx")
+
+
+def test_changing_word_doc_to_landscape(word_doc):
+    change_word_doc_landscape(word_doc)
+    word_doc.save("resources/summary_changed_to_landscape.docx")
 
 
 def test_project_cost_profile_chart_into_word_doc_many(word_doc, costs_masters, project_info):
@@ -115,7 +134,7 @@ def test_project_cost_profile_chart_into_word_doc_many(word_doc, costs_masters, 
     costs = CostData(master)
     for p in master.current_projects:
         costs.get_cost_profile(p, 'ipdc_costs')
-        graph = cost_profile_graph(costs)
+        graph = cost_profile_graph(FIGURE_STYLE[2], costs)
         put_matplotlib_fig_into_word(word_doc, graph)
         word_doc.save("resources/summary_temp_altered.docx")
 
@@ -154,7 +173,7 @@ def test_get_group_cost_profile_chart(costs_masters, project_info):
     master = Master(costs_masters, project_info)
     costs = CostData(master)
     costs.get_cost_profile(master.current_projects, 'ipdc_costs')
-    cost_profile_graph(costs, 'Group Test')
+    cost_profile_graph(FIGURE_STYLE[2], costs, 'Group Test')
 
 
 def test_get_project_total_cost_calculations_for_project(costs_masters, project_info):
@@ -171,8 +190,8 @@ def test_get_project_total_costs_benefits_bar_chart(costs_masters, project_info)
     costs = CostData(master)
     benefits = BenefitsData(master)
     costs.get_cost_totals('Mars', 'ipdc_costs')
-    benefits.get_ben_totals('Mars', 'ipdc_costs')
-    total_costs_benefits_bar_chart(costs, benefits)
+    benefits.get_ben_totals('Mars', 'ipdc_benefits')
+    total_costs_benefits_bar_chart(FIGURE_STYLE[2], costs, benefits)
 
 
 def test_get_group_total_cost_calculations(costs_masters, project_info):
@@ -188,7 +207,7 @@ def test_get_group_total_cost_and_bens_chart(costs_masters, project_info):
     bens = BenefitsData(master)
     costs.get_cost_totals(master.current_projects, 'ipdc_costs')
     bens.get_ben_totals(master.current_projects, 'ipdc_benefits')
-    total_costs_benefits_bar_chart(costs, bens, 'Total Group')
+    total_costs_benefits_bar_chart(FIGURE_STYLE[2], costs, bens, 'Total Group')
 
 
 def test_put_change_keys_into_a_dict(change_log):
@@ -248,6 +267,6 @@ def test_saving_total_cost_benefit_graph_files(costs_masters, project_info):
     master = Master(costs_masters, project_info)
     costs = CostData(master)
     benefits = BenefitsData(master)
-    fig_style = "half horizontal"
-    totals_chart(fig_style, costs, benefits, a13)
+    fig_style = FIGURE_STYLE[2]
+    totals_chart(fig_style, costs, benefits, f9)
     totals_chart(fig_style, costs, benefits, group, 'Matplotlib')

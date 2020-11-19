@@ -480,6 +480,8 @@ FILE_FORMATS = [
     "tiff",
 ]
 
+FIGURE_STYLE = {1: "half horizontal", 2: "full horizontal"}
+
 
 def calculate_profiled(p: List[int], s: List[int], unpro: List[int]) -> list:
     """small helper function to calculate the proper profiled amount. This is necessary as
@@ -625,7 +627,7 @@ class MilestoneData:
         # self.project_data()
         # self.group_data()
 
-    def project_data(self, milestone_type):  # renamed to project_data
+    def project_data(self, milestone_type):  # renamed to figproject_data
         """
         Creates project milestone dictionaries for current, last, and
         baselines when provided with a milestone_type for all
@@ -1852,9 +1854,11 @@ def vfm_matplotlib_graph(labels, current_qrt, last_qrt, title):
     plt.show()
 
 
-def set_figure_size(graph_type):
+def set_figure_size(graph_type: str) -> Tuple[int, int]:
     if graph_type == "half horizontal":
         return 11.69, 4.10
+    if graph_type == "full horizontal":
+        return 11.69, 8.20
 
 
 def cost_profile_graph(
@@ -2092,7 +2096,7 @@ def spent_calculation(
     master: Dict[str, Union[str, date, int, float]], project: str
 ) -> int:
     keys = [
-        "Pre-profile RDEL Forecast one off new costs",
+        "Pre-profile RDEL",
         "20-21 RDEL STD Total",
         "Pre-profile CDEL Forecast one off new costs",
         "20-21 CDEL STD Total",
@@ -2267,20 +2271,18 @@ def dca_narratives(doc: Document, master: Master, project_name: str) -> None:
         compare_text_new_and_old(text_one, text_two, doc)
 
 
+def change_word_doc_landscape(doc: Document) -> Document():
+    new_section = doc.add_section(WD_SECTION_START.NEW_PAGE)  # new page
+    # change to landscape
+    new_width, new_height = new_section.page_height, new_section.page_width
+    new_section.orientation = WD_ORIENTATION.LANDSCAPE
+    new_section.page_width = new_width
+    new_section.page_height = new_height
+    return doc
+
+
 def put_matplotlib_fig_into_word(doc: Document, fig) -> None:
     """Places line graph cost profile into word document"""
-
-    # TODO modulise change page orientation
-    # new_section = doc.add_section(WD_SECTION_START.NEW_PAGE)  # new page
-    # # change to landscape
-    # new_width, new_height = new_section.page_height, new_section.page_width
-    # new_section.orientation = WD_ORIENTATION.LANDSCAPE
-    # new_section.page_width = new_width
-    # new_section.page_height = new_height
-
-    # fig.canvas.draw()  # for scaling
-    fig.tight_layout(rect=[0, 0.03, 1, 0.95])  # for title
-
     # Place fig in word doc.
     fig.savefig("cost_profile.png")
     doc.add_picture("cost_profile.png", width=Inches(8))  # to place nicely in doc
@@ -2399,7 +2401,7 @@ def make_file_friendly(quarter_str: str) -> str:
 
 
 def total_costs_benefits_bar_chart(
-    fig_size: plt.figure,
+    fig_size: str,
     cost_master: CostData,
     ben_master: BenefitsData,
     *args: Tuple[Optional[str]]
@@ -2776,20 +2778,20 @@ def compare_masters(files: List[typing.TextIO], projects: List[str] or str) -> w
 
 
 def totals_chart(
-    fig: plt.figure,
+    fig_size: str,
     costs: CostData,
     benefits: BenefitsData,
     project: str or List[str],
     *args: Tuple[Optional[str]]
-):
+) -> None:
     """Small function to hold together code to create and save a total_costs_benefits_bar_chart"""
     costs.get_cost_totals(project, "ipdc_costs")
     benefits.get_ben_totals(project, "ipdc_benefits")
     if args == ():
-        f = total_costs_benefits_bar_chart(fig, costs, benefits)
+        f = total_costs_benefits_bar_chart(fig_size, costs, benefits)
         f.savefig(root_path / "output/{}_profile.png".format(costs.entity[0]))
     else:
-        f = total_costs_benefits_bar_chart(fig, costs, benefits, args[0])
+        f = total_costs_benefits_bar_chart(fig_size, costs, benefits, args[0])
         f.savefig(root_path / "output/{}_profile.png".format(str(args[0])))
 
 
@@ -2807,3 +2809,46 @@ def standard_profile(
     else:
         f = cost_profile_graph(fig, costs, args[0])
         f.savefig(root_path / "output/{}_profile.png".format(str(args[0])))
+
+
+# LIST_OF_GROUPS = [master.current_projects,
+#                   Projects.he,
+#                   Projects.rail,
+#                   Projects.rail_franchising,
+#                   Projects.hs2,
+#                   Projects.hsmrpg,
+#                   Projects.sarh2,
+#                   Projects.all_not_hs2,
+#                   Projects.fbc_stage,
+#                   Projects.obc_stage,
+#                   Projects.sobc_stage]
+# LIST_OF_TITLES = ['ALL',
+#                   'HE',
+#                   'RAIL INFRASTRUCTURE',
+#                   'RAIL FRANCHISING',
+#                   'HS2',
+#                   'HSMRPG',
+#                   'AMIS (SARH2)',
+#                   'ALL, NOT HS2,',
+#                   'FBC Projects',
+#                   'OBC Projects',
+#                   'SOBC Projects']
+
+
+# def compile_all_profiles():
+#     report_doc = open_word_doc(wd_path)
+#     for i, p in enumerate(LIST_OF_GROUPS):
+#         costs.get_cost_profile(p, 'ipdc_costs')
+#         graph = cost_profile_graph(costs, LIST_OF_TITLES[i])
+#         put_matplotlib_fig_into_word(report_doc, graph)
+#         report_doc.save(root_path / "output/different_cost_profiles.docx")
+#
+#
+# def compile_all_totals():
+#     report_doc = open_word_doc(wd_path)
+#     for i, p in enumerate(LIST_OF_GROUPS):
+#         costs.get_cost_totals(p, 'ipdc_costs')
+#         benefits.get_ben_totals(p, 'ipdc_benefits')
+#         graph = total_costs_benefits_bar_chart(costs, benefits, LIST_OF_TITLES[i])
+#         put_matplotlib_fig_into_word(report_doc, graph)
+#         report_doc.save(root_path / "output/different_total_cost_profiles.docx")
