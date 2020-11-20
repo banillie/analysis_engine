@@ -183,7 +183,7 @@ IPDC_DATE = datetime.date(
 blue_line_date = datetime.date.today()  # blue line on graph date.
 
 # abbreviations. Used in analysis instead of full projects names
-abbreviations = {
+ABBREVIATION = {
     "2nd Generation UK Search and Rescue Aviation": "SARH2",
     "A12 Chelmsford to A120 widening": "A12",
     "A14 Cambridge to Huntingdon Improvement Scheme": "A14",
@@ -606,10 +606,446 @@ class Master:
             break
 
 
+class CostData:
+    def __init__(self, master: Master):
+        self.master = master
+        self.cat_spent = []
+        self.cat_profiled = []
+        self.cat_unprofiled = []
+        self.spent = []
+        self.profiled = []
+        self.unprofiled = []
+        self.current_profile = []
+        self.last_profile = []
+        self.baseline_profile_one = []
+        self.baseline_profile_two = []
+        self.baseline_profile_three = []
+        self.rdel_profile = []
+        self.cdel_profile = []
+        self.ngov_profile = []
+        self.y_scale_max = 0
+        self.entity = []
+
+    def get_cost_totals(self, group: List[str] or str, baseline: str) -> None:
+        """Returns lists containing the sum total of group (of projects) costs,
+        sliced in different ways. Cumbersome for loop used at the moment, but
+        is the least cumbersome loop I could design!"""
+        self.group = group
+        self.baseline = baseline
+
+        spent = []
+        profiled = []
+        unprofiled = []
+        group_rdel_spent = 0
+        group_cdel_spent = 0
+        group_ngov_spent = 0
+        group_rdel_profiled = 0
+        group_cdel_profiled = 0
+        group_ngov_profiled = 0
+        group_rdel_unprofiled = 0
+        group_cdel_unprofiled = 0
+        group_ngov_unprofiled = 0
+
+        group = string_conversion(self.group)
+
+        for i in range(3):
+            for x, key in enumerate(COST_TYPE_KEY_LIST):
+                group_total = 0
+                for project_name in group:
+                    cost_bl_index = self.master.bl_index[baseline][project_name]
+                    try:
+                        rdel = self.master.master_data[cost_bl_index[i]].data[
+                            project_name
+                        ][key[0]]
+                        if rdel is None:
+                            rdel = 0
+
+                        cdel = self.master.master_data[cost_bl_index[i]].data[
+                            project_name
+                        ][key[1]]
+                        if cdel is None:
+                            cdel = 0
+
+                        ngov = self.master.master_data[cost_bl_index[i]].data[
+                            project_name
+                        ][key[2]]
+                        if ngov is None:
+                            ngov = 0
+
+                        total = round(rdel + cdel + ngov)
+                        group_total += total
+                    except TypeError:  # handle None types, which are present if project not reporting last quarter.
+                        rdel = 0
+                        cdel = 0
+                        ngov = 0
+                        total = 0
+                        group_total += total
+
+                    if i == 0:  # current quarter
+                        if x == 0:  # spent
+                            try:  # handling for spend to date figures which are not present in all masters
+                                rdel_std = self.master.master_data[
+                                    cost_bl_index[i]
+                                ].data[project_name]["20-21 RDEL STD one off new costs"]
+                                if rdel_std is None:
+                                    rdel_std = 0
+                                cdel_std = self.master.master_data[
+                                    cost_bl_index[i]
+                                ].data[project_name]["20-21 CDEL STD one off new costs"]
+                                if cdel_std is None:
+                                    cdel_std = 0
+                                ngov_std = self.master.master_data[
+                                    cost_bl_index[i]
+                                ].data[project_name]["20-21 CDEL STD Non Gov costs"]
+                                if ngov_std is None:
+                                    ngov_std = 0
+                                group_rdel_spent += round(rdel + rdel_std)
+                                group_cdel_spent += round(cdel + cdel_std)
+                                group_ngov_spent += round(ngov + ngov_std)
+                            except KeyError:
+                                group_rdel_spent += rdel
+                                group_cdel_spent += cdel
+                                group_ngov_spent += ngov
+                        if x == 1:  # profiled
+                            group_rdel_profiled += rdel
+                            group_cdel_profiled += cdel
+                            group_ngov_profiled += ngov
+                        if x == 2:  # unprofiled
+                            group_rdel_unprofiled += rdel
+                            group_cdel_unprofiled += cdel
+                            group_ngov_unprofiled += ngov
+
+                if x == 0:  # spent
+                    try:  # handling for spend to date figures which are not present in all masters
+                        rdel_std = self.master.master_data[cost_bl_index[i]].data[
+                            project_name
+                        ]["20-21 RDEL STD one off new costs"]
+                        cdel_std = self.master.master_data[cost_bl_index[i]].data[
+                            project_name
+                        ]["20-21 CDEL STD one off new costs"]
+                        ngov_std = self.master.master_data[cost_bl_index[i]].data[
+                            project_name
+                        ]["20-21 CDEL STD Non Gov costs"]
+                        std_list = [
+                            rdel_std,
+                            cdel_std,
+                            ngov_std,
+                        ]  # converts none types to zero
+                        for s, std in enumerate(std_list):
+                            if std is None:
+                                std_list[s] = 0
+                        spent.append(round(group_total + sum(std_list)))
+                    except (
+                        KeyError,
+                        TypeError,
+                    ):  # Note. TypeError here as projects may have no baseline
+                        spent.append(group_total)
+                if x == 1:  # profiled
+                    profiled.append(group_total)
+                if x == 2:  # unprofiled
+                    unprofiled.append(group_total)
+
+        cat_spent = [group_rdel_spent, group_cdel_spent, group_ngov_spent]
+        cat_profiled = [group_rdel_profiled, group_cdel_profiled, group_ngov_profiled]
+        cat_unprofiled = [
+            group_rdel_unprofiled,
+            group_cdel_unprofiled,
+            group_ngov_unprofiled,
+        ]
+        final_cat_profiled = calculate_profiled(cat_profiled, cat_spent, cat_unprofiled)
+
+        all_profiled = calculate_profiled(profiled, spent, unprofiled)
+
+        self.cat_spent = cat_spent
+        self.cat_profiled = final_cat_profiled
+        self.cat_unprofiled = cat_unprofiled
+        self.spent = spent
+        self.profiled = all_profiled
+        self.unprofiled = unprofiled
+        self.y_scale_max = max(profiled)
+        self.entity = group
+
+    def get_cost_profile(self, group: List[str] or str, baseline: str) -> None:
+        """Returns several lists which contain the sum of different cost profiles for the group of project
+        contained with the master"""
+        self.group = group
+        self.baseline = baseline
+
+        current_profile = []
+        last_profile = []
+        baseline_profile_one = []
+        baseline_profile_two = []
+        baseline_profile_three = []
+        rdel_current_profile = []
+        cdel_current_profile = []
+        ngov_current_profile = []
+        missing_projects = []
+
+        group = string_conversion(self.group)
+
+        for i in range(5):
+            yearly_profile = []
+            rdel_yearly_profile = []
+            cdel_yearly_profile = []
+            ngov_yearly_profile = []
+            for year in YEAR_LIST:
+                cost_total = 0
+                rdel_total = 0
+                cdel_total = 0
+                ngov_total = 0
+                for cost_type in COST_KEY_LIST:
+                    for project_name in group:
+                        project_bl_index = self.master.bl_index[baseline][project_name]
+                        try:
+                            cost = self.master.master_data[project_bl_index[i]].data[
+                                project_name
+                            ][year + cost_type]
+                            if cost is None:
+                                cost = 0
+                            cost_total += cost
+                        except KeyError:  # to handle data across different financial years
+                            cost = 0
+                            cost_total += cost
+                        except TypeError:  # Handles projects not present in the previous quarter
+                            missing_projects.append(
+                                str(project_name)
+                            )  # projects added here. message is below.
+                            cost = 0
+                            cost_total += cost
+                        except IndexError:  # Handles project baseline index
+                            # TODO improve this loop
+                            if i == 3:
+                                try:
+                                    cost = self.master.master_data[
+                                        project_bl_index[2]
+                                    ].data[project_name][year + cost_type]
+                                    if cost is None:
+                                        cost = 0
+                                    cost_total += cost
+                                except KeyError:  # to handle data across different financial years
+                                    cost = 0
+                                    cost_total += cost
+                            if i == 4:
+                                try:
+                                    cost = self.master.master_data[
+                                        project_bl_index[3]
+                                    ].data[project_name][year + cost_type]
+                                    if cost is None:
+                                        cost = 0
+                                    cost_total += cost
+                                except KeyError:  # to handle data across different financial years
+                                    cost = 0
+                                    cost_total += cost
+                                except IndexError:
+                                    try:
+                                        cost = self.master.master_data[
+                                            project_bl_index[2]
+                                        ].data[project_name][year + cost_type]
+                                        if cost is None:
+                                            cost = 0
+                                        cost_total += cost
+                                    except KeyError:  # to handle data across different financial years
+                                        cost = 0
+                                        cost_total += cost
+
+                        if cost_type == COST_KEY_LIST[0]:  # rdel
+                            rdel_total += cost
+                        if cost_type == COST_KEY_LIST[1]:  # cdel
+                            cdel_total += cost
+                        if cost_type == COST_KEY_LIST[2]:  # ngov
+                            ngov_total += cost
+
+                yearly_profile.append(round(cost_total))
+                rdel_yearly_profile.append(round(rdel_total))
+                cdel_yearly_profile.append(round(cdel_total))
+                ngov_yearly_profile.append(round(ngov_total))
+
+            if i == 0:
+                current_profile = yearly_profile
+                rdel_current_profile = rdel_yearly_profile
+                cdel_current_profile = cdel_yearly_profile
+                ngov_current_profile = ngov_yearly_profile
+            if i == 1:
+                last_profile = yearly_profile
+            if i == 2:
+                baseline_profile_one = yearly_profile
+            if i == 3:
+                baseline_profile_two = yearly_profile
+            if i == 4:
+                baseline_profile_three = yearly_profile
+
+        missing_projects = list(set(missing_projects))  # if TypeError raised above
+        if len(missing_projects) is not 0:
+            print(
+                "NOTE: The following project(s) were not part of the portfolio last quarter "
+                + str(missing_projects)
+                + " this means current quarter and last quarter cost profiles are not like for like."
+                " If you would like a like for like comparison between current and last quarter"
+                " remove this project(s) from the master group."
+            )
+
+        self.current_profile = current_profile
+        self.last_profile = last_profile
+        self.baseline_profile_one = baseline_profile_one
+        self.baseline_profile_two = baseline_profile_two
+        self.baseline_profile_three = baseline_profile_three
+        self.rdel_profile = rdel_current_profile
+        self.cdel_profile = cdel_current_profile
+        self.ngov_profile = ngov_current_profile
+        self.entity = group
+
+
+class BenefitsData:
+    def __init__(self, master: Master):
+        self.master = master
+        self.cat_delivered = []
+        self.cat_profiled = []
+        self.cat_unprofiled = []
+        self.delivered = []
+        self.profiled = []
+        self.unprofiled = []
+        self.y_scale_max = 0
+        self.y_scale_min = 0
+        self.economic_max = 0
+
+    def get_ben_totals(self, group: List[str] or str, baseline: str) -> None:
+        """Returns lists containing the sum total of group (of projects) benefits,
+        sliced in different ways. Cumbersome for loop used at the moment, but
+        is the least cumbersome loop I could design!"""
+        self.group = group
+        self.baseline = baseline
+
+        delivered = []
+        profiled = []
+        unprofiled = []
+        group_cash_dev = 0
+        group_uncash_dev = 0
+        group_economic_dev = 0
+        group_disben_dev = 0
+        group_cash_profiled = 0
+        group_uncash_profiled = 0
+        group_economic_profiled = 0
+        group_disben_profiled = 0
+        group_cash_unprofiled = 0
+        group_uncash_unprofiled = 0
+        group_economic_unprofiled = 0
+        group_disben_unprofiled = 0
+
+        group = string_conversion(self.group)
+
+        # where to store this function. need it at a global level for CostData Class
+        def calculate_profiled(p: List[int], s: List[int], unpro: List[int]) -> list:
+            """small helper function to calculate the proper profiled amount. This is necessary as
+            other wise 'profiled' would actually be the total figure.
+            p = profiled list
+            s = spent list
+            unpro = unprofiled list"""
+            f_profiled = []
+            for y, amount in enumerate(p):
+                t = amount - (s[y] + unpro[y])
+                f_profiled.append(t)
+            return f_profiled
+
+        for i in range(3):
+            for x, key in enumerate(BEN_TYPE_KEY_LIST):
+                group_total = 0
+                for project in group:
+                    ben_bl_index = self.master.bl_index[baseline][project]
+                    try:
+                        cash = round(
+                            self.master.master_data[ben_bl_index[i]].data[project][
+                                key[0]
+                            ]
+                        )
+                        uncash = round(
+                            self.master.master_data[ben_bl_index[i]].data[project][
+                                key[1]
+                            ]
+                        )
+                        economic = round(
+                            self.master.master_data[ben_bl_index[i]].data[project][
+                                key[2]
+                            ]
+                        )
+                        disben = round(
+                            self.master.master_data[ben_bl_index[i]].data[project][
+                                key[3]
+                            ]
+                        )
+
+                        total = round(cash + uncash + economic + disben)
+                        group_total += total
+                    except TypeError:  # handle None types, which are present if project not reporting last quarter.
+                        cash = 0
+                        uncash = 0
+                        economic = 0
+                        disben = 0
+                        total = 0
+                        group_total += total
+
+                    if i == 0:  # current quarter
+                        if x == 0:  # spent
+                            group_cash_dev += cash
+                            group_uncash_dev += uncash
+                            group_economic_dev += economic
+                            group_disben_dev += disben
+                        if x == 1:  # profiled
+                            group_cash_profiled += cash
+                            group_uncash_profiled += uncash
+                            group_economic_profiled += economic
+                            group_disben_profiled += disben
+                        if x == 2:  # unprofiled
+                            group_cash_unprofiled += cash
+                            group_uncash_unprofiled += uncash
+                            group_economic_unprofiled += economic
+                            group_disben_unprofiled += disben
+
+                if x == 0:  # spent
+                    delivered.append(group_total)
+                if x == 1:  # profiled
+                    profiled.append(group_total)
+                if x == 2:  # unprofiled
+                    unprofiled.append(group_total)
+
+        cat_spent = [
+            group_cash_dev,
+            group_uncash_dev,
+            group_economic_dev,
+            group_disben_dev,
+        ]
+        cat_profiled = [
+            group_cash_profiled,
+            group_uncash_profiled,
+            group_economic_profiled,
+            group_disben_profiled,
+        ]
+        cat_unprofiled = [
+            group_cash_unprofiled,
+            group_uncash_unprofiled,
+            group_economic_unprofiled,
+            group_disben_unprofiled,
+        ]
+        final_cat_profiled = calculate_profiled(cat_profiled, cat_spent, cat_unprofiled)
+        all_profiled = calculate_profiled(profiled, delivered, unprofiled)
+
+        self.cat_delivered = cat_spent
+        self.cat_profiled = final_cat_profiled
+        self.cat_unprofiled = cat_unprofiled
+        self.delivered = delivered
+        self.profiled = all_profiled
+        self.unprofiled = unprofiled
+        self.y_scale_max = max(profiled)
+        self.y_scale_min = min(
+            [group_disben_dev, group_disben_profiled, group_disben_unprofiled]
+        )
+        self.economic_max = max(
+            [group_economic_dev, group_economic_unprofiled, group_economic_profiled]
+        )
+
+
 class MilestoneData:
-    def __init__(self, masters_object, abbreviations):
-        self.masters = masters_object
-        self.abbreviations = abbreviations
+    def __init__(self, master: Master):
+        self.master = master
         self.project_current = {}
         self.project_last = {}
         self.project_baseline = {}
@@ -624,16 +1060,18 @@ class MilestoneData:
         self.group_choronological_list_current = []
         self.group_choronological_list_last = []
         self.group_choronological_list_baseline = []
-        # self.project_data()
-        # self.group_data()
 
-    def project_data(self, milestone_type):  # renamed to figproject_data
+    def project_data(self, group: List[str] or str, baseline: str) -> None:
         """
         Creates project milestone dictionaries for current, last, and
         baselines when provided with a milestone_type for all
         projects within a MilestoneData type.
         """
-        self.milestone_type = milestone_type
+        # Are these two lines necessary? code works without
+        self.group = group
+        self.baseline = baseline
+
+        group = string_conversion(self.group)
 
         current_dict = {}
         last_dict = {}
@@ -643,150 +1081,92 @@ class MilestoneData:
         sorted_last = []
         sorted_baseline = []
 
-        if self.milestone_type == "All":
-            for name in self.masters.current_projects:
-                for ind in self.masters.bl_index[name][:4]:  # limit to four for now
-                    lower_dict = {}
-                    raw_list = []
+        for project_name in group:
+            for ind in self.master.bl_index[baseline][project_name]:
+                lower_dict = {}
+                raw_list = []
+                p_data = self.master.master_data[ind].data[project_name]
+                for i in range(1, 50):
                     try:
-                        p_data = self.masters.master_data[ind].data[name]
-                        for i in range(1, 50):
-                            try:
-                                try:
-                                    t = (
-                                        p_data["Approval MM" + str(i)],
-                                        p_data[
-                                            "Approval MM"
-                                            + str(i)
-                                            + " Forecast / Actual"
-                                        ],
-                                        p_data["Approval MM" + str(i) + " Notes"],
-                                    )
-                                    raw_list.append(t)
-                                except KeyError:
-                                    t = (
-                                        p_data["Approval MM" + str(i)],
-                                        p_data[
-                                            "Approval MM"
-                                            + str(i)
-                                            + " Forecast - Actual"
-                                        ],
-                                        p_data["Approval MM" + str(i) + " Notes"],
-                                    )
-                                    raw_list.append(t)
-
-                                t = (
-                                    p_data["Assurance MM" + str(i)],
-                                    p_data[
-                                        "Assurance MM" + str(i) + " Forecast - Actual"
-                                    ],
-                                    p_data["Assurance MM" + str(i) + " Notes"],
-                                )
-                                raw_list.append(t)
-
-                            except KeyError:
-                                pass
-
-                        for i in range(18, 67):
-                            try:
-                                t = (
-                                    p_data["Project MM" + str(i)],
-                                    p_data[
-                                        "Project MM" + str(i) + " Forecast - Actual"
-                                    ],
-                                    p_data["Project MM" + str(i) + " Notes"],
-                                )
-                                raw_list.append(t)
-                            except KeyError:
-                                pass
-                    except (KeyError, TypeError):
-                        pass
-
-                    # put the list in chronological order
-                    sorted_list = sorted(raw_list, key=lambda k: (k[1] is None, k[1]))
-
-                    # loop to stop key names being the same. Not ideal as doesn't handle keys that may already have numbers as
-                    # strings at end of names. But still useful.
-                    for x in sorted_list:
-                        if x[0] is not None:
-                            if x[0] in lower_dict:
-                                for y in range(2, 15):
-                                    key_name = x[0] + " " + str(y)
-                                    if key_name in lower_dict:
-                                        continue
-                                    else:
-                                        lower_dict[key_name] = {x[1]: x[2]}
-                                        break
-                            else:
-                                lower_dict[x[0]] = {x[1]: x[2]}
-                        else:
+                        t = [("Project", project_name),
+                             ("Milestone", p_data["Approval MM" + str(i)]),
+                             ("Type", "Approval"),
+                             ("Date", p_data[
+                                "Approval MM" + str(i) + " Forecast / Actual"]),
+                            ("Notes", p_data["Approval MM" + str(i) + " Notes"],)]
+                        raw_list.append(t)
+                    except KeyError:
+                        try:
+                            t = [("Project", project_name),
+                                 ("Milestone", p_data["Approval MM" + str(i)]),
+                                 ("Type", "Approval"),
+                                 ("Date", p_data[
+                                     "Approval MM" + str(i) + " Forecast - Actual"]),
+                                 ("Notes", p_data["Approval MM" + str(i) + " Notes"],)]
+                            raw_list.append(t)
+                        except KeyError:
                             pass
 
-                    if self.masters.bl_index[name].index(ind) == 0:
-                        current_dict[name] = lower_dict
-                        sorted_current = sorted_list
-                    if self.masters.bl_index[name].index(ind) == 1:
-                        last_dict[name] = lower_dict
-                        sorted_last = sorted_list
-                    if self.masters.bl_index[name].index(ind) == 2:
-                        baseline_dict[name] = lower_dict
-                        sorted_baseline = sorted_list
-                    if self.masters.bl_index[name].index(ind) == 3:
-                        baseline_dict_two[name] = lower_dict
+                # for i in range(1, 50):
+                #     try:
+                #         t = ("Assurance",
+                #             p_data["Assurance MM" + str(i)],
+                #             p_data["Assurance MM" + str(i) + " Forecast - Actual"],
+                #             p_data["Assurance MM" + str(i) + " Notes"],
+                #         )
+                #         raw_list.append(t)
+                #     except KeyError:
+                #         pass
 
-        if self.milestone_type == "Delivery":
-            for name in self.masters.current_projects:
-                for ind in self.masters.bl_index[name][:4]:  # limit to four for now
-                    lower_dict = {}
-                    raw_list = []
-                    try:
-                        p_data = self.masters.master_data[ind].data[name]
-                        for i in range(18, 67):
-                            try:
-                                t = (
-                                    p_data["Project MM" + str(i)],
-                                    p_data[
-                                        "Project MM" + str(i) + " Forecast - Actual"
-                                    ],
-                                    p_data["Project MM" + str(i) + " Notes"],
-                                )
-                                raw_list.append(t)
-                            except KeyError:
-                                pass
-                    except (KeyError, TypeError):
-                        pass
+                # for i in range(18, 67):
+                #     try:
+                #         t = ("Project",
+                #             p_data["Project MM" + str(i)],
+                #             p_data["Project MM" + str(i) + " Forecast - Actual"],
+                #             p_data["Project MM" + str(i) + " Notes"],
+                #         )
+                #         raw_list.append(t)
+                #     except KeyError:
+                #         pass
 
-                    # put the list in chronological order
-                    sorted_list = sorted(raw_list, key=lambda k: (k[1] is None, k[1]))
+                # put the list in chronological order
+                #sorted_list = sorted(raw_list, key=lambda k: (k[2] is None, k[2]))
 
-                    # loop to stop key names being the same. Not ideal as doesn't handle keys that may already have numbers as
-                    # strings at end of names. But still useful.
-                    for x in sorted_list:
-                        if x[0] is not None:
-                            if x[0] in lower_dict:
-                                for y in range(2, 15):
-                                    key_name = x[0] + " " + str(y)
-                                    if key_name in lower_dict:
-                                        continue
-                                    else:
-                                        lower_dict[key_name] = {x[1]: x[2]}
-                                        break
-                            else:
-                                lower_dict[x[0]] = {x[1]: x[2]}
-                        else:
-                            pass
+                # loop to stop key names being the same. Not ideal as doesn't handle
+                # keys that may already have numbers as strings at end of names.
+                # But still useful.
 
-                    if self.masters.bl_index[name].index(ind) == 0:
-                        current_dict[name] = lower_dict
-                        # sorted_current = sorted_list
-                    if self.masters.bl_index[name].index(ind) == 1:
-                        last_dict[name] = lower_dict
-                        # sorted_last = sorted_list
-                    if self.masters.bl_index[name].index(ind) == 2:
-                        baseline_dict[name] = lower_dict
-                        # sorted_baseline = sorted_list
-                    if self.masters.bl_index[name].index(ind) == 3:
-                        baseline_dict_two[name] = lower_dict
+
+
+                # for x in sorted_list:
+                #     if x[1] is not None:
+                #         if x[1] in lower_dict:
+                #             for y in range(2, 15):
+                #                 key_name = x[1] + " " + str(y)
+                #                 if key_name in lower_dict:
+                #                     continue
+                #                 else:
+                #                     lower_dict[key_name] = {x[2]: x[3]}
+                #                     break
+                #         else:
+                #             lower_dict[x[1]] = {x[2]: x[3]}
+                #     else:
+                #         pass
+
+                for i in range(len(raw_list)):
+                    lower_dict["Milestone " + str(i)] = dict(raw_list[i])
+
+                if ind == 0:
+                    current_dict["Current"] = lower_dict
+                    # sorted_current = sorted_list
+                if ind == 1:
+                    last_dict["Last"] = lower_dict
+                    # sorted_last = sorted_list
+                if ind == 2:
+                    baseline_dict["BL_one"] = lower_dict
+                    # sorted_baseline = sorted_list
+                if ind == 3:
+                    baseline_dict_two["BL_two"] = lower_dict
 
         self.project_current = current_dict
         self.project_last = last_dict
@@ -815,10 +1195,10 @@ class MilestoneData:
         if self.milestone_type == "All":
             for num in range(0, 4):
                 raw_list = []
-                for name in self.masters.current_projects:
+                for name in self.master.current_projects:
                     try:
-                        p_data = self.masters.master_data[
-                            self.masters.bl_index[name][num]
+                        p_data = self.master.master_data[
+                            self.master.bl_index[name][num]
                         ].data[name]
                         for i in range(1, 50):
                             try:
@@ -1368,443 +1748,6 @@ class MilestoneCharts:
                 self.ipdc_date,
             )
         pass
-
-
-class CostData:
-    def __init__(self, master: Master):
-        self.master = master
-        self.cat_spent = []
-        self.cat_profiled = []
-        self.cat_unprofiled = []
-        self.spent = []
-        self.profiled = []
-        self.unprofiled = []
-        self.current_profile = []
-        self.last_profile = []
-        self.baseline_profile_one = []
-        self.baseline_profile_two = []
-        self.baseline_profile_three = []
-        self.rdel_profile = []
-        self.cdel_profile = []
-        self.ngov_profile = []
-        self.y_scale_max = 0
-        self.entity = []
-
-    def get_cost_totals(self, group: List[str] or str, baseline: str) -> None:
-        """Returns lists containing the sum total of group (of projects) costs,
-        sliced in different ways. Cumbersome for loop used at the moment, but
-        is the least cumbersome loop I could design!"""
-        self.group = group
-        self.baseline = baseline
-
-        spent = []
-        profiled = []
-        unprofiled = []
-        group_rdel_spent = 0
-        group_cdel_spent = 0
-        group_ngov_spent = 0
-        group_rdel_profiled = 0
-        group_cdel_profiled = 0
-        group_ngov_profiled = 0
-        group_rdel_unprofiled = 0
-        group_cdel_unprofiled = 0
-        group_ngov_unprofiled = 0
-
-        group = string_conversion(self.group)
-
-        for i in range(3):
-            for x, key in enumerate(COST_TYPE_KEY_LIST):
-                group_total = 0
-                for project_name in group:
-                    cost_bl_index = self.master.bl_index[baseline][project_name]
-                    try:
-                        rdel = self.master.master_data[cost_bl_index[i]].data[
-                            project_name
-                        ][key[0]]
-                        if rdel is None:
-                            rdel = 0
-
-                        cdel = self.master.master_data[cost_bl_index[i]].data[
-                            project_name
-                        ][key[1]]
-                        if cdel is None:
-                            cdel = 0
-
-                        ngov = self.master.master_data[cost_bl_index[i]].data[
-                            project_name
-                        ][key[2]]
-                        if ngov is None:
-                            ngov = 0
-
-                        total = round(rdel + cdel + ngov)
-                        group_total += total
-                    except TypeError:  # handle None types, which are present if project not reporting last quarter.
-                        rdel = 0
-                        cdel = 0
-                        ngov = 0
-                        total = 0
-                        group_total += total
-
-                    if i == 0:  # current quarter
-                        if x == 0:  # spent
-                            try:  # handling for spend to date figures which are not present in all masters
-                                rdel_std = self.master.master_data[
-                                    cost_bl_index[i]
-                                ].data[project_name]["20-21 RDEL STD one off new costs"]
-                                if rdel_std is None:
-                                    rdel_std = 0
-                                cdel_std = self.master.master_data[
-                                    cost_bl_index[i]
-                                ].data[project_name]["20-21 CDEL STD one off new costs"]
-                                if cdel_std is None:
-                                    cdel_std = 0
-                                ngov_std = self.master.master_data[
-                                    cost_bl_index[i]
-                                ].data[project_name]["20-21 CDEL STD Non Gov costs"]
-                                if ngov_std is None:
-                                    ngov_std = 0
-                                group_rdel_spent += round(rdel + rdel_std)
-                                group_cdel_spent += round(cdel + cdel_std)
-                                group_ngov_spent += round(ngov + ngov_std)
-                            except KeyError:
-                                group_rdel_spent += rdel
-                                group_cdel_spent += cdel
-                                group_ngov_spent += ngov
-                        if x == 1:  # profiled
-                            group_rdel_profiled += rdel
-                            group_cdel_profiled += cdel
-                            group_ngov_profiled += ngov
-                        if x == 2:  # unprofiled
-                            group_rdel_unprofiled += rdel
-                            group_cdel_unprofiled += cdel
-                            group_ngov_unprofiled += ngov
-
-                if x == 0:  # spent
-                    try:  # handling for spend to date figures which are not present in all masters
-                        rdel_std = self.master.master_data[cost_bl_index[i]].data[
-                            project_name
-                        ]["20-21 RDEL STD one off new costs"]
-                        cdel_std = self.master.master_data[cost_bl_index[i]].data[
-                            project_name
-                        ]["20-21 CDEL STD one off new costs"]
-                        ngov_std = self.master.master_data[cost_bl_index[i]].data[
-                            project_name
-                        ]["20-21 CDEL STD Non Gov costs"]
-                        std_list = [
-                            rdel_std,
-                            cdel_std,
-                            ngov_std,
-                        ]  # converts none types to zero
-                        for s, std in enumerate(std_list):
-                            if std is None:
-                                std_list[s] = 0
-                        spent.append(round(group_total + sum(std_list)))
-                    except (
-                        KeyError,
-                        TypeError,
-                    ):  # Note. TypeError here as projects may have no baseline
-                        spent.append(group_total)
-                if x == 1:  # profiled
-                    profiled.append(group_total)
-                if x == 2:  # unprofiled
-                    unprofiled.append(group_total)
-
-        cat_spent = [group_rdel_spent, group_cdel_spent, group_ngov_spent]
-        cat_profiled = [group_rdel_profiled, group_cdel_profiled, group_ngov_profiled]
-        cat_unprofiled = [
-            group_rdel_unprofiled,
-            group_cdel_unprofiled,
-            group_ngov_unprofiled,
-        ]
-        final_cat_profiled = calculate_profiled(cat_profiled, cat_spent, cat_unprofiled)
-
-        all_profiled = calculate_profiled(profiled, spent, unprofiled)
-
-        self.cat_spent = cat_spent
-        self.cat_profiled = final_cat_profiled
-        self.cat_unprofiled = cat_unprofiled
-        self.spent = spent
-        self.profiled = all_profiled
-        self.unprofiled = unprofiled
-        self.y_scale_max = max(profiled)
-        self.entity = group
-
-    def get_cost_profile(self, group: List[str] or str, baseline: str) -> None:
-        """Returns several lists which contain the sum of different cost profiles for the group of project
-        contained with the master"""
-        self.group = group
-        self.baseline = baseline
-
-        current_profile = []
-        last_profile = []
-        baseline_profile_one = []
-        baseline_profile_two = []
-        baseline_profile_three = []
-        rdel_current_profile = []
-        cdel_current_profile = []
-        ngov_current_profile = []
-        missing_projects = []
-
-        group = string_conversion(self.group)
-
-        for i in range(5):
-            yearly_profile = []
-            rdel_yearly_profile = []
-            cdel_yearly_profile = []
-            ngov_yearly_profile = []
-            for year in YEAR_LIST:
-                cost_total = 0
-                rdel_total = 0
-                cdel_total = 0
-                ngov_total = 0
-                for cost_type in COST_KEY_LIST:
-                    for project_name in group:
-                        project_bl_index = self.master.bl_index[baseline][project_name]
-                        try:
-                            cost = self.master.master_data[project_bl_index[i]].data[
-                                project_name
-                            ][year + cost_type]
-                            if cost is None:
-                                cost = 0
-                            cost_total += cost
-                        except KeyError:  # to handle data across different financial years
-                            cost = 0
-                            cost_total += cost
-                        except TypeError:  # Handles projects not present in the previous quarter
-                            missing_projects.append(
-                                str(project_name)
-                            )  # projects added here. message is below.
-                            cost = 0
-                            cost_total += cost
-                        except IndexError:  # Handles project baseline index
-                            # TODO improve this loop
-                            if i == 3:
-                                try:
-                                    cost = self.master.master_data[
-                                        project_bl_index[2]
-                                    ].data[project_name][year + cost_type]
-                                    if cost is None:
-                                        cost = 0
-                                    cost_total += cost
-                                except KeyError:  # to handle data across different financial years
-                                    cost = 0
-                                    cost_total += cost
-                            if i == 4:
-                                try:
-                                    cost = self.master.master_data[
-                                        project_bl_index[3]
-                                    ].data[project_name][year + cost_type]
-                                    if cost is None:
-                                        cost = 0
-                                    cost_total += cost
-                                except KeyError:  # to handle data across different financial years
-                                    cost = 0
-                                    cost_total += cost
-                                except IndexError:
-                                    try:
-                                        cost = self.master.master_data[
-                                            project_bl_index[2]
-                                        ].data[project_name][year + cost_type]
-                                        if cost is None:
-                                            cost = 0
-                                        cost_total += cost
-                                    except KeyError:  # to handle data across different financial years
-                                        cost = 0
-                                        cost_total += cost
-
-                        if cost_type == COST_KEY_LIST[0]:  # rdel
-                            rdel_total += cost
-                        if cost_type == COST_KEY_LIST[1]:  # cdel
-                            cdel_total += cost
-                        if cost_type == COST_KEY_LIST[2]:  # ngov
-                            ngov_total += cost
-
-                yearly_profile.append(round(cost_total))
-                rdel_yearly_profile.append(round(rdel_total))
-                cdel_yearly_profile.append(round(cdel_total))
-                ngov_yearly_profile.append(round(ngov_total))
-
-            if i == 0:
-                current_profile = yearly_profile
-                rdel_current_profile = rdel_yearly_profile
-                cdel_current_profile = cdel_yearly_profile
-                ngov_current_profile = ngov_yearly_profile
-            if i == 1:
-                last_profile = yearly_profile
-            if i == 2:
-                baseline_profile_one = yearly_profile
-            if i == 3:
-                baseline_profile_two = yearly_profile
-            if i == 4:
-                baseline_profile_three = yearly_profile
-
-        missing_projects = list(set(missing_projects))  # if TypeError raised above
-        if len(missing_projects) is not 0:
-            print(
-                "NOTE: The following project(s) were not part of the portfolio last quarter "
-                + str(missing_projects)
-                + " this means current quarter and last quarter cost profiles are not like for like."
-                " If you would like a like for like comparison between current and last quarter"
-                " remove this project(s) from the master group."
-            )
-
-        self.current_profile = current_profile
-        self.last_profile = last_profile
-        self.baseline_profile_one = baseline_profile_one
-        self.baseline_profile_two = baseline_profile_two
-        self.baseline_profile_three = baseline_profile_three
-        self.rdel_profile = rdel_current_profile
-        self.cdel_profile = cdel_current_profile
-        self.ngov_profile = ngov_current_profile
-        self.entity = group
-
-
-class BenefitsData:
-    def __init__(self, master: Master):
-        self.master = master
-        self.cat_delivered = []
-        self.cat_profiled = []
-        self.cat_unprofiled = []
-        self.delivered = []
-        self.profiled = []
-        self.unprofiled = []
-        self.y_scale_max = 0
-        self.y_scale_min = 0
-        self.economic_max = 0
-
-    def get_ben_totals(self, group: List[str] or str, baseline: str) -> None:
-        """Returns lists containing the sum total of group (of projects) benefits,
-        sliced in different ways. Cumbersome for loop used at the moment, but
-        is the least cumbersome loop I could design!"""
-        self.group = group
-        self.baseline = baseline
-
-        delivered = []
-        profiled = []
-        unprofiled = []
-        group_cash_dev = 0
-        group_uncash_dev = 0
-        group_economic_dev = 0
-        group_disben_dev = 0
-        group_cash_profiled = 0
-        group_uncash_profiled = 0
-        group_economic_profiled = 0
-        group_disben_profiled = 0
-        group_cash_unprofiled = 0
-        group_uncash_unprofiled = 0
-        group_economic_unprofiled = 0
-        group_disben_unprofiled = 0
-
-        group = string_conversion(self.group)
-
-        # where to store this function. need it at a global level for CostData Class
-        def calculate_profiled(p: List[int], s: List[int], unpro: List[int]) -> list:
-            """small helper function to calculate the proper profiled amount. This is necessary as
-            other wise 'profiled' would actually be the total figure.
-            p = profiled list
-            s = spent list
-            unpro = unprofiled list"""
-            f_profiled = []
-            for y, amount in enumerate(p):
-                t = amount - (s[y] + unpro[y])
-                f_profiled.append(t)
-            return f_profiled
-
-        for i in range(3):
-            for x, key in enumerate(BEN_TYPE_KEY_LIST):
-                group_total = 0
-                for project in group:
-                    ben_bl_index = self.master.bl_index[baseline][project]
-                    try:
-                        cash = round(
-                            self.master.master_data[ben_bl_index[i]].data[project][
-                                key[0]
-                            ]
-                        )
-                        uncash = round(
-                            self.master.master_data[ben_bl_index[i]].data[project][
-                                key[1]
-                            ]
-                        )
-                        economic = round(
-                            self.master.master_data[ben_bl_index[i]].data[project][
-                                key[2]
-                            ]
-                        )
-                        disben = round(
-                            self.master.master_data[ben_bl_index[i]].data[project][
-                                key[3]
-                            ]
-                        )
-
-                        total = round(cash + uncash + economic + disben)
-                        group_total += total
-                    except TypeError:  # handle None types, which are present if project not reporting last quarter.
-                        cash = 0
-                        uncash = 0
-                        economic = 0
-                        disben = 0
-                        total = 0
-                        group_total += total
-
-                    if i == 0:  # current quarter
-                        if x == 0:  # spent
-                            group_cash_dev += cash
-                            group_uncash_dev += uncash
-                            group_economic_dev += economic
-                            group_disben_dev += disben
-                        if x == 1:  # profiled
-                            group_cash_profiled += cash
-                            group_uncash_profiled += uncash
-                            group_economic_profiled += economic
-                            group_disben_profiled += disben
-                        if x == 2:  # unprofiled
-                            group_cash_unprofiled += cash
-                            group_uncash_unprofiled += uncash
-                            group_economic_unprofiled += economic
-                            group_disben_unprofiled += disben
-
-                if x == 0:  # spent
-                    delivered.append(group_total)
-                if x == 1:  # profiled
-                    profiled.append(group_total)
-                if x == 2:  # unprofiled
-                    unprofiled.append(group_total)
-
-        cat_spent = [
-            group_cash_dev,
-            group_uncash_dev,
-            group_economic_dev,
-            group_disben_dev,
-        ]
-        cat_profiled = [
-            group_cash_profiled,
-            group_uncash_profiled,
-            group_economic_profiled,
-            group_disben_profiled,
-        ]
-        cat_unprofiled = [
-            group_cash_unprofiled,
-            group_uncash_unprofiled,
-            group_economic_unprofiled,
-            group_disben_unprofiled,
-        ]
-        final_cat_profiled = calculate_profiled(cat_profiled, cat_spent, cat_unprofiled)
-        all_profiled = calculate_profiled(profiled, delivered, unprofiled)
-
-        self.cat_delivered = cat_spent
-        self.cat_profiled = final_cat_profiled
-        self.cat_unprofiled = cat_unprofiled
-        self.delivered = delivered
-        self.profiled = all_profiled
-        self.unprofiled = unprofiled
-        self.y_scale_max = max(profiled)
-        self.y_scale_min = min(
-            [group_disben_dev, group_disben_profiled, group_disben_unprofiled]
-        )
-        self.economic_max = max(
-            [group_economic_dev, group_economic_unprofiled, group_economic_profiled]
-        )
 
 
 def vfm_matplotlib_graph(labels, current_qrt, last_qrt, title):

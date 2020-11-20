@@ -8,10 +8,9 @@ from data_mgmt.data import Master, CostData, spent_calculation, wd_heading, \
     cost_profile_graph, total_costs_benefits_bar_chart, \
     run_get_old_fy_data, run_place_old_fy_data_into_masters, put_key_change_master_into_dict, run_change_keys, \
     BenefitsData, compare_masters, get_gmpp_projects, standard_profile, totals_chart, change_word_doc_landscape, \
-    FIGURE_STYLE
+    FIGURE_STYLE, MilestoneData
 
 # test masters project names
-
 sot = "Sea of Tranquility"
 a11 = "Apollo 11"
 a13 = "Apollo 13"
@@ -270,3 +269,10 @@ def test_saving_total_cost_benefit_graph_files(costs_masters, project_info):
     fig_style = FIGURE_STYLE[2]
     totals_chart(fig_style, costs, benefits, f9)
     totals_chart(fig_style, costs, benefits, group, 'Matplotlib')
+
+
+def test_get_milestone_data_project(diff_milestone_types, project_info):
+    master = Master(diff_milestone_types, project_info)
+    milestones = MilestoneData(master)
+    milestones.project_data(sot, "ipdc_milestones")
+    assert milestones.project_current == {}
