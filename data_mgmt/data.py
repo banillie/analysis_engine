@@ -8,7 +8,7 @@ from typing import List, Dict, Union, Optional, Tuple
 
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
-from datetime import timedelta, date
+from datetime import timedelta
 import numpy as np
 from datamaps.api import project_data_from_master
 import platform
@@ -39,7 +39,7 @@ root_path = _platform_docs_dir()
 
 
 def get_master_data() -> List[
-    Dict[str, Union[str, int, date, float]]
+    Dict[str, Union[str, int, datetime.date, float]]
 ]:  # how specify a list of dictionaries?
     """Returns a list of dictionaries each containing quarter data"""
     master_data_list = [
@@ -498,9 +498,9 @@ def calculate_profiled(p: List[int], s: List[int], unpro: List[int]) -> list:
 
 class Master:
     def __init__(
-        self,
-        master_data: List[Dict[str, Union[str, int, date, float]]],
-        project_information: Dict[str, Union[str, int]],
+            self,
+            master_data: List[Dict[str, Union[str, int, datetime.date, float]]],
+            project_information: Dict[str, Union[str, int]],
     ) -> None:
         self.master_data = master_data
         self.project_information = project_information
@@ -576,7 +576,7 @@ class Master:
                 print(
                     p
                     + " is not in the projects information document. Project names must be identical "
-                    " in both documents. Programme stopping. Please amend."
+                      " in both documents. Programme stopping. Please amend."
                 )
                 break
             else:
@@ -597,9 +597,9 @@ class Master:
                         + " does not have a baseline point for "
                         + v
                         + " this could cause the programme to "
-                        "crash. Therefore the programme is stopping. "
-                        "Please amend the data for " + p + " so that "
-                        " it has at least one baseline point for " + v
+                          "crash. Therefore the programme is stopping. "
+                          "Please amend the data for " + p + " so that "
+                                                             " it has at least one baseline point for " + v
                     )
             else:
                 continue
@@ -736,8 +736,8 @@ class CostData:
                                 std_list[s] = 0
                         spent.append(round(group_total + sum(std_list)))
                     except (
-                        KeyError,
-                        TypeError,
+                            KeyError,
+                            TypeError,
                     ):  # Note. TypeError here as projects may have no baseline
                         spent.append(group_total)
                 if x == 1:  # profiled
@@ -880,8 +880,8 @@ class CostData:
                 "NOTE: The following project(s) were not part of the portfolio last quarter "
                 + str(missing_projects)
                 + " this means current quarter and last quarter cost profiles are not like for like."
-                " If you would like a like for like comparison between current and last quarter"
-                " remove this project(s) from the master group."
+                  " If you would like a like for like comparison between current and last quarter"
+                  " remove this project(s) from the master group."
             )
 
         self.current_profile = current_profile
@@ -1046,20 +1046,14 @@ class BenefitsData:
 class MilestoneData:
     def __init__(self, master: Master):
         self.master = master
-        self.project_current = {}
-        self.project_last = {}
-        self.project_baseline = {}
-        self.project_baseline_two = {}
-        self.group_current = {}
-        self.group_last = {}
-        self.group_baseline = {}
-        self.group_baseline_two = {}
-        self.project_choronological_list_current = []
-        self.project_choronological_list_last = []
-        self.project_choronological_list_baseline = []
-        self.group_choronological_list_current = []
-        self.group_choronological_list_last = []
-        self.group_choronological_list_baseline = []
+        self.current = {}
+        self.last_quarter = {}
+        self.baseline = {}
+        self.baseline_two = {}
+        self.ordered_list_current = []
+        self.ordered_list_last = []
+        self.ordered_list_bl = []
+        self.ordered_list_bl_two = []
 
     def project_data(self, group: List[str] or str, baseline: str) -> None:
         """
@@ -1073,271 +1067,124 @@ class MilestoneData:
 
         group = string_conversion(self.group)
 
-        current_dict = {}
-        last_dict = {}
-        baseline_dict = {}
-        baseline_dict_two = {}
-        sorted_current = []
-        sorted_last = []
-        sorted_baseline = []
+        for bl in range(4):
+            lower_dict = {}
+            raw_list = []
+            for project_name in group:
+                milestone_bl_index = self.master.bl_index[baseline][project_name]
+                try:
+                    p_data = self.master.master_data[milestone_bl_index[bl]].data[project_name]
+                except IndexError:
+                    break
 
-        for project_name in group:
-            for ind in self.master.bl_index[baseline][project_name]:
-                lower_dict = {}
-                raw_list = []
-                p_data = self.master.master_data[ind].data[project_name]
+                # i loops below remove None Milestone names and reject non datetime Dates
                 for i in range(1, 50):
                     try:
-                        t = [("Project", project_name),
-                             ("Milestone", p_data["Approval MM" + str(i)]),
-                             ("Type", "Approval"),
-                             ("Date", p_data[
+                        t = [
+                            ("Project", project_name),
+                            ("Milestone", p_data["Approval MM" + str(i)]),
+                            ("Type", "Approval"),
+                            ("Date", p_data[
                                 "Approval MM" + str(i) + " Forecast / Actual"]),
-                            ("Notes", p_data["Approval MM" + str(i) + " Notes"],)]
-                        raw_list.append(t)
+                            ("Notes", p_data["Approval MM" + str(i) + " Notes"])
+                        ]
+                        if t[1][1] is not None:
+                            if isinstance(t[3][1], datetime.date):
+                                raw_list.append(t)
                     except KeyError:
                         try:
-                            t = [("Project", project_name),
-                                 ("Milestone", p_data["Approval MM" + str(i)]),
-                                 ("Type", "Approval"),
-                                 ("Date", p_data[
-                                     "Approval MM" + str(i) + " Forecast - Actual"]),
-                                 ("Notes", p_data["Approval MM" + str(i) + " Notes"],)]
-                            raw_list.append(t)
+                            t = [
+                                ("Project", project_name),
+                                ("Milestone", p_data["Approval MM" + str(i)]),
+                                ("Type", "Approval"),
+                                ("Date", p_data[
+                                    "Approval MM" + str(i) + " Forecast - Actual"]),
+                                ("Notes", p_data["Approval MM" + str(i) + " Notes"])
+                            ]
+                            if t[1][1] is not None:
+                                if isinstance(t[3][1], datetime.date):
+                                    raw_list.append(t)
                         except KeyError:
                             pass
 
-                # for i in range(1, 50):
-                #     try:
-                #         t = ("Assurance",
-                #             p_data["Assurance MM" + str(i)],
-                #             p_data["Assurance MM" + str(i) + " Forecast - Actual"],
-                #             p_data["Assurance MM" + str(i) + " Notes"],
-                #         )
-                #         raw_list.append(t)
-                #     except KeyError:
-                #         pass
-
-                # for i in range(18, 67):
-                #     try:
-                #         t = ("Project",
-                #             p_data["Project MM" + str(i)],
-                #             p_data["Project MM" + str(i) + " Forecast - Actual"],
-                #             p_data["Project MM" + str(i) + " Notes"],
-                #         )
-                #         raw_list.append(t)
-                #     except KeyError:
-                #         pass
-
-                # put the list in chronological order
-                #sorted_list = sorted(raw_list, key=lambda k: (k[2] is None, k[2]))
-
-                # loop to stop key names being the same. Not ideal as doesn't handle
-                # keys that may already have numbers as strings at end of names.
-                # But still useful.
-
-
-
-                # for x in sorted_list:
-                #     if x[1] is not None:
-                #         if x[1] in lower_dict:
-                #             for y in range(2, 15):
-                #                 key_name = x[1] + " " + str(y)
-                #                 if key_name in lower_dict:
-                #                     continue
-                #                 else:
-                #                     lower_dict[key_name] = {x[2]: x[3]}
-                #                     break
-                #         else:
-                #             lower_dict[x[1]] = {x[2]: x[3]}
-                #     else:
-                #         pass
-
-                for i in range(len(raw_list)):
-                    lower_dict["Milestone " + str(i)] = dict(raw_list[i])
-
-                if ind == 0:
-                    current_dict["Current"] = lower_dict
-                    # sorted_current = sorted_list
-                if ind == 1:
-                    last_dict["Last"] = lower_dict
-                    # sorted_last = sorted_list
-                if ind == 2:
-                    baseline_dict["BL_one"] = lower_dict
-                    # sorted_baseline = sorted_list
-                if ind == 3:
-                    baseline_dict_two["BL_two"] = lower_dict
-
-        self.project_current = current_dict
-        self.project_last = last_dict
-        self.project_baseline = baseline_dict
-        self.project_baseline_two = baseline_dict_two
-        self.project_choronological_list_current = sorted_current
-        self.project_choronological_list_last = sorted_last
-        self.project_choronological_list_baseline = sorted_baseline
-
-    def group_data(self, milestone_type):
-        """
-        Creates group milestone dictionaries for current, last, and
-        baselines when provided with a milestone_type for all
-        projects within a MilestoneData type.
-        """
-        self.milestone_type = milestone_type
-
-        current_dict = {}
-        last_dict = {}
-        baseline_dict = {}
-        baseline_dict_two = {}
-        sorted_current = []
-        sorted_last = []
-        sorted_baseline = []
-
-        if self.milestone_type == "All":
-            for num in range(0, 4):
-                raw_list = []
-                for name in self.master.current_projects:
+                for i in range(1, 50):
                     try:
-                        p_data = self.master.master_data[
-                            self.master.bl_index[name][num]
-                        ].data[name]
-                        for i in range(1, 50):
-                            try:
-                                try:
-                                    if p_data["Approval MM" + str(i)] is None:
-                                        pass
-                                    else:
-                                        key_name = (
-                                            self.abbreviations[name]
-                                            + ", "
-                                            + p_data["Approval MM" + str(i)]
-                                        )
-                                        t = (
-                                            key_name,
-                                            p_data[
-                                                "Approval MM"
-                                                + str(i)
-                                                + " Forecast / Actual"
-                                            ],
-                                            p_data["Approval MM" + str(i) + " Notes"],
-                                        )
-                                        raw_list.append(t)
-                                except KeyError:
-                                    if p_data["Approval MM" + str(i)] is None:
-                                        pass
-                                    else:
-                                        key_name = (
-                                            self.abbreviations[name]
-                                            + ", "
-                                            + p_data["Approval MM" + str(i)]
-                                        )
-                                        t = (
-                                            key_name,
-                                            p_data[
-                                                "Approval MM"
-                                                + str(i)
-                                                + " Forecast - Actual"
-                                            ],
-                                            p_data["Approval MM" + str(i) + " Notes"],
-                                        )
-                                        raw_list.append(t)
-
-                                if p_data["Assurance MM" + str(i)] is None:
-                                    pass
-                                else:
-                                    key_name = (
-                                        self.abbreviations[name]
-                                        + ", "
-                                        + p_data["Assurance MM" + str(i)]
-                                    )
-                                    t = (
-                                        key_name,
-                                        p_data[
-                                            "Assurance MM"
-                                            + str(i)
-                                            + " Forecast - Actual"
-                                        ],
-                                        p_data["Assurance MM" + str(i) + " Notes"],
-                                    )
-                                    raw_list.append(t)
-
-                            except KeyError:
-                                pass
-
-                        for i in range(18, 67):
-                            try:
-                                if p_data["Project MM" + str(i)] is None:
-                                    pass
-                                else:
-                                    key_name = (
-                                        self.abbreviations[name]
-                                        + ", "
-                                        + p_data["Project MM" + str(i)]
-                                    )
-                                    t = (
-                                        key_name,
-                                        p_data[
-                                            "Project MM" + str(i) + " Forecast - Actual"
-                                        ],
-                                        p_data["Project MM" + str(i) + " Notes"],
-                                    )
-                                    raw_list.append(t)
-                            except KeyError:
-                                pass
-                    except (KeyError, TypeError, IndexError):
+                        t = [
+                            ("Project", project_name),
+                            ("Milestone", p_data["Assurance MM" + str(i)]),
+                            ("Type", "Assurance"),
+                            ("Date", p_data["Assurance MM" + str(i) + " Forecast - Actual"]),
+                            ("Notes", p_data["Assurance MM" + str(i) + " Notes"])
+                        ]
+                        if t[1][1] is not None:
+                            if isinstance(t[3][1], datetime.date):
+                                raw_list.append(t)
+                    except KeyError:
                         pass
 
-                sorted_list = sorted(
-                    raw_list, key=lambda k: (k[1] is None, k[1])
-                )  # put the list in chronological order
-
-                """loop to stop key names being the same. Not ideal as doesn't handle keys that may
-                already have numbers as strings at end of names. But still useful."""
-
-                output_dict = {}
-                for x in sorted_list:
-                    if x[0] is not None:
-                        if x[0] in output_dict:
-                            for i in range(2, 15):
-                                key_name = x[0] + " " + str(i)
-                                if key_name in output_dict:
-                                    continue
-                                else:
-                                    output_dict[key_name] = {x[1]: x[2]}
-                                    break
-                        else:
-                            output_dict[x[0]] = {x[1]: x[2]}
-                    else:
+                for i in range(18, 67):
+                    try:
+                        t = [
+                            ("Project", project_name),
+                            ("Milestone", p_data["Project MM" + str(i)]),
+                            ("Type", "Delivery"),
+                            ("Date", p_data["Project MM" + str(i) + " Forecast - Actual"]),
+                            ("Notes", p_data["Project MM" + str(i) + " Notes"])
+                        ]
+                        if t[1][1] is not None:
+                            if isinstance(t[3][1], datetime.date):
+                                raw_list.append(t)
+                    except KeyError:
                         pass
 
-                if num == 0:
-                    current_dict = output_dict
-                    sorted_current = sorted_list
-                if num == 1:
-                    last_dict = output_dict
-                    sorted_last = sorted_list
-                if num == 2:
-                    baseline_dict = output_dict
-                    sorted_baseline = sorted_list
-                if num == 3:
-                    baseline_dict_two = output_dict
+            # puts the list in chronological order
+            sorted_list = sorted(raw_list, key=lambda k: (k[3][1] is None, k[3][1]))
 
-        self.group_current = current_dict
-        self.group_last = last_dict
-        self.group_baseline = baseline_dict
-        self.group_baseline_two = baseline_dict_two
-        self.group_choronological_list_current = sorted_current
-        self.group_choronological_list_last = sorted_last
-        self.group_choronological_list_baseline = sorted_baseline
+            # TODO loop to prevent projects having identical milestone names e.g. Board meeting. old loop below.
+            # loop to stop key names being the same. Not ideal as doesn't handle
+            # keys that may already have numbers as strings at end of names.
+            # But still useful.
+
+            # for x in sorted_list:
+            #     if x[1] is not None:
+            #         if x[1] in lower_dict:
+            #             for y in range(2, 15):
+            #                 key_name = x[1] + " " + str(y)
+            #                 if key_name in lower_dict:
+            #                     continue
+            #                 else:
+            #                     lower_dict[key_name] = {x[2]: x[3]}
+            #                     break
+            #         else:
+            #             lower_dict[x[1]] = {x[2]: x[3]}
+            #     else:
+            #         pass
+
+            for r in range(len(sorted_list)):
+                lower_dict["Milestone " + str(r)] = dict(sorted_list[r])
+
+            if bl == 0:
+                self.current = lower_dict
+                self.ordered_list_current = sorted_list
+            if bl == 1:
+                self.last_quarter = lower_dict
+                self.ordered_list_last = sorted_list
+            if bl == 2:
+                self.baseline = lower_dict
+                self.ordered_list_bl = sorted_list
+            if bl == 3:
+                self.baseline_two = lower_dict
+                self.ordered_list_bl_two = sorted_list
 
 
 class MilestoneChartData:
     def __init__(
-        self,
-        milestone_data_object,
-        keys_of_interest=None,
-        keys_not_of_interest=None,
-        filter_start_date=datetime.date(2000, 1, 1),
-        filter_end_date=datetime.date(2050, 1, 1),
+            self,
+            milestone_data_object,
+            keys_of_interest=None,
+            keys_not_of_interest=None,
+            filter_start_date=datetime.date(2000, 1, 1),
+            filter_end_date=datetime.date(2050, 1, 1),
     ):
         self.m_data = milestone_data_object
         self.keys_of_interest = keys_of_interest
@@ -1368,7 +1215,7 @@ class MilestoneChartData:
         # shown in particular way in output chart
         for m in list(self.m_data.group_current.keys()):
             if (
-                "Project - Business Case End Date" in m
+                    "Project - Business Case End Date" in m
             ):  # filter out as dates not helpful
                 pass
             else:
@@ -1483,7 +1330,7 @@ class CombinedData:
                 )
             else:
                 for i in range(
-                    2, 15
+                        2, 15
                 ):  # alters duplicates by adding number to end of key
                     mi_altered_milestone_key_name = mi_milestone_key_name + " " + str(i)
                     if mi_altered_milestone_key_name in mi_milestone_name_list:
@@ -1507,7 +1354,7 @@ class CombinedData:
 
         pfm_tuple_list_forecast = []
         pfm_tuple_list_baseline = []
-        for data in self.pfm_milestone_data.group_choronological_list_current:
+        for data in self.pfm_milestone_data.ordered_list_bl_two:
             pfm_tuple_list_forecast.append(("PfM, " + data[0], data[1], data[2]))
         for data in self.pfm_milestone_data.group_choronological_list_baseline:
             pfm_tuple_list_baseline.append(("PfM, " + data[0], data[1], data[2]))
@@ -1541,13 +1388,13 @@ class CombinedData:
 
 class MilestoneCharts:
     def __init__(
-        self,
-        latest_milestone_names,
-        latest_milestone_dates,
-        last_milestone_dates,
-        baseline_milestone_dates,
-        graph_title,
-        ipdc_date,
+            self,
+            latest_milestone_names,
+            latest_milestone_dates,
+            last_milestone_dates,
+            baseline_milestone_dates,
+            graph_title,
+            ipdc_date,
     ):
         self.latest_milestone_names = latest_milestone_names
         self.latest_milestone_dates = latest_milestone_dates
@@ -1648,9 +1495,9 @@ class MilestoneCharts:
         # Add line of IPDC date, but only if in the time period
         try:
             if (
-                self.latest_milestone_dates[0]
-                <= self.ipdc_date
-                <= self.latest_milestone_dates[-1]
+                    self.latest_milestone_dates[0]
+                    <= self.ipdc_date
+                    <= self.latest_milestone_dates[-1]
             ):
                 plt.axvline(self.ipdc_date)
                 plt.figtext(
@@ -1731,19 +1578,19 @@ class MilestoneCharts:
             )
             title = self.graph_title + " cont. 1"
             MilestoneCharts(
-                np.array(final_labels[third : third * 2]),
-                np.array(self.latest_milestone_dates[third : third * 2]),
-                np.array(self.last_milestone_dates[third : third * 2]),
-                np.array(self.baseline_milestone_dates[third : third * 2]),
+                np.array(final_labels[third: third * 2]),
+                np.array(self.latest_milestone_dates[third: third * 2]),
+                np.array(self.last_milestone_dates[third: third * 2]),
+                np.array(self.baseline_milestone_dates[third: third * 2]),
                 title,
                 self.ipdc_date,
             )
             title = self.graph_title + " cont. 2"
             MilestoneCharts(
-                np.array(final_labels[third * 2 : no_milestones]),
-                np.array(self.latest_milestone_dates[third * 2 : no_milestones]),
-                np.array(self.last_milestone_dates[third * 2 : no_milestones]),
-                np.array(self.baseline_milestone_dates[third * 2 : no_milestones]),
+                np.array(final_labels[third * 2: no_milestones]),
+                np.array(self.latest_milestone_dates[third * 2: no_milestones]),
+                np.array(self.last_milestone_dates[third * 2: no_milestones]),
+                np.array(self.baseline_milestone_dates[third * 2: no_milestones]),
                 title,
                 self.ipdc_date,
             )
@@ -1805,7 +1652,7 @@ def set_figure_size(graph_type: str) -> Tuple[int, int]:
 
 
 def cost_profile_graph(
-    fig_size: str, cost_master: CostData, *args: Tuple[Optional[str]]
+        fig_size: str, cost_master: CostData, *args: Tuple[Optional[str]]
 ):
     """Compiles a matplotlib line chart for costs of GROUP of projects contained within cost_master class.
     As as default last quarters profile is not included. It creates two plots. First plot shows overall
@@ -1825,7 +1672,7 @@ def cost_profile_graph(
 
     # Overall cost profile chart
     if (
-        sum(cost_master.baseline_profile_one) != 0
+            sum(cost_master.baseline_profile_one) != 0
     ):  # handling in the event that group of projects have no baseline profile.
         ax1.plot(
             YEAR_LIST,
@@ -1837,7 +1684,7 @@ def cost_profile_graph(
     else:
         pass
     if (
-        sum(cost_master.last_profile) != 0
+            sum(cost_master.last_profile) != 0
     ):  # handling in the event that group of projects have no last quarter profile
         ax1.plot(
             YEAR_LIST,
@@ -1870,7 +1717,7 @@ def cost_profile_graph(
 
     # plot rdel, cdel, non-gov chart data
     if (
-        sum(cost_master.ngov_profile) != 0
+            sum(cost_master.ngov_profile) != 0
     ):  # if statement as most projects don't have ngov cost.
         ax2.plot(
             YEAR_LIST,
@@ -1933,7 +1780,7 @@ def cost_profile_baseline_graph(cost_master: CostData, *args: Tuple[Optional[str
 
     # Overall cost profile chart
     if (
-        sum(cost_master.baseline_profile_three) != 0
+            sum(cost_master.baseline_profile_three) != 0
     ):  # handling in the event that group of projects have no baseline profile.
         ax1.plot(
             YEAR_LIST,
@@ -1945,7 +1792,7 @@ def cost_profile_baseline_graph(cost_master: CostData, *args: Tuple[Optional[str
     else:
         pass
     if (
-        sum(cost_master.baseline_profile_two) != 0
+            sum(cost_master.baseline_profile_two) != 0
     ):  # handling in the event that group of projects have no baseline profile.
         ax1.plot(
             YEAR_LIST,
@@ -1957,7 +1804,7 @@ def cost_profile_baseline_graph(cost_master: CostData, *args: Tuple[Optional[str
     else:
         pass
     if (
-        sum(cost_master.baseline_profile_one) != 0
+            sum(cost_master.baseline_profile_one) != 0
     ):  # handling in the event that group of projects have no last quarter profile
         ax1.plot(
             YEAR_LIST,
@@ -1990,7 +1837,7 @@ def cost_profile_baseline_graph(cost_master: CostData, *args: Tuple[Optional[str
 
     # plot rdel, cdel, non-gov chart data
     if (
-        sum(cost_master.ngov_profile) != 0
+            sum(cost_master.ngov_profile) != 0
     ):  # if statement as most projects don't have ngov cost.
         ax2.plot(
             YEAR_LIST,
@@ -2036,7 +1883,7 @@ def cost_profile_baseline_graph(cost_master: CostData, *args: Tuple[Optional[str
 
 
 def spent_calculation(
-    master: Dict[str, Union[str, date, int, float]], project: str
+        master: Dict[str, Union[str, datetime.date, int, float]], project: str
 ) -> int:
     keys = [
         "Pre-profile RDEL",
@@ -2063,7 +1910,7 @@ def open_word_doc(wd_path: str) -> Document:
 
 
 def wd_heading(
-    doc: Document, project_info: Dict[str, Union[str, int]], project_name: str
+        doc: Document, project_info: Dict[str, Union[str, int]], project_name: str
 ) -> None:
     """Function adds header to word doc"""
     font = doc.styles["Normal"].font
@@ -2344,10 +2191,10 @@ def make_file_friendly(quarter_str: str) -> str:
 
 
 def total_costs_benefits_bar_chart(
-    fig_size: str,
-    cost_master: CostData,
-    ben_master: BenefitsData,
-    *args: Tuple[Optional[str]]
+        fig_size: str,
+        cost_master: CostData,
+        ben_master: BenefitsData,
+        *args: Tuple[Optional[str]]
 ) -> plt.figure:
     """compiles a matplotlib bar chart which shows total project costs"""
     fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2)  # four sub plots
@@ -2516,9 +2363,9 @@ def check_baselines(master: Master) -> None:
                     + " does not have a baseline point for "
                     + v
                     + " this could cause the programme to"
-                    "crash. Therefore the programme is stopping. "
-                    "Please amend the data for " + p + " so that "
-                    " it has at least one baseline point for " + v
+                      "crash. Therefore the programme is stopping. "
+                      "Please amend the data for " + p + " so that "
+                                                         " it has at least one baseline point for " + v
                 )
                 break
         else:
@@ -2531,7 +2378,7 @@ def percentage(percent: int, whole: float) -> int:
 
 
 def get_old_fy_cost_data(
-    master_file: typing.TextIO, project_id_wb: typing.TextIO
+        master_file: typing.TextIO, project_id_wb: typing.TextIO
 ) -> None:
     """
     Gets all old financial data from a specified master and places into project id document.
@@ -2559,13 +2406,13 @@ def get_old_fy_cost_data(
 
 def run_get_old_fy_data(master_files_list: list, project_id_wb: typing.TextIO) -> None:
     for f in reversed(
-        master_files_list
+            master_files_list
     ):  # reversed so it gets the latest data in masters
         get_old_fy_cost_data(f, project_id_wb)
 
 
 def place_old_fy_data_into_master_wb(
-    master_file: typing.TextIO, project_id_wb: typing.TextIO
+        master_file: typing.TextIO, project_id_wb: typing.TextIO
 ) -> None:
     """
     places all old financial year data into master files.
@@ -2592,7 +2439,7 @@ def place_old_fy_data_into_master_wb(
 
 
 def run_place_old_fy_data_into_masters(
-    master_files_list: list, project_id_wb: typing.TextIO
+        master_files_list: list, project_id_wb: typing.TextIO
 ) -> None:
     for f in master_files_list:
         place_old_fy_data_into_master_wb(f, project_id_wb)
@@ -2615,7 +2462,7 @@ def put_key_change_master_into_dict(key_change_file: typing.TextIO) -> Dict[str,
 
 
 def alter_wb_master_file_key_names(
-    master_file: typing.TextIO, key_change_dict: Dict[str, str]
+        master_file: typing.TextIO, key_change_dict: Dict[str, str]
 ) -> workbook:
     """
     places altered key names, from the key change master dictionary, into master wb(s).
@@ -2625,14 +2472,14 @@ def alter_wb_master_file_key_names(
 
     for row_num in range(2, ws.max_row + 1):
         for (
-            key
+                key
         ) in key_change_dict.keys():  # changes stored in the altered key change log wb
             if ws.cell(row=row_num, column=1).value == key:
                 ws.cell(row=row_num, column=1).value = key_change_dict[key]
         for year in YEAR_LIST:  # changes to yearly profile keys
             if ws.cell(row=row_num, column=1).value == year + " CDEL Forecast Total":
                 ws.cell(row=row_num, column=1).value = (
-                    year + " CDEL Forecast one off new costs"
+                        year + " CDEL Forecast one off new costs"
                 )
 
     return wb.save(master_file)
@@ -2690,7 +2537,7 @@ def compare_masters(files: List[typing.TextIO], projects: List[str] or str) -> w
                         change_count += 1
                 except KeyError:
                     if (
-                        project_name in last_master.projects
+                            project_name in last_master.projects
                     ):  # key error due to key not being present.
                         ws.cell(row=row_num, column=1).fill = PatternFill(
                             start_color="ffba00", end_color="ffba00", fill_type="solid"
@@ -2721,11 +2568,11 @@ def compare_masters(files: List[typing.TextIO], projects: List[str] or str) -> w
 
 
 def totals_chart(
-    fig_size: str,
-    costs: CostData,
-    benefits: BenefitsData,
-    project: str or List[str],
-    *args: Tuple[Optional[str]]
+        fig_size: str,
+        costs: CostData,
+        benefits: BenefitsData,
+        project: str or List[str],
+        *args: Tuple[Optional[str]]
 ) -> None:
     """Small function to hold together code to create and save a total_costs_benefits_bar_chart"""
     costs.get_cost_totals(project, "ipdc_costs")
@@ -2739,10 +2586,10 @@ def totals_chart(
 
 
 def standard_profile(
-    fig: plt.figure,
-    costs: CostData,
-    project: str or List[str],
-    *args: Tuple[Optional[str]]
+        fig: plt.figure,
+        costs: CostData,
+        project: str or List[str],
+        *args: Tuple[Optional[str]]
 ):
     """Small function to hold together code to create and save a cost_profile_graph"""
     costs.get_cost_profile(project, "ipdc_costs")
@@ -2752,7 +2599,6 @@ def standard_profile(
     else:
         f = cost_profile_graph(fig, costs, args[0])
         f.savefig(root_path / "output/{}_profile.png".format(str(args[0])))
-
 
 # LIST_OF_GROUPS = [master.current_projects,
 #                   Projects.he,

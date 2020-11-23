@@ -13,36 +13,36 @@ def put_into_wb_all(milestone_data_object):
     ws = wb.active
 
     row_num = 2
-    for project_name in milestone_data_object.project_current.keys():
-        for i, milestone in enumerate(milestone_data_object.project_current[project_name].keys()):
+    for project_name in milestone_data_object.current.keys():
+        for i, milestone in enumerate(milestone_data_object.current[project_name].keys()):
             ws.cell(row=row_num + i, column=1).value = project_name
             ws.cell(row=row_num + i, column=2).value = milestone
             try:
-                milestone_date = tuple(milestone_data_object.project_current[project_name][milestone])[0]
+                milestone_date = tuple(milestone_data_object.current[project_name][milestone])[0]
                 ws.cell(row=row_num + i, column=3).value = milestone_date
                 ws.cell(row=row_num + i, column=3).number_format = 'dd/mm/yy'
             except KeyError:
                 ws.cell(row=row_num + i, column=3).value = ''
 
             try:
-                last_date = tuple(milestone_data_object.project_last[project_name][milestone])[0]
+                last_date = tuple(milestone_data_object.last_quarter[project_name][milestone])[0]
                 ws.cell(row=row_num + i, column=4).value = (milestone_date - last_date).days
             except (KeyError, TypeError):
                 ws.cell(row=row_num + i, column=4).value = ''
 
             try:
-                baseline_date = tuple(milestone_data_object.project_baseline[project_name][milestone])[0]
+                baseline_date = tuple(milestone_data_object.baseline[project_name][milestone])[0]
                 ws.cell(row=row_num + i, column=5).value = (milestone_date - baseline_date).days
             except (KeyError, TypeError):
                 ws.cell(row=row_num + i, column=5).value = ''
 
             try:
-                notes = milestone_data_object.project_current[project_name][milestone][milestone_date]
+                notes = milestone_data_object.current[project_name][milestone][milestone_date]
                 ws.cell(row=row_num + i, column=7).value = notes
             except (IndexError, KeyError):
                 ws.cell(row=row_num + i, column=7).value = ''
 
-        row_num = row_num + len(milestone_data_object.project_current[project_name].keys())
+        row_num = row_num + len(milestone_data_object.current[project_name].keys())
 
     ws.cell(row=1, column=1).value = 'Project'
     ws.cell(row=1, column=2).value = 'Milestone'
