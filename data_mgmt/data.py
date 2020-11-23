@@ -9,12 +9,14 @@ from typing import List, Dict, Union, Optional, Tuple
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from datetime import timedelta
+from dateutil import parser
 import numpy as np
 from datamaps.api import project_data_from_master
 import platform
 from pathlib import Path
 
 from datamaps.api.api import project_data_from_master_api
+from dateutil.parser import ParserError
 from docx import Document, table
 from docx.enum.section import WD_SECTION_START, WD_ORIENTATION
 from docx.oxml import parse_xml
@@ -1043,6 +1045,22 @@ class BenefitsData:
         )
 
 
+def milestone_info_handling(output_list: list, t_list: list) -> list:
+    """helper function for handling and cleaning up milestone date generated
+    via MilestoneDate class. Removes none type milestone names and non date
+    string values"""
+    if t_list[1][1] is not None:
+        if isinstance(t_list[3][1], datetime.date):
+            return output_list.append(t_list)
+        else:
+            try:
+                d = parser.parse(t_list[3][1])
+                t_list[3] = ("Date", d.date())
+                return output_list.append(t_list)
+            except ParserError:
+                pass
+
+
 class MilestoneData:
     def __init__(self, master: Master):
         self.master = master
@@ -1055,22 +1073,18 @@ class MilestoneData:
         self.ordered_list_bl = []
         self.ordered_list_bl_two = []
 
-    def project_data(self, group: List[str] or str, baseline: str) -> None:
+    def m_dictionary(self, group: List[str] or str, baseline: str) -> None:
         """
-        Creates project milestone dictionaries for current, last, and
-        baselines when provided with a milestone_type for all
-        projects within a MilestoneData type.
+        Creates project milestone dictionaries for current, last_quarter, and
+        baselines when provided with group and baseline type.
         """
-        # Are these two lines necessary? code works without
-        self.group = group
-        self.baseline = baseline
-
-        group = string_conversion(self.group)
+        group = string_conversion(group)
 
         for bl in range(4):
             lower_dict = {}
             raw_list = []
             for project_name in group:
+                project_list = []
                 milestone_bl_index = self.master.bl_index[baseline][project_name]
                 try:
                     p_data = self.master.master_data[milestone_bl_index[bl]].data[project_name]
@@ -1088,9 +1102,7 @@ class MilestoneData:
                                 "Approval MM" + str(i) + " Forecast / Actual"]),
                             ("Notes", p_data["Approval MM" + str(i) + " Notes"])
                         ]
-                        if t[1][1] is not None:
-                            if isinstance(t[3][1], datetime.date):
-                                raw_list.append(t)
+                        milestone_info_handling(project_list, t)
                     except KeyError:
                         try:
                             t = [
@@ -1101,9 +1113,7 @@ class MilestoneData:
                                     "Approval MM" + str(i) + " Forecast - Actual"]),
                                 ("Notes", p_data["Approval MM" + str(i) + " Notes"])
                             ]
-                            if t[1][1] is not None:
-                                if isinstance(t[3][1], datetime.date):
-                                    raw_list.append(t)
+                            milestone_info_handling(project_list, t)
                         except KeyError:
                             pass
 
@@ -1116,9 +1126,7 @@ class MilestoneData:
                             ("Date", p_data["Assurance MM" + str(i) + " Forecast - Actual"]),
                             ("Notes", p_data["Assurance MM" + str(i) + " Notes"])
                         ]
-                        if t[1][1] is not None:
-                            if isinstance(t[3][1], datetime.date):
-                                raw_list.append(t)
+                        milestone_info_handling(project_list, t)
                     except KeyError:
                         pass
 
@@ -1131,11 +1139,19 @@ class MilestoneData:
                             ("Date", p_data["Project MM" + str(i) + " Forecast - Actual"]),
                             ("Notes", p_data["Project MM" + str(i) + " Notes"])
                         ]
-                        if t[1][1] is not None:
-                            if isinstance(t[3][1], datetime.date):
-                                raw_list.append(t)
+                        milestone_info_handling(project_list, t)
                     except KeyError:
                         pass
+
+                counter_list = []
+                for entry in project_list:
+                    counter_list.append(entry[1][1])
+
+                count = Counter(counter_list)
+
+                # for entry in project_list:
+                #     if entry[1][1].
+                #     raw_list.append(entry)
 
             # puts the list in chronological order
             sorted_list = sorted(raw_list, key=lambda k: (k[3][1] is None, k[3][1]))

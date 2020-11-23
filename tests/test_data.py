@@ -312,5 +312,6 @@ def test_saving_total_cost_benefit_graph_files(costs_masters, project_info):
 def test_get_milestone_data_project(diff_milestone_types, project_info):
     master = Master(diff_milestone_types, project_info)
     milestones = MilestoneData(master)
-    milestones.project_data([sot, a11], "ipdc_milestones")
+    milestones.m_dictionary([a11, a13], "ipdc_milestones")
+    print(milestones.current)
     assert isinstance(milestones.current, (dict,))
