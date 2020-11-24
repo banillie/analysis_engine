@@ -240,7 +240,8 @@
 #              'HSMRPG schedule',
 #              blue_line_date,
 #              20)
-from data_mgmt.data import Master, get_master_data, get_project_information, MilestoneData
+from data_mgmt.data import Master, get_master_data, get_project_information, MilestoneData, \
+    Projects, milestone_chart
 
 master = Master(get_master_data(), get_project_information())
 milestones = MilestoneData(master)

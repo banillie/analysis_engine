@@ -25,7 +25,7 @@ from data_mgmt.data import (
     totals_chart,
     change_word_doc_landscape,
     FIGURE_STYLE,
-    MilestoneData,
+    MilestoneData, milestone_chart,
 )
 
 # test masters project names
@@ -324,4 +324,11 @@ def test_get_milestone_chart_data(milestone_masters, project_info):
     assert len(milestones.key_names) == 5
     assert len(milestones.md_current) == 5
     assert len(milestones.md_last) == 5
-    print(milestones.md_baseline)
+
+
+def test_compile_milestone_chart(milestone_masters, project_info):
+    master = Master(milestone_masters, project_info)
+    milestones = MilestoneData(master)
+    milestones.get_milestones([sot, a11, a13], "ipdc_milestones")
+    milestones.get_chart_info()
+    milestone_chart("half horizontal", milestones, "testing")

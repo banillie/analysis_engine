@@ -378,6 +378,29 @@ class Projects:
     ]
 
 
+LIST_OF_GROUPS = [  # master.current_projects,
+    Projects.he,
+    Projects.rail,
+    Projects.rail_franchising,
+    Projects.hs2,
+    Projects.hsmrpg,
+    Projects.sarh2,
+    Projects.all_not_hs2,
+    Projects.fbc_stage,
+    Projects.obc_stage,
+    Projects.sobc_stage]
+LIST_OF_TITLES = ['ALL',
+                  'HE',
+                  'RAIL INFRASTRUCTURE',
+                  'RAIL FRANCHISING',
+                  'HS2',
+                  'HSMRPG',
+                  'AMIS (SARH2)',
+                  'ALL, NOT HS2,',
+                  'FBC Projects',
+                  'OBC Projects',
+                  'SOBC Projects']
+
 #  list of different baseline types. hold at global level?
 BASELINE_TYPES = {
     "Re-baseline this quarter": "quarter",
@@ -912,6 +935,7 @@ class BenefitsData:
         self.y_scale_max = 0
         self.y_scale_min = 0
         self.economic_max = 0
+        self.entity = []
 
     def get_ben_totals(self, group: List[str] or str, baseline: str) -> None:
         """Returns lists containing the sum total of group (of projects) benefits,
@@ -1046,6 +1070,7 @@ class BenefitsData:
         self.economic_max = max(
             [group_economic_dev, group_economic_unprofiled, group_economic_profiled]
         )
+        self.entity = group
 
 
 def milestone_info_handling(output_list: list, t_list: list) -> list:
@@ -1080,6 +1105,8 @@ class MilestoneData:
         self.md_current = []
         self.md_last = []
         self.md_baseline = []
+        self.md_baseline_two = []
+        self.entity = []
 
     def get_milestones(self, group: List[str] or str, baseline: str) -> None:
         """
@@ -1185,6 +1212,8 @@ class MilestoneData:
                 self.baseline_two = lower_dict
                 self.ordered_list_bl_two = sorted_list
 
+        self.entity = group
+
     def get_chart_info(self):
         """returns data lists for matplotlib chart"""
         # Note this code could refactored so that it collects all milestones
@@ -1203,28 +1232,41 @@ class MilestoneData:
             key_names.append(m_project + ", " + m_name)
             md_current.append(m_date)
 
-            m_last_date = numpy.nan
+            # In two loops below NoneType has to be replaced with a datetime object
+            # due to matplotlib being unable to handle NoneTypes when milestone_chart
+            # is created. Haven't been able to find a solution to this.
+            m_last_date = None
             for m_last in self.last_quarter.values():
                 if m_last["Project"] == m_project:
                     if m_last["Milestone"] == m_name:
                         m_last_date = m_last["Date"]
                         md_last.append(m_last_date)
-            if m_last_date is numpy.nan:
-                md_last.append(m_last_date)
+            if m_last_date is None:
+                md_last.append(m_date)
 
-            m_bl_date = numpy.nan
+            m_bl_date = None
             for m_bl in self.baseline.values():
                 if m_bl["Project"] == m_project:
                     if m_bl["Milestone"] == m_name:
                         m_bl_date = m_bl["Date"]
                         md_baseline.append(m_bl_date)
-            if m_bl_date is numpy.nan:
-                md_baseline.append(m_bl_date)
+            if m_bl_date is None:
+                md_baseline.append(m_date)
+
+            m_bl_two_date = None
+            for m_bl_two in self.baseline_two.values():
+                if m_bl_two["Project"] == m_project:
+                    if m_bl_two["Milestone"] == m_name:
+                        m_bl_date = m_bl_two["Date"]
+                        md_baseline_two.append(m_bl_date)
+            if m_bl_two_date is None:
+                md_baseline_two.append(m_date)
 
         self.key_names = key_names
         self.md_current = md_current
         self.md_last = md_last
         self.md_baseline = md_baseline
+
 
 # class MilestoneChartData:
 #     def __init__(
@@ -1843,7 +1885,7 @@ def cost_profile_graph(
 
 
 # what does this output plt.figure.Figure?
-def cost_profile_baseline_graph(cost_master: CostData, *args: Tuple[Optional[str]]):
+def cost_profile_baseline_graph(cost_master: CostData, *title: Tuple[Optional[str]]) -> plt.figure:
     """Compiles a matplotlib line chart for costs of GROUP of projects contained within cost_master class.
     As as default last quarters profile is not included. It creates two plots. First plot shows overall
     profile in current, last quarters anb baseline form. Second plot shows rdel, cdel, and 'non-gov' cost profile"""
@@ -1854,7 +1896,7 @@ def cost_profile_baseline_graph(cost_master: CostData, *args: Tuple[Optional[str
     if len(cost_master.entity) == 1:
         fig.suptitle(cost_master.entity[0] + " Cost Profile", fontweight="bold")
     else:
-        fig.suptitle(args[0] + " Cost Profile", fontweight="bold")  # title
+        fig.suptitle(title[0] + " Cost Profile", fontweight="bold")  # title
 
     # Overall cost profile chart
     if (
@@ -2664,7 +2706,7 @@ def totals_chart(
 
 
 def standard_profile(
-        fig: plt.figure,
+        fig: str,
         costs: CostData,
         project: str or List[str],
         *args: Tuple[Optional[str]]
@@ -2678,29 +2720,107 @@ def standard_profile(
         f = cost_profile_graph(fig, costs, args[0])
         f.savefig(root_path / "output/{}_profile.png".format(str(args[0])))
 
-# LIST_OF_GROUPS = [master.current_projects,
-#                   Projects.he,
-#                   Projects.rail,
-#                   Projects.rail_franchising,
-#                   Projects.hs2,
-#                   Projects.hsmrpg,
-#                   Projects.sarh2,
-#                   Projects.all_not_hs2,
-#                   Projects.fbc_stage,
-#                   Projects.obc_stage,
-#                   Projects.sobc_stage]
-# LIST_OF_TITLES = ['ALL',
-#                   'HE',
-#                   'RAIL INFRASTRUCTURE',
-#                   'RAIL FRANCHISING',
-#                   'HS2',
-#                   'HSMRPG',
-#                   'AMIS (SARH2)',
-#                   'ALL, NOT HS2,',
-#                   'FBC Projects',
-#                   'OBC Projects',
-#                   'SOBC Projects']
 
+def milestone_chart(
+        fig_size: str,
+        milestone_data: MilestoneData,
+        *title: Tuple[Optional[str]]
+) -> plt.figure:
+    # build scatter chart
+    fig, ax1 = plt.subplots()
+    fig.set_size_inches(set_figure_size(fig_size))
+
+    if len(milestone_data.entity) == 1:
+        fig.suptitle(milestone_data.entity[0] + " Cost Profile", fontweight="bold")
+    else:
+        fig.suptitle(title[0] + " Cost Profile", fontweight="bold")  # title
+
+    ax1.scatter(milestone_data.md_baseline, milestone_data.key_names, label='Baseline')
+    ax1.scatter(milestone_data.md_last, milestone_data.key_names, label='Last quarter')
+    ax1.scatter(milestone_data.md_current, milestone_data.key_names, label='Current')
+
+    # format the x ticks
+    years = mdates.YearLocator()  # every year
+    months = mdates.MonthLocator()  # every month
+    years_fmt = mdates.DateFormatter('%Y')
+    months_fmt = mdates.DateFormatter('%b')
+    ax1.xaxis.set_major_locator(years)
+    ax1.xaxis.set_minor_locator(months)
+    ax1.xaxis.set_major_formatter(years_fmt)
+    ax1.xaxis.set_minor_formatter(months_fmt)
+    plt.setp(ax1.xaxis.get_minorticklabels(), rotation=45)
+    plt.setp(ax1.xaxis.get_majorticklabels(), rotation=45, weight='bold')
+
+    # """calculate the length of the time period covered in chart.
+    # Not perfect as baseline dates can distort."""
+    # try:
+    #     td = (latest_milestone_dates[-1] - latest_milestone_dates[0]).days
+    #     if td >= 365 * 3:
+    #         print('Yes')
+    #         ax1.xaxis.set_major_locator(years)
+    #         ax1.xaxis.set_minor_locator(months)
+    #         ax1.xaxis.set_major_formatter(years_fmt)
+    #         ax1.xaxis.set_minor_formatter(months_fmt)
+    #         plt.setp(ax1.xaxis.get_minorticklabels(), rotation=45)
+    #         plt.setp(ax1.xaxis.get_majorticklabels(), rotation=45, weight='bold')
+    #
+    #         # scaling x axis
+    #         # x axis value to no more than three months after last latest milestone date, or three months
+    #         # before first latest milestone date. Hack, can be improved. Text highlights movements off chart.
+    #         x_max = latest_milestone_dates[-1] + timedelta(days=90)
+    #         x_min = latest_milestone_dates[0] - timedelta(days=90)
+    #         for date in baseline_milestone_dates:
+    #             if date > x_max:
+    #                 ax1.set_xlim(x_min, x_max)
+    #                 plt.figtext(0.98, 0.03,
+    #                             'Check full schedule to see all milestone movements',
+    #                             horizontalalignment='right', fontsize=6, fontweight='bold')
+    #             if date < x_min:
+    #                 ax1.set_xlim(x_min, x_max)
+    #                 plt.figtext(0.98, 0.03,
+    #                             'Check full schedule to see all milestone movements',
+    #                             horizontalalignment='right', fontsize=6, fontweight='bold')
+    #     else:
+    #         ax1.xaxis.set_major_locator(years)
+    #         ax1.xaxis.set_minor_locator(months)
+    #         ax1.xaxis.set_major_formatter(years_fmt)
+    #         ax1.xaxis.set_minor_formatter(months_fmt)
+    #         plt.setp(ax1.xaxis.get_minorticklabels(), rotation=45)
+    #         plt.setp(ax1.xaxis.get_majorticklabels(), rotation=45, weight='bold')
+    #
+    #
+    # except IndexError:  # if milestone dates list is empty:
+    #     pass
+
+    ax1.legend()  # insert legend
+
+    # reverse y axis so order is earliest to oldest
+    ax1 = plt.gca()
+    ax1.set_ylim(ax1.get_ylim()[::-1])
+    ax1.tick_params(axis='y', which='major', labelsize=7)
+    ax1.yaxis.grid()  # horizontal lines
+    ax1.set_axisbelow(True)
+    # ax1.get_yaxis().set_visible(False)
+
+    # Add line of analysis date, but only if in the time period
+    # try:
+    #     if milestone_data.current[0] <= analysis_date <= milestone_data.current-1]:
+    #         plt.axvline(analysis_date)
+    #         plt.figtext(0.98, 0.01, 'Line represents date analysis compiled',
+    #                     horizontalalignment='right', fontsize=6, fontweight='bold')
+    #         # plt.figtext(0.98, 0.01, 'Line represents when IPDC will discuss Q1 20_21 portfolio management report',
+    #         #            horizontalalignment='right', fontsize=6, fontweight='bold')
+    # except IndexError:
+    #     pass
+
+    # size of chart and fit
+    fig.canvas.draw()
+    fig.tight_layout(rect=[0, 0.03, 1, 0.95])  # for title
+    plt.show()
+
+    # fig.savefig(root_path / 'output/{}.png'.format(graph_title), bbox_inches='tight')
+
+    # plt.close() #automatically closes figure so don't need to do manually.
 
 # def compile_all_profiles():
 #     report_doc = open_word_doc(wd_path)
