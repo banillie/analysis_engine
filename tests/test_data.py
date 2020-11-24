@@ -309,9 +309,19 @@ def test_saving_total_cost_benefit_graph_files(costs_masters, project_info):
     totals_chart(fig_style, costs, benefits, group, "Matplotlib")
 
 
-def test_get_milestone_data_project(diff_milestone_types, project_info):
-    master = Master(diff_milestone_types, project_info)
+def test_get_milestone_data(milestone_masters, project_info):
+    master = Master(milestone_masters, project_info)
     milestones = MilestoneData(master)
-    milestones.m_dictionary([a11, a13], "ipdc_milestones")
-    print(milestones.current)
+    milestones.get_milestones([sot, a11, a13], "ipdc_milestones")
     assert isinstance(milestones.current, (dict,))
+
+
+def test_get_milestone_chart_data(milestone_masters, project_info):
+    master = Master(milestone_masters, project_info)
+    milestones = MilestoneData(master)
+    milestones.get_milestones([sot, a11, a13], "ipdc_milestones")
+    milestones.get_chart_info()
+    assert len(milestones.key_names) == 5
+    assert len(milestones.md_current) == 5
+    assert len(milestones.md_last) == 5
+    print(milestones.md_baseline)

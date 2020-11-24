@@ -9,13 +9,14 @@ from typing import List, Dict, Union, Optional, Tuple
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from datetime import timedelta
+
+import numpy
 from dateutil import parser
 import numpy as np
 from datamaps.api import project_data_from_master
 import platform
 from pathlib import Path
 
-from datamaps.api.api import project_data_from_master_api
 from dateutil.parser import ParserError
 from docx import Document, table
 from docx.enum.section import WD_SECTION_START, WD_ORIENTATION
@@ -533,12 +534,14 @@ class Master:
                         try:
                             approved_bc = master.data[name][b_type]
                             quarter = str(master.quarter)
-                        except KeyError:  # exception handling in here because data keys across masters are not consistent.
+                        # exception handling in here because data keys across masters are not consistent.
+                        except KeyError:
                             print(
                                 str(b_type)
                                 + " key not present in "
                                 + str(master.quarter)
                             )
+                            # this should cause programme to stop as otherwise will crash.
                         if approved_bc == "Yes":
                             bc_list.append(approved_bc)
                             lower_list.append((approved_bc, quarter, i))
@@ -1057,7 +1060,8 @@ def milestone_info_handling(output_list: list, t_list: list) -> list:
                 d = parser.parse(t_list[3][1])
                 t_list[3] = ("Date", d.date())
                 return output_list.append(t_list)
-            except ParserError:
+            # ParserError for non-date string. TypeError for None types
+            except (ParserError, TypeError):
                 pass
 
 
@@ -1072,8 +1076,12 @@ class MilestoneData:
         self.ordered_list_last = []
         self.ordered_list_bl = []
         self.ordered_list_bl_two = []
+        self.key_names = []
+        self.md_current = []
+        self.md_last = []
+        self.md_baseline = []
 
-    def m_dictionary(self, group: List[str] or str, baseline: str) -> None:
+    def get_milestones(self, group: List[str] or str, baseline: str) -> None:
         """
         Creates project milestone dictionaries for current, last_quarter, and
         baselines when provided with group and baseline type.
@@ -1088,8 +1096,10 @@ class MilestoneData:
                 milestone_bl_index = self.master.bl_index[baseline][project_name]
                 try:
                     p_data = self.master.master_data[milestone_bl_index[bl]].data[project_name]
-                except IndexError:
-                    break
+                # IndexError handles len of project bl index.
+                # TypeError handles None Type present if project not reporting last quarter
+                except (IndexError, TypeError):
+                    pass
 
                 # i loops below remove None Milestone names and reject non datetime Dates
                 for i in range(1, 50):
@@ -1103,7 +1113,15 @@ class MilestoneData:
                             ("Notes", p_data["Approval MM" + str(i) + " Notes"])
                         ]
                         milestone_info_handling(project_list, t)
-                    except KeyError:
+                        t = [
+                            ("Project", project_name),
+                            ("Milestone", p_data["Assurance MM" + str(i)]),
+                            ("Type", "Assurance"),
+                            ("Date", p_data["Assurance MM" + str(i) + " Forecast - Actual"]),
+                            ("Notes", p_data["Assurance MM" + str(i) + " Notes"])
+                        ]
+                        milestone_info_handling(project_list, t)
+                    except KeyError:  # handles inconsistent key naming for approval milestones.
                         try:
                             t = [
                                 ("Project", project_name),
@@ -1117,19 +1135,7 @@ class MilestoneData:
                         except KeyError:
                             pass
 
-                for i in range(1, 50):
-                    try:
-                        t = [
-                            ("Project", project_name),
-                            ("Milestone", p_data["Assurance MM" + str(i)]),
-                            ("Type", "Assurance"),
-                            ("Date", p_data["Assurance MM" + str(i) + " Forecast - Actual"]),
-                            ("Notes", p_data["Assurance MM" + str(i) + " Notes"])
-                        ]
-                        milestone_info_handling(project_list, t)
-                    except KeyError:
-                        pass
-
+                # handles inconsistent number of Milestone. could be incorporated above.
                 for i in range(18, 67):
                     try:
                         t = [
@@ -1143,38 +1149,25 @@ class MilestoneData:
                     except KeyError:
                         pass
 
-                counter_list = []
+                # loop to stop key names being the same. Done at project level.
+                # note particularly concise code.
+                upper_counter_list = []
                 for entry in project_list:
-                    counter_list.append(entry[1][1])
-
-                count = Counter(counter_list)
-
-                # for entry in project_list:
-                #     if entry[1][1].
-                #     raw_list.append(entry)
+                    upper_counter_list.append(entry[1][1])
+                upper_count = Counter(upper_counter_list)
+                lower_counter_list = []
+                for entry in project_list:
+                    if upper_count[entry[1][1]] > 1:
+                        lower_counter_list.append(entry[1][1])
+                        lower_count = Counter(lower_counter_list)
+                        new_milestone_key = entry[1][1] + " (" + str(lower_count[entry[1][1]]) + ")"
+                        entry[1] = ("Milestone", new_milestone_key)
+                        raw_list.append(entry)
+                    else:
+                        raw_list.append(entry)
 
             # puts the list in chronological order
             sorted_list = sorted(raw_list, key=lambda k: (k[3][1] is None, k[3][1]))
-
-            # TODO loop to prevent projects having identical milestone names e.g. Board meeting. old loop below.
-            # loop to stop key names being the same. Not ideal as doesn't handle
-            # keys that may already have numbers as strings at end of names.
-            # But still useful.
-
-            # for x in sorted_list:
-            #     if x[1] is not None:
-            #         if x[1] in lower_dict:
-            #             for y in range(2, 15):
-            #                 key_name = x[1] + " " + str(y)
-            #                 if key_name in lower_dict:
-            #                     continue
-            #                 else:
-            #                     lower_dict[key_name] = {x[2]: x[3]}
-            #                     break
-            #         else:
-            #             lower_dict[x[1]] = {x[2]: x[3]}
-            #     else:
-            #         pass
 
             for r in range(len(sorted_list)):
                 lower_dict["Milestone " + str(r)] = dict(sorted_list[r])
@@ -1192,117 +1185,186 @@ class MilestoneData:
                 self.baseline_two = lower_dict
                 self.ordered_list_bl_two = sorted_list
 
-
-class MilestoneChartData:
-    def __init__(
-            self,
-            milestone_data_object,
-            keys_of_interest=None,
-            keys_not_of_interest=None,
-            filter_start_date=datetime.date(2000, 1, 1),
-            filter_end_date=datetime.date(2050, 1, 1),
-    ):
-        self.m_data = milestone_data_object
-        self.keys_of_interest = keys_of_interest
-        self.keys_not_of_interest = keys_not_of_interest
-        self.filter_start_date = filter_start_date
-        self.filter_end_date = filter_end_date
-        self.group_keys = []
-        self.group_current_tds = []
-        self.group_last_tds = []
-        self.group_baseline_tds = []
-        self.group_baseline_tds_two = []
-        self.group_chart()
-
-    def group_chart(self):
-        """
-        Given optional requirements, returns lists containing
-        data for a group of project.
-        key_of_interest is either default none or a list of strings
-        """
-
+    def get_chart_info(self):
+        """returns data lists for matplotlib chart"""
+        # Note this code could refactored so that it collects all milestones
+        # reported across current, last and baseline. At the moment it only
+        # uses milestones that are present in the current quarter.
         key_names = []
-        td_current = []
-        td_last = []
-        td_baseline = []
-        td_baseline_two = []
+        md_current = []
+        md_last = []
+        md_baseline = []
+        md_baseline_two = []
 
-        # all milestone keys and time deltas calculated this way so
-        # shown in particular way in output chart
-        for m in list(self.m_data.group_current.keys()):
-            if (
-                    "Project - Business Case End Date" in m
-            ):  # filter out as dates not helpful
-                pass
-            else:
-                if m is not None:
-                    m_d_current = tuple(self.m_data.group_current[m])[0]
+        for m in self.current.values():
+            m_project = m["Project"]
+            m_name = m["Milestone"]
+            m_date = m["Date"]
+            key_names.append(m_project + ", " + m_name)
+            md_current.append(m_date)
 
-                if m in list(self.m_data.group_last.keys()):
-                    m_d_last = tuple(self.m_data.group_last[m])[0]
-                    if m_d_last is None:
-                        m_d_last = tuple(self.m_data.group_current[m])[0]
-                else:
-                    m_d_last = tuple(self.m_data.group_current[m])[0]
+            m_last_date = numpy.nan
+            for m_last in self.last_quarter.values():
+                if m_last["Project"] == m_project:
+                    if m_last["Milestone"] == m_name:
+                        m_last_date = m_last["Date"]
+                        md_last.append(m_last_date)
+            if m_last_date is numpy.nan:
+                md_last.append(m_last_date)
 
-                if m in list(self.m_data.group_baseline.keys()):
-                    m_d_baseline = tuple(self.m_data.group_baseline[m])[0]
-                    if m_d_baseline is None:
-                        m_d_baseline = tuple(self.m_data.group_current[m])[0]
-                else:
-                    m_d_baseline = tuple(self.m_data.group_current[m])[0]
+            m_bl_date = numpy.nan
+            for m_bl in self.baseline.values():
+                if m_bl["Project"] == m_project:
+                    if m_bl["Milestone"] == m_name:
+                        m_bl_date = m_bl["Date"]
+                        md_baseline.append(m_bl_date)
+            if m_bl_date is numpy.nan:
+                md_baseline.append(m_bl_date)
 
-                if m in list(self.m_data.group_baseline_two.keys()):
-                    m_d_baseline_two = tuple(self.m_data.group_baseline_two[m])[0]
-                    if m_d_baseline_two is None:
-                        m_d_baseline_two = tuple(self.m_data.group_current[m])[0]
-                else:
-                    m_d_baseline_two = tuple(self.m_data.group_current[m])[0]
+        self.key_names = key_names
+        self.md_current = md_current
+        self.md_last = md_last
+        self.md_baseline = md_baseline
 
-                if m_d_current is not None:
-                    if self.filter_start_date <= m_d_current <= self.filter_end_date:
-                        if self.keys_of_interest is None:
-                            key_names.append(m)
-                            td_current.append(m_d_current)
-                            td_last.append(m_d_last)
-                            td_baseline.append(m_d_baseline)
-                            td_baseline_two.append(m_d_baseline_two)
-
-                        else:
-                            for key in self.keys_of_interest:
-                                if key in m:
-                                    if m not in key_names:  # prevent repeats
-                                        key_names.append(m)
-                                        td_current.append(m_d_current)
-                                        td_last.append(m_d_last)
-                                        td_baseline.append(m_d_baseline)
-                                        td_baseline_two.append(m_d_baseline_two)
-
-        # loop to remove
-        if self.keys_not_of_interest is not None:
-            for x in range(len(key_names)):
-                for y in self.keys_not_of_interest:
-                    try:
-                        if y in key_names[x]:
-                            key_names[x] = None
-                            td_current[x] = None
-                            td_last[x] = None
-                            td_baseline[x] = None
-                            td_baseline_two[x] = None
-                    except TypeError:
-                        pass
-
-        key_names_final = [x for x in key_names if x is not None]
-        td_current_final = [x for x in td_current if x is not None]
-        td_last_final = [x for x in td_last if x is not None]
-        td_baseline_final = [x for x in td_baseline if x is not None]
-        td_baseline_two_final = [x for x in td_baseline_two if x is not None]
-
-        self.group_keys = key_names_final
-        self.group_current_tds = td_current_final
-        self.group_last_tds = td_last_final
-        self.group_baseline_tds = td_baseline_final
-        self.group_baseline_tds_two = td_baseline_two_final
+# class MilestoneChartData:
+#     def __init__(
+#             self,
+#             m_data: MilestoneData,
+#             keys_of_interest=None,
+#             keys_not_of_interest=None,
+#             filter_start_date=datetime.date(2000, 1, 1),
+#             filter_end_date=datetime.date(2050, 1, 1),
+#     ):
+#         self.m_data = m_data
+#         self.keys_of_interest = keys_of_interest
+#         self.keys_not_of_interest = keys_not_of_interest
+#         self.filter_start_date = filter_start_date
+#         self.filter_end_date = filter_end_date
+#         self.group_keys = []
+#         self.group_current_tds = []
+#         self.group_last_tds = []
+#         self.group_baseline_tds = []
+#         self.group_baseline_tds_two = []
+#         self.group_chart()
+#
+#     def group_chart(self):
+#         """
+#         Given optional requirements, returns lists containing
+#         data for a group of project.
+#         key_of_interest is either default none or a list of strings
+#         """
+#         key_names = []
+#         md_current = []
+#         md_last = []
+#         td_baseline = []
+#         td_baseline_two = []
+#
+#         for m in self.m_data.current.values():
+#             m_project = self.m_data.current[m]["Project"]
+#             m_name = self.m_date.current[m]["Milestone"]
+#             m_date = self.m_data.current[m]["Date"]
+#             key_names.append(m_project + ", " + m_name)
+#             md_current.append(m_date)
+#             m_last_date = None
+#             for m_last in self.m_data.last_quarter.values():
+#                 if self.m_data.last_quarter[m_last]["Project"] == m_project:
+#                     if self.m_data.last_quarter[m_last]["Milestone"] == m_name:
+#                         m_last_date = self.m_data.last_quarter[m_last]["Date"]
+#                         md_last.append(m_last_date)
+#                         continue
+#                 else:
+#                     md_last.append(m_last_date)
+#
+#
+#
+#
+#                 self.m_data.last_quarter[m]["Date"]
+#
+#             current_project.append(m_project)
+#             try:
+#                 last_project.append(self.m_data.last[m]["Project"])
+#             except:
+#
+#             m_name = self.m_date.current[m]["Milestone"]
+#             current_name.append(m_name)
+#
+#             key_names.append(m_project + ", " + m_name)
+#
+#             m_date = self.m_data.current[m]["Date"]
+#             md_current.append(m_date)
+#             for ml in list(self.m_data.last_quarter.values()):
+#                 ml_project = self.m_data.last_quarter[m]["Project"]
+#                 ml_name = self.m_data.last_quarter[m]["Milestone"]
+#                 ml_date = self.m_data.last_quarter[m]["Date"]
+#                 if ml_name == m_name:
+#                     if ml_project == m_project:
+#
+#
+#
+#
+#                     if m_d_last is None:
+#                         m_d_last = tuple(self.m_data.group_current[m])[0]
+#                 else:
+#                     m_d_last = tuple(self.m_data.group_current[m])[0]
+#
+#                 if m in list(self.m_data.group_baseline.keys()):
+#                     m_d_baseline = tuple(self.m_data.group_baseline[m])[0]
+#                     if m_d_baseline is None:
+#                         m_d_baseline = tuple(self.m_data.group_current[m])[0]
+#                 else:
+#                     m_d_baseline = tuple(self.m_data.group_current[m])[0]
+#
+#                 if m in list(self.m_data.group_baseline_two.keys()):
+#                     m_d_baseline_two = tuple(self.m_data.group_baseline_two[m])[0]
+#                     if m_d_baseline_two is None:
+#                         m_d_baseline_two = tuple(self.m_data.group_current[m])[0]
+#                 else:
+#                     m_d_baseline_two = tuple(self.m_data.group_current[m])[0]
+#
+#                 if m_d_current is not None:
+#                     if self.filter_start_date <= m_d_current <= self.filter_end_date:
+#                         if self.keys_of_interest is None:
+#                             key_names.append(m)
+#                             md_current.append(m_d_current)
+#                             md_last.append(m_d_last)
+#                             td_baseline.append(m_d_baseline)
+#                             td_baseline_two.append(m_d_baseline_two)
+#
+#                         else:
+#                             for key in self.keys_of_interest:
+#                                 if key in m:
+#                                     if m not in key_names:  # prevent repeats
+#                                         key_names.append(m)
+#                                         md_current.append(m_d_current)
+#                                         md_last.append(m_d_last)
+#                                         td_baseline.append(m_d_baseline)
+#                                         td_baseline_two.append(m_d_baseline_two)
+#
+#         # loop to remove
+#         if self.keys_not_of_interest is not None:
+#             for x in range(len(key_names)):
+#                 for y in self.keys_not_of_interest:
+#                     try:
+#                         if y in key_names[x]:
+#                             key_names[x] = None
+#                             md_current[x] = None
+#                             md_last[x] = None
+#                             td_baseline[x] = None
+#                             td_baseline_two[x] = None
+#                     except TypeError:
+#                         pass
+#
+#         key_names_final = [x for x in key_names if x is not None]
+#         td_current_final = [x for x in md_current if x is not None]
+#         td_last_final = [x for x in md_last if x is not None]
+#         td_baseline_final = [x for x in td_baseline if x is not None]
+#         td_baseline_two_final = [x for x in td_baseline_two if x is not None]
+#
+#         self.group_keys = key_names_final
+#         self.group_current_tds = td_current_final
+#         self.group_last_tds = td_last_final
+#         self.group_baseline_tds = td_baseline_final
+#         self.group_baseline_tds_two = td_baseline_two_final
 
 
 class CombinedData:
