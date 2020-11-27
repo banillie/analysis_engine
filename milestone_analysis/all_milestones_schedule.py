@@ -245,5 +245,11 @@ from data_mgmt.data import Master, get_master_data, get_project_information, Mil
 
 master = Master(get_master_data(), get_project_information())
 milestones = MilestoneData(master)
-# milestones.m_dictionary(master.current_projects, "ipdc_milestones")
+milestones.get_milestones(Projects.fbc_stage, "ipdc_milestones")
+milestones.get_chart_info()
+milestones.filter_chart_info(milestone_type="Delivery",
+                             start_date="1/10/2020",
+                             end_date="1/10/2022")
+milestone_chart("half horizontal", milestones, "testing")
+
 

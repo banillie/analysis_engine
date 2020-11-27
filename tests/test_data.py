@@ -2,6 +2,7 @@
 Tests for analysis_engine
 """
 import os
+import datetime
 
 from data_mgmt.data import (
     Master,
@@ -331,5 +332,6 @@ def test_compile_milestone_chart(milestone_masters, project_info):
     milestones = MilestoneData(master)
     milestones.get_milestones([sot, a11, a13], "ipdc_milestones")
     milestones.get_chart_info()
-    milestones.filter_chart_info(milestone_of_interest="Standard")
+    milestones.filter_chart_info(start_date="1/1/2013",
+                                 end_date="1/1/2014")
     milestone_chart("half horizontal", milestones, "testing")
