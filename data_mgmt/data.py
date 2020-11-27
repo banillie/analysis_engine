@@ -1274,10 +1274,10 @@ class MilestoneData:
         self.type_list = type_list
 
     def filter_chart_info(self,
-                          milestone_type: str or List[str] = "All"):
+                          milestone_type: str or List[str] = "All",
+                          milestone_of_interest: str or List[str] = None):
 
         milestone_type = string_conversion(milestone_type)
-
         if milestone_type != ["All"]:  # needs to be list as per string conversion
             for i, v in enumerate(self.type_list):
                 if v not in milestone_type:
@@ -1294,10 +1294,33 @@ class MilestoneData:
             self.md_last = [x for x in self.md_last if x is not None]
             self.md_baseline = [x for x in self.md_baseline if x is not None]
             self.md_baseline_two = [x for x in self.md_baseline_two if x is not None]
-
         else:
             pass
 
+        milestone_of_interest = string_conversion(milestone_of_interest)
+        filtered_list = []
+        if milestone_of_interest is not None:
+            # if developed further clearly good use regex
+            for s in milestone_of_interest:  # s is string
+                for v in self.key_names:  # v is value
+                    if s in v:
+                        filtered_list.append(v)
+            for i, v in enumerate(self.key_names):  # fv is filtered value
+                if v not in filtered_list:
+                    self.key_names[i] = None
+                    self.md_current[i] = None
+                    self.md_last[i] = None
+                    self.md_baseline[i] = None
+                    self.md_baseline_two[i] = None
+                else:
+                    pass
+            self.key_names = [x for x in self.key_names if x is not None]
+            self.md_current = [x for x in self.md_current if x is not None]
+            self.md_last = [x for x in self.md_last if x is not None]
+            self.md_baseline = [x for x in self.md_baseline if x is not None]
+            self.md_baseline_two = [x for x in self.md_baseline_two if x is not None]
+        else:
+            pass
 
 
 
