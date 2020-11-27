@@ -1102,6 +1102,7 @@ class MilestoneData:
         self.ordered_list_bl = []
         self.ordered_list_bl_two = []
         self.key_names = []
+        self.type_list = []
         self.md_current = []
         self.md_last = []
         self.md_baseline = []
@@ -1224,13 +1225,16 @@ class MilestoneData:
         md_last = []
         md_baseline = []
         md_baseline_two = []
+        type_list = []
 
         for m in self.current.values():
             m_project = m["Project"]
             m_name = m["Milestone"]
             m_date = m["Date"]
+            m_type = m["Type"]
             key_names.append(m_project + ", " + m_name)
             md_current.append(m_date)
+            type_list.append(m_type)
 
             # In two loops below NoneType has to be replaced with a datetime object
             # due to matplotlib being unable to handle NoneTypes when milestone_chart
@@ -1266,6 +1270,40 @@ class MilestoneData:
         self.md_current = md_current
         self.md_last = md_last
         self.md_baseline = md_baseline
+        self.md_baseline_two = md_baseline_two
+        self.type_list = type_list
+
+    def filter_chart_info(self,
+                          milestone_type: str or List[str] = "All"):
+
+        milestone_type = string_conversion(milestone_type)
+
+        if milestone_type != ["All"]:  # needs to be list as per string conversion
+            for i, v in enumerate(self.type_list):
+                if v not in milestone_type:
+                    self.key_names[i] = None
+                    self.md_current[i] = None
+                    self.md_last[i] = None
+                    self.md_baseline[i] = None
+                    self.md_baseline_two[i] = None
+                else:
+                    pass
+
+            self.key_names = [x for x in self.key_names if x is not None]
+            self.md_current = [x for x in self.md_current if x is not None]
+            self.md_last = [x for x in self.md_last if x is not None]
+            self.md_baseline = [x for x in self.md_baseline if x is not None]
+            self.md_baseline_two = [x for x in self.md_baseline_two if x is not None]
+
+        else:
+            pass
+
+
+
+
+
+
+
 
 
 # class MilestoneChartData:
@@ -1778,7 +1816,7 @@ def cost_profile_graph(
     As as default last quarters profile is not included. It creates two plots. First plot shows overall
     profile in current, last quarters anb baseline form. Second plot shows rdel, cdel, and 'non-gov' cost profile"""
 
-    fig, (ax1, ax2) = plt.subplots(2)  # two subplots for this chart
+    fig, (ax1) = plt.subplots(1)  # two subplots for this chart
     fig.set_size_inches(set_figure_size(fig_size))
 
     """cost profile charts"""
@@ -1832,50 +1870,50 @@ def cost_profile_graph(
     ax1.grid(color="grey", linestyle="-", linewidth=0.2)
     ax1.legend(prop={"size": 6})
     ax1.set_title(
-        "Fig 1 - cost profile changes", loc="left", fontsize=8, fontweight="bold"
+        "Fig 1. Cost Profile Changes Over Time", loc="left", fontsize=8, fontweight="bold"
     )
 
-    # plot rdel, cdel, non-gov chart data
-    if (
-            sum(cost_master.ngov_profile) != 0
-    ):  # if statement as most projects don't have ngov cost.
-        ax2.plot(
-            YEAR_LIST,
-            np.array(cost_master.ngov_profile),
-            label="Non-Gov",
-            linewidth=3.0,
-            marker="o",
-        )
-    ax2.plot(
-        YEAR_LIST,
-        np.array(cost_master.cdel_profile),
-        label="CDEL",
-        linewidth=3.0,
-        marker="o",
-    )
-    ax2.plot(
-        YEAR_LIST,
-        np.array(cost_master.rdel_profile),
-        label="RDEL",
-        linewidth=3.0,
-        marker="o",
-    )
-
-    # rdel/cdel profile chart styling
-    ax2.tick_params(axis="x", which="major", labelsize=6, rotation=45)
-    ax2.set_xlabel("Financial Years")
-    ax2.set_ylabel("Cost (£m)")
-    xlab2 = ax2.xaxis.get_label()
-    ylab2 = ax2.yaxis.get_label()
-    xlab2.set_style("italic")
-    xlab2.set_size(8)
-    ylab2.set_style("italic")
-    ylab2.set_size(8)
-    ax2.grid(color="grey", linestyle="-", linewidth=0.2)
-    ax2.legend(prop={"size": 6})
-    ax2.set_title(
-        "Fig 2 - current cost type profile", loc="left", fontsize=8, fontweight="bold"
-    )
+    # # plot rdel, cdel, non-gov chart data
+    # if (
+    #         sum(cost_master.ngov_profile) != 0
+    # ):  # if statement as most projects don't have ngov cost.
+    #     ax2.plot(
+    #         YEAR_LIST,
+    #         np.array(cost_master.ngov_profile),
+    #         label="Non-Gov",
+    #         linewidth=3.0,
+    #         marker="o",
+    #     )
+    # ax2.plot(
+    #     YEAR_LIST,
+    #     np.array(cost_master.cdel_profile),
+    #     label="CDEL",
+    #     linewidth=3.0,
+    #     marker="o",
+    # )
+    # ax2.plot(
+    #     YEAR_LIST,
+    #     np.array(cost_master.rdel_profile),
+    #     label="RDEL",
+    #     linewidth=3.0,
+    #     marker="o",
+    # )
+    #
+    # # rdel/cdel profile chart styling
+    # ax2.tick_params(axis="x", which="major", labelsize=6, rotation=45)
+    # ax2.set_xlabel("Financial Years")
+    # ax2.set_ylabel("Cost (£m)")
+    # xlab2 = ax2.xaxis.get_label()
+    # ylab2 = ax2.yaxis.get_label()
+    # xlab2.set_style("italic")
+    # xlab2.set_size(8)
+    # ylab2.set_style("italic")
+    # ylab2.set_size(8)
+    # ax2.grid(color="grey", linestyle="-", linewidth=0.2)
+    # ax2.legend(prop={"size": 6})
+    # ax2.set_title(
+    #     "Fig 2 - current cost type profile", loc="left", fontsize=8, fontweight="bold"
+    # )
 
     fig.tight_layout(rect=[0, 0.03, 1, 0.95])  # size/fit of chart
 
@@ -2358,7 +2396,7 @@ def total_costs_benefits_bar_chart(
     ax1.tick_params(axis="x", which="major", labelsize=6)
     ax1.tick_params(axis="y", which="major", labelsize=6)
     ax1.set_title(
-        "Fig 1 - Total costs: change over time",
+        "Fig 1. Total Cost Changes Over Time",
         loc="left",
         fontsize=8,
         fontweight="bold",
@@ -2390,7 +2428,7 @@ def total_costs_benefits_bar_chart(
     ax2.tick_params(axis="x", which="major", labelsize=6)
     ax2.tick_params(axis="y", which="major", labelsize=6)
     ax2.set_title(
-        "Fig 2 - wlc cost type break down", loc="left", fontsize=8, fontweight="bold"
+        "Fig 2. Current Cost Profile Breakdown", loc="left", fontsize=8, fontweight="bold"
     )
 
     ax2.set_ylim(0, y_max)  # scale y axis max
@@ -2421,7 +2459,7 @@ def total_costs_benefits_bar_chart(
     ax3.tick_params(axis="x", which="major", labelsize=6)
     ax3.tick_params(axis="y", which="major", labelsize=6)
     ax3.set_title(
-        "Fig 3 - ben total change over time", loc="left", fontsize=8, fontweight="bold"
+        "Fig 3. Total Benefit Changes Over Time", loc="left", fontsize=8, fontweight="bold"
     )
 
     ax3.set_ylim(0, y_max)
@@ -2452,7 +2490,7 @@ def total_costs_benefits_bar_chart(
     ax4.tick_params(axis="x", which="major", labelsize=6)
     ax4.tick_params(axis="y", which="major", labelsize=6)
     ax4.set_title(
-        "Fig 4 - benefits profile type", loc="left", fontsize=8, fontweight="bold"
+        "Fig 4. Current Benefit Profile Breakdown", loc="left", fontsize=8, fontweight="bold"
     )
 
     y_min = ben_master.y_scale_min + percentage(40, ben_master.y_scale_min)
@@ -2731,9 +2769,9 @@ def milestone_chart(
     fig.set_size_inches(set_figure_size(fig_size))
 
     if len(milestone_data.entity) == 1:
-        fig.suptitle(milestone_data.entity[0] + " Cost Profile", fontweight="bold")
+        fig.suptitle(milestone_data.entity[0] + " Schedule", fontweight="bold")
     else:
-        fig.suptitle(title[0] + " Cost Profile", fontweight="bold")  # title
+        fig.suptitle(title[0] + " Schedule", fontweight="bold")  # title
 
     ax1.scatter(milestone_data.md_baseline, milestone_data.key_names, label='Baseline')
     ax1.scatter(milestone_data.md_last, milestone_data.key_names, label='Last quarter')
@@ -2751,46 +2789,45 @@ def milestone_chart(
     plt.setp(ax1.xaxis.get_minorticklabels(), rotation=45)
     plt.setp(ax1.xaxis.get_majorticklabels(), rotation=45, weight='bold')
 
-    # """calculate the length of the time period covered in chart.
-    # Not perfect as baseline dates can distort."""
-    # try:
-    #     td = (latest_milestone_dates[-1] - latest_milestone_dates[0]).days
-    #     if td >= 365 * 3:
-    #         print('Yes')
-    #         ax1.xaxis.set_major_locator(years)
-    #         ax1.xaxis.set_minor_locator(months)
-    #         ax1.xaxis.set_major_formatter(years_fmt)
-    #         ax1.xaxis.set_minor_formatter(months_fmt)
-    #         plt.setp(ax1.xaxis.get_minorticklabels(), rotation=45)
-    #         plt.setp(ax1.xaxis.get_majorticklabels(), rotation=45, weight='bold')
-    #
-    #         # scaling x axis
-    #         # x axis value to no more than three months after last latest milestone date, or three months
-    #         # before first latest milestone date. Hack, can be improved. Text highlights movements off chart.
-    #         x_max = latest_milestone_dates[-1] + timedelta(days=90)
-    #         x_min = latest_milestone_dates[0] - timedelta(days=90)
-    #         for date in baseline_milestone_dates:
-    #             if date > x_max:
-    #                 ax1.set_xlim(x_min, x_max)
-    #                 plt.figtext(0.98, 0.03,
-    #                             'Check full schedule to see all milestone movements',
-    #                             horizontalalignment='right', fontsize=6, fontweight='bold')
-    #             if date < x_min:
-    #                 ax1.set_xlim(x_min, x_max)
-    #                 plt.figtext(0.98, 0.03,
-    #                             'Check full schedule to see all milestone movements',
-    #                             horizontalalignment='right', fontsize=6, fontweight='bold')
-    #     else:
-    #         ax1.xaxis.set_major_locator(years)
-    #         ax1.xaxis.set_minor_locator(months)
-    #         ax1.xaxis.set_major_formatter(years_fmt)
-    #         ax1.xaxis.set_minor_formatter(months_fmt)
-    #         plt.setp(ax1.xaxis.get_minorticklabels(), rotation=45)
-    #         plt.setp(ax1.xaxis.get_majorticklabels(), rotation=45, weight='bold')
-    #
-    #
-    # except IndexError:  # if milestone dates list is empty:
-    #     pass
+    """calculate the length of the time period covered in chart.
+    Not perfect as baseline dates can distort."""
+    try:
+        td = (milestone_data.md_current[-1] - milestone_data.md_current[0]).days
+        if td >= 365 * 3:
+            print('Yes')
+            ax1.xaxis.set_major_locator(years)
+            ax1.xaxis.set_minor_locator(months)
+            ax1.xaxis.set_major_formatter(years_fmt)
+            ax1.xaxis.set_minor_formatter(months_fmt)
+            plt.setp(ax1.xaxis.get_minorticklabels(), rotation=45)
+            plt.setp(ax1.xaxis.get_majorticklabels(), rotation=45, weight='bold')
+
+            # scaling x axis
+            # x axis value to no more than three months after last latest milestone date, or three months
+            # before first latest milestone date. Hack, can be improved. Text highlights movements off chart.
+            x_max = milestone_data.md_current[-1] + timedelta(days=90)
+            x_min = milestone_data.md_current[0] - timedelta(days=90)
+            for date in milestone_data.md_baseline:
+                if date > x_max:
+                    ax1.set_xlim(x_min, x_max)
+                    plt.figtext(0.98, 0.03,
+                                'Check full schedule to see all milestone movements',
+                                horizontalalignment='right', fontsize=6, fontweight='bold')
+                if date < x_min:
+                    ax1.set_xlim(x_min, x_max)
+                    plt.figtext(0.98, 0.03,
+                                'Check full schedule to see all milestone movements',
+                                horizontalalignment='right', fontsize=6, fontweight='bold')
+        else:
+            ax1.xaxis.set_major_locator(years)
+            ax1.xaxis.set_minor_locator(months)
+            ax1.xaxis.set_major_formatter(years_fmt)
+            ax1.xaxis.set_minor_formatter(months_fmt)
+            plt.setp(ax1.xaxis.get_minorticklabels(), rotation=45)
+            plt.setp(ax1.xaxis.get_majorticklabels(), rotation=45, weight='bold')
+
+    except IndexError:  # if milestone dates list is empty:
+        pass
 
     ax1.legend()  # insert legend
 

@@ -331,4 +331,5 @@ def test_compile_milestone_chart(milestone_masters, project_info):
     milestones = MilestoneData(master)
     milestones.get_milestones([sot, a11, a13], "ipdc_milestones")
     milestones.get_chart_info()
+    milestones.filter_chart_info()
     milestone_chart("half horizontal", milestones, "testing")
