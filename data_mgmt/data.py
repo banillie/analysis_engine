@@ -1082,7 +1082,7 @@ def milestone_info_handling(output_list: list, t_list: list) -> list:
             return output_list.append(t_list)
         else:
             try:
-                d = parser.parse(t_list[3][1])
+                d = parser.parse(t_list[3][1], dayfirst=True)
                 t_list[3] = ("Date", d.date())
                 return output_list.append(t_list)
             # ParserError for non-date string. TypeError for None types
@@ -1327,8 +1327,8 @@ class MilestoneData:
             pass
 
         #  Fliter milestones based on date.
-        start = parser.parse(start_date)
-        end = parser.parse(end_date)
+        start = parser.parse(start_date, dayfirst=True)
+        end = parser.parse(end_date, dayfirst=True)
         for i, d in enumerate(self.md_current):
             if start.date() <= d <= end.date():
                 pass
