@@ -26,7 +26,8 @@ from data_mgmt.data import (
     totals_chart,
     change_word_doc_landscape,
     FIGURE_STYLE,
-    MilestoneData, milestone_chart,
+    MilestoneData,
+    milestone_chart,
 )
 
 # test masters project names
@@ -66,6 +67,17 @@ def test_get_current_project_names(basic_masters_dicts, project_info):
 def test_check_projects_in_project_info(basic_masters_dicts, project_info_incorrect):
     Master(basic_masters_dicts, project_info_incorrect)
     # assert error message
+
+
+def test_get_project_abbreviations(basic_masters_dicts, project_info):
+    master = Master(basic_masters_dicts, project_info)
+    assert master.abbreviations == {
+        "Apollo 11": "A11",
+        "Apollo 13": "A13",
+        "Columbia": "Columbia",
+        "Falcon 9": "F9",
+        "Sea of Tranquility": "SoT",
+    }
 
 
 def test_checking_baseline_data(basic_master_wrong_baselines, project_info):
@@ -329,9 +341,6 @@ def test_get_milestone_chart_data(milestone_masters, project_info):
 
 def test_compile_milestone_chart(milestone_masters, project_info):
     master = Master(milestone_masters, project_info)
-    milestones = MilestoneData(master)
-    milestones.get_milestones([sot, a11, a13], "ipdc_milestones")
-    milestones.get_chart_info()
-    milestones.filter_chart_info(start_date="1/1/2013",
-                                 end_date="1/1/2014")
+    milestones = MilestoneData(master, [sot, a11, a13])
+    milestones.filter_chart_info(start_date="1/1/2013", end_date="1/1/2014")
     milestone_chart("half horizontal", milestones, "testing")

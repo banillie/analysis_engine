@@ -530,12 +530,14 @@ class Master:
     ) -> None:
         self.master_data = master_data
         self.project_information = project_information
+        self.abbreviations = {}
         self.current_projects = self.get_current_projects()
         self.check_project_information()
         self.bl_info = {}
         self.bl_index = {}
         self.baseline_data()
         # self.check_baselines()  # optional for now
+        self.get_project_abbreviations()
 
     def baseline_data(self) -> dict:
         """
@@ -632,6 +634,12 @@ class Master:
             else:
                 continue
             break
+
+    def get_project_abbreviations(self) -> None:
+        """gets the abbreviations for all current projects.
+        held in the project info document"""
+        for p in self.current_projects:
+            self.abbreviations[p] = self.project_information[p]["Abbreviations"]
 
 
 class CostData:
@@ -1091,8 +1099,12 @@ def milestone_info_handling(output_list: list, t_list: list) -> list:
 
 
 class MilestoneData:
-    def __init__(self, master: Master):
+    def __init__(self, master: Master,
+                 group: List[str] or str,
+                 baseline_type: str = "ipdc_milestones"):
         self.master = master
+        self.group = group
+        self.baseline_type = baseline_type
         self.current = {}
         self.last_quarter = {}
         self.baseline = {}
@@ -1108,20 +1120,22 @@ class MilestoneData:
         self.md_baseline = []
         self.md_baseline_two = []
         self.entity = []
+        self.get_milestones()
+        self.get_chart_info()
 
-    def get_milestones(self, group: List[str] or str, baseline: str) -> None:
+    def get_milestones(self) -> None:
         """
         Creates project milestone dictionaries for current, last_quarter, and
         baselines when provided with group and baseline type.
         """
-        group = string_conversion(group)
+        group = string_conversion(self.group)
 
         for bl in range(4):
             lower_dict = {}
             raw_list = []
             for project_name in group:
                 project_list = []
-                milestone_bl_index = self.master.bl_index[baseline][project_name]
+                milestone_bl_index = self.master.bl_index[self.baseline_type][project_name]
                 try:
                     p_data = self.master.master_data[milestone_bl_index[bl]].data[project_name]
                 # IndexError handles len of project bl index.
@@ -1133,7 +1147,7 @@ class MilestoneData:
                 for i in range(1, 50):
                     try:
                         t = [
-                            ("Project", project_name),
+                            ("Project", self.master.abbreviations[project_name]),
                             ("Milestone", p_data["Approval MM" + str(i)]),
                             ("Type", "Approval"),
                             ("Date", p_data[
@@ -1142,7 +1156,7 @@ class MilestoneData:
                         ]
                         milestone_info_handling(project_list, t)
                         t = [
-                            ("Project", project_name),
+                            ("Project", self.master.abbreviations[project_name]),
                             ("Milestone", p_data["Assurance MM" + str(i)]),
                             ("Type", "Assurance"),
                             ("Date", p_data["Assurance MM" + str(i) + " Forecast - Actual"]),
@@ -1152,7 +1166,7 @@ class MilestoneData:
                     except KeyError:  # handles inconsistent key naming for approval milestones.
                         try:
                             t = [
-                                ("Project", project_name),
+                                ("Project", self.master.abbreviations[project_name]),
                                 ("Milestone", p_data["Approval MM" + str(i)]),
                                 ("Type", "Approval"),
                                 ("Date", p_data[
@@ -1167,7 +1181,7 @@ class MilestoneData:
                 for i in range(18, 67):
                     try:
                         t = [
-                            ("Project", project_name),
+                            ("Project", self.master.abbreviations[project_name]),
                             ("Milestone", p_data["Project MM" + str(i)]),
                             ("Type", "Delivery"),
                             ("Date", p_data["Project MM" + str(i) + " Forecast - Actual"]),
@@ -1178,7 +1192,7 @@ class MilestoneData:
                         pass
 
                 # loop to stop key names being the same. Done at project level.
-                # note particularly concise code.
+                # not particularly concise code.
                 upper_counter_list = []
                 for entry in project_list:
                     upper_counter_list.append(entry[1][1])
@@ -1215,7 +1229,7 @@ class MilestoneData:
 
         self.entity = group
 
-    def get_chart_info(self):
+    def get_chart_info(self) -> None:
         """returns data lists for matplotlib chart"""
         # Note this code could refactored so that it collects all milestones
         # reported across current, last and baseline. At the moment it only
@@ -1289,6 +1303,7 @@ class MilestoneData:
                     self.md_last[i] = None
                     self.md_baseline[i] = None
                     self.md_baseline_two[i] = None
+                    self.type_list[i] = None
                 else:
                     pass
 
@@ -1297,6 +1312,7 @@ class MilestoneData:
             self.md_last = [x for x in self.md_last if x is not None]
             self.md_baseline = [x for x in self.md_baseline if x is not None]
             self.md_baseline_two = [x for x in self.md_baseline_two if x is not None]
+            self.type_list = [x for x in self.type_list if x is not None]
         else:
             pass
 
@@ -1316,6 +1332,7 @@ class MilestoneData:
                     self.md_last[i] = None
                     self.md_baseline[i] = None
                     self.md_baseline_two[i] = None
+                    self.type_list[i] = None
                 else:
                     pass
             self.key_names = [x for x in self.key_names if x is not None]
@@ -1323,6 +1340,7 @@ class MilestoneData:
             self.md_last = [x for x in self.md_last if x is not None]
             self.md_baseline = [x for x in self.md_baseline if x is not None]
             self.md_baseline_two = [x for x in self.md_baseline_two if x is not None]
+            self.type_list = [x for x in self.type_list if x is not None]
         else:
             pass
 
@@ -1338,11 +1356,13 @@ class MilestoneData:
                 self.md_last[i] = None
                 self.md_baseline[i] = None
                 self.md_baseline_two[i] = None
+                self.type_list[i] = None
         self.key_names = [x for x in self.key_names if x is not None]
         self.md_current = [x for x in self.md_current if x is not None]
         self.md_last = [x for x in self.md_last if x is not None]
         self.md_baseline = [x for x in self.md_baseline if x is not None]
         self.md_baseline_two = [x for x in self.md_baseline_two if x is not None]
+        self.type_list = [x for x in self.type_list if x is not None]
 
 
 class CombinedData:

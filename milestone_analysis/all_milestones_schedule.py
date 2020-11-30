@@ -244,11 +244,9 @@ from data_mgmt.data import Master, get_master_data, get_project_information, Mil
     Projects, milestone_chart
 
 master = Master(get_master_data(), get_project_information())
-milestones = MilestoneData(master)
-milestones.get_milestones(Projects.he, "ipdc_milestones")
-milestones.get_chart_info()
-milestones.filter_chart_info(start_date="01/10/2020",
-                             end_date="01/10/2022")
+milestones = MilestoneData(master, Projects.he)
+milestones.filter_chart_info(start_date="30/11/2020",
+                             end_date="31/12/2020")
 milestone_chart("half horizontal", milestones, "HE")
 
 
