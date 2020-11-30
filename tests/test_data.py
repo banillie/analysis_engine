@@ -167,7 +167,7 @@ def test_changing_word_doc_to_landscape(word_doc):
 
 
 def test_project_cost_profile_chart_into_word_doc_many(
-        word_doc, costs_masters, project_info
+    word_doc, costs_masters, project_info
 ):
     master = Master(costs_masters, project_info)
     for p in master.current_projects:
@@ -323,4 +323,10 @@ def test_compile_milestone_chart(milestone_masters, project_info):
     master = Master(milestone_masters, project_info)
     milestones = MilestoneData(master, [sot, a11, a13])
     milestones.filter_chart_info(start_date="1/1/2013", end_date="1/1/2014")
-    milestone_chart(milestones, title="Group Test", fig_size=FIGURE_STYLE[1])
+    milestone_chart(milestones, title="Group Test", fig_size=FIGURE_STYLE[1], blue_line="Today")
+
+
+def test_removing_project_name_from_milestone_keys(milestone_masters, project_info):
+    master = Master(milestone_masters, project_info)
+    milestones = MilestoneData(master, sot)
+    assert milestones.key_names == ['Standard A', 'Inverted Cosmonauts']
