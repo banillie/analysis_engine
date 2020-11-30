@@ -40,12 +40,12 @@ mars = "Mars"
 group = [sot, a13, f9, columbia, mars]
 
 
-def test_creation_of_Masters_class(basic_masters_dicts, project_info):
+def test_creation_of_masters_class(basic_masters_dicts, project_info):
     master = Master(basic_masters_dicts, project_info)
     assert isinstance(master.master_data, (list,))
 
 
-def test_getting_baseline_data_from_Masters(basic_masters_dicts, project_info):
+def test_getting_baseline_data_from_masters(basic_masters_dicts, project_info):
     master = Master(basic_masters_dicts, project_info)
     assert isinstance(master.bl_index, (dict,))
     assert master.bl_index["ipdc_milestones"]["Sea of Tranquility"] == [0, 1]
@@ -64,9 +64,9 @@ def test_get_current_project_names(basic_masters_dicts, project_info):
     ]
 
 
-def test_check_projects_in_project_info(basic_masters_dicts, project_info_incorrect):
-    Master(basic_masters_dicts, project_info_incorrect)
-    # assert error message
+# def test_check_projects_in_project_info(basic_masters_dicts, project_info_incorrect):
+#     Master(basic_masters_dicts, project_info_incorrect)
+#     # assert error message
 
 
 def test_get_project_abbreviations(basic_masters_dicts, project_info):
@@ -129,27 +129,23 @@ def test_word_doc_dca_narratives(word_doc, project_info, dca_masters):
 
 def test_get_project_cost_profile(costs_masters, project_info):
     master = Master(costs_masters, project_info)
-    master.check_baselines()
-    costs = CostData(master)
-    costs.get_cost_profile("Falcon 9", "ipdc_costs")
+    # master.check_baselines()
+    costs = CostData(master, f9)
     assert len(costs.current_profile) == 24
 
 
 def test_project_cost_profile_chart(costs_masters, project_info):
     master = Master(costs_masters, project_info)
-    costs = CostData(master)
-    costs.get_cost_profile("Falcon 9", "ipdc_costs")
-    cost_profile_graph(FIGURE_STYLE[2], costs, "Falcon 9")
+    costs = CostData(master, f9)
+    cost_profile_graph(costs, show="No")
 
 
 def test_project_cost_profile_chart_into_word_doc_one(
     word_doc, costs_masters, project_info
 ):
     master = Master(costs_masters, project_info)
-    costs = CostData(master)
-    costs.get_cost_profile("Falcon 9", "ipdc_costs")
-    fig_style = "half horizontal"
-    graph = cost_profile_graph(fig_style, costs)
+    costs = CostData(master, f9)
+    graph = cost_profile_graph(costs, show="No")
     put_matplotlib_fig_into_word(word_doc, graph)
     word_doc.save("resources/summary_temp_altered.docx")
 
@@ -158,12 +154,9 @@ def test_total_cost_profile_chart_into_word_doc_one(
     word_doc, costs_masters, project_info
 ):
     master = Master(costs_masters, project_info)
-    costs = CostData(master)
-    benefits = BenefitsData(master)
-    costs.get_cost_totals("Falcon 9", "ipdc_costs")
-    benefits.get_ben_totals("Falcon 9", "ipdc_benefits")
-    fig_size = FIGURE_STYLE[2]
-    graph = total_costs_benefits_bar_chart(fig_size, costs, benefits)
+    costs = CostData(master, f9)
+    benefits = BenefitsData(master, f9)
+    graph = total_costs_benefits_bar_chart(costs, benefits, show="No")
     put_matplotlib_fig_into_word(word_doc, graph)
     word_doc.save("resources/summary_temp_altered.docx")
 
@@ -174,21 +167,19 @@ def test_changing_word_doc_to_landscape(word_doc):
 
 
 def test_project_cost_profile_chart_into_word_doc_many(
-    word_doc, costs_masters, project_info
+        word_doc, costs_masters, project_info
 ):
     master = Master(costs_masters, project_info)
-    costs = CostData(master)
     for p in master.current_projects:
-        costs.get_cost_profile(p, "ipdc_costs")
-        graph = cost_profile_graph(FIGURE_STYLE[2], costs)
+        costs = CostData(master, p)
+        graph = cost_profile_graph(costs, show="No")
         put_matplotlib_fig_into_word(word_doc, graph)
         word_doc.save("resources/summary_temp_altered.docx")
 
 
 def test_get_group_cost_profile(costs_masters, project_info):
     master = Master(costs_masters, project_info)
-    costs = CostData(master)
-    costs.get_cost_profile(master.current_projects, "ipdc_costs")
+    costs = CostData(master, master.current_projects)
     assert costs.current_profile == [
         0,
         933,
@@ -219,15 +210,13 @@ def test_get_group_cost_profile(costs_masters, project_info):
 
 def test_get_group_cost_profile_chart(costs_masters, project_info):
     master = Master(costs_masters, project_info)
-    costs = CostData(master)
-    costs.get_cost_profile(master.current_projects, "ipdc_costs")
-    cost_profile_graph(FIGURE_STYLE[2], costs, "Group Test")
+    costs = CostData(master, master.current_projects)
+    cost_profile_graph(costs, title="Group Test", show="No")
 
 
 def test_get_project_total_cost_calculations_for_project(costs_masters, project_info):
     master = Master(costs_masters, project_info)
-    costs = CostData(master)
-    costs.get_cost_totals("Falcon 9", "ipdc_costs")
+    costs = CostData(master, f9)
     assert costs.spent == [471, 188, 188]
     assert costs.profiled == [6281, 6204, 6204]
     assert costs.unprofiled == [0, 0, 0]
@@ -235,25 +224,22 @@ def test_get_project_total_cost_calculations_for_project(costs_masters, project_
 
 def test_get_project_total_costs_benefits_bar_chart(costs_masters, project_info):
     master = Master(costs_masters, project_info)
-    costs = CostData(master, "Mars")
-    benefits = BenefitsData(master, "Mars")
-    total_costs_benefits_bar_chart(FIGURE_STYLE[2], costs, benefits)
+    costs = CostData(master, mars)
+    benefits = BenefitsData(master, mars)
+    total_costs_benefits_bar_chart(costs, benefits, show="No")
 
 
 def test_get_group_total_cost_calculations(costs_masters, project_info):
     master = Master(costs_masters, project_info)
-    costs = CostData(master)
-    costs.get_cost_totals(master.current_projects, "ipdc_costs")
+    costs = CostData(master, master.current_projects)
     assert costs.spent == [2929, 2210, 2210]
 
 
 def test_get_group_total_cost_and_bens_chart(costs_masters, project_info):
     master = Master(costs_masters, project_info)
-    costs = CostData(master)
-    bens = BenefitsData(master)
-    costs.get_cost_totals(master.current_projects, "ipdc_costs")
-    bens.get_ben_totals(master.current_projects, "ipdc_benefits")
-    total_costs_benefits_bar_chart(FIGURE_STYLE[2], costs, bens, "Total Group")
+    costs = CostData(master, master.current_projects)
+    benefits = BenefitsData(master, master.current_projects)
+    total_costs_benefits_bar_chart(costs, benefits, title="Total Group", show="No")
 
 
 def test_put_change_keys_into_a_dict(change_log):
@@ -278,8 +264,7 @@ def test_placing_old_fy_cost_data_into_master_wbs(
 
 def test_getting_benefits_profile_for_a_group(costs_masters, project_info):
     master = Master(costs_masters, project_info)
-    ben = BenefitsData(master)
-    ben.get_ben_totals(master.current_projects, "ipdc_benefits")
+    ben = BenefitsData(master, master.current_projects)
     assert ben.delivered == [0, 0, 0]
     assert ben.profiled == [43659, 20608, 64227]
     assert ben.unprofiled == [10164, 19228, 19228]
@@ -287,8 +272,7 @@ def test_getting_benefits_profile_for_a_group(costs_masters, project_info):
 
 def test_getting_benefits_profile_for_a_project(costs_masters, project_info):
     master = Master(costs_masters, project_info)
-    ben = BenefitsData(master)
-    ben.get_ben_totals("Falcon 9", "ipdc_benefits")
+    ben = BenefitsData(master, f9)
     assert ben.profiled == [-200, 240, 240]
 
 
@@ -305,33 +289,31 @@ def test_get_gmpp_projects(project_info):
 
 def test_saving_cost_profile_graph_files(costs_masters, project_info):
     master = Master(costs_masters, project_info)
-    costs = CostData(master)
-    fig_style = "half horizontal"
-    standard_profile(fig_style, costs, sot)
-    standard_profile(fig_style, costs, group, "Python")
+    costs = CostData(master, sot)
+    standard_profile(costs)
+    costs = CostData(master, group)
+    standard_profile(costs, title="Python", fig_size=FIGURE_STYLE[1])
 
 
 def test_saving_total_cost_benefit_graph_files(costs_masters, project_info):
     master = Master(costs_masters, project_info)
-    costs = CostData(master)
-    benefits = BenefitsData(master)
-    fig_style = FIGURE_STYLE[2]
-    totals_chart(fig_style, costs, benefits, f9)
-    totals_chart(fig_style, costs, benefits, group, "Matplotlib")
+    costs = CostData(master, f9)
+    benefits = BenefitsData(master, f9)
+    totals_chart(costs, benefits)
+    costs = CostData(master, group)
+    benefits = BenefitsData(master, group)
+    totals_chart(costs, benefits, title="Test Group")
 
 
 def test_get_milestone_data(milestone_masters, project_info):
     master = Master(milestone_masters, project_info)
-    milestones = MilestoneData(master)
-    milestones.get_milestones([sot, a11, a13], "ipdc_milestones")
+    milestones = MilestoneData(master, [sot, a11, a13])
     assert isinstance(milestones.current, (dict,))
 
 
 def test_get_milestone_chart_data(milestone_masters, project_info):
     master = Master(milestone_masters, project_info)
-    milestones = MilestoneData(master)
-    milestones.get_milestones([sot, a11, a13], "ipdc_milestones")
-    milestones.get_chart_info()
+    milestones = MilestoneData(master, [sot, a11, a13])
     assert len(milestones.key_names) == 5
     assert len(milestones.md_current) == 5
     assert len(milestones.md_last) == 5
@@ -341,4 +323,4 @@ def test_compile_milestone_chart(milestone_masters, project_info):
     master = Master(milestone_masters, project_info)
     milestones = MilestoneData(master, [sot, a11, a13])
     milestones.filter_chart_info(start_date="1/1/2013", end_date="1/1/2014")
-    milestone_chart("half horizontal", milestones, "testing")
+    milestone_chart(milestones, title="Group Test", fig_size=FIGURE_STYLE[1])

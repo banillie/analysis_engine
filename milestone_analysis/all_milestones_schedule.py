@@ -247,6 +247,6 @@ master = Master(get_master_data(), get_project_information())
 milestones = MilestoneData(master, Projects.he)
 milestones.filter_chart_info(start_date="30/11/2020",
                              end_date="31/12/2020")
-milestone_chart("half horizontal", milestones, "HE")
+milestone_chart(milestones, "HE")
 
 

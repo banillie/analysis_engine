@@ -388,18 +388,21 @@ LIST_OF_GROUPS = [  # master.current_projects,
     Projects.all_not_hs2,
     Projects.fbc_stage,
     Projects.obc_stage,
-    Projects.sobc_stage]
-LIST_OF_TITLES = ['ALL',
-                  'HE',
-                  'RAIL INFRASTRUCTURE',
-                  'RAIL FRANCHISING',
-                  'HS2',
-                  'HSMRPG',
-                  'AMIS (SARH2)',
-                  'ALL, NOT HS2,',
-                  'FBC Projects',
-                  'OBC Projects',
-                  'SOBC Projects']
+    Projects.sobc_stage,
+]
+LIST_OF_TITLES = [
+    "ALL",
+    "HE",
+    "RAIL INFRASTRUCTURE",
+    "RAIL FRANCHISING",
+    "HS2",
+    "HSMRPG",
+    "AMIS (SARH2)",
+    "ALL, NOT HS2,",
+    "FBC Projects",
+    "OBC Projects",
+    "SOBC Projects",
+]
 
 #  list of different baseline types. hold at global level?
 BASELINE_TYPES = {
@@ -506,7 +509,7 @@ FILE_FORMATS = [
     "tiff",
 ]
 
-FIGURE_STYLE = {1: "half horizontal", 2: "full horizontal"}
+FIGURE_STYLE = {1: "half_horizontal", 2: "full_horizontal"}
 
 
 def calculate_profiled(p: List[int], s: List[int], unpro: List[int]) -> list:
@@ -524,18 +527,18 @@ def calculate_profiled(p: List[int], s: List[int], unpro: List[int]) -> list:
 
 class Master:
     def __init__(
-            self,
-            master_data: List[Dict[str, Union[str, int, datetime.date, float]]],
-            project_information: Dict[str, Union[str, int]],
+        self,
+        master_data: List[Dict[str, Union[str, int, datetime.date, float]]],
+        project_information: Dict[str, Union[str, int]],
     ) -> None:
         self.master_data = master_data
         self.project_information = project_information
         self.abbreviations = {}
         self.current_projects = self.get_current_projects()
-        self.check_project_information()
         self.bl_info = {}
         self.bl_index = {}
         self.baseline_data()
+        self.check_project_information()
         # self.check_baselines()  # optional for now
         self.get_project_abbreviations()
 
@@ -606,13 +609,13 @@ class Master:
                 print(
                     p
                     + " is not in the projects information document. Project names must be identical "
-                      " in both documents. Programme stopping. Please amend."
+                    " in both documents. Programme stopping. Please amend."
                 )
                 break
             else:
                 if p == self.current_projects[-1]:
                     print("The latest master and project information match")
-                continue
+
 
     def check_baselines(self) -> None:
         """checks that projects have the correct baseline information. stops the
@@ -627,9 +630,9 @@ class Master:
                         + " does not have a baseline point for "
                         + v
                         + " this could cause the programme to "
-                          "crash. Therefore the programme is stopping. "
-                          "Please amend the data for " + p + " so that "
-                                                             " it has at least one baseline point for " + v
+                        "crash. Therefore the programme is stopping. "
+                        "Please amend the data for " + p + " so that "
+                        " it has at least one baseline point for " + v
                     )
             else:
                 continue
@@ -643,9 +646,12 @@ class Master:
 
 
 class CostData:
-    def __init__(self, master: Master,
-                 project_group: List[str] or str,
-                 baseline_type: str = "ipdc_costs"):
+    def __init__(
+        self,
+        master: Master,
+        project_group: List[str] or str,
+        baseline_type: str = "ipdc_costs",
+    ):
         self.master = master
         self.project_group = project_group
         self.baseline_type = baseline_type
@@ -690,7 +696,9 @@ class CostData:
             for x, key in enumerate(COST_TYPE_KEY_LIST):
                 group_total = 0
                 for project_name in self.project_group:
-                    cost_bl_index = self.master.bl_index[self.baseline_type][project_name]
+                    cost_bl_index = self.master.bl_index[self.baseline_type][
+                        project_name
+                    ]
                     try:
                         rdel = self.master.master_data[cost_bl_index[i]].data[
                             project_name
@@ -774,8 +782,8 @@ class CostData:
                                 std_list[s] = 0
                         spent.append(round(group_total + sum(std_list)))
                     except (
-                            KeyError,
-                            TypeError,
+                        KeyError,
+                        TypeError,
                     ):  # Note. TypeError here as projects may have no baseline
                         spent.append(group_total)
                 if x == 1:  # profiled
@@ -830,7 +838,9 @@ class CostData:
                 ngov_total = 0
                 for cost_type in COST_KEY_LIST:
                     for project_name in self.project_group:
-                        project_bl_index = self.master.bl_index[self.baseline_type][project_name]
+                        project_bl_index = self.master.bl_index[self.baseline_type][
+                            project_name
+                        ]
                         try:
                             cost = self.master.master_data[project_bl_index[i]].data[
                                 project_name
@@ -915,8 +925,8 @@ class CostData:
                 "NOTE: The following project(s) were not part of the portfolio last quarter "
                 + str(missing_projects)
                 + " this means current quarter and last quarter cost profiles are not like for like."
-                  " If you would like a like for like comparison between current and last quarter"
-                  " remove this project(s) from the master group."
+                " If you would like a like for like comparison between current and last quarter"
+                " remove this project(s) from the master group."
             )
 
         self.current_profile = current_profile
@@ -930,9 +940,12 @@ class CostData:
 
 
 class BenefitsData:
-    def __init__(self, master: Master,
-                 project_group: List[str] or str,
-                 baseline_type: str = "ipdc_benefits"):
+    def __init__(
+        self,
+        master: Master,
+        project_group: List[str] or str,
+        baseline_type: str = "ipdc_benefits",
+    ):
         self.master = master
         self.project_group = project_group
         self.baseline_type = baseline_type
@@ -1084,11 +1097,14 @@ def milestone_info_handling(output_list: list, t_list: list) -> list:
 
 
 class MilestoneData:
-    def __init__(self, master: Master,
-                 group: List[str] or str,
-                 baseline_type: str = "ipdc_milestones"):
+    def __init__(
+        self,
+        master: Master,
+        project_group: List[str] or str,
+        baseline_type: str = "ipdc_milestones",
+    ):
         self.master = master
-        self.group = group
+        self.project_group = project_group
         self.baseline_type = baseline_type
         self.current = {}
         self.last_quarter = {}
@@ -1104,7 +1120,6 @@ class MilestoneData:
         self.md_last = []
         self.md_baseline = []
         self.md_baseline_two = []
-        self.entity = []
         self.get_milestones()
         self.get_chart_info()
 
@@ -1113,16 +1128,20 @@ class MilestoneData:
         Creates project milestone dictionaries for current, last_quarter, and
         baselines when provided with group and baseline type.
         """
-        group = string_conversion(self.group)
+        group = string_conversion(self.project_group)
 
         for bl in range(4):
             lower_dict = {}
             raw_list = []
             for project_name in group:
                 project_list = []
-                milestone_bl_index = self.master.bl_index[self.baseline_type][project_name]
+                milestone_bl_index = self.master.bl_index[self.baseline_type][
+                    project_name
+                ]
                 try:
-                    p_data = self.master.master_data[milestone_bl_index[bl]].data[project_name]
+                    p_data = self.master.master_data[milestone_bl_index[bl]].data[
+                        project_name
+                    ]
                 # IndexError handles len of project bl index.
                 # TypeError handles None Type present if project not reporting last quarter
                 except (IndexError, TypeError):
@@ -1135,17 +1154,22 @@ class MilestoneData:
                             ("Project", self.master.abbreviations[project_name]),
                             ("Milestone", p_data["Approval MM" + str(i)]),
                             ("Type", "Approval"),
-                            ("Date", p_data[
-                                "Approval MM" + str(i) + " Forecast / Actual"]),
-                            ("Notes", p_data["Approval MM" + str(i) + " Notes"])
+                            (
+                                "Date",
+                                p_data["Approval MM" + str(i) + " Forecast / Actual"],
+                            ),
+                            ("Notes", p_data["Approval MM" + str(i) + " Notes"]),
                         ]
                         milestone_info_handling(project_list, t)
                         t = [
                             ("Project", self.master.abbreviations[project_name]),
                             ("Milestone", p_data["Assurance MM" + str(i)]),
                             ("Type", "Assurance"),
-                            ("Date", p_data["Assurance MM" + str(i) + " Forecast - Actual"]),
-                            ("Notes", p_data["Assurance MM" + str(i) + " Notes"])
+                            (
+                                "Date",
+                                p_data["Assurance MM" + str(i) + " Forecast - Actual"],
+                            ),
+                            ("Notes", p_data["Assurance MM" + str(i) + " Notes"]),
                         ]
                         milestone_info_handling(project_list, t)
                     except KeyError:  # handles inconsistent key naming for approval milestones.
@@ -1154,9 +1178,13 @@ class MilestoneData:
                                 ("Project", self.master.abbreviations[project_name]),
                                 ("Milestone", p_data["Approval MM" + str(i)]),
                                 ("Type", "Approval"),
-                                ("Date", p_data[
-                                    "Approval MM" + str(i) + " Forecast - Actual"]),
-                                ("Notes", p_data["Approval MM" + str(i) + " Notes"])
+                                (
+                                    "Date",
+                                    p_data[
+                                        "Approval MM" + str(i) + " Forecast - Actual"
+                                    ],
+                                ),
+                                ("Notes", p_data["Approval MM" + str(i) + " Notes"]),
                             ]
                             milestone_info_handling(project_list, t)
                         except KeyError:
@@ -1169,8 +1197,11 @@ class MilestoneData:
                             ("Project", self.master.abbreviations[project_name]),
                             ("Milestone", p_data["Project MM" + str(i)]),
                             ("Type", "Delivery"),
-                            ("Date", p_data["Project MM" + str(i) + " Forecast - Actual"]),
-                            ("Notes", p_data["Project MM" + str(i) + " Notes"])
+                            (
+                                "Date",
+                                p_data["Project MM" + str(i) + " Forecast - Actual"],
+                            ),
+                            ("Notes", p_data["Project MM" + str(i) + " Notes"]),
                         ]
                         milestone_info_handling(project_list, t)
                     except KeyError:
@@ -1187,7 +1218,9 @@ class MilestoneData:
                     if upper_count[entry[1][1]] > 1:
                         lower_counter_list.append(entry[1][1])
                         lower_count = Counter(lower_counter_list)
-                        new_milestone_key = entry[1][1] + " (" + str(lower_count[entry[1][1]]) + ")"
+                        new_milestone_key = (
+                            entry[1][1] + " (" + str(lower_count[entry[1][1]]) + ")"
+                        )
                         entry[1] = ("Milestone", new_milestone_key)
                         raw_list.append(entry)
                     else:
@@ -1212,7 +1245,6 @@ class MilestoneData:
                 self.baseline_two = lower_dict
                 self.ordered_list_bl_two = sorted_list
 
-        self.entity = group
 
     def get_chart_info(self) -> None:
         """returns data lists for matplotlib chart"""
@@ -1272,11 +1304,13 @@ class MilestoneData:
         self.md_baseline_two = md_baseline_two
         self.type_list = type_list
 
-    def filter_chart_info(self,
-                          milestone_type: str or List[str] = "All",
-                          milestone_of_interest: str or List[str] = None,
-                          start_date: str = "1/1/2015",
-                          end_date: str = "1/1/2041"):
+    def filter_chart_info(
+        self,
+        milestone_type: str or List[str] = "All",
+        milestone_of_interest: str or List[str] = None,
+        start_date: str = "1/1/2015",
+        end_date: str = "1/1/2041",
+    ):
 
         #  Filter milestone type
         milestone_type = string_conversion(milestone_type)
@@ -1391,7 +1425,7 @@ class CombinedData:
                 )
             else:
                 for i in range(
-                        2, 15
+                    2, 15
                 ):  # alters duplicates by adding number to end of key
                     mi_altered_milestone_key_name = mi_milestone_key_name + " " + str(i)
                     if mi_altered_milestone_key_name in mi_milestone_name_list:
@@ -1449,13 +1483,13 @@ class CombinedData:
 
 class MilestoneCharts:
     def __init__(
-            self,
-            latest_milestone_names,
-            latest_milestone_dates,
-            last_milestone_dates,
-            baseline_milestone_dates,
-            graph_title,
-            ipdc_date,
+        self,
+        latest_milestone_names,
+        latest_milestone_dates,
+        last_milestone_dates,
+        baseline_milestone_dates,
+        graph_title,
+        ipdc_date,
     ):
         self.latest_milestone_names = latest_milestone_names
         self.latest_milestone_dates = latest_milestone_dates
@@ -1556,9 +1590,9 @@ class MilestoneCharts:
         # Add line of IPDC date, but only if in the time period
         try:
             if (
-                    self.latest_milestone_dates[0]
-                    <= self.ipdc_date
-                    <= self.latest_milestone_dates[-1]
+                self.latest_milestone_dates[0]
+                <= self.ipdc_date
+                <= self.latest_milestone_dates[-1]
             ):
                 plt.axvline(self.ipdc_date)
                 plt.figtext(
@@ -1639,19 +1673,19 @@ class MilestoneCharts:
             )
             title = self.graph_title + " cont. 1"
             MilestoneCharts(
-                np.array(final_labels[third: third * 2]),
-                np.array(self.latest_milestone_dates[third: third * 2]),
-                np.array(self.last_milestone_dates[third: third * 2]),
-                np.array(self.baseline_milestone_dates[third: third * 2]),
+                np.array(final_labels[third : third * 2]),
+                np.array(self.latest_milestone_dates[third : third * 2]),
+                np.array(self.last_milestone_dates[third : third * 2]),
+                np.array(self.baseline_milestone_dates[third : third * 2]),
                 title,
                 self.ipdc_date,
             )
             title = self.graph_title + " cont. 2"
             MilestoneCharts(
-                np.array(final_labels[third * 2: no_milestones]),
-                np.array(self.latest_milestone_dates[third * 2: no_milestones]),
-                np.array(self.last_milestone_dates[third * 2: no_milestones]),
-                np.array(self.baseline_milestone_dates[third * 2: no_milestones]),
+                np.array(final_labels[third * 2 : no_milestones]),
+                np.array(self.latest_milestone_dates[third * 2 : no_milestones]),
+                np.array(self.last_milestone_dates[third * 2 : no_milestones]),
+                np.array(self.baseline_milestone_dates[third * 2 : no_milestones]),
                 title,
                 self.ipdc_date,
             )
@@ -1706,34 +1740,43 @@ def vfm_matplotlib_graph(labels, current_qrt, last_qrt, title):
 
 
 def set_figure_size(graph_type: str) -> Tuple[int, int]:
-    if graph_type == "half horizontal":
+    if graph_type == "half_horizontal":
         return 11.69, 4.10
-    if graph_type == "full horizontal":
+    if graph_type == "full_horizontal":
         return 11.69, 8.20
 
 
-def cost_profile_graph(
-        fig_size: str, cost_master: CostData, *args: Tuple[Optional[str]]
-):
+def cost_profile_graph(cost_master: CostData, **kwargs) -> plt.figure:
     """Compiles a matplotlib line chart for costs of GROUP of projects contained within cost_master class.
     As as default last quarters profile is not included. It creates two plots. First plot shows overall
     profile in current, last quarters anb baseline form. Second plot shows rdel, cdel, and 'non-gov' cost profile"""
 
     fig, (ax1) = plt.subplots(1)  # two subplots for this chart
-    fig.set_size_inches(set_figure_size(fig_size))
+
+    try:
+        fig_size = kwargs["fig_size"]
+        fig.set_size_inches(set_figure_size(fig_size))
+    except KeyError:
+        fig.set_size_inches(set_figure_size(FIGURE_STYLE[2]))
+        pass
 
     """cost profile charts"""
-    if len(cost_master.entity) == 1:
-        fig.suptitle(cost_master.entity[0] + " Cost Profile", fontweight="bold")
+    if len(cost_master.project_group) == 1:
+        fig.suptitle(
+            cost_master.master.abbreviations[cost_master.project_group[0]]
+            + " Cost Profile",
+            fontweight="bold",
+        )
     else:
         try:
-            fig.suptitle(args[0] + " Cost Profile", fontweight="bold")  # title
+            fig.suptitle(kwargs["title"] + " Cost Profile", fontweight="bold")  # title
         except IndexError:
+            pass
             print("You need to provide a title for this chart")
 
     # Overall cost profile chart
     if (
-            sum(cost_master.baseline_profile_one) != 0
+        sum(cost_master.baseline_profile_one) != 0
     ):  # handling in the event that group of projects have no baseline profile.
         ax1.plot(
             YEAR_LIST,
@@ -1745,7 +1788,7 @@ def cost_profile_graph(
     else:
         pass
     if (
-            sum(cost_master.last_profile) != 0
+        sum(cost_master.last_profile) != 0
     ):  # handling in the event that group of projects have no last quarter profile
         ax1.plot(
             YEAR_LIST,
@@ -1773,7 +1816,10 @@ def cost_profile_graph(
     ax1.grid(color="grey", linestyle="-", linewidth=0.2)
     ax1.legend(prop={"size": 6})
     ax1.set_title(
-        "Fig 1. Cost Profile Changes Over Time", loc="left", fontsize=8, fontweight="bold"
+        "Fig 1. Cost Profile Changes Over Time",
+        loc="left",
+        fontsize=8,
+        fontweight="bold",
     )
 
     # # plot rdel, cdel, non-gov chart data
@@ -1820,13 +1866,18 @@ def cost_profile_graph(
 
     fig.tight_layout(rect=[0, 0.03, 1, 0.95])  # size/fit of chart
 
-    plt.show()
+    try:
+        kwargs["show"] == "No"
+    except KeyError:
+        plt.show()
 
     return fig
 
 
 # what does this output plt.figure.Figure?
-def cost_profile_baseline_graph(cost_master: CostData, *title: Tuple[Optional[str]]) -> plt.figure:
+def cost_profile_baseline_graph(
+    cost_master: CostData, *title: Tuple[Optional[str]]
+) -> plt.figure:
     """Compiles a matplotlib line chart for costs of GROUP of projects contained within cost_master class.
     As as default last quarters profile is not included. It creates two plots. First plot shows overall
     profile in current, last quarters anb baseline form. Second plot shows rdel, cdel, and 'non-gov' cost profile"""
@@ -1841,7 +1892,7 @@ def cost_profile_baseline_graph(cost_master: CostData, *title: Tuple[Optional[st
 
     # Overall cost profile chart
     if (
-            sum(cost_master.baseline_profile_three) != 0
+        sum(cost_master.baseline_profile_three) != 0
     ):  # handling in the event that group of projects have no baseline profile.
         ax1.plot(
             YEAR_LIST,
@@ -1853,7 +1904,7 @@ def cost_profile_baseline_graph(cost_master: CostData, *title: Tuple[Optional[st
     else:
         pass
     if (
-            sum(cost_master.baseline_profile_two) != 0
+        sum(cost_master.baseline_profile_two) != 0
     ):  # handling in the event that group of projects have no baseline profile.
         ax1.plot(
             YEAR_LIST,
@@ -1865,7 +1916,7 @@ def cost_profile_baseline_graph(cost_master: CostData, *title: Tuple[Optional[st
     else:
         pass
     if (
-            sum(cost_master.baseline_profile_one) != 0
+        sum(cost_master.baseline_profile_one) != 0
     ):  # handling in the event that group of projects have no last quarter profile
         ax1.plot(
             YEAR_LIST,
@@ -1898,7 +1949,7 @@ def cost_profile_baseline_graph(cost_master: CostData, *title: Tuple[Optional[st
 
     # plot rdel, cdel, non-gov chart data
     if (
-            sum(cost_master.ngov_profile) != 0
+        sum(cost_master.ngov_profile) != 0
     ):  # if statement as most projects don't have ngov cost.
         ax2.plot(
             YEAR_LIST,
@@ -1944,7 +1995,7 @@ def cost_profile_baseline_graph(cost_master: CostData, *title: Tuple[Optional[st
 
 
 def spent_calculation(
-        master: Dict[str, Union[str, datetime.date, int, float]], project: str
+    master: Dict[str, Union[str, datetime.date, int, float]], project: str
 ) -> int:
     keys = [
         "Pre-profile RDEL",
@@ -1971,7 +2022,7 @@ def open_word_doc(wd_path: str) -> Document:
 
 
 def wd_heading(
-        doc: Document, project_info: Dict[str, Union[str, int]], project_name: str
+    doc: Document, project_info: Dict[str, Union[str, int]], project_name: str
 ) -> None:
     """Function adds header to word doc"""
     font = doc.styles["Normal"].font
@@ -2252,21 +2303,33 @@ def make_file_friendly(quarter_str: str) -> str:
 
 
 def total_costs_benefits_bar_chart(
-        fig_size: str,
-        cost_master: CostData,
-        ben_master: BenefitsData,
-        *title: Tuple[Optional[str]]
+    cost_master: CostData,
+    ben_master: BenefitsData,
+    **kwargs
 ) -> plt.figure:
     """compiles a matplotlib bar chart which shows total project costs"""
     fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2)  # four sub plots
-    fig.set_size_inches(set_figure_size(fig_size))
 
+    try:
+        fig_size = kwargs["fig_size"]
+        fig.set_size_inches(set_figure_size(fig_size))
+    except KeyError:
+        fig.set_size_inches(set_figure_size(FIGURE_STYLE[2]))
+        pass
+
+    """cost profile charts"""
     if len(cost_master.project_group) == 1:
         fig.suptitle(
-            cost_master.master.abbreviations[cost_master.project_group[0]] + " Cost and Benefits Profile", fontweight="bold"
+            cost_master.master.abbreviations[cost_master.project_group[0]]
+            + " Cost Profile",
+            fontweight="bold",
         )
     else:
-        fig.suptitle(title[0] + " Cost and Benefits Profile", fontweight="bold")  # title
+        try:
+            fig.suptitle(kwargs["title"] + " Cost Profile", fontweight="bold")  # title
+        except IndexError:
+            pass
+            print("You need to provide a title for this chart")
 
     # Y AXIS SCALE MAX
     highest_int = max([cost_master.y_scale_max, ben_master.y_scale_max])
@@ -2331,7 +2394,10 @@ def total_costs_benefits_bar_chart(
     ax2.tick_params(axis="x", which="major", labelsize=6)
     ax2.tick_params(axis="y", which="major", labelsize=6)
     ax2.set_title(
-        "Fig 2. Current Cost Profile Breakdown", loc="left", fontsize=8, fontweight="bold"
+        "Fig 2. Current Cost Profile Breakdown",
+        loc="left",
+        fontsize=8,
+        fontweight="bold",
     )
 
     ax2.set_ylim(0, y_max)  # scale y axis max
@@ -2362,7 +2428,10 @@ def total_costs_benefits_bar_chart(
     ax3.tick_params(axis="x", which="major", labelsize=6)
     ax3.tick_params(axis="y", which="major", labelsize=6)
     ax3.set_title(
-        "Fig 3. Total Benefit Changes Over Time", loc="left", fontsize=8, fontweight="bold"
+        "Fig 3. Total Benefit Changes Over Time",
+        loc="left",
+        fontsize=8,
+        fontweight="bold",
     )
 
     ax3.set_ylim(0, y_max)
@@ -2393,7 +2462,10 @@ def total_costs_benefits_bar_chart(
     ax4.tick_params(axis="x", which="major", labelsize=6)
     ax4.tick_params(axis="y", which="major", labelsize=6)
     ax4.set_title(
-        "Fig 4. Current Benefit Profile Breakdown", loc="left", fontsize=8, fontweight="bold"
+        "Fig 4. Current Benefit Profile Breakdown",
+        loc="left",
+        fontsize=8,
+        fontweight="bold",
     )
 
     y_min = ben_master.y_scale_min + percentage(40, ben_master.y_scale_min)
@@ -2406,7 +2478,10 @@ def total_costs_benefits_bar_chart(
 
     fig.tight_layout(rect=[0, 0.03, 1, 0.95])  # size/fit of chart
 
-    plt.show()  # doesn't seem to do anything
+    try:
+        kwargs["show"] == "No"
+    except KeyError:
+        plt.show()
 
     return fig
 
@@ -2424,9 +2499,9 @@ def check_baselines(master: Master) -> None:
                     + " does not have a baseline point for "
                     + v
                     + " this could cause the programme to"
-                      "crash. Therefore the programme is stopping. "
-                      "Please amend the data for " + p + " so that "
-                                                         " it has at least one baseline point for " + v
+                    "crash. Therefore the programme is stopping. "
+                    "Please amend the data for " + p + " so that "
+                    " it has at least one baseline point for " + v
                 )
                 break
         else:
@@ -2439,7 +2514,7 @@ def percentage(percent: int, whole: float) -> int:
 
 
 def get_old_fy_cost_data(
-        master_file: typing.TextIO, project_id_wb: typing.TextIO
+    master_file: typing.TextIO, project_id_wb: typing.TextIO
 ) -> None:
     """
     Gets all old financial data from a specified master and places into project id document.
@@ -2467,13 +2542,13 @@ def get_old_fy_cost_data(
 
 def run_get_old_fy_data(master_files_list: list, project_id_wb: typing.TextIO) -> None:
     for f in reversed(
-            master_files_list
+        master_files_list
     ):  # reversed so it gets the latest data in masters
         get_old_fy_cost_data(f, project_id_wb)
 
 
 def place_old_fy_data_into_master_wb(
-        master_file: typing.TextIO, project_id_wb: typing.TextIO
+    master_file: typing.TextIO, project_id_wb: typing.TextIO
 ) -> None:
     """
     places all old financial year data into master files.
@@ -2500,7 +2575,7 @@ def place_old_fy_data_into_master_wb(
 
 
 def run_place_old_fy_data_into_masters(
-        master_files_list: list, project_id_wb: typing.TextIO
+    master_files_list: list, project_id_wb: typing.TextIO
 ) -> None:
     for f in master_files_list:
         place_old_fy_data_into_master_wb(f, project_id_wb)
@@ -2523,7 +2598,7 @@ def put_key_change_master_into_dict(key_change_file: typing.TextIO) -> Dict[str,
 
 
 def alter_wb_master_file_key_names(
-        master_file: typing.TextIO, key_change_dict: Dict[str, str]
+    master_file: typing.TextIO, key_change_dict: Dict[str, str]
 ) -> workbook:
     """
     places altered key names, from the key change master dictionary, into master wb(s).
@@ -2533,14 +2608,14 @@ def alter_wb_master_file_key_names(
 
     for row_num in range(2, ws.max_row + 1):
         for (
-                key
+            key
         ) in key_change_dict.keys():  # changes stored in the altered key change log wb
             if ws.cell(row=row_num, column=1).value == key:
                 ws.cell(row=row_num, column=1).value = key_change_dict[key]
         for year in YEAR_LIST:  # changes to yearly profile keys
             if ws.cell(row=row_num, column=1).value == year + " CDEL Forecast Total":
                 ws.cell(row=row_num, column=1).value = (
-                        year + " CDEL Forecast one off new costs"
+                    year + " CDEL Forecast one off new costs"
                 )
 
     return wb.save(master_file)
@@ -2598,7 +2673,7 @@ def compare_masters(files: List[typing.TextIO], projects: List[str] or str) -> w
                         change_count += 1
                 except KeyError:
                     if (
-                            project_name in last_master.projects
+                        project_name in last_master.projects
                     ):  # key error due to key not being present.
                         ws.cell(row=row_num, column=1).fill = PatternFill(
                             start_color="ffba00", end_color="ffba00", fill_type="solid"
@@ -2629,81 +2704,105 @@ def compare_masters(files: List[typing.TextIO], projects: List[str] or str) -> w
 
 
 def totals_chart(
-        fig_size: str,
-        costs: CostData,
-        benefits: BenefitsData,
-        project: str or List[str],
-        *args: Tuple[Optional[str]]
+    costs: CostData,
+    benefits: BenefitsData,
+    **kwargs
 ) -> None:
     """Small function to hold together code to create and save a total_costs_benefits_bar_chart"""
-    costs.get_cost_totals(project, "ipdc_costs")
-    benefits.get_ben_totals(project, "ipdc_benefits")
-    if args == ():
-        f = total_costs_benefits_bar_chart(fig_size, costs, benefits)
-        f.savefig(root_path / "output/{}_profile.png".format(costs.entity[0]))
+    if kwargs == {}:
+        f = total_costs_benefits_bar_chart(costs, benefits)
+        f.savefig(root_path / "output/{}_profile.png".format(costs.project_group[0]))
     else:
-        f = total_costs_benefits_bar_chart(fig_size, costs, benefits, args[0])
-        f.savefig(root_path / "output/{}_profile.png".format(str(args[0])))
+        if list(kwargs.keys()) == ["title", "fig_size"]:
+            f = total_costs_benefits_bar_chart(costs, benefits, fig_size=kwargs["fig_size"], title=kwargs["title"])
+            f.savefig(root_path / "output/{}_profile.png".format(str(kwargs["title"])))
+        if list(kwargs.keys()) == ["fig_size", "title"]:
+            f = total_costs_benefits_bar_chart(costs, benefits, fig_size=kwargs["fig_size"], title=kwargs["title"])
+            f.savefig(root_path / "output/{}_profile.png".format(str(kwargs["title"])))
+        if list(kwargs.keys()) == ["title"]:
+            f = total_costs_benefits_bar_chart(costs, benefits, title=kwargs["title"])
+            f.savefig(root_path / "output/{}_profile.png".format(str(kwargs["title"])))
+        if list(kwargs.keys()) == ["fig_size"]:
+            f = total_costs_benefits_bar_chart(costs, benefits, fig_size=kwargs["fig_size"])
+            f.savefig(root_path / "output/{}_profile.png".format(costs.project_group[0]))
 
 
-def standard_profile(
-        fig: str,
-        costs: CostData,
-        project: str or List[str],
-        *args: Tuple[Optional[str]]
+def standard_profile(costs: CostData,
+                     **kwargs
 ):
     """Small function to hold together code to create and save a cost_profile_graph"""
-    costs.get_cost_profile(project, "ipdc_costs")
-    if args == ():
-        f = cost_profile_graph(fig, costs)
-        f.savefig(root_path / "output/{}_profile.png".format(costs.entity[0]))
+    if kwargs == {}:
+        f = cost_profile_graph(costs)
+        f.savefig(root_path / "output/{}_profile.png".format(costs.project_group[0]))
     else:
-        f = cost_profile_graph(fig, costs, args[0])
-        f.savefig(root_path / "output/{}_profile.png".format(str(args[0])))
+        if list(kwargs.keys()) == ["title", "fig_size"]:
+            f = cost_profile_graph(costs, fig_size=kwargs["fig_size"], title=kwargs["title"])
+            f.savefig(root_path / "output/{}_profile.png".format(str(kwargs["title"])))
+        if list(kwargs.keys()) == ["fig_size", "title"]:
+            f = cost_profile_graph(costs, fig_size=kwargs["fig_size"], title=kwargs["title"])
+            f.savefig(root_path / "output/{}_profile.png".format(str(kwargs["title"])))
+        if list(kwargs.keys()) == ["title"]:
+            f = cost_profile_graph(costs, title=kwargs["title"])
+            f.savefig(root_path / "output/{}_profile.png".format(str(kwargs["title"])))
+        if list(kwargs.keys()) == ["fig_size"]:
+            f = cost_profile_graph(costs, fig_size=kwargs["fig_size"])
+            f.savefig(root_path / "output/{}_profile.png".format(costs.project_group[0]))
 
 
-def milestone_chart(
-        fig_size: str,
-        milestone_data: MilestoneData,
-        *title: Tuple[Optional[str]]
+def milestone_chart(milestone_data: MilestoneData,
+                    **kwargs,
 ) -> plt.figure:
     # build scatter chart
     fig, ax1 = plt.subplots()
-    fig.set_size_inches(set_figure_size(fig_size))
+    try:
+        fig_size = kwargs["fig_size"]
+        fig.set_size_inches(set_figure_size(fig_size))
+    except KeyError:
+        fig.set_size_inches(set_figure_size(FIGURE_STYLE[2]))
+        pass
 
-    if len(milestone_data.entity) == 1:
-        fig.suptitle(milestone_data.entity[0] + " Schedule", fontweight="bold")
+    """cost profile charts"""
+    if len(milestone_data.project_group) == 1:
+        fig.suptitle(
+            milestone_data.master.abbreviations[milestone_data.project_group[0]]
+            + " Cost Profile",
+            fontweight="bold",
+        )
     else:
-        fig.suptitle(title[0] + " Schedule", fontweight="bold")  # title
+        try:
+            fig.suptitle(kwargs["title"] + " Cost Profile", fontweight="bold")  # title
+        except IndexError:
+            pass
+            print("You need to provide a title for this chart")
 
-    ax1.scatter(milestone_data.md_baseline, milestone_data.key_names, label='Baseline')
-    ax1.scatter(milestone_data.md_last, milestone_data.key_names, label='Last quarter')
-    ax1.scatter(milestone_data.md_current, milestone_data.key_names, label='Current')
+    ax1.scatter(milestone_data.md_baseline, milestone_data.key_names, label="Baseline")
+    ax1.scatter(milestone_data.md_last, milestone_data.key_names, label="Last quarter")
+    ax1.scatter(milestone_data.md_current, milestone_data.key_names, label="Current")
 
     # format the x ticks
     years = mdates.YearLocator()  # every year
     months = mdates.MonthLocator()  # every month
-    years_fmt = mdates.DateFormatter('%Y')
-    months_fmt = mdates.DateFormatter('%b')
+    years_fmt = mdates.DateFormatter("%Y")
+    months_fmt = mdates.DateFormatter("%b")
     ax1.xaxis.set_major_locator(years)
     ax1.xaxis.set_minor_locator(months)
     ax1.xaxis.set_major_formatter(years_fmt)
     ax1.xaxis.set_minor_formatter(months_fmt)
     plt.setp(ax1.xaxis.get_minorticklabels(), rotation=45)
-    plt.setp(ax1.xaxis.get_majorticklabels(), rotation=45, weight='bold')
+    plt.setp(ax1.xaxis.get_majorticklabels(), rotation=45, weight="bold")
 
     """calculate the length of the time period covered in chart.
     Not perfect as baseline dates can distort."""
     try:
         td = (milestone_data.md_current[-1] - milestone_data.md_current[0]).days
         if td >= 365 * 3:
-            print('Yes')
+            print("Yes")
             ax1.xaxis.set_major_locator(years)
             ax1.xaxis.set_minor_locator(months)
             ax1.xaxis.set_major_formatter(years_fmt)
             ax1.xaxis.set_minor_formatter(months_fmt)
             plt.setp(ax1.xaxis.get_minorticklabels(), rotation=45)
-            plt.setp(ax1.xaxis.get_majorticklabels(), rotation=45, weight='bold')
+            plt.setp(ax1.xaxis.get_majorticklabels(), rotation=45, weight="bold")
 
             # scaling x axis
             # x axis value to no more than three months after last latest milestone date, or three months
@@ -2713,21 +2812,31 @@ def milestone_chart(
             for date in milestone_data.md_baseline:
                 if date > x_max:
                     ax1.set_xlim(x_min, x_max)
-                    plt.figtext(0.98, 0.03,
-                                'Check full schedule to see all milestone movements',
-                                horizontalalignment='right', fontsize=6, fontweight='bold')
+                    plt.figtext(
+                        0.98,
+                        0.03,
+                        "Check full schedule to see all milestone movements",
+                        horizontalalignment="right",
+                        fontsize=6,
+                        fontweight="bold",
+                    )
                 if date < x_min:
                     ax1.set_xlim(x_min, x_max)
-                    plt.figtext(0.98, 0.03,
-                                'Check full schedule to see all milestone movements',
-                                horizontalalignment='right', fontsize=6, fontweight='bold')
+                    plt.figtext(
+                        0.98,
+                        0.03,
+                        "Check full schedule to see all milestone movements",
+                        horizontalalignment="right",
+                        fontsize=6,
+                        fontweight="bold",
+                    )
         else:
             ax1.xaxis.set_major_locator(years)
             ax1.xaxis.set_minor_locator(months)
             ax1.xaxis.set_major_formatter(years_fmt)
             ax1.xaxis.set_minor_formatter(months_fmt)
             plt.setp(ax1.xaxis.get_minorticklabels(), rotation=45)
-            plt.setp(ax1.xaxis.get_majorticklabels(), rotation=45, weight='bold')
+            plt.setp(ax1.xaxis.get_majorticklabels(), rotation=45, weight="bold")
 
     except IndexError:  # if milestone dates list is empty:
         pass
@@ -2737,7 +2846,7 @@ def milestone_chart(
     # reverse y axis so order is earliest to oldest
     ax1 = plt.gca()
     ax1.set_ylim(ax1.get_ylim()[::-1])
-    ax1.tick_params(axis='y', which='major', labelsize=7)
+    ax1.tick_params(axis="y", which="major", labelsize=7)
     ax1.yaxis.grid()  # horizontal lines
     ax1.set_axisbelow(True)
     # ax1.get_yaxis().set_visible(False)
@@ -2761,6 +2870,7 @@ def milestone_chart(
     # fig.savefig(root_path / 'output/{}.png'.format(graph_title), bbox_inches='tight')
 
     # plt.close() #automatically closes figure so don't need to do manually.
+
 
 # def compile_all_profiles():
 #     report_doc = open_word_doc(wd_path)
