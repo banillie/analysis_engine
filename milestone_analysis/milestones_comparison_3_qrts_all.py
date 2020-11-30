@@ -31,7 +31,7 @@ def put_into_wb_all(milestone_data_object):
                 ws.cell(row=row_num + i, column=4).value = ''
 
             try:
-                baseline_date = tuple(milestone_data_object.baseline[project_name][milestone])[0]
+                baseline_date = tuple(milestone_data_object.baseline_type[project_name][milestone])[0]
                 ws.cell(row=row_num + i, column=5).value = (milestone_date - baseline_date).days
             except (KeyError, TypeError):
                 ws.cell(row=row_num + i, column=5).value = ''

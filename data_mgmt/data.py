@@ -643,8 +643,12 @@ class Master:
 
 
 class CostData:
-    def __init__(self, master: Master):
+    def __init__(self, master: Master,
+                 project_group: List[str] or str,
+                 baseline_type: str = "ipdc_costs"):
         self.master = master
+        self.project_group = project_group
+        self.baseline_type = baseline_type
         self.cat_spent = []
         self.cat_profiled = []
         self.cat_unprofiled = []
@@ -660,15 +664,13 @@ class CostData:
         self.cdel_profile = []
         self.ngov_profile = []
         self.y_scale_max = 0
-        self.entity = []
+        self.get_cost_totals()
+        self.get_cost_profile()
 
-    def get_cost_totals(self, group: List[str] or str, baseline: str) -> None:
+    def get_cost_totals(self) -> None:
         """Returns lists containing the sum total of group (of projects) costs,
         sliced in different ways. Cumbersome for loop used at the moment, but
         is the least cumbersome loop I could design!"""
-        self.group = group
-        self.baseline = baseline
-
         spent = []
         profiled = []
         unprofiled = []
@@ -682,13 +684,13 @@ class CostData:
         group_cdel_unprofiled = 0
         group_ngov_unprofiled = 0
 
-        group = string_conversion(self.group)
+        self.project_group = string_conversion(self.project_group)
 
         for i in range(3):
             for x, key in enumerate(COST_TYPE_KEY_LIST):
                 group_total = 0
-                for project_name in group:
-                    cost_bl_index = self.master.bl_index[baseline][project_name]
+                for project_name in self.project_group:
+                    cost_bl_index = self.master.bl_index[self.baseline_type][project_name]
                     try:
                         rdel = self.master.master_data[cost_bl_index[i]].data[
                             project_name
@@ -799,13 +801,10 @@ class CostData:
         self.profiled = all_profiled
         self.unprofiled = unprofiled
         self.y_scale_max = max(profiled)
-        self.entity = group
 
-    def get_cost_profile(self, group: List[str] or str, baseline: str) -> None:
+    def get_cost_profile(self) -> None:
         """Returns several lists which contain the sum of different cost profiles for the group of project
         contained with the master"""
-        self.group = group
-        self.baseline = baseline
 
         current_profile = []
         last_profile = []
@@ -817,7 +816,7 @@ class CostData:
         ngov_current_profile = []
         missing_projects = []
 
-        group = string_conversion(self.group)
+        self.project_group = string_conversion(self.project_group)
 
         for i in range(5):
             yearly_profile = []
@@ -830,8 +829,8 @@ class CostData:
                 cdel_total = 0
                 ngov_total = 0
                 for cost_type in COST_KEY_LIST:
-                    for project_name in group:
-                        project_bl_index = self.master.bl_index[baseline][project_name]
+                    for project_name in self.project_group:
+                        project_bl_index = self.master.bl_index[self.baseline_type][project_name]
                         try:
                             cost = self.master.master_data[project_bl_index[i]].data[
                                 project_name
@@ -928,12 +927,15 @@ class CostData:
         self.rdel_profile = rdel_current_profile
         self.cdel_profile = cdel_current_profile
         self.ngov_profile = ngov_current_profile
-        self.entity = group
 
 
 class BenefitsData:
-    def __init__(self, master: Master):
+    def __init__(self, master: Master,
+                 project_group: List[str] or str,
+                 baseline_type: str = "ipdc_benefits"):
         self.master = master
+        self.project_group = project_group
+        self.baseline_type = baseline_type
         self.cat_delivered = []
         self.cat_profiled = []
         self.cat_unprofiled = []
@@ -943,15 +945,12 @@ class BenefitsData:
         self.y_scale_max = 0
         self.y_scale_min = 0
         self.economic_max = 0
-        self.entity = []
+        self.get_ben_totals()
 
-    def get_ben_totals(self, group: List[str] or str, baseline: str) -> None:
+    def get_ben_totals(self) -> None:
         """Returns lists containing the sum total of group (of projects) benefits,
         sliced in different ways. Cumbersome for loop used at the moment, but
         is the least cumbersome loop I could design!"""
-        self.group = group
-        self.baseline = baseline
-
         delivered = []
         profiled = []
         unprofiled = []
@@ -968,26 +967,13 @@ class BenefitsData:
         group_economic_unprofiled = 0
         group_disben_unprofiled = 0
 
-        group = string_conversion(self.group)
-
-        # where to store this function. need it at a global level for CostData Class
-        def calculate_profiled(p: List[int], s: List[int], unpro: List[int]) -> list:
-            """small helper function to calculate the proper profiled amount. This is necessary as
-            other wise 'profiled' would actually be the total figure.
-            p = profiled list
-            s = spent list
-            unpro = unprofiled list"""
-            f_profiled = []
-            for y, amount in enumerate(p):
-                t = amount - (s[y] + unpro[y])
-                f_profiled.append(t)
-            return f_profiled
+        self.project_group = string_conversion(self.project_group)
 
         for i in range(3):
             for x, key in enumerate(BEN_TYPE_KEY_LIST):
                 group_total = 0
-                for project in group:
-                    ben_bl_index = self.master.bl_index[baseline][project]
+                for project in self.project_group:
+                    ben_bl_index = self.master.bl_index[self.baseline_type][project]
                     try:
                         cash = round(
                             self.master.master_data[ben_bl_index[i]].data[project][
@@ -1078,7 +1064,6 @@ class BenefitsData:
         self.economic_max = max(
             [group_economic_dev, group_economic_unprofiled, group_economic_profiled]
         )
-        self.entity = group
 
 
 def milestone_info_handling(output_list: list, t_list: list) -> list:
@@ -2270,18 +2255,18 @@ def total_costs_benefits_bar_chart(
         fig_size: str,
         cost_master: CostData,
         ben_master: BenefitsData,
-        *args: Tuple[Optional[str]]
+        *title: Tuple[Optional[str]]
 ) -> plt.figure:
     """compiles a matplotlib bar chart which shows total project costs"""
     fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2)  # four sub plots
     fig.set_size_inches(set_figure_size(fig_size))
 
-    if len(cost_master.entity) == 1:
+    if len(cost_master.project_group) == 1:
         fig.suptitle(
-            cost_master.entity[0] + " Cost and Benefits Profile", fontweight="bold"
+            cost_master.master.abbreviations[cost_master.project_group[0]] + " Cost and Benefits Profile", fontweight="bold"
         )
     else:
-        fig.suptitle(args[0] + " Cost and Benefits Profile", fontweight="bold")  # title
+        fig.suptitle(title[0] + " Cost and Benefits Profile", fontweight="bold")  # title
 
     # Y AXIS SCALE MAX
     highest_int = max([cost_master.y_scale_max, ben_master.y_scale_max])

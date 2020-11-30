@@ -235,10 +235,8 @@ def test_get_project_total_cost_calculations_for_project(costs_masters, project_
 
 def test_get_project_total_costs_benefits_bar_chart(costs_masters, project_info):
     master = Master(costs_masters, project_info)
-    costs = CostData(master)
-    benefits = BenefitsData(master)
-    costs.get_cost_totals("Mars", "ipdc_costs")
-    benefits.get_ben_totals("Mars", "ipdc_benefits")
+    costs = CostData(master, "Mars")
+    benefits = BenefitsData(master, "Mars")
     total_costs_benefits_bar_chart(FIGURE_STYLE[2], costs, benefits)
 
 
