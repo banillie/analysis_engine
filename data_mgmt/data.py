@@ -1893,7 +1893,6 @@ def cost_profile_graph(cost_master: CostData, **kwargs) -> plt.figure:
     return fig
 
 
-# what does this output plt.figure.Figure?
 def cost_profile_baseline_graph(
         cost_master: CostData, *title: Tuple[Optional[str]]
 ) -> plt.figure:
@@ -2774,6 +2773,29 @@ def standard_profile(costs: CostData, **kwargs):
             )
 
 
+def save_graph(fig: plt.figure, file_name: str, **kwargs) -> None:
+    """Generic function for saving matplotlib figure into a word document"""
+    if "orientation" in list(kwargs.keys()):
+        if kwargs["orientation"] == "landscape":
+            fig.savefig("temp_file.png")
+            doc = open_word_doc(root_path / "input/summary_temp_landscape.docx")
+            doc.add_picture("temp_file.png", width=Inches(8))
+            doc.save(root_path / "output/{}.docx".format(file_name))
+            os.remove("temp_file.png")
+        if kwargs["orientation"] == "portrait":
+            fig.savefig("temp_file.png")
+            doc = open_word_doc(root_path / "input/summary_temp.docx")
+            doc.add_picture("temp_file.png", width=Inches(8))
+            doc.save(root_path / "output/{}.docx".format(file_name))
+            os.remove("temp_file.png")
+    else:
+        fig.savefig("temp_file.png")
+        doc = open_word_doc(root_path / "input/summary_temp_landscape.docx")
+        doc.add_picture("temp_file.png", width=Inches(8))
+        doc.save(root_path / "output/{}.docx".format(file_name))
+        os.remove("temp_file.png")
+
+
 def milestone_chart(
         milestone_data: MilestoneData,
         **kwargs,
@@ -2898,6 +2920,8 @@ def milestone_chart(
         kwargs["show"] == "No"
     except KeyError:
         plt.show()
+
+    return fig
 
     # fig.savefig(root_path / 'output/{}.png'.format(graph_title), bbox_inches='tight')
 

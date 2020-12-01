@@ -241,12 +241,12 @@
 #              blue_line_date,
 #              20)
 from data_mgmt.data import Master, get_master_data, get_project_information, MilestoneData, \
-    Projects, milestone_chart
+    Projects, milestone_chart, save_graph
 
 master = Master(get_master_data(), get_project_information())
 milestones = MilestoneData(master, Projects.a303)
 milestones.filter_chart_info(start_date="30/10/2020",
                              end_date="20/04/2022")
-milestone_chart(milestones, title="HE", blue_line="ipdc_date")
-
+f = milestone_chart(milestones, blue_line="ipdc_date")
+save_graph(f, "A303 schedule analysis")
 

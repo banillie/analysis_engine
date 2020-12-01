@@ -27,7 +27,7 @@ from data_mgmt.data import (
     change_word_doc_landscape,
     FIGURE_STYLE,
     MilestoneData,
-    milestone_chart,
+    milestone_chart, save_graph,
 )
 
 # test masters project names
@@ -330,3 +330,11 @@ def test_removing_project_name_from_milestone_keys(milestone_masters, project_in
     master = Master(milestone_masters, project_info)
     milestones = MilestoneData(master, sot)
     assert milestones.key_names == ['Standard A', 'Inverted Cosmonauts']
+
+
+def test_saving_graph_to_word_doc(milestone_masters, project_info):
+    master = Master(milestone_masters, project_info)
+    milestones = MilestoneData(master, [sot, a11, a13])
+    milestones.filter_chart_info(start_date="1/1/2013", end_date="1/1/2014")
+    f = milestone_chart(milestones, title="Group Test", fig_size=FIGURE_STYLE[1], blue_line="Today")
+    save_graph(f, "testing", orientation="landscape")
