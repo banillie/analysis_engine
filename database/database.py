@@ -113,7 +113,7 @@ def import_milestone_to_master_db(master: Dict[str, str], c, project_id: dict) -
         else:
             return m_key.replace("'", "''")
 
-    #  small helper function to handle inconsistent key name in excel master
+    #  small helper function to handle inconsistent keys name in excel master
     def approval_date_handling(m_int: int):
         try:
             return master.data[project]['Approval MM' + str(m_int) + ' Forecast / Actual']
@@ -130,7 +130,7 @@ def import_milestone_to_master_db(master: Dict[str, str], c, project_id: dict) -
             if m_type_as in list(master.data[project].keys()):
                 note = alter_note_text(i, "Approval") #  note string amended to handle apostrophes
                 date = approval_date_handling(i)
-                key = alter_m_key_text(i, "Approval") #  milestone key name amended to handle apostrophes
+                key = alter_m_key_text(i, "Approval") #  milestone keys name amended to handle apostrophes
                 #  these keys are not present in all masters
                 try:
                     gov_type = master.data[project]['Approval MM' + str(i) + ' Gov Type']
@@ -222,7 +222,7 @@ def import_milestone_to_master_db(master: Dict[str, str], c, project_id: dict) -
                         f"'{cp}', 'None')")
                 except sqlite3.OperationalError:
                     print("Incorrect data needs checking and amending in " + str(master.quarter) +
-                          " for " + project + " milestone key name " + key)
+                          " for " + project + " milestone keys name " + key)
                     pass
                 except KeyError:
                     print(str(master.quarter) + " has a redundant Project MM17 which needs to be removed")

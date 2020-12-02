@@ -287,6 +287,7 @@ def test_get_gmpp_projects(project_info):
     assert gmpp_list == ["Sea of Tranquility"]
 
 
+# this method has probably now been superceded by save_graph
 def test_saving_cost_profile_graph_files(costs_masters, project_info):
     master = Master(costs_masters, project_info)
     costs = CostData(master, sot)
@@ -295,6 +296,7 @@ def test_saving_cost_profile_graph_files(costs_masters, project_info):
     standard_profile(costs, title="Python", fig_size=FIGURE_STYLE[1])
 
 
+# this method has probably now been superceded by save_graph
 def test_saving_total_cost_benefit_graph_files(costs_masters, project_info):
     master = Master(costs_masters, project_info)
     costs = CostData(master, f9)
@@ -322,8 +324,14 @@ def test_get_milestone_chart_data(milestone_masters, project_info):
 def test_compile_milestone_chart(milestone_masters, project_info):
     master = Master(milestone_masters, project_info)
     milestones = MilestoneData(master, [sot, a11, a13])
-    milestones.filter_chart_info(start_date="1/1/2013", end_date="1/1/2014")
     milestone_chart(milestones, title="Group Test", fig_size=FIGURE_STYLE[1], blue_line="Today")
+
+
+def test_compile_milestone_chart_with_filter(milestone_masters, project_info):
+    master = Master(milestone_masters, project_info)
+    milestones = MilestoneData(master, [sot, a11, a13])
+    milestones.filter_chart_info(start_date="1/1/2013", end_date="1/1/2014")
+    milestone_chart(milestones, title="Group Test", fig_size=FIGURE_STYLE[1])
 
 
 def test_removing_project_name_from_milestone_keys(milestone_masters, project_info):

@@ -54,7 +54,7 @@ def create_master(
                 try:
                     if (
                             key != "Project/Programme Name"
-                    ):  # this key will not be excel document.
+                    ):  # this keys will not be excel document.
                         ws.cell(row=row_num, column=7 + i).value = master.data[
                             project_name
                         ][key]
@@ -66,7 +66,7 @@ def create_master(
                     try:
                         key_altered = key.replace(
                             ",", ""
-                        )  # This handles key names in excel document have comma's which are not
+                        )  # This handles keys names in excel document have comma's which are not
                         # present in the python dictionary
                         ws.cell(row=row_num, column=7 + i).value = master.data[
                             project_name

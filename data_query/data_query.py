@@ -1,4 +1,4 @@
-'''Returns project values across multiple masters for specified keys of interest. Return for each key is provided
+'''Returns project values across multiple masters for specified keys of interest. Return for each keys is provided
 on a separate wb. Code can handle both standard and project milestone keys, as well as project name lists across
 multiple quarters.
 
@@ -10,7 +10,7 @@ Conditional formatting is placed in the files as follows:
 rag_rating colours
 missing data (md) = black grey
 project not reporting (pnr) = light grey
-key not collected (knc) = light blue grey
+keys not collected (knc) = light blue grey
 '''
 
 

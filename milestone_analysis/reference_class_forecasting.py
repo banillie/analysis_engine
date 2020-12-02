@@ -106,7 +106,7 @@ def ref_class_fore(master_dict, project_title, start_row, output_wb):
     for x in output_list[7:9]:
         ws.cell(row=2, column=x[0] + 4, value=x[1][0])
         ws.cell(row=start_row + 1, column=x[0] + 4, value=x[1][1])
-        # ws.cell(row=start_row+1, column=x[0]+5, value=time_delta3)
+        # ws.cell(row=start_row+1, column=series_one[0]+5, value=time_delta3)
 
     for x in output_list[9:11]:
         ws.cell(row=2, column=x[0] + 5, value=x[1][0])
@@ -125,7 +125,7 @@ def ref_class_fore(master_dict, project_title, start_row, output_wb):
 
     for x in output_list[1:3]:
         ws.cell(row=start_row + 13, column=x[0] + 1, value=x[1][1])
-        # ws.cell(row=start_row+10, column=x[0]+2, value=x[1][1])
+        # ws.cell(row=start_row+10, column=series_one[0]+2, value=series_one[1][1])
         ws.cell(row=start_row + 13, column=5, value=time_delta1)
         ws.cell(row=start_row + 13, column=6, value=1)
 

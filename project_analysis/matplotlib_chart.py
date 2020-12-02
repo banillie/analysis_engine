@@ -185,9 +185,9 @@ def three_graph_chart(project_list):
         # fig.savefig('cost_profile.png')
         #
         # #put into word doc
-        # y = doc.add_paragraph()
+        # series_two = doc.add_paragraph()
         # heading = 'Annex - Financial Analysis'
-        # y.add_run(str(heading)).bold = True
+        # series_two.add_run(str(heading)).bold = True
         #
         # sections = doc.sections
         # section_2 = sections[0]

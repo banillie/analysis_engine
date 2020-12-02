@@ -526,9 +526,9 @@ def calculate_profiled(p: List[int], s: List[int], unpro: List[int]) -> list:
 
 class Master:
     def __init__(
-            self,
-            master_data: List[Dict[str, Union[str, int, datetime.date, float]]],
-            project_information: Dict[str, Union[str, int]],
+        self,
+        master_data: List[Dict[str, Union[str, int, datetime.date, float]]],
+        project_information: Dict[str, Union[str, int]],
     ) -> None:
         self.master_data = master_data
         self.project_information = project_information
@@ -565,7 +565,7 @@ class Master:
                         except KeyError:
                             print(
                                 str(b_type)
-                                + " key not present in "
+                                + " keys not present in "
                                 + str(master.quarter)
                             )
                             # this should cause programme to stop as otherwise will crash.
@@ -608,7 +608,7 @@ class Master:
                 print(
                     p
                     + " is not in the projects information document. Project names must be identical "
-                      " in both documents. Programme stopping. Please amend."
+                    " in both documents. Programme stopping. Please amend."
                 )
                 break
             else:
@@ -628,9 +628,9 @@ class Master:
                         + " does not have a baseline point for "
                         + v
                         + " this could cause the programme to "
-                          "crash. Therefore the programme is stopping. "
-                          "Please amend the data for " + p + " so that "
-                                                             " it has at least one baseline point for " + v
+                        "crash. Therefore the programme is stopping. "
+                        "Please amend the data for " + p + " so that "
+                        " it has at least one baseline point for " + v
                     )
             else:
                 continue
@@ -645,10 +645,10 @@ class Master:
 
 class CostData:
     def __init__(
-            self,
-            master: Master,
-            project_group: List[str] or str,
-            baseline_type: str = "ipdc_costs",
+        self,
+        master: Master,
+        project_group: List[str] or str,
+        baseline_type: str = "ipdc_costs",
     ):
         self.master = master
         self.project_group = project_group
@@ -780,8 +780,8 @@ class CostData:
                                 std_list[s] = 0
                         spent.append(round(group_total + sum(std_list)))
                     except (
-                            KeyError,
-                            TypeError,
+                        KeyError,
+                        TypeError,
                     ):  # Note. TypeError here as projects may have no baseline
                         spent.append(group_total)
                 if x == 1:  # profiled
@@ -923,8 +923,8 @@ class CostData:
                 "NOTE: The following project(s) were not part of the portfolio last quarter "
                 + str(missing_projects)
                 + " this means current quarter and last quarter cost profiles are not like for like."
-                  " If you would like a like for like comparison between current and last quarter"
-                  " remove this project(s) from the master group."
+                " If you would like a like for like comparison between current and last quarter"
+                " remove this project(s) from the master group."
             )
 
         self.current_profile = current_profile
@@ -939,10 +939,10 @@ class CostData:
 
 class BenefitsData:
     def __init__(
-            self,
-            master: Master,
-            project_group: List[str] or str,
-            baseline_type: str = "ipdc_benefits",
+        self,
+        master: Master,
+        project_group: List[str] or str,
+        baseline_type: str = "ipdc_benefits",
     ):
         self.master = master
         self.project_group = project_group
@@ -1103,12 +1103,16 @@ def remove_project_name(project_name: str, milestone_key_list: List[str]) -> Lis
     return output_list
 
 
+def remove_none_types(input_list):
+    return [x for x in input_list if x is not None]
+
+
 class MilestoneData:
     def __init__(
-            self,
-            master: Master,
-            project_group: List[str] or str,
-            baseline_type: str = "ipdc_milestones",
+        self,
+        master: Master,
+        project_group: List[str] or str,
+        baseline_type: str = "ipdc_milestones",
     ):
         self.master = master
         self.project_group = project_group
@@ -1182,7 +1186,7 @@ class MilestoneData:
                             ("Notes", p_data["Assurance MM" + str(i) + " Notes"]),
                         ]
                         milestone_info_handling(project_list, t)
-                    except KeyError:  # handles inconsistent key naming for approval milestones.
+                    except KeyError:  # handles inconsistent keys naming for approval milestones.
                         try:
                             t = [
                                 ("Project", self.master.abbreviations[project_name]),
@@ -1192,7 +1196,7 @@ class MilestoneData:
                                     "Date",
                                     p_data[
                                         "Approval MM" + str(i) + " Forecast - Actual"
-                                        ],
+                                    ],
                                 ),
                                 ("Notes", p_data["Approval MM" + str(i) + " Notes"]),
                             ]
@@ -1217,7 +1221,7 @@ class MilestoneData:
                     except KeyError:
                         pass
 
-                # loop to stop key names being the same. Done at project level.
+                # loop to stop keys names being the same. Done at project level.
                 # not particularly concise code.
                 upper_counter_list = []
                 for entry in project_list:
@@ -1229,7 +1233,7 @@ class MilestoneData:
                         lower_counter_list.append(entry[1][1])
                         lower_count = Counter(lower_counter_list)
                         new_milestone_key = (
-                                entry[1][1] + " (" + str(lower_count[entry[1][1]]) + ")"
+                            entry[1][1] + " (" + str(lower_count[entry[1][1]]) + ")"
                         )
                         entry[1] = ("Milestone", new_milestone_key)
                         raw_list.append(entry)
@@ -1286,7 +1290,7 @@ class MilestoneData:
                         m_last_date = m_last["Date"]
                         md_last.append(m_last_date)
             if m_last_date is None:
-                md_last.append(m_date)
+                md_last.append(None)
 
             m_bl_date = None
             for m_bl in self.baseline.values():
@@ -1295,7 +1299,7 @@ class MilestoneData:
                         m_bl_date = m_bl["Date"]
                         md_baseline.append(m_bl_date)
             if m_bl_date is None:
-                md_baseline.append(m_date)
+                md_baseline.append(None)
 
             m_bl_two_date = None
             for m_bl_two in self.baseline_two.values():
@@ -1304,10 +1308,12 @@ class MilestoneData:
                         m_bl_date = m_bl_two["Date"]
                         md_baseline_two.append(m_bl_date)
             if m_bl_two_date is None:
-                md_baseline_two.append(m_date)
+                md_baseline_two.append(None)
 
         if len(self.project_group) == 1:
-            key_names = remove_project_name(self.master.abbreviations[self.project_group[0]], key_names)
+            key_names = remove_project_name(
+                self.master.abbreviations[self.project_group[0]], key_names
+            )
         else:
             pass
 
@@ -1317,15 +1323,23 @@ class MilestoneData:
         self.md_baseline = md_baseline
         self.md_baseline_two = md_baseline_two
         self.type_list = type_list
-        self.max_date = max(self.md_current + self.md_last + self.md_baseline)
-        self.min_date = min(self.md_current + self.md_last + self.md_baseline)
+        self.max_date = max(
+            remove_none_types(self.md_current)
+            + remove_none_types(self.md_last)
+            + remove_none_types(self.md_baseline)
+        )
+        self.min_date = min(
+            remove_none_types(self.md_current)
+            + remove_none_types(self.md_last)
+            + remove_none_types(self.md_baseline)
+        )
 
     def filter_chart_info(
-            self,
-            milestone_type: str or List[str] = "All",
-            milestone_of_interest: str or List[str] = None,
-            start_date: str = "1/1/2015",
-            end_date: str = "1/1/2041",
+        self,
+        milestone_type: str or List[str] = "All",
+        key_of_interest: str or List[str] = None,
+        start_date: str = "1/1/2015",
+        end_date: str = "1/1/2041",
     ):
 
         #  Filter milestone type
@@ -1333,49 +1347,53 @@ class MilestoneData:
         if milestone_type != ["All"]:  # needs to be list as per string conversion
             for i, v in enumerate(self.type_list):
                 if v not in milestone_type:
-                    self.key_names[i] = None
-                    self.md_current[i] = None
-                    self.md_last[i] = None
-                    self.md_baseline[i] = None
-                    self.md_baseline_two[i] = None
-                    self.type_list[i] = None
+                    self.key_names[i] = "remove"
+                    self.md_current[i] = "remove"
+                    self.md_last[i] = "remove"
+                    self.md_baseline[i] = "remove"
+                    self.md_baseline_two[i] = "remove"
+                    self.type_list[i] = "remove"
                 else:
                     pass
 
-            self.key_names = [x for x in self.key_names if x is not None]
-            self.md_current = [x for x in self.md_current if x is not None]
-            self.md_last = [x for x in self.md_last if x is not None]
-            self.md_baseline = [x for x in self.md_baseline if x is not None]
-            self.md_baseline_two = [x for x in self.md_baseline_two if x is not None]
-            self.type_list = [x for x in self.type_list if x is not None]
+            self.key_names = [x for x in self.key_names if x is not "remove"]
+            self.md_current = [x for x in self.md_current if x is not "remove"]
+            self.md_last = [x for x in self.md_last if x is not "remove"]
+            self.md_baseline = [x for x in self.md_baseline if x is not "remove"]
+            self.md_baseline_two = [
+                x for x in self.md_baseline_two if x is not "remove"
+            ]
+            self.type_list = [x for x in self.type_list if x is not "remove"]
         else:
             pass
 
         #  Filter milestone names of interest
-        milestone_of_interest = string_conversion(milestone_of_interest)
+        key_of_interest = string_conversion(key_of_interest)
         filtered_list = []
-        if milestone_of_interest is not None:
+        if key_of_interest is not None:
             # if developed further clearly good use regex
-            for s in milestone_of_interest:  # s is string
+            for s in key_of_interest:  # s is string
                 for v in self.key_names:  # v is value
                     if s in v:
                         filtered_list.append(v)
             for i, v in enumerate(self.key_names):  # fv is filtered value
                 if v not in filtered_list:
-                    self.key_names[i] = None
-                    self.md_current[i] = None
-                    self.md_last[i] = None
-                    self.md_baseline[i] = None
-                    self.md_baseline_two[i] = None
-                    self.type_list[i] = None
+                    self.key_names[i] = "remove"
+                    self.md_current[i] = "remove"
+                    self.md_last[i] = "remove"
+                    self.md_baseline[i] = "remove"
+                    self.md_baseline_two[i] = "remove"
+                    self.type_list[i] = "remove"
                 else:
                     pass
-            self.key_names = [x for x in self.key_names if x is not None]
-            self.md_current = [x for x in self.md_current if x is not None]
-            self.md_last = [x for x in self.md_last if x is not None]
-            self.md_baseline = [x for x in self.md_baseline if x is not None]
-            self.md_baseline_two = [x for x in self.md_baseline_two if x is not None]
-            self.type_list = [x for x in self.type_list if x is not None]
+            self.key_names = [x for x in self.key_names if x is not "remove"]
+            self.md_current = [x for x in self.md_current if x is not "remove"]
+            self.md_last = [x for x in self.md_last if x is not "remove"]
+            self.md_baseline = [x for x in self.md_baseline if x is not "remove"]
+            self.md_baseline_two = [
+                x for x in self.md_baseline_two if x is not "remove"
+            ]
+            self.type_list = [x for x in self.type_list if x is not "remove"]
         else:
             pass
 
@@ -1386,333 +1404,342 @@ class MilestoneData:
             if start.date() <= d <= end.date():
                 pass
             else:
-                self.key_names[i] = None
-                self.md_current[i] = None
-                self.md_last[i] = None
-                self.md_baseline[i] = None
-                self.md_baseline_two[i] = None
-                self.type_list[i] = None
-        self.key_names = [x for x in self.key_names if x is not None]
-        self.md_current = [x for x in self.md_current if x is not None]
-        self.md_last = [x for x in self.md_last if x is not None]
-        self.md_baseline = [x for x in self.md_baseline if x is not None]
-        self.md_baseline_two = [x for x in self.md_baseline_two if x is not None]
-        self.type_list = [x for x in self.type_list if x is not None]
+                self.key_names[i] = "remove"
+                self.md_current[i] = "remove"
+                self.md_last[i] = "remove"
+                self.md_baseline[i] = "remove"
+                self.md_baseline_two[i] = "remove"
+                self.type_list[i] = "remove"
+        self.key_names = [x for x in self.key_names if x is not "remove"]
+        self.md_current = [x for x in self.md_current if x is not "remove"]
+        self.md_last = [x for x in self.md_last if x is not "remove"]
+        self.md_baseline = [x for x in self.md_baseline if x is not "remove"]
+        self.md_baseline_two = [x for x in self.md_baseline_two if x is not "remove"]
+        self.type_list = [x for x in self.type_list if x is not "remove"]
 
-        self.max_date = max(self.md_current + self.md_last + self.md_baseline)
-        self.min_date = min(self.md_current + self.md_last + self.md_baseline)
-
-
-class CombinedData:
-    def __init__(self, wb, pfm_milestone_data):
-        self.wb = wb
-        self.pfm_milestone_data = pfm_milestone_data
-        # self.project_current = {}
-        # self.project_last = {}
-        # self.project_baseline = {}
-        # self.project_baseline_two = {}
-        self.group_current = {}
-        self.group_last = {}
-        self.group_baseline = {}
-        self.group_baseline_two = {}
-        self.combined_tuple_list_forecast = []
-        self.combined_tuple_list_baseline = []
-        self.combine_mi_pfm_data()
-
-    def combine_mi_pfm_data(self):
-        """
-        coverts data from MI system into usable format for graphical outputs
-        """
-        ws = self.wb.active
-
-        mi_milestone_name_list = []  # handles duplicates
-        mi_tuple_list_forecast = []
-        mi_tuple_list_baseline = []
-        for r in range(4, ws.max_row + 1):
-            mi_milestone_key_name_raw = ws.cell(row=r, column=3).value
-            mi_milestone_key_name = "MI, " + mi_milestone_key_name_raw
-            forecast_date = ws.cell(row=r, column=8).value
-            baseline_date = ws.cell(row=r, column=9).value
-            notes = ws.cell(row=r, column=10).value
-            if mi_milestone_key_name not in mi_milestone_name_list:
-                mi_milestone_name_list.append(mi_milestone_key_name)
-                mi_tuple_list_forecast.append(
-                    (mi_milestone_key_name, forecast_date.date(), notes)
-                )
-                mi_tuple_list_baseline.append(
-                    (mi_milestone_key_name, baseline_date.date(), notes)
-                )
-            else:
-                for i in range(
-                        2, 15
-                ):  # alters duplicates by adding number to end of key
-                    mi_altered_milestone_key_name = mi_milestone_key_name + " " + str(i)
-                    if mi_altered_milestone_key_name in mi_milestone_name_list:
-                        continue
-                    else:
-                        mi_tuple_list_forecast.append(
-                            (mi_altered_milestone_key_name, forecast_date.date(), notes)
-                        )
-                        mi_tuple_list_baseline.append(
-                            (mi_altered_milestone_key_name, baseline_date.date(), notes)
-                        )
-                        mi_milestone_name_list.append(mi_altered_milestone_key_name)
-                        break
-
-        mi_tuple_list_forecast = sorted(
-            mi_tuple_list_forecast, key=lambda k: (k[1] is None, k[1])
-        )  # put the list in chronological order
-        mi_tuple_list_baseline = sorted(
-            mi_tuple_list_baseline, key=lambda k: (k[1] is None, k[1])
-        )  # put the list in chronological order
-
-        pfm_tuple_list_forecast = []
-        pfm_tuple_list_baseline = []
-        for data in self.pfm_milestone_data.ordered_list_bl_two:
-            pfm_tuple_list_forecast.append(("PfM, " + data[0], data[1], data[2]))
-        for data in self.pfm_milestone_data.group_choronological_list_baseline:
-            pfm_tuple_list_baseline.append(("PfM, " + data[0], data[1], data[2]))
-
-        combined_tuple_list_forecast = mi_tuple_list_forecast + pfm_tuple_list_forecast
-        combined_tuple_list_baseline = mi_tuple_list_baseline + pfm_tuple_list_baseline
-
-        combined_tuple_list_forecast = sorted(
-            combined_tuple_list_forecast, key=lambda k: (k[1] is None, k[1])
-        )  # put the list in chronological order
-        combined_tuple_list_baseline = sorted(
-            combined_tuple_list_baseline, key=lambda k: (k[1] is None, k[1])
-        )  # put the list in chronological order
-
-        milestone_dict_forecast = {}
-        for x in combined_tuple_list_forecast:
-            if x[0] is not None:
-                milestone_dict_forecast[x[0]] = {x[1]: x[2]}
-        milestone_dict_baseline = {}
-        for x in combined_tuple_list_baseline:
-            if x[0] is not None:
-                milestone_dict_baseline[x[0]] = {x[1]: x[2]}
-
-        self.group_current = milestone_dict_forecast
-        self.group_last = {}
-        self.group_baseline = milestone_dict_baseline
-        self.group_baseline_two = {}
-        self.combined_tuple_list_forecast = combined_tuple_list_forecast
-        self.combined_tuple_list_baseline = combined_tuple_list_baseline
-
-
-class MilestoneCharts:
-    def __init__(
-            self,
-            latest_milestone_names,
-            latest_milestone_dates,
-            last_milestone_dates,
-            baseline_milestone_dates,
-            graph_title,
-            ipdc_date,
-    ):
-        self.latest_milestone_names = latest_milestone_names
-        self.latest_milestone_dates = latest_milestone_dates
-        self.last_milestone_dates = last_milestone_dates
-        self.baseline_milestone_dates = baseline_milestone_dates
-        self.graph_title = graph_title
-        self.ipdc_date = ipdc_date
-        # self.milestone_swimlane_charts()
-        self.build_charts()
-
-    def milestone_swimlane_charts(self):
-        # build scatter chart
-        fig, ax1 = plt.subplots()
-        fig.suptitle(self.graph_title, fontweight="bold")  # title
-        # set fig size
-        fig.set_figheight(4)
-        fig.set_figwidth(8)
-
-        ax1.scatter(
-            self.baseline_milestone_dates, self.latest_milestone_names, label="Baseline"
+        self.max_date = max(
+            remove_none_types(self.md_current)
+            + remove_none_types(self.md_last)
+            + remove_none_types(self.md_baseline)
         )
-        ax1.scatter(
-            self.last_milestone_dates, self.latest_milestone_names, label="Last Qrt"
-        )
-        ax1.scatter(
-            self.latest_milestone_dates, self.latest_milestone_names, label="Latest Qrt"
+        self.min_date = min(
+            remove_none_types(self.md_current)
+            + remove_none_types(self.md_last)
+            + remove_none_types(self.md_baseline)
         )
 
-        # format the x ticks
-        years = mdates.YearLocator()  # every year
-        months = mdates.MonthLocator()  # every month
-        years_fmt = mdates.DateFormatter("%Y")
-        months_fmt = mdates.DateFormatter("%b")
 
-        # calculate the length of the time period covered in chart. Not perfect as baseline dates can distort.
-        try:
-            td = (self.latest_milestone_dates[-1] - self.latest_milestone_dates[0]).days
-            if td <= 365 * 3:
-                ax1.xaxis.set_major_locator(years)
-                ax1.xaxis.set_minor_locator(months)
-                ax1.xaxis.set_major_formatter(years_fmt)
-                ax1.xaxis.set_minor_formatter(months_fmt)
-                plt.setp(ax1.xaxis.get_minorticklabels(), rotation=45)
-                plt.setp(
-                    ax1.xaxis.get_majorticklabels(), rotation=45, weight="bold"
-                )  # milestone_swimlane_charts(key_name,
-                #                           current_m_data,
-                #                           last_m_data,
-                #                           baseline_m_data,
-                #                           'All Milestones')
-                # scaling x axis
-                # x axis value to no more than three months after last latest milestone date, or three months
-                # before first latest milestone date. Hack, can be improved. Text highlights movements off chart.
-                x_max = self.latest_milestone_dates[-1] + timedelta(days=90)
-                x_min = self.latest_milestone_dates[0] - timedelta(days=90)
-                for date in self.baseline_milestone_dates:
-                    if date > x_max:
-                        ax1.set_xlim(x_min, x_max)
-                        plt.figtext(
-                            0.98,
-                            0.03,
-                            "Check full schedule to see all milestone movements",
-                            horizontalalignment="right",
-                            fontsize=6,
-                            fontweight="bold",
-                        )
-                    if date < x_min:
-                        ax1.set_xlim(x_min, x_max)
-                        plt.figtext(
-                            0.98,
-                            0.03,
-                            "Check full schedule to see all milestone movements",
-                            horizontalalignment="right",
-                            fontsize=6,
-                            fontweight="bold",
-                        )
-            else:
-                ax1.xaxis.set_major_locator(years)
-                ax1.xaxis.set_minor_locator(months)
-                ax1.xaxis.set_major_formatter(years_fmt)
-                plt.setp(ax1.xaxis.get_majorticklabels(), rotation=45, weight="bold")
-        except IndexError:  # if milestone dates list is empty:
-            pass
-
-        ax1.legend()  # insert legend
-
-        # reverse y axis so order is earliest to oldest
-        ax1 = plt.gca()
-        ax1.set_ylim(ax1.get_ylim()[::-1])
-        ax1.tick_params(axis="y", which="major", labelsize=7)
-        ax1.yaxis.grid()  # horizontal lines
-        ax1.set_axisbelow(True)
-        # ax1.get_yaxis().set_visible(False)
-
-        # for i, txt in enumerate(latest_milestone_names):
-        #     ax1.annotate(txt, (i, latest_milestone_dates[i]))
-
-        # Add line of IPDC date, but only if in the time period
-        try:
-            if (
-                    self.latest_milestone_dates[0]
-                    <= self.ipdc_date
-                    <= self.latest_milestone_dates[-1]
-            ):
-                plt.axvline(self.ipdc_date)
-                plt.figtext(
-                    0.98,
-                    0.01,
-                    "Line represents when IPDC will discuss Q1 20_21 portfolio management report",
-                    horizontalalignment="right",
-                    fontsize=6,
-                    fontweight="bold",
-                )
-        except IndexError:
-            pass
-
-        # size of chart and fit
-        fig.canvas.draw()
-        fig.tight_layout(rect=[0, 0.03, 1, 0.95])  # for title
-
-        fig.savefig(
-            root_path / "output/{}.png".format(self.graph_title), bbox_inches="tight"
-        )
-
-        # plt.close() #automatically closes figure so don't need to do manually.
-
-    def build_charts(self):
-
-        # add \n to y axis labels and cut down if two long
-        # labels = ['\n'.join(wrap(l, 40)) for l in latest_milestone_names]
-        labels = self.latest_milestone_names
-        final_labels = []
-        for l in labels:
-            if len(l) > 40:
-                final_labels.append(l[:35])
-            else:
-                final_labels.append(l)
-
-        # Chart
-        no_milestones = len(self.latest_milestone_names)
-
-        if no_milestones <= 30:
-            (
-                np.array(final_labels),
-                np.array(self.latest_milestone_dates),
-                np.array(self.last_milestone_dates),
-                np.array(self.baseline_milestone_dates),
-                self.graph_title,
-                self.ipdc_date,
-            )
-
-        if 31 <= no_milestones <= 60:
-            half = int(no_milestones / 2)
-            MilestoneCharts(
-                np.array(final_labels[:half]),
-                np.array(self.latest_milestone_dates[:half]),
-                np.array(self.last_milestone_dates[:half]),
-                np.array(self.baseline_milestone_dates[:half]),
-                self.graph_title,
-                self.ipdc_date,
-            )
-            title = self.graph_title + " cont."
-            MilestoneCharts(
-                np.array(final_labels[half:no_milestones]),
-                np.array(self.latest_milestone_dates[half:no_milestones]),
-                np.array(self.last_milestone_dates[half:no_milestones]),
-                np.array(self.baseline_milestone_dates[half:no_milestones]),
-                title,
-                self.ipdc_date,
-            )
-
-        if 61 <= no_milestones <= 90:
-            third = int(no_milestones / 3)
-            MilestoneCharts(
-                np.array(final_labels[:third]),
-                np.array(self.latest_milestone_dates[:third]),
-                np.array(self.last_milestone_dates[:third]),
-                np.array(self.baseline_milestone_dates[:third]),
-                self.graph_title,
-                self.ipdc_date,
-            )
-            title = self.graph_title + " cont. 1"
-            MilestoneCharts(
-                np.array(final_labels[third: third * 2]),
-                np.array(self.latest_milestone_dates[third: third * 2]),
-                np.array(self.last_milestone_dates[third: third * 2]),
-                np.array(self.baseline_milestone_dates[third: third * 2]),
-                title,
-                self.ipdc_date,
-            )
-            title = self.graph_title + " cont. 2"
-            MilestoneCharts(
-                np.array(final_labels[third * 2: no_milestones]),
-                np.array(self.latest_milestone_dates[third * 2: no_milestones]),
-                np.array(self.last_milestone_dates[third * 2: no_milestones]),
-                np.array(self.baseline_milestone_dates[third * 2: no_milestones]),
-                title,
-                self.ipdc_date,
-            )
-        pass
+# class CombinedData:
+#     def __init__(self, wb, pfm_milestone_data):
+#         self.wb = wb
+#         self.pfm_milestone_data = pfm_milestone_data
+#         # self.project_current = {}
+#         # self.project_last = {}
+#         # self.project_baseline = {}
+#         # self.project_baseline_two = {}
+#         self.group_current = {}
+#         self.group_last = {}
+#         self.group_baseline = {}
+#         self.group_baseline_two = {}
+#         self.combined_tuple_list_forecast = []
+#         self.combined_tuple_list_baseline = []
+#         self.combine_mi_pfm_data()
+#
+#     def combine_mi_pfm_data(self):
+#         """
+#         coverts data from MI system into usable format for graphical outputs
+#         """
+#         ws = self.wb.active
+#
+#         mi_milestone_name_list = []  # handles duplicates
+#         mi_tuple_list_forecast = []
+#         mi_tuple_list_baseline = []
+#         for r in range(4, ws.max_row + 1):
+#             mi_milestone_key_name_raw = ws.cell(row=r, column=3).value
+#             mi_milestone_key_name = "MI, " + mi_milestone_key_name_raw
+#             forecast_date = ws.cell(row=r, column=8).value
+#             baseline_date = ws.cell(row=r, column=9).value
+#             notes = ws.cell(row=r, column=10).value
+#             if mi_milestone_key_name not in mi_milestone_name_list:
+#                 mi_milestone_name_list.append(mi_milestone_key_name)
+#                 mi_tuple_list_forecast.append(
+#                     (mi_milestone_key_name, forecast_date.date(), notes)
+#                 )
+#                 mi_tuple_list_baseline.append(
+#                     (mi_milestone_key_name, baseline_date.date(), notes)
+#                 )
+#             else:
+#                 for i in range(
+#                         2, 15
+#                 ):  # alters duplicates by adding number to end of keys
+#                     mi_altered_milestone_key_name = mi_milestone_key_name + " " + str(i)
+#                     if mi_altered_milestone_key_name in mi_milestone_name_list:
+#                         continue
+#                     else:
+#                         mi_tuple_list_forecast.append(
+#                             (mi_altered_milestone_key_name, forecast_date.date(), notes)
+#                         )
+#                         mi_tuple_list_baseline.append(
+#                             (mi_altered_milestone_key_name, baseline_date.date(), notes)
+#                         )
+#                         mi_milestone_name_list.append(mi_altered_milestone_key_name)
+#                         break
+#
+#         mi_tuple_list_forecast = sorted(
+#             mi_tuple_list_forecast, keys=lambda k: (k[1] is None, k[1])
+#         )  # put the list in chronological order
+#         mi_tuple_list_baseline = sorted(
+#             mi_tuple_list_baseline, keys=lambda k: (k[1] is None, k[1])
+#         )  # put the list in chronological order
+#
+#         pfm_tuple_list_forecast = []
+#         pfm_tuple_list_baseline = []
+#         for data in self.pfm_milestone_data.ordered_list_bl_two:
+#             pfm_tuple_list_forecast.append(("PfM, " + data[0], data[1], data[2]))
+#         for data in self.pfm_milestone_data.group_choronological_list_baseline:
+#             pfm_tuple_list_baseline.append(("PfM, " + data[0], data[1], data[2]))
+#
+#         combined_tuple_list_forecast = mi_tuple_list_forecast + pfm_tuple_list_forecast
+#         combined_tuple_list_baseline = mi_tuple_list_baseline + pfm_tuple_list_baseline
+#
+#         combined_tuple_list_forecast = sorted(
+#             combined_tuple_list_forecast, keys=lambda k: (k[1] is None, k[1])
+#         )  # put the list in chronological order
+#         combined_tuple_list_baseline = sorted(
+#             combined_tuple_list_baseline, keys=lambda k: (k[1] is None, k[1])
+#         )  # put the list in chronological order
+#
+#         milestone_dict_forecast = {}
+#         for series_one in combined_tuple_list_forecast:
+#             if series_one[0] is not None:
+#                 milestone_dict_forecast[series_one[0]] = {series_one[1]: series_one[2]}
+#         milestone_dict_baseline = {}
+#         for series_one in combined_tuple_list_baseline:
+#             if series_one[0] is not None:
+#                 milestone_dict_baseline[series_one[0]] = {series_one[1]: series_one[2]}
+#
+#         self.group_current = milestone_dict_forecast
+#         self.group_last = {}
+#         self.group_baseline = milestone_dict_baseline
+#         self.group_baseline_two = {}
+#         self.combined_tuple_list_forecast = combined_tuple_list_forecast
+#         self.combined_tuple_list_baseline = combined_tuple_list_baseline
+#
+#
+# class MilestoneCharts:
+#     def __init__(
+#             self,
+#             latest_milestone_names,
+#             latest_milestone_dates,
+#             last_milestone_dates,
+#             baseline_milestone_dates,
+#             graph_title,
+#             ipdc_date,
+#     ):
+#         self.latest_milestone_names = latest_milestone_names
+#         self.latest_milestone_dates = latest_milestone_dates
+#         self.last_milestone_dates = last_milestone_dates
+#         self.baseline_milestone_dates = baseline_milestone_dates
+#         self.graph_title = graph_title
+#         self.ipdc_date = ipdc_date
+#         # self.milestone_swimlane_charts()
+#         self.build_charts()
+#
+#     def milestone_swimlane_charts(self):
+#         # build scatter chart
+#         fig, ax1 = plt.subplots()
+#         fig.suptitle(self.graph_title, fontweight="bold")  # title
+#         # set fig size
+#         fig.set_figheight(4)
+#         fig.set_figwidth(8)
+#
+#         ax1.scatter(
+#             self.baseline_milestone_dates, self.latest_milestone_names, label="Baseline"
+#         )
+#         ax1.scatter(
+#             self.last_milestone_dates, self.latest_milestone_names, label="Last Qrt"
+#         )
+#         ax1.scatter(
+#             self.latest_milestone_dates, self.latest_milestone_names, label="Latest Qrt"
+#         )
+#
+#         # format the series_one ticks
+#         years = mdates.YearLocator()  # every year
+#         months = mdates.MonthLocator()  # every month
+#         years_fmt = mdates.DateFormatter("%Y")
+#         months_fmt = mdates.DateFormatter("%b")
+#
+#         # calculate the length of the time period covered in chart. Not perfect as baseline dates can distort.
+#         try:
+#             td = (self.latest_milestone_dates[-1] - self.latest_milestone_dates[0]).days
+#             if td <= 365 * 3:
+#                 ax1.xaxis.set_major_locator(years)
+#                 ax1.xaxis.set_minor_locator(months)
+#                 ax1.xaxis.set_major_formatter(years_fmt)
+#                 ax1.xaxis.set_minor_formatter(months_fmt)
+#                 plt.setp(ax1.xaxis.get_minorticklabels(), rotation=45)
+#                 plt.setp(
+#                     ax1.xaxis.get_majorticklabels(), rotation=45, weight="bold"
+#                 )  # milestone_swimlane_charts(key_name,
+#                 #                           current_m_data,
+#                 #                           last_m_data,
+#                 #                           baseline_m_data,
+#                 #                           'All Milestones')
+#                 # scaling series_one axis
+#                 # series_one axis value to no more than three months after last latest milestone date, or three months
+#                 # before first latest milestone date. Hack, can be improved. Text highlights movements off chart.
+#                 x_max = self.latest_milestone_dates[-1] + timedelta(days=90)
+#                 x_min = self.latest_milestone_dates[0] - timedelta(days=90)
+#                 for date in self.baseline_milestone_dates:
+#                     if date > x_max:
+#                         ax1.set_xlim(x_min, x_max)
+#                         plt.figtext(
+#                             0.98,
+#                             0.03,
+#                             "Check full schedule to see all milestone movements",
+#                             horizontalalignment="right",
+#                             fontsize=6,
+#                             fontweight="bold",
+#                         )
+#                     if date < x_min:
+#                         ax1.set_xlim(x_min, x_max)
+#                         plt.figtext(
+#                             0.98,
+#                             0.03,
+#                             "Check full schedule to see all milestone movements",
+#                             horizontalalignment="right",
+#                             fontsize=6,
+#                             fontweight="bold",
+#                         )
+#             else:
+#                 ax1.xaxis.set_major_locator(years)
+#                 ax1.xaxis.set_minor_locator(months)
+#                 ax1.xaxis.set_major_formatter(years_fmt)
+#                 plt.setp(ax1.xaxis.get_majorticklabels(), rotation=45, weight="bold")
+#         except IndexError:  # if milestone dates list is empty:
+#             pass
+#
+#         ax1.legend()  # insert legend
+#
+#         # reverse series_two axis so order is earliest to oldest
+#         ax1 = plt.gca()
+#         ax1.set_ylim(ax1.get_ylim()[::-1])
+#         ax1.tick_params(axis="series_two", which="major", labelsize=7)
+#         ax1.yaxis.grid()  # horizontal lines
+#         ax1.set_axisbelow(True)
+#         # ax1.get_yaxis().set_visible(False)
+#
+#         # for i, txt in enumerate(latest_milestone_names):
+#         #     ax1.annotate(txt, (i, latest_milestone_dates[i]))
+#
+#         # Add line of IPDC date, but only if in the time period
+#         try:
+#             if (
+#                     self.latest_milestone_dates[0]
+#                     <= self.ipdc_date
+#                     <= self.latest_milestone_dates[-1]
+#             ):
+#                 plt.axvline(self.ipdc_date)
+#                 plt.figtext(
+#                     0.98,
+#                     0.01,
+#                     "Line represents when IPDC will discuss Q1 20_21 portfolio management report",
+#                     horizontalalignment="right",
+#                     fontsize=6,
+#                     fontweight="bold",
+#                 )
+#         except IndexError:
+#             pass
+#
+#         # size of chart and fit
+#         fig.canvas.draw()
+#         fig.tight_layout(rect=[0, 0.03, 1, 0.95])  # for title
+#
+#         fig.savefig(
+#             root_path / "output/{}.png".format(self.graph_title), bbox_inches="tight"
+#         )
+#
+#         # plt.close() #automatically closes figure so don't need to do manually.
+#
+#     def build_charts(self):
+#
+#         # add \n to series_two axis labels and cut down if two long
+#         # labels = ['\n'.join(wrap(l, 40)) for l in latest_milestone_names]
+#         labels = self.latest_milestone_names
+#         final_labels = []
+#         for l in labels:
+#             if len(l) > 40:
+#                 final_labels.append(l[:35])
+#             else:
+#                 final_labels.append(l)
+#
+#         # Chart
+#         no_milestones = len(self.latest_milestone_names)
+#
+#         if no_milestones <= 30:
+#             (
+#                 np.array(final_labels),
+#                 np.array(self.latest_milestone_dates),
+#                 np.array(self.last_milestone_dates),
+#                 np.array(self.baseline_milestone_dates),
+#                 self.graph_title,
+#                 self.ipdc_date,
+#             )
+#
+#         if 31 <= no_milestones <= 60:
+#             half = int(no_milestones / 2)
+#             MilestoneCharts(
+#                 np.array(final_labels[:half]),
+#                 np.array(self.latest_milestone_dates[:half]),
+#                 np.array(self.last_milestone_dates[:half]),
+#                 np.array(self.baseline_milestone_dates[:half]),
+#                 self.graph_title,
+#                 self.ipdc_date,
+#             )
+#             title = self.graph_title + " cont."
+#             MilestoneCharts(
+#                 np.array(final_labels[half:no_milestones]),
+#                 np.array(self.latest_milestone_dates[half:no_milestones]),
+#                 np.array(self.last_milestone_dates[half:no_milestones]),
+#                 np.array(self.baseline_milestone_dates[half:no_milestones]),
+#                 title,
+#                 self.ipdc_date,
+#             )
+#
+#         if 61 <= no_milestones <= 90:
+#             third = int(no_milestones / 3)
+#             MilestoneCharts(
+#                 np.array(final_labels[:third]),
+#                 np.array(self.latest_milestone_dates[:third]),
+#                 np.array(self.last_milestone_dates[:third]),
+#                 np.array(self.baseline_milestone_dates[:third]),
+#                 self.graph_title,
+#                 self.ipdc_date,
+#             )
+#             title = self.graph_title + " cont. 1"
+#             MilestoneCharts(
+#                 np.array(final_labels[third: third * 2]),
+#                 np.array(self.latest_milestone_dates[third: third * 2]),
+#                 np.array(self.last_milestone_dates[third: third * 2]),
+#                 np.array(self.baseline_milestone_dates[third: third * 2]),
+#                 title,
+#                 self.ipdc_date,
+#             )
+#             title = self.graph_title + " cont. 2"
+#             MilestoneCharts(
+#                 np.array(final_labels[third * 2: no_milestones]),
+#                 np.array(self.latest_milestone_dates[third * 2: no_milestones]),
+#                 np.array(self.last_milestone_dates[third * 2: no_milestones]),
+#                 np.array(self.baseline_milestone_dates[third * 2: no_milestones]),
+#                 title,
+#                 self.ipdc_date,
+#             )
+#         pass
+#
 
 
 def vfm_matplotlib_graph(labels, current_qrt, last_qrt, title):
-    #  Need to split this strings over two lines on x axis
+    #  Need to split this strings over two lines on series_one axis
     for n, i in enumerate(labels):
         if i == "Very High and Financially Positive":
             labels[n] = "Very High and \n Financially Positive"
@@ -1726,7 +1753,7 @@ def vfm_matplotlib_graph(labels, current_qrt, last_qrt, title):
     rects_one = ax.bar(x - width / 2, current_qrt, width, label="This quarter")
     rects_two = ax.bar(x + width / 2, last_qrt, width, label="Last quarter")
 
-    # Add some text for labels, title and custom x-axis tick labels, etc.
+    # Add some text for labels, title and custom series_one-axis tick labels, etc.
     # ax.set_ylabel('Number')
     ax.set_title(title)
     ax.set_xticks(x)
@@ -1795,7 +1822,7 @@ def cost_profile_graph(cost_master: CostData, **kwargs) -> plt.figure:
 
     # Overall cost profile chart
     if (
-            sum(cost_master.baseline_profile_one) != 0
+        sum(cost_master.baseline_profile_one) != 0
     ):  # handling in the event that group of projects have no baseline profile.
         ax1.plot(
             YEAR_LIST,
@@ -1807,7 +1834,7 @@ def cost_profile_graph(cost_master: CostData, **kwargs) -> plt.figure:
     else:
         pass
     if (
-            sum(cost_master.last_profile) != 0
+        sum(cost_master.last_profile) != 0
     ):  # handling in the event that group of projects have no last quarter profile
         ax1.plot(
             YEAR_LIST,
@@ -1827,7 +1854,7 @@ def cost_profile_graph(cost_master: CostData, **kwargs) -> plt.figure:
     )
 
     # Chart styling
-    ax1.tick_params(axis="x", which="major", labelsize=6, rotation=45)
+    ax1.tick_params(axis="series_one", which="major", labelsize=6, rotation=45)
     ax1.set_ylabel("Cost (£m)")
     ylab1 = ax1.yaxis.get_label()
     ylab1.set_style("italic")
@@ -1868,7 +1895,7 @@ def cost_profile_graph(cost_master: CostData, **kwargs) -> plt.figure:
     # )
     #
     # # rdel/cdel profile chart styling
-    # ax2.tick_params(axis="x", which="major", labelsize=6, rotation=45)
+    # ax2.tick_params(axis="series_one", which="major", labelsize=6, rotation=45)
     # ax2.set_xlabel("Financial Years")
     # ax2.set_ylabel("Cost (£m)")
     # xlab2 = ax2.xaxis.get_label()
@@ -1894,7 +1921,7 @@ def cost_profile_graph(cost_master: CostData, **kwargs) -> plt.figure:
 
 
 def cost_profile_baseline_graph(
-        cost_master: CostData, *title: Tuple[Optional[str]]
+    cost_master: CostData, *title: Tuple[Optional[str]]
 ) -> plt.figure:
     """Compiles a matplotlib line chart for costs of GROUP of projects contained within cost_master class.
     As as default last quarters profile is not included. It creates two plots. First plot shows overall
@@ -1910,7 +1937,7 @@ def cost_profile_baseline_graph(
 
     # Overall cost profile chart
     if (
-            sum(cost_master.baseline_profile_three) != 0
+        sum(cost_master.baseline_profile_three) != 0
     ):  # handling in the event that group of projects have no baseline profile.
         ax1.plot(
             YEAR_LIST,
@@ -1922,7 +1949,7 @@ def cost_profile_baseline_graph(
     else:
         pass
     if (
-            sum(cost_master.baseline_profile_two) != 0
+        sum(cost_master.baseline_profile_two) != 0
     ):  # handling in the event that group of projects have no baseline profile.
         ax1.plot(
             YEAR_LIST,
@@ -1934,7 +1961,7 @@ def cost_profile_baseline_graph(
     else:
         pass
     if (
-            sum(cost_master.baseline_profile_one) != 0
+        sum(cost_master.baseline_profile_one) != 0
     ):  # handling in the event that group of projects have no last quarter profile
         ax1.plot(
             YEAR_LIST,
@@ -1954,7 +1981,7 @@ def cost_profile_baseline_graph(
     )
 
     # Chart styling
-    ax1.tick_params(axis="x", which="major", labelsize=6, rotation=45)
+    ax1.tick_params(axis="series_one", which="major", labelsize=6, rotation=45)
     ax1.set_ylabel("Cost (£m)")
     ylab1 = ax1.yaxis.get_label()
     ylab1.set_style("italic")
@@ -1967,7 +1994,7 @@ def cost_profile_baseline_graph(
 
     # plot rdel, cdel, non-gov chart data
     if (
-            sum(cost_master.ngov_profile) != 0
+        sum(cost_master.ngov_profile) != 0
     ):  # if statement as most projects don't have ngov cost.
         ax2.plot(
             YEAR_LIST,
@@ -1992,7 +2019,7 @@ def cost_profile_baseline_graph(
     )
 
     # rdel/cdel profile chart styling
-    ax2.tick_params(axis="x", which="major", labelsize=6, rotation=45)
+    ax2.tick_params(axis="series_one", which="major", labelsize=6, rotation=45)
     ax2.set_xlabel("Financial Years")
     ax2.set_ylabel("Cost (£m)")
     xlab2 = ax2.xaxis.get_label()
@@ -2013,7 +2040,7 @@ def cost_profile_baseline_graph(
 
 
 def spent_calculation(
-        master: Dict[str, Union[str, datetime.date, int, float]], project: str
+    master: Dict[str, Union[str, datetime.date, int, float]], project: str
 ) -> int:
     keys = [
         "Pre-profile RDEL",
@@ -2040,7 +2067,7 @@ def open_word_doc(wd_path: str) -> Document:
 
 
 def wd_heading(
-        doc: Document, project_info: Dict[str, Union[str, int]], project_name: str
+    doc: Document, project_info: Dict[str, Union[str, int]], project_name: str
 ) -> None:
     """Function adds header to word doc"""
     font = doc.styles["Normal"].font
@@ -2056,7 +2083,7 @@ def wd_heading(
 
 
 def key_contacts(doc: Document, master: Master, project_name: str) -> None:
-    """Function adds key contact details"""
+    """Function adds keys contact details"""
     sro_name = master.master_data[0].data[project_name][
         "Senior Responsible Owner (SRO)"
     ]
@@ -2321,7 +2348,7 @@ def make_file_friendly(quarter_str: str) -> str:
 
 
 def total_costs_benefits_bar_chart(
-        cost_master: CostData, ben_master: BenefitsData, **kwargs
+    cost_master: CostData, ben_master: BenefitsData, **kwargs
 ) -> plt.figure:
     """compiles a matplotlib bar chart which shows total project costs"""
     fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2)  # four sub plots
@@ -2375,8 +2402,8 @@ def total_costs_benefits_bar_chart(
     ylab1 = ax1.yaxis.get_label()
     ylab1.set_style("italic")
     ylab1.set_size(8)
-    ax1.tick_params(axis="x", which="major", labelsize=6)
-    ax1.tick_params(axis="y", which="major", labelsize=6)
+    ax1.tick_params(axis="series_one", which="major", labelsize=6)
+    ax1.tick_params(axis="series_two", which="major", labelsize=6)
     ax1.set_title(
         "Fig 1. Total Cost Changes Over Time",
         loc="left",
@@ -2407,8 +2434,8 @@ def total_costs_benefits_bar_chart(
     ylab3 = ax2.yaxis.get_label()
     ylab3.set_style("italic")
     ylab3.set_size(8)
-    ax2.tick_params(axis="x", which="major", labelsize=6)
-    ax2.tick_params(axis="y", which="major", labelsize=6)
+    ax2.tick_params(axis="series_one", which="major", labelsize=6)
+    ax2.tick_params(axis="series_two", which="major", labelsize=6)
     ax2.set_title(
         "Fig 2. Current Cost Profile Breakdown",
         loc="left",
@@ -2416,7 +2443,7 @@ def total_costs_benefits_bar_chart(
         fontweight="bold",
     )
 
-    ax2.set_ylim(0, y_max)  # scale y axis max
+    ax2.set_ylim(0, y_max)  # scale series_two axis max
 
     # BENEFITS SPENT, PROFILED AND UNPROFILED
     labels = ["Latest", "Last Quarter", "Baseline"]
@@ -2441,8 +2468,8 @@ def total_costs_benefits_bar_chart(
     ylab3 = ax3.yaxis.get_label()
     ylab3.set_style("italic")
     ylab3.set_size(8)
-    ax3.tick_params(axis="x", which="major", labelsize=6)
-    ax3.tick_params(axis="y", which="major", labelsize=6)
+    ax3.tick_params(axis="series_one", which="major", labelsize=6)
+    ax3.tick_params(axis="series_two", which="major", labelsize=6)
     ax3.set_title(
         "Fig 3. Total Benefit Changes Over Time",
         loc="left",
@@ -2475,8 +2502,8 @@ def total_costs_benefits_bar_chart(
     ylab4 = ax4.yaxis.get_label()
     ylab4.set_style("italic")
     ylab4.set_size(8)
-    ax4.tick_params(axis="x", which="major", labelsize=6)
-    ax4.tick_params(axis="y", which="major", labelsize=6)
+    ax4.tick_params(axis="series_one", which="major", labelsize=6)
+    ax4.tick_params(axis="series_two", which="major", labelsize=6)
     ax4.set_title(
         "Fig 4. Current Benefit Profile Breakdown",
         loc="left",
@@ -2515,9 +2542,9 @@ def check_baselines(master: Master) -> None:
                     + " does not have a baseline point for "
                     + v
                     + " this could cause the programme to"
-                      "crash. Therefore the programme is stopping. "
-                      "Please amend the data for " + p + " so that "
-                                                         " it has at least one baseline point for " + v
+                    "crash. Therefore the programme is stopping. "
+                    "Please amend the data for " + p + " so that "
+                    " it has at least one baseline point for " + v
                 )
                 break
         else:
@@ -2530,7 +2557,7 @@ def percentage(percent: int, whole: float) -> int:
 
 
 def get_old_fy_cost_data(
-        master_file: typing.TextIO, project_id_wb: typing.TextIO
+    master_file: typing.TextIO, project_id_wb: typing.TextIO
 ) -> None:
     """
     Gets all old financial data from a specified master and places into project id document.
@@ -2558,13 +2585,13 @@ def get_old_fy_cost_data(
 
 def run_get_old_fy_data(master_files_list: list, project_id_wb: typing.TextIO) -> None:
     for f in reversed(
-            master_files_list
+        master_files_list
     ):  # reversed so it gets the latest data in masters
         get_old_fy_cost_data(f, project_id_wb)
 
 
 def place_old_fy_data_into_master_wb(
-        master_file: typing.TextIO, project_id_wb: typing.TextIO
+    master_file: typing.TextIO, project_id_wb: typing.TextIO
 ) -> None:
     """
     places all old financial year data into master files.
@@ -2591,7 +2618,7 @@ def place_old_fy_data_into_master_wb(
 
 
 def run_place_old_fy_data_into_masters(
-        master_files_list: list, project_id_wb: typing.TextIO
+    master_files_list: list, project_id_wb: typing.TextIO
 ) -> None:
     for f in master_files_list:
         place_old_fy_data_into_master_wb(f, project_id_wb)
@@ -2599,7 +2626,7 @@ def run_place_old_fy_data_into_masters(
 
 def put_key_change_master_into_dict(key_change_file: typing.TextIO) -> Dict[str, str]:
     """
-    places key information i.e. keys old and new names from wb into a python dictionary
+    places keys information i.e. keys old and new names from wb into a python dictionary
     """
     wb = load_workbook(key_change_file)
     ws = wb.active
@@ -2614,24 +2641,24 @@ def put_key_change_master_into_dict(key_change_file: typing.TextIO) -> Dict[str,
 
 
 def alter_wb_master_file_key_names(
-        master_file: typing.TextIO, key_change_dict: Dict[str, str]
+    master_file: typing.TextIO, key_change_dict: Dict[str, str]
 ) -> workbook:
     """
-    places altered key names, from the key change master dictionary, into master wb(s).
+    places altered keys names, from the keys change master dictionary, into master wb(s).
     """
     wb = load_workbook(master_file)
     ws = wb.active
 
     for row_num in range(2, ws.max_row + 1):
         for (
-                key
-        ) in key_change_dict.keys():  # changes stored in the altered key change log wb
+            key
+        ) in key_change_dict.keys():  # changes stored in the altered keys change log wb
             if ws.cell(row=row_num, column=1).value == key:
                 ws.cell(row=row_num, column=1).value = key_change_dict[key]
         for year in YEAR_LIST:  # changes to yearly profile keys
             if ws.cell(row=row_num, column=1).value == year + " CDEL Forecast Total":
                 ws.cell(row=row_num, column=1).value = (
-                        year + " CDEL Forecast one off new costs"
+                    year + " CDEL Forecast one off new costs"
                 )
 
     return wb.save(master_file)
@@ -2639,7 +2666,7 @@ def alter_wb_master_file_key_names(
 
 def run_change_keys(master_files_list: list, key_dict: Dict[str, str]) -> None:
     """
-    runs code which replaces old key names with new names in master excel workbooks.
+    runs code which replaces old keys names with new names in master excel workbooks.
     """
     for f in master_files_list:
         alter_wb_master_file_key_names(f, key_dict)
@@ -2689,12 +2716,12 @@ def compare_masters(files: List[typing.TextIO], projects: List[str] or str) -> w
                         change_count += 1
                 except KeyError:
                     if (
-                            project_name in last_master.projects
-                    ):  # key error due to key not being present.
+                        project_name in last_master.projects
+                    ):  # keys error due to keys not being present.
                         ws.cell(row=row_num, column=1).fill = PatternFill(
                             start_color="ffba00", end_color="ffba00", fill_type="solid"
                         )
-                    else:  # key error due to project not being present.
+                    else:  # keys error due to project not being present.
                         ws.cell(row=1, column=column_num).fill = PatternFill(
                             start_color="ffba00", end_color="ffba00", fill_type="solid"
                         )
@@ -2797,8 +2824,8 @@ def save_graph(fig: plt.figure, file_name: str, **kwargs) -> None:
 
 
 def milestone_chart(
-        milestone_data: MilestoneData,
-        **kwargs,
+    milestone_data: MilestoneData,
+    **kwargs,
 ) -> plt.figure:
     # build scatter chart
     fig, ax1 = plt.subplots()
@@ -2821,15 +2848,63 @@ def milestone_chart(
     else:
         try:
             fig.suptitle(kwargs["title"] + " Schedule", fontweight="bold")  # title
-        except IndexError:
+        except KeyError:
             pass
             print("You need to provide a title for this chart")
 
-    ax1.scatter(milestone_data.md_baseline, milestone_data.key_names, label="Baseline")
-    ax1.scatter(milestone_data.md_last, milestone_data.key_names, label="Last quarter")
-    ax1.scatter(milestone_data.md_current, milestone_data.key_names, label="Current")
+    # convert lists into numpy arrays.
+    milestone_data.md_baseline = np.array(milestone_data.md_baseline)
+    milestone_data.md_last = np.array(milestone_data.md_last)
+    milestone_data.md_current = np.array(milestone_data.md_current)
 
-    # format the x ticks
+    # fom stackoverflow, Since plotting series as a scatter plot, the order 
+    # is not crucial. index nparrays for non-zero elements. not using at moment. 
+    # idx_three = milestone_data.md_current.nonzero()[0].tolist()
+    # ax1.scatter(
+    #     milestone_data.md_current[idx_three],
+    #     np.array(milestone_data.key_names)[idx_three],
+    #     label="Current",
+    #     zorder=10,
+    #     c='g'
+    # )
+    # idx_two = milestone_data.md_last.nonzero()[0].tolist()
+    # ax1.scatter(
+    #     milestone_data.md_last[idx_two],
+    #     np.array(milestone_data.key_names)[idx_two],
+    #     label="Last quarter",
+    #     zorder=5,
+    #     c='orange'
+    # )
+    # idx = milestone_data.md_baseline.nonzero()[0].tolist()
+    # ax1.scatter(
+    #     milestone_data.md_baseline[idx],
+    #     np.array(milestone_data.key_names)[idx],
+    #     label="Baseline",
+    #     zorder=1,
+    #     c='b'
+    # )
+
+    # this method does not handle NoneTypes. Therefore get_chart_info returns md_current
+    # instead of NoneTypes. Works fine, but underlying data is incorrect. Although this is 
+    # hidden from the user, preference for not making data wrong. not using at moment. 
+    # ax1.scatter(milestone_data.md_baseline, milestone_data.key_names, label="Baseline")
+    # ax1.scatter(milestone_data.md_last, milestone_data.key_names, label="Last quarter")
+    # ax1.scatter(milestone_data.md_current, milestone_data.key_names, label="Current")
+
+    # from stakeoverflow. In use need to better understand. 
+    def do_mask(x, y):
+        """
+        @type x: object
+        """
+        mask = None
+        mask = ~(x == None)
+        return np.array(x)[mask], np.array(y)[mask]
+
+    ax1.scatter(*do_mask(milestone_data.md_current, milestone_data.key_names), label="Current", zorder=10, c='g')
+    ax1.scatter(*do_mask(milestone_data.md_last, milestone_data.key_names), label="Last quarter", zorder=5, c='orange')
+    ax1.scatter(*do_mask(milestone_data.md_baseline, milestone_data.key_names), label="Baseline", zorder=1, c='b')
+
+    # format the series_one ticks
     years = mdates.YearLocator()  # every year
     months = mdates.MonthLocator()  # every month
     years_fmt = mdates.DateFormatter("%Y")
@@ -2852,8 +2927,8 @@ def milestone_chart(
         plt.setp(ax1.xaxis.get_minorticklabels(), rotation=45)
         plt.setp(ax1.xaxis.get_majorticklabels(), rotation=45, weight="bold")
 
-        # scaling x axis. Keeping for now in case useful.
-        # x axis value to no more than three months after last latest milestone date, or three months
+        # scaling series_one axis. Keeping for now in case useful.
+        # series_one axis value to no more than three months after last latest milestone date, or three months
         # before first latest milestone date. Hack, can be improved. Text highlights movements off chart.
         # x_max = milestone_data.md_current[-1] + timedelta(days=90)
         # x_min = milestone_data.md_current[0] - timedelta(days=90)
@@ -2888,10 +2963,10 @@ def milestone_chart(
 
     ax1.legend()  # insert legend
 
-    # reverse y axis so order is earliest to oldest
+    # reverse series_two axis so order is earliest to oldest
     ax1 = plt.gca()
     ax1.set_ylim(ax1.get_ylim()[::-1])
-    ax1.tick_params(axis="y", which="major", labelsize=7)
+    ax1.tick_params(axis="series_two", which="major", labelsize=7)
     ax1.yaxis.grid()  # horizontal lines
     ax1.set_axisbelow(True)
     # ax1.get_yaxis().set_visible(False)
@@ -2900,15 +2975,31 @@ def milestone_chart(
     try:
         blue_line = kwargs["blue_line"]
         if blue_line == "Today":
-            if milestone_data.min_date <= datetime.date.today() <= milestone_data.max_date:
+            if (
+                milestone_data.min_date
+                <= datetime.date.today()
+                <= milestone_data.max_date
+            ):
                 plt.axvline(datetime.date.today())
-                plt.figtext(0.98, 0.01, 'Line represents date analysis compiled',
-                            horizontalalignment='right', fontsize=6, fontweight='bold')
+                plt.figtext(
+                    0.98,
+                    0.01,
+                    "Line represents date analysis compiled",
+                    horizontalalignment="right",
+                    fontsize=6,
+                    fontweight="bold",
+                )
         if blue_line == "ipdc_date":
             if milestone_data.min_date <= IPDC_DATE <= milestone_data.max_date:
                 plt.axvline(IPDC_DATE)
-                plt.figtext(0.98, 0.01, 'Line represents PfM report at IPDC',
-                            horizontalalignment='right', fontsize=6, fontweight='bold')
+                plt.figtext(
+                    0.98,
+                    0.01,
+                    "Line represents PfM report at IPDC",
+                    horizontalalignment="right",
+                    fontsize=6,
+                    fontweight="bold",
+                )
     except KeyError:
         pass
 
@@ -2927,6 +3018,7 @@ def milestone_chart(
 
     # plt.close() #automatically closes figure so don't need to do manually.
 
+
 # def compile_all_profiles():
 #     report_doc = open_word_doc(wd_path)
 #     for i, p in enumerate(LIST_OF_GROUPS):
@@ -2944,3 +3036,78 @@ def milestone_chart(
 #         graph = total_costs_benefits_bar_chart(costs, benefits, LIST_OF_TITLES[i])
 #         put_matplotlib_fig_into_word(report_doc, graph)
 #         report_doc.save(root_path / "output/different_total_cost_profiles.docx")
+
+# def build_charts(latest_milestone_names,
+#                  latest_milestone_dates,
+#                  last_milestone_dates,
+#                  baseline_milestone_dates,
+#                  baseline_milestone_dates_two,
+#                  graph_title,
+#                  ipdc_date,
+#                  no_of_labels):
+#     """
+#     calculates how many graphical outputs to produced
+#     based on number of milestones. Milestone keys names,
+#     dates, graph title, date for blue line to represent,
+#     and number of labels to have on each graph
+#     are passed in.
+#     """
+#
+#     # axis labels are reduced if two long
+#     labels = latest_milestone_names
+#     final_labels = []
+#     for l in labels:
+#         if len(l) >= 40:
+#             final_labels.append(l[:40])
+#         else:
+#             final_labels.append(l)
+#
+#     #  Charts are built
+#     no_milestones = len(latest_milestone_names)
+#
+#     if no_milestones <= no_of_labels:
+#         milestone_swimlane_charts(np.array(final_labels), np.array(latest_milestone_dates),
+#                                   np.array(last_milestone_dates),
+#                                   np.array(baseline_milestone_dates),
+#                                   np.array(baseline_milestone_dates_two),
+#                                   graph_title, ipdc_date)
+#
+#     if no_of_labels + 1 <= no_milestones <= no_of_labels*2:
+#         half = int(no_milestones / 2)
+#         milestone_swimlane_charts(np.array(final_labels[:half]),
+#                                   np.array(latest_milestone_dates[:half]),
+#                                   np.array(last_milestone_dates[:half]),
+#                                   np.array(baseline_milestone_dates[:half]),
+#                                   np.array(baseline_milestone_dates_two[:half]),
+#                                   graph_title, ipdc_date)
+#         title = graph_title + ' cont.'
+#         milestone_swimlane_charts(np.array(final_labels[half:no_milestones]),
+#                                   np.array(latest_milestone_dates[half:no_milestones]),
+#                                   np.array(last_milestone_dates[half:no_milestones]),
+#                                   np.array(baseline_milestone_dates[half:no_milestones]),
+#                                   np.array(baseline_milestone_dates_two[half:no_milestones]),
+#                                   title, ipdc_date)
+#
+#     if (no_of_labels*2) + 1 <= no_milestones <= no_of_labels*3:
+#         third = int(no_milestones / 3)
+#         milestone_swimlane_charts(np.array(final_labels[:third]),
+#                                   np.array(latest_milestone_dates[:third]),
+#                                   np.array(last_milestone_dates[:third]),
+#                                   np.array(baseline_milestone_dates[:third]),
+#                                   np.array(baseline_milestone_dates_two[:third]),
+#                                   graph_title, ipdc_date)
+#         title = graph_title + ' cont. 1'
+#         milestone_swimlane_charts(np.array(final_labels[third:third * 2]),
+#                                   np.array(latest_milestone_dates[third:third * 2]),
+#                                   np.array(last_milestone_dates[third:third * 2]),
+#                                   np.array(baseline_milestone_dates[third:third * 2]),
+#                                   np.array(baseline_milestone_dates_two[third:third * 2]),
+#                                   title, ipdc_date)
+#         title = graph_title + ' cont. 2'
+#         milestone_swimlane_charts(np.array(final_labels[third * 2:no_milestones]),
+#                                   np.array(latest_milestone_dates[third * 2:no_milestones]),
+#                                   np.array(last_milestone_dates[third * 2:no_milestones]),
+#                                   np.array(baseline_milestone_dates[third * 2:no_milestones]),
+#                                   np.array(baseline_milestone_dates_two[third * 2:no_milestones]),
+#                                   title, ipdc_date)
+#     pass

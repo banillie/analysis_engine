@@ -196,7 +196,7 @@ def project_all_milestones_dict(project_names,
         # put the list in chronological order
         sorted_list = sorted(raw_list, key=lambda k: (k[1] is None, k[1]))
 
-        # loop to stop key names being the same. Not ideal as doesn't handle keys that may already have numbers as
+        # loop to stop keys names being the same. Not ideal as doesn't handle keys that may already have numbers as
         # strings at end of names. But still useful.
         for x in sorted_list:
             if x[0] is not None:
@@ -601,7 +601,7 @@ def get_project_cost_profile(project_name_list, q_masters_data_list, cost_list, 
     Function that gets projects project cost information and returns it in a python dictionary format.
     :param project_name_list: list of project names
     :param q_masters_data_list: list of master python dictionaries containing quarter information
-    :param cost_list: list of cost key names. this is necessary due to the total cost having be calculated across
+    :param cost_list: list of cost keys names. this is necessary due to the total cost having be calculated across
     rdel, cdel and non-gov breakdown.
     :param year_list: list of year keys e.g. '19-20', '20-21'
     :param index: index value for which master to use from the q_master_data_list . 0 is for latest, 1 last and
@@ -651,7 +651,7 @@ def get_project_income_profile(project_name_list, q_masters_data_list, income_li
     Function that gets projects project income information and returns it in a python dictionary format.
     :param project_name_list: list of project names
     :param q_masters_data_list: list of master python dictionaries containing quarter information
-    :param income_list: list of income key names.
+    :param income_list: list of income keys names.
     :param year_list: list of year keys e.g. '19-20', '20-21'
     :param index: index value for which master to use from the q_master_data_list . 0 is for latest, 1 last and
     2 baseline. The actual index list q_master_list is set at a global level in this programme.

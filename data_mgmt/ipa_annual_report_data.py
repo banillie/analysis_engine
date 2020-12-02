@@ -182,7 +182,7 @@ wb = load_workbook(
     'C:\\Users\\Standalone\\general\\masters folder\\ipa_annual_report\\ipa_annual_report_dashboard_master.xlsx')
 ws = wb.active
 
-'''2) Provide file paths to the master IAP AR data sets. Make sure the key names are the same as last year'''
+'''2) Provide file paths to the master IAP AR data sets. Make sure the keys names are the same as last year'''
 latest_ar_data = project_data_from_master(
     'C:\\Users\\Standalone\\general\\masters folder\\ipa_annual_report\\DfT AR 2019 Data.xlsx', 2, 2019)
 last_ar_data = project_data_from_master(

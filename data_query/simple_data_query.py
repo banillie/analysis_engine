@@ -10,7 +10,7 @@ Conditional formatting is placed in the files as follows:
 rag_rating colours
 missing data (md) = black grey
 project not reporting (pnr) = light grey
-key not collected (knc) = light blue grey
+keys not collected (knc) = light blue grey
 """
 
 

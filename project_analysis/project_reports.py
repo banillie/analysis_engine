@@ -627,7 +627,7 @@ def produce_word_doc(projects):
         #                                  milestone_filter_start_date,
         #                                  milestone_filter_end_date)
         #
-        # # add \n to y axis labels and cut down if two long
+        # # add \n to series_two axis labels and cut down if two long
         # labels = ['\n'.join(wrap(l, 40)) for l in m_data[0]]
         # final_labels = []
         # for l in labels:
@@ -659,7 +659,7 @@ def produce_word_doc(projects):
                                          p_baseline_milestones,
                                          project_name)
         #print(m_data)
-        # add \n to y axis labels and cut down if two long
+        # add \n to series_two axis labels and cut down if two long
         labels = ['\n'.join(wrap(l, 40)) for l in m_data[0]]
         final_labels = []
         for l in labels:
@@ -792,12 +792,12 @@ def fin_ben_total_charts(doc,
     ylab1 = ax1.yaxis.get_label()
     ylab1.set_style('italic')
     ylab1.set_size(8)
-    ax1.tick_params(axis='x', which='major', labelsize=6)
-    ax1.tick_params(axis='y', which='major', labelsize=6)
+    ax1.tick_params(axis='series_one', which='major', labelsize=6)
+    ax1.tick_params(axis='series_two', which='major', labelsize=6)
     ax1.set_title('Fig 1 - cost total change over time', loc='left', fontsize=8, fontweight='bold')
 
-    #scaling y axis
-    #y axis value setting so it takes either highest ben or cost figure
+    #scaling series_two axis
+    #series_two axis value setting so it takes either highest ben or cost figure
     cost_max = max(total_fin) + max(total_fin)/5
     ben_max = max(total_ben) + max(total_ben)/5
     # print(cost_max)
@@ -817,12 +817,12 @@ def fin_ben_total_charts(doc,
     ylab3 = ax3.yaxis.get_label()
     ylab3.set_style('italic')
     ylab3.set_size(8)
-    ax3.tick_params(axis='x', which='major', labelsize=6)
-    ax3.tick_params(axis='y', which='major', labelsize=6)
+    ax3.tick_params(axis='series_one', which='major', labelsize=6)
+    ax3.tick_params(axis='series_two', which='major', labelsize=6)
     ax3.set_title('Fig 2 - wlc cost type break down', loc='left', fontsize=8, fontweight='bold')
 
     #y_max = max(total_fin) + max(total_fin) * 1 / 5
-    ax3.set_ylim(0, y_max) #scale y axis max
+    ax3.set_ylim(0, y_max) #scale series_two axis max
 
     # benefits change
     labels = ['Baseline', 'Last Quarter', 'Latest']
@@ -835,8 +835,8 @@ def fin_ben_total_charts(doc,
     ylab2 = ax2.yaxis.get_label()
     ylab2.set_style('italic')
     ylab2.set_size(8)
-    ax2.tick_params(axis='x', which='major', labelsize=6)
-    ax2.tick_params(axis='y', which='major', labelsize=6)
+    ax2.tick_params(axis='series_one', which='major', labelsize=6)
+    ax2.tick_params(axis='series_two', which='major', labelsize=6)
     ax2.set_title('Fig 3 - ben total change over time', loc='left', fontsize=8, fontweight='bold')
 
     ax2.set_ylim(0, y_max)
@@ -852,8 +852,8 @@ def fin_ben_total_charts(doc,
     ylab4 = ax4.yaxis.get_label()
     ylab4.set_style('italic')
     ylab4.set_size(8)
-    ax4.tick_params(axis='x', which='major', labelsize=6)
-    ax4.tick_params(axis='y', which='major', labelsize=6)
+    ax4.tick_params(axis='series_one', which='major', labelsize=6)
+    ax4.tick_params(axis='series_two', which='major', labelsize=6)
     ax4.set_title('Fig 4 - benefits profile type', loc='left', fontsize=8, fontweight='bold')
 
     y_min = min(type_disbenefit_ben)
@@ -896,7 +896,7 @@ def fin_profile_graph(doc,
     ax1.plot(year, latest_profile_total, label='Latest', linewidth=3.0, marker="o")
 
     #cost profile change chart styling
-    ax1.tick_params(axis='x', which='major', labelsize=6, rotation=45)
+    ax1.tick_params(axis='series_one', which='major', labelsize=6, rotation=45)
     ax1.set_ylabel('Cost (£m)')
     ylab1 = ax1.yaxis.get_label()
     ylab1.set_style('italic')
@@ -905,8 +905,8 @@ def fin_profile_graph(doc,
     ax1.legend(prop={'size': 6})
     ax1.set_title('Fig 1 - cost profile changes', loc='left', fontsize=8, fontweight='bold')
 
-    # scaling y axis
-    # y axis value setting so it takes highest cost profile yeah
+    # scaling series_two axis
+    # series_two axis value setting so it takes highest cost profile yeah
     all = profile_data_total[0] + profile_data_total[1] + profile_data_total[2]
     y_max = max(all) + max(all) * 1 / 5
     ax1.set_ylim(0, y_max)
@@ -916,7 +916,7 @@ def fin_profile_graph(doc,
     ax2.plot(year, latest_profile_rdel, label='RDEL', linewidth=3.0, marker="o")
 
     #rdel/cdel profile chart styling
-    ax2.tick_params(axis='x', which='major', labelsize=6, rotation=45)
+    ax2.tick_params(axis='series_one', which='major', labelsize=6, rotation=45)
     ax2.set_xlabel('Financial Years')
     ax2.set_ylabel('Cost (£m)')
     xlab2 = ax2.xaxis.get_label()
@@ -960,7 +960,7 @@ def milestone_swimlane_charts(doc, project_name, latest_milestone_names, latest_
     ax1.scatter(last_milestone_dates, latest_milestone_names, label='Last Qrt')
     ax1.scatter(latest_milestone_dates, latest_milestone_names, label='Latest Qrt')
 
-    # format the x ticks
+    # format the series_one ticks
     years = mdates.YearLocator()  # every year
     months = mdates.MonthLocator()  # every month
     years_fmt = mdates.DateFormatter('%Y')
@@ -976,8 +976,8 @@ def milestone_swimlane_charts(doc, project_name, latest_milestone_names, latest_
             ax1.xaxis.set_minor_formatter(months_fmt)
             plt.setp(ax1.xaxis.get_minorticklabels(), rotation=45, fontsize=6)
             plt.setp(ax1.xaxis.get_majorticklabels(), rotation=45, weight='bold', fontsize=8)
-            # scaling x axis
-            # x axis value to no more than three months after last latest milestone date, or three months
+            # scaling series_one axis
+            # series_one axis value to no more than three months after last latest milestone date, or three months
             # before first latest milestone date. Hack, can be improved. Text highlights movements off chart.
             x_max = last_milestone_dates[-1] + timedelta(days=90)
             x_min = last_milestone_dates[0] - timedelta(days=90)
@@ -1002,10 +1002,10 @@ def milestone_swimlane_charts(doc, project_name, latest_milestone_names, latest_
 
     ax1.legend() #insert legend
 
-    #reverse y axis so order is earliest to oldest
+    #reverse series_two axis so order is earliest to oldest
     ax1 = plt.gca()
     ax1.set_ylim(ax1.get_ylim()[::-1])
-    ax1.tick_params(axis='y', which='major', labelsize=7)
+    ax1.tick_params(axis='series_two', which='major', labelsize=7)
     ax1.yaxis.grid()  # horizontal lines
     ax1.set_axisbelow(True)
 

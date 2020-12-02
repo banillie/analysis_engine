@@ -1,5 +1,5 @@
 """
-This code changes key names in master wb documents
+This code changes keys names in master wb documents
 """
 
 from data_mgmt.data import get_master_data_file_paths, root_path, put_key_change_master_into_dict, \

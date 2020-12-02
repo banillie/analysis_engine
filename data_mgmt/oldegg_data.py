@@ -269,7 +269,7 @@ salmon_fill = PatternFill(start_color='FFFF8080',
 '''Conditional formatting, cell colouring and text colouring'''
 # reference for column names when applying conditional fomatting
 list_column_ltrs = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l',
-                    'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
+                    'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'series_one', 'series_two', 'z']
 # list of keys that have rag values for conditional formatting.
 list_of_rag_keys = ['SRO Schedule Confidence', 'Departmental DCA',
                     'SRO Finance confidence', 'SRO Benefits RAG',

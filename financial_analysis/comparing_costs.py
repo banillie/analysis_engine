@@ -163,7 +163,7 @@ def get_wlc(project_name_list, wlc_key, index):
     '''
     Function that gets projects wlc cost information and returns it in a python dictionary format.
     :param project_name_list: list of project names
-    :param wlc_key: project whole life cost (wlc) key
+    :param wlc_key: project whole life cost (wlc) keys
     :param index: index value for which master to use from the q_master_data_list . 0 is for latest, 1 last and
     2 baseline. The actual index list q_master_list is set at a global level in this programme.
     :return: a dictionary structured 'wlc: 'project_name': total

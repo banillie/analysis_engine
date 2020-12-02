@@ -32,7 +32,7 @@ def change_key(project_list, master_wb_title_list, change_key):
                 if project_name == name:
                     print(name)
                     for row_num in range(2, ws.max_row + 1):
-                        for i in range(2): # TODO: non-hard code fix. change key length?
+                        for i in range(2): # TODO: non-hard code fix. change keys length?
                             try:
                                 if ws.cell(row=row_num, column=col_num).value == change_key[project_name]['Key '+ str(i)]:
                                         print(change_key[project_name]['Key '+ str(i)])
@@ -69,7 +69,7 @@ master_list = (root_path/'core_data/master_1_2020.xlsx',
 '''TWO. Provide file path to document which contains information on the data that needs to be changed'''
 key_change = project_data_from_master(root_path/'input/change_milestone_keys_q1_2021.xlsx', 2, 2019)
 
-'''THREE. List of projects. taken from the key change document - as this contains the only projects that need 
+'''THREE. List of projects. taken from the keys change document - as this contains the only projects that need 
 information changed'''
 project_name_list = key_change.projects
 #project_name_list = ['A303 Amesbury to Berwick Down']

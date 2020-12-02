@@ -372,7 +372,7 @@ def schedule_info(wb):
                 ws.cell(row=row_num, column=26).value = ''
 
     '''list of columns with conditional formatting'''
-    list_columns = ['v', 'w', 'x', 'y', 'z']
+    list_columns = ['v', 'w', 'series_one', 'series_two', 'z']
 
     '''same loop but the text is black. In addition these two loops go through the list_columns list above'''
     for column in list_columns:
@@ -513,7 +513,7 @@ def benefits_info(wb):
             # In year benefits
             iyb = list_of_masters_all[0].data[project_name]["BEN Forecast In-Year"]
             ws.cell(row=row_num, column=14).value = iyb
-            # No iyb variance yet as this key only present in Q2 2021 master.
+            # No iyb variance yet as this keys only present in Q2 2021 master.
 
 
             '''benefits DCA rating - this quarter'''

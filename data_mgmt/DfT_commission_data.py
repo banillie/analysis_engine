@@ -20,12 +20,12 @@ def create_master(workbook, project_name_list, commission_q_data, latest_q_data)
         # for loop for placing data into the worksheet
         for row_num in range(2, ws.max_row+1):
             key = ws.cell(row=row_num, column=1).value
-            #print(key)
+            #print(keys)
 
             if key in commission_q_data.data[name].keys():
                 ws.cell(row=row_num, column=2+i).value = commission_q_data[name][key]
-            # if "lst qrt" in key:
-            #     altered_lst_quarter = key.replace("lst qrt ", "")
+            # if "lst qrt" in keys:
+            #     altered_lst_quarter = keys.replace("lst qrt ", "")
             #     try:
             #         ws.cell(row=row_num, column=2 + i).value = latest_q_data.data[name][altered_lst_quarter]
             #     except KeyError:
@@ -33,219 +33,219 @@ def create_master(workbook, project_name_list, commission_q_data, latest_q_data)
             #
             #     try:
             #         '''handling of DN types'''
-            #         if key == "lst qrt DN Type 1":
+            #         if keys == "lst qrt DN Type 1":
             #             ws.cell(row=row_num, column=2 + i).value = dn_combine_text(latest_q_data.data[name],['DN Type 1', 'DN Description 1'])
-            #         if key == "lst qrt DN Type 2":
+            #         if keys == "lst qrt DN Type 2":
             #             ws.cell(row=row_num, column=2 + i).value = dn_combine_text(latest_q_data.data[name],['DN Type 2', 'DN Description 2'])
-            #         if key == "lst qrt DN Type 3":
+            #         if keys == "lst qrt DN Type 3":
             #             ws.cell(row=row_num, column=2 + i).value = dn_combine_text(latest_q_data.data[name],['DN Type 3', 'DN Description 3'])
-            #         if key == "lst qrt DN Type 4":
+            #         if keys == "lst qrt DN Type 4":
             #             ws.cell(row=row_num, column=2 + i).value = dn_combine_text(latest_q_data.data[name],['DN Type 4', 'DN Description 4'])
-            #         if key == "lst qrt DN Type 5":
+            #         if keys == "lst qrt DN Type 5":
             #             ws.cell(row=row_num, column=2 + i).value = dn_combine_text(latest_q_data.data[name],['DN Type 5', 'DN Description 5'])
             #
             #         '''handling of strategic outcomes'''
-            #         if key == "lst qrt List Strategic Outcomes (GMPP - Intended Outcome 1)":
+            #         if keys == "lst qrt List Strategic Outcomes (GMPP - Intended Outcome 1)":
             #             ws.cell(row=row_num, column=2 + i).value = \
             #                 strategic_combine_text(latest_q_data.data[name], ['List Strategic Outcomes (GMPP - Intended Outcome 1)',
             #                                                             'IO1', 'IO1 - Monetised?', 'IO1 PESTLE'])
-            #         if key == "lst qrt List Strategic Outcomes (GMPP - Intended Outcome 2)":
+            #         if keys == "lst qrt List Strategic Outcomes (GMPP - Intended Outcome 2)":
             #             ws.cell(row=row_num, column=2 + i).value = \
             #                 strategic_combine_text(latest_q_data.data[name], ['List Strategic Outcomes (GMPP - Intended Outcome 2)',
             #                                                             'IO2', 'IO2 - Monetised?', 'IO2 PESTLE'])
-            #         if key == "lst qrt List Strategic Outcomes (GMPP - Intended Outcome 3)":
+            #         if keys == "lst qrt List Strategic Outcomes (GMPP - Intended Outcome 3)":
             #             ws.cell(row=row_num, column=2 + i).value = \
             #                 strategic_combine_text(latest_q_data.data[name], ['List Strategic Outcomes (GMPP - Intended Outcome 3)',
             #                                                             'IO3', 'IO3 - Monetised?', 'IO3 PESTLE'])
-            #         if key == "lst qrt List Strategic Outcomes (GMPP - Intended Outcome 4)":
+            #         if keys == "lst qrt List Strategic Outcomes (GMPP - Intended Outcome 4)":
             #             ws.cell(row=row_num, column=2 + i).value = \
             #                 strategic_combine_text(latest_q_data.data[name], ['List Strategic Outcomes (GMPP - Intended Outcome 4)',
             #                                                             'IO4', 'IO4 - Monetised?', 'IO4 PESTLE'])
-            #         if key == "lst qrt List Strategic Outcomes (GMPP - Intended Outcome 5)":
+            #         if keys == "lst qrt List Strategic Outcomes (GMPP - Intended Outcome 5)":
             #             ws.cell(row=row_num, column=2 + i).value = \
             #                 strategic_combine_text(latest_q_data.data[name], ['List Strategic Outcomes (GMPP - Intended Outcome 5)',
             #                                                             'IO5', 'IO5 - Monetised?', 'IO5 PESTLE'])
-            #         if key == "lst qrt List Strategic Outcomes (GMPP - Intended Outcome 6)":
+            #         if keys == "lst qrt List Strategic Outcomes (GMPP - Intended Outcome 6)":
             #             ws.cell(row=row_num, column=2 + i).value = \
             #                 strategic_combine_text(latest_q_data.data[name], ['List Strategic Outcomes (GMPP - Intended Outcome 6)',
             #                                                             'IO6', 'IO6 - Monetised?', 'IO6 PESTLE'])
-            #         if key == "lst qrt List Strategic Outcomes (GMPP - Intended Outcome 7)":
+            #         if keys == "lst qrt List Strategic Outcomes (GMPP - Intended Outcome 7)":
             #             ws.cell(row=row_num, column=2 + i).value = \
             #                 strategic_combine_text(latest_q_data.data[name], ['List Strategic Outcomes (GMPP - Intended Outcome 7)',
             #                                                             'IO7', 'IO7 - Monetised?', 'IO7 PESTLE'])
-            #         if key == "lst qrt List Strategic Outcomes (GMPP - Intended Outcome 8)":
+            #         if keys == "lst qrt List Strategic Outcomes (GMPP - Intended Outcome 8)":
             #             ws.cell(row=row_num, column=2 + i).value = \
             #                 strategic_combine_text(latest_q_data.data[name], ['List Strategic Outcomes (GMPP - Intended Outcome 8)',
             #                                                             'IO8', 'IO8 - Monetised?', 'IO8 PESTLE'])
-            #         if key == "lst qrt List Strategic Outcomes (GMPP - Intended Outcome 8)":
+            #         if keys == "lst qrt List Strategic Outcomes (GMPP - Intended Outcome 8)":
             #             ws.cell(row=row_num, column=2 + i).value = \
             #                 strategic_combine_text(latest_q_data.data[name], ['List Strategic Outcomes (GMPP - Intended Outcome 8)',
             #                                                             'IO8', 'IO8 - Monetised?', 'IO8 PESTLE'])
-            #         if key == "lst qrt List Strategic Outcomes (GMPP - Intended Outcome 9)":
+            #         if keys == "lst qrt List Strategic Outcomes (GMPP - Intended Outcome 9)":
             #             ws.cell(row=row_num, column=2 + i).value = \
             #                 strategic_combine_text(latest_q_data.data[name], ['List Strategic Outcomes (GMPP - Intended Outcome 9)',
             #                                                             'IO9', 'IO9 - Monetised?', 'IO9 PESTLE'])
-            #         if key == "lst qrt List Strategic Outcomes (GMPP - Intended Outcome 10)":
+            #         if keys == "lst qrt List Strategic Outcomes (GMPP - Intended Outcome 10)":
             #             ws.cell(row=row_num, column=2 + i).value = \
             #                 strategic_combine_text(latest_q_data.data[name], ['List Strategic Outcomes (GMPP - Intended Outcome 10)',
             #                                                             'IO10', 'IO10 - Monetised?', 'IO10 PESTLE'])
             #
             #         '''handling of investment objectives'''
-            #         if key == "lst qrt Primary investment Objective":
+            #         if keys == "lst qrt Primary investment Objective":
             #             ws.cell(row=row_num, column=2 + i).value = dn_combine_text(latest_q_data.data[name],
             #                                        ['Primary investment Objective', 'IO11 Monetised'])
-            #         if key == "lst qrt Secondary investment Objective":
+            #         if keys == "lst qrt Secondary investment Objective":
             #             ws.cell(row=row_num, column=2 + i).value = dn_combine_text(latest_q_data.data[name],
             #                                        ['Secondary investment Objective', 'IO12 Monetised'])
             #
             #         '''handling of risk descriptions'''
-            #         if key == "lst qrt Brief Risk Decription 1":
+            #         if keys == "lst qrt Brief Risk Decription 1":
             #             ws.cell(row=row_num, column=2 + i).value = \
             #                 risk_combine_text(latest_q_data.data[name], [
             #                     'Brief Risk Decription 1', 'BRD 1Risk Category', 'BRD 1 Primary Risk to',
             #                     'BRD 1 Internal Control', 'BRD 1 Residual Impact', 'BRD 1 Residual Likelihood'])
-            #         if key == "lst qrt Brief Risk Decription 2":
+            #         if keys == "lst qrt Brief Risk Decription 2":
             #             ws.cell(row=row_num, column=2 + i).value = \
             #                 risk_combine_text(latest_q_data.data[name], [
             #                     'Brief Risk Decription 2', 'BRD 2 Risk Category', 'BRD 2 Primary Risk to',
             #                     'BRD 2 Internal Control', 'BRD 2 Residual Impact', 'BRD 2 Residual Likelihood'])
-            #         if key == "lst qrt Brief Risk Decription 3":
+            #         if keys == "lst qrt Brief Risk Decription 3":
             #             ws.cell(row=row_num, column=2 + i).value = \
             #                 risk_combine_text(latest_q_data.data[name], [
             #                     'Brief Risk Decription 3', 'BRD 3 Risk Category', 'BRD 3 Primary Risk to',
             #                     'BRD 3 Internal Control', 'BRD 3 Residual Impact', 'BRD 3 Residual Likelihood'])
-            #         if key == "lst qrt Brief Risk Decription 4":
+            #         if keys == "lst qrt Brief Risk Decription 4":
             #             ws.cell(row=row_num, column=2 + i).value = \
             #                 risk_combine_text(latest_q_data.data[name], [
             #                     'Brief Risk Decription 4', 'BRD 4 Risk Category', 'BRD 4 Primary Risk to',
             #                     'BRD 4 Internal Control', 'BRD 4 Residual Impact', 'BRD 4 Residual Likelihood'])
-            #         if key == "lst qrt Brief Risk Decription 5":
+            #         if keys == "lst qrt Brief Risk Decription 5":
             #             ws.cell(row=row_num, column=2 + i).value = \
             #                 risk_combine_text(latest_q_data.data[name], [
             #                     'Brief Risk Decription 5', 'BRD 5 Risk Category', 'BRD 5 Primary Risk to',
             #                     'BRD 5 Internal Control', 'BRD 5 Residual Impact', 'BRD 5 Residual Likelihood'])
             #
             #         '''handling of leaders info'''
-            #         if key == "lst qrt Job Title / Grade":
+            #         if keys == "lst qrt Job Title / Grade":
             #             ws.cell(row=row_num, column=2 + i).value = \
             #                 dn_combine_text(latest_q_data.data[name], ['Job Title / Grade', 'SRO Grade'])
-            #         if key == "lst qrt Job Title":
+            #         if keys == "lst qrt Job Title":
             #             ws.cell(row=row_num, column=2 + i).value = \
             #                 dn_combine_text(latest_q_data.data[name], ['Job Title', 'PD Grade'])
             #
             #         '''handling of resourcing info'''
-            #         if key == "lst qrt Digital - Now":
+            #         if keys == "lst qrt Digital - Now":
             #             ws.cell(row=row_num, column=2 + i).value = \
             #                 resource_combine_text(latest_q_data.data[name], ['Digital - Now', 'Digital - Future',
             #                                                             'Digital Short Narrative (Amber or Red)'])
-            #         if key == "lst qrt Information Technology - Now":
+            #         if keys == "lst qrt Information Technology - Now":
             #             ws.cell(row=row_num, column=2 + i).value = \
             #                 resource_combine_text(latest_q_data.data[name], ['Information Technology - Now', 'Information Technology - Future',
             #                                                             'Information Technology Short Narrative (Amber or Red)'])
-            #         if key == "lst qrt Legal Commercial Contract Management - Now":
+            #         if keys == "lst qrt Legal Commercial Contract Management - Now":
             #             ws.cell(row=row_num, column=2 + i).value = \
             #                 resource_combine_text(latest_q_data.data[name], ['Legal Commercial Contract Management - Now', 'Legal Commercial Contract Management - Future',
             #                                                             'Legal Commercial & Contract Management Short Narrative (Amber or Red)'])
-            #         if key == "lst qrt Project Delivery - Now":
+            #         if keys == "lst qrt Project Delivery - Now":
             #             ws.cell(row=row_num, column=2 + i).value = \
             #                 resource_combine_text(latest_q_data.data[name], ['Project Delivery - Now', 'Project Delivery - Future',
             #                                                             'Project Delivery Short Narrative (Amber or Red)'])
-            #         if key == "lst qrt Change Implementation - Now":
+            #         if keys == "lst qrt Change Implementation - Now":
             #             ws.cell(row=row_num, column=2 + i).value = \
             #                 resource_combine_text(latest_q_data.data[name], ['Change Implementation - Now', 'Change Implementation - Future',
             #                                                             'Change Implementation Short Narrative (Amber or Red)'])
-            #         if key == "lst qrt Technical - Now":
+            #         if keys == "lst qrt Technical - Now":
             #             ws.cell(row=row_num, column=2 + i).value = \
             #                 resource_combine_text(latest_q_data.data[name], ['Technical - Now', 'Technical - Future',
             #                                                             'Technical Short Narrative (Amber or Red)'])
-            #         if key == "lst qrt Industry Knowledge - Now":
+            #         if keys == "lst qrt Industry Knowledge - Now":
             #             ws.cell(row=row_num, column=2 + i).value = \
             #                 resource_combine_text(latest_q_data.data[name], ['Industry Knowledge - Now', 'Industry Knowledge - Future',
             #                                                             'Industry Knowledge Short Narrative (Amber or Red)'])
-            #         if key == "lst qrt Finance - Now":
+            #         if keys == "lst qrt Finance - Now":
             #             ws.cell(row=row_num, column=2 + i).value = \
             #                 resource_combine_text(latest_q_data.data[name], ['Finance - Now', 'Finance - Future',
             #                                                             'Finance Short Narrative (Amber or Red)'])
-            #         # if key == "lst qrt Analysis Now":
+            #         # if keys == "lst qrt Analysis Now":
             #         #     ws.cell(row=row_num, column=2 + i).value = \
             #         #         resource_combine_text(latest_q_data.data[name], ['Analysis - Now', 'Analysis - Future',
             #         #                                                     'Analysis Short Narrative (Amber or Red)'])
-            #         if key == "lst qrt Communications & Stakeholder Engagement - Now":
+            #         if keys == "lst qrt Communications & Stakeholder Engagement - Now":
             #             ws.cell(row=row_num, column=2 + i).value = \
             #                 resource_combine_text(latest_q_data.data[name], ['Communications & Stakeholder Engagement - Now', 'Communications & Stakeholder Engagement - Future',
             #                                                             'Communications & Stakeholder Engagement Short Narrative (Amber or Red)'])
             #
             #         '''handling of extra resource'''
-            #         if key == "lst qrt Additional Capability 1 Descriptor":
+            #         if keys == "lst qrt Additional Capability 1 Descriptor":
             #             ws.cell(row=row_num, column=2 + i).value = \
             #                 extra_resource_combine_text(latest_q_data.data[name], ['Additional Capability 1 Descriptor', 'Additional Capability 1 Now',
             #                                                             'Additional Capability 1 Future', 'Additional Capability 1 Short Narrative (Amber or Red)'])
-            #         if key == "lst qrt Additional Capability 2 Descriptor":
+            #         if keys == "lst qrt Additional Capability 2 Descriptor":
             #             ws.cell(row=row_num, column=2 + i).value = \
             #                 extra_resource_combine_text(latest_q_data.data[name], ['Additional Capability 2 Descriptor', 'Additional Capability 2 Now',
             #                                                             'Additional Capability 2 Future', 'Additional Capability 2 Short Narrative (Amber or Red)'])
-            #         if key == "lst qrt Additional Capability 3 Descriptor":
+            #         if keys == "lst qrt Additional Capability 3 Descriptor":
             #             ws.cell(row=row_num, column=2 + i).value = \
             #                 extra_resource_combine_text(latest_q_data.data[name], ['Additional Capability 3 Descriptor', 'Other Capability 3 - Now',
             #                                                             'Other Capability 3 - Future', 'Additional Capability 3 Short Narrative (Amber or Red)'])
-            #         if key == "lst qrt Additional Capability 4 Descriptor":
+            #         if keys == "lst qrt Additional Capability 4 Descriptor":
             #             ws.cell(row=row_num, column=2 + i).value = \
             #                 extra_resource_combine_text(latest_q_data.data[name], ['Additional Capability 4 Descriptor', 'Other Capability 4 - Now',
             #                                                             'Other Capability 4 - Future', 'Additional Capability 4 Short Narrative (Amber or Red)'])
-            #         if key == "lst qrt Additional Capability 5 Descriptor":
+            #         if keys == "lst qrt Additional Capability 5 Descriptor":
             #             ws.cell(row=row_num, column=2 + i).value = \
             #                 extra_resource_combine_text(latest_q_data.data[name], ['Additional Capability 5 Descriptor', 'Additional Capability 5 Now',
             #                                                             'Additional Capability 5 Future', 'Additional Capability 5 Short Narrative (Amber or Red)'])
             #
             #
             #         '''handling of project costs'''
-            #         if key == "lst qrt RDEL one off costs":
+            #         if keys == "lst qrt RDEL one off costs":
             #             ws.cell(row=row_num, column=2 + i).value = \
             #                 combine_figures(latest_q_data.data[name], ['Total RDEL BL one off new costs', 'Total RDEL Forecast one off new costs'])
-            #         if key == "lst qrt RDEL recurring new costs":
+            #         if keys == "lst qrt RDEL recurring new costs":
             #             ws.cell(row=row_num, column=2 + i).value = \
             #                 combine_figures(latest_q_data.data[name], ['Total RDEL BL recurring new costs', 'Total RDEL Forecast recurring new costs'])
-            #         if key == "lst qrt RDEL recurring old costs":
+            #         if keys == "lst qrt RDEL recurring old costs":
             #             ws.cell(row=row_num, column=2 + i).value = \
             #                 combine_figures(latest_q_data.data[name], ['Total RDEL BL recurring old costs', 'Total RDEL Forecast recurring old costs'])
-            #         if key == "lst qrt RDEL non gov":
+            #         if keys == "lst qrt RDEL non gov":
             #             ws.cell(row=row_num, column=2 + i).value = \
             #                 combine_figures(latest_q_data.data[name], ['Total RDEL BL Non Gov costs', 'Total RDEL Forecast Non Gov costs'])
-            #         if key == "lst qrt CDEL one off costs":
+            #         if keys == "lst qrt CDEL one off costs":
             #             ws.cell(row=row_num, column=2 + i).value = \
             #                 combine_figures(latest_q_data.data[name], ['Total CDEL BL one off new costs', 'Total CDEL Forecast Total'])
-            #         if key == "lst qrt CDEL recurring new costs":
+            #         if keys == "lst qrt CDEL recurring new costs":
             #             ws.cell(row=row_num, column=2 + i).value = \
             #                 combine_figures(latest_q_data.data[name], ['Total CDEL BL recurring new costs', 'Total CDEL Forecast recurring new costs'])
-            #         if key == "lst qrt CDEL recurring old costs":
+            #         if keys == "lst qrt CDEL recurring old costs":
             #             ws.cell(row=row_num, column=2 + i).value = \
             #                 combine_figures(latest_q_data.data[name], ['Total CDEL BL recurring old costs', 'Total CDEL Forecast recurring old costs'])
-            #         if key == "lst qrt CDEL non gov":
+            #         if keys == "lst qrt CDEL non gov":
             #             ws.cell(row=row_num, column=2 + i).value = \
             #                 combine_figures(latest_q_data.data[name], ['Non-Gov Total Budget/BL', 'Non-Gov Total Forecast'])
-            #         if key == "lst qrt Total Budget/BL":
+            #         if keys == "lst qrt Total Budget/BL":
             #             ws.cell(row=row_num, column=2 + i).value = combine_figures(latest_q_data.data[name],
             #                                                                        ['Total Budget/BL', 'Total Forecast'])
-            #         if key == "lst qrt In-Year Spend Total":
+            #         if keys == "lst qrt In-Year Spend Total":
             #             ws.cell(row=row_num, column=2 + i).value = add_combine_figures(latest_q_data.data[name],
             #                                                                        ['19-20 RDEL BL Total', '19-20 CDEL BL WLC',
             #                                                                         '19-20 RDEL Forecast Total', '19-20 CDEL Forecast Total WLC'])
-            #         if key == "lst qrt Income total":
+            #         if keys == "lst qrt Income total":
             #             ws.cell(row=row_num, column=2 + i).value = combine_figures(latest_q_data.data[name],
             #                                                                        ['Total Baseline - Income both Revenue and Capital',
             #                                                                         'Total Forecast - Income both Revenue and Capital'])
-            #         if key == "lst qrt In-Year Income Total":
+            #         if keys == "lst qrt In-Year Income Total":
             #             ws.cell(row=row_num, column=2 + i).value = add_combine_figures(latest_q_data.data[name],
             #                                                                        ['19-20 RDEL BL Income', '19-20 BL Income both Revenue and Capital',
             #                                                                         '19-20 RDEL Forecast Income',
             #                                                                         '19-20 Forecast - Income both Revenue and Capital'])
-            #         #if key == "lst qrt 19-20 RDEL Forecast one off new costs":
+            #         #if keys == "lst qrt 19-20 RDEL Forecast one off new costs":
             #         #     ws.cell(row=row_num, column=2 + i).value = combine_figures(latest_q_data.data[name],
             #         #                                                                ['19-20 RDEL Forecast one off new costs', '19-20 RDEL Forecast Income'])
-            #         # if key == "lst qrt 20-21 RDEL BL one off new costs":
+            #         # if keys == "lst qrt 20-21 RDEL BL one off new costs":
             #         #     ws.cell(row=row_num, column=2 + i).value = combine_figures(latest_q_data.data[name],
             #         #                                                                ['20-21 RDEL BL one off new costs', '20-21 RDEL BL Income'])
-            #         # if key == "lst qrt 20-21 RDEL Forecast one off new costs":
+            #         # if keys == "lst qrt 20-21 RDEL Forecast one off new costs":
             #         #     ws.cell(row=row_num, column=2 + i).value = combine_figures(latest_q_data.data[name],
             #         #                                                                ['20-21 RDEL Forecast one off new costs', '20-21 RDEL Forecast Income'])
             #
@@ -255,9 +255,9 @@ def create_master(workbook, project_name_list, commission_q_data, latest_q_data)
             #
             #     # this section of the code ensures that all financial costs / benefit forecasts have a zero
             #     for cost_type in type_list_2:
-            #         if cost_type in key:
+            #         if cost_type in keys:
             #             try:
-            #                 if latest_q_data.data[name][key] is None:
+            #                 if latest_q_data.data[name][keys] is None:
             #                     ws.cell(row=row_num, column=2 + i).value = 0
             #             except KeyError:
             #                 pass
@@ -301,9 +301,9 @@ def create_master(workbook, project_name_list, commission_q_data, latest_q_data)
 #
 #     '''handling for none types'''
 #     other_list = []
-#     for x in string_list:
-#         if q_data[x] is not None:
-#             other_list.append(q_data[x])
+#     for series_one in string_list:
+#         if q_data[series_one] is not None:
+#             other_list.append(q_data[series_one])
 #         else:
 #             other_list.append('')
 #
@@ -388,9 +388,9 @@ run.save(root_path/'output/commission_master_test_populated.xlsx')
 #     ws = wb.active
 #
 #     for i in range(1, ws.max_row+1):
-#         for key in m_dict.data['type'].keys():
-#             if ws.cell(row=i+2, column=1).value == key:
-#                 ws.cell(row=i+2, column=5).value = m_dict.data['type'][key]
+#         for keys in m_dict.data['type'].keys():
+#             if ws.cell(row=i+2, column=1).value == keys:
+#                 ws.cell(row=i+2, column=5).value = m_dict.data['type'][keys]
 #
 #     wb.save('/home/will/Documents/analysis_engine/input/new_dm.xlsx')
 
