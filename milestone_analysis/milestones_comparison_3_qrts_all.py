@@ -58,7 +58,7 @@ master_data = get_master_data()
 current_project_name_list = get_current_project_names()
 
 mst = Master(master_data, current_project_name_list)  # get Master object and specify projects of interest
-mst.baseline_data('Re-baseline IPDC milestones')  # place baseline information of interest into master object
+mst.get_baseline_data('Re-baseline IPDC milestones')  # place baseline information of interest into master object
 milestone_data = MilestoneData(mst, abbreviations)  # create MilestoneData object
 milestone_data.get_milestones('Delivery')  # place type of milestone data of interest into MilestoneData object
 

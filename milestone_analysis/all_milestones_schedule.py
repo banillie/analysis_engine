@@ -1,11 +1,16 @@
 from data_mgmt.data import (
     Master,
+    CostData,
+    BenefitsData,
     get_master_data,
     get_project_information,
     MilestoneData,
     Projects,
     milestone_chart,
     save_graph,
+    cost_profile_graph,
+    FIGURE_STYLE,
+    total_costs_benefits_bar_chart
 )
 
 PARLIAMENT = [
@@ -85,8 +90,8 @@ HE_SPECIFIC = [
     "PVR" "Submission",
 ]
 
-master = Master(get_master_data(), get_project_information())
-milestones = MilestoneData(master, master.current_projects)
-milestones.filter_chart_info(milestone_type='Delivery', start_date="1/12/2020", end_date="1/6/2021")
-f = milestone_chart(milestones, title="Planning")
-# save_graph(f, "non zero solution 2")
+# master = Master(get_master_data(), get_project_information())
+# milestones = MilestoneData(master, master.current_projects)
+# milestones.filter_chart_info(milestone_type='Delivery', start_date="1/12/2020", end_date="1/6/2021")
+# f = milestone_chart(milestones, title="Planning")
+# # save_graph(f, "non zero solution 2")

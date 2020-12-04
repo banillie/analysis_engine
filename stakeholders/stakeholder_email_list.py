@@ -53,9 +53,4 @@ def filter_mode(stakeholder_dict, mode):
     return output_list
 
 
-
-he_major_roads = ['A14 Cambridge to Huntingdon Improvement Scheme', 'A303 Amesbury to Berwick Down',
-                  'A428 Black Cat to Caxton Gibbett', 'Lower Thames Crossing']
-#he_strategy_schemes = ['Manchester North West Quadrant', 'Oxford-Cambridge Expressway ', 'A66']
-
 email_list = get_stakeholder_list(stakeholders, all_projects)

@@ -375,6 +375,20 @@ class Projects:
         a66,
         ewr_config2,
     ]
+    rail_infrastructure = [
+        crossrail,
+        iep,
+        gwrm,
+        midland_mainline,
+        midlands_rail_hub,
+        thameslink,
+        east_coast_mainline,
+        tru,
+        wrlth,
+        south_west_route_capacity,
+        nwe,
+        brighton_ml,
+    ]
 
 
 LIST_OF_GROUPS = [  # master.current_projects,
@@ -536,12 +550,12 @@ class Master:
         self.current_projects = self.get_current_projects()
         self.bl_info = {}
         self.bl_index = {}
-        self.baseline_data()
+        self.get_baseline_data()
         self.check_project_information()
-        # self.check_baselines()  # optional for now
+        self.check_baselines()
         self.get_project_abbreviations()
 
-    def baseline_data(self) -> dict:
+    def get_baseline_data(self) -> dict:
         """
         Returns the two dictionaries baseline_info and baseline_index for all projects for all
         baseline types
@@ -1290,7 +1304,7 @@ class MilestoneData:
                         m_last_date = m_last["Date"]
                         md_last.append(m_last_date)
             if m_last_date is None:
-                md_last.append(None)
+                md_last.append(m_date)
 
             m_bl_date = None
             for m_bl in self.baseline.values():
@@ -1299,7 +1313,7 @@ class MilestoneData:
                         m_bl_date = m_bl["Date"]
                         md_baseline.append(m_bl_date)
             if m_bl_date is None:
-                md_baseline.append(None)
+                md_baseline.append(m_date)
 
             m_bl_two_date = None
             for m_bl_two in self.baseline_two.values():
@@ -1308,7 +1322,7 @@ class MilestoneData:
                         m_bl_date = m_bl_two["Date"]
                         md_baseline_two.append(m_bl_date)
             if m_bl_two_date is None:
-                md_baseline_two.append(None)
+                md_baseline_two.append(m_date)
 
         if len(self.project_group) == 1:
             key_names = remove_project_name(
@@ -1816,7 +1830,7 @@ def cost_profile_graph(cost_master: CostData, **kwargs) -> plt.figure:
     else:
         try:
             fig.suptitle(kwargs["title"] + " Cost Profile", fontweight="bold")  # title
-        except IndexError:
+        except KeyError:
             pass
             print("You need to provide a title for this chart")
 
@@ -2064,6 +2078,12 @@ def spent_calculation(
 def open_word_doc(wd_path: str) -> Document:
     """Function stores an empty word doc as a variable"""
     return Document(wd_path)
+
+
+def get_word_doc() -> Document():
+    """returns the summary temp doc"""
+    wd_path = root_path / "input/summary_temp.docx"
+    return open_word_doc(wd_path)
 
 
 def wd_heading(
@@ -2364,13 +2384,15 @@ def total_costs_benefits_bar_chart(
     if len(cost_master.project_group) == 1:
         fig.suptitle(
             cost_master.master.abbreviations[cost_master.project_group[0]]
-            + " Cost Profile",
+            + " total costs and benefits",
             fontweight="bold",
         )
     else:
         try:
-            fig.suptitle(kwargs["title"] + " Cost Profile", fontweight="bold")  # title
-        except IndexError:
+            fig.suptitle(
+                kwargs["title"] + " total costs and benefits", fontweight="bold"
+            )  # title
+        except KeyError:
             pass
             print("You need to provide a title for this chart")
 
@@ -2823,6 +2845,17 @@ def save_graph(fig: plt.figure, file_name: str, **kwargs) -> None:
         os.remove("temp_file.png")
 
 
+# from stackoverflow.
+def do_mask(x: List[datetime.date], y: List[datetime.date]):
+    """
+    helper function for putting series of datetime.date values with NoneType into
+    matplotlib.
+    """
+    mask = None
+    mask = ~(x == None)
+    return np.array(x)[mask], np.array(y)[mask]
+
+
 def milestone_chart(
     milestone_data: MilestoneData,
     **kwargs,
@@ -2853,12 +2886,12 @@ def milestone_chart(
             print("You need to provide a title for this chart")
 
     # convert lists into numpy arrays.
-    milestone_data.md_baseline = np.array(milestone_data.md_baseline)
-    milestone_data.md_last = np.array(milestone_data.md_last)
-    milestone_data.md_current = np.array(milestone_data.md_current)
+    # milestone_data.md_baseline = np.array(milestone_data.md_baseline)
+    # milestone_data.md_last = np.array(milestone_data.md_last)
+    # milestone_data.md_current = np.array(milestone_data.md_current)
 
-    # fom stackoverflow, Since plotting series as a scatter plot, the order 
-    # is not crucial. index nparrays for non-zero elements. not using at moment. 
+    # fom stackoverflow, Since plotting series as a scatter plot, the order
+    # is not crucial. index nparrays for non-zero elements. not using at moment.
     # idx_three = milestone_data.md_current.nonzero()[0].tolist()
     # ax1.scatter(
     #     milestone_data.md_current[idx_three],
@@ -2885,24 +2918,15 @@ def milestone_chart(
     # )
 
     # this method does not handle NoneTypes. Therefore get_chart_info returns md_current
-    # instead of NoneTypes. Works fine, but underlying data is incorrect. Although this is 
-    # hidden from the user, preference for not making data wrong. not using at moment. 
-    # ax1.scatter(milestone_data.md_baseline, milestone_data.key_names, label="Baseline")
-    # ax1.scatter(milestone_data.md_last, milestone_data.key_names, label="Last quarter")
-    # ax1.scatter(milestone_data.md_current, milestone_data.key_names, label="Current")
+    # instead of NoneTypes. Works fine, but underlying data is incorrect. Although this is
+    # hidden from the user, preference for not making data wrong. not using at moment.
+    ax1.scatter(milestone_data.md_baseline, milestone_data.key_names, label="Baseline")
+    ax1.scatter(milestone_data.md_last, milestone_data.key_names, label="Last quarter")
+    ax1.scatter(milestone_data.md_current, milestone_data.key_names, label="Current")
 
-    # from stakeoverflow. In use need to better understand. 
-    def do_mask(x, y):
-        """
-        @type x: object
-        """
-        mask = None
-        mask = ~(x == None)
-        return np.array(x)[mask], np.array(y)[mask]
-
-    ax1.scatter(*do_mask(milestone_data.md_current, milestone_data.key_names), label="Current", zorder=10, c='g')
-    ax1.scatter(*do_mask(milestone_data.md_last, milestone_data.key_names), label="Last quarter", zorder=5, c='orange')
-    ax1.scatter(*do_mask(milestone_data.md_baseline, milestone_data.key_names), label="Baseline", zorder=1, c='b')
+    # ax1.scatter(*do_mask(milestone_data.md_current, milestone_data.key_names), label="Current", zorder=10, c='g')
+    # ax1.scatter(*do_mask(milestone_data.md_last, milestone_data.key_names), label="Last quarter", zorder=5, c='orange')
+    # ax1.scatter(*do_mask(milestone_data.md_baseline, milestone_data.key_names), label="Baseline", zorder=1, c='b')
 
     # format the series_one ticks
     years = mdates.YearLocator()  # every year
@@ -2969,7 +2993,12 @@ def milestone_chart(
     ax1.tick_params(axis="series_two", which="major", labelsize=7)
     ax1.yaxis.grid()  # horizontal lines
     ax1.set_axisbelow(True)
-    # ax1.get_yaxis().set_visible(False)
+
+    try:
+        if kwargs["show_keys"] == "no":
+            ax1.get_yaxis().set_visible(False)
+    except KeyError:
+        pass
 
     # Add line of analysis date, but only if in the time period
     try:
@@ -3111,3 +3140,141 @@ def milestone_chart(
 #                                   np.array(baseline_milestone_dates_two[third * 2:no_milestones]),
 #                                   title, ipdc_date)
 #     pass
+
+DCA_KEYS = {
+    "SRO": "Departmental DCA",
+    "FINANCE": "SRO Finance confidence",
+    "BENEFITS": "SRO Benefits RAG",
+    "SCHEDULE": "SRO Schedule Confidence",
+}
+
+DCA_RATING_SCORES = {"Green": 5, "Amber/Green": 4, "Amber": 3, "Amber/Red": 2, "Red": 1}
+
+
+def calculate_dca_change(master: Master, dca_type: str) -> Dict[str, Dict[str, str]]:
+    """
+    collects all data for calculating changes in dca ratings.
+    """
+    type_dict = {}
+    for dca_type in list(DCA_KEYS.values()):
+        dca_dict = {}
+        for project_name in master.current_projects:
+            latest_dca = [
+                (
+                    dca_type + " latest",
+                    master.master_data[0].data[project_name][dca_type],
+                )
+            ]
+            try:
+                last_dca = [
+                    (
+                        dca_type + " last",
+                        master.master_data[1].data[project_name][dca_type],
+                    )
+                ]
+            except KeyError:
+                last_dca = [(dca_type + " last", "None")]
+            if latest_dca[0][1] == last_dca[0][1]:
+                change = [("Change", "None")]
+                status = [("Status", "No change")]
+            if last_dca[0][1] == "None":
+                change = [("Change", "New this quarter")]
+                status = [("Status", "New")]
+            else:
+                try:
+                    if (
+                        DCA_RATING_SCORES[latest_dca[0][1]]
+                        > DCA_RATING_SCORES[last_dca[0][1]]
+                    ):
+                        change = [
+                            (
+                                "Change",
+                                "Improved from "
+                                + last_dca[0][1]
+                                + " to "
+                                + latest_dca[0][1],
+                            )
+                        ]
+                        status = [("Status", "Up")]
+                    if (
+                        DCA_RATING_SCORES[latest_dca[0][1]]
+                        < DCA_RATING_SCORES[last_dca[0][1]]
+                    ):
+                        change = [
+                            (
+                                "Change",
+                                "Worsened from "
+                                + last_dca[0][1]
+                                + " to "
+                                + latest_dca[0][1],
+                            )
+                        ]
+                        status = [("Status", "Down")]
+                except KeyError:
+                    change = [("Change", "Has not provided a rating")]
+                    status = [("Status", "Missing")]
+
+            type = [("Type", dca_type)]
+
+            dca_dict[master.abbreviations[project_name]] = dict(
+                latest_dca + last_dca + change + status + type
+            )
+
+        type_dict[dca_type] = dca_dict
+
+    return type_dict
+
+
+def dca_changes_into_word(dca_dict: Dict[str, Dict[str, str]], doc: Document) -> None:
+    for i, dca_type in enumerate(list(dca_dict.keys())):
+        if i != 0:
+            doc.add_section(WD_SECTION_START.NEW_PAGE)
+        else:
+            pass
+        title = dca_type + " " + "Confidence changes this quarter"
+        top = doc.add_paragraph()
+        top.add_run(title).bold = True
+
+        doc.add_paragraph()
+        sub_head = "Improvement this quarter"
+        sub = doc.add_paragraph()
+        sub.add_run(sub_head).bold = True
+        count = 0
+        for project_name in list(dca_dict[dca_type].keys()):
+            if dca_dict[dca_type][project_name]["Status"] == "Up":
+                doc.add_paragraph(
+                    project_name + " " + dca_dict[dca_type][project_name]["Change"]
+                )
+                count += 1
+        total_line = str(count) + " project(s) in total have improved"
+        doc.add_paragraph(total_line)
+
+        doc.add_paragraph()
+        sub_head = "Decreased this quarter"
+        sub = doc.add_paragraph()
+        sub.add_run(sub_head).bold = True
+        count = 0
+        for project_name in list(dca_dict[dca_type].keys()):
+            if dca_dict[dca_type][project_name]["Status"] == "Down":
+                doc.add_paragraph(
+                    project_name + " " + dca_dict[dca_type][project_name]["Change"]
+                )
+                count += 1
+        total_line = str(count) + " project(s) in total have decreased"
+        doc.add_paragraph(total_line)
+
+        doc.add_paragraph()
+        sub_head = "Missing this quarter"
+        sub = doc.add_paragraph()
+        sub.add_run(sub_head).bold = True
+        count = 0
+        for project_name in list(dca_dict[dca_type].keys()):
+            if dca_dict[dca_type][project_name]["Status"] == "Missing":
+                doc.add_paragraph(
+                    project_name + " " + dca_dict[dca_type][project_name]["Change"]
+                )
+                count += 1
+        total_line = str(count) + " project(s) in total are missing a rating"
+        doc.add_paragraph(total_line)
+
+    return doc

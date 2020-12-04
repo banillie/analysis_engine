@@ -17,7 +17,7 @@ keys not collected (knc) = light blue grey
 from openpyxl import Workbook
 from analysis.data import list_of_masters_all, root_path, gen_txt_list, \
     gen_txt_colours, gen_fill_colours, list_column_ltrs, list_of_rag_keys, rag_txt_list_full, \
-    rag_fill_colours, rag_txt_colours, salmon_fill, ben_type_key_list, milestones
+    rag_fill_colours, rag_txt_colours, salmon_fill, stakeholders
 from analysis.engine_functions import all_milestone_data_bulk, conditional_formatting
 
 def return_data(data_key_list, quarter_master):
@@ -105,13 +105,13 @@ data_interest = ['IPDC approval point',
 
 # Specify which quarter to take the data from
 # format 'quarter fy' e.g. Q1 20/21
-quarter = 'Q1 20/21'
+quarter = 'Q2 20/21'
 
 # Default name for output file is s_data_query_output.
 # See general guidance re saving output files names
 # if other name to be used.
-run = return_data(data_interest, quarter)
-run.save(root_path/'output/supply_chain_data_query_output.xlsx')
+run = return_data(stakeholders, quarter)
+run.save(root_path/'output/major_project_stakeholders.xlsx')
 
 
 

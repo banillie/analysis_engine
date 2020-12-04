@@ -13,7 +13,7 @@ from data_mgmt.data import MilestoneData, MilestoneChartData, \
 
 
 mst = Master(master_data_list[1:], Projects.hsmrpg)  # get master data and specify projects
-mst.baseline_data('Re-baseline IPDC milestones')  # get baseline information of interest
+mst.get_baseline_data('Re-baseline IPDC milestones')  # get baseline information of interest
 milestone_data = MilestoneData(mst, abbreviations)  # get milestone data
 
 hsmrpg_milestone_wb = load_workbook("/home/will/Documents/analysis_engine/input/exported_milestones_HSMRPG.xlsx")

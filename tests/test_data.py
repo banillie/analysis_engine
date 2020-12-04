@@ -28,6 +28,7 @@ from data_mgmt.data import (
     FIGURE_STYLE,
     MilestoneData,
     milestone_chart, save_graph,
+    calculate_dca_change, DCA_KEYS, dca_changes_into_word
 )
 
 # test masters project names
@@ -99,8 +100,8 @@ def test_open_word_doc(word_doc):
     word_doc.save("resources/summary_temp_altered.docx")
     var = word_doc.paragraphs[1].text
     assert (
-        "Because i'm still in love with you I want to see you dance again, "
-        "because i'm still in love with you on this harvest moon" == var
+            "Because i'm still in love with you I want to see you dance again, "
+            "because i'm still in love with you on this harvest moon" == var
     )
 
 
@@ -141,7 +142,7 @@ def test_project_cost_profile_chart(costs_masters, project_info):
 
 
 def test_project_cost_profile_chart_into_word_doc_one(
-    word_doc, costs_masters, project_info
+        word_doc, costs_masters, project_info
 ):
     master = Master(costs_masters, project_info)
     costs = CostData(master, f9)
@@ -151,7 +152,7 @@ def test_project_cost_profile_chart_into_word_doc_one(
 
 
 def test_total_cost_profile_chart_into_word_doc_one(
-    word_doc, costs_masters, project_info
+        word_doc, costs_masters, project_info
 ):
     master = Master(costs_masters, project_info)
     costs = CostData(master, f9)
@@ -167,7 +168,7 @@ def test_changing_word_doc_to_landscape(word_doc):
 
 
 def test_project_cost_profile_chart_into_word_doc_many(
-    word_doc, costs_masters, project_info
+        word_doc, costs_masters, project_info
 ):
     master = Master(costs_masters, project_info)
     for p in master.current_projects:
@@ -257,7 +258,7 @@ def test_get_old_fy_cost_data(list_cost_masters_files, project_group_id_path):
 
 
 def test_placing_old_fy_cost_data_into_master_wbs(
-    list_cost_masters_files, project_old_fy_path
+        list_cost_masters_files, project_old_fy_path
 ):
     run_place_old_fy_data_into_masters(list_cost_masters_files, project_old_fy_path)
 
@@ -346,3 +347,11 @@ def test_saving_graph_to_word_doc(milestone_masters, project_info):
     milestones.filter_chart_info(start_date="1/1/2013", end_date="1/1/2014")
     f = milestone_chart(milestones, title="Group Test", fig_size=FIGURE_STYLE[1], blue_line="Today")
     save_graph(f, "testing", orientation="landscape")
+
+
+def test_dca_changes(project_info, dca_masters, word_doc):
+    m = Master(dca_masters, project_info)
+    assessment = calculate_dca_change(m, DCA_KEYS["SRO"])
+    dca_changes_into_word(assessment, word_doc)
+    word_doc.save("resources/dca_checks.docx")
+    assert isinstance(assessment["SRO Finance confidence"], (dict,))
