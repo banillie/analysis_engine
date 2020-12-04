@@ -28,7 +28,7 @@ from data_mgmt.data import (
     FIGURE_STYLE,
     MilestoneData,
     milestone_chart, save_graph,
-    calculate_dca_change, DCA_KEYS, dca_changes_into_word
+    DCA_KEYS, dca_changes_into_word, dca_changes_into_excel, DcaData
 )
 
 # test masters project names
@@ -351,7 +351,13 @@ def test_saving_graph_to_word_doc(milestone_masters, project_info):
 
 def test_dca_changes(project_info, dca_masters, word_doc):
     m = Master(dca_masters, project_info)
-    assessment = calculate_dca_change(m, DCA_KEYS["SRO"])
-    dca_changes_into_word(assessment, word_doc)
+    dca = DcaData(m, group)
+    # assert dca.dca_dictionary == {}
+    dca.get_changes("Q4 19/20", "Q4 18/19")
+    # assert dca.dca_changes == {}
+    dca_changes_into_word(dca, word_doc)
     word_doc.save("resources/dca_checks.docx")
-    assert isinstance(assessment["SRO Finance confidence"], (dict,))
+    # wb = dca_changes_into_excel(assessment)
+    # wb.save("resources/dcas.xlsx")
+    # # assert isinstance(assessment["SRO Finance confidence"], (dict,))
+
