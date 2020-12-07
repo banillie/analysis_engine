@@ -9,16 +9,18 @@ from data_mgmt.data import (
     dca_changes_into_word,
     get_project_information,
     get_master_data,
-    get_word_doc, DcaData
+    get_word_doc, DcaData, dca_changes_into_excel
 )
 
 
-def dca_analysis(m_data, project_info, word_doc):
-    m = Master(m_data, project_info)
-    dca = DcaData(m, m.current_projects)
-    dca.get_changes("Q2 20/21", "Q1 20/21")
-    dca_changes_into_word(dca, word_doc)
-    word_doc.save(root_path / "output/dca_checks.docx")
+m = Master(get_master_data(), get_project_information())
+dca = DcaData(m)
+# dca.get_changes("Q2 20/21", "Q1 20/21")
+# word_doc = dca_changes_into_word(dca, get_word_doc())
+# word_doc.save(root_path / "output/dca_checks.docx")
+quarter_list = ["Q2 20/21", "Q1 20/21"]
+wb = dca_changes_into_excel(dca, quarter_list)
+wb.save(root_path / "output/dca_print.xlsx")
 
 
-dca_analysis(get_master_data(), get_project_information(), get_word_doc())
+# dca_analysis(get_master_data(), get_project_information(), get_word_doc())

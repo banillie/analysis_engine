@@ -653,7 +653,7 @@ class Master:
     def get_project_abbreviations(self) -> None:
         """gets the abbreviations for all current projects.
         held in the project info document"""
-        for p in self.current_projects:
+        for p in self.project_information.projects:
             self.abbreviations[p] = self.project_information[p]["Abbreviations"]
 
 
@@ -3148,17 +3148,24 @@ DCA_KEYS = {
     "SCHEDULE": "SRO Schedule Confidence",
 }
 
-DCA_RATING_SCORES = {"Green": 5, "Amber/Green": 4, "Amber": 3, "Amber/Red": 2, "Red": 1}
+DCA_RATING_SCORES = {
+    "Green": 5,
+    "Amber/Green": 4,
+    "Amber": 3,
+    "Amber/Red": 2,
+    "Red": 1,
+    None: None,
+}
 
 
 class DcaData:
-    def __init__(self, master: Master, project_group: List[str] or str):
+    def __init__(self, master: Master):
         self.master = master
-        self.project_group = project_group
         self.dca_dictionary = {}
         self.dca_changes = {}
+        self.dca_count = {}
         self.get_dictionary()
-        # self.get_changes()
+        self.get_count()
 
     def get_dictionary(self) -> None:
         """
@@ -3166,21 +3173,18 @@ class DcaData:
         """
         quarter_dict = {}
         for i in range(len(self.master.master_data)):
-            type_dict = {}
-            for dca_type in list(DCA_KEYS.values()):
-                dca_dict = {}
-                for project_name in self.project_group:
-                    try:
+            try:
+                type_dict = {}
+                for dca_type in list(DCA_KEYS.values()):
+                    dca_dict = {}
+                    for project_name in self.master.master_data[i].projects:
                         dca_rating = [
                             (
                                 "DCA",
                                 self.master.master_data[i].data[project_name][dca_type],
                             )
                         ]
-                    except KeyError:
-                        dca_rating = [("DCA", "Not reporting")]
-                    t = [("Type", dca_type)]
-                    try:
+                        t = [("Type", dca_type)]
                         costs = [
                             (
                                 "Costs",
@@ -3189,20 +3193,20 @@ class DcaData:
                                 ],
                             )
                         ]
-                    except KeyError:
-                        costs = [("Costs", "Not reporting")]
-                    quarter = [("Quarter", str(self.master.master_data[i].quarter))]
+                        quarter = [("Quarter", str(self.master.master_data[i].quarter))]
 
-                    dca_dict[self.master.abbreviations[project_name]] = dict(
-                        dca_rating + t + costs + quarter
-                    )
+                        dca_dict[self.master.abbreviations[project_name]] = dict(
+                            dca_rating + t + costs + quarter)
 
-                type_dict[dca_type] = dca_dict
+                    type_dict[dca_type] = dca_dict
+            except KeyError:  # handles dca_type e.g. schedule confidence key not present
+                pass
             quarter_dict[str(self.master.master_data[i].quarter)] = type_dict
 
         self.dca_dictionary = quarter_dict
 
     def get_changes(self, q_one: str, q_two: str) -> None:
+        """compiles dictionary of changes in dca ratings when provided with two quarter arguments"""
         self.q_one = q_one
         self.q_two = q_two
 
@@ -3216,6 +3220,16 @@ class DcaData:
                         DCA_RATING_SCORES[
                             self.dca_dictionary[q_one][dca_type][project_name]["DCA"]
                         ]
+                        == DCA_RATING_SCORES[
+                            self.dca_dictionary[q_two][dca_type][project_name]["DCA"]
+                        ]
+                    ):
+                        status = [("Status", "Same")]
+                        change = [("Change", "Unchanged")]
+                    if (
+                        DCA_RATING_SCORES[
+                            self.dca_dictionary[q_one][dca_type][project_name]["DCA"]
+                        ]
                         > DCA_RATING_SCORES[
                             self.dca_dictionary[q_two][dca_type][project_name]["DCA"]
                         ]
@@ -3224,16 +3238,16 @@ class DcaData:
                             (
                                 "Status",
                                 "Improved from "
-                                + self.dca_dictionary[q_one][dca_type][project_name][
+                                + self.dca_dictionary[q_two][dca_type][project_name][
                                     "DCA"
                                 ]
                                 + " to "
-                                + self.dca_dictionary[q_two][dca_type][project_name][
+                                + self.dca_dictionary[q_one][dca_type][project_name][
                                     "DCA"
                                 ],
                             )
                         ]
-                        change =[("Change", "Up")]
+                        change = [("Change", "Up")]
                     if (
                         DCA_RATING_SCORES[
                             self.dca_dictionary[q_one][dca_type][project_name]["DCA"]
@@ -3246,11 +3260,11 @@ class DcaData:
                             (
                                 "Status",
                                 "Worsened from "
-                                + self.dca_dictionary[q_one][dca_type][project_name][
+                                + self.dca_dictionary[q_two][dca_type][project_name][
                                     "DCA"
                                 ]
                                 + " to "
-                                + self.dca_dictionary[q_two][dca_type][project_name][
+                                + self.dca_dictionary[q_one][dca_type][project_name][
                                     "DCA"
                                 ],
                             )
@@ -3258,64 +3272,104 @@ class DcaData:
                         change = [("Change", "Down")]
                 except TypeError:
                     status = [("Status", "Missing")]
-                    change = [("Change", "Missing")]
+                    change = [("Change", "Unknown")]
                 except KeyError:
                     status = [("Status", "New entry")]
                     change = [("Change", "New entry")]
 
                 lower_dict[project_name] = dict(t + status + change)
-            c_dict[dca_type] = lower_dict
 
+            c_dict[dca_type] = lower_dict
         self.dca_changes = c_dict
 
+    def get_count(self) -> None:
+        """Returns dictionary containing a count of dcas"""
+        output_dict = {}
+        for quarter in self.dca_dictionary.keys():
+            dca_dict = {}
+            for i, dca_type in enumerate(list(self.dca_dictionary[quarter].keys())):
+                colour_count = []
+                total_count = []
+                for x, colour in enumerate(list(DCA_RATING_SCORES.keys())):
+                    count = 0
+                    cost = 0
+                    total = 0
+                    cost_total = 0
+                    for y, project in enumerate(list(self.dca_dictionary[quarter][dca_type].keys())):
+                        total += 1
+                        try:
+                            cost_total += self.dca_dictionary[quarter][dca_type][project]["Costs"]
+                        except TypeError:
+                            print(project + " total costs for " + str(quarter) + " are in an incorrect data type and need changing")
+                            pass
+                        if self.dca_dictionary[quarter][dca_type][project]["DCA"] == colour:
+                            count += 1
+                            try:
+                                cost += self.dca_dictionary[quarter][dca_type][project]["Costs"]
+                            except TypeError:  # error message above doesn't need repeating
+                                pass
+                    colour_count.append((colour, (count, cost, cost/cost_total)))
+                    total_count.append(("Total", (total, cost_total, cost_total/cost_total)))
 
-def dca_changes_into_word(dca_data: DcaData, doc: Document) -> None:
+                dca_dict[dca_type] = dict(colour_count + total_count)
+            output_dict[quarter] = dca_dict
+
+        self.dca_count = output_dict
+
+
+def dca_changes_into_word(dca_data: DcaData, doc: Document) -> Document:
     for i, dca_type in enumerate(list(dca_data.dca_changes.keys())):
         if i != 0:
             doc.add_section(WD_SECTION_START.NEW_PAGE)
         else:
             pass
-        title = dca_type + " " + "Confidence changes this quarter"
+        title = dca_type + " " + "Confidence changes"
         top = doc.add_paragraph()
         top.add_run(title).bold = True
 
         doc.add_paragraph()
-        sub_head = "Improvement this quarter"
+        sub_head = "Improvements"
         sub = doc.add_paragraph()
         sub.add_run(sub_head).bold = True
         count = 0
         for project_name in list(dca_data.dca_changes[dca_type].keys()):
             if dca_data.dca_changes[dca_type][project_name]["Change"] == "Up":
                 doc.add_paragraph(
-                    project_name + " " + dca_data.dca_changes[dca_type][project_name]["Status"]
+                    project_name
+                    + " "
+                    + dca_data.dca_changes[dca_type][project_name]["Status"]
                 )
                 count += 1
-        total_line = str(count) + " project(s) in total have improved"
+        total_line = str(count) + " project(s) in total improved"
         doc.add_paragraph(total_line)
 
         doc.add_paragraph()
-        sub_head = "Decreased this quarter"
+        sub_head = "Decreases"
         sub = doc.add_paragraph()
         sub.add_run(sub_head).bold = True
         count = 0
         for project_name in list(dca_data.dca_changes[dca_type].keys()):
             if dca_data.dca_changes[dca_type][project_name]["Change"] == "Down":
                 doc.add_paragraph(
-                    project_name + " " + dca_data.dca_changes[dca_type][project_name]["Status"]
+                    project_name
+                    + " "
+                    + dca_data.dca_changes[dca_type][project_name]["Status"]
                 )
                 count += 1
         total_line = str(count) + " project(s) in total have decreased"
         doc.add_paragraph(total_line)
 
         doc.add_paragraph()
-        sub_head = "Missing this quarter"
+        sub_head = "Missing ratings"
         sub = doc.add_paragraph()
         sub.add_run(sub_head).bold = True
         count = 0
         for project_name in list(dca_data.dca_changes[dca_type].keys()):
-            if dca_data.dca_changes[dca_type][project_name]["Change"] == "Missing":
+            if dca_data.dca_changes[dca_type][project_name]["Change"] == "Unknown":
                 doc.add_paragraph(
-                    project_name + " " + dca_data.dca_changes[dca_type][project_name]["Status"]
+                    project_name
+                    + " "
+                    + dca_data.dca_changes[dca_type][project_name]["Status"]
                 )
                 count += 1
         total_line = str(count) + " project(s) in total are missing a rating"
@@ -3324,53 +3378,28 @@ def dca_changes_into_word(dca_data: DcaData, doc: Document) -> None:
     return doc
 
 
-def dca_changes_into_excel(dca_dict: Dict[str, Dict[str, str]]) -> workbook:
+def dca_changes_into_excel(dca_data: DcaData, quarter: List[str] or str) -> workbook:
     wb = Workbook()
-    ws = wb.active
 
-    start_row = 3
-    for i, dca_type in enumerate(list(dca_dict.keys())):
-        ws.cell(row=start_row + i, column=2).value = dca_type
-        for x, colour in enumerate(list(DCA_RATING_SCORES.keys())):
-            ws.cell(row=start_row + i + x + 1, column=2).value = colour
-            current_dca_colour = 0
-            current_dca_total = 0
-            current_costs_dca = 0
-            current_total_costs_dca = 0
-            last_dca_colour = 0
-            last_dca_total = 0
-            last_costs_dca = 0
-            last_total_costs_dca = 0
-            for y, project in enumerate(list(dca_dict[dca_type].keys())):
-                if dca_dict[dca_type][project][dca_type + " latest"] == colour:
-                    current_dca_colour += 1
-                    current_costs_dca += dca_dict[dca_type][project]["Latest costs"]
-                    # current_total_costs_dca += dca_dict[dca_type][project]["Latest costs"]
-                if dca_dict[dca_type][project]["Status"] != "Missing":
-                    current_dca_total += 1
-                    current_total_costs_dca += dca_dict[dca_type][project][
-                        "Latest costs"
-                    ]
-                ws.cell(row=start_row + i + x + 1, column=3).value = current_dca_colour
-                ws.cell(row=start_row + i + x + 1, column=4).value = current_costs_dca
+    quarter = string_conversion(quarter)
 
-                if dca_dict[dca_type][project][dca_type + " last"] == colour:
-                    last_dca_colour += 1
-                    # last_dca_total += 1
-                    last_costs_dca += dca_dict[dca_type][project]["Last costs"]
-                    # last_total_costs_dca += dca_dict[dca_type][project]["Last costs"]
-                if dca_dict[dca_type][project]["Status"] != "Missing":
-                    last_dca_total += 1
-                    last_total_costs_dca += dca_dict[dca_type][project]["Last costs"]
-                ws.cell(row=start_row + i + x + 1, column=9).value = last_dca_colour
-                ws.cell(row=start_row + i + x + 1, column=10).value = last_costs_dca
+    for q in quarter:
+        start_row = 3
+        ws = wb.create_sheet(make_file_friendly(q))  # creating worksheets. names restricted to 30 characters.
+        ws.title = make_file_friendly(q)  # title of worksheet
+        for i, dca_type in enumerate(list(dca_data.dca_count[q].keys())):
+            ws.cell(row=start_row + i, column=2).value = dca_type
+            ws.cell(row=start_row + i, column=3).value = "Count"
+            ws.cell(row=start_row + i, column=4).value = "Costs"
+            ws.cell(row=start_row + i, column=5).value = "Proportion costs"
+            for x, colour in enumerate(list(dca_data.dca_count[q][dca_type].keys())):
+                ws.cell(row=start_row + i + x + 1, column=2).value = colour
+                ws.cell(row=start_row + i + x + 1, column=3).value = (dca_data.dca_count[q][dca_type][colour])[0]
+                ws.cell(row=start_row + i + x + 1, column=4).value = (dca_data.dca_count[q][dca_type][colour])[1]
+                ws.cell(row=start_row + i + x + 1, column=5).value = (dca_data.dca_count[q][dca_type][colour])[2]
+                if colour is None:
+                    ws.cell(row=start_row + i + x + 1, column=2).value = "None"
 
-        ws.cell(row=start_row + i + x + 2, column=2).value = "Total"
-        ws.cell(row=start_row + i + x + 2, column=3).value = current_dca_total
-        ws.cell(row=start_row + i + x + 2, column=4).value = current_total_costs_dca
-        ws.cell(row=start_row + i + x + 2, column=9).value = last_dca_total
-        ws.cell(row=start_row + i + x + 2, column=10).value = last_total_costs_dca
-
-        start_row += 9
+            start_row += 9
 
     return wb
