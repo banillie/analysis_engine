@@ -3178,37 +3178,33 @@ class DcaData:
                 for dca_type in list(DCA_KEYS.values()):
                     dca_dict = {}
                     for project_name in self.master.master_data[i].projects:
-                        dca_rating = [
-                            (
-                                "DCA",
-                                self.master.master_data[i].data[project_name][dca_type],
-                            )
+                        colour = self.master.master_data[i].data[project_name][dca_type]
+                        score = DCA_RATING_SCORES[
+                            self.master.master_data[i].data[project_name][dca_type]
                         ]
+                        costs = self.master.master_data[i].data[project_name][
+                            "Total Forecast"
+                        ]
+                        dca_colour = [("DCA", colour)]
+                        dca_score = [("DCA score", score)]
                         t = [("Type", dca_type)]
-                        costs = [
-                            (
-                                "Costs",
-                                self.master.master_data[i].data[project_name][
-                                    "Total Forecast"
-                                ],
-                            )
-                        ]
+                        cost_amount = [("Costs", costs)]
                         quarter = [("Quarter", str(self.master.master_data[i].quarter))]
-
                         dca_dict[self.master.abbreviations[project_name]] = dict(
-                            dca_rating + t + costs + quarter)
-
+                            dca_colour + t + cost_amount + quarter + dca_score
+                        )
                     type_dict[dca_type] = dca_dict
             except KeyError:  # handles dca_type e.g. schedule confidence key not present
                 pass
+
             quarter_dict[str(self.master.master_data[i].quarter)] = type_dict
 
         self.dca_dictionary = quarter_dict
 
-    def get_changes(self, q_one: str, q_two: str) -> None:
+    def get_changes(self, quarter_one: str, quarter_two: str) -> None:
         """compiles dictionary of changes in dca ratings when provided with two quarter arguments"""
-        self.q_one = q_one
-        self.q_two = q_two
+        self.q_one = quarter_one
+        self.q_two = quarter_two
 
         c_dict = {}
         for dca_type in list(self.dca_dictionary[self.q_one].keys()):
@@ -3216,64 +3212,47 @@ class DcaData:
             for project_name in list(self.dca_dictionary[self.q_one][dca_type].keys()):
                 t = [("Type", dca_type)]
                 try:
-                    if (
-                        DCA_RATING_SCORES[
-                            self.dca_dictionary[q_one][dca_type][project_name]["DCA"]
-                        ]
-                        == DCA_RATING_SCORES[
-                            self.dca_dictionary[q_two][dca_type][project_name]["DCA"]
-                        ]
-                    ):
+                    dca_one_colour = self.dca_dictionary[quarter_one][dca_type][
+                        project_name
+                    ]["DCA"]
+                    dca_two_colour = self.dca_dictionary[quarter_two][dca_type][
+                        project_name
+                    ]["DCA"]
+                    dca_one_score = self.dca_dictionary[quarter_one][dca_type][
+                        project_name
+                    ]["DCA score"]
+                    dca_two_score = self.dca_dictionary[quarter_two][dca_type][
+                        project_name
+                    ]["DCA score"]
+                    if dca_one_score == dca_two_score:
                         status = [("Status", "Same")]
                         change = [("Change", "Unchanged")]
-                    if (
-                        DCA_RATING_SCORES[
-                            self.dca_dictionary[q_one][dca_type][project_name]["DCA"]
-                        ]
-                        > DCA_RATING_SCORES[
-                            self.dca_dictionary[q_two][dca_type][project_name]["DCA"]
-                        ]
-                    ):
+                    if dca_one_score > dca_two_score:
                         status = [
                             (
                                 "Status",
                                 "Improved from "
-                                + self.dca_dictionary[q_two][dca_type][project_name][
-                                    "DCA"
-                                ]
+                                + dca_two_colour
                                 + " to "
-                                + self.dca_dictionary[q_one][dca_type][project_name][
-                                    "DCA"
-                                ],
+                                + dca_one_colour,
                             )
                         ]
                         change = [("Change", "Up")]
-                    if (
-                        DCA_RATING_SCORES[
-                            self.dca_dictionary[q_one][dca_type][project_name]["DCA"]
-                        ]
-                        < DCA_RATING_SCORES[
-                            self.dca_dictionary[q_two][dca_type][project_name]["DCA"]
-                        ]
-                    ):
+                    if dca_one_score < dca_two_score:
                         status = [
                             (
                                 "Status",
                                 "Worsened from "
-                                + self.dca_dictionary[q_two][dca_type][project_name][
-                                    "DCA"
-                                ]
+                                + dca_two_colour
                                 + " to "
-                                + self.dca_dictionary[q_one][dca_type][project_name][
-                                    "DCA"
-                                ],
+                                + dca_one_colour,
                             )
                         ]
                         change = [("Change", "Down")]
-                except TypeError:
+                except TypeError:  # This picks up None types
                     status = [("Status", "Missing")]
                     change = [("Change", "Unknown")]
-                except KeyError:
+                except KeyError:  # This picks up projects not being present in the quarters being analysed.
                     status = [("Status", "New entry")]
                     change = [("Change", "New entry")]
 
@@ -3295,21 +3274,37 @@ class DcaData:
                     cost = 0
                     total = 0
                     cost_total = 0
-                    for y, project in enumerate(list(self.dca_dictionary[quarter][dca_type].keys())):
+                    for y, project in enumerate(
+                        list(self.dca_dictionary[quarter][dca_type].keys())
+                    ):
                         total += 1
                         try:
-                            cost_total += self.dca_dictionary[quarter][dca_type][project]["Costs"]
-                        except TypeError:
-                            print(project + " total costs for " + str(quarter) + " are in an incorrect data type and need changing")
+                            cost_total += self.dca_dictionary[quarter][dca_type][
+                                project
+                            ]["Costs"]
+                        except TypeError:  # TODO error message handling
+                            print(
+                                project
+                                + " total costs for "
+                                + str(quarter)
+                                + " are in an incorrect data type and need changing"
+                            )
                             pass
-                        if self.dca_dictionary[quarter][dca_type][project]["DCA"] == colour:
+                        if (
+                            self.dca_dictionary[quarter][dca_type][project]["DCA"]
+                            == colour
+                        ):
                             count += 1
                             try:
-                                cost += self.dca_dictionary[quarter][dca_type][project]["Costs"]
+                                cost += self.dca_dictionary[quarter][dca_type][project][
+                                    "Costs"
+                                ]
                             except TypeError:  # error message above doesn't need repeating
                                 pass
-                    colour_count.append((colour, (count, cost, cost/cost_total)))
-                    total_count.append(("Total", (total, cost_total, cost_total/cost_total)))
+                    colour_count.append((colour, (count, cost, cost / cost_total)))
+                    total_count.append(
+                        ("Total", (total, cost_total, cost_total / cost_total))
+                    )
 
                 dca_dict[dca_type] = dict(colour_count + total_count)
             output_dict[quarter] = dca_dict
@@ -3385,7 +3380,9 @@ def dca_changes_into_excel(dca_data: DcaData, quarter: List[str] or str) -> work
 
     for q in quarter:
         start_row = 3
-        ws = wb.create_sheet(make_file_friendly(q))  # creating worksheets. names restricted to 30 characters.
+        ws = wb.create_sheet(
+            make_file_friendly(q)
+        )  # creating worksheets. names restricted to 30 characters.
         ws.title = make_file_friendly(q)  # title of worksheet
         for i, dca_type in enumerate(list(dca_data.dca_count[q].keys())):
             ws.cell(row=start_row + i, column=2).value = dca_type
@@ -3394,12 +3391,18 @@ def dca_changes_into_excel(dca_data: DcaData, quarter: List[str] or str) -> work
             ws.cell(row=start_row + i, column=5).value = "Proportion costs"
             for x, colour in enumerate(list(dca_data.dca_count[q][dca_type].keys())):
                 ws.cell(row=start_row + i + x + 1, column=2).value = colour
-                ws.cell(row=start_row + i + x + 1, column=3).value = (dca_data.dca_count[q][dca_type][colour])[0]
-                ws.cell(row=start_row + i + x + 1, column=4).value = (dca_data.dca_count[q][dca_type][colour])[1]
-                ws.cell(row=start_row + i + x + 1, column=5).value = (dca_data.dca_count[q][dca_type][colour])[2]
+                ws.cell(row=start_row + i + x + 1, column=3).value = (
+                    dca_data.dca_count[q][dca_type][colour]
+                )[0]
+                ws.cell(row=start_row + i + x + 1, column=4).value = (
+                    dca_data.dca_count[q][dca_type][colour]
+                )[1]
+                ws.cell(row=start_row + i + x + 1, column=5).value = (
+                    dca_data.dca_count[q][dca_type][colour]
+                )[2]
                 if colour is None:
                     ws.cell(row=start_row + i + x + 1, column=2).value = "None"
 
             start_row += 9
-
+    wb.remove(wb['Sheet'])
     return wb
