@@ -3415,10 +3415,32 @@ RISK_LIST = ["Brief Risk Decription ",
              "BRD Mitigation - Actions taken (brief description)",
              "BRD Residual Impact",
              "BRD Residual Likelihood",
+             "Severity Score Risk Category",
              "BRD Has this Risk turned into an Issue?"]
 
+RISK_SCORES = {"Very Low": 0,
+               "Low": 1,
+               "Medium": 2,
+               "High": 3,
+               "Very High": 4}
 
-class RiskData():
+
+def risk_score(risk_impact: str, risk_likelihood: str) -> str:
+    impact_score = RISK_SCORES[risk_impact]
+    likelihood_score = RISK_SCORES[risk_likelihood]
+    score = impact_score + likelihood_score
+    if score <= 3:
+        return "Low"
+    if 4 <= score <= 6:
+        if risk_impact and risk_likelihood == "High":
+            return "High"
+        else:
+            return "Medium"
+    if score > 6:
+        return "High"
+
+
+class RiskData:
     def __init__(self, master: Master):
         self.master = master
         self.risk_dictionary = {}
@@ -3428,28 +3450,80 @@ class RiskData():
         quarter_dict = {}
         for i in range(len(self.master.master_data)):
             type_dict = {}
-            # try:
-            for x in range(1, 8):
-                for risk_type in RISK_LIST:
-                    risk_list = []
-                    for project_name in self.master.master_data[i].projects:
-                        try:
-                            amended_risk_type = risk_type + str(x)
-                            risk = (self.master.abbreviations[project_name],
-                                    self.master.master_data[i].data[project_name][amended_risk_type])
-                            risk_list.append(risk)
-                        except KeyError:
+            try:  # tortourous loop due to key names being inconsistent and need cleaning.
+                for project_name in self.master.master_data[i].projects:
+                    number_dict = {}
+                    for x in range(1, 11):
+                        risk_list = []
+                        for risk_type in RISK_LIST:
                             try:
-                                amended_risk_type = risk_type[:4] + str(x) + risk_type[3:]
-                                risk = (self.master.abbreviations[project_name],
+                                amended_risk_type = risk_type + str(x)
+                                risk = (amended_risk_type,
                                         self.master.master_data[i].data[project_name][amended_risk_type])
                                 risk_list.append(risk)
                             except KeyError:
-                                print(risk_type)
+                                try:
+                                    amended_risk_type = risk_type[:4] + str(x) + risk_type[3:]
+                                    risk = (amended_risk_type,
+                                            self.master.master_data[i].data[project_name][amended_risk_type])
+                                    risk_list.append(risk)
+                                except KeyError:
+                                    try:
+                                        if risk_type == "Severity Score Risk Category":
+                                            impact = "BRD Residual Impact"[:4] + str(x) + "BRD Residual Impact"[3:]
+                                            likelihoood = "BRD Residual Likelihood"[:4] + str(
+                                                x) + "BRD Residual Likelihood"[3:]
+                                            score = risk_score(self.master.master_data[i].data[project_name][impact],
+                                                               self.master.master_data[i].data[project_name][likelihoood])
+                                            risk = ("Severity Score Risk Category " + str(x), score)
+                                            risk_list.append(risk)
+                                    except KeyError:
+                                        risk = ("Severity Score Risk Category " + str(x), None)
+                                        risk_list.append(risk)
+                                        print(risk_type)
 
-                    type_dict[amended_risk_type] = dict(risk_list)
-            # except KeyError:  # handles dca_type e.g. schedule confidence key not present
-            #     pass
+                            number_dict[x] = dict(risk_list)
+
+                    type_dict[self.master.abbreviations[project_name]] = number_dict
+            except KeyError:  # handles dca_type e.g. schedule confidence key not present
+                pass
             quarter_dict[str(self.master.master_data[i].quarter)] = type_dict
 
         self.risk_dictionary = quarter_dict
+
+
+def risks_into_excel(risk_data: RiskData, quarter: List[str] or str) -> workbook:
+    wb = Workbook()
+
+    quarter = string_conversion(quarter)
+
+    for q in quarter:
+        start_row = 3
+        ws = wb.create_sheet(
+            make_file_friendly(q + " All")
+        )  # creating worksheets. names restricted to 30 characters.
+        ws.title = make_file_friendly(q + " All")  # title of worksheet
+        # for a, risk_title in enumerate(RISK_LIST):
+        #     ws.cell(row=start_row, column=a + 3).value = risk_title
+
+        for y, project_name in enumerate(list(risk_data.risk_dictionary[q].keys())):
+            # ws.cell(row=start_row + 1 + y, column=1).value = project_name
+            for x, number in enumerate(list(risk_data.risk_dictionary[q][project_name].keys())):
+                ws.cell(row=start_row + 1 + x, column=1).value = project_name
+                ws.cell(row=start_row + 1 + x, column=2).value = str(number)
+                if risk_data.risk_dictionary[q][project_name][number]["Brief Risk Decription " + str(number)] is None:
+                    print("Yes")
+                    pass
+                else:
+                    for i, risk in enumerate(list(risk_data.risk_dictionary[q][project_name][number].keys())):
+                        ws.cell(row=3, column=3 + i).value = ''.join([i for i in risk if not i.isdigit()])
+                        ws.cell(row=start_row + 1 + x, column=3 + i).value = risk_data.risk_dictionary[q][project_name][number][risk]
+
+            start_row += x + 1
+
+        ws.cell(row=3, column=1).value = "Project Name"
+        ws.cell(row=3, column=2).value = "Risk Number"
+
+    wb.remove(wb['Sheet'])
+
+    return wb

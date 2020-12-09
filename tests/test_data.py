@@ -28,7 +28,7 @@ from data_mgmt.data import (
     FIGURE_STYLE,
     MilestoneData,
     milestone_chart, save_graph,
-    DCA_KEYS, dca_changes_into_word, dca_changes_into_excel, DcaData, RiskData
+    DCA_KEYS, dca_changes_into_word, dca_changes_into_excel, DcaData, RiskData, risks_into_excel
 )
 
 # test masters project names
@@ -363,4 +363,6 @@ def test_dca_changes(project_info, dca_masters, word_doc):
 def test_risk_analysis(project_info, risk_masters):
     m = Master(risk_masters, project_info)
     risk = RiskData(m)
-    assert risk.risk_dictionary == {}
+    # assert risk.risk_dictionary == {}
+    wb = risks_into_excel(risk, "Q2 20/21")
+    wb.save("resources/risks.xlsx")
