@@ -1,3 +1,9 @@
+"""
+Compiles risk analysis. Output is as follows:
+- Excel wb containing quarters data and count of risk score. Wb is titled 'risks' and is placed
+in the analysis_engine/output folder.
+"""
+
 
 from data_mgmt.data import (
     Master,
