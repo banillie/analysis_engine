@@ -3444,7 +3444,10 @@ class RiskData:
     def __init__(self, master: Master):
         self.master = master
         self.risk_dictionary = {}
+        self.risk_count = {}
+        self.risk_impact_count = {}
         self.get_dictionary()
+        self.get_count()
 
     def get_dictionary(self):
         quarter_dict = {}
@@ -3491,6 +3494,36 @@ class RiskData:
 
         self.risk_dictionary = quarter_dict
 
+    def get_count(self):
+        count_output_dict = {}
+        impact_output_dict = {}
+        for quarter in self.risk_dictionary.keys():
+            count_lower_dict = {}
+            impact_lower_dict = {}
+            for i in range(len(RISK_LIST)):
+                count_list = []
+                impact_list = []
+                for y, project_name in enumerate(list(self.risk_dictionary[quarter].keys())):
+                    for x, number in enumerate(list(self.risk_dictionary[quarter][project_name].keys())):
+                        try:
+                            risk_value = self.risk_dictionary[quarter][project_name][number][RISK_LIST[i]]
+                            impact = self.risk_dictionary[quarter][project_name][number]["Severity Score Risk Category"]
+                            count_list.append(risk_value)
+                            impact_list.append((risk_value, impact))
+                        except KeyError:
+                            pass
+
+                count_lower_dict[RISK_LIST[i]] = Counter(count_list)
+                impact_lower_dict[RISK_LIST[i]] = Counter(impact_list)
+
+            count_output_dict[quarter] = count_lower_dict
+            impact_output_dict[quarter] = impact_lower_dict
+
+        self.risk_count = count_output_dict
+        self.risk_impact_count = impact_output_dict
+
+
+
 
 def risks_into_excel(risk_data: RiskData, quarter: List[str] or str) -> workbook:
     wb = Workbook()
@@ -3500,9 +3533,9 @@ def risks_into_excel(risk_data: RiskData, quarter: List[str] or str) -> workbook
     for q in quarter:
         start_row = 3
         ws = wb.create_sheet(
-            make_file_friendly(q + " All")
+            make_file_friendly(q + " all data")
         )  # creating worksheets. names restricted to 30 characters.
-        ws.title = make_file_friendly(q + " All")  # title of worksheet
+        ws.title = make_file_friendly(q + " all data")  # title of worksheet
 
         for y, project_name in enumerate(list(risk_data.risk_dictionary[q].keys())):
             for x, number in enumerate(list(risk_data.risk_dictionary[q][project_name].keys())):
@@ -3522,9 +3555,32 @@ def risks_into_excel(risk_data: RiskData, quarter: List[str] or str) -> workbook
 
         for i in range(len(RISK_LIST)):
             ws.cell(row=3, column=4 + i).value = RISK_LIST[i]
-
         ws.cell(row=3, column=2).value = "Project Name"
         ws.cell(row=3, column=3).value = "Risk Number"
+
+        ws = wb.create_sheet(
+            make_file_friendly(q + " Count")
+        )  # creating worksheets. names restricted to 30 characters.
+        ws.title = make_file_friendly(q + " Count")  # title of worksheet
+
+        start_row = 3
+        for v, risk_cat in enumerate(list(risk_data.risk_count[q].keys())):
+            if risk_cat == "Brief Risk Decription " or risk_cat == "BRD Mitigation - Actions taken (brief description)":
+                continue
+            else:
+                ws.cell(row=start_row, column=2).value = risk_cat
+                ws.cell(row=start_row, column=3).value = "Low"
+                ws.cell(row=start_row, column=4).value = "Medium"
+                ws.cell(row=start_row, column=5).value = "High"
+                ws.cell(row=start_row, column=6).value = "Total"
+                for b, cat in enumerate(list(risk_data.risk_count[q][risk_cat].keys())):
+                    ws.cell(row=start_row + b + 1, column=2).value = cat
+                    ws.cell(row=start_row + b + 1, column=3).value = risk_data.risk_impact_count[q][risk_cat][(cat, "Low")]
+                    ws.cell(row=start_row + b + 1, column=4).value = risk_data.risk_impact_count[q][risk_cat][(cat, "Medium")]
+                    ws.cell(row=start_row + b + 1, column=5).value = risk_data.risk_impact_count[q][risk_cat][(cat, "High")]
+                    ws.cell(row=start_row + b + 1, column=6).value = risk_data.risk_count[q][risk_cat][cat]
+
+                start_row += b + 4
 
     wb.remove(wb['Sheet'])
 
