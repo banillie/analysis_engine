@@ -3432,7 +3432,7 @@ def risk_score(risk_impact: str, risk_likelihood: str) -> str:
     if score <= 3:
         return "Low"
     if 4 <= score <= 6:
-        if risk_impact and risk_likelihood == "High":
+        if risk_impact == "High" and risk_likelihood == "High":
             return "High"
         else:
             return "Medium"
@@ -3458,13 +3458,13 @@ class RiskData:
                         for risk_type in RISK_LIST:
                             try:
                                 amended_risk_type = risk_type + str(x)
-                                risk = (amended_risk_type,
+                                risk = (risk_type,
                                         self.master.master_data[i].data[project_name][amended_risk_type])
                                 risk_list.append(risk)
                             except KeyError:
                                 try:
                                     amended_risk_type = risk_type[:4] + str(x) + risk_type[3:]
-                                    risk = (amended_risk_type,
+                                    risk = (risk_type,
                                             self.master.master_data[i].data[project_name][amended_risk_type])
                                     risk_list.append(risk)
                                 except KeyError:
@@ -3475,7 +3475,7 @@ class RiskData:
                                                 x) + "BRD Residual Likelihood"[3:]
                                             score = risk_score(self.master.master_data[i].data[project_name][impact],
                                                                self.master.master_data[i].data[project_name][likelihoood])
-                                            risk = ("Severity Score Risk Category " + str(x), score)
+                                            risk = ("Severity Score Risk Category", score)
                                             risk_list.append(risk)
                                     except KeyError:
                                         risk = ("Severity Score Risk Category " + str(x), None)
@@ -3503,26 +3503,28 @@ def risks_into_excel(risk_data: RiskData, quarter: List[str] or str) -> workbook
             make_file_friendly(q + " All")
         )  # creating worksheets. names restricted to 30 characters.
         ws.title = make_file_friendly(q + " All")  # title of worksheet
-        # for a, risk_title in enumerate(RISK_LIST):
-        #     ws.cell(row=start_row, column=a + 3).value = risk_title
 
         for y, project_name in enumerate(list(risk_data.risk_dictionary[q].keys())):
-            # ws.cell(row=start_row + 1 + y, column=1).value = project_name
             for x, number in enumerate(list(risk_data.risk_dictionary[q][project_name].keys())):
-                ws.cell(row=start_row + 1 + x, column=1).value = project_name
-                ws.cell(row=start_row + 1 + x, column=2).value = str(number)
-                if risk_data.risk_dictionary[q][project_name][number]["Brief Risk Decription " + str(number)] is None:
-                    print("Yes")
-                    pass
+                if risk_data.risk_dictionary[q][project_name][number]["Brief Risk Decription "] is None:
+                    break
                 else:
-                    for i, risk in enumerate(list(risk_data.risk_dictionary[q][project_name][number].keys())):
-                        ws.cell(row=3, column=3 + i).value = ''.join([i for i in risk if not i.isdigit()])
-                        ws.cell(row=start_row + 1 + x, column=3 + i).value = risk_data.risk_dictionary[q][project_name][number][risk]
+                    ws.cell(row=start_row + 1 + x, column=2).value = project_name
+                    ws.cell(row=start_row + 1 + x, column=3).value = str(number)
+                    for i in range(len(RISK_LIST)):
+                        try:
+                            ws.cell(row=start_row + 1 + x, column=4 + i).value = \
+                                risk_data.risk_dictionary[q][project_name][number][RISK_LIST[i]]
+                        except KeyError:
+                            pass
 
-            start_row += x + 1
+            start_row += x
 
-        ws.cell(row=3, column=1).value = "Project Name"
-        ws.cell(row=3, column=2).value = "Risk Number"
+        for i in range(len(RISK_LIST)):
+            ws.cell(row=3, column=4 + i).value = RISK_LIST[i]
+
+        ws.cell(row=3, column=2).value = "Project Name"
+        ws.cell(row=3, column=3).value = "Risk Number"
 
     wb.remove(wb['Sheet'])
 
