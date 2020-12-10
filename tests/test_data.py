@@ -365,5 +365,6 @@ def test_risk_analysis(project_info, risk_masters):
     risk = RiskData(m)
     # assert risk.risk_impact_count == {}
     # assert risk.risk_count == {}
-    wb = risks_into_excel(risk, "Q2 20/21")
+    # assert risk.risk_dictionary == {}
+    wb = risks_into_excel(risk, "Q1 20/21")
     wb.save("resources/risks.xlsx")

@@ -1,5 +1,4 @@
 
-
 from data_mgmt.data import (
     Master,
     root_path,

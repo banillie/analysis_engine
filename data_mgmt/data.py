@@ -3408,7 +3408,7 @@ def dca_changes_into_excel(dca_data: DcaData, quarter: List[str] or str) -> work
     return wb
 
 
-RISK_LIST = ["Brief Risk Decription ",
+RISK_LIST = ["Brief Risk Description ",
              "BRD Risk Category",
              "BRD Primary Risk to",
              "BRD Internal Control",
@@ -3453,7 +3453,7 @@ class RiskData:
         quarter_dict = {}
         for i in range(len(self.master.master_data)):
             type_dict = {}
-            try:  # tortourous loop due to key names being inconsistent and need cleaning.
+            try:
                 for project_name in self.master.master_data[i].projects:
                     number_dict = {}
                     for x in range(1, 11):
@@ -3481,9 +3481,10 @@ class RiskData:
                                             risk = ("Severity Score Risk Category", score)
                                             risk_list.append(risk)
                                     except KeyError:
-                                        risk = ("Severity Score Risk Category " + str(x), None)
-                                        risk_list.append(risk)
-                                        print(risk_type)
+                                        if risk_type == "Severity Score Risk Category":
+                                            pass
+                                        else:
+                                            print("check " + project_name + " " + str(x) + " " + risk_type)
 
                             number_dict[x] = dict(risk_list)
 
@@ -3539,7 +3540,7 @@ def risks_into_excel(risk_data: RiskData, quarter: List[str] or str) -> workbook
 
         for y, project_name in enumerate(list(risk_data.risk_dictionary[q].keys())):
             for x, number in enumerate(list(risk_data.risk_dictionary[q][project_name].keys())):
-                if risk_data.risk_dictionary[q][project_name][number]["Brief Risk Decription "] is None:
+                if risk_data.risk_dictionary[q][project_name][number]["Brief Risk Description "] is None:
                     break
                 else:
                     ws.cell(row=start_row + 1 + x, column=2).value = project_name
@@ -3565,8 +3566,8 @@ def risks_into_excel(risk_data: RiskData, quarter: List[str] or str) -> workbook
 
         start_row = 3
         for v, risk_cat in enumerate(list(risk_data.risk_count[q].keys())):
-            if risk_cat == "Brief Risk Decription " or risk_cat == "BRD Mitigation - Actions taken (brief description)":
-                continue
+            if risk_cat == "Brief Risk Description " or risk_cat == "BRD Mitigation - Actions taken (brief description)":
+                pass
             else:
                 ws.cell(row=start_row, column=2).value = risk_cat
                 ws.cell(row=start_row, column=3).value = "Low"
