@@ -167,6 +167,12 @@ def costs_masters():
 
 
 @pytest.fixture()
+def vfm_masters():
+    return [project_data_from_master(os.path.join(os.getcwd(), "resources/test_vfm_master_1_2020.xlsx"), 1, 2020),
+            project_data_from_master(os.path.join(os.getcwd(), "resources/test_vfm_master_4_2019.xlsx"), 4, 2019)]
+
+
+@pytest.fixture()
 def change_log():
     return os.path.join(os.getcwd(), "resources/test_key_change_log.xlsx")
 

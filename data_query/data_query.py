@@ -107,9 +107,9 @@ def return_data(project_name_list, data_key_list):
         list_columns = list_column_ltrs[2:len(list_of_masters_all)+2]
 
         if key in list_of_rag_keys:
-            conditional_formatting(ws, list_columns, rag_txt_list_full, rag_txt_colours, rag_fill_colours, '1', '60')
+            conditional_formatting(ws, list_columns, rag_txt_list_full, rag_txt_colours, rag_fill_colours, '1', '80')
 
-        conditional_formatting(ws, list_columns, gen_txt_list, gen_txt_colours, gen_fill_colours, '1', '60')
+        conditional_formatting(ws, list_columns, gen_txt_list, gen_txt_colours, gen_fill_colours, '1', '80')
 
     return wb
 
@@ -190,9 +190,9 @@ def return_baseline_data(project_name_list, data_key_list):
         list_columns = list_column_ltrs[2:10] # hard coded so not ideal
 
         if key in list_of_rag_keys:
-            conditional_formatting(ws, list_columns, rag_txt_list_full, rag_txt_colours, rag_fill_colours, '1', '60')
+            conditional_formatting(ws, list_columns, rag_txt_list_full, rag_txt_colours, rag_fill_colours, '1', '80')
 
-        conditional_formatting(ws, list_columns, gen_txt_list, gen_txt_colours, gen_fill_colours, '1', '60')
+        conditional_formatting(ws, list_columns, gen_txt_list, gen_txt_colours, gen_fill_colours, '1', '80')
 
     return wb
 
@@ -208,8 +208,12 @@ def get_key_type(key):
 
 '''Running the programme'''
 '''Place all keys of interest as strings in to a list or use one of the imported lists from the data file'''
-data_interest = ['DFT ID Number',
-                 'DfT Group']
+data_interest = ["FBC - IPDC Approval",
+                 "FBC - HMT Approval",
+                 "Present Value Cost (PVC)",
+                 "VfM Category single entry",
+                 "VfM Category lower range",
+                 "VfM Category upper range"]
 
 '''output one - all data. 
 first variable = list of project names. There are two options. 1) latest_quarter_project_names 2) all_projects_names

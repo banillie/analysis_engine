@@ -28,7 +28,8 @@ from data_mgmt.data import (
     FIGURE_STYLE,
     MilestoneData,
     milestone_chart, save_graph,
-    DCA_KEYS, dca_changes_into_word, dca_changes_into_excel, DcaData, RiskData, risks_into_excel
+    DCA_KEYS, dca_changes_into_word, dca_changes_into_excel, DcaData, RiskData, risks_into_excel, VfMData,
+    vfm_into_excel
 )
 
 # test masters project names
@@ -352,6 +353,7 @@ def test_saving_graph_to_word_doc(milestone_masters, project_info):
 def test_dca_changes(project_info, dca_masters, word_doc):
     m = Master(dca_masters, project_info)
     dca = DcaData(m)
+    # assert dca.dca_count == {}
     dca.get_changes("Q4 19/20", "Q4 18/19")
     dca_changes_into_word(dca, word_doc)
     word_doc.save("resources/dca_checks.docx")
@@ -368,3 +370,15 @@ def test_risk_analysis(project_info, risk_masters):
     # assert risk.risk_dictionary == {}
     wb = risks_into_excel(risk, "Q1 20/21")
     wb.save("resources/risks.xlsx")
+
+
+def test_vfm_analysis(project_info, vfm_masters):
+    m = Master(vfm_masters, project_info)
+    vfm = VfMData(m)
+    # assert vfm.vfm_dictionary == {}
+    assert vfm.vfm_cat_pvc == {}
+    quarter_list = ["Q1 20/21", "Q4 19/20"]
+    wb = vfm_into_excel(vfm, quarter_list)
+    wb.save("resources/vfm.xlsx")
+
+

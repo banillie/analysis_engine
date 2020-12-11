@@ -4,7 +4,6 @@ Compiles risk analysis. Output is as follows:
 in the analysis_engine/output folder.
 """
 
-
 from data_mgmt.data import (
     Master,
     root_path,
