@@ -1,3 +1,7 @@
+"""
+Compiles VfM analysis. Places into output file an excel file with required data.
+User can specify which quarters data they would like to return in the quarters_list variable.
+"""
 
 from data_mgmt.data import (
     Master,
@@ -11,6 +15,6 @@ from data_mgmt.data import (
 
 m = Master(get_master_data(), get_project_information())
 vfm = VfMData(m)
-quarter_list = ["Q1 20/21", "Q4 19/20"]
+quarter_list = ["Q2 20/21", "Q1 20/21"]
 wb = vfm_into_excel(vfm, quarter_list)
 wb.save(root_path / "output/vfm.xlsx")

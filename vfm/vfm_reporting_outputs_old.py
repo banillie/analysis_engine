@@ -1,7 +1,7 @@
 #  code of running and compiling vfm data analysis each quarter.
 
 from data_mgmt.data import root_path, get_master_data
-from vfm.vfm_analysis_workings import compile_data
+from vfm.vfm_analysis_workings_old import compile_data
 
 
 master_data = get_master_data()
