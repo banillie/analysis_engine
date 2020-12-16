@@ -164,6 +164,12 @@ def get_gmpp_projects(project_info_dict) -> List[str]:
     return output_list
 
 
+def get_error_list(seq: List[str]):
+    seen = set()
+    seen_add = seen.add
+    return [x for x in seq if not (x in seen or seen_add(x))]
+
+
 # for project summary pages
 SRO_CONF_TABLE_LIST = [
     "SRO DCA",
@@ -3264,6 +3270,7 @@ class DcaData:
     def get_count(self) -> None:
         """Returns dictionary containing a count of dcas"""
         output_dict = {}
+        error_list = []
         for quarter in self.dca_dictionary.keys():
             dca_dict = {}
             for i, dca_type in enumerate(list(self.dca_dictionary[quarter].keys())):
@@ -3282,8 +3289,8 @@ class DcaData:
                             cost_total += self.dca_dictionary[quarter][dca_type][
                                 project
                             ]["Costs"]
-                        except TypeError:  # TODO error message handling
-                            print(
+                        except TypeError:
+                            error_list.append(
                                 project
                                 + " total costs for "
                                 + str(quarter)
@@ -3308,6 +3315,10 @@ class DcaData:
 
                 dca_dict[dca_type] = dict(colour_count + total_count)
             output_dict[quarter] = dca_dict
+
+        error_list = get_error_list(error_list)
+        for x in error_list:
+            print(x)
 
         self.dca_count = output_dict
 
@@ -3696,7 +3707,6 @@ class VfMData:
 
             self.vfm_dictionary = quarter_dict
 
-
     def get_count(self) -> None:
         """Returns dictionary containing a count of vfm categories and pvc totals"""
         count_output_dict = {}
@@ -3737,11 +3747,7 @@ class VfMData:
             pvc_output_dict[quarter] = dict(pvc_list)
             count_output_dict[quarter] = dict(cat_list)
 
-        def f7(seq):
-            seen = set()
-            seen_add = seen.add
-            return [x for x in seq if not (x in seen or seen_add(x))]
-        error_list = f7(error_list)
+        error_list = get_error_list(error_list)
         for x in error_list:
             print(x)
 

@@ -1,16 +1,13 @@
 """
-Outputs analysis for SRO confidence ratings. Outputs are place in analysis_engine/output. They are:
-- A word document titled dca_changes which specifies which project dca ratings have changed
+Outputs analysis for SRO confidence ratings. Output is placed in analysis_engine/output. The output is:
 - An excel workbook titled dca_data which provides a count of DCAs and their proportion of cost.
 """
 
 from data_mgmt.data import (
     Master,
     root_path,
-    dca_changes_into_word,
     get_project_information,
     get_master_data,
-    get_word_doc,
     DcaData,
     dca_changes_into_excel,
 )
@@ -19,11 +16,10 @@ from data_mgmt.data import (
 def compile_dca_analysis():
     m = Master(get_master_data(), get_project_information())
     dca = DcaData(m)
-    dca.get_changes("Q2 20/21", "Q1 20/21")
-    word_doc = dca_changes_into_word(dca, get_word_doc())
-    word_doc.save(root_path / "output/dca_changes.docx")
-    quarter_list = ["Q2 20/21", "Q1 20/21"]
-    wb = dca_changes_into_excel(dca, quarter_list)
+    latest_quarter = str(m.master_data[0].quarter)
+    last_quarter = str(m.master_data[1].quarter)
+    default_quarter_list = [latest_quarter, last_quarter]
+    wb = dca_changes_into_excel(dca, default_quarter_list)
     wb.save(root_path / "output/dca_data.xlsx")
 
 
