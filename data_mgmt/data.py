@@ -3689,11 +3689,13 @@ class VfMData:
 
             self.vfm_dictionary = quarter_dict
 
+
     def get_count(self) -> None:
         """Returns dictionary containing a count of vfm categories and pvc totals"""
         count_output_dict = {}
         pvc_output_dict = {}
-        for quarter in self.vfm_dictionary.keys():
+        error_list = []
+        for i, quarter in enumerate(self.vfm_dictionary.keys()):
             pvc_list = []
             cat_list = []
             for cat in VFM_CAT:
@@ -3703,20 +3705,23 @@ class VfMData:
                 total_count = 0
                 for y, project in enumerate(list(self.vfm_dictionary[quarter].keys())):
                     try:
-                        total_pvc_count += self.vfm_dictionary[quarter][project]["Present Value Cost (PVC)"]
+                        project_pvc = self.vfm_dictionary[quarter][project]["Present Value Cost (PVC)"]
+                        total_pvc_count += project_pvc
                         proj_cat = self.vfm_dictionary[quarter][project]["VfM Category single entry"]
                         if proj_cat == cat:
-                            cat_pvc_count += self.vfm_dictionary[quarter][project]["Present Value Cost (PVC)"]
+                            cat_pvc_count += project_pvc
                     except TypeError:
-                        print(quarter + " " + project + " PVC data needs checking")
-                        pass
+                        if project_pvc is not None:
+                            error_list.append(quarter + " " + project + " PVC data needs checking")
+                            pass
                     proj_cat = self.vfm_dictionary[quarter][project]["VfM Category single entry"]
                     if proj_cat != None:
                         total_count += 1
                         if proj_cat == cat:
                             cat_count += 1
                     if proj_cat == None:
-                        print(quarter + " " + project + " VfM Category is None")
+                        if i == 0:
+                            error_list.append(quarter + " " + project + " VfM Category is None")
 
                 pvc_list.append((cat, cat_pvc_count))
                 cat_list.append((cat, cat_count))
@@ -3724,6 +3729,14 @@ class VfMData:
             cat_list.append(('Total', total_count))
             pvc_output_dict[quarter] = dict(pvc_list)
             count_output_dict[quarter] = dict(cat_list)
+
+        def f7(seq):
+            seen = set()
+            seen_add = seen.add
+            return [x for x in seq if not (x in seen or seen_add(x))]
+        error_list = f7(error_list)
+        for x in error_list:
+            print(x)
 
         self.vfm_cat_pvc = pvc_output_dict
         self.vfm_cat_count = count_output_dict
