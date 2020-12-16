@@ -3427,11 +3427,18 @@ def risk_score(risk_impact: str, risk_likelihood: str) -> str:
     impact_score = RISK_SCORES[risk_impact]
     likelihood_score = RISK_SCORES[risk_likelihood]
     score = impact_score + likelihood_score
-    if score <= 3:
-        return "Low"
-    if 4 <= score <= 6:
+    if score <= 4:
+        if risk_impact == "Medium" and risk_likelihood == "Medium":
+            return "Medium"
+        else:
+            return "Low"
+    if 5 <= score <= 6:
         if risk_impact == "High" and risk_likelihood == "High":
             return "High"
+        if risk_impact == "Low" and risk_likelihood == "Very High":
+            return "Low"
+        if risk_impact == "Very High" and risk_likelihood == "Low":
+            return "Low"
         else:
             return "Medium"
     if score > 6:
@@ -3715,11 +3722,11 @@ class VfMData:
                             error_list.append(quarter + " " + project + " PVC data needs checking")
                             pass
                     proj_cat = self.vfm_dictionary[quarter][project]["VfM Category single entry"]
-                    if proj_cat != None:
+                    if proj_cat is not None:
                         total_count += 1
                         if proj_cat == cat:
                             cat_count += 1
-                    if proj_cat == None:
+                    if proj_cat is None:
                         if i == 0:
                             error_list.append(quarter + " " + project + " VfM Category is None")
 
