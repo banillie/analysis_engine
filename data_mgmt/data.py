@@ -3673,8 +3673,11 @@ VFM_LIST = [
     "Adjusted Benefits Cost Ratio (BCR)",
     "Initial Benefits Cost Ratio (BCR)",
     "VfM Category single entry",
+    "VfM Category lower range",
+    "VfM Category upper range",
     "Present Value Cost (PVC)",
     "Present Value Benefit (PVB)",
+    "Benefits Narrative"
 ]
 
 VFM_CAT = [
@@ -3705,11 +3708,14 @@ class VfMData:
             for project_name in self.master.master_data[i].projects:
                 vfm_list = []
                 for vfm_type in VFM_LIST:
-                    vfm = (
-                        vfm_type,
-                        self.master.master_data[i].data[project_name][vfm_type],
-                    )
-                    vfm_list.append(vfm)
+                    try:
+                        vfm = (
+                            vfm_type,
+                            self.master.master_data[i].data[project_name][vfm_type],
+                        )
+                        vfm_list.append(vfm)
+                    except KeyError:  # vfm range keys not in all masters
+                        pass
 
                 project_dict[self.master.abbreviations[project_name]] = dict(vfm_list)
             quarter_dict[str(self.master.master_data[i].quarter)] = project_dict
@@ -3825,6 +3831,8 @@ def vfm_into_excel(vfm_data: VfMData, quarter: List[str] or str) -> workbook:
     return wb
 
 
+# degree_range, rot_text, and gauge all in early development. Code taken from
+# http://nicolasfauchereau.github.io/climatecode/posts/drawing-a-gauge-with-matplotlib/
 def degree_range(n):
     start = np.linspace(0, 180, n + 1, endpoint=True)[0:-1]
     end = np.linspace(0, 180, n + 1, endpoint=True)[1::]
