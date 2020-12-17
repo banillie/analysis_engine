@@ -23,6 +23,8 @@ from docx.enum.section import WD_SECTION_START, WD_ORIENTATION
 from docx.oxml import parse_xml
 from docx.oxml.ns import nsdecls
 from docx.shared import Pt, Cm, RGBColor, Inches
+from matplotlib import cm, pyplot as plt
+from matplotlib.patches import Wedge, Rectangle, Circle
 from openpyxl import load_workbook, Workbook
 from openpyxl.styles import Font, PatternFill
 from openpyxl.workbook import workbook
@@ -546,9 +548,9 @@ def calculate_profiled(p: List[int], s: List[int], unpro: List[int]) -> list:
 
 class Master:
     def __init__(
-            self,
-            master_data: List[Dict[str, Union[str, int, datetime.date, float]]],
-            project_information: Dict[str, Union[str, int]],
+        self,
+        master_data: List[Dict[str, Union[str, int, datetime.date, float]]],
+        project_information: Dict[str, Union[str, int]],
     ) -> None:
         self.master_data = master_data
         self.project_information = project_information
@@ -628,7 +630,7 @@ class Master:
                 print(
                     p
                     + " is not in the projects information document. Project names must be identical "
-                      " in both documents. Programme stopping. Please amend."
+                    " in both documents. Programme stopping. Please amend."
                 )
                 break
             else:
@@ -648,9 +650,9 @@ class Master:
                         + " does not have a baseline point for "
                         + v
                         + " this could cause the programme to "
-                          "crash. Therefore the programme is stopping. "
-                          "Please amend the data for " + p + " so that "
-                                                             " it has at least one baseline point for " + v
+                        "crash. Therefore the programme is stopping. "
+                        "Please amend the data for " + p + " so that "
+                        " it has at least one baseline point for " + v
                     )
             else:
                 continue
@@ -665,10 +667,10 @@ class Master:
 
 class CostData:
     def __init__(
-            self,
-            master: Master,
-            project_group: List[str] or str,
-            baseline_type: str = "ipdc_costs",
+        self,
+        master: Master,
+        project_group: List[str] or str,
+        baseline_type: str = "ipdc_costs",
     ):
         self.master = master
         self.project_group = project_group
@@ -800,8 +802,8 @@ class CostData:
                                 std_list[s] = 0
                         spent.append(round(group_total + sum(std_list)))
                     except (
-                            KeyError,
-                            TypeError,
+                        KeyError,
+                        TypeError,
                     ):  # Note. TypeError here as projects may have no baseline
                         spent.append(group_total)
                 if x == 1:  # profiled
@@ -943,8 +945,8 @@ class CostData:
                 "NOTE: The following project(s) were not part of the portfolio last quarter "
                 + str(missing_projects)
                 + " this means current quarter and last quarter cost profiles are not like for like."
-                  " If you would like a like for like comparison between current and last quarter"
-                  " remove this project(s) from the master group."
+                " If you would like a like for like comparison between current and last quarter"
+                " remove this project(s) from the master group."
             )
 
         self.current_profile = current_profile
@@ -959,10 +961,10 @@ class CostData:
 
 class BenefitsData:
     def __init__(
-            self,
-            master: Master,
-            project_group: List[str] or str,
-            baseline_type: str = "ipdc_benefits",
+        self,
+        master: Master,
+        project_group: List[str] or str,
+        baseline_type: str = "ipdc_benefits",
     ):
         self.master = master
         self.project_group = project_group
@@ -1129,10 +1131,10 @@ def remove_none_types(input_list):
 
 class MilestoneData:
     def __init__(
-            self,
-            master: Master,
-            project_group: List[str] or str,
-            baseline_type: str = "ipdc_milestones",
+        self,
+        master: Master,
+        project_group: List[str] or str,
+        baseline_type: str = "ipdc_milestones",
     ):
         self.master = master
         self.project_group = project_group
@@ -1216,7 +1218,7 @@ class MilestoneData:
                                     "Date",
                                     p_data[
                                         "Approval MM" + str(i) + " Forecast - Actual"
-                                        ],
+                                    ],
                                 ),
                                 ("Notes", p_data["Approval MM" + str(i) + " Notes"]),
                             ]
@@ -1253,7 +1255,7 @@ class MilestoneData:
                         lower_counter_list.append(entry[1][1])
                         lower_count = Counter(lower_counter_list)
                         new_milestone_key = (
-                                entry[1][1] + " (" + str(lower_count[entry[1][1]]) + ")"
+                            entry[1][1] + " (" + str(lower_count[entry[1][1]]) + ")"
                         )
                         entry[1] = ("Milestone", new_milestone_key)
                         raw_list.append(entry)
@@ -1355,11 +1357,11 @@ class MilestoneData:
         )
 
     def filter_chart_info(
-            self,
-            milestone_type: str or List[str] = "All",
-            key_of_interest: str or List[str] = None,
-            start_date: str = "1/1/2015",
-            end_date: str = "1/1/2041",
+        self,
+        milestone_type: str or List[str] = "All",
+        key_of_interest: str or List[str] = None,
+        start_date: str = "1/1/2015",
+        end_date: str = "1/1/2041",
     ):
 
         #  Filter milestone type
@@ -1842,7 +1844,7 @@ def cost_profile_graph(cost_master: CostData, **kwargs) -> plt.figure:
 
     # Overall cost profile chart
     if (
-            sum(cost_master.baseline_profile_one) != 0
+        sum(cost_master.baseline_profile_one) != 0
     ):  # handling in the event that group of projects have no baseline profile.
         ax1.plot(
             YEAR_LIST,
@@ -1854,7 +1856,7 @@ def cost_profile_graph(cost_master: CostData, **kwargs) -> plt.figure:
     else:
         pass
     if (
-            sum(cost_master.last_profile) != 0
+        sum(cost_master.last_profile) != 0
     ):  # handling in the event that group of projects have no last quarter profile
         ax1.plot(
             YEAR_LIST,
@@ -1941,7 +1943,7 @@ def cost_profile_graph(cost_master: CostData, **kwargs) -> plt.figure:
 
 
 def cost_profile_baseline_graph(
-        cost_master: CostData, *title: Tuple[Optional[str]]
+    cost_master: CostData, *title: Tuple[Optional[str]]
 ) -> plt.figure:
     """Compiles a matplotlib line chart for costs of GROUP of projects contained within cost_master class.
     As as default last quarters profile is not included. It creates two plots. First plot shows overall
@@ -1957,7 +1959,7 @@ def cost_profile_baseline_graph(
 
     # Overall cost profile chart
     if (
-            sum(cost_master.baseline_profile_three) != 0
+        sum(cost_master.baseline_profile_three) != 0
     ):  # handling in the event that group of projects have no baseline profile.
         ax1.plot(
             YEAR_LIST,
@@ -1969,7 +1971,7 @@ def cost_profile_baseline_graph(
     else:
         pass
     if (
-            sum(cost_master.baseline_profile_two) != 0
+        sum(cost_master.baseline_profile_two) != 0
     ):  # handling in the event that group of projects have no baseline profile.
         ax1.plot(
             YEAR_LIST,
@@ -1981,7 +1983,7 @@ def cost_profile_baseline_graph(
     else:
         pass
     if (
-            sum(cost_master.baseline_profile_one) != 0
+        sum(cost_master.baseline_profile_one) != 0
     ):  # handling in the event that group of projects have no last quarter profile
         ax1.plot(
             YEAR_LIST,
@@ -2014,7 +2016,7 @@ def cost_profile_baseline_graph(
 
     # plot rdel, cdel, non-gov chart data
     if (
-            sum(cost_master.ngov_profile) != 0
+        sum(cost_master.ngov_profile) != 0
     ):  # if statement as most projects don't have ngov cost.
         ax2.plot(
             YEAR_LIST,
@@ -2060,7 +2062,7 @@ def cost_profile_baseline_graph(
 
 
 def spent_calculation(
-        master: Dict[str, Union[str, datetime.date, int, float]], project: str
+    master: Dict[str, Union[str, datetime.date, int, float]], project: str
 ) -> int:
     keys = [
         "Pre-profile RDEL",
@@ -2093,7 +2095,7 @@ def get_word_doc() -> Document():
 
 
 def wd_heading(
-        doc: Document, project_info: Dict[str, Union[str, int]], project_name: str
+    doc: Document, project_info: Dict[str, Union[str, int]], project_name: str
 ) -> None:
     """Function adds header to word doc"""
     font = doc.styles["Normal"].font
@@ -2374,7 +2376,7 @@ def make_file_friendly(quarter_str: str) -> str:
 
 
 def total_costs_benefits_bar_chart(
-        cost_master: CostData, ben_master: BenefitsData, **kwargs
+    cost_master: CostData, ben_master: BenefitsData, **kwargs
 ) -> plt.figure:
     """compiles a matplotlib bar chart which shows total project costs"""
     fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2)  # four sub plots
@@ -2570,9 +2572,9 @@ def check_baselines(master: Master) -> None:
                     + " does not have a baseline point for "
                     + v
                     + " this could cause the programme to"
-                      "crash. Therefore the programme is stopping. "
-                      "Please amend the data for " + p + " so that "
-                                                         " it has at least one baseline point for " + v
+                    "crash. Therefore the programme is stopping. "
+                    "Please amend the data for " + p + " so that "
+                    " it has at least one baseline point for " + v
                 )
                 break
         else:
@@ -2585,7 +2587,7 @@ def percentage(percent: int, whole: float) -> int:
 
 
 def get_old_fy_cost_data(
-        master_file: typing.TextIO, project_id_wb: typing.TextIO
+    master_file: typing.TextIO, project_id_wb: typing.TextIO
 ) -> None:
     """
     Gets all old financial data from a specified master and places into project id document.
@@ -2613,13 +2615,13 @@ def get_old_fy_cost_data(
 
 def run_get_old_fy_data(master_files_list: list, project_id_wb: typing.TextIO) -> None:
     for f in reversed(
-            master_files_list
+        master_files_list
     ):  # reversed so it gets the latest data in masters
         get_old_fy_cost_data(f, project_id_wb)
 
 
 def place_old_fy_data_into_master_wb(
-        master_file: typing.TextIO, project_id_wb: typing.TextIO
+    master_file: typing.TextIO, project_id_wb: typing.TextIO
 ) -> None:
     """
     places all old financial year data into master files.
@@ -2646,7 +2648,7 @@ def place_old_fy_data_into_master_wb(
 
 
 def run_place_old_fy_data_into_masters(
-        master_files_list: list, project_id_wb: typing.TextIO
+    master_files_list: list, project_id_wb: typing.TextIO
 ) -> None:
     for f in master_files_list:
         place_old_fy_data_into_master_wb(f, project_id_wb)
@@ -2669,7 +2671,7 @@ def put_key_change_master_into_dict(key_change_file: typing.TextIO) -> Dict[str,
 
 
 def alter_wb_master_file_key_names(
-        master_file: typing.TextIO, key_change_dict: Dict[str, str]
+    master_file: typing.TextIO, key_change_dict: Dict[str, str]
 ) -> workbook:
     """
     places altered keys names, from the keys change master dictionary, into master wb(s).
@@ -2679,14 +2681,14 @@ def alter_wb_master_file_key_names(
 
     for row_num in range(2, ws.max_row + 1):
         for (
-                key
+            key
         ) in key_change_dict.keys():  # changes stored in the altered keys change log wb
             if ws.cell(row=row_num, column=1).value == key:
                 ws.cell(row=row_num, column=1).value = key_change_dict[key]
         for year in YEAR_LIST:  # changes to yearly profile keys
             if ws.cell(row=row_num, column=1).value == year + " CDEL Forecast Total":
                 ws.cell(row=row_num, column=1).value = (
-                        year + " CDEL Forecast one off new costs"
+                    year + " CDEL Forecast one off new costs"
                 )
 
     return wb.save(master_file)
@@ -2744,7 +2746,7 @@ def compare_masters(files: List[typing.TextIO], projects: List[str] or str) -> w
                         change_count += 1
                 except KeyError:
                     if (
-                            project_name in last_master.projects
+                        project_name in last_master.projects
                     ):  # keys error due to keys not being present.
                         ws.cell(row=row_num, column=1).fill = PatternFill(
                             start_color="ffba00", end_color="ffba00", fill_type="solid"
@@ -2863,8 +2865,8 @@ def do_mask(x: List[datetime.date], y: List[datetime.date]):
 
 
 def milestone_chart(
-        milestone_data: MilestoneData,
-        **kwargs,
+    milestone_data: MilestoneData,
+    **kwargs,
 ) -> plt.figure:
     # build scatter chart
     fig, ax1 = plt.subplots()
@@ -3011,9 +3013,9 @@ def milestone_chart(
         blue_line = kwargs["blue_line"]
         if blue_line == "Today":
             if (
-                    milestone_data.min_date
-                    <= datetime.date.today()
-                    <= milestone_data.max_date
+                milestone_data.min_date
+                <= datetime.date.today()
+                <= milestone_data.max_date
             ):
                 plt.axvline(datetime.date.today())
                 plt.figtext(
@@ -3282,7 +3284,7 @@ class DcaData:
                     total = 0
                     cost_total = 0
                     for y, project in enumerate(
-                            list(self.dca_dictionary[quarter][dca_type].keys())
+                        list(self.dca_dictionary[quarter][dca_type].keys())
                     ):
                         total += 1
                         try:
@@ -3298,8 +3300,8 @@ class DcaData:
                             )
                             pass
                         if (
-                                self.dca_dictionary[quarter][dca_type][project]["DCA"]
-                                == colour
+                            self.dca_dictionary[quarter][dca_type][project]["DCA"]
+                            == colour
                         ):
                             count += 1
                             try:
@@ -3487,7 +3489,7 @@ class RiskData:
                             except KeyError:
                                 try:
                                     amended_risk_type = (
-                                            risk_type[:4] + str(x) + risk_type[3:]
+                                        risk_type[:4] + str(x) + risk_type[3:]
                                     )
                                     risk = (
                                         risk_type,
@@ -3500,14 +3502,14 @@ class RiskData:
                                     try:
                                         if risk_type == "Severity Score Risk Category":
                                             impact = (
-                                                    "BRD Residual Impact"[:4]
-                                                    + str(x)
-                                                    + "BRD Residual Impact"[3:]
+                                                "BRD Residual Impact"[:4]
+                                                + str(x)
+                                                + "BRD Residual Impact"[3:]
                                             )
                                             likelihoood = (
-                                                    "BRD Residual Likelihood"[:4]
-                                                    + str(x)
-                                                    + "BRD Residual Likelihood"[3:]
+                                                "BRD Residual Likelihood"[:4]
+                                                + str(x)
+                                                + "BRD Residual Likelihood"[3:]
                                             )
                                             score = risk_score(
                                                 self.master.master_data[i].data[
@@ -3554,10 +3556,10 @@ class RiskData:
                 count_list = []
                 impact_list = []
                 for y, project_name in enumerate(
-                        list(self.risk_dictionary[quarter].keys())
+                    list(self.risk_dictionary[quarter].keys())
                 ):
                     for x, number in enumerate(
-                            list(self.risk_dictionary[quarter][project_name].keys())
+                        list(self.risk_dictionary[quarter][project_name].keys())
                     ):
                         try:
                             risk_value = self.risk_dictionary[quarter][project_name][
@@ -3595,13 +3597,13 @@ def risks_into_excel(risk_data: RiskData, quarter: List[str] or str) -> workbook
 
         for y, project_name in enumerate(list(risk_data.risk_dictionary[q].keys())):
             for x, number in enumerate(
-                    list(risk_data.risk_dictionary[q][project_name].keys())
+                list(risk_data.risk_dictionary[q][project_name].keys())
             ):
                 if (
-                        risk_data.risk_dictionary[q][project_name][number][
-                            "Brief Risk Description "
-                        ]
-                        is None
+                    risk_data.risk_dictionary[q][project_name][number][
+                        "Brief Risk Description "
+                    ]
+                    is None
                 ):
                     break
                 else:
@@ -3634,8 +3636,8 @@ def risks_into_excel(risk_data: RiskData, quarter: List[str] or str) -> workbook
         start_row = 3
         for v, risk_cat in enumerate(list(risk_data.risk_count[q].keys())):
             if (
-                    risk_cat == "Brief Risk Description "
-                    or risk_cat == "BRD Mitigation - Actions taken (brief description)"
+                risk_cat == "Brief Risk Description "
+                or risk_cat == "BRD Mitigation - Actions taken (brief description)"
             ):
                 pass
             else:
@@ -3666,16 +3668,25 @@ def risks_into_excel(risk_data: RiskData, quarter: List[str] or str) -> workbook
     return wb
 
 
-VFM_LIST = ['NPV for all projects and NPV for programmes if available',
-            'Adjusted Benefits Cost Ratio (BCR)',
-            'Initial Benefits Cost Ratio (BCR)',
-            'VfM Category single entry',
-            'Present Value Cost (PVC)',
-            'Present Value Benefit (PVB)']
+VFM_LIST = [
+    "NPV for all projects and NPV for programmes if available",
+    "Adjusted Benefits Cost Ratio (BCR)",
+    "Initial Benefits Cost Ratio (BCR)",
+    "VfM Category single entry",
+    "Present Value Cost (PVC)",
+    "Present Value Benefit (PVB)",
+]
 
-VFM_CAT = ["Poor", "Low", "Medium", "High", "Very High",
-           "Very High and Financially Positive",
-           "Economically Positive", "Total"]
+VFM_CAT = [
+    "Poor",
+    "Low",
+    "Medium",
+    "High",
+    "Very High",
+    "Very High and Financially Positive",
+    "Economically Positive",
+    "Total",
+]
 
 
 class VfMData:
@@ -3696,9 +3707,7 @@ class VfMData:
                 for vfm_type in VFM_LIST:
                     vfm = (
                         vfm_type,
-                        self.master.master_data[i].data[project_name][
-                            vfm_type
-                        ],
+                        self.master.master_data[i].data[project_name][vfm_type],
                     )
                     vfm_list.append(vfm)
 
@@ -3722,28 +3731,38 @@ class VfMData:
                 total_count = 0
                 for y, project in enumerate(list(self.vfm_dictionary[quarter].keys())):
                     try:
-                        project_pvc = self.vfm_dictionary[quarter][project]["Present Value Cost (PVC)"]
+                        project_pvc = self.vfm_dictionary[quarter][project][
+                            "Present Value Cost (PVC)"
+                        ]
                         total_pvc_count += project_pvc
-                        proj_cat = self.vfm_dictionary[quarter][project]["VfM Category single entry"]
+                        proj_cat = self.vfm_dictionary[quarter][project][
+                            "VfM Category single entry"
+                        ]
                         if proj_cat == cat:
                             cat_pvc_count += project_pvc
                     except TypeError:
                         if project_pvc is not None:
-                            error_list.append(quarter + " " + project + " PVC data needs checking")
+                            error_list.append(
+                                quarter + " " + project + " PVC data needs checking"
+                            )
                             pass
-                    proj_cat = self.vfm_dictionary[quarter][project]["VfM Category single entry"]
+                    proj_cat = self.vfm_dictionary[quarter][project][
+                        "VfM Category single entry"
+                    ]
                     if proj_cat is not None:
                         total_count += 1
                         if proj_cat == cat:
                             cat_count += 1
                     if proj_cat is None:
                         if i == 0:
-                            error_list.append(quarter + " " + project + " VfM Category is None")
+                            error_list.append(
+                                quarter + " " + project + " VfM Category is None"
+                            )
 
                 pvc_list.append((cat, cat_pvc_count))
                 cat_list.append((cat, cat_count))
-            pvc_list.append(('Total', total_pvc_count))
-            cat_list.append(('Total', total_count))
+            pvc_list.append(("Total", total_pvc_count))
+            cat_list.append(("Total", total_count))
             pvc_output_dict[quarter] = dict(pvc_list)
             count_output_dict[quarter] = dict(cat_list)
 
@@ -3768,9 +3787,13 @@ def vfm_into_excel(vfm_data: VfMData, quarter: List[str] or str) -> workbook:
         ws.title = make_file_friendly(q)  # title of worksheet
         for i, project_name in enumerate(list(vfm_data.vfm_dictionary[q].keys())):
             ws.cell(row=start_row + i, column=2).value = project_name
-            for x, key in enumerate(list(vfm_data.vfm_dictionary[q][project_name].keys())):
+            for x, key in enumerate(
+                list(vfm_data.vfm_dictionary[q][project_name].keys())
+            ):
                 ws.cell(row=2, column=3 + x).value = key
-                ws.cell(row=start_row + i, column=3 + x).value = vfm_data.vfm_dictionary[q][project_name][key]
+                ws.cell(
+                    row=start_row + i, column=3 + x
+                ).value = vfm_data.vfm_dictionary[q][project_name][key]
 
         ws.cell(row=2, column=2).value = "Project/Programme"
 
@@ -3784,8 +3807,12 @@ def vfm_into_excel(vfm_data: VfMData, quarter: List[str] or str) -> workbook:
             ws.cell(row=start_row + i, column=2).value = cat
             ws.cell(row=start_row + i + 12, column=2).value = cat
             try:
-                ws.cell(row=start_row + i, column=3 + x).value = vfm_data.vfm_cat_pvc[q][cat]
-                ws.cell(row=start_row + i + 12, column=3 + x).value = vfm_data.vfm_cat_count[q][cat]
+                ws.cell(row=start_row + i, column=3 + x).value = vfm_data.vfm_cat_pvc[
+                    q
+                ][cat]
+                ws.cell(
+                    row=start_row + i + 12, column=3 + x
+                ).value = vfm_data.vfm_cat_count[q][cat]
             except KeyError:
                 pass
 
@@ -3796,3 +3823,170 @@ def vfm_into_excel(vfm_data: VfMData, quarter: List[str] or str) -> workbook:
 
     wb.remove(wb["Sheet"])
     return wb
+
+
+def degree_range(n):
+    start = np.linspace(0, 180, n + 1, endpoint=True)[0:-1]
+    end = np.linspace(0, 180, n + 1, endpoint=True)[1::]
+    mid_points = start + ((end - start) / 2.0)
+    return np.c_[start, end], mid_points
+
+
+def rot_text(ang):
+    rotation = np.degrees(np.radians(ang) * np.pi / np.pi - np.radians(90))
+    return rotation
+
+
+def gauge(
+    labels=["LOW", "MEDIUM", "HIGH", "VERY HIGH", "EXTREME"],
+    colors="jet_r",
+    arrow=1,
+    arrow_two=2,
+    title="",
+    fname=False,
+):
+    """
+    some sanity checks first
+
+    """
+
+    N = len(labels)
+
+    if arrow > N:
+        raise Exception(
+            "\n\nThe category ({}) is greated than \
+        the length\nof the labels ({})".format(
+                arrow, N
+            )
+        )
+
+    """
+    if colors is a string, we assume it's a matplotlib colormap
+    and we discretize in N discrete colors 
+    """
+
+    if isinstance(colors, str):
+        cmap = cm.get_cmap(colors, N)
+        cmap = cmap(np.arange(N))
+        colors = cmap[::-1, :].tolist()
+    if isinstance(colors, list):
+        if len(colors) == N:
+            colors = colors[::-1]
+        else:
+            raise Exception(
+                "\n\nnumber of colors {} not equal \
+            to number of categories{}\n".format(
+                    len(colors), N
+                )
+            )
+
+    """
+    begins the plotting
+    """
+
+    fig, ax = plt.subplots()
+
+    ang_range, mid_points = degree_range(N)
+    print(ang_range)
+    print(mid_points)
+
+    labels = labels[::-1]
+
+    """
+    plots the sectors and the arcs
+    """
+    patches = []
+    for ang, c in zip(ang_range, colors):
+        # sectors
+        patches.append(Wedge((0.0, 0.0), 0.4, *ang, facecolor="w", lw=2))
+        # arcs
+        patches.append(
+            Wedge((0.0, 0.0), 0.4, *ang, width=0.10, facecolor=c, lw=2, alpha=0.5)
+        )
+
+    [ax.add_patch(p) for p in patches]
+
+    """
+    set the labels (e.g. 'LOW','MEDIUM',...)
+    """
+
+    for mid, lab in zip(mid_points, labels):
+        ax.text(
+            0.35 * np.cos(np.radians(mid)),
+            0.35 * np.sin(np.radians(mid)),
+            lab,
+            horizontalalignment="center",
+            verticalalignment="center",
+            fontsize=14,
+            fontweight="bold",
+            rotation=rot_text(mid),
+        )
+
+    """
+    set the bottom banner and the title
+    """
+    r = Rectangle((-0.4, -0.1), 0.8, 0.1, facecolor="w", lw=2)
+    ax.add_patch(r)
+
+    ax.text(
+        0,
+        -0.05,
+        title,
+        horizontalalignment="center",
+        verticalalignment="center",
+        fontsize=22,
+        fontweight="bold",
+    )
+
+    """
+    plots the arrow now
+    """
+
+    # pos = abs(arrow - N)
+    pos = mid_points[abs(arrow - N)]
+    print(pos)
+
+    ax.arrow(
+        0,
+        0,
+        0.225 * np.cos(np.radians(pos)),
+        0.225 * np.sin(np.radians(pos)),
+        width=0.04,
+        head_width=0.09,
+        head_length=0.1,
+        fc="k",
+        ec="k",
+    )
+
+    pos_two = mid_points[abs(arrow_two - N)]
+
+    ax.arrow(
+        0,
+        0,
+        0.225 * np.cos(np.radians(pos_two)),
+        0.225 * np.sin(np.radians(pos_two)),
+        width=0.04,
+        head_width=0.09,
+        head_length=0.1,
+        fill=False,
+        ec="k",
+    )
+
+    ax.add_patch(Circle((0, 0), radius=0.02, facecolor="k"))
+    ax.add_patch(Circle((0, 0), radius=0.01, facecolor="w", zorder=11))
+
+    """
+    removes frame and ticks, and makes axis equal and tight
+    """
+
+    ax.set_frame_on(False)
+    ax.axes.set_xticks([])
+    ax.axes.set_yticks([])
+    ax.axis("equal")
+    plt.tight_layout()
+    if fname:
+        fig.savefig(root_path / "output/speed_dial_graph.png", dpi=200)
+        # doc = open_word_doc(root_path / "input/summary_temp.docx")
+        # doc.add_picture("temp_file.png", width=Inches(8))
+        # doc.save(root_path / "output/speed_dial.docx")
+        # os.remove("temp_file.png")
