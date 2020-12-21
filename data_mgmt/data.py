@@ -558,10 +558,13 @@ class Master:
         self.current_projects = self.get_current_projects()
         self.bl_info = {}
         self.bl_index = {}
+        self.dft_groups = {}
+        self.project_stage = {}
         self.get_baseline_data()
         self.check_project_information()
         self.check_baselines()
         self.get_project_abbreviations()
+        self.get_project_groups()
 
     def get_baseline_data(self) -> dict:
         """
@@ -663,6 +666,58 @@ class Master:
         held in the project info document"""
         for p in self.project_information.projects:
             self.abbreviations[p] = self.project_information[p]["Abbreviations"]
+
+    def get_project_groups(self) -> None:
+        """gets the groups that projects are part of e.g. business case
+        stage or dft group"""
+
+        raw_dict = {}
+        raw_list = []
+        group_list = []
+        stage_list = []
+        for i, master in enumerate(self.master_data):
+            lower_dict = {}
+            for p in master.projects:
+                dft_group = master[p]["DfT Group"]
+                stage = master[p]["IPDC approval point"]
+                raw_list.append(("group", dft_group))
+                raw_list.append(("stage", stage))
+                lower_dict[p] = dict(raw_list)
+                group_list.append(dft_group)
+                stage_list.append(stage)
+            raw_dict[master.quarter] = lower_dict
+
+        group_list = list(set(group_list))
+        stage_list = list(set(stage_list))
+
+        group_dict = {}
+        stage_dict = {}
+        for quarter in raw_dict.keys():
+            lower_g_dict = {}
+            lower_s_dict = {}
+            for group_type in group_list:
+                g_list = []
+                for p in raw_dict[quarter].keys():
+                    p_group = raw_dict[quarter][p]["group"]
+                    if p_group == group_type:
+                        g_list.append(p)
+
+                lower_g_dict[group_type] = g_list
+
+            for stage_type in stage_list:
+                s_list = []
+                for p in raw_dict[quarter].keys():
+                    p_stage = raw_dict[quarter][p]["stage"]
+                    if p_stage == stage_type:
+                        s_list.append(p)
+
+                lower_s_dict[stage_type] = s_list
+
+            group_dict[quarter] = lower_g_dict
+            stage_dict[quarter] = lower_s_dict
+
+        self.dft_groups = group_dict
+        self.project_stage = stage_dict
 
 
 class CostData:

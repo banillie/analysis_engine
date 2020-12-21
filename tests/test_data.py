@@ -382,3 +382,9 @@ def test_vfm_analysis(project_info, vfm_masters):
     wb.save("resources/vfm.xlsx")
 
 
+def test_getting_project_groups(project_info, basic_masters_dicts):
+    m = Master(basic_masters_dicts, project_info)
+    # assert m.dft_groups == {}
+    # assert m.project_stage == {}
+    assert isinstance(m.project_stage, (dict,))
+    assert isinstance(m.dft_groups, (dict,))
