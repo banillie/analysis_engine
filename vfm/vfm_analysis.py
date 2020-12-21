@@ -1,6 +1,19 @@
 """
-Compiles VfM analysis. Places into output file an excel file with required data.
-User can specify which quarters data they would like to return in the quarters_list variable.
+Compiles VfM analysis. Places into output file an excel file with data.
+
+This programme takes the project data from the following keys:
+- state when code finalised.
+In the output workbook the initial tabs contain a raw print out of this data for each
+project. The final tab contains a 'count' as required for analysis.
+What is the analysis trying to achieve... need from user(s).
+
+Command line options
+analysis_engine run vfm analysis. Default is current and latest quarter, all projects.
+flags.
+- quarters. specify the quarters to be analysed
+- groups. specify particular groups e.g. business case stage, dft group
+- project. specify a particular project or group of projects.
+
 """
 
 from data_mgmt.data import (
