@@ -1042,7 +1042,6 @@ class CostData:
         self.wlc_change = wlc_change_dict
 
 
-
 class BenefitsData:
     def __init__(
             self,
@@ -1239,8 +1238,10 @@ class MilestoneData:
         self.md_baseline_two = []
         self.max_date = None
         self.min_date = None
+        self.schedule_change = {}
         self.get_milestones()
         self.get_chart_info()
+        self.calculate_schedule_changes()
 
     def get_milestones(self) -> None:
         """
@@ -1534,6 +1535,25 @@ class MilestoneData:
             + remove_none_types(self.md_baseline)
         )
 
+    def calculate_schedule_changes(self) -> None:
+        """calculates the changes in project schedules. If standard key for calculation
+        not available it using the best next one available"""
+
+        self.project_group = string_conversion(self.project_group)
+
+        output_dict = {}
+        for project_name in self.project_group:
+            p_list = []
+            if "Standard A" in self.key_names:
+                current_full_op = self.current[project_name]["Standard A"]
+                bl_full_op = self.baseline[project_name]["Standard A"]
+                p_list.append(("current", current_full_op))
+                p_list.append(("baseline", bl_full_op))
+            else:
+                pass
+            output_dict[project_name] = dict(p_list)
+
+        self.schedule_change = output_dict
 
 # class CombinedData:
 #     def __init__(self, wb, pfm_milestone_data):

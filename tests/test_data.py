@@ -402,4 +402,12 @@ def test_sorting_project_by_dca(project_info, dca_masters):
 def test_calculating_wlc_changes(costs_masters, project_info):
     master = Master(costs_masters, project_info)
     costs = CostData(master, master.current_projects)
-    assert costs.wlc_change == {}
+    assert costs.wlc_change == {'Apollo 13': {'baseline one': 0, 'last quarter': 0},
+                                'Columbia': {'baseline one': -43, 'last quarter': -43},
+                                'Falcon 9': {'baseline one': 5, 'last quarter': 5},
+                                'Mars': {'baseline one': 0},
+                                'Sea of Tranquility': {'baseline one': 54, 'last quarter': 54}}
+
+
+def test_calculating_schedule_changes():
+    # To do
