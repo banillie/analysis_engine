@@ -29,7 +29,7 @@ from data_mgmt.data import (
     MilestoneData,
     milestone_chart, save_graph,
     DCA_KEYS, dca_changes_into_word, dca_changes_into_excel, DcaData, RiskData, risks_into_excel, VfMData,
-    vfm_into_excel
+    vfm_into_excel, sort_projects_by_dca
 )
 
 # test masters project names
@@ -388,3 +388,18 @@ def test_getting_project_groups(project_info, basic_masters_dicts):
     # assert m.project_stage == {}
     assert isinstance(m.project_stage, (dict,))
     assert isinstance(m.dft_groups, (dict,))
+
+
+def test_sorting_project_by_dca(project_info, dca_masters):
+    rag_list = sort_projects_by_dca(dca_masters[0], group)
+    assert rag_list == [('Falcon 9', 'Amber'),
+                        ('Mars', 'Amber'),
+                        ('Apollo 13', 'Amber/Green'),
+                        ('Sea of Tranquility', 'Green'),
+                        ('Columbia', 'Green')]
+
+
+def test_calculating_wlc_changes(costs_masters, project_info):
+    master = Master(costs_masters, project_info)
+    costs = CostData(master, master.current_projects)
+    assert costs.wlc_change == {}

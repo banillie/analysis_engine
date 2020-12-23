@@ -15,45 +15,6 @@ from openpyxl.chart import Series, Reference, BubbleChart
 from collections import Counter
 import datetime
 
-def get_project_by_stage(master, list_of_stages):
-
-    output = []
-    for i in master.projects:
-        for x in list_of_stages:
-            if x == master.data[i]['IPDC approval point']:
-                output.append(i)
-            else:
-                pass
-    return output
-
-def cost_v_schedule_chart(list_project_names):
-
-    l_data = list_of_masters_all[0]
-
-    sorted_by_rag = sort_by_rag(l_data, list_project_names)
-
-    rag_occurance = Counter(x[1] for x in sorted_by_rag)
-
-    wb = Workbook()
-    ws = wb.active
-
-    ws.cell(row=2, column=2).value = 'Project Name'
-    ws.cell(row=2, column=3).value = 'Schedule change'
-    ws.cell(row=2, column=4).value = 'WLC Change'
-    ws.cell(row=2, column=5).value = 'WLC'
-    ws.cell(row=2, column=6).value = 'DCA'
-
-    for x, tuple in enumerate(sorted_by_rag):
-        project_name = tuple[0]
-        ws.cell(row=x+3, column=2).value = abbreviations[project_name]
-        ws.cell(row=x+3, column=3).value = calculate_schedule_change(project_name)
-        ws.cell(row=x+3, column=4).value = calculate_wlc_change(project_name)
-        ws.cell(row=x+3, column=5).value = l_data.data[project_name]['Total Forecast']
-        ws.cell(row=x+3, column=6).value = l_data.data[project_name]['Departmental DCA']
-
-    bubble_chart(ws, rag_occurance)
-
-    return wb
 
 def bubble_chart(ws, rag_count):
 
@@ -106,30 +67,6 @@ def bubble_chart(ws, rag_count):
 
     return ws
 
-def sort_by_rag(quarter_data, list_project_names):
-
-    rag_list = []
-    for project_name in list_project_names:
-        rag = quarter_data.data[project_name]['Departmental DCA']
-        rag_list.append((project_name, rag))
-
-    rag_list_sorted = sorted(rag_list, key=lambda x:x[1])
-
-    return rag_list_sorted
-
-def calculate_wlc_change(project_name):
-
-    '''Total WLC'''
-    wlc_now = list_of_masters_all[0].data[project_name]['Total Forecast']
-    '''WLC variance against baseline quarter'''
-    wlc_baseline = list_of_masters_all[costs_bl_index[project_name][2]].data[project_name]['Total Forecast']
-
-    try:
-        percentage_change = int(((wlc_now - wlc_baseline) / wlc_now) * 100)
-    except ZeroDivisionError:
-        percentage_change = 'couldn\'t calculate'
-
-    return percentage_change
 
 def calculate_schedule_change(project_name):
 
