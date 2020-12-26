@@ -1231,6 +1231,8 @@ class MilestoneData:
         self.ordered_list_bl = []
         self.ordered_list_bl_two = []
         self.key_names = []
+        self.key_names_last = []
+        self.key_names_baseline = []
         self.type_list = []
         self.md_current = []
         self.md_last = []
@@ -1239,6 +1241,8 @@ class MilestoneData:
         self.max_date = None
         self.min_date = None
         self.schedule_change = {}
+        self.schedule_key_last = None
+        self.schedule_key_baseline = None
         self.get_milestones()
         self.get_chart_info()
         self.calculate_schedule_changes()
@@ -1372,6 +1376,8 @@ class MilestoneData:
         # reported across current, last and baseline. At the moment it only
         # uses milestones that are present in the current quarter.
         key_names = []
+        key_names_last = []
+        keys_names_baseline = []
         md_current = []
         md_last = []
         md_baseline = []
@@ -1394,6 +1400,7 @@ class MilestoneData:
             for m_last in self.last_quarter.values():
                 if m_last["Project"] == m_project:
                     if m_last["Milestone"] == m_name:
+                        key_names_last.append(m_project + ", " + m_name)
                         m_last_date = m_last["Date"]
                         md_last.append(m_last_date)
             if m_last_date is None:
@@ -1403,6 +1410,7 @@ class MilestoneData:
             for m_bl in self.baseline.values():
                 if m_bl["Project"] == m_project:
                     if m_bl["Milestone"] == m_name:
+                        keys_names_baseline.append(m_project + ", " + m_name)
                         m_bl_date = m_bl["Date"]
                         md_baseline.append(m_bl_date)
             if m_bl_date is None:
@@ -1425,6 +1433,8 @@ class MilestoneData:
             pass
 
         self.key_names = key_names
+        self.key_names_last = key_names_last
+        self.key_names_baseline = keys_names_baseline
         self.md_current = md_current
         self.md_last = md_last
         self.md_baseline = md_baseline
@@ -1541,19 +1551,33 @@ class MilestoneData:
 
         self.project_group = string_conversion(self.project_group)
 
-        output_dict = {}
+        # output_dict = {}
         for project_name in self.project_group:
-            p_list = []
-            if "Standard A" in self.key_names:
-                current_full_op = self.current[project_name]["Standard A"]
-                bl_full_op = self.baseline[project_name]["Standard A"]
-                p_list.append(("current", current_full_op))
-                p_list.append(("baseline", bl_full_op))
-            else:
-                pass
-            output_dict[project_name] = dict(p_list)
+            project_name = self.master.abbreviations[project_name]
+            for key in reversed(self.key_names):
+                try:
+                    if key.split(",")[0] ==
+                    alter_key = key.replace(project_name + ", ", "")
+                    for last_key in reversed(self.key_names_last):
+                        alter_key_last = last_key.replace(project_name + ", ", "")
+                        if alter_key == alter_key_last:
+                            self.schedule_key_last = alter_key
+                            pass
+                except KeyError:
+                    pass
 
-        self.schedule_change = output_dict
+        #     self.key_names_baseline
+        #     p_list = []
+        #     if "Standard A" in self.key_names:
+        #         current_full_op = self.current[project_name]["Standard A"]
+        #         bl_full_op = self.baseline[project_name]["Standard A"]
+        #         p_list.append(("current", current_full_op))
+        #         p_list.append(("baseline", bl_full_op))
+        #     else:
+        #         pass
+        #     output_dict[project_name] = dict(p_list)
+        #
+        # self.schedule_change = output_dict
 
 # class CombinedData:
 #     def __init__(self, wb, pfm_milestone_data):

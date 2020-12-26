@@ -409,5 +409,7 @@ def test_calculating_wlc_changes(costs_masters, project_info):
                                 'Sea of Tranquility': {'baseline one': 54, 'last quarter': 54}}
 
 
-def test_calculating_schedule_changes():
-    # To do
+def test_calculating_schedule_changes(milestone_masters, project_info):
+    master = Master(milestone_masters, project_info)
+    milestones = MilestoneData(master, [sot, a11, a13])
+    assert milestones.schedule_key_last == []
