@@ -1460,7 +1460,7 @@ class MilestoneData:
         self,
         milestone_type: str or List[str] = "All",
         key_of_interest: str or List[str] = None,
-        start_date: str = "1/1/2015",
+        start_date: str = "1/1/2000",
         end_date: str = "1/1/2041",
     ):
 
@@ -1555,7 +1555,16 @@ class MilestoneData:
         not available it using the best next one available"""
 
         self.project_group = string_conversion(self.project_group)
-        self.filter_chart_info()  # to decide whether to apply delivery filter here.
+        self.filter_chart_info(milestone_type=["Delivery", "Approval"])
+
+        def get_milestone_date(project_name: str,
+                               milestone_dictionary: Dict[str, Union[datetime.date, str]],
+                               milestone_name: str) -> datetime:
+
+            for k in milestone_dictionary.keys():
+                if milestone_dictionary[k]["Project"] == project_name:
+                    if milestone_dictionary[k]["Milestone"] == milestone_name[1:]:
+                        return milestone_dictionary[k]["Date"]
 
         output_dict = {}
         for project_name in self.project_group:
@@ -1564,41 +1573,51 @@ class MilestoneData:
             current_key_list = []
             last_key_list = []
             baseline_key_list = []
-            for key in reversed(self.key_names):
+            for key in self.key_names:
                 p = key.split(",")[0]
                 milestone_key = key.split(",")[1]
                 if project_name == p:
                     if (
                         milestone_key != " Project - Business Case End Date"
-                        and milestone_key != " Project End Date"
                     ):
                         current_key_list.append(milestone_key)
-            for last_key in reversed(self.key_names_last):
+            for last_key in self.key_names_last:
                 p = last_key.split(",")[0]
                 milestone_key_last = last_key.split(",")[1]
                 if project_name == p:
                     if (
                         milestone_key_last != " Project - Business Case End Date"
-                        and milestone_key_last != " Project End Date"
                     ):
                         last_key_list.append(milestone_key_last)
-            for baseline_key in reversed(self.key_names_baseline):
+            for baseline_key in self.key_names_baseline:
                 p = baseline_key.split(",")[0]
                 milestone_key_baseline = baseline_key.split(",")[1]
                 if project_name == p:
                     if (
                         milestone_key_baseline != " Project - Business Case End Date"
-                        and milestone_key_baseline != " Project End Date"
+                        # and milestone_key_baseline != " Project End Date"
                     ):
                         baseline_key_list.append(milestone_key_baseline)
 
-            # Here. break loop so stops when finds first result.
             for b_key in reversed(baseline_key_list):
                 if b_key in current_key_list:
-                    lower_dict["baseline"] = b_key
+                    sop = get_milestone_date(project_name, self.baseline, " Start of Project")
+                    if sop is None:  # Here causing crash as some projects don't have start of project date
+                        sop = get_milestone_date(project_name, self.current, " Start of Project")
+                    date = get_milestone_date(project_name, self.current, b_key)
+                    b_date = get_milestone_date(project_name, self.baseline, b_key)
+                    project_length = (b_date - sop).days
+                    change = (date - b_date).days
+                    p_change = int((change / project_length) * 100)
+                    lower_dict["baseline"] = {b_key: p_change}
+                    break
+
             for l_key in reversed(last_key_list):
                 if l_key in current_key_list:
+                    date = get_milestone_date(project_name, self.current, l_key)
+                    l_date = get_milestone_date(project_name, self.last_quarter, l_key)
                     lower_dict["last"] = l_key
+                    break
 
             output_dict[project_name] = lower_dict
 
