@@ -1587,7 +1587,7 @@ class MilestoneData:
                     date = get_milestone_date(project_name, current_dict, key)
                     schedule_info.append(("end current date", date))
                     other_date = get_milestone_date(project_name, other_dict, key)
-                    schedule_info.append(("end baseline date", other_date))
+                    schedule_info.append(("end other date", other_date))
                     project_length = (other_date - sop).days
                     schedule_info.append(("project length", project_length))
                     change = (date - other_date).days
@@ -1602,7 +1602,6 @@ class MilestoneData:
         output_dict = {}
         for project_name in self.project_group:
             project_name = self.master.abbreviations[project_name]
-            lower_dict = {}
             current_key_list = []
             last_key_list = []
             baseline_key_list = []
@@ -1632,10 +1631,11 @@ class MilestoneData:
                     ):
                         baseline_key_list.append(milestone_key_baseline)
 
-            lower_dict = schedule_info(project_name,
-                                       baseline_key_list,
-                                       current_key_list,
-                                       self.baseline_dict, self.current, "baseline")
+            b_dict = schedule_info(project_name, baseline_key_list, current_key_list,
+                                   self.baseline_dict, self.current, "baseline")
+            l_dict = schedule_info(project_name, last_key_list, current_key_list,
+                                   self.last_quarter, self.current, "last")
+            lower_dict = {**b_dict, **l_dict}
 
             # baseline_schedule_info = []
             # for b_key in reversed(baseline_key_list):
@@ -4240,34 +4240,35 @@ def sort_projects_by_dca(
     return rag_list_sorted
 
 
-#
-# def cost_v_schedule_chart(master: Master,
-#                           quarter: List[str] or str,
-#                           projects: List[str] or str):
-#
-#     quarter_data = master.master_data[quarter]
-#
-#     sorted_by_rag = sort_projects_by_dca(quarter_data, master.current_projects)
-#
-#     rag_occurrence = Counter(x[1] for x in sorted_by_rag)
-#
-#     wb = Workbook()
-#     ws = wb.active
-#
-#     ws.cell(row=2, column=2).value = 'Project Name'
-#     ws.cell(row=2, column=3).value = 'Schedule change'
-#     ws.cell(row=2, column=4).value = 'WLC Change'
-#     ws.cell(row=2, column=5).value = 'WLC'
-#     ws.cell(row=2, column=6).value = 'DCA'
-#
-#     for x, tuple in enumerate(sorted_by_rag):
-#         project_name = tuple[0]
-#         ws.cell(row=x + 3, column=2).value = abbreviations[project_name]
-#         ws.cell(row=x + 3, column=3).value = calculate_schedule_change(project_name)
-#         ws.cell(row=x + 3, column=4).value = calculate_wlc_change(project_name)
-#         ws.cell(row=x + 3, column=5).value = l_data.data[project_name]['Total Forecast']
-#         ws.cell(row=x + 3, column=6).value = l_data.data[project_name]['Departmental DCA']
-#
-#     bubble_chart(ws, rag_occurrence)
-#
-#     return wb
+def cost_v_schedule_chart(milestones: MilestoneData,
+                          costs: CostData):
+
+    sorted_by_rag = sort_projects_by_dca(milestones.master.master_data[0], milestones.master.project_stage["Q2 20/21"]["FBC"])
+
+    rag_occurrence = Counter(x[1] for x in sorted_by_rag)
+
+    wb = Workbook()
+    ws = wb.active
+
+    ws.cell(row=2, column=2).value = 'Project Name'
+    ws.cell(row=2, column=3).value = 'Schedule change'
+    ws.cell(row=2, column=4).value = 'WLC Change'
+    ws.cell(row=2, column=5).value = 'WLC'
+    ws.cell(row=2, column=6).value = 'DCA'
+    ws.cell(row=2, column=7).value = "Start key"
+    ws.cell(row=2, column=8).value = "End key"
+
+    for x, project_name in enumerate(sorted_by_rag):  # here messing around with functionality
+            # milestones.master.current_projects):
+        ab = milestones.master.abbreviations[project_name]
+        ws.cell(row=x + 3, column=2).value = ab
+        ws.cell(row=x + 3, column=3).value = milestones.schedule_change[ab]["baseline"]["percent change"]
+        ws.cell(row=x + 3, column=4).value = costs.wlc_change[project_name]["baseline one"]
+        ws.cell(row=x + 3, column=5).value = costs.master.master_data[0].data[project_name]["Total Forecast"]
+        ws.cell(row=x + 3, column=6).value = costs.master.master_data[0].data[project_name]['Departmental DCA']
+        ws.cell(row=x + 3, column=7).value = milestones.schedule_change[ab]["baseline"]["start key"]
+        ws.cell(row=x + 3, column=8).value = milestones.schedule_change[ab]["baseline"]["end key"]
+
+    # bubble_chart(ws, rag_occurrence)
+
+    return wb
