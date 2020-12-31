@@ -1229,7 +1229,7 @@ class MilestoneData:
         self.baseline_type = baseline_type
         self.current = {}
         self.last_quarter = {}
-        self.baseline = {}
+        self.baseline_dict = {}
         self.baseline_two = {}
         self.ordered_list_current = []
         self.ordered_list_last = []
@@ -1369,7 +1369,7 @@ class MilestoneData:
                 self.last_quarter = lower_dict
                 self.ordered_list_last = sorted_list
             if bl == 2:
-                self.baseline = lower_dict
+                self.baseline_dict = lower_dict
                 self.ordered_list_bl = sorted_list
             if bl == 3:
                 self.baseline_two = lower_dict
@@ -1412,7 +1412,7 @@ class MilestoneData:
                 md_last.append(m_date)
 
             m_bl_date = None
-            for m_bl in self.baseline.values():
+            for m_bl in self.baseline_dict.values():
                 if m_bl["Project"] == m_project:
                     if m_bl["Milestone"] == m_name:
                         keys_names_baseline.append(m_project + ", " + m_name)
@@ -1566,6 +1566,39 @@ class MilestoneData:
                     if milestone_dictionary[k]["Milestone"] == milestone_name[1:]:
                         return milestone_dictionary[k]["Date"]
 
+        def schedule_info(project_name: str,
+                          other_key_list: List[str],
+                          c_key_list: List[str],
+                          other_dict: dict,
+                          current_dict: dict,
+                          dict_label: str):
+            output_dict = {}
+            schedule_info = []
+            for key in reversed(other_key_list):
+                if key in c_key_list:
+                    sop = get_milestone_date(project_name, other_dict, " Start of Project")
+                    if sop is None:
+                        sop = get_milestone_date(project_name, current_dict, other_key_list[0])
+                        schedule_info.append(("start key", other_key_list[0]))
+                    else:
+                        schedule_info.append(("start key", " Start of Project"))
+                    schedule_info.append(("start", sop))
+                    schedule_info.append(("end key", key))
+                    date = get_milestone_date(project_name, current_dict, key)
+                    schedule_info.append(("end current date", date))
+                    other_date = get_milestone_date(project_name, other_dict, key)
+                    schedule_info.append(("end baseline date", other_date))
+                    project_length = (other_date - sop).days
+                    schedule_info.append(("project length", project_length))
+                    change = (date - other_date).days
+                    schedule_info.append(("change", change))
+                    p_change = int((change / project_length) * 100)
+                    schedule_info.append(("percent change", p_change))
+                    output_dict[dict_label] = dict(schedule_info)
+                    break
+
+            return output_dict
+
         output_dict = {}
         for project_name in self.project_group:
             project_name = self.master.abbreviations[project_name]
@@ -1599,25 +1632,43 @@ class MilestoneData:
                     ):
                         baseline_key_list.append(milestone_key_baseline)
 
-            for b_key in reversed(baseline_key_list):
-                if b_key in current_key_list:
-                    sop = get_milestone_date(project_name, self.baseline, " Start of Project")
-                    if sop is None:  # Here causing crash as some projects don't have start of project date
-                        sop = get_milestone_date(project_name, self.current, " Start of Project")
-                    date = get_milestone_date(project_name, self.current, b_key)
-                    b_date = get_milestone_date(project_name, self.baseline, b_key)
-                    project_length = (b_date - sop).days
-                    change = (date - b_date).days
-                    p_change = int((change / project_length) * 100)
-                    lower_dict["baseline"] = {b_key: p_change}
-                    break
+            lower_dict = schedule_info(project_name,
+                                       baseline_key_list,
+                                       current_key_list,
+                                       self.baseline_dict, self.current, "baseline")
 
-            for l_key in reversed(last_key_list):
-                if l_key in current_key_list:
-                    date = get_milestone_date(project_name, self.current, l_key)
-                    l_date = get_milestone_date(project_name, self.last_quarter, l_key)
-                    lower_dict["last"] = l_key
-                    break
+            # baseline_schedule_info = []
+            # for b_key in reversed(baseline_key_list):
+            #     if b_key in current_key_list:
+            #         sop = get_milestone_date(project_name, self.baseline, " Start of Project")
+            #         if sop is None:
+            #             sop = get_milestone_date(project_name, self.current, baseline_key_list[0])
+            #             baseline_schedule_info.append(("start key", baseline_key_list[0]))
+            #         else:
+            #             baseline_schedule_info.append(("start key", " Start of Project"))
+            #         baseline_schedule_info.append(("start", sop))
+            #         baseline_schedule_info.append(("end key", b_key))
+            #         date = get_milestone_date(project_name, self.current, b_key)
+            #         baseline_schedule_info.append(("end current date", date))
+            #         b_date = get_milestone_date(project_name, self.baseline, b_key)
+            #         baseline_schedule_info.append(("end baseline date", b_date))
+            #         project_length = (b_date - sop).days
+            #         baseline_schedule_info.append(("project length", project_length))
+            #         change = (date - b_date).days
+            #         baseline_schedule_info.append(("change", change))
+            #         p_change = int((change / project_length) * 100)
+            #         baseline_schedule_info.append(("percent change", p_change))
+            #         lower_dict["baseline"] = dict(baseline_schedule_info)
+            #         break
+
+            # last_schedule_info = []
+            # for l_key in reversed(last_key_list):
+            #     last_schedule_info.append(("start key", sop))
+            #     if l_key in current_key_list:
+            #         date = get_milestone_date(project_name, self.current, l_key)
+            #         l_date = get_milestone_date(project_name, self.last_quarter, l_key)
+            #         lower_dict["last"] = l_key
+            #         break
 
             output_dict[project_name] = lower_dict
 
