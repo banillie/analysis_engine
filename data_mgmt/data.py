@@ -2065,12 +2065,11 @@ def set_figure_size(graph_type: str) -> Tuple[int, int]:
 
 
 def cost_profile_graph(cost_master: CostData, **kwargs) -> plt.figure:
-    """Compiles a matplotlib line chart for costs of GROUP of projects contained within cost_master class.
-    As as default last quarters profile is not included. It creates two plots. First plot shows overall
-    profile in current, last quarters anb baseline form. Second plot shows rdel, cdel, and 'non-gov' cost profile"""
+    """Compiles a matplotlib line chart for costs of GROUP of projects contained within cost_master class"""
 
     fig, (ax1) = plt.subplots(1)  # two subplots for this chart
 
+    # fig size
     try:
         fig_size = kwargs["fig_size"]
         fig.set_size_inches(set_figure_size(fig_size))
@@ -2078,41 +2077,40 @@ def cost_profile_graph(cost_master: CostData, **kwargs) -> plt.figure:
         fig.set_size_inches(set_figure_size(FIGURE_STYLE[2]))
         pass
 
-    """cost profile charts"""
+    # title
     if len(cost_master.project_group) == 1:
-        fig.suptitle(
-            cost_master.master.abbreviations[cost_master.project_group[0]]
-            + " Cost Profile",
-            fontweight="bold",
-        )
+        title = cost_master.master.abbreviations[cost_master.project_group[0]] + " cost profile change"
     else:
         try:
-            fig.suptitle(kwargs["title"] + " Cost Profile", fontweight="bold")  # title
+            title = kwargs["title"] + " cost profile change"
         except KeyError:
             pass
+            title = ""
             print("You need to provide a title for this chart")
+
+    plt.suptitle(title, fontweight="bold", fontsize=25)
 
     # Overall cost profile chart
     if (
-        sum(cost_master.baseline_profile_one) != 0
+        sum(cost_master.baseline_profile_one) != 0 or cost_master.baseline_profile_one == []
     ):  # handling in the event that group of projects have no baseline profile.
         ax1.plot(
             YEAR_LIST,
             np.array(cost_master.baseline_profile_one),  # baseline profile
             label="Baseline",
-            linewidth=3.0,
+            linewidth=5.0,
             marker="o",
         )
     else:
         pass
     if (
-        sum(cost_master.last_profile) != 0
-    ):  # handling in the event that group of projects have no last quarter profile
+        sum(cost_master.last_profile) != 0 or cost_master.last_profile == [] or cost_master.last_profile != cost_master.baseline_profile_one
+    ):  # handling for no cost profile, project not present last quarter and last/baseline profiles being the same.
         ax1.plot(
             YEAR_LIST,
             np.array(cost_master.last_profile),  # last quarter profile
             label="Last quarter",
-            linewidth=3.0,
+            linewidth=5.0,
             marker="o",
         )
     else:
@@ -2121,24 +2119,26 @@ def cost_profile_graph(cost_master: CostData, **kwargs) -> plt.figure:
         YEAR_LIST,
         np.array(cost_master.current_profile),  # current profile
         label="Latest",
-        linewidth=3.0,
+        linewidth=5.0,
         marker="o",
     )
 
     # Chart styling
-    ax1.tick_params(axis="series_one", which="major", labelsize=6, rotation=45)
+    plt.xticks(rotation=45, size=14)
+    plt.yticks(size=14)
+    ax1.tick_params(axis="series_one", which="major")
     ax1.set_ylabel("Cost (£m)")
     ylab1 = ax1.yaxis.get_label()
     ylab1.set_style("italic")
-    ylab1.set_size(8)
+    ylab1.set_size(16)
     ax1.grid(color="grey", linestyle="-", linewidth=0.2)
-    ax1.legend(prop={"size": 6})
-    ax1.set_title(
-        "Fig 1. Cost Profile Changes Over Time",
-        loc="left",
-        fontsize=8,
-        fontweight="bold",
-    )
+    ax1.legend(prop={"size": 16})
+    # ax1.set_title(
+    #     "Change in project cost profile",
+    #     loc="left",
+    #     fontsize=12,
+    #     fontweight="bold",
+    # )
 
     # # plot rdel, cdel, non-gov chart data
     # if (
@@ -2638,21 +2638,19 @@ def total_costs_benefits_bar_chart(
         fig.set_size_inches(set_figure_size(FIGURE_STYLE[2]))
         pass
 
-    """cost profile charts"""
+    # cost profile charts.
     if len(cost_master.project_group) == 1:
-        fig.suptitle(
-            cost_master.master.abbreviations[cost_master.project_group[0]]
-            + " total costs and benefits",
-            fontweight="bold",
-        )
+        title = cost_master.master.abbreviations[cost_master.project_group[0]] + " cost and benefit totals"
     else:
         try:
-            fig.suptitle(
-                kwargs["title"] + " total costs and benefits", fontweight="bold"
-            )  # title
+            title = kwargs["title"] + " cost and benefit totals"
         except KeyError:
-            pass
+            title = ""
             print("You need to provide a title for this chart")
+
+    plt.suptitle(title, fontweight="bold", fontsize=25)
+    plt.xticks(size=12) # here
+    plt.yticks(size=10)
 
     # Y AXIS SCALE MAX
     highest_int = max([cost_master.y_scale_max, ben_master.y_scale_max])
@@ -2660,7 +2658,7 @@ def total_costs_benefits_bar_chart(
     ax1.set_ylim(0, y_max)
 
     # COST SPENT, PROFILED AND UNPROFILED
-    labels = ["Latest", "Last Quarter", "Baseline"]
+    labels = ["Latest", "Last quarter", "Baseline"]
     width = 0.5
     ax1.bar(labels, np.array(cost_master.spent), width, label="Spent")
     ax1.bar(
@@ -2677,17 +2675,17 @@ def total_costs_benefits_bar_chart(
         bottom=np.array(cost_master.spent) + np.array(cost_master.profiled),
         label="Unprofiled",
     )
-    ax1.legend(prop={"size": 6})
+    ax1.legend(prop={"size": 10})
     ax1.set_ylabel("Cost (£m)")
     ylab1 = ax1.yaxis.get_label()
     ylab1.set_style("italic")
-    ylab1.set_size(8)
-    ax1.tick_params(axis="series_one", which="major", labelsize=6)
-    ax1.tick_params(axis="series_two", which="major", labelsize=6)
+    ylab1.set_size(10)
+    # ax1.tick_params(axis="series_one", which="major")
+    # ax1.tick_params(axis="series_two", which="major")
     ax1.set_title(
         "Fig 1. Total Cost Changes Over Time",
         loc="left",
-        fontsize=8,
+        fontsize=12,
         fontweight="bold",
     )
 

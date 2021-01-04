@@ -148,7 +148,7 @@ def test_get_project_cost_profile(costs_masters, project_info):
 def test_project_cost_profile_chart(costs_masters, project_info):
     master = Master(costs_masters, project_info)
     costs = CostData(master, f9)
-    cost_profile_graph(costs, show="No")
+    cost_profile_graph(costs)
 
 
 def test_project_cost_profile_chart_into_word_doc_one(
@@ -157,6 +157,7 @@ def test_project_cost_profile_chart_into_word_doc_one(
     master = Master(costs_masters, project_info)
     costs = CostData(master, f9)
     graph = cost_profile_graph(costs, show="No")
+    change_word_doc_landscape(word_doc)
     put_matplotlib_fig_into_word(word_doc, graph)
     word_doc.save("resources/summary_temp_altered.docx")
 
@@ -168,6 +169,7 @@ def test_total_cost_profile_chart_into_word_doc_one(
     costs = CostData(master, f9)
     benefits = BenefitsData(master, f9)
     graph = total_costs_benefits_bar_chart(costs, benefits, show="No")
+    change_word_doc_landscape(word_doc)
     put_matplotlib_fig_into_word(word_doc, graph)
     word_doc.save("resources/summary_temp_altered.docx")
 
