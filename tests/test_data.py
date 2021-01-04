@@ -78,14 +78,14 @@ def test_get_project_abbreviations(basic_masters_dicts, project_info):
         "Apollo 13": "A13",
         "Columbia": "Columbia",
         "Falcon 9": "F9",
+        "Mars": "Mars",
         "Sea of Tranquility": "SoT",
     }
 
-
+# assert expected error message
 def test_checking_baseline_data(basic_master_wrong_baselines, project_info):
     master = Master(basic_master_wrong_baselines, project_info)
     master.check_baselines()
-    # assert expected error message
 
 
 def test_calculating_spent(spent_master):
@@ -318,9 +318,9 @@ def test_get_milestone_data(milestone_masters, project_info):
 def test_get_milestone_chart_data(milestone_masters, project_info):
     master = Master(milestone_masters, project_info)
     milestones = MilestoneData(master, [sot, a11, a13])
-    assert len(milestones.key_names) == 5
-    assert len(milestones.md_current) == 5
-    assert len(milestones.md_last) == 5
+    assert len(milestones.key_names) == 8
+    assert len(milestones.md_current) == 8
+    assert len(milestones.md_last) == 8
 
 
 def test_compile_milestone_chart(milestone_masters, project_info):
@@ -339,7 +339,7 @@ def test_compile_milestone_chart_with_filter(milestone_masters, project_info):
 def test_removing_project_name_from_milestone_keys(milestone_masters, project_info):
     master = Master(milestone_masters, project_info)
     milestones = MilestoneData(master, sot)
-    assert milestones.key_names == ['Standard A', 'Inverted Cosmonauts']
+    assert milestones.key_names == ["Start of Project", 'Standard A', 'Inverted Cosmonauts']
 
 
 def test_saving_graph_to_word_doc(milestone_masters, project_info):
@@ -409,8 +409,8 @@ def test_calculating_wlc_changes(costs_masters, project_info):
                                 'Sea of Tranquility': {'baseline one': 54, 'last quarter': 54}}
 
 
-# milestone masters need updating
 def test_calculating_schedule_changes(milestone_masters, project_info):
     master = Master(milestone_masters, project_info)
     milestones = MilestoneData(master, [sot, a11, a13])
-    assert milestones.schedule_change == []
+    milestones.calculate_schedule_changes()
+    assert isinstance(milestones.schedule_change, (dict,))

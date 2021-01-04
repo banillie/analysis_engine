@@ -1250,7 +1250,7 @@ class MilestoneData:
         self.schedule_key_baseline = None
         self.get_milestones()
         self.get_chart_info()
-        self.calculate_schedule_changes()
+        # self.calculate_schedule_changes()
 
     def get_milestones(self) -> None:
         """
@@ -1557,28 +1557,36 @@ class MilestoneData:
         self.project_group = string_conversion(self.project_group)
         self.filter_chart_info(milestone_type=["Delivery", "Approval"])
 
-        def get_milestone_date(project_name: str,
-                               milestone_dictionary: Dict[str, Union[datetime.date, str]],
-                               milestone_name: str) -> datetime:
+        def get_milestone_date(
+            project_name: str,
+            milestone_dictionary: Dict[str, Union[datetime.date, str]],
+            milestone_name: str,
+        ) -> datetime:
 
             for k in milestone_dictionary.keys():
                 if milestone_dictionary[k]["Project"] == project_name:
                     if milestone_dictionary[k]["Milestone"] == milestone_name[1:]:
                         return milestone_dictionary[k]["Date"]
 
-        def schedule_info(project_name: str,
-                          other_key_list: List[str],
-                          c_key_list: List[str],
-                          other_dict: dict,
-                          current_dict: dict,
-                          dict_label: str):
+        def schedule_info(
+            project_name: str,
+            other_key_list: List[str],
+            c_key_list: List[str],
+            other_dict: dict,
+            current_dict: dict,
+            dict_label: str,
+        ):
             output_dict = {}
             schedule_info = []
             for key in reversed(other_key_list):
                 if key in c_key_list:
-                    sop = get_milestone_date(project_name, other_dict, " Start of Project")
+                    sop = get_milestone_date(
+                        project_name, other_dict, " Start of Project"
+                    )
                     if sop is None:
-                        sop = get_milestone_date(project_name, current_dict, other_key_list[0])
+                        sop = get_milestone_date(
+                            project_name, current_dict, other_key_list[0]
+                        )
                         schedule_info.append(("start key", other_key_list[0]))
                     else:
                         schedule_info.append(("start key", " Start of Project"))
@@ -1606,35 +1614,51 @@ class MilestoneData:
             last_key_list = []
             baseline_key_list = []
             for key in self.key_names:
-                p = key.split(",")[0]
-                milestone_key = key.split(",")[1]
-                if project_name == p:
-                    if (
-                        milestone_key != " Project - Business Case End Date"
-                    ):
-                        current_key_list.append(milestone_key)
+                try:
+                    p = key.split(",")[0]
+                    milestone_key = key.split(",")[1]
+                    if project_name == p:
+                        if milestone_key != " Project - Business Case End Date":
+                            current_key_list.append(milestone_key)
+                except IndexError:
+                    # patch of single project group. In this instance the project name
+                    # is removed from the key_name via remove_project_name function as
+                    # part of get chart info.
+                    if len(self.project_group) == 1:
+                        current_key_list.append(key)
             for last_key in self.key_names_last:
                 p = last_key.split(",")[0]
                 milestone_key_last = last_key.split(",")[1]
                 if project_name == p:
-                    if (
-                        milestone_key_last != " Project - Business Case End Date"
-                    ):
+                    if milestone_key_last != " Project - Business Case End Date":
                         last_key_list.append(milestone_key_last)
             for baseline_key in self.key_names_baseline:
                 p = baseline_key.split(",")[0]
                 milestone_key_baseline = baseline_key.split(",")[1]
                 if project_name == p:
                     if (
-                        milestone_key_baseline != " Project - Business Case End Date"
+                        milestone_key_baseline
+                        != " Project - Business Case End Date"
                         # and milestone_key_baseline != " Project End Date"
                     ):
                         baseline_key_list.append(milestone_key_baseline)
 
-            b_dict = schedule_info(project_name, baseline_key_list, current_key_list,
-                                   self.baseline_dict, self.current, "baseline")
-            l_dict = schedule_info(project_name, last_key_list, current_key_list,
-                                   self.last_quarter, self.current, "last")
+            b_dict = schedule_info(
+                project_name,
+                baseline_key_list,
+                current_key_list,
+                self.baseline_dict,
+                self.current,
+                "baseline",
+            )
+            l_dict = schedule_info(
+                project_name,
+                last_key_list,
+                current_key_list,
+                self.last_quarter,
+                self.current,
+                "last",
+            )
             lower_dict = {**b_dict, **l_dict}
 
             # baseline_schedule_info = []
@@ -4240,34 +4264,50 @@ def sort_projects_by_dca(
     return rag_list_sorted
 
 
-def cost_v_schedule_chart(milestones: MilestoneData,
-                          costs: CostData):
+def cost_v_schedule_chart(milestones: MilestoneData, costs: CostData):
 
-    sorted_by_rag = sort_projects_by_dca(milestones.master.master_data[0], milestones.master.project_stage["Q2 20/21"]["FBC"])
+    sorted_by_rag = sort_projects_by_dca(
+        milestones.master.master_data[0],
+        milestones.master.project_stage["Q2 20/21"]["FBC"],
+    )
 
     rag_occurrence = Counter(x[1] for x in sorted_by_rag)
 
     wb = Workbook()
     ws = wb.active
 
-    ws.cell(row=2, column=2).value = 'Project Name'
-    ws.cell(row=2, column=3).value = 'Schedule change'
-    ws.cell(row=2, column=4).value = 'WLC Change'
-    ws.cell(row=2, column=5).value = 'WLC'
-    ws.cell(row=2, column=6).value = 'DCA'
+    ws.cell(row=2, column=2).value = "Project Name"
+    ws.cell(row=2, column=3).value = "Schedule change"
+    ws.cell(row=2, column=4).value = "WLC Change"
+    ws.cell(row=2, column=5).value = "WLC"
+    ws.cell(row=2, column=6).value = "DCA"
     ws.cell(row=2, column=7).value = "Start key"
     ws.cell(row=2, column=8).value = "End key"
 
-    for x, project_name in enumerate(sorted_by_rag):  # here messing around with functionality
-            # milestones.master.current_projects):
+    for x, project_name in enumerate(
+        sorted_by_rag
+    ):  # here messing around with functionality
+        # milestones.master.current_projects):
         ab = milestones.master.abbreviations[project_name]
         ws.cell(row=x + 3, column=2).value = ab
-        ws.cell(row=x + 3, column=3).value = milestones.schedule_change[ab]["baseline"]["percent change"]
-        ws.cell(row=x + 3, column=4).value = costs.wlc_change[project_name]["baseline one"]
-        ws.cell(row=x + 3, column=5).value = costs.master.master_data[0].data[project_name]["Total Forecast"]
-        ws.cell(row=x + 3, column=6).value = costs.master.master_data[0].data[project_name]['Departmental DCA']
-        ws.cell(row=x + 3, column=7).value = milestones.schedule_change[ab]["baseline"]["start key"]
-        ws.cell(row=x + 3, column=8).value = milestones.schedule_change[ab]["baseline"]["end key"]
+        ws.cell(row=x + 3, column=3).value = milestones.schedule_change[ab]["baseline"][
+            "percent change"
+        ]
+        ws.cell(row=x + 3, column=4).value = costs.wlc_change[project_name][
+            "baseline one"
+        ]
+        ws.cell(row=x + 3, column=5).value = costs.master.master_data[0].data[
+            project_name
+        ]["Total Forecast"]
+        ws.cell(row=x + 3, column=6).value = costs.master.master_data[0].data[
+            project_name
+        ]["Departmental DCA"]
+        ws.cell(row=x + 3, column=7).value = milestones.schedule_change[ab]["baseline"][
+            "start key"
+        ]
+        ws.cell(row=x + 3, column=8).value = milestones.schedule_change[ab]["baseline"][
+            "end key"
+        ]
 
     # bubble_chart(ws, rag_occurrence)
 
