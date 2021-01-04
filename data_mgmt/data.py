@@ -20,6 +20,7 @@ from pathlib import Path
 from dateutil.parser import ParserError
 from docx import Document, table
 from docx.enum.section import WD_SECTION_START, WD_ORIENTATION
+from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.oxml import parse_xml
 from docx.oxml.ns import nsdecls
 from docx.shared import Pt, Cm, RGBColor, Inches
@@ -28,6 +29,7 @@ from matplotlib.patches import Wedge, Rectangle, Circle
 from openpyxl import load_workbook, Workbook
 from openpyxl.styles import Font, PatternFill
 from openpyxl.workbook import workbook
+from textwrap import wrap
 
 
 def _platform_docs_dir() -> Path:
@@ -189,7 +191,7 @@ SRO_CONF_KEY_LIST = [
 ]
 
 IPDC_DATE = datetime.date(
-    2021, 2, 10
+    2021, 2, 22
 )  # ipdc date. Python date format is Year, Month, day
 
 # abbreviations. Used in analysis instead of full projects names
@@ -1217,6 +1219,17 @@ def remove_none_types(input_list):
     return [x for x in input_list if x is not None]
 
 
+def get_milestone_date(
+        project_name: str,
+        milestone_dictionary: Dict[str, Union[datetime.date, str]],
+        milestone_name: str,
+) -> datetime:
+    for k in milestone_dictionary.keys():
+        if milestone_dictionary[k]["Project"] == project_name:
+            if milestone_dictionary[k]["Milestone"] == milestone_name[1:]:
+                return milestone_dictionary[k]["Date"]
+
+
 class MilestoneData:
     def __init__(
         self,
@@ -1556,17 +1569,6 @@ class MilestoneData:
 
         self.project_group = string_conversion(self.project_group)
         self.filter_chart_info(milestone_type=["Delivery", "Approval"])
-
-        def get_milestone_date(
-            project_name: str,
-            milestone_dictionary: Dict[str, Union[datetime.date, str]],
-            milestone_name: str,
-        ) -> datetime:
-
-            for k in milestone_dictionary.keys():
-                if milestone_dictionary[k]["Project"] == project_name:
-                    if milestone_dictionary[k]["Milestone"] == milestone_name[1:]:
-                        return milestone_dictionary[k]["Date"]
 
         def schedule_info(
             project_name: str,
@@ -3141,6 +3143,18 @@ def milestone_chart(
             pass
             print("You need to provide a title for this chart")
 
+    def handle_long_keys(key_names: List[str]) -> List[str]:
+        labels = ['\n'.join(wrap(l, 40)) for l in key_names]
+        final_labels = []
+        for l in labels:
+            if len(l) > 70:
+                final_labels.append(l[:70])
+            else:
+                final_labels.append(l)
+        return final_labels
+
+    m_key_names = handle_long_keys(milestone_data.key_names)
+
     # convert lists into numpy arrays.
     # milestone_data.md_baseline = np.array(milestone_data.md_baseline)
     # milestone_data.md_last = np.array(milestone_data.md_last)
@@ -3175,10 +3189,10 @@ def milestone_chart(
 
     # this method does not handle NoneTypes. Therefore get_chart_info returns md_current
     # instead of NoneTypes. Works fine, but underlying data is incorrect. Although this is
-    # hidden from the user, preference for not making data wrong. not using at moment.
-    ax1.scatter(milestone_data.md_baseline, milestone_data.key_names, label="Baseline")
-    ax1.scatter(milestone_data.md_last, milestone_data.key_names, label="Last quarter")
-    ax1.scatter(milestone_data.md_current, milestone_data.key_names, label="Current")
+    # hidden from the user, preference for not making data wrong. but using at the moment.
+    ax1.scatter(milestone_data.md_baseline, m_key_names, label="Baseline")
+    ax1.scatter(milestone_data.md_last, m_key_names, label="Last quarter")
+    ax1.scatter(milestone_data.md_current, m_key_names, label="Current")
 
     # ax1.scatter(*do_mask(milestone_data.md_current, milestone_data.key_names), label="Current", zorder=10, c='g')
     # ax1.scatter(*do_mask(milestone_data.md_last, milestone_data.key_names), label="Last quarter", zorder=5, c='orange')
@@ -4312,3 +4326,269 @@ def cost_v_schedule_chart(milestones: MilestoneData, costs: CostData):
     # bubble_chart(ws, rag_occurrence)
 
     return wb
+
+
+def make_columns_bold(columns: list) -> None:
+    for column in columns:
+        for cell in column.cells:
+            for paragraph in cell.paragraphs:
+                for run in paragraph.runs:
+                    run.font.bold = True
+
+
+def change_text_size(columns: list, size: int) -> None:
+    for column in columns:
+        for cell in column.cells:
+            for paragraph in cell.paragraphs:
+                for run in paragraph.runs:
+                    font = run.font
+                    font.size = Pt(size)
+
+
+def convert_bc_stage_text(bc_stage: str) -> str:
+    '''
+    function that converts bc stage.
+    :param bc_stage: the string name for business cases that it kept in the master
+    :return: standard/shorter string name
+    '''
+
+    if bc_stage == 'Strategic Outline Case':
+        return 'SOBC'
+    elif bc_stage == 'Outline Business Case':
+        return 'OBC'
+    elif bc_stage == 'Full Business Case':
+        return 'FBC'
+    elif bc_stage == 'pre-Strategic Outline Case':
+        return 'pre-SOBC'
+    else:
+        return bc_stage
+
+
+def make_text_red(columns: list) -> None:
+    for column in columns:
+        for cell in column.cells:
+            for paragraph in cell.paragraphs:
+                for run in paragraph.runs:
+                    if run.text == 'Not reported':
+                        run.font.color.rgb = RGBColor(255, 0, 0)
+
+
+def project_report_meta_data(doc: Document,
+                             costs: CostData,
+                             milestones: MilestoneData,
+                             benefits: BenefitsData,
+                             project_name: str):
+    '''Meta data table'''
+    doc.add_section(WD_SECTION_START.NEW_PAGE)
+    paragraph = doc.add_paragraph()
+    paragraph.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+    paragraph.add_run('Annex A. High level MI data and analysis').bold = True
+
+    '''Costs meta data'''
+    run = doc.add_paragraph().add_run('Costs')
+    font = run.font
+    font.bold = True
+    font.underline = True
+    t = doc.add_table(rows=1, cols=4)
+    hdr_cells = t.rows[0].cells
+    hdr_cells[0].text = 'WLC:'
+    hdr_cells[1].text = '£' + str(round(costs.master.master_data[0].data[project_name]["Total Forecast"])) + 'm'
+    hdr_cells[2].text = 'Spent:'
+    spent = spent_calculation(costs.master.master_data[0], project_name)
+    hdr_cells[3].text = '£' + str(round(spent)) + 'm'
+    row_cells = t.add_row().cells
+    row_cells[0].text = 'RDEL Total:'
+    row_cells[1].text = '£' + str(round(sum(costs.rdel_profile))) + 'm'
+    row_cells[2].text = 'Profiled:'
+    row_cells[3].text = '£' + str(round(sum(costs.profiled))) + 'm'
+    row_cells = t.add_row().cells
+    row_cells[0].text = 'CDEL Total:'
+    row_cells[1].text = '£' + str(round(sum(costs.cdel_profile))) + 'm'
+    row_cells[2].text = 'Unprofiled:'
+    row_cells[3].text = '£' + str(round(sum(costs.unprofiled))) + 'm'
+
+    # set column width
+    column_widths = (Cm(4), Cm(3), Cm(4), Cm(3))
+    set_col_widths(t, column_widths)
+    # make column keys bold
+    make_columns_bold([t.columns[0], t.columns[2]])
+    change_text_size([t.columns[0], t.columns[1], t.columns[2], t.columns[3]], 10)
+
+    '''Financial data'''
+    doc.add_paragraph()
+    run = doc.add_paragraph().add_run('Financial')
+    font = run.font
+    font.bold = True
+    font.underline = True
+    table = doc.add_table(rows=1, cols=4)
+    hdr_cells = table.rows[0].cells
+    hdr_cells[0].text = 'Type of funding:'
+    hdr_cells[1].text = str(costs.master.master_data[0].data[project_name]['Source of Finance'])
+    hdr_cells[2].text = 'Contingency:'
+    contingency = costs.master.master_data[0].data[project_name]['Overall contingency (£m)']
+    if contingency is None: #  can this be refactored?
+        hdr_cells[3].text = "None"
+    else:
+        hdr_cells[3].text = '£' + str(round(contingency)) + 'm'
+    row_cells = table.add_row().cells
+    row_cells[0].text = 'Optimism Bias (OB):'
+    ob = costs.master.master_data[0].data[project_name]['Overall figure for Optimism Bias (£m)']
+    if ob is None:
+        row_cells[1].text = str(ob)
+    else:
+        try:
+            row_cells[1].text = '£' + str(round(ob)) + 'm'
+        except TypeError:
+            row_cells[1].text = ob
+    row_cells[2].text = 'Contingency in costs:'
+    con_included_wlc = costs.master.master_data[0].data[project_name] \
+        ['Is this Continency amount included within the WLC?']
+    if con_included_wlc is None:
+        row_cells[3].text = 'Not reported'
+    else:
+        row_cells[3].text = con_included_wlc
+    row_cells = table.add_row().cells
+    row_cells[0].text = 'OB in costs:'
+    ob_included_wlc = costs.master.master_data[0].data[project_name] \
+        ['Is this Optimism Bias included within the WLC?']
+    if ob_included_wlc is None:
+        row_cells[1].text = 'Not reported'
+    else:
+        row_cells[1].text = ob_included_wlc
+    row_cells[2].text = ''
+    row_cells[3].text = ''
+
+    # set column width
+    column_widths = (Cm(4), Cm(3), Cm(4), Cm(3))
+    set_col_widths(table, column_widths)
+    # make column keys bold
+    make_columns_bold([table.columns[0], table.columns[2]])
+    change_text_size([table.columns[0], table.columns[1], table.columns[2], table.columns[3]], 10)
+
+    '''Project Stage data'''
+    doc.add_paragraph()
+    run = doc.add_paragraph().add_run('Stage')
+    font = run.font
+    font.bold = True
+    font.underline = True
+    table = doc.add_table(rows=1, cols=4)
+    hdr_cells = table.rows[0].cells
+    hdr_cells[0].text = 'Business case stage (IPDC approved):'
+    hdr_cells[1].text = convert_bc_stage_text(
+            costs.master.master_data[0].data[project_name]['IPDC approval point'])
+    hdr_cells[2].text = 'Delivery stage:'
+    delivery_stage = costs.master.master_data[0].data[project_name]['Project stage']
+    if delivery_stage is None:
+        hdr_cells[3].text = "Not reported"
+    else:
+        hdr_cells[3].text = delivery_stage
+
+    # set column width
+    column_widths = (Cm(4), Cm(3), Cm(4), Cm(3))
+    set_col_widths(table, column_widths)
+    # make column keys bold
+    make_columns_bold([table.columns[0], table.columns[2]])
+    change_text_size([table.columns[0], table.columns[1], table.columns[2], table.columns[3]], 10)
+    make_text_red([table.columns[1], table.columns[3]])  # make 'not reported red'
+
+    '''Milestone/Stage meta data'''
+    doc.add_paragraph()
+    run = doc.add_paragraph().add_run('Schedule/Milestones')
+    font = run.font
+    font.bold = True
+    font.underline = True
+    table = doc.add_table(rows=1, cols=4)
+    hdr_cells = table.rows[0].cells
+    hdr_cells[0].text = 'Start date:'
+    try:
+        start_project = get_milestone_date(project_name, milestones.current, "Start of Project")
+        hdr_cells[1].text = start_project.strftime("%d/%m/%Y")
+    except KeyError:
+        hdr_cells[1].text = "Not reported"
+    except AttributeError:
+        hdr_cells[1].text = "Not reported"
+    hdr_cells[2].text = 'Start of operations:'
+    try:
+        start_ops = get_milestone_date(project_name, milestones.current, " Start of Operation")
+        hdr_cells[3].text = start_ops.strftime("%d/%m/%Y")
+    except KeyError:
+        hdr_cells[3].text = "Not reported"
+    except AttributeError:
+        hdr_cells[3].text = "Not reported"
+    row_cells = table.add_row().cells
+    row_cells[0].text = 'Start of construction:'  #  check
+    try:
+        start_con = get_milestone_date(project_name, milestones.current, " Start of Construction/build")
+        hdr_cells[1].text = start_con.strftime("%d/%m/%Y")
+    except KeyError:
+        hdr_cells[1].text = "Not reported"
+    except AttributeError:
+        hdr_cells[1].text = "Not reported"
+    row_cells[2].text = 'Full Operations:'  # check
+    try:
+        full_ops = get_milestone_date(project_name, milestones.current, " Full Operations")
+        hdr_cells[3].text = full_ops.strftime("%d/%m/%Y")
+    except KeyError:
+        hdr_cells[3].text = "Not reported"
+    except AttributeError:
+        hdr_cells[3].text = "Not reported"
+
+    # set column width
+    column_widths = (Cm(4), Cm(3), Cm(4), Cm(3))
+    set_col_widths(table, column_widths)
+    # make column keys bold
+    make_columns_bold([table.columns[0], table.columns[2]])
+    change_text_size([table.columns[0], table.columns[1], table.columns[2], table.columns[3]], 10)
+    make_text_red([table.columns[1], table.columns[3]])  # make 'not reported red'
+
+    '''vfm meta data'''
+    doc.add_paragraph()
+    run = doc.add_paragraph().add_run('VfM')
+    font = run.font
+    font.bold = True
+    font.underline = True
+    table = doc.add_table(rows=1, cols=4)
+    hdr_cells = table.rows[0].cells
+    hdr_cells[0].text = 'VfM category:'
+    vfm_cat = costs.master.master_data[0].data[project_name]['VfM Category single entry']
+    if vfm_cat is None:
+        hdr_cells[1].text = "Not reported"
+    else:
+        hdr_cells[1].text = vfm_cat
+    hdr_cells[2].text = 'BCR:'
+    bcr = costs.master.master_data[0].data[project_name]['Adjusted Benefits Cost Ratio (BCR)']
+    hdr_cells[3].text = str(bcr)
+
+    # set column width
+    column_widths = (Cm(4), Cm(3), Cm(4), Cm(3))
+    set_col_widths(table, column_widths)
+    # make column keys bold
+    make_columns_bold([table.columns[0], table.columns[2]])
+    change_text_size([table.columns[0], table.columns[1], table.columns[2], table.columns[3]], 10)
+    make_text_red([table.columns[1], table.columns[3]])  # make 'not reported red'
+
+    '''benefits meta data'''
+    doc.add_paragraph()
+    run = doc.add_paragraph().add_run('Benefits')
+    font = run.font
+    font.bold = True
+    font.underline = True
+    table = doc.add_table(rows=1, cols=4)
+    hdr_cells = table.rows[0].cells
+    hdr_cells[0].text = 'Total Benefits:'
+    hdr_cells[1].text = '£' + str(round(benefits.master.master_data[0].data[project_name]["BEN Totals Forecast"])) + 'm'
+    hdr_cells[2].text = 'Benefits delivered:'
+    hdr_cells[3].text = '£' + str(round(sum(benefits.delivered))) + 'm'
+    row_cells = table.add_row().cells
+    row_cells[0].text = 'Benefits profiled:'
+    row_cells[1].text = '£' + str(round(sum(benefits.profiled))) + 'm'
+    row_cells[2].text = 'Benefits unprofiled:'
+    row_cells[3].text = '£' + str(round(sum(benefits.unprofiled))) + 'm'
+
+    # set column width
+    column_widths = (Cm(4), Cm(3), Cm(4), Cm(3))
+    set_col_widths(table, column_widths)
+    # make column keys bold
+    make_columns_bold([table.columns[0], table.columns[2]])
+    change_text_size([table.columns[0], table.columns[1], table.columns[2], table.columns[3]], 10)
+    return doc

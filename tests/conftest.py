@@ -36,9 +36,15 @@ def spent_master():
 
 
 @pytest.fixture
-def one_master():
+def one_milestones_master():
     return [project_data_from_master(os.path.join(os.getcwd(), "resources/"
                                                                "milestones_test_master_4_2019.xlsx"), 4, 2019)]
+
+
+@pytest.fixture
+def two_masters():
+    return [project_data_from_master(os.path.join(os.getcwd(), "resources/test_master_1_2020_f9.xlsx"), 1, 2020),
+            project_data_from_master(os.path.join(os.getcwd(), "resources/test_master_4_2019_f9.xlsx"), 4, 2019)]
 
 
 @pytest.fixture

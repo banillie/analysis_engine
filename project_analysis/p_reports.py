@@ -23,7 +23,7 @@ from data_mgmt.data import (
     change_word_doc_landscape,
     BenefitsData,
     total_costs_benefits_bar_chart,
-    FIGURE_STYLE,
+    FIGURE_STYLE, MilestoneData, milestone_chart, project_report_meta_data,
 )
 
 
@@ -37,17 +37,19 @@ def compile_report(
     key_contacts(doc, master, project_name)
     dca_table(doc, master, project_name)
     dca_narratives(doc, master, project_name)
-    costs = CostData(master)
-    benefits = BenefitsData(master)
-    costs.get_cost_totals(project_name, "ipdc_costs")
-    benefits.get_ben_totals(project_name, "ipdc_benefits")
+    costs = CostData(master, project_name)
+    benefits = BenefitsData(master, project_name)
+    milestones = MilestoneData(master, project_name)
+    project_report_meta_data(doc, costs, milestones, benefits, project_name)
     change_word_doc_landscape(doc)
-    fig_style = FIGURE_STYLE[2]
-    total_profile = total_costs_benefits_bar_chart(fig_style, costs, benefits)
+    # fig_style = FIGURE_STYLE[2]
+    total_profile = total_costs_benefits_bar_chart(costs, benefits)
     put_matplotlib_fig_into_word(doc, total_profile)
-    costs.get_cost_profile(project_name, "ipdc_costs")
-    cost_profile = cost_profile_graph(fig_style, costs)
+    cost_profile = cost_profile_graph(costs)
     put_matplotlib_fig_into_word(doc, cost_profile)
+    milestones.filter_chart_info(start_date="1/1/2021", end_date="20/12/2022")
+    milestones_chart = milestone_chart(milestones, blue_line="ipdc_date")
+    put_matplotlib_fig_into_word(doc, milestones_chart)
 
     return doc
 
@@ -58,3 +60,5 @@ m = Master(get_master_data(), get_project_information())
 
 output = compile_report(report_doc, get_project_information(), m, Projects.crossrail)
 output.save(root_path / "output/crossrail_report_tests.docx")
+
+

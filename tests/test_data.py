@@ -29,7 +29,7 @@ from data_mgmt.data import (
     MilestoneData,
     milestone_chart, save_graph,
     DCA_KEYS, dca_changes_into_word, dca_changes_into_excel, DcaData, RiskData, risks_into_excel, VfMData,
-    vfm_into_excel, sort_projects_by_dca
+    vfm_into_excel, sort_projects_by_dca, project_report_meta_data
 )
 
 # test masters project names
@@ -126,6 +126,15 @@ def test_word_doc_dca_table(word_doc, project_info, dca_masters):
 def test_word_doc_dca_narratives(word_doc, project_info, dca_masters):
     master = Master(dca_masters, project_info)
     dca_narratives(word_doc, master, "Falcon 9")
+    word_doc.save("resources/summary_temp_altered.docx")
+
+
+def test_project_report_meta_data(word_doc, project_info, two_masters):
+    master = Master(two_masters, project_info)
+    costs = CostData(master, "Falcon 9")
+    m = MilestoneData(master, "Falcon 9")
+    b = BenefitsData(master, "Falcon 9")
+    project_report_meta_data(word_doc, costs, m, b, "Falcon 9")
     word_doc.save("resources/summary_temp_altered.docx")
 
 

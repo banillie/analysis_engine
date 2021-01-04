@@ -16,10 +16,10 @@ def test_create_db(db):
     assert c.fetchall() == [(1,)]
 
 
-def test_import_master_to_db(db, one_master, project_group_id):
+def test_import_master_to_db(db, one_milestones_master, project_group_id):
     conn = sqlite3.connect(db)
     c = conn.cursor()
-    import_master_to_db(db, one_master, project_group_id)
+    import_master_to_db(db, one_milestones_master, project_group_id)
     c.execute("""SELECT count(*) FROM project""")
     assert c.fetchall() == [(6,)]
 
