@@ -24,7 +24,7 @@ from data_mgmt.data import (
     BenefitsData,
     total_costs_benefits_bar_chart,
     FIGURE_STYLE, MilestoneData, milestone_chart, project_report_meta_data, change_word_doc_portrait,
-    print_out_project_milestones,
+    print_out_project_milestones, project_scope_text,
 )
 
 
@@ -53,6 +53,7 @@ def compile_report(
     put_matplotlib_fig_into_word(doc, milestones_chart)
     print_out_project_milestones(doc, milestones, project_name)
     change_word_doc_portrait(doc)
+    project_scope_text(doc, master, project_name)
     return doc
 
 

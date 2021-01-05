@@ -4634,6 +4634,7 @@ def project_report_meta_data(doc: Document,
     change_text_size([table.columns[0], table.columns[1], table.columns[2], table.columns[3]], 10)
     return doc
 
+
 def print_out_project_milestones(doc: Document, milestones: MilestoneData, project_name: str) -> Document:
     def plus_minus_days(change_value):
         '''mini function to place plus or minus sign before time delta
@@ -4755,5 +4756,17 @@ def print_out_project_milestones(doc: Document, milestones: MilestoneData, proje
     # make_text_red([table.columns[1], table.columns[4]])  # make 'not reported red'
 
     make_rows_bold([table.rows[0]])  # makes top of table bold. Found function on stack overflow.
+    return doc
 
+
+def project_scope_text(doc: Document, master: Master, project_name: str) -> Document:
+    doc.add_paragraph().add_run('Project Scope').bold = True
+    text_one = str(master.master_data[0].data[project_name]['Project Scope'])
+    try:
+        text_two = str(master.master_data[1].data[project_name]['Project Scope'])
+    except KeyError:
+        text_two = text_one
+    # different options for comparing costs
+    # compare_text_showall(dca_a, dca_b, doc)
+    compare_text_new_and_old(text_one, text_two, doc)
     return doc
