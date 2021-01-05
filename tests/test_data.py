@@ -29,7 +29,7 @@ from data_mgmt.data import (
     MilestoneData,
     milestone_chart, save_graph,
     DCA_KEYS, dca_changes_into_word, dca_changes_into_excel, DcaData, RiskData, risks_into_excel, VfMData,
-    vfm_into_excel, sort_projects_by_dca, project_report_meta_data
+    vfm_into_excel, sort_projects_by_dca, project_report_meta_data, print_out_project_milestones
 )
 
 # test masters project names
@@ -353,7 +353,17 @@ def test_removing_project_name_from_milestone_keys(milestone_masters, project_in
     assert milestones.key_names == ["Start of Project", 'Standard A', 'Inverted Cosmonauts']
 
 
-def test_saving_graph_to_word_doc(milestone_masters, project_info):
+def test_saving_graph_to_word_doc_one(word_doc, milestone_masters, project_info):
+    master = Master(milestone_masters, project_info)
+    milestones = MilestoneData(master, [sot, a11, a13])
+    change_word_doc_landscape(word_doc)
+    # milestones.filter_chart_info(start_date="1/1/2013", end_date="1/1/2014")
+    graph = milestone_chart(milestones, title="Group Test", blue_line="Today", show="No")
+    put_matplotlib_fig_into_word(word_doc, graph)
+    word_doc.save("resources/summary_temp_altered.docx")
+
+
+def test_saving_graph_to_word_doc_other(milestone_masters, project_info):
     master = Master(milestone_masters, project_info)
     milestones = MilestoneData(master, [sot, a11, a13])
     milestones.filter_chart_info(start_date="1/1/2013", end_date="1/1/2014")
@@ -425,3 +435,14 @@ def test_calculating_schedule_changes(milestone_masters, project_info):
     milestones = MilestoneData(master, [sot, a11, a13])
     milestones.calculate_schedule_changes()
     assert isinstance(milestones.schedule_change, (dict,))
+
+
+def test_printout_of_milestones(word_doc, milestone_masters, project_info):
+    master = Master(milestone_masters, project_info)
+    milestones = MilestoneData(master, sot)
+    change_word_doc_landscape(word_doc)
+    print_out_project_milestones(word_doc, milestones, sot)
+    # milestones.filter_chart_info(start_date="1/1/2013", end_date="1/1/2014")
+    # graph = milestone_chart(milestones, title="Group Test", blue_line="Today", show="No")
+    # put_matplotlib_fig_into_word(word_doc, graph)
+    word_doc.save("resources/summary_temp_altered.docx")

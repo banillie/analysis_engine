@@ -1254,7 +1254,9 @@ class MilestoneData:
         self.type_list = []
         self.md_current = []
         self.md_last = []
+        self.md_last_po = []
         self.md_baseline = []
+        self.md_baseline_po = []
         self.md_baseline_two = []
         self.max_date = None
         self.min_date = None
@@ -1398,7 +1400,9 @@ class MilestoneData:
         keys_names_baseline = []
         md_current = []
         md_last = []
+        md_last_po = []  # po is for printout
         md_baseline = []
+        md_baseline_po = []  #
         md_baseline_two = []
         type_list = []
 
@@ -1421,8 +1425,10 @@ class MilestoneData:
                         key_names_last.append(m_project + ", " + m_name)
                         m_last_date = m_last["Date"]
                         md_last.append(m_last_date)
+                        md_last_po.append(m_last_date)
             if m_last_date is None:
                 md_last.append(m_date)
+                md_last_po.append(None)
 
             m_bl_date = None
             for m_bl in self.baseline_dict.values():
@@ -1431,8 +1437,10 @@ class MilestoneData:
                         keys_names_baseline.append(m_project + ", " + m_name)
                         m_bl_date = m_bl["Date"]
                         md_baseline.append(m_bl_date)
+                        md_baseline_po.append(m_bl_date)
             if m_bl_date is None:
                 md_baseline.append(m_date)
+                md_baseline_po.append(None)
 
             m_bl_two_date = None
             for m_bl_two in self.baseline_two.values():
@@ -1455,7 +1463,9 @@ class MilestoneData:
         self.key_names_baseline = keys_names_baseline
         self.md_current = md_current
         self.md_last = md_last
+        self.md_last_po = md_last_po
         self.md_baseline = md_baseline
+        self.md_baseline_po = md_baseline_po
         self.md_baseline_two = md_baseline_two
         self.type_list = type_list
         self.max_date = max(
@@ -1485,7 +1495,9 @@ class MilestoneData:
                     self.key_names[i] = "remove"
                     self.md_current[i] = "remove"
                     self.md_last[i] = "remove"
+                    self.md_last_po[i] = "remove"
                     self.md_baseline[i] = "remove"
+                    self.md_baseline_po[i] = "remove"
                     self.md_baseline_two[i] = "remove"
                     self.type_list[i] = "remove"
                 else:
@@ -1494,7 +1506,9 @@ class MilestoneData:
             self.key_names = [x for x in self.key_names if x is not "remove"]
             self.md_current = [x for x in self.md_current if x is not "remove"]
             self.md_last = [x for x in self.md_last if x is not "remove"]
+            self.md_last_po = [x for x in self.md_last_po if x is not "remove"]
             self.md_baseline = [x for x in self.md_baseline if x is not "remove"]
+            self.md_baseline_po = [x for x in self.md_baseline_po if x is not "remove"]
             self.md_baseline_two = [
                 x for x in self.md_baseline_two if x is not "remove"
             ]
@@ -1516,7 +1530,9 @@ class MilestoneData:
                     self.key_names[i] = "remove"
                     self.md_current[i] = "remove"
                     self.md_last[i] = "remove"
+                    self.md_last_po[i] = "remove"
                     self.md_baseline[i] = "remove"
+                    self.md_baseline_po[i] = "remove"
                     self.md_baseline_two[i] = "remove"
                     self.type_list[i] = "remove"
                 else:
@@ -1524,7 +1540,9 @@ class MilestoneData:
             self.key_names = [x for x in self.key_names if x is not "remove"]
             self.md_current = [x for x in self.md_current if x is not "remove"]
             self.md_last = [x for x in self.md_last if x is not "remove"]
+            self.md_last_po = [x for x in self.md_last_po if x is not "remove"]
             self.md_baseline = [x for x in self.md_baseline if x is not "remove"]
+            self.md_baseline_po = [x for x in self.md_baseline_po if x is not "remove"]
             self.md_baseline_two = [
                 x for x in self.md_baseline_two if x is not "remove"
             ]
@@ -1542,13 +1560,17 @@ class MilestoneData:
                 self.key_names[i] = "remove"
                 self.md_current[i] = "remove"
                 self.md_last[i] = "remove"
+                self.md_last_po[i] = "remove"
                 self.md_baseline[i] = "remove"
+                self.md_baseline_po[i] = "remove"
                 self.md_baseline_two[i] = "remove"
                 self.type_list[i] = "remove"
         self.key_names = [x for x in self.key_names if x is not "remove"]
         self.md_current = [x for x in self.md_current if x is not "remove"]
         self.md_last = [x for x in self.md_last if x is not "remove"]
+        self.md_last_po = [x for x in self.md_last_po if x is not "remove"]
         self.md_baseline = [x for x in self.md_baseline if x is not "remove"]
+        self.md_baseline_po = [x for x in self.md_baseline_po if x is not "remove"]
         self.md_baseline_two = [x for x in self.md_baseline_two if x is not "remove"]
         self.type_list = [x for x in self.type_list if x is not "remove"]
 
@@ -2496,11 +2518,19 @@ def dca_narratives(doc: Document, master: Master, project_name: str) -> None:
         compare_text_new_and_old(text_one, text_two, doc)
 
 
-def change_word_doc_landscape(doc: Document) -> Document():
+def change_word_doc_landscape(doc: Document) -> Document:
     new_section = doc.add_section(WD_SECTION_START.NEW_PAGE)  # new page
-    # change to landscape
     new_width, new_height = new_section.page_height, new_section.page_width
     new_section.orientation = WD_ORIENTATION.LANDSCAPE
+    new_section.page_width = new_width
+    new_section.page_height = new_height
+    return doc
+
+
+def change_word_doc_portrait(doc: Document) -> Document:
+    new_section = doc.add_section(WD_SECTION_START.NEW_PAGE)
+    new_width, new_height = new_section.page_height, new_section.page_width
+    new_section.orientation = WD_ORIENTATION.PORTRAIT
     new_section.page_width = new_width
     new_section.page_height = new_height
     return doc
@@ -2649,11 +2679,11 @@ def total_costs_benefits_bar_chart(
             print("You need to provide a title for this chart")
 
     plt.suptitle(title, fontweight="bold", fontsize=25)
-    plt.xticks(size=12) # here
+    plt.xticks(size=12)
     plt.yticks(size=10)
 
     # Y AXIS SCALE MAX
-    highest_int = max([cost_master.y_scale_max, ben_master.y_scale_max])
+    highest_int = max([cost_master.y_scale_max, ben_master.economic_max])  # check in refactor
     y_max = highest_int + percentage(5, highest_int)
     ax1.set_ylim(0, y_max)
 
@@ -2676,14 +2706,16 @@ def total_costs_benefits_bar_chart(
         label="Unprofiled",
     )
     ax1.legend(prop={"size": 10})
+    ax1.xaxis.set_tick_params(labelsize=12)
+    ax1.yaxis.set_tick_params(labelsize=12)
     ax1.set_ylabel("Cost (£m)")
     ylab1 = ax1.yaxis.get_label()
     ylab1.set_style("italic")
-    ylab1.set_size(10)
+    ylab1.set_size(12)
     # ax1.tick_params(axis="series_one", which="major")
     # ax1.tick_params(axis="series_two", which="major")
     ax1.set_title(
-        "Fig 1. Total Cost Changes Over Time",
+        "Fig 1. Change in total cost",
         loc="left",
         fontsize=12,
         fontweight="bold",
@@ -2707,17 +2739,19 @@ def total_costs_benefits_bar_chart(
         bottom=np.array(cost_master.cat_spent) + np.array(cost_master.cat_profiled),
         label="Unprofiled",
     )
-    ax2.legend(prop={"size": 6})
+    ax2.legend(prop={"size": 10})
+    ax2.xaxis.set_tick_params(labelsize=12)
+    ax2.yaxis.set_tick_params(labelsize=12)
     ax2.set_ylabel("Costs (£m)")
     ylab3 = ax2.yaxis.get_label()
     ylab3.set_style("italic")
-    ylab3.set_size(8)
-    ax2.tick_params(axis="series_one", which="major", labelsize=6)
-    ax2.tick_params(axis="series_two", which="major", labelsize=6)
+    ylab3.set_size(12)
+    # ax2.tick_params(axis="series_one", which="major", labelsize=6)
+    # ax2.tick_params(axis="series_two", which="major", labelsize=6)
     ax2.set_title(
-        "Fig 2. Current Cost Profile Breakdown",
+        "Fig 2. Current cost breakdown",
         loc="left",
-        fontsize=8,
+        fontsize=12,
         fontweight="bold",
     )
 
@@ -2741,17 +2775,19 @@ def total_costs_benefits_bar_chart(
         bottom=np.array(ben_master.delivered) + np.array(ben_master.profiled),
         label="Unprofiled",
     )
-    ax3.legend(prop={"size": 6})
+    ax3.legend(prop={"size": 10})
+    ax3.xaxis.set_tick_params(labelsize=12)
+    ax3.yaxis.set_tick_params(labelsize=12)
     ax3.set_ylabel("Benefits (£m)")
     ylab3 = ax3.yaxis.get_label()
     ylab3.set_style("italic")
-    ylab3.set_size(8)
-    ax3.tick_params(axis="series_one", which="major", labelsize=6)
-    ax3.tick_params(axis="series_two", which="major", labelsize=6)
+    ylab3.set_size(12)
+    # ax3.tick_params(axis="series_one", which="major", labelsize=6)
+    # ax3.tick_params(axis="series_two", which="major", labelsize=6)
     ax3.set_title(
-        "Fig 3. Total Benefit Changes Over Time",
+        "Fig 3. Change in total benefits",
         loc="left",
-        fontsize=8,
+        fontsize=12,
         fontweight="bold",
     )
 
@@ -2775,23 +2811,25 @@ def total_costs_benefits_bar_chart(
         bottom=np.array(ben_master.cat_delivered) + np.array(ben_master.cat_profiled),
         label="Unprofiled",
     )
-    ax4.legend(prop={"size": 6})
+    ax4.legend(prop={"size": 10})
+    ax4.xaxis.set_tick_params(labelsize=12)
+    ax4.yaxis.set_tick_params(labelsize=12)
     ax4.set_ylabel("Benefits (£m)")
     ylab4 = ax4.yaxis.get_label()
     ylab4.set_style("italic")
-    ylab4.set_size(8)
-    ax4.tick_params(axis="series_one", which="major", labelsize=6)
-    ax4.tick_params(axis="series_two", which="major", labelsize=6)
+    ylab4.set_size(12)
+    # ax4.tick_params(axis="series_one", which="major", labelsize=6)
+    # ax4.tick_params(axis="series_two", which="major", labelsize=6)
     ax4.set_title(
-        "Fig 4. Current Benefit Profile Breakdown",
+        "Fig 4. Current benefit breakdown",
         loc="left",
-        fontsize=8,
+        fontsize=12,
         fontweight="bold",
     )
 
     y_min = ben_master.y_scale_min + percentage(40, ben_master.y_scale_min)
     if ben_master.economic_max > y_max:
-        ax4.set_ylim(y_min, y_max)
+        ax4.set_ylim(y_min, ben_master.economic_max)
     else:
         ax4.set_ylim(
             y_min, y_max
@@ -3129,17 +3167,18 @@ def milestone_chart(
 
     # title
     if len(milestone_data.project_group) == 1:
-        fig.suptitle(
-            milestone_data.master.abbreviations[milestone_data.project_group[0]]
-            + " Schedule",
-            fontweight="bold",
-        )
+        try:
+            title = kwargs["title"]
+        except KeyError:
+            title = milestone_data.master.abbreviations[milestone_data.project_group[0]] + " Schedule"
     else:
         try:
-            fig.suptitle(kwargs["title"] + " Schedule", fontweight="bold")  # title
+            title = kwargs["title"]
         except KeyError:
             pass
             print("You need to provide a title for this chart")
+
+    fig.suptitle(title, fontweight="bold", fontsize=25)
 
     def handle_long_keys(key_names: List[str]) -> List[str]:
         labels = ['\n'.join(wrap(l, 40)) for l in key_names]
@@ -3188,9 +3227,9 @@ def milestone_chart(
     # this method does not handle NoneTypes. Therefore get_chart_info returns md_current
     # instead of NoneTypes. Works fine, but underlying data is incorrect. Although this is
     # hidden from the user, preference for not making data wrong. but using at the moment.
-    ax1.scatter(milestone_data.md_baseline, m_key_names, label="Baseline")
-    ax1.scatter(milestone_data.md_last, m_key_names, label="Last quarter")
-    ax1.scatter(milestone_data.md_current, m_key_names, label="Current")
+    ax1.scatter(milestone_data.md_baseline, m_key_names, label="Baseline", s=200)
+    ax1.scatter(milestone_data.md_last, m_key_names, label="Last quarter", s=200)
+    ax1.scatter(milestone_data.md_current, m_key_names, label="Current", s=200)
 
     # ax1.scatter(*do_mask(milestone_data.md_current, milestone_data.key_names), label="Current", zorder=10, c='g')
     # ax1.scatter(*do_mask(milestone_data.md_last, milestone_data.key_names), label="Last quarter", zorder=5, c='orange')
@@ -3216,8 +3255,8 @@ def milestone_chart(
         ax1.xaxis.set_minor_locator(months)
         ax1.xaxis.set_major_formatter(years_fmt)
         # ax1.xaxis.set_minor_formatter(months_fmt)
-        plt.setp(ax1.xaxis.get_minorticklabels(), rotation=45)
-        plt.setp(ax1.xaxis.get_majorticklabels(), rotation=45, weight="bold")
+        plt.setp(ax1.xaxis.get_minorticklabels(), rotation=45, size=14)
+        plt.setp(ax1.xaxis.get_majorticklabels(), rotation=45, weight="bold", size=16)
 
         # scaling series_one axis. Keeping for now in case useful.
         # series_one axis value to no more than three months after last latest milestone date, or three months
@@ -3250,10 +3289,13 @@ def milestone_chart(
         ax1.xaxis.set_minor_locator(months)
         ax1.xaxis.set_major_formatter(years_fmt)
         ax1.xaxis.set_minor_formatter(months_fmt)
-        plt.setp(ax1.xaxis.get_minorticklabels(), rotation=45)
-        plt.setp(ax1.xaxis.get_majorticklabels(), rotation=45, weight="bold")
+        plt.setp(ax1.xaxis.get_minorticklabels(), rotation=45, size=14)
+        plt.setp(ax1.xaxis.get_majorticklabels(), rotation=45, weight="bold", size=16)
 
-    ax1.legend()  # insert legend
+    ax1.legend(prop={"size": 14})  # insert legend
+
+    # plt.xticks(rotation=45, size=14)
+    plt.yticks(size=12)
 
     # reverse series_two axis so order is earliest to oldest
     ax1 = plt.gca()
@@ -4471,7 +4513,7 @@ def project_report_meta_data(doc: Document,
     font.underline = True
     table = doc.add_table(rows=1, cols=4)
     hdr_cells = table.rows[0].cells
-    hdr_cells[0].text = 'Business case stage (IPDC approved):'
+    hdr_cells[0].text = 'Business case stage :'
     hdr_cells[1].text = convert_bc_stage_text(
             costs.master.master_data[0].data[project_name]['IPDC approval point'])
     hdr_cells[2].text = 'Delivery stage:'
@@ -4490,6 +4532,7 @@ def project_report_meta_data(doc: Document,
     make_text_red([table.columns[1], table.columns[3]])  # make 'not reported red'
 
     '''Milestone/Stage meta data'''
+    abb = milestones.master.abbreviations[project_name]
     doc.add_paragraph()
     run = doc.add_paragraph().add_run('Schedule/Milestones')
     font = run.font
@@ -4499,7 +4542,7 @@ def project_report_meta_data(doc: Document,
     hdr_cells = table.rows[0].cells
     hdr_cells[0].text = 'Start date:'
     try:
-        start_project = get_milestone_date(project_name, milestones.current, "Start of Project")
+        start_project = get_milestone_date(abb, milestones.current, " Start of Project")
         hdr_cells[1].text = start_project.strftime("%d/%m/%Y")
     except KeyError:
         hdr_cells[1].text = "Not reported"
@@ -4507,29 +4550,29 @@ def project_report_meta_data(doc: Document,
         hdr_cells[1].text = "Not reported"
     hdr_cells[2].text = 'Start of operations:'
     try:
-        start_ops = get_milestone_date(project_name, milestones.current, " Start of Operation")
+        start_ops = get_milestone_date(abb, milestones.current, " Start of Operation")
         hdr_cells[3].text = start_ops.strftime("%d/%m/%Y")
     except KeyError:
         hdr_cells[3].text = "Not reported"
     except AttributeError:
         hdr_cells[3].text = "Not reported"
     row_cells = table.add_row().cells
-    row_cells[0].text = 'Start of construction:'  #  check
+    row_cells[0].text = 'Start of construction:'
     try:
-        start_con = get_milestone_date(project_name, milestones.current, " Start of Construction/build")
-        hdr_cells[1].text = start_con.strftime("%d/%m/%Y")
+        start_con = get_milestone_date(abb, milestones.current, " Start of Construction/build")
+        row_cells[1].text = start_con.strftime("%d/%m/%Y")
     except KeyError:
-        hdr_cells[1].text = "Not reported"
+        row_cells[1].text = "Not reported"
     except AttributeError:
-        hdr_cells[1].text = "Not reported"
+        row_cells[1].text = "Not reported"
     row_cells[2].text = 'Full Operations:'  # check
     try:
-        full_ops = get_milestone_date(project_name, milestones.current, " Full Operations")
-        hdr_cells[3].text = full_ops.strftime("%d/%m/%Y")
+        full_ops = get_milestone_date(abb, milestones.current, " Full Operations")
+        row_cells[3].text = full_ops.strftime("%d/%m/%Y")
     except KeyError:
-        hdr_cells[3].text = "Not reported"
+        row_cells[3].text = "Not reported"
     except AttributeError:
-        hdr_cells[3].text = "Not reported"
+        row_cells[3].text = "Not reported"
 
     # set column width
     column_widths = (Cm(4), Cm(3), Cm(4), Cm(3))
@@ -4576,12 +4619,12 @@ def project_report_meta_data(doc: Document,
     hdr_cells[0].text = 'Total Benefits:'
     hdr_cells[1].text = '£' + str(round(benefits.master.master_data[0].data[project_name]["BEN Totals Forecast"])) + 'm'
     hdr_cells[2].text = 'Benefits delivered:'
-    hdr_cells[3].text = '£' + str(round(sum(benefits.delivered))) + 'm'
+    hdr_cells[3].text = '£' + str(round(benefits.delivered[0])) + 'm' #  first in list is current
     row_cells = table.add_row().cells
     row_cells[0].text = 'Benefits profiled:'
-    row_cells[1].text = '£' + str(round(sum(benefits.profiled))) + 'm'
+    row_cells[1].text = '£' + str(round(benefits.profiled[0])) + 'm'
     row_cells[2].text = 'Benefits unprofiled:'
-    row_cells[3].text = '£' + str(round(sum(benefits.unprofiled))) + 'm'
+    row_cells[3].text = '£' + str(round(benefits.unprofiled[0])) + 'm'
 
     # set column width
     column_widths = (Cm(4), Cm(3), Cm(4), Cm(3))
@@ -4589,4 +4632,128 @@ def project_report_meta_data(doc: Document,
     # make column keys bold
     make_columns_bold([table.columns[0], table.columns[2]])
     change_text_size([table.columns[0], table.columns[1], table.columns[2], table.columns[3]], 10)
+    return doc
+
+def print_out_project_milestones(doc: Document, milestones: MilestoneData, project_name: str) -> Document:
+    def plus_minus_days(change_value):
+        '''mini function to place plus or minus sign before time delta
+        value in milestone_table function. Only need + signs to be added
+        as negative numbers have minus already'''
+        try:
+            if change_value > 0:
+                text = '+ ' + str(change_value)
+            else:
+                text = str(change_value)
+        except TypeError:
+            text = change_value
+
+        return text
+
+    def get_milestone_notes(
+            project_name: str,
+            milestone_dictionary: Dict[str, Union[datetime.date, str]],
+            milestone_name: str,
+    ) -> datetime:
+        for k in milestone_dictionary.keys():
+            if milestone_dictionary[k]["Project"] == project_name:
+                if milestone_dictionary[k]["Milestone"] == milestone_name:
+                    return milestone_dictionary[k]["Notes"]
+
+    doc.add_section(WD_SECTION_START.NEW_PAGE)
+    # table heading
+    ab = milestones.master.abbreviations[project_name]
+    doc.add_paragraph().add_run(str(ab + ' milestone table (2021 - 22)')).bold = True
+    # some_text = 'The below table presents all project reported remaining high-level milestones, with six months grace ' \
+                # 'from close of the current quarter. Milestones are sorted in chronological order. Changes in milestones' \
+                # ' dates in comparison to last quarter and baseline have been calculated and are provided.'
+    # doc.add_paragraph().add_run(str(some_text)).italic = True
+
+    ab = milestones.master.abbreviations[project_name]
+
+    table = doc.add_table(rows=1, cols=5)
+    hdr_cells = table.rows[0].cells
+    hdr_cells[0].text = 'Milestone'
+    hdr_cells[1].text = 'Date'
+    hdr_cells[2].text = 'Change from last quarter'
+    hdr_cells[3].text = 'Change from baseline'
+    hdr_cells[4].text = 'Notes'
+
+    for i, m in enumerate(milestones.key_names):
+        row_cells = table.add_row().cells
+        row_cells[0].text = m
+        row_cells[1].text = milestones.md_current[i].strftime("%d/%m/%Y")
+        try:
+            row_cells[2].text = plus_minus_days((milestones.md_current[i] - milestones.md_last_po[i]).days)
+        except TypeError:
+            row_cells[2].text = "Not reported"
+        try:
+            row_cells[3].text = plus_minus_days((milestones.md_current[i] - milestones.md_baseline_po[i]).days)
+        except TypeError:
+            row_cells[3].text = "Not reported"
+        try:
+            row_cells[4].text = get_milestone_notes(ab, milestones.current, m)
+            paragraph = row_cells[4].paragraphs[0]
+            run = paragraph.runs
+            font = run[0].font
+            font.size = Pt(8)  # font size = 8
+        except TypeError:
+            pass
+
+        # try:
+        #     if milestone_filter_start_date <= milestone_date:  # filter based on date
+        #         row_cells = table.add_row().cells
+        #         row_cells[0].text = milestone
+        #         if milestone_date is None:
+        #             row_cells[1].text = 'No date'
+        #         else:
+        #             row_cells[1].text = milestone_date.strftime("%d/%m/%Y")
+        #         b_one_value = first_diff_data[project_name][milestone]
+        #         row_cells[2].text = plus_minus_days(b_one_value)
+        #         b_two_value = second_diff_data[project_name][milestone]
+        #         row_cells[3].text = plus_minus_days(b_two_value)
+        #
+        #         notes = p_current_milestones[project_name][milestone][milestone_date]
+        #         row_cells[4].text = str(notes)
+        #         # trying to high changes to narratuve in red text
+        #         # if milestone in p_last_milestones[project_name].keys():
+        #         #     last_milestone_date = p_last_milestones[project_name][milestone]
+        #         #     last_note = p_last_milestones[project_name][milestone][last_milestone_date]
+        #         #     row_cells[4] = compare_text_newandold(notes, last_note, doc)
+        #         # elif milestone not in p_last_milestones[project_name].keys():
+        #         #     row_cells[4].text = str(notes)
+        #
+        #         paragraph = row_cells[4].paragraphs[0]
+        #         run = paragraph.runs
+        #         font = run[0].font
+        #         font.size = Pt(8)  # font size = 8
+        #
+        #
+        # except TypeError:  # this is to deal with none types which are still placed in output
+        #     row_cells = table.add_row().cells
+        #     row_cells[0].text = milestone
+        #     if milestone_date is None:
+        #         row_cells[1].text = 'No date'
+        #     else:
+        #         row_cells[1].text = milestone_date.strftime("%d/%m/%Y")
+        #     b_one_value = first_diff_data[project_name][milestone]
+        #     row_cells[2].text = plus_minus_days(b_one_value)
+        #     b_two_value = second_diff_data[project_name][milestone]
+        #     row_cells[3].text = plus_minus_days(b_two_value)
+        #     notes = p_current_milestones[project_name][milestone][milestone_date]
+        #     row_cells[4].text = str(notes)
+        #     paragraph = row_cells[4].paragraphs[0]
+        #     run = paragraph.runs
+        #     font = run[0].font
+        #     font.size = Pt(8)  # font size = 8
+
+    table.style = 'Table Grid'
+
+    # column widths
+    column_widths = (Cm(6), Cm(2.6), Cm(2), Cm(2), Cm(8.95))
+    set_col_widths(table, column_widths)
+    # make_columns_bold([table.columns[0], table.columns[3]])  # make keys bold
+    # make_text_red([table.columns[1], table.columns[4]])  # make 'not reported red'
+
+    make_rows_bold([table.rows[0]])  # makes top of table bold. Found function on stack overflow.
+
     return doc

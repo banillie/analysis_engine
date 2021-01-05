@@ -23,7 +23,8 @@ from data_mgmt.data import (
     change_word_doc_landscape,
     BenefitsData,
     total_costs_benefits_bar_chart,
-    FIGURE_STYLE, MilestoneData, milestone_chart, project_report_meta_data,
+    FIGURE_STYLE, MilestoneData, milestone_chart, project_report_meta_data, change_word_doc_portrait,
+    print_out_project_milestones,
 )
 
 
@@ -42,23 +43,28 @@ def compile_report(
     milestones = MilestoneData(master, project_name)
     project_report_meta_data(doc, costs, milestones, benefits, project_name)
     change_word_doc_landscape(doc)
-    # fig_style = FIGURE_STYLE[2]
-    total_profile = total_costs_benefits_bar_chart(costs, benefits)
-    put_matplotlib_fig_into_word(doc, total_profile)
-    cost_profile = cost_profile_graph(costs)
+    cost_profile = cost_profile_graph(costs, show="No")
     put_matplotlib_fig_into_word(doc, cost_profile)
+    total_profile = total_costs_benefits_bar_chart(costs, benefits, show="No")
+    put_matplotlib_fig_into_word(doc, total_profile)
     milestones.filter_chart_info(start_date="1/1/2021", end_date="20/12/2022")
-    milestones_chart = milestone_chart(milestones, blue_line="ipdc_date")
+    ab = master.abbreviations[project_name]
+    milestones_chart = milestone_chart(milestones, blue_line="ipdc_date", title=ab + " schedule (2021 - 22)", show="No")
     put_matplotlib_fig_into_word(doc, milestones_chart)
-
+    print_out_project_milestones(doc, milestones, project_name)
+    change_word_doc_portrait(doc)
     return doc
 
 
 wd_path = root_path / "input/summary_temp.docx"
 report_doc = open_word_doc(wd_path)
 m = Master(get_master_data(), get_project_information())
+costs = CostData(m, Projects.crossrail)
+benefits = BenefitsData(m, Projects.crossrail)
+milestones = MilestoneData(m, Projects.crossrail)
 
 output = compile_report(report_doc, get_project_information(), m, Projects.crossrail)
 output.save(root_path / "output/crossrail_report_tests.docx")
+
 
 
