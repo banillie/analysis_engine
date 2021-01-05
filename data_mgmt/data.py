@@ -50,6 +50,7 @@ def get_master_data() -> List[
 ]:  # how specify a list of dictionaries?
     """Returns a list of dictionaries each containing quarter data"""
     master_data_list = [
+        project_data_from_master(root_path / "core_data/master_3_2020_hs2.xlsx", 3, 2020),
         project_data_from_master(root_path / "core_data/master_2_2020.xlsx", 2, 2020),
         project_data_from_master(root_path / "core_data/master_1_2020.xlsx", 1, 2020),
         project_data_from_master(root_path / "core_data/master_4_2019.xlsx", 4, 2019),
@@ -567,6 +568,16 @@ class Master:
         self.check_baselines()
         self.get_project_abbreviations()
         self.get_project_groups()
+    """This is the entry point for all data. It converts a list of excel wbs (note at the moment)
+    this is actually done prior to being passed into the Master class. The Master class does a number
+    of things. 
+    compiles and checks all baseline data for projects. These index reference points. 
+    compiles lists of different project groups. e.g stage and DfT Group
+    gets a list of projects currently in the portfolio. 
+    checks data returned by projects is consistent with whats in project_information
+    gets project abbreviations
+    
+    """
 
     def get_baseline_data(self) -> dict:
         """
@@ -588,14 +599,13 @@ class Master:
                         try:
                             approved_bc = master.data[name][b_type]
                             quarter = str(master.quarter)
-                        # exception handling in here because data keys across masters are not consistent.
+                        # exception handling in here in case data keys across masters are not consistent.
                         except KeyError:
                             print(
                                 str(b_type)
                                 + " keys not present in "
                                 + str(master.quarter)
                             )
-                            # this should cause programme to stop as otherwise will crash.
                         if approved_bc == "Yes":
                             bc_list.append(approved_bc)
                             lower_list.append((approved_bc, quarter, i))
@@ -687,7 +697,7 @@ class Master:
                 lower_dict[p] = dict(raw_list)
                 group_list.append(dft_group)
                 stage_list.append(stage)
-            raw_dict[master.quarter] = lower_dict
+            raw_dict[str(master.quarter)] = lower_dict  # here
 
         group_list = list(set(group_list))
         stage_list = list(set(stage_list))
@@ -721,7 +731,7 @@ class Master:
         self.dft_groups = group_dict
         self.project_stage = stage_dict
 
-
+#  check cdel cost profile
 class CostData:
     def __init__(
         self,
@@ -979,10 +989,10 @@ class CostData:
                         if cost_type == COST_KEY_LIST[2]:  # ngov
                             ngov_total += cost
 
-                yearly_profile.append(round(cost_total))
-                rdel_yearly_profile.append(round(rdel_total))
-                cdel_yearly_profile.append(round(cdel_total))
-                ngov_yearly_profile.append(round(ngov_total))
+                yearly_profile.append(cost_total)
+                rdel_yearly_profile.append(rdel_total)
+                cdel_yearly_profile.append(cdel_total)
+                ngov_yearly_profile.append(ngov_total)
 
             if i == 0:
                 current_profile = yearly_profile
@@ -1292,7 +1302,7 @@ class MilestoneData:
                 except (IndexError, TypeError):
                     continue
 
-                # i loops below remove None Milestone names and reject non datetime Dates
+                # i loops below removes None Milestone names and rejects non-datetime date values.
                 for i in range(1, 50):
                     try:
                         t = [
@@ -1347,6 +1357,25 @@ class MilestoneData:
                                 p_data["Project MM" + str(i) + " Forecast - Actual"],
                             ),
                             ("Notes", p_data["Project MM" + str(i) + " Notes"]),
+                        ]
+                        milestone_info_handling(project_list, t)
+                    except KeyError:
+                        pass
+
+                # change in Q3. Some milestones collected via HMT approval section.
+                # this loop picks them up
+                # TODO check these are coming through in q3 data
+                for i in range(1, 4):
+                    try:
+                        t = [
+                            ("Project", self.master.abbreviations[project_name]),
+                            ("Milestone", p_data["HMT Approval " + str(i)]),
+                            ("Type", "Approval"),
+                            (
+                                "Date",
+                                p_data["HMT Approval " + str(i) + " Forecast / Actual"],
+                            ),
+                            ("Notes", p_data["HMT Approval " + str(i) + " Notes"]),
                         ]
                         milestone_info_handling(project_list, t)
                     except KeyError:
@@ -4434,18 +4463,18 @@ def project_report_meta_data(doc: Document,
     hdr_cells[0].text = 'WLC:'
     hdr_cells[1].text = '£' + str(round(costs.master.master_data[0].data[project_name]["Total Forecast"])) + 'm'
     hdr_cells[2].text = 'Spent:'
-    spent = spent_calculation(costs.master.master_data[0], project_name)
-    hdr_cells[3].text = '£' + str(round(spent)) + 'm'
+    # spent = spent_calculation(costs.master.master_data[0], project_name)
+    hdr_cells[3].text = '£' + str(round(costs.spent[0])) + 'm'
     row_cells = t.add_row().cells
     row_cells[0].text = 'RDEL Total:'
     row_cells[1].text = '£' + str(round(sum(costs.rdel_profile))) + 'm'
     row_cells[2].text = 'Profiled:'
-    row_cells[3].text = '£' + str(round(sum(costs.profiled))) + 'm'
+    row_cells[3].text = '£' + str(round(costs.profiled[0])) + 'm'  #  first in list is current
     row_cells = t.add_row().cells
     row_cells[0].text = 'CDEL Total:'
     row_cells[1].text = '£' + str(round(sum(costs.cdel_profile))) + 'm'
     row_cells[2].text = 'Unprofiled:'
-    row_cells[3].text = '£' + str(round(sum(costs.unprofiled))) + 'm'
+    row_cells[3].text = '£' + str(round(costs.unprofiled[0])) + 'm'
 
     # set column width
     column_widths = (Cm(4), Cm(3), Cm(4), Cm(3))
