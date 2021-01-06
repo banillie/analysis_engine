@@ -731,6 +731,7 @@ class Master:
         self.dft_groups = group_dict
         self.project_stage = stage_dict
 
+
 #  check cdel cost profile
 class CostData:
     def __init__(
@@ -938,8 +939,14 @@ class CostData:
                                 cost = 0
                             cost_total += cost
                         except KeyError:  # to handle data across different financial years
-                            cost = 0
-                            cost_total += cost
+                            if i == 0:  # from Q3 onwards all old FY data in project information.
+                                cost = self.master.project_information.data[project_name][year + cost_type]
+                                if cost is None:
+                                    cost = 0
+                                cost_total += cost
+                            else:
+                                cost = 0
+                                cost_total += cost
                         except TypeError:  # Handles projects not present in the previous quarter
                             missing_projects.append(
                                 str(project_name)

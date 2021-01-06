@@ -28,7 +28,7 @@ from data_mgmt.data import (
     project_report_meta_data,
     change_word_doc_portrait,
     print_out_project_milestones,
-    project_scope_text,
+    project_scope_text, make_file_friendly,
 )
 
 
@@ -67,6 +67,7 @@ report_doc = open_word_doc(root_path / "input/summary_temp.docx")
 m = Master(get_master_data(), get_project_information())
 
 for p in m.current_projects:
+    qrt = make_file_friendly(str(m.master_data[0].quarter))
     output = compile_report(report_doc, get_project_information(), m, p)
-    output.save(root_path / "output/{}_report_tests.docx".format(p))
+    output.save(root_path / "output/{}_report_{}.docx".format(p, qrt))  # add quarter here
     report_doc = open_word_doc(root_path / "input/summary_temp.docx")
