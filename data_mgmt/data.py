@@ -944,14 +944,14 @@ class CostData:
                                 cost = 0
                             cost_total += cost
                         except KeyError:  # to handle data across different financial years
-                            if i == 0:  # from Q3 onwards all old FY data in project information.
+                            # TODO come back and check this is working properly
+                            try:
                                 cost = self.master.project_information.data[project_name][year + cost_type]
-                                if cost is None:
-                                    cost = 0
-                                cost_total += cost
-                            else:
+                            except KeyError:
                                 cost = 0
-                                cost_total += cost
+                            if cost is None:
+                                cost = 0
+                            cost_total += cost
                         except TypeError:  # Handles projects not present in the previous quarter
                             missing_projects.append(
                                 str(project_name)
@@ -2727,7 +2727,7 @@ def total_costs_benefits_bar_chart(
     plt.yticks(size=10)
 
     # Y AXIS SCALE MAX
-    highest_int = max([cost_master.y_scale_max, ben_master.economic_max])  # check in refactor
+    highest_int = max([cost_master.y_scale_max, ben_master.y_scale_max, ben_master.economic_max])  # check in refactor
     y_max = highest_int + percentage(5, highest_int)
     ax1.set_ylim(0, y_max)
 
@@ -2871,13 +2871,11 @@ def total_costs_benefits_bar_chart(
         fontweight="bold",
     )
 
-    y_min = ben_master.y_scale_min + percentage(40, ben_master.y_scale_min)
-    if ben_master.economic_max > y_max:
-        ax4.set_ylim(y_min, ben_master.economic_max)
-    else:
-        ax4.set_ylim(
-            y_min, y_max
-        )  # possible for economic benefits figure to be the largest
+    if ben_master.y_scale_min == 0:
+        ax4.set_ylim(0, y_max)
+    else:  #  for negative benefits
+        y_min = ben_master.y_scale_min + percentage(40, ben_master.y_scale_min)  # arbitrary 40 percent
+        ax4.set_ylim(y_min, y_max)
 
     fig.tight_layout(rect=[0, 0.03, 1, 0.95])  # size/fit of chart
 
@@ -3369,7 +3367,7 @@ def milestone_chart(
                     0.01,
                     "Line represents date analysis compiled",
                     horizontalalignment="right",
-                    fontsize=6,
+                    fontsize=10,
                     fontweight="bold",
                 )
         if blue_line == "ipdc_date":
@@ -3380,7 +3378,7 @@ def milestone_chart(
                     0.01,
                     "Line represents PfM report at IPDC",
                     horizontalalignment="right",
-                    fontsize=6,
+                    fontsize=10,
                     fontweight="bold",
                 )
     except KeyError:
@@ -4384,21 +4382,20 @@ def cost_v_schedule_chart(milestones: MilestoneData, costs: CostData):
     ws.cell(row=2, column=7).value = "Start key"
     ws.cell(row=2, column=8).value = "End key"
 
-    for x, project_name in enumerate(rags):  # here messing around with functionality
-        # milestones.master.current_projects):
-        ab = milestones.master.abbreviations[project_name]
+    for x, project_name in enumerate(rags):
+        ab = milestones.master.abbreviations[project_name[0]]
         ws.cell(row=x + 3, column=2).value = ab
         ws.cell(row=x + 3, column=3).value = milestones.schedule_change[ab]["baseline"][
             "percent change"
         ]
-        ws.cell(row=x + 3, column=4).value = costs.wlc_change[project_name][
+        ws.cell(row=x + 3, column=4).value = costs.wlc_change[project_name[0]][
             "baseline one"
         ]
         ws.cell(row=x + 3, column=5).value = costs.master.master_data[0].data[
-            project_name
+            project_name[0]
         ]["Total Forecast"]
         ws.cell(row=x + 3, column=6).value = costs.master.master_data[0].data[
-            project_name
+            project_name[0]
         ]["Departmental DCA"]
         ws.cell(row=x + 3, column=7).value = milestones.schedule_change[ab]["baseline"][
             "start key"
