@@ -3,7 +3,7 @@ New code for compiling individual project reports.
 """
 
 from datetime import date
-from typing import Dict, Union
+from typing import Dict, Union, List
 
 from docx import Document
 from data_mgmt.data import (
@@ -28,7 +28,7 @@ from data_mgmt.data import (
     project_report_meta_data,
     change_word_doc_portrait,
     print_out_project_milestones,
-    project_scope_text, make_file_friendly,
+    project_scope_text, make_file_friendly, string_conversion
 )
 
 
@@ -51,23 +51,37 @@ def compile_report(
     put_matplotlib_fig_into_word(doc, cost_profile)
     total_profile = total_costs_benefits_bar_chart(costs, benefits, show="No")
     put_matplotlib_fig_into_word(doc, total_profile)
-    milestones.filter_chart_info(start_date="1/1/2021", end_date="30/12/2022")
+    #  handling of no milestones within filtered period.
     ab = master.abbreviations[project_name]
-    milestones_chart = milestone_chart(
-        milestones, blue_line="ipdc_date", title=ab + " schedule (2021 - 22)", show="No"
-    )
-    put_matplotlib_fig_into_word(doc, milestones_chart)
+    try:
+        milestones.filter_chart_info(start_date="1/9/2020", end_date="30/12/2022")
+        milestones_chart = milestone_chart(
+            milestones, blue_line="ipdc_date", title=ab + " schedule (2021 - 22)", show="No"
+        )
+        put_matplotlib_fig_into_word(doc, milestones_chart)
+        # print_out_project_milestones(doc, milestones, project_name)
+    except ValueError:  # extends the time period.
+        milestones = MilestoneData(master, project_name)
+        milestones.filter_chart_info(start_date="1/9/2020", end_date="30/12/2024")
+        milestones_chart = milestone_chart(
+            milestones, blue_line="ipdc_date", title=ab + " schedule (2021 - 24)", show="No"
+        )
+        put_matplotlib_fig_into_word(doc, milestones_chart)
     print_out_project_milestones(doc, milestones, project_name)
     change_word_doc_portrait(doc)
     project_scope_text(doc, master, project_name)
     return doc
 
 
-report_doc = open_word_doc(root_path / "input/summary_temp.docx")
 m = Master(get_master_data(), get_project_information())
 
-for p in m.current_projects:
-    qrt = make_file_friendly(str(m.master_data[0].quarter))
-    output = compile_report(report_doc, get_project_information(), m, p)
-    output.save(root_path / "output/{}_report_{}.docx".format(p, qrt))  # add quarter here
-    report_doc = open_word_doc(root_path / "input/summary_temp.docx")
+
+def run_p_reports(projects: List[str] or str, m: Master) -> None:
+    projects = string_conversion(projects)
+    for p in projects:
+        report_doc = open_word_doc(root_path / "input/summary_temp.docx")
+        qrt = make_file_friendly(str(m.master_data[0].quarter))
+        output = compile_report(report_doc, get_project_information(), m, p)
+        output.save(root_path / "output/{}_report_{}.docx".format(p, qrt))  # add quarter here
+
+

@@ -50,7 +50,7 @@ def get_master_data() -> List[
 ]:  # how specify a list of dictionaries?
     """Returns a list of dictionaries each containing quarter data"""
     master_data_list = [
-        project_data_from_master(root_path / "core_data/master_3_2020_hs2.xlsx", 3, 2020),
+        project_data_from_master(root_path / "core_data/master_3_2020_draft.xlsx", 3, 2020),
         project_data_from_master(root_path / "core_data/master_2_2020.xlsx", 2, 2020),
         project_data_from_master(root_path / "core_data/master_1_2020.xlsx", 1, 2020),
         project_data_from_master(root_path / "core_data/master_4_2019.xlsx", 4, 2019),
@@ -557,17 +557,20 @@ class Master:
     ) -> None:
         self.master_data = master_data
         self.project_information = project_information
+        self.current_quarter = self.master_data[0].quarter
         self.abbreviations = {}
         self.current_projects = self.get_current_projects()
         self.bl_info = {}
         self.bl_index = {}
         self.dft_groups = {}
         self.project_stage = {}
+        self.fbc_projects = []
         self.get_baseline_data()
         self.check_project_information()
         self.check_baselines()
         self.get_project_abbreviations()
         self.get_project_groups()
+
     """This is the entry point for all data. It converts a list of excel wbs (note at the moment)
     this is actually done prior to being passed into the Master class. The Master class does a number
     of things. 
@@ -578,6 +581,7 @@ class Master:
     gets project abbreviations
     
     """
+    # function to check abbreviations
 
     def get_baseline_data(self) -> dict:
         """
@@ -730,6 +734,7 @@ class Master:
 
         self.dft_groups = group_dict
         self.project_stage = stage_dict
+        # self.fbc_projects = stage_dict[str(self.current_quarter)]["Full Business Case"]
 
 
 #  check cdel cost profile
@@ -1522,6 +1527,8 @@ class MilestoneData:
         start_date: str = "1/1/2000",
         end_date: str = "1/1/2041",
     ):
+        # bug handling required in the event that there are no milestones with the filter.
+        # i.e. the filter returns no milestones.
 
         #  Filter milestone type
         milestone_type = string_conversion(milestone_type)
@@ -1615,6 +1622,7 @@ class MilestoneData:
             + remove_none_types(self.md_last)
             + remove_none_types(self.md_baseline)
         )
+
         self.min_date = min(
             remove_none_types(self.md_current)
             + remove_none_types(self.md_last)
@@ -4356,12 +4364,14 @@ def sort_projects_by_dca(
 
 def cost_v_schedule_chart(milestones: MilestoneData, costs: CostData):
 
-    sorted_by_rag = sort_projects_by_dca(
-        milestones.master.master_data[0],
-        milestones.master.project_stage["Q2 20/21"]["FBC"],
-    )
+    rags = []
+    for project_name in milestones.project_group:
+        rag = milestones.master.master_data[0].data[project_name]["Departmental DCA"]
+        rags.append((project_name, rag))
 
-    rag_occurrence = Counter(x[1] for x in sorted_by_rag)
+    rags = sorted(rags, key=lambda x: x[1])
+
+    rag_count = Counter(x[1] for x in rags)
 
     wb = Workbook()
     ws = wb.active
@@ -4374,9 +4384,7 @@ def cost_v_schedule_chart(milestones: MilestoneData, costs: CostData):
     ws.cell(row=2, column=7).value = "Start key"
     ws.cell(row=2, column=8).value = "End key"
 
-    for x, project_name in enumerate(
-        sorted_by_rag
-    ):  # here messing around with functionality
+    for x, project_name in enumerate(rags):  # here messing around with functionality
         # milestones.master.current_projects):
         ab = milestones.master.abbreviations[project_name]
         ws.cell(row=x + 3, column=2).value = ab
