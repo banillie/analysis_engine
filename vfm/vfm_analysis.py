@@ -15,6 +15,8 @@ flags.
 - project. specify a particular project or group of projects.
 
 """
+import argparse
+import sys
 
 from data_mgmt.data import (
     Master,
@@ -36,4 +38,13 @@ def compile_vfm_analysis():
     wb.save(root_path / "output/vfm.xlsx")
 
 
-compile_vfm_analysis()
+my_parser = argparse.ArgumentParser(description='Run vfm analysis')
+my_parser.add_argument('input',
+                       action='store',
+                       nargs='*',
+                       default='run')
+
+args = my_parser.parse_args()
+
+if args == "run":
+    compile_vfm_analysis()
