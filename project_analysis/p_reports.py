@@ -76,7 +76,7 @@ def compile_report(
 m = Master(get_master_data(), get_project_information())
 
 
-def run_p_reports(projects: List[str] or str, m: Master) -> None:
+def run_p_reports(projects: List[str] or str) -> None:
     projects = string_conversion(projects)
     for p in projects:
         report_doc = open_word_doc(root_path / "input/summary_temp.docx")

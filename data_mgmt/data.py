@@ -4466,6 +4466,7 @@ def project_report_meta_data(doc: Document,
     paragraph.add_run('Annex A. High level MI data and analysis').bold = True
 
     '''Costs meta data'''
+    # this chuck is pretty messy because the data is messy
     run = doc.add_paragraph().add_run('Costs')
     font = run.font
     font.bold = True
@@ -4479,14 +4480,28 @@ def project_report_meta_data(doc: Document,
     hdr_cells[3].text = '£' + str(round(costs.spent[0])) + 'm'
     row_cells = t.add_row().cells
     row_cells[0].text = 'RDEL Total:'
-    row_cells[1].text = '£' + str(round(sum(costs.rdel_profile))) + 'm'
+    rdel_total = costs.master.master_data[0].data[project_name]["Total RDEL Forecast Total"]
+                # sum(costs.rdel_profile[4:])
+    row_cells[1].text = '£' + str(round(rdel_total)) + 'm'
     row_cells[2].text = 'Profiled:'
     row_cells[3].text = '£' + str(round(costs.profiled[0])) + 'm'  #  first in list is current
     row_cells = t.add_row().cells
+    cdel_total = costs.master.master_data[0].data[project_name]["Total CDEL Forecast one off new costs"]
+                 # sum(costs.cdel_profile[4:])
     row_cells[0].text = 'CDEL Total:'
-    row_cells[1].text = '£' + str(round(sum(costs.cdel_profile))) + 'm'
+    row_cells[1].text = '£' + str(round(cdel_total)) + 'm'
     row_cells[2].text = 'Unprofiled:'
     row_cells[3].text = '£' + str(round(costs.unprofiled[0])) + 'm'
+    row_cells = t.add_row().cells
+    n_gov_total = costs.master.master_data[0].data[project_name]["Non-Gov Total Forecast"]
+    if n_gov_total is None:
+        n_gov_total = 0
+    # n_gov_std = costs.master.master_data[0].data[project_name]["20-21 CDEL STD Non Gov costs"]
+    # if n_gov_std is None:
+    #     n_gov_std = 0
+    # ngov_total = n_gov_pre + sum(costs.ngov_profile[4:])
+    row_cells[0].text = 'Non-gov Total:'
+    row_cells[1].text = '£' + str(round(n_gov_total)) + 'm'
 
     # set column width
     column_widths = (Cm(4), Cm(3), Cm(4), Cm(3))
