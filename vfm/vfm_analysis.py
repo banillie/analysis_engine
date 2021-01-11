@@ -15,7 +15,6 @@ flags.
 - project. specify a particular project or group of projects.
 
 """
-
 from data_mgmt.data import (
     Master,
     root_path,
@@ -26,8 +25,8 @@ from data_mgmt.data import (
 )
 
 
-def compile_vfm_analysis():
-    m = Master(get_master_data(), get_project_information())
+def compile_vfm_analysis(m):
+    # m = Master(get_master_data(), get_project_information())
     vfm = VfMData(m)
     latest_quarter = str(m.master_data[0].quarter)
     last_quarter = str(m.master_data[1].quarter)
@@ -36,4 +35,4 @@ def compile_vfm_analysis():
     wb.save(root_path / "output/vfm.xlsx")
 
 
-compile_vfm_analysis()
+
