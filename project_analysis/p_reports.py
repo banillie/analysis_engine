@@ -73,7 +73,7 @@ def compile_report(
     return doc
 
 
-# m = Master(get_master_data(), get_project_information())
+m = Master(get_master_data(), get_project_information())
 
 
 def run_p_reports(projects: List[str] or str) -> None:

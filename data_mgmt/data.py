@@ -441,6 +441,38 @@ BASELINE_TYPES = {
     "Re-baseline HMT cost": "hmt_costs",
     "Re-baseline HMT benefits": "hmt_benefits",
 }
+# using dicts to clean up text
+BC_STAGE_DICT = {"Strategic Outline Case": "SOBC",
+                 "SOBC": "SOBC",
+                 "pre-Strategic Outline Case": "pre-SOBC",
+                 "pre-SOBC": "pre-SOBC",
+                 "Outline Business Case": "OBC",
+                 "OBC": "OBC",
+                 "Full Business Case": "FBC",
+                 "FBC": "FBC",
+                 # older returns that require cleaning
+                 "Pre - SOBC": "pre-SOBC",
+                 "Pre Strategic Outline Business Case": "pre_SOBC",
+                 None: None,
+                 "Other": "Other",
+                 "Other ": "Other",
+                 "To be confirmed": None,
+                 "To be confirmed ": None}
+DFT_GROUP_DICT = {'High Speed Rail Group': "HSMRPG",
+                  'International Security and Environment': "AMIS",
+                  'Transport for London': "Rail",
+                  'DVSA': "RDM",
+                  'Roads Places and Environment Group': "RDM",
+                  'ISG': "AMIS",
+                  'HSMRPG': "HSMRPG",
+                  'DfT': "DfT",
+                  'RDM': "RDM",
+                  'Rail Group': "Rail",
+                  'Highways England': "RDM",
+                  'Rail': "Rail",
+                  'Roads Devolution & Motoring': "RDM",
+                  'AMIS': "AMIS",
+                  None: None}
 
 YEAR_LIST = [
     "16-17",
@@ -718,7 +750,7 @@ class Master:
                     if p_group == group_type:
                         g_list.append(p)
 
-                lower_g_dict[group_type] = g_list
+                lower_g_dict[DFT_GROUP_DICT[group_type]] = g_list
 
             for stage_type in stage_list:
                 s_list = []
@@ -727,7 +759,7 @@ class Master:
                     if p_stage == stage_type:
                         s_list.append(p)
 
-                lower_s_dict[stage_type] = s_list
+                lower_s_dict[BC_STAGE_DICT[stage_type]] = s_list
 
             group_dict[quarter] = lower_g_dict
             stage_dict[quarter] = lower_s_dict
@@ -4054,8 +4086,13 @@ VFM_CAT = [
 
 
 class VfMData:
-    def __init__(self, master: Master):
+    def __init__(
+            self,
+            master: Master,
+            # project_group: List[str]
+    ):
         self.master = master
+        # self.project_group = string_conversion(project_group)
         self.vfm_dictionary = {}
         self.vfm_cat_count = {}
         self.vfm_cat_pvc = {}
@@ -4141,7 +4178,10 @@ class VfMData:
         self.vfm_cat_count = count_output_dict
 
 
-def vfm_into_excel(vfm_data: VfMData, quarter: List[str] or str) -> workbook:
+def vfm_into_excel(master: Master,
+                   vfm_data: VfMData,
+                   quarter: List[str] or str,
+                   **kwargs) -> workbook:
     wb = Workbook()
 
     quarter = string_conversion(quarter)
@@ -4152,7 +4192,13 @@ def vfm_into_excel(vfm_data: VfMData, quarter: List[str] or str) -> workbook:
             make_file_friendly(q)
         )  # creating worksheets. names restricted to 30 characters.
         ws.title = make_file_friendly(q)  # title of worksheet
-        for i, project_name in enumerate(list(vfm_data.vfm_dictionary[q].keys())):
+        if kwargs["stage"]:  # here. how to work with kwargs
+            projects = master.project_stage[q][kwargs["stage"]]
+        if kwargs["group"]:
+            projects = master.dft_groups[q][kwargs["group"]]
+        else:
+            projects = list(vfm_data.vfm_dictionary[q].keys())
+        for i, project_name in enumerate(projects):
             ws.cell(row=start_row + i, column=2).value = project_name
             for x, key in enumerate(
                 list(vfm_data.vfm_dictionary[q][project_name].keys())
