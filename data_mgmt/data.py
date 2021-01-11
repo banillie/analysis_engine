@@ -50,7 +50,7 @@ def get_master_data() -> List[
 ]:  # how specify a list of dictionaries?
     """Returns a list of dictionaries each containing quarter data"""
     master_data_list = [
-        project_data_from_master(root_path / "core_data/master_3_2020_draft.xlsx", 3, 2020),
+        # project_data_from_master(root_path / "core_data/master_3_2020_draft.xlsx", 3, 2020),
         project_data_from_master(root_path / "core_data/master_2_2020.xlsx", 2, 2020),
         project_data_from_master(root_path / "core_data/master_1_2020.xlsx", 1, 2020),
         project_data_from_master(root_path / "core_data/master_4_2019.xlsx", 4, 2019),
@@ -1276,10 +1276,11 @@ class MilestoneData:
         self.type_list = []
         self.md_current = []
         self.md_last = []
-        self.md_last_po = []
+        self.md_last_po = []   # po is print out
         self.md_baseline = []
         self.md_baseline_po = []
         self.md_baseline_two = []
+        self.md_baseline_two_po = []
         self.max_date = None
         self.min_date = None
         self.schedule_change = {}
@@ -1443,7 +1444,8 @@ class MilestoneData:
         md_last = []
         md_last_po = []  # po is for printout
         md_baseline = []
-        md_baseline_po = []  #
+        md_baseline_po = []
+        md_baseline_two_po = []
         md_baseline_two = []
         type_list = []
 
@@ -1487,10 +1489,12 @@ class MilestoneData:
             for m_bl_two in self.baseline_two.values():
                 if m_bl_two["Project"] == m_project:
                     if m_bl_two["Milestone"] == m_name:
-                        m_bl_date = m_bl_two["Date"]
-                        md_baseline_two.append(m_bl_date)
+                        m_bl_two_date = m_bl_two["Date"]
+                        md_baseline_two.append(m_bl_two_date)
+                        md_baseline_two_po.append(m_bl_two_date)
             if m_bl_two_date is None:
                 md_baseline_two.append(m_date)
+                md_baseline_two_po.append(None)
 
         if len(self.project_group) == 1:
             key_names = remove_project_name(
@@ -1508,6 +1512,7 @@ class MilestoneData:
         self.md_baseline = md_baseline
         self.md_baseline_po = md_baseline_po
         self.md_baseline_two = md_baseline_two
+        self.md_baseline_two_po = md_baseline_two_po
         self.type_list = type_list
         self.max_date = max(
             remove_none_types(self.md_current)
@@ -1542,6 +1547,7 @@ class MilestoneData:
                     self.md_baseline[i] = "remove"
                     self.md_baseline_po[i] = "remove"
                     self.md_baseline_two[i] = "remove"
+                    self.md_baseline_two_po[i] = "remove"
                     self.type_list[i] = "remove"
                 else:
                     pass
@@ -1554,6 +1560,9 @@ class MilestoneData:
             self.md_baseline_po = [x for x in self.md_baseline_po if x is not "remove"]
             self.md_baseline_two = [
                 x for x in self.md_baseline_two if x is not "remove"
+            ]
+            self.md_baseline_two_po = [
+                x for x in self.md_baseline_two_po if x is not "remove"
             ]
             self.type_list = [x for x in self.type_list if x is not "remove"]
         else:
@@ -1577,6 +1586,7 @@ class MilestoneData:
                     self.md_baseline[i] = "remove"
                     self.md_baseline_po[i] = "remove"
                     self.md_baseline_two[i] = "remove"
+                    self.md_baseline_two_po[i] = "remove"
                     self.type_list[i] = "remove"
                 else:
                     pass
@@ -1588,6 +1598,9 @@ class MilestoneData:
             self.md_baseline_po = [x for x in self.md_baseline_po if x is not "remove"]
             self.md_baseline_two = [
                 x for x in self.md_baseline_two if x is not "remove"
+            ]
+            self.md_baseline_two_po = [
+                x for x in self.md_baseline_two_po if x is not "remove"
             ]
             self.type_list = [x for x in self.type_list if x is not "remove"]
         else:
@@ -1607,6 +1620,7 @@ class MilestoneData:
                 self.md_baseline[i] = "remove"
                 self.md_baseline_po[i] = "remove"
                 self.md_baseline_two[i] = "remove"
+                self.md_baseline_two_po[i] = "remove"
                 self.type_list[i] = "remove"
         self.key_names = [x for x in self.key_names if x is not "remove"]
         self.md_current = [x for x in self.md_current if x is not "remove"]
@@ -1615,6 +1629,9 @@ class MilestoneData:
         self.md_baseline = [x for x in self.md_baseline if x is not "remove"]
         self.md_baseline_po = [x for x in self.md_baseline_po if x is not "remove"]
         self.md_baseline_two = [x for x in self.md_baseline_two if x is not "remove"]
+        self.md_baseline_two_po = [
+            x for x in self.md_baseline_two_po if x is not "remove"
+        ]
         self.type_list = [x for x in self.type_list if x is not "remove"]
 
         self.max_date = max(
@@ -4691,6 +4708,16 @@ def project_report_meta_data(doc: Document,
     return doc
 
 
+def get_milestone_notes(
+        project_name: str,
+        milestone_dictionary: Dict[str, Union[datetime.date, str]],
+        milestone_name: str,
+) -> datetime:
+    for k in milestone_dictionary.keys():
+        if milestone_dictionary[k]["Project"] == project_name:
+            if milestone_dictionary[k]["Milestone"] == milestone_name:
+                return milestone_dictionary[k]["Notes"]
+
 def print_out_project_milestones(doc: Document, milestones: MilestoneData, project_name: str) -> Document:
     def plus_minus_days(change_value):
         '''mini function to place plus or minus sign before time delta
@@ -4706,15 +4733,15 @@ def print_out_project_milestones(doc: Document, milestones: MilestoneData, proje
 
         return text
 
-    def get_milestone_notes(
-            project_name: str,
-            milestone_dictionary: Dict[str, Union[datetime.date, str]],
-            milestone_name: str,
-    ) -> datetime:
-        for k in milestone_dictionary.keys():
-            if milestone_dictionary[k]["Project"] == project_name:
-                if milestone_dictionary[k]["Milestone"] == milestone_name:
-                    return milestone_dictionary[k]["Notes"]
+    # def get_milestone_notes(
+    #         project_name: str,
+    #         milestone_dictionary: Dict[str, Union[datetime.date, str]],
+    #         milestone_name: str,
+    # ) -> datetime:
+    #     for k in milestone_dictionary.keys():
+    #         if milestone_dictionary[k]["Project"] == project_name:
+    #             if milestone_dictionary[k]["Milestone"] == milestone_name:
+    #                 return milestone_dictionary[k]["Notes"]
 
     doc.add_section(WD_SECTION_START.NEW_PAGE)
     # table heading
