@@ -591,7 +591,9 @@ class Master:
         self.project_information = project_information
         self.current_quarter = self.master_data[0].quarter
         self.abbreviations = {}
-        self.current_projects = self.get_current_projects()
+        self.current_projects = []
+        self.get_project_abbreviations()
+        self.get_current_projects()
         self.bl_info = {}
         self.bl_index = {}
         self.dft_groups = {}
@@ -600,7 +602,6 @@ class Master:
         self.get_baseline_data()
         self.check_project_information()
         self.check_baselines()
-        self.get_project_abbreviations()
         self.get_project_groups()
 
     """This is the entry point for all data. It converts a list of excel wbs (note at the moment)
@@ -614,6 +615,14 @@ class Master:
     
     """
     # function to check abbreviations
+
+    def get_project_abbreviations(self) -> Dict[str,str]:
+        """gets the abbreviations for all current projects.
+        held in the project info document"""
+        output_dict = {}
+        for p in self.project_information.projects:
+            output_dict[p] = self.project_information[p]["Abbreviations"]
+        self.abbreviations = output_dict
 
     def get_baseline_data(self) -> dict:
         """
@@ -671,7 +680,10 @@ class Master:
 
     def get_current_projects(self) -> list:
         """Returns a list of all the project names in the latest master"""
-        return self.master_data[0].projects
+        output_list = []
+        for p in self.master_data[0].projects:
+            output_list.append(self.abbreviations[p])
+        return output_list
 
     def check_project_information(self) -> None:
         """Checks that project names in master are present/the same as in project info.
@@ -709,12 +721,6 @@ class Master:
                 continue
             break
 
-    def get_project_abbreviations(self) -> None:
-        """gets the abbreviations for all current projects.
-        held in the project info document"""
-        for p in self.project_information.projects:
-            self.abbreviations[p] = self.project_information[p]["Abbreviations"]
-
     def get_project_groups(self) -> None:
         """gets the groups that projects are part of e.g. business case
         stage or dft group"""
@@ -730,7 +736,7 @@ class Master:
                 stage = master[p]["IPDC approval point"]
                 raw_list.append(("group", dft_group))
                 raw_list.append(("stage", stage))
-                lower_dict[p] = dict(raw_list)
+                lower_dict[self.abbreviations[p]] = dict(raw_list)
                 group_list.append(dft_group)
                 stage_list.append(stage)
             raw_dict[str(master.quarter)] = lower_dict  # here
@@ -4120,7 +4126,8 @@ class VfMData:
 
             self.vfm_dictionary = quarter_dict
 
-    def get_count(self) -> None:
+    def get_count(self,
+                  **kwargs) -> None:
         """Returns dictionary containing a count of vfm categories and pvc totals"""
         count_output_dict = {}
         pvc_output_dict = {}
@@ -4192,11 +4199,13 @@ def vfm_into_excel(master: Master,
             make_file_friendly(q)
         )  # creating worksheets. names restricted to 30 characters.
         ws.title = make_file_friendly(q)  # title of worksheet
-        if kwargs["stage"]:  # here. how to work with kwargs
+        # TODO kwargs error handling. e.g wrong stage or group entered.
+        #  Or kwargs return empty lists.
+        if "stage" in kwargs.keys():
             projects = master.project_stage[q][kwargs["stage"]]
-        if kwargs["group"]:
+        if "group" in kwargs.keys():
             projects = master.dft_groups[q][kwargs["group"]]
-        else:
+        if kwargs is None:
             projects = list(vfm_data.vfm_dictionary[q].keys())
         for i, project_name in enumerate(projects):
             ws.cell(row=start_row + i, column=2).value = project_name
@@ -4763,6 +4772,7 @@ def get_milestone_notes(
         if milestone_dictionary[k]["Project"] == project_name:
             if milestone_dictionary[k]["Milestone"] == milestone_name:
                 return milestone_dictionary[k]["Notes"]
+
 
 def print_out_project_milestones(doc: Document, milestones: MilestoneData, project_name: str) -> Document:
     def plus_minus_days(change_value):

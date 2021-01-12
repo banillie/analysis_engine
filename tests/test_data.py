@@ -397,7 +397,7 @@ def test_vfm_analysis(project_info, vfm_masters):
     m = Master(vfm_masters, project_info)
     vfm = VfMData(m)
     quarter_list = ["Q1 20/21", "Q4 19/20"]
-    wb = vfm_into_excel(m, vfm, quarter_list, group="SOBC")
+    wb = vfm_into_excel(m, vfm, quarter_list, stage="FBC")
     wb.save("resources/vfm.xlsx")
 
 
