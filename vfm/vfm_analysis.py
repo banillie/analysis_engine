@@ -27,25 +27,27 @@ from data_mgmt.data import (
 
 def compile_vfm_analysis(m: Master,
                          **kwargs):
-    # m = Master(get_master_data(), get_project_information())
     vfm = VfMData(m)
-    try:
+    # current and last set as default
+    current_quarter = str(m.master_data[0].quarter)
+    last_quarter = str(m.master_data[1].quarter)
+    quarter_list = [current_quarter, last_quarter]
+    vfm.get_dictionary()
+    vfm.get_count()
+    if "quarters" in kwargs.keys():
         quarter_list = kwargs["quarters"]
-    except KeyError:
-        latest_quarter = str(m.master_data[0].quarter)
-        last_quarter = str(m.master_data[1].quarter)
-        quarter_list = [latest_quarter, last_quarter]
+    if "group" in kwargs.keys():
+        vfm.get_dictionary(group=kwargs["group"])
+        vfm.get_count()
+    if "stage" in kwargs.keys():
+        vfm.get_dictionary(stage=kwargs["stage"])
+        vfm.get_count()
 
-    try:
-        project_group = kwargs["group"]
-        wb = vfm_into_excel(m, vfm, quarter_list, group=project_group)
-        wb.save(root_path / "output/vfm.xlsx")
-    except KeyError:
-        wb = vfm_into_excel(m, vfm, quarter_list)
-        wb.save(root_path / "output/vfm.xlsx")
+    wb = vfm_into_excel(vfm, quarter_list)
+    wb.save(root_path / "output/vfm.xlsx")
 
 
 mst = Master(get_master_data(), get_project_information())
-compile_vfm_analysis(mst, group="SOBC")
+compile_vfm_analysis(mst, stage="FBC", quarters=["Q4 18/19", "Q3 19/20", "Q2 20/21"])
 # compile_vfm_analysis(mst, quarters=["Q4 18/19", "Q3 19/20", "Q2 20/21"])
 

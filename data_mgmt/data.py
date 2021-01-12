@@ -473,7 +473,6 @@ DFT_GROUP_DICT = {'High Speed Rail Group': "HSMRPG",
                   'Roads Devolution & Motoring': "RDM",
                   'AMIS': "AMIS",
                   None: None}
-
 YEAR_LIST = [
     "16-17",
     "17-18",
@@ -500,7 +499,6 @@ YEAR_LIST = [
     "38-39",
     "39-40",
 ]
-
 COST_KEY_LIST = [
     " RDEL Forecast Total",
     " CDEL Forecast one off new costs",
@@ -548,7 +546,6 @@ BEN_TYPE_KEY_LIST = [
         "Unprofiled Remainder BEN Forecast - Disbenefit UK Economic",
     ),
 ]
-
 # Matplotlib file formats
 FILE_FORMATS = [
     "eps",
@@ -564,7 +561,6 @@ FILE_FORMATS = [
     "tif",
     "tiff",
 ]
-
 FIGURE_STYLE = {1: "half_horizontal", 2: "full_horizontal"}
 
 
@@ -736,7 +732,7 @@ class Master:
                 stage = master[p]["IPDC approval point"]
                 raw_list.append(("group", dft_group))
                 raw_list.append(("stage", stage))
-                lower_dict[self.abbreviations[p]] = dict(raw_list)
+                lower_dict[p] = dict(raw_list)  # here is where abbreviations could be inserted
                 group_list.append(dft_group)
                 stage_list.append(stage)
             raw_dict[str(master.quarter)] = lower_dict  # here
@@ -4095,21 +4091,28 @@ class VfMData:
     def __init__(
             self,
             master: Master,
-            # project_group: List[str]
     ):
         self.master = master
-        # self.project_group = string_conversion(project_group)
         self.vfm_dictionary = {}
         self.vfm_cat_count = {}
         self.vfm_cat_pvc = {}
-        self.get_dictionary()
-        self.get_count()
+        # self.get_dictionary()
+        # self.get_count()
 
-    def get_dictionary(self) -> None:
+    # TODO kwargs error handling. e.g wrong stage or group entered.
+    #  Or kwargs return empty lists.
+    def get_dictionary(self, **kwargs) -> None:
         quarter_dict = {}
         for i in range(len(self.master.master_data)):
             project_dict = {}
-            for project_name in self.master.master_data[i].projects:
+            q = str(self.master.master_data[i].quarter)
+            if "stage" in kwargs.keys():
+                group = self.master.project_stage[q][kwargs["stage"]]
+            if "group" in kwargs.keys():
+                group = self.master.dft_groups[q][kwargs["group"]]
+            if kwargs == {}:
+                group = self.master.master_data[i].projects
+            for project_name in group:
                 vfm_list = []
                 for vfm_type in VFM_LIST:
                     try:
@@ -4121,13 +4124,12 @@ class VfMData:
                     except KeyError:  # vfm range keys not in all masters
                         pass
 
-                project_dict[self.master.abbreviations[project_name]] = dict(vfm_list)
+                project_dict[project_name] = dict(vfm_list)
             quarter_dict[str(self.master.master_data[i].quarter)] = project_dict
 
-            self.vfm_dictionary = quarter_dict
+        self.vfm_dictionary = quarter_dict
 
-    def get_count(self,
-                  **kwargs) -> None:
+    def get_count(self) -> None:
         """Returns dictionary containing a count of vfm categories and pvc totals"""
         count_output_dict = {}
         pvc_output_dict = {}
@@ -4185,10 +4187,9 @@ class VfMData:
         self.vfm_cat_count = count_output_dict
 
 
-def vfm_into_excel(master: Master,
-                   vfm_data: VfMData,
-                   quarter: List[str] or str,
-                   **kwargs) -> workbook:
+def vfm_into_excel(vfm_data: VfMData,
+                   quarter: List[str] or str
+                   ) -> workbook:
     wb = Workbook()
 
     quarter = string_conversion(quarter)
@@ -4199,16 +4200,8 @@ def vfm_into_excel(master: Master,
             make_file_friendly(q)
         )  # creating worksheets. names restricted to 30 characters.
         ws.title = make_file_friendly(q)  # title of worksheet
-        # TODO kwargs error handling. e.g wrong stage or group entered.
-        #  Or kwargs return empty lists.
-        if "stage" in kwargs.keys():
-            projects = master.project_stage[q][kwargs["stage"]]
-        if "group" in kwargs.keys():
-            projects = master.dft_groups[q][kwargs["group"]]
-        if kwargs is None:
-            projects = list(vfm_data.vfm_dictionary[q].keys())
-        for i, project_name in enumerate(projects):
-            ws.cell(row=start_row + i, column=2).value = project_name
+        for i, project_name in enumerate(list(vfm_data.vfm_dictionary[q].keys())):
+            ws.cell(row=start_row + i, column=2).value = vfm_data.master.abbreviations[project_name]
             for x, key in enumerate(
                 list(vfm_data.vfm_dictionary[q][project_name].keys())
             ):
