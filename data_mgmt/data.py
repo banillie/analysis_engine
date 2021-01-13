@@ -590,8 +590,8 @@ class Master:
         self.master_data = master_data
         self.project_information = project_information
         self.current_quarter = self.master_data[0].quarter
+        self.current_projects = self.master_data[0].projects
         self.abbreviations = {}
-        self.current_projects = self.get_current_projects()
         self.get_project_abbreviations()
         self.bl_info = {}
         self.bl_index = {}
@@ -612,17 +612,25 @@ class Master:
     gets project abbreviations
     
     """
-    # function to check abbreviations
 
-    def get_project_abbreviations(self) -> Dict[str, str]:
+    def get_project_abbreviations(self) -> None:
         """gets the abbreviations for all current projects.
         held in the project info document"""
         output_dict = {}
         for p in self.project_information.projects:
-            output_dict[p] = self.project_information[p]["Abbreviations"]
+            abb = self.project_information[p]["Abbreviations"]
+            output_dict[p] = abb
+            if abb is None:
+                # cleaning abbreviations here.
+                # TODO wrap into system messaging
+                print(
+                    "No abbreviation provided for "
+                    + str(p)
+                    + " this could cause the programme to crash. Please update the project information document."
+                )
         self.abbreviations = output_dict
 
-    def get_baseline_data(self) -> dict:
+    def get_baseline_data(self) -> None:
         """
         Returns the two dictionaries baseline_info and baseline_index for all projects for all
         baseline types
@@ -676,9 +684,9 @@ class Master:
         self.bl_info = baseline_info
         self.bl_index = baseline_index
 
-    def get_current_projects(self) -> List[str]:
-        """Returns a list of all the project names in the latest master"""
-        return self.master_data[0].projects
+    # def get_current_projects(self) -> List[str]:
+    #     """Returns a list of all the project names in the latest master"""
+    #     return self.master_data[0].projects
 
     def check_project_information(self) -> None:
         """Checks that project names in master are present/the same as in project info.
@@ -717,7 +725,6 @@ class Master:
             break
 
     def get_project_groups(self) -> None:
-        # not working properly
         """gets the groups that projects are part of e.g. business case
         stage or dft group"""
 
@@ -728,7 +735,9 @@ class Master:
         for i, master in enumerate(self.master_data):
             lower_dict = {}
             for p in master.projects:
-                dft_group = DFT_GROUP_DICT[master[p]["DfT Group"]]  # different groups cleaned here
+                dft_group = DFT_GROUP_DICT[
+                    master[p]["DfT Group"]
+                ]  # different groups cleaned here
                 stage = BC_STAGE_DICT[master[p]["IPDC approval point"]]
                 raw_list.append(("group", dft_group))
                 raw_list.append(("stage", stage))
@@ -756,8 +765,13 @@ class Master:
                 if group_type is None or group_type == "DfT":
                     if g_list:
                         for x in g_list:
-                            print(str(quarter) + " " + str(
-                                x) + " DfT Group data needs cleaning. Currently " + str(group_type))
+                            print(
+                                str(quarter)
+                                + " "
+                                + str(x)
+                                + " DfT Group data needs cleaning. Currently "
+                                + str(group_type)
+                            )
                 lower_g_dict[group_type] = g_list
             group_dict[quarter] = lower_g_dict
 
@@ -775,8 +789,13 @@ class Master:
                 if stage_type is None:
                     if s_list:
                         for x in s_list:
-                            print(str(quarter) + " " + str(
-                                x) + " IPDC stage data needs cleaning. Currently " + str(stage_type))
+                            print(
+                                str(quarter)
+                                + " "
+                                + str(x)
+                                + " IPDC stage data needs cleaning. Currently "
+                                + str(stage_type)
+                            )
                 lower_s_dict[stage_type] = s_list
             stage_dict[quarter] = lower_s_dict
 
