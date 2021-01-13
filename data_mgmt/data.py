@@ -591,14 +591,12 @@ class Master:
         self.project_information = project_information
         self.current_quarter = self.master_data[0].quarter
         self.abbreviations = {}
-        self.current_projects = []
+        self.current_projects = self.get_current_projects()
         self.get_project_abbreviations()
-        self.get_current_projects()
         self.bl_info = {}
         self.bl_index = {}
         self.dft_groups = {}
         self.project_stage = {}
-        self.fbc_projects = []
         self.get_baseline_data()
         self.check_project_information()
         self.check_baselines()
@@ -678,12 +676,9 @@ class Master:
         self.bl_info = baseline_info
         self.bl_index = baseline_index
 
-    def get_current_projects(self) -> list:
+    def get_current_projects(self) -> List[str]:
         """Returns a list of all the project names in the latest master"""
-        output_list = []
-        for p in self.master_data[0].projects:
-            output_list.append(self.abbreviations[p])
-        return output_list
+        return self.master_data[0].projects
 
     def check_project_information(self) -> None:
         """Checks that project names in master are present/the same as in project info.
@@ -722,6 +717,7 @@ class Master:
             break
 
     def get_project_groups(self) -> None:
+        # not working properly
         """gets the groups that projects are part of e.g. business case
         stage or dft group"""
 
@@ -732,8 +728,8 @@ class Master:
         for i, master in enumerate(self.master_data):
             lower_dict = {}
             for p in master.projects:
-                dft_group = master[p]["DfT Group"]
-                stage = master[p]["IPDC approval point"]
+                dft_group = DFT_GROUP_DICT[master[p]["DfT Group"]]  # different groups cleaned here
+                stage = BC_STAGE_DICT[master[p]["IPDC approval point"]]
                 raw_list.append(("group", dft_group))
                 raw_list.append(("stage", stage))
                 lower_dict[p] = dict(
@@ -741,40 +737,51 @@ class Master:
                 )  # here is where abbreviations could be inserted
                 group_list.append(dft_group)
                 stage_list.append(stage)
-            raw_dict[str(master.quarter)] = lower_dict  # here
+            raw_dict[str(master.quarter)] = lower_dict
 
         group_list = list(set(group_list))
         stage_list = list(set(stage_list))
 
         group_dict = {}
-        stage_dict = {}
         for quarter in raw_dict.keys():
             lower_g_dict = {}
-            lower_s_dict = {}
             for group_type in group_list:
                 g_list = []
                 for p in raw_dict[quarter].keys():
                     p_group = raw_dict[quarter][p]["group"]
                     if p_group == group_type:
                         g_list.append(p)
+                # messaging to clean up group data.
+                # TODO wrap into system messaging
+                if group_type is None or group_type == "DfT":
+                    if g_list:
+                        for x in g_list:
+                            print(str(quarter) + " " + str(
+                                x) + " DfT Group data needs cleaning. Currently " + str(group_type))
+                lower_g_dict[group_type] = g_list
+            group_dict[quarter] = lower_g_dict
 
-                lower_g_dict[DFT_GROUP_DICT[group_type]] = g_list
-
+        stage_dict = {}
+        for quarter in raw_dict.keys():
+            lower_s_dict = {}
             for stage_type in stage_list:
                 s_list = []
                 for p in raw_dict[quarter].keys():
                     p_stage = raw_dict[quarter][p]["stage"]
                     if p_stage == stage_type:
                         s_list.append(p)
-
-                lower_s_dict[BC_STAGE_DICT[stage_type]] = s_list
-
-            group_dict[quarter] = lower_g_dict
+                # messaging to clean up group data.
+                # TODO wrap into system messaging
+                if stage_type is None:
+                    if s_list:
+                        for x in s_list:
+                            print(str(quarter) + " " + str(
+                                x) + " IPDC stage data needs cleaning. Currently " + str(stage_type))
+                lower_s_dict[stage_type] = s_list
             stage_dict[quarter] = lower_s_dict
 
         self.dft_groups = group_dict
         self.project_stage = stage_dict
-        # self.fbc_projects = stage_dict[str(self.current_quarter)]["Full Business Case"]
 
 
 #  check cdel cost profile
@@ -4203,9 +4210,9 @@ class VfMData:
             pvc_output_dict[quarter] = dict(pvc_list)
             count_output_dict[quarter] = dict(cat_list)
 
-        error_list = get_error_list(error_list)
-        for x in error_list:
-            print(x)
+        # error_list = get_error_list(error_list)
+        # for x in error_list:
+        #     print(x)
 
         self.vfm_cat_pvc = pvc_output_dict
         self.vfm_cat_count = count_output_dict

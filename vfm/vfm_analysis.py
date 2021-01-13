@@ -50,7 +50,7 @@ def compile_vfm_analysis(m: Master,
     wb.save(root_path / "output/vfm.xlsx")
 
 
-# mst = Master(get_master_data(), get_project_information())
+mst = Master(get_master_data(), get_project_information())
 # compile_vfm_analysis(mst, stage="FBC", quarters=["Q4 18/19", "Q3 19/20", "Q2 20/21"])
 
 
