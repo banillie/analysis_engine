@@ -1,5 +1,5 @@
 """
-cml for analysis engine.
+cli for analysis engine.
 currently working on one example - vfm analysis
 
 Arguments
@@ -11,13 +11,13 @@ vfm: is the name of the command to runs analysis
 -stage and -group cannot be entered at same time.
 
 Once above established:
-- build other cml arguments for other analysis engine outputs e.g. milestones.
+- build other cli arguments for other analysis engine outputs e.g. milestones.
 - explore possibility of there being a way to 'initiate' analysis engine so
 master data is stored in memory and arguments run directly from it. rather
 than having to convert excel ws into python dict each time. This would also be
 a useful first step as lots of data checking is done as part of Master Class
 creation.
-- have cml so that it is analysis_engine, rather than main.py
+- have cli so that it is analysis_engine, rather than main.py
 
 """
 
@@ -35,8 +35,7 @@ def main():
     parser = argparse.ArgumentParser(prog='vfm',
         description='value for money analysis')
     parser.add_argument('-vfm',
-                        action='store_const',
-                        const='run',
+                        action='store_true',
                         help='runs vfm analysis')
     parser.add_argument('-stage',
                         type=str,
@@ -54,7 +53,7 @@ def main():
                         nargs='+',
                         help='returns analysis for specified quarters')
     args = vars(parser.parse_args())
-    if args["vfm"] == "run":
+    if args["vfm"]:
         print("compiling vfm analysis")
         m = Master(get_master_data(), get_project_information())
         current_quarter = str(m.master_data[0].quarter)

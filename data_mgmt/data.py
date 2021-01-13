@@ -50,7 +50,7 @@ def get_master_data() -> List[
 ]:  # how specify a list of dictionaries?
     """Returns a list of dictionaries each containing quarter data"""
     master_data_list = [
-        # project_data_from_master(root_path / "core_data/master_3_2020_draft.xlsx", 3, 2020),
+        project_data_from_master(root_path / "core_data/master_3_2020.xlsx", 3, 2020),
         project_data_from_master(root_path / "core_data/master_2_2020.xlsx", 2, 2020),
         project_data_from_master(root_path / "core_data/master_1_2020.xlsx", 1, 2020),
         project_data_from_master(root_path / "core_data/master_4_2019.xlsx", 4, 2019),
@@ -2283,7 +2283,7 @@ def cost_profile_graph(cost_master: CostData, **kwargs) -> plt.figure:
     # Chart styling
     plt.xticks(rotation=45, size=14)
     plt.yticks(size=14)
-    ax1.tick_params(axis="series_one", which="major")
+    # ax1.tick_params(axis="series_one", which="major")  # matplotlib version issue
     ax1.set_ylabel("Cost (£m)")
     ylab1 = ax1.yaxis.get_label()
     ylab1.set_style("italic")
@@ -3443,7 +3443,7 @@ def milestone_chart(
     # reverse series_two axis so order is earliest to oldest
     ax1 = plt.gca()
     ax1.set_ylim(ax1.get_ylim()[::-1])
-    ax1.tick_params(axis="series_two", which="major", labelsize=7)
+    # ax1.tick_params(axis="series_two", which="major", labelsize=7)  # matplotlib version issue
     ax1.yaxis.grid()  # horizontal lines
     ax1.set_axisbelow(True)
 
