@@ -53,24 +53,20 @@ def main():
                         nargs='+',
                         help='returns analysis for specified quarters')
     args = vars(parser.parse_args())
+    print(args)
     if args["vfm"]:
         print("compiling vfm analysis")
         m = Master(get_master_data(), get_project_information())
-        current_quarter = str(m.master_data[0].quarter)
-        last_quarter = str(m.master_data[1].quarter)
-        quarter_list = [current_quarter, last_quarter]
         vfm = VfMData(m)
-        vfm.get_dictionary()
-        vfm.get_count()
-        if args["stage"] in ["FBC", "OBC", "SOBC", "pre-SOBC"]:
-            vfm.get_dictionary(stage=args["stage"])
-            vfm.get_count()
-        if args["group"] in ["HSMRPG", "AMIS", "Rail", "RDM"]:
-            vfm.get_dictionary(group=args["group"])
-            vfm.get_count()
+        #  TODO work on combinations below
         if args["quarters"]:
-            quarter_list = args["quarters"]
-        wb = vfm_into_excel(vfm, quarter_list)
+            vfm = VfMData(m, quarters=args["quarters"])
+        if args["stage"] in ["FBC", "OBC", "SOBC", "pre-SOBC"]:
+            vfm = VfMData(m, stage=args["stage"])
+        if args["group"] in ["HSMRPG", "AMIS", "Rail", "RDM"]:
+            vfm = VfMData(m, group=args["group"])
+
+        wb = vfm_into_excel(vfm)
         wb.save(root_path / "output/vfm.xlsx")
         print("vfm analysis compiled")
 

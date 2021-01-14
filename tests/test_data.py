@@ -82,6 +82,7 @@ def test_get_project_abbreviations(basic_masters_dicts, project_info):
         "Sea of Tranquility": "SoT",
     }
 
+
 # assert expected error message
 def test_checking_baseline_data(basic_master_wrong_baselines, project_info):
     master = Master(basic_master_wrong_baselines, project_info)
@@ -194,30 +195,30 @@ def test_get_group_cost_profile(costs_masters, project_info):
     master = Master(costs_masters, project_info)
     costs = CostData(master, master.current_projects)
     assert costs.current_profile == [
-        0,
-        933,
-        798,
-        407,
-        363,
-        345,
-        943,
-        1236,
-        1363,
-        1573,
-        1125,
-        535,
-        265,
-        221,
-        224,
-        227,
-        230,
-        233,
-        217,
-        146,
-        52,
-        1,
-        1,
-        1,
+        15.45,
+        932.8199999999999,
+        798.1,
+        406.81,
+        362.8,
+        344.97,
+        943.07,
+        1235.95,
+        1362.52,
+        1572.957082855212,
+        1124.88,
+        534.5699999999999,
+        264.61,
+        221.47,
+        223.66,
+        226.79,
+        229.96,
+        233.23999999999998,
+        217.29999999999998,
+        145.93999999999997,
+        51.87,
+        0.6799999999999999,
+        0.6799999999999999,
+        0.6799999999999999
     ]
 
 
@@ -395,11 +396,9 @@ def test_risk_analysis(project_info, risk_masters):
 
 def test_vfm_analysis(project_info, vfm_masters):
     m = Master(vfm_masters, project_info)
-    vfm = VfMData(m)
-    vfm.get_dictionary()
-    vfm.get_count()
     quarter_list = ["Q1 20/21", "Q4 19/20"]
-    wb = vfm_into_excel(vfm, quarter_list)
+    vfm = VfMData(m, quarters=quarter_list)
+    wb = vfm_into_excel(vfm)
     wb.save("resources/vfm.xlsx")
 
 

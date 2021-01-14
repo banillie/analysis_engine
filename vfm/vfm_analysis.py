@@ -27,30 +27,29 @@ from data_mgmt.data import (
 
 def compile_vfm_analysis(m: Master,
                          **kwargs):
-    vfm = VfMData(m)
+    vfm = VfMData(m, kwargs)
     # current and last quarter set as default
-    if kwargs == {}:
-        current_quarter = str(m.master_data[0].quarter)
-        last_quarter = str(m.master_data[1].quarter)
-        quarter_list = [current_quarter, last_quarter]
-        vfm.get_dictionary()
-        vfm.get_count()
-    if "quarters" in kwargs.keys():
-        quarter_list = kwargs["quarters"]
-        vfm.get_dictionary()
-        vfm.get_count()
-    if "group" in kwargs.keys():
-        vfm.get_dictionary(group=kwargs["group"])
-        vfm.get_count()
-    if "stage" in kwargs.keys():
-        vfm.get_dictionary(stage=kwargs["stage"])
-        vfm.get_count()
+    # if kwargs == {}:
+    #     vfm.get_dictionary()
+    #     vfm.get_count()
+    # if "quarters" in kwargs.keys():
+    #     vfm.get_dictionary(quarters=kwargs["quarters"])
+    #     vfm.get_count()
+    # if "group" in kwargs.keys():
+    #     vfm.get_dictionary(group=kwargs["group"])
+    #     vfm.get_count()
+    # if "stage" in kwargs.keys():
+    #     vfm.get_dictionary(stage=kwargs["stage"])
+    #     vfm.get_count()
 
-    wb = vfm_into_excel(vfm, quarter_list)
+    wb = vfm_into_excel(vfm)
     wb.save(root_path / "output/vfm.xlsx")
 
 
 mst = Master(get_master_data(), get_project_information())
+vfm = VfMData(mst, quarters=["Q3 18/19", "Q1 19/20"], stage="FBC")
+wb = vfm_into_excel(vfm)
+wb.save(root_path / "output/vfm.xlsx")
 # compile_vfm_analysis(mst, stage="FBC", quarters=["Q4 18/19", "Q3 19/20", "Q2 20/21"])
 
 

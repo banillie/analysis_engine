@@ -401,6 +401,7 @@ class Projects:
         brighton_ml,
     ]
 
+# Hard code and needs abstracting
 
 LIST_OF_GROUPS = [  # master.current_projects,
     Projects.he,
@@ -597,6 +598,8 @@ class Master:
         self.bl_index = {}
         self.dft_groups = {}
         self.project_stage = {}
+        self.quarter_list = []
+        self.get_quarter_list()
         self.get_baseline_data()
         self.check_project_information()
         self.check_baselines()
@@ -735,17 +738,20 @@ class Master:
         for i, master in enumerate(self.master_data):
             lower_dict = {}
             for p in master.projects:
-                dft_group = DFT_GROUP_DICT[
-                    master[p]["DfT Group"]
-                ]  # different groups cleaned here
-                stage = BC_STAGE_DICT[master[p]["IPDC approval point"]]
-                raw_list.append(("group", dft_group))
-                raw_list.append(("stage", stage))
-                lower_dict[p] = dict(
-                    raw_list
-                )  # here is where abbreviations could be inserted
-                group_list.append(dft_group)
-                stage_list.append(stage)
+                try:
+                    dft_group = DFT_GROUP_DICT[
+                        master[p]["DfT Group"]
+                    ]  # different groups cleaned here
+                    stage = BC_STAGE_DICT[master[p]["IPDC approval point"]]
+                    raw_list.append(("group", dft_group))
+                    raw_list.append(("stage", stage))
+                    lower_dict[p] = dict(
+                        raw_list
+                    )
+                    group_list.append(dft_group)
+                    stage_list.append(stage)
+                except KeyError:
+                    print(str(master.quarter) + ": " + str(p) + " has reported an incorrect DfT Group value. Amend" )
             raw_dict[str(master.quarter)] = lower_dict
 
         group_list = list(set(group_list))
@@ -801,6 +807,13 @@ class Master:
 
         self.dft_groups = group_dict
         self.project_stage = stage_dict
+
+    def get_quarter_list(self) -> None:
+        output_list = []
+        for master in self.master_data:
+            output_list.append(str(master.quarter))
+        self.quarter_list = output_list
+
 
 
 #  check cdel cost profile
@@ -4141,26 +4154,32 @@ class VfMData:
     def __init__(
         self,
         master: Master,
+        **kwargs,
     ):
         self.master = master
+        self.kwargs = kwargs
         self.vfm_dictionary = {}
         self.vfm_cat_count = {}
         self.vfm_cat_pvc = {}
-        # self.get_dictionary()
-        # self.get_count()
+        self.get_dictionary()
+        self.get_count()
 
-    # TODO kwargs error handling. e.g wrong stage or group entered.
-    #  Or kwargs return empty lists.
-    def get_dictionary(self, **kwargs) -> None:
+    # TODO kwargs error handling. e.g wrong stage or group entered or kwargs return empty lists.
+    def get_dictionary(self) -> None:
         quarter_dict = {}
-        for i in range(len(self.master.master_data)):
+        if "quarters" in self.kwargs.keys():
+            quarters = self.kwargs["quarters"]
+        else:
+            quarters = [self.master.quarter_list[0], self.master.quarter_list[1]]
+        for q in quarters:  # q is quarter
             project_dict = {}
-            q = str(self.master.master_data[i].quarter)
-            if "stage" in kwargs.keys():
-                group = self.master.project_stage[q][kwargs["stage"]]
-            if "group" in kwargs.keys():
-                group = self.master.dft_groups[q][kwargs["group"]]
-            if kwargs == {}:
+            i = self.master.quarter_list.index(q)  # i for index
+            # TODO list compilation improvements required here
+            if "stage" in self.kwargs.keys():
+                group = self.master.project_stage[q][self.kwargs["stage"]]
+            if "group" in self.kwargs.keys():
+                group = self.master.dft_groups[q][self.kwargs["group"]]
+            if "stage" not in self.kwargs.keys() and "group" not in self.kwargs.keys():
                 group = self.master.master_data[i].projects
             for project_name in group:
                 vfm_list = []
@@ -4229,20 +4248,21 @@ class VfMData:
             pvc_output_dict[quarter] = dict(pvc_list)
             count_output_dict[quarter] = dict(cat_list)
 
-        # error_list = get_error_list(error_list)
-        # for x in error_list:
-        #     print(x)
+        #  Data handling. should only print out errors in quarters being analysed.
+        error_list = get_error_list(error_list)
+        for x in error_list:
+            print(x)
 
         self.vfm_cat_pvc = pvc_output_dict
         self.vfm_cat_count = count_output_dict
 
 
-def vfm_into_excel(vfm_data: VfMData, quarter: List[str] or str) -> workbook:
+def vfm_into_excel(vfm_data: VfMData) -> workbook:
     wb = Workbook()
 
-    quarter = string_conversion(quarter)
+    # quarter = string_conversion(quarter)
 
-    for q in quarter:
+    for q in vfm_data.vfm_dictionary.keys():
         start_row = 3
         ws = wb.create_sheet(
             make_file_friendly(q)
@@ -4265,7 +4285,7 @@ def vfm_into_excel(vfm_data: VfMData, quarter: List[str] or str) -> workbook:
     start_row = 4
     ws = wb.create_sheet("Count")
     ws.title = "Count"
-    for x, q in enumerate(quarter):
+    for x, q in enumerate(vfm_data.vfm_dictionary.keys()):
         ws.cell(row=3, column=3 + x).value = q
         ws.cell(row=3 + 12, column=3 + x).value = q
         for i, cat in enumerate(VFM_CAT):
