@@ -31,44 +31,59 @@ from data_mgmt.data import (
 )
 
 
+def vfm(args):
+    print("compiling vfm analysis")
+    m = Master(get_master_data(), get_project_information())
+    vfm_m = VfMData(m)
+    if args["quarters"]:
+        vfm_m = VfMData(m, quarters=args["quarters"])
+    if args["stage"][0] in ["FBC", "OBC", "SOBC", "pre-SOBC"]:
+        vfm_m = VfMData(m, stage=args["stage"])
+    if args["group"] in ["HSMRPG", "AMIS", "Rail", "RDM"]:
+        vfm_m = VfMData(m, group=args["group"])
+    if args["quarters"] and args["stage"][0] in ["FBC", "OBC", "SOBC", "pre-SOBC"]:
+        vfm_m = VfMData(m, quarters=args["quarters"], stage=args["stage"])
+    if args["quarters"] and args["group"] in ["HSMRPG", "AMIS", "Rail", "RDM"]:
+        vfm_m = VfMData(m, quarters=args["quarters"], group=args["group"])
+    wb = vfm_into_excel(vfm_m)
+    wb.save(root_path / "output/vfm.xlsx")
+    print("VfM analysis has been compiled. Enjoy!")
+
+
 def main():
-    parser = argparse.ArgumentParser(prog='vfm',
+    parser = argparse.ArgumentParser(prog='engine',
         description='value for money analysis')
-    parser.add_argument('-vfm',
-                        action='store_true',
-                        help='runs vfm analysis')
-    parser.add_argument('-stage',
-                        type=str,
-                        action='store',
-                        choices=["FBC", "OBC", "SOBC", "pre-SOBC"],
-                        help='returns analysis for a group a projects at specified stage')
-    parser.add_argument('-group',
-                        type=str,
-                        action='store',
-                        choices=["HSMRPG", "AMIS", "Rail", "RDM"],
-                        help='returns analysis for specified DfT Group')
-    parser.add_argument('-quarters',
+    subparsers = parser.add_subparsers(help='vfm help')
+    parser_vfm = subparsers.add_parser('vfm',
+                                       help='vfm help')
+    # parser_summaries = subparsers.add_parser()
+    # parser_summaries.add_argument()
+    # parser_a.add_argument('bar', type=int, help='bar help')
+    # parser_vfm.add_argument('-v',
+    #                     '--vfm',
+    #                     action='store_true',
+    #                     help='runs vfm analysis')
+    parser_vfm.add_argument('-s',
+                        '--stage',
                         type=str,
                         action='store',
                         nargs='+',
-                        help='returns analysis for specified quarters')
-    args = vars(parser.parse_args())
-    print(args)
-    if args["vfm"]:
-        print("compiling vfm analysis")
-        m = Master(get_master_data(), get_project_information())
-        vfm = VfMData(m)
-        #  TODO work on combinations below
-        if args["quarters"]:
-            vfm = VfMData(m, quarters=args["quarters"])
-        if args["stage"] in ["FBC", "OBC", "SOBC", "pre-SOBC"]:
-            vfm = VfMData(m, stage=args["stage"])
-        if args["group"] in ["HSMRPG", "AMIS", "Rail", "RDM"]:
-            vfm = VfMData(m, group=args["group"])
-
-        wb = vfm_into_excel(vfm)
-        wb.save(root_path / "output/vfm.xlsx")
-        print("vfm analysis compiled")
+                        choices=["FBC", "OBC", "SOBC", "pre-SOBC"],
+                        help='Returns analysis for a group a projects at specified stage')
+    parser_vfm.add_argument('-group',
+                        type=str,
+                        action='store',
+                        nargs='+',
+                        choices=["HSMRPG", "AMIS", "Rail", "RDM"],
+                        help='Returns analysis for specified DfT Group')
+    parser_vfm.add_argument('-quarters',
+                        type=str,
+                        action='store',
+                        nargs='+',
+                        help='Returns analysis for specified quarters. Must be in format e.g Q3 19/20')
+    parser_vfm.set_defaults(func=vfm)
+    args = parser.parse_args()
+    args.func(vars(args))
 
 
 if __name__ == "__main__":

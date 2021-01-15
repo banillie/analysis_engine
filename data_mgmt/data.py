@@ -4150,6 +4150,18 @@ VFM_CAT = [
 ]
 
 
+def cal_group(lists_input: List[str] or List[List[str]],
+              master: Master,
+              quarter: str) -> List[str]:
+    if len(lists_input) > 1:
+        group = []
+        for g in lists_input:
+            local_g = master.project_stage[quarter][g]
+            group += local_g
+    else:
+        group = master.project_stage[quarter][lists_input]
+    return group
+
 class VfMData:
     def __init__(
         self,
@@ -4174,11 +4186,12 @@ class VfMData:
         for q in quarters:  # q is quarter
             project_dict = {}
             i = self.master.quarter_list.index(q)  # i for index
-            # TODO list compilation improvements required here
             if "stage" in self.kwargs.keys():
-                group = self.master.project_stage[q][self.kwargs["stage"]]
+                s_input = self.kwargs["stage"]
+                group = cal_group(s_input, self.master, q)
             if "group" in self.kwargs.keys():
-                group = self.master.dft_groups[q][self.kwargs["group"]]
+                g_input = self.kwargs["group"]
+                group = cal_group(g_input, self.master, q)
             if "stage" not in self.kwargs.keys() and "group" not in self.kwargs.keys():
                 group = self.master.master_data[i].projects
             for project_name in group:
