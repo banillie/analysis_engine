@@ -1,0 +1,549 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="BranchesTreeState">
+    <expand>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="LOCAL_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:origin" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+    </expand>
+    <select />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="205bd717-e7d2-47dc-82c7-88a8dae3593c" name="Default Changelist" comment="change portfolio_financial_profile.py to include old bl profile data">
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Risks/risk_analysis.py" beforeDir="false" afterPath="$PROJECT_DIR$/Risks/risk_analysis.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data_mgmt/DfT_commission_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/analysis_engine/DfT_commission_data.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data_mgmt/change_wb_master_keys.py" beforeDir="false" afterPath="$PROJECT_DIR$/analysis_engine/change_wb_master_keys.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data_mgmt/compare_gmpp_changes.py" beforeDir="false" afterPath="$PROJECT_DIR$/analysis_engine/compare_gmpp_changes.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data_mgmt/data.py" beforeDir="false" afterPath="$PROJECT_DIR$/analysis_engine/data.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data_mgmt/gmpp_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/analysis_engine/gmpp_data.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data_mgmt/ipa_annual_report_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/analysis_engine/ipa_annual_report_data.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data_mgmt/old_costs.py" beforeDir="false" afterPath="$PROJECT_DIR$/analysis_engine/old_costs.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data_mgmt/oldegg_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/analysis_engine/oldegg_data.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data_mgmt/oldegg_functions.py" beforeDir="false" afterPath="$PROJECT_DIR$/analysis_engine/oldegg_functions.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/financial_analysis/cost_charts.py" beforeDir="false" afterPath="$PROJECT_DIR$/financial_analysis/cost_charts.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/financial_analysis/group_financial_analysis.py" beforeDir="false" afterPath="$PROJECT_DIR$/financial_analysis/group_financial_analysis.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/milestone_analysis/all_milestones_schedule.py" beforeDir="false" afterPath="$PROJECT_DIR$/milestone_analysis/all_milestones_schedule.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/milestone_analysis/milestones_comparison_3_qrts_all.py" beforeDir="false" afterPath="$PROJECT_DIR$/milestone_analysis/milestones_comparison_3_qrts_all.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/milestone_analysis/ms_comp_combined_all.py" beforeDir="false" afterPath="$PROJECT_DIR$/milestone_analysis/ms_comp_combined_all.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/misc/sr_qa.py" beforeDir="false" afterPath="$PROJECT_DIR$/misc/sr_qa.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/project_analysis/p_reports.py" beforeDir="false" afterPath="$PROJECT_DIR$/project_analysis/p_reports.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/project_analysis/project_reports.py" beforeDir="false" afterPath="$PROJECT_DIR$/project_analysis/project_reports.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/conftest.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/conftest.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/temp_testing.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/temp_testing.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/test_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test_data.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/top_analysis/cost_v_schedule_new.py" beforeDir="false" afterPath="$PROJECT_DIR$/top_analysis/cost_v_schedule_new.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/top_analysis/dca_analysis.py" beforeDir="false" afterPath="$PROJECT_DIR$/top_analysis/dca_analysis.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/top_analysis/ipdc_new_dashboards.py" beforeDir="false" afterPath="$PROJECT_DIR$/top_analysis/ipdc_new_dashboards.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/top_analysis/speed_dials.py" beforeDir="false" afterPath="$PROJECT_DIR$/top_analysis/speed_dials.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/vfm/vfm_analysis.py" beforeDir="false" afterPath="$PROJECT_DIR$/vfm/vfm_analysis.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/vfm/vfm_analysis_workings_old.py" beforeDir="false" afterPath="$PROJECT_DIR$/vfm/vfm_analysis_workings_old.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/vfm/vfm_database_old.py" beforeDir="false" afterPath="$PROJECT_DIR$/vfm/vfm_database_old.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/vfm/vfm_graph_old.py" beforeDir="false" afterPath="$PROJECT_DIR$/vfm/vfm_graph_old.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/vfm/vfm_reporting_outputs_old.py" beforeDir="false" afterPath="$PROJECT_DIR$/vfm/vfm_reporting_outputs_old.py" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="PREVIOUS_COMMIT_AUTHORS">
+      <list>
+        <option value="Will Grant &lt;will.granty@yahoo.co.uk&gt;" />
+      </list>
+    </option>
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitSEFilterConfiguration">
+    <file-type-list>
+      <filtered-out-file-type name="LOCAL_BRANCH" />
+      <filtered-out-file-type name="REMOTE_BRANCH" />
+      <filtered-out-file-type name="TAG" />
+      <filtered-out-file-type name="COMMIT_BY_MESSAGE" />
+    </file-type-list>
+  </component>
+  <component name="ProjectId" id="1W1pYLm3ddKhAplFEATtSfLrqiI" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="ASKED_ADD_EXTERNAL_FILES" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/main.py" />
+    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
+  </component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/tests" />
+      <recent name="$PROJECT_DIR$/database" />
+      <recent name="$PROJECT_DIR$/vfm" />
+      <recent name="$PROJECT_DIR$/other" />
+      <recent name="$PROJECT_DIR$/data_query" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Python tests.pytest for test_data.test_compile_milestone_chart_with_filter">
+    <configuration name="p_reports" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="analysis_engine" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/project_analysis" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/project_analysis/p_reports.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="true" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="risk_analysis" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="analysis_engine" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/Risks" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Risks/risk_analysis.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="true" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="vfm" type="PythonConfigurationType" factoryName="Python">
+      <module name="analysis_engine" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="$USER_HOME$/.virtualenvs/a_engine/bin/python" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/analysis_engine/main.py" />
+      <option name="PARAMETERS" value="vfm" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration default="true" type="tests" factoryName="py.test">
+      <module name="analysis_engine" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="$USER_HOME$/.virtualenvs/a_engine/bin/python" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="_new_keywords" value="&quot;&quot;" />
+      <option name="_new_parameters" value="&quot;&quot;" />
+      <option name="_new_additionalArguments" value="&quot;--tb\u003dshort&quot;" />
+      <option name="_new_target" value="&quot;&quot;" />
+      <option name="_new_targetType" value="&quot;PATH&quot;" />
+      <method v="2" />
+    </configuration>
+    <configuration name="all_dB_tests" type="tests" factoryName="py.test">
+      <module name="analysis_engine" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="$USER_HOME$/.virtualenvs/a_engine/bin/python" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="_new_keywords" value="&quot;&quot;" />
+      <option name="_new_parameters" value="&quot;&quot;" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;$PROJECT_DIR$/tests/test_database.py&quot;" />
+      <option name="_new_targetType" value="&quot;PATH&quot;" />
+      <method v="2" />
+    </configuration>
+    <configuration name="pytest for test_data.test_compile_milestone_chart_with_filter" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
+      <module name="analysis_engine" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="$USER_HOME$/.virtualenvs/a_engine/bin/python" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="_new_keywords" value="&quot;&quot;" />
+      <option name="_new_parameters" value="&quot;&quot;" />
+      <option name="_new_additionalArguments" value="&quot;--tb\u003dshort&quot;" />
+      <option name="_new_target" value="&quot;test_data.test_compile_milestone_chart_with_filter&quot;" />
+      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
+      <method v="2" />
+    </configuration>
+    <configuration name="pytest for test_data.test_vfm_analysis" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
+      <module name="analysis_engine" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="$USER_HOME$/.virtualenvs/a_engine/bin/python" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="_new_keywords" value="&quot;&quot;" />
+      <option name="_new_parameters" value="&quot;&quot;" />
+      <option name="_new_additionalArguments" value="&quot;--tb\u003dshort&quot;" />
+      <option name="_new_target" value="&quot;test_data.test_vfm_analysis&quot;" />
+      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
+      <method v="2" />
+    </configuration>
+    <configuration name="temp_tests" type="tests" factoryName="py.test">
+      <module name="analysis_engine" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="$USER_HOME$/.virtualenvs/a_engine/bin/python" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="_new_keywords" value="&quot;&quot;" />
+      <option name="_new_parameters" value="&quot;&quot;" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;$PROJECT_DIR$/tests/temp_testing.py&quot;" />
+      <option name="_new_targetType" value="&quot;PATH&quot;" />
+      <method v="2" />
+    </configuration>
+    <configuration name="test_all" type="tests" factoryName="py.test">
+      <module name="analysis_engine" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="$USER_HOME$/.virtualenvs/a_engine/bin/python" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="_new_keywords" value="&quot;&quot;" />
+      <option name="_new_parameters" value="&quot;&quot;" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;$PROJECT_DIR$/tests&quot;" />
+      <option name="_new_targetType" value="&quot;PATH&quot;" />
+      <method v="2" />
+    </configuration>
+    <configuration name="test_data_all" type="tests" factoryName="py.test">
+      <module name="analysis_engine" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="$USER_HOME$/.virtualenvs/a_engine/bin/python" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="_new_keywords" value="&quot;&quot;" />
+      <option name="_new_parameters" value="&quot;&quot;" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;$PROJECT_DIR$/tests/test_data.py&quot;" />
+      <option name="_new_targetType" value="&quot;PATH&quot;" />
+      <method v="2" />
+    </configuration>
+    <list>
+      <item itemvalue="Python.vfm" />
+      <item itemvalue="Python.p_reports" />
+      <item itemvalue="Python.risk_analysis" />
+      <item itemvalue="Python tests.all_dB_tests" />
+      <item itemvalue="Python tests.temp_tests" />
+      <item itemvalue="Python tests.test_all" />
+      <item itemvalue="Python tests.test_data_all" />
+      <item itemvalue="Python tests.pytest for test_data.test_vfm_analysis" />
+      <item itemvalue="Python tests.pytest for test_data.test_compile_milestone_chart_with_filter" />
+    </list>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Python tests.pytest for test_data.test_compile_milestone_chart_with_filter" />
+        <item itemvalue="Python.risk_analysis" />
+        <item itemvalue="Python tests.pytest for test_data.test_vfm_analysis" />
+        <item itemvalue="Python.p_reports" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="205bd717-e7d2-47dc-82c7-88a8dae3593c" name="Default Changelist" comment="" />
+      <created>1578327001597</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1578327001597</updated>
+    </task>
+    <task id="LOCAL-00001" summary="comment">
+      <created>1578327909392</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1578327909392</updated>
+    </task>
+    <task id="LOCAL-00002" summary="changing file paths to linux">
+      <created>1579008459510</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1579008459510</updated>
+    </task>
+    <task id="LOCAL-00003" summary="cost_v_schedule.py code, plus some changes to dev_dashboards.py">
+      <created>1579203118543</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1579203118543</updated>
+    </task>
+    <task id="LOCAL-00004" summary="cost_v_schedule.py code, plus some changes to dev_dashboards.py">
+      <created>1579266535508</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1579266535508</updated>
+    </task>
+    <task id="LOCAL-00005" summary="minor changes to gmpp_data code">
+      <created>1579530925104</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1579530925104</updated>
+    </task>
+    <task id="LOCAL-00006" summary="refactoring of one_point_data_return.py into two seperate programmes. One for non-milestone data and one for milestone data">
+      <created>1579539056018</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1579539056018</updated>
+    </task>
+    <task id="LOCAL-00007" summary="pushing latest code for cost v schedule not completed">
+      <created>1579539100754</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1579539100754</updated>
+    </task>
+    <task id="LOCAL-00008" summary="dev code of making file paths to core_data generic">
+      <created>1579593822619</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1579593822620</updated>
+    </task>
+    <task id="LOCAL-00009" summary="various">
+      <created>1579635796206</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1579635796206</updated>
+    </task>
+    <task id="LOCAL-00010" summary="some refactoring of check_milestone_changes.py and project_summary_dashboards.py. working, but would ben from further refactor.">
+      <created>1579693131501</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1579693131501</updated>
+    </task>
+    <task id="LOCAL-00011" summary="some refactoring of change_milestone_keys.py check_milestone_changes.py and milestone_comparison_3_qrts_proj.py. working. however more refactoring required.">
+      <created>1579702712819</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1579702712819</updated>
+    </task>
+    <task id="LOCAL-00012" summary="updating with generic file path solution">
+      <created>1579855963350</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1579855963350</updated>
+    </task>
+    <task id="LOCAL-00013" summary="updating / improving">
+      <created>1579866721834</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1579866721834</updated>
+    </task>
+    <task id="LOCAL-00014" summary="updating / improving">
+      <created>1579875069838</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1579875069838</updated>
+    </task>
+    <task id="LOCAL-00015" summary="updating / improving">
+      <created>1579875760808</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1579875760808</updated>
+    </task>
+    <task id="LOCAL-00016" summary="in process of refactoring speed_dials.py">
+      <created>1579897202622</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1579897202622</updated>
+    </task>
+    <task id="LOCAL-00017" summary="in process of refactoring comparing_costs.py and portfolio_financial_profile.py in line with new framework">
+      <created>1580143127404</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1580143127404</updated>
+    </task>
+    <task id="LOCAL-00018" summary="changes to accomodate changes to master excel wb for dev_dashboards.py">
+      <created>1580299377218</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1580299377218</updated>
+    </task>
+    <task id="LOCAL-00019" summary="first commit for multiple_milestone_data_query.py code. intend for this to be generic in the long term, but coded for a particular task for now.">
+      <created>1580476265976</created>
+      <option name="number" value="00019" />
+      <option name="presentableId" value="LOCAL-00019" />
+      <option name="project" value="LOCAL" />
+      <updated>1580476265976</updated>
+    </task>
+    <task id="LOCAL-00020" summary="minor edits to various code to ensure uptodate. plus README.md file">
+      <created>1581319053087</created>
+      <option name="number" value="00020" />
+      <option name="presentableId" value="LOCAL-00020" />
+      <option name="project" value="LOCAL" />
+      <updated>1581319053087</updated>
+    </task>
+    <task id="LOCAL-00021" summary="uploading a README.md file">
+      <created>1581319194939</created>
+      <option name="number" value="00021" />
+      <option name="presentableId" value="LOCAL-00021" />
+      <option name="project" value="LOCAL" />
+      <updated>1581319194939</updated>
+    </task>
+    <task id="LOCAL-00022" summary="amendment to speed_dials.py so that overall dial outputs are in excel wb">
+      <created>1581442129298</created>
+      <option name="number" value="00022" />
+      <option name="presentableId" value="LOCAL-00022" />
+      <option name="project" value="LOCAL" />
+      <updated>1581442129298</updated>
+    </task>
+    <task id="LOCAL-00023" summary="amendment to speed_dials.py so that overall dial outputs are in excel wb">
+      <created>1581442224506</created>
+      <option name="number" value="00023" />
+      <option name="presentableId" value="LOCAL-00023" />
+      <option name="project" value="LOCAL" />
+      <updated>1581442224506</updated>
+    </task>
+    <task id="LOCAL-00024" summary="change ipdc_new_dashboards.py name and how vfm data changes are flagged as red.">
+      <created>1581507026569</created>
+      <option name="number" value="00024" />
+      <option name="presentableId" value="LOCAL-00024" />
+      <option name="project" value="LOCAL" />
+      <updated>1581507026569</updated>
+    </task>
+    <task id="LOCAL-00025" summary="correct intial and adjusted bcr values used by programme. sorted error.">
+      <created>1581600108612</created>
+      <option name="number" value="00025" />
+      <option name="presentableId" value="LOCAL-00025" />
+      <option name="project" value="LOCAL" />
+      <updated>1581600108612</updated>
+    </task>
+    <task id="LOCAL-00026" summary="first commit no10_commission.py">
+      <created>1581629122842</created>
+      <option name="number" value="00026" />
+      <option name="presentableId" value="LOCAL-00026" />
+      <option name="project" value="LOCAL" />
+      <updated>1581629122842</updated>
+    </task>
+    <task id="LOCAL-00027" summary="change portfolio_financial_profile.py to include old bl profile data">
+      <created>1581943412577</created>
+      <option name="number" value="00027" />
+      <option name="presentableId" value="LOCAL-00027" />
+      <option name="project" value="LOCAL" />
+      <updated>1581943412577</updated>
+    </task>
+    <option name="localTasksCounter" value="28" />
+    <servers />
+  </component>
+  <component name="UnknownFeatures">
+    <option featureType="com.intellij.fileTypeFactory" implementationName="requirements.txt" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+    <option name="oldMeFiltersMigrated" value="true" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <ignored-roots>
+      <path value="$PROJECT_DIR$/src/projectlibrary" />
+    </ignored-roots>
+    <MESSAGE value="comment" />
+    <MESSAGE value="changing file paths to linux" />
+    <MESSAGE value="cost_v_schedule.py code, plus some changes to dev_dashboards.py" />
+    <MESSAGE value="minor changes to gmpp_data code" />
+    <MESSAGE value="refactoring of one_point_data_return.py into two seperate programmes. One for non-milestone data and one for milestone data" />
+    <MESSAGE value="pushing latest code for cost v schedule not completed" />
+    <MESSAGE value="dev code of making file paths to core_data generic" />
+    <MESSAGE value="various" />
+    <MESSAGE value="some refactoring of check_milestone_changes.py and project_summary_dashboards.py. working, but would ben from further refactor." />
+    <MESSAGE value="some refactoring of change_milestone_keys.py check_milestone_changes.py and milestone_comparison_3_qrts_proj.py. working. however more refactoring required." />
+    <MESSAGE value="updating with generic file path solution" />
+    <MESSAGE value="updating / improving" />
+    <MESSAGE value="in process of refactoring speed_dials.py" />
+    <MESSAGE value="in process of refactoring comparing_costs.py and portfolio_financial_profile.py in line with new framework" />
+    <MESSAGE value="changes to accomodate changes to master excel wb for dev_dashboards.py" />
+    <MESSAGE value="first commit for multiple_milestone_data_query.py code. intend for this to be generic in the long term, but coded for a particular task for now." />
+    <MESSAGE value="minor edits to various code to ensure uptodate. plus README.md file" />
+    <MESSAGE value="uploading a README.md file" />
+    <MESSAGE value="amendment to speed_dials.py so that overall dial outputs are in excel wb" />
+    <MESSAGE value="change ipdc_new_dashboards.py name and how vfm data changes are flagged as red." />
+    <MESSAGE value="correct intial and adjusted bcr values used by programme. sorted error." />
+    <MESSAGE value="first commit no10_commission.py" />
+    <MESSAGE value="change portfolio_financial_profile.py to include old bl profile data" />
+    <option name="LAST_COMMIT_MESSAGE" value="change portfolio_financial_profile.py to include old bl profile data" />
+  </component>
+</project>
