@@ -1,7 +1,7 @@
 #  Builds a vfm category type bar chart output in matplotlib
 
 from collections import Counter
-from data_mgmt.data import root_path, vfm_matplotlib_graph
+from analysis_engine.data import root_path, vfm_matplotlib_graph
 from database.database import query_db
 
 #  gets the number of projects reporting each category.

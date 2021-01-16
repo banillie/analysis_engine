@@ -2,7 +2,7 @@
 from datetime import datetime
 import datetime
 
-from data_mgmt.oldegg_functions import baseline_index, baseline_information, \
+from analysis_engine.oldegg_functions import baseline_index, baseline_information, \
     project_all_milestones_dict, get_ben_totals
 
 

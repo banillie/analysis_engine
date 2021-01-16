@@ -7,7 +7,7 @@ from openpyxl import Workbook, load_workbook
 # from analysis.data import list_of_masters_all, bc_index, \
 #     p_current_milestones, p_last_milestones, p_baseline_milestones, \
 #     p_baseline_milestones_two
-from data_mgmt.data import MilestoneData, MilestoneChartData, \
+from analysis_engine.data import MilestoneData, MilestoneChartData, \
     Master, Projects, master_data_list, root_path, blue_line_date, \
     abbreviations, CombinedData
 

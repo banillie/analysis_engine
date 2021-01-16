@@ -5,7 +5,7 @@ baseline quarter.
 """
 
 from openpyxl import Workbook
-from data_mgmt.data import MilestoneData, Master, Projects, get_master_data, root_path, get_project_information
+from analysis_engine.data import MilestoneData, Master, Projects, get_master_data, root_path, get_project_information
 
 
 def put_into_wb_all(milestones: MilestoneData) -> Workbook:

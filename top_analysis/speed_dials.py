@@ -4,7 +4,7 @@ Outputs analysis for speed_dials. Outputs are place in analysis_engine/output. T
 - matplotlib speed dial?
 """
 
-from data_mgmt.data import (
+from analysis_engine.data import (
     Master,
     root_path,
     dca_changes_into_word,

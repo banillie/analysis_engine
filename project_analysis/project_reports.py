@@ -21,7 +21,7 @@ import numpy as np
 import datetime
 from datetime import timedelta
 from textwrap import wrap
-from data_mgmt.data import Projects, string_conversion
+from analysis_engine.data import Projects, string_conversion
 
 from analysis.engine_functions import convert_rag_text, project_time_difference, convert_bc_stage_text
 from analysis.data import list_of_masters_all, root_path, latest_cost_profiles, last_cost_profiles, \
@@ -32,7 +32,7 @@ from analysis.data import list_of_masters_all, root_path, latest_cost_profiles, 
 
 import os
 
-from data_mgmt.data import spent_calculation
+from analysis_engine.data import spent_calculation
 
 milestone_filter_start_date = ipdc_date - timedelta(days=30*6)
 milestone_filter_end_date = ipdc_date + timedelta(days=545)

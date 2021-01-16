@@ -3,7 +3,7 @@ import os
 import pytest
 from datamaps.api import project_data_from_master
 
-from data_mgmt.data import open_word_doc
+from analysis_engine.data import open_word_doc
 from database.database import create_db
 
 

@@ -2,7 +2,7 @@
 New production code for compiling total cost and benefits bar charts.
 """
 
-from data_mgmt.data import Master, get_master_data, get_project_information, root_path, CostData, \
+from analysis_engine.data import Master, get_master_data, get_project_information, root_path, CostData, \
     BenefitsData, totals_chart, Projects, FIGURE_STYLE, standard_profile
 
 master = Master(get_master_data(), get_project_information())

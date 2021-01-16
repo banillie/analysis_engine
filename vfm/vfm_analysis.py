@@ -15,7 +15,7 @@ flags.
 - project. specify a particular project or group of projects.
 
 """
-from data_mgmt.data import (
+from analysis_engine.data import (
     Master,
     root_path,
     get_project_information,

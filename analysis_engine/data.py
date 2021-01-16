@@ -150,7 +150,7 @@ def get_datamap_file_paths():
 def get_project_information() -> Dict[str, Union[str, int]]:
     """Returns dictionary containing all project meta data"""
     return project_data_from_master(
-        root_path / "core_data/data_mgmt/project_info.xlsx", 2, 2020
+        root_path / "core_data/analysis_engine/project_info.xlsx", 2, 2020
     )
 
 

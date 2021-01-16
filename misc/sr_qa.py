@@ -1,6 +1,6 @@
 from datamaps.api import project_data_from_master
 from openpyxl import Workbook
-from data_mgmt.data import root_path
+from analysis_engine.data import root_path
 
 
 def get_project_names():

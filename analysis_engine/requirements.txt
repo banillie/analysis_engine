@@ -1,5 +1,4 @@
 datamaps
--e git+https://github.com/banillie/projectlibrary#egg=projectlibrary
 python-docx==0.8.10
 openpyxl==3.0.0
 matplotlib==3.3.0

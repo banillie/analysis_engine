@@ -1,4 +1,4 @@
-from data_mgmt.data import Master, CostData, cost_profile_graph, \
+from analysis_engine.data import Master, CostData, cost_profile_graph, \
     get_master_data, get_project_information
 
 master = Master(get_master_data(), get_project_information())

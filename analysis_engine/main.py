@@ -25,7 +25,7 @@ creation.
 import argparse
 
 
-from data_mgmt.data import (
+from analysis_engine.data import (
     get_master_data,
     Master,
     get_project_information, VfMData, root_path, vfm_into_excel

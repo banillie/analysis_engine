@@ -4,7 +4,7 @@ Tests for analysis_engine
 import os
 import datetime
 
-from data_mgmt.data import (
+from analysis_engine.data import (
     Master,
     CostData,
     spent_calculation,

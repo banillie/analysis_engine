@@ -6,7 +6,7 @@ from datetime import date
 from typing import Dict, Union, List
 
 from docx import Document
-from data_mgmt.data import (
+from analysis_engine.data import (
     root_path,
     CostData,
     Projects,
