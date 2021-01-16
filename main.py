@@ -1,23 +1,24 @@
 """
 cli for analysis engine.
-currently working on one example - vfm analysis
-
-Arguments
+currently working on number of different subcommands
+sub commands.. so far.
 vfm: is the name of the command to runs analysis
+
+Options... so far.
 -group: an option for a particular dft group of projects. str. specific options.
 -stage: an option for a group of projects at a particular business case stage. str. specific options.
 -quarter: specifies the quarter(s) for analysis. at least one str.
 
--stage and -group cannot be entered at same time.
+-stage and -group cannot be entered at same time current. Can sort.
 
-Once above established:
-- build other cli arguments for other analysis engine outputs e.g. milestones.
+Next steps:
 - explore possibility of there being a way to 'initiate' analysis engine so
 master data is stored in memory and arguments run directly from it. rather
 than having to convert excel ws into python dict each time. This would also be
 a useful first step as lots of data checking is done as part of Master Class
 creation.
 - have cli so that it is analysis_engine, rather than main.py
+- packaged onto PyPI.
 
 """
 
@@ -53,16 +54,9 @@ def vfm(args):
 def main():
     parser = argparse.ArgumentParser(prog='engine',
         description='value for money analysis')
-    subparsers = parser.add_subparsers(help='vfm help')
+    subparsers = parser.add_subparsers()
     parser_vfm = subparsers.add_parser('vfm',
-                                       help='vfm help')
-    # parser_summaries = subparsers.add_parser()
-    # parser_summaries.add_argument()
-    # parser_a.add_argument('bar', type=int, help='bar help')
-    # parser_vfm.add_argument('-v',
-    #                     '--vfm',
-    #                     action='store_true',
-    #                     help='runs vfm analysis')
+                                       help="vfm help")
     parser_vfm.add_argument('-s',
                         '--stage',
                         type=str,

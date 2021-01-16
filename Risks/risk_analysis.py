@@ -14,5 +14,5 @@ from data_mgmt.data import (
 
 m = Master(get_master_data(), get_project_information())
 risk = RiskData(m)
-wb = risks_into_excel(risk, "Q2 20/21")
+wb = risks_into_excel(risk, "Q1 20/21")
 wb.save(root_path / "output/risks.xlsx")
