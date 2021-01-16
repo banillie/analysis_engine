@@ -1102,7 +1102,7 @@ class CostData:
                 baseline_profile_three = yearly_profile
 
         missing_projects = list(set(missing_projects))  # if TypeError raised above
-        if len(missing_projects) is not 0:
+        if len(missing_projects) != 0:
             print(
                 "NOTE: The following project(s) were not part of the portfolio last quarter "
                 + str(missing_projects)
@@ -1633,19 +1633,19 @@ class MilestoneData:
                 else:
                     pass
 
-            self.key_names = [x for x in self.key_names if x is not "remove"]
-            self.md_current = [x for x in self.md_current if x is not "remove"]
-            self.md_last = [x for x in self.md_last if x is not "remove"]
-            self.md_last_po = [x for x in self.md_last_po if x is not "remove"]
-            self.md_baseline = [x for x in self.md_baseline if x is not "remove"]
-            self.md_baseline_po = [x for x in self.md_baseline_po if x is not "remove"]
+            self.key_names = [x for x in self.key_names if x != "remove"]
+            self.md_current = [x for x in self.md_current if x != "remove"]
+            self.md_last = [x for x in self.md_last if x != "remove"]
+            self.md_last_po = [x for x in self.md_last_po if x != "remove"]
+            self.md_baseline = [x for x in self.md_baseline if x != "remove"]
+            self.md_baseline_po = [x for x in self.md_baseline_po if x != "remove"]
             self.md_baseline_two = [
-                x for x in self.md_baseline_two if x is not "remove"
+                x for x in self.md_baseline_two if x != "remove"
             ]
             self.md_baseline_two_po = [
-                x for x in self.md_baseline_two_po if x is not "remove"
+                x for x in self.md_baseline_two_po if x != "remove"
             ]
-            self.type_list = [x for x in self.type_list if x is not "remove"]
+            self.type_list = [x for x in self.type_list if x != "remove"]
         else:
             pass
 
@@ -1671,19 +1671,19 @@ class MilestoneData:
                     self.type_list[i] = "remove"
                 else:
                     pass
-            self.key_names = [x for x in self.key_names if x is not "remove"]
-            self.md_current = [x for x in self.md_current if x is not "remove"]
-            self.md_last = [x for x in self.md_last if x is not "remove"]
-            self.md_last_po = [x for x in self.md_last_po if x is not "remove"]
-            self.md_baseline = [x for x in self.md_baseline if x is not "remove"]
-            self.md_baseline_po = [x for x in self.md_baseline_po if x is not "remove"]
+            self.key_names = [x for x in self.key_names if x != "remove"]
+            self.md_current = [x for x in self.md_current if x != "remove"]
+            self.md_last = [x for x in self.md_last if x != "remove"]
+            self.md_last_po = [x for x in self.md_last_po if x != "remove"]
+            self.md_baseline = [x for x in self.md_baseline if x != "remove"]
+            self.md_baseline_po = [x for x in self.md_baseline_po if x != "remove"]
             self.md_baseline_two = [
-                x for x in self.md_baseline_two if x is not "remove"
+                x for x in self.md_baseline_two if x != "remove"
             ]
             self.md_baseline_two_po = [
-                x for x in self.md_baseline_two_po if x is not "remove"
+                x for x in self.md_baseline_two_po if x != "remove"
             ]
-            self.type_list = [x for x in self.type_list if x is not "remove"]
+            self.type_list = [x for x in self.type_list if x != "remove"]
         else:
             pass
 
@@ -1703,17 +1703,17 @@ class MilestoneData:
                 self.md_baseline_two[i] = "remove"
                 self.md_baseline_two_po[i] = "remove"
                 self.type_list[i] = "remove"
-        self.key_names = [x for x in self.key_names if x is not "remove"]
-        self.md_current = [x for x in self.md_current if x is not "remove"]
-        self.md_last = [x for x in self.md_last if x is not "remove"]
-        self.md_last_po = [x for x in self.md_last_po if x is not "remove"]
-        self.md_baseline = [x for x in self.md_baseline if x is not "remove"]
-        self.md_baseline_po = [x for x in self.md_baseline_po if x is not "remove"]
-        self.md_baseline_two = [x for x in self.md_baseline_two if x is not "remove"]
+        self.key_names = [x for x in self.key_names if x != "remove"]
+        self.md_current = [x for x in self.md_current if x != "remove"]
+        self.md_last = [x for x in self.md_last if x != "remove"]
+        self.md_last_po = [x for x in self.md_last_po if x != "remove"]
+        self.md_baseline = [x for x in self.md_baseline if x != "remove"]
+        self.md_baseline_po = [x for x in self.md_baseline_po if x != "remove"]
+        self.md_baseline_two = [x for x in self.md_baseline_two if x != "remove"]
         self.md_baseline_two_po = [
-            x for x in self.md_baseline_two_po if x is not "remove"
+            x for x in self.md_baseline_two_po if x != "remove"
         ]
-        self.type_list = [x for x in self.type_list if x is not "remove"]
+        self.type_list = [x for x in self.type_list if x != "remove"]
 
         self.max_date = max(
             remove_none_types(self.md_current)
