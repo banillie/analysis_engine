@@ -768,16 +768,16 @@ class Master:
                         g_list.append(p)
                 # messaging to clean up group data.
                 # TODO wrap into system messaging
-                if group_type is None or group_type == "DfT":
-                    if g_list:
-                        for x in g_list:
-                            print(
-                                str(quarter)
-                                + " "
-                                + str(x)
-                                + " DfT Group data needs cleaning. Currently "
-                                + str(group_type)
-                            )
+                # if group_type is None or group_type == "DfT":
+                #     if g_list:
+                #         for x in g_list:
+                #             print(
+                #                 str(quarter)
+                #                 + " "
+                #                 + str(x)
+                #                 + " DfT Group data needs cleaning. Currently "
+                #                 + str(group_type)
+                #             )
                 lower_g_dict[group_type] = g_list
             group_dict[quarter] = lower_g_dict
 
@@ -792,16 +792,16 @@ class Master:
                         s_list.append(p)
                 # messaging to clean up group data.
                 # TODO wrap into system messaging
-                if stage_type is None:
-                    if s_list:
-                        for x in s_list:
-                            print(
-                                str(quarter)
-                                + " "
-                                + str(x)
-                                + " IPDC stage data needs cleaning. Currently "
-                                + str(stage_type)
-                            )
+                # if stage_type is None:
+                #     if s_list:
+                #         for x in s_list:
+                #             print(
+                #                 str(quarter)
+                #                 + " "
+                #                 + str(x)
+                #                 + " IPDC stage data needs cleaning. Currently "
+                #                 + str(stage_type)
+                #             )
                 lower_s_dict[stage_type] = s_list
             stage_dict[quarter] = lower_s_dict
 
@@ -4156,10 +4156,18 @@ def cal_group(lists_input: List[str] or List[List[str]],
     if len(lists_input) > 1:
         group = []
         for g in lists_input:
-            local_g = master.project_stage[quarter][g]
-            group += local_g
+            try:
+                local_g = master.project_stage[quarter][g]
+                group += local_g
+            except KeyError:
+                local_g = master.dft_groups[quarter][g]
+                group += local_g
     else:
-        group = master.project_stage[quarter][lists_input]
+        try:
+            group = master.project_stage[quarter][lists_input[0]]
+        except KeyError:
+            group = master.dft_groups[quarter][lists_input[0]]
+
     return group
 
 class VfMData:
