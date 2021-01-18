@@ -22,6 +22,10 @@
     <list default="true" id="205bd717-e7d2-47dc-82c7-88a8dae3593c" name="Default Changelist" comment="change portfolio_financial_profile.py to include old bl profile data">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/analysis_engine/data.py" beforeDir="false" afterPath="$PROJECT_DIR$/analysis_engine/data.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/milestone_analysis/all_milestones_schedule.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/milestone_analysis/milestone_comparison_3_qrts_proj.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/milestone_analysis/milestones_comparison_3_qrts_all.py" beforeDir="false" afterPath="$PROJECT_DIR$/milestone_analysis/milestones_comparison_3_qrts_all.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/test_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test_data.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -72,20 +76,17 @@
       <recent name="$PROJECT_DIR$/other" />
     </key>
   </component>
-  <component name="RunManager" selected="Python tests.pytest for test_data.test_compile_milestone_chart_with_filter">
-    <configuration name="p_reports" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+  <component name="RunManager" selected="Python tests.pytest for test_data.test_putting_milestones_into_wb">
+    <configuration name="milestones_comparison_3_qrts_all" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="analysis_engine" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/project_analysis" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/milestone_analysis" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/project_analysis/p_reports.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/milestone_analysis/milestones_comparison_3_qrts_all.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="true" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -184,6 +185,22 @@
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
+    <configuration name="pytest for test_data.test_putting_milestones_into_wb" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
+      <module name="analysis_engine" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="$USER_HOME$/.virtualenvs/a_engine/bin/python" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="_new_keywords" value="&quot;&quot;" />
+      <option name="_new_parameters" value="&quot;&quot;" />
+      <option name="_new_additionalArguments" value="&quot;--tb\u003dshort&quot;" />
+      <option name="_new_target" value="&quot;test_data.test_putting_milestones_into_wb&quot;" />
+      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
+      <method v="2" />
+    </configuration>
     <configuration name="pytest for test_data.test_vfm_analysis" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
       <module name="analysis_engine" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -250,7 +267,6 @@
     </configuration>
     <list>
       <item itemvalue="Python.vfm" />
-      <item itemvalue="Python.p_reports" />
       <item itemvalue="Python.risk_analysis" />
       <item itemvalue="Python tests.all_dB_tests" />
       <item itemvalue="Python tests.temp_tests" />
@@ -258,13 +274,16 @@
       <item itemvalue="Python tests.test_data_all" />
       <item itemvalue="Python tests.pytest for test_data.test_compile_milestone_chart_with_filter" />
       <item itemvalue="Python tests.pytest for test_data.test_vfm_analysis" />
+      <item itemvalue="Python.milestones_comparison_3_qrts_all" />
+      <item itemvalue="Python tests.pytest for test_data.test_putting_milestones_into_wb" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Python tests.pytest for test_data.test_putting_milestones_into_wb" />
+        <item itemvalue="Python.milestones_comparison_3_qrts_all" />
         <item itemvalue="Python tests.pytest for test_data.test_compile_milestone_chart_with_filter" />
         <item itemvalue="Python.risk_analysis" />
         <item itemvalue="Python tests.pytest for test_data.test_vfm_analysis" />
-        <item itemvalue="Python.p_reports" />
       </list>
     </recent_temporary>
   </component>

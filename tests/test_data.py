@@ -29,7 +29,7 @@ from analysis_engine.data import (
     MilestoneData,
     milestone_chart, save_graph,
     DCA_KEYS, dca_changes_into_word, dca_changes_into_excel, DcaData, RiskData, risks_into_excel, VfMData,
-    vfm_into_excel, sort_projects_by_dca, project_report_meta_data, print_out_project_milestones
+    vfm_into_excel, sort_projects_by_dca, project_report_meta_data, print_out_project_milestones, put_milestones_into_wb
 )
 
 # test masters project names
@@ -352,6 +352,14 @@ def test_removing_project_name_from_milestone_keys(milestone_masters, project_in
     master = Master(milestone_masters, project_info)
     milestones = MilestoneData(master, sot)
     assert milestones.key_names == ["Start of Project", 'Standard A', 'Inverted Cosmonauts']
+
+
+def test_putting_milestones_into_wb(milestone_masters, project_info):
+    mst = Master(milestone_masters, project_info)
+    milestone_data = MilestoneData(mst, a13)
+    milestone_data.filter_chart_info(milestone_type=["Approval", "Delivery"])
+    wb = put_milestones_into_wb(milestone_data)
+    wb.save("resources/milestone_data_output_test.xlsx")
 
 
 def test_saving_graph_to_word_doc_one(word_doc, milestone_masters, project_info):
