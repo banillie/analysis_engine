@@ -3,3 +3,5 @@
 __pycache__
 live.db
 analysis_engine/create_test_files.py
+.idea/
+**/.__pycache__/*
