@@ -38,11 +38,11 @@ def vfm(args):
     vfm_m = VfMData(m)
     if args["quarters"]:
         vfm_m = VfMData(m, quarters=args["quarters"])
-    if args["stage"][0] in ["FBC", "OBC", "SOBC", "pre-SOBC"]:
+    if args["stage"]:
         vfm_m = VfMData(m, stage=args["stage"])
-    if args["group"] in ["HSMRPG", "AMIS", "Rail", "RDM"]:
+    if args["group"]:
         vfm_m = VfMData(m, group=args["group"])
-    if args["quarters"] and args["stage"][0] in ["FBC", "OBC", "SOBC", "pre-SOBC"]:
+    if args["quarters"] and args["stage"] in ["FBC", "OBC", "SOBC", "pre-SOBC"]:
         vfm_m = VfMData(m, quarters=args["quarters"], stage=args["stage"])
     if args["quarters"] and args["group"] in ["HSMRPG", "AMIS", "Rail", "RDM"]:
         vfm_m = VfMData(m, quarters=args["quarters"], group=args["group"])
@@ -64,19 +64,22 @@ def main():
                         nargs='+',
                         choices=["FBC", "OBC", "SOBC", "pre-SOBC"],
                         help='Returns analysis for a group a projects at specified stage')
-    parser_vfm.add_argument('-group',
+    parser_vfm.add_argument('-g',
+                        '--group',
                         type=str,
                         action='store',
                         nargs='+',
                         choices=["HSMRPG", "AMIS", "Rail", "RDM"],
                         help='Returns analysis for specified DfT Group')
-    parser_vfm.add_argument('-quarters',
+    parser_vfm.add_argument('-q',
+                        '--quarters',
                         type=str,
                         action='store',
                         nargs='+',
                         help='Returns analysis for specified quarters. Must be in format e.g Q3 19/20')
     parser_vfm.set_defaults(func=vfm)
     args = parser.parse_args()
+    # print(vars(args))
     args.func(vars(args))
 
 
