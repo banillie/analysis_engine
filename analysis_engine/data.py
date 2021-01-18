@@ -4612,6 +4612,58 @@ def sort_projects_by_dca(
     return rag_list_sorted
 
 
+def bubble_chart(ws, rag_count):
+
+    chart = BubbleChart()
+    chart.style = 18  # use a preset style
+
+    # add the first series of data
+    amber_stop = 2 + rag_count['Amber']
+    xvalues = Reference(ws, min_col=3, min_row=3, max_row= amber_stop)
+    yvalues = Reference(ws, min_col=4, min_row=3, max_row= amber_stop)
+    size = Reference(ws, min_col=5, min_row=3, max_row= amber_stop)
+    series = Series(values=yvalues, xvalues=xvalues, zvalues=size, title="Amber")
+    chart.series.append(series)
+    series.graphicalProperties.solidFill = "fce553"
+
+    # add the second
+    amber_g_stop = amber_stop + rag_count['Amber/Green']
+    xvalues = Reference(ws, min_col=3, min_row= amber_stop + 1, max_row= amber_g_stop)
+    yvalues = Reference(ws, min_col=4, min_row= amber_stop + 1, max_row= amber_g_stop)
+    size = Reference(ws, min_col=5, min_row= amber_stop + 1, max_row= amber_g_stop)
+    series = Series(values=yvalues, xvalues=xvalues, zvalues=size, title="Amber/Green")
+    chart.series.append(series)
+    series.graphicalProperties.solidFill = "a5b700"
+
+    amber_r_stop = amber_g_stop + rag_count['Amber/Red']
+    xvalues = Reference(ws, min_col=3, min_row=amber_g_stop + 1, max_row=amber_r_stop)
+    yvalues = Reference(ws, min_col=4, min_row=amber_g_stop + 1, max_row=amber_r_stop)
+    size = Reference(ws, min_col=5, min_row=amber_g_stop + 1, max_row=amber_r_stop)
+    series = Series(values=yvalues, xvalues=xvalues, zvalues=size, title="Amber/Red")
+    chart.series.append(series)
+    series.graphicalProperties.solidFill = "f97b31"
+
+    green_stop = amber_r_stop + rag_count['Green']
+    xvalues = Reference(ws, min_col=3, min_row=amber_r_stop + 1, max_row=green_stop)
+    yvalues = Reference(ws, min_col=4, min_row=amber_r_stop + 1, max_row=green_stop)
+    size = Reference(ws, min_col=5, min_row=amber_r_stop + 1, max_row=green_stop)
+    series = Series(values=yvalues, xvalues=xvalues, zvalues=size, title="Green")
+    chart.series.append(series)
+    series.graphicalProperties.solidFill = "17960c"
+
+    red_stop = green_stop + rag_count['Red']
+    xvalues = Reference(ws, min_col=3, min_row=green_stop + 1, max_row=red_stop)
+    yvalues = Reference(ws, min_col=4, min_row=green_stop + 1, max_row=red_stop)
+    size = Reference(ws, min_col=5, min_row=green_stop + 1, max_row=red_stop)
+    series = Series(values=yvalues, xvalues=xvalues, zvalues=size, title="Red")
+    chart.series.append(series)
+    series.graphicalProperties.solidFill = "cb1f00"
+
+    ws.add_chart(chart, "E1")
+
+    return ws
+
+
 def cost_v_schedule_chart(milestones: MilestoneData, costs: CostData):
 
     rags = []
