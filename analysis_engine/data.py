@@ -4219,6 +4219,7 @@ def cal_group(lists_input: List[str] or List[List[str]],
 
     return group
 
+
 class VfMData:
     def __init__(
         self,
@@ -5102,290 +5103,485 @@ def project_scope_text(doc: Document, master: Master, project_name: str) -> Docu
 
 
 # TODO refactor code below
-#
-# def grey_conditional_formatting(ws):
-#     '''
-#     function applies grey conditional formatting for 'Not Reporting'.
-#     :param worksheet: ws
-#     :return: cf of sheet
-#     '''
-#
-#     grey_text = Font(color="f0f0f0")
-#     grey_fill = PatternFill(bgColor="f0f0f0")
-#     dxf = DifferentialStyle(font=grey_text, fill=grey_fill)
-#     rule = Rule(type="containsText", operator="containsText", text="Not reporting", dxf=dxf)
-#     rule.formula = ['NOT(ISERROR(SEARCH("Not reporting",A1)))']
-#     ws.conditional_formatting.add('A1:X80', rule)
-#
-#     grey_text = Font(color="cfcfea")
-#     grey_fill = PatternFill(bgColor="cfcfea")
-#     dxf = DifferentialStyle(font=grey_text, fill=grey_fill)
-#     rule = Rule(type="containsText", operator="containsText", text="Data not collected", dxf=dxf)
-#     rule.formula = ['NOT(ISERROR(SEARCH("Data not collected",A1)))']
-#     ws.conditional_formatting.add('A1:X80', rule)
-#
-#     return ws
-#
-#
-# def conditional_formatting(ws, list_columns, list_conditional_text, list_text_colours, list_background_colours,
-#                            row_start, row_end):
-#     for column in list_columns:
-#         for i, txt in enumerate(list_conditional_text):
-#             text = list_text_colours[i]
-#             fill = list_background_colours[i]
-#             dxf = DifferentialStyle(font=text, fill=fill)
-#             rule = Rule(type="containsText", operator="containsText", text=txt, dxf=dxf)
-#             for_rule_formula = 'NOT(ISERROR(SEARCH("' + txt + '",' + column + '1)))'
-#             rule.formula = [for_rule_formula]
-#             ws.conditional_formatting.add(column + row_start + ':' + column + row_end, rule)
-#
-#     return ws
-#
-# def return_data(master: Master,
-#                 milestones: MilestoneData,
-#                 project_group: List[str] or str,
-#                 data_key_list: List[str] or str):
-#     """Returns project values across multiple masters for specified keys of interest:
-#     project_names_list: list of project names
-#     data_key_list: list of data keys
-#     """
-#     wb = Workbook()
-#
-#     for i, key in enumerate(data_key_list):
-#         '''worksheet is created for each project'''
-#         try:
-#             ws = wb.create_sheet(key[:29], i)  # creating worksheets
-#             ws.title = key[:29]
-#         except ValueError:
-#             if "/" in key:
-#                 newstr = key.replace("/", "")
-#                 ws = wb.create_sheet(newstr[:29], i)  # creating worksheets
-#                 ws.title = newstr[:29]  # title of worksheet
-#
-#         '''list project names, groups and stage in ws'''
-#         for y, project_name in enumerate(project_group):
-#             # get project group info
-#             try:
-#                 group = master[0].data[project_name]['DfT Group']
-#             except KeyError:
-#                 for m, master in enumerate(master):
-#                     if project_name in master.projects:
-#                         group = master[m].data[project_name]['DfT Group']
-#
-#             ws.cell(row=2 + y, column=1, value=group) # group info return
-#             ws.cell(row=2 + y, column=2, value=project_name)  # project name returned
-#
-#             for x, master in enumerate(master):
-#                 if project_name in master.projects:
-#                     try:
-#                         #standard keys
-#                         if key in master[x].data[project_name].keys():
-#                             value = master[x].data[project_name][key]
-#                             ws.cell(row=2 + y, column=3 + x, value=value) # returns value
-#
-#                             if value is None:
-#                                 ws.cell(row=2 + y, column=3 + x, value='md')
-#
-#                             try: # checks for change against last quarter
-#                                 lst_value = master[x + 1].data[project_name][key]
-#                                 if value != lst_value:
-#                                     ws.cell(row=2 + y, column=3 + x).fill = SALMON_FILL
-#                             except (KeyError, IndexError):
-#                                 pass
-#
-#                         # milestone keys
-#                         else:
-#                             get_milestone_date(project_name)
-#                             milestones = all_milestone_data_bulk([project_name], master[x])
-#                             value = tuple(milestones[project_name][key])[0]
-#                             ws.cell(row=2 + y, column=3 + x, value=value)
-#                             ws.cell(row=2 + y, column=3 + x).number_format = 'dd/mm/yy'
-#                             if value is None:
-#                                 ws.cell(row=2 + y, column=3 + x, value='md')
-#
-#                             try:  # loop checks if value has changed since last quarter
-#                                 old_milestones = all_milestone_data_bulk([project_name], master[x + 1])
-#                                 lst_value = tuple(old_milestones[project_name][key])[0]
-#                                 if value != lst_value:
-#                                     ws.cell(row=2 + y, column=3 + x).fill = SALMON_FILL
-#                             except (KeyError, IndexError):
-#                                 pass
-#
-#                     except KeyError:
-#                         if project_name in master.projects:
-#                             #loop calculates if project was not reporting or data missing
-#                             ws.cell(row=2 + y, column=3 + x, value='knc')
-#                         else:
-#                             ws.cell(row=2 + y, column=3 + x, value='pnr')
-#
-#                 else:
-#                     ws.cell(row=2 + y, column=3 + x, value='pnr')
-#
-#         '''quarter tag information'''
-#         ws.cell(row=1, column=1, value='Group')
-#         ws.cell(row=1, column=2, value='Projects')
-#         quarter_labels = get_quarter_stamp(master)
-#         for l, label in enumerate(quarter_labels):
-#             ws.cell(row=1, column=l + 3, value=label)
-#
-#         list_columns = list_column_ltrs[2:len(master) + 2]
-#
-#         if key in list_of_rag_keys:
-#             conditional_formatting(ws, list_columns, rag_txt_list_full, rag_txt_colours, rag_fill_colours, '1', '80')
-#
-#         conditional_formatting(ws, list_columns, gen_txt_list, gen_txt_colours, gen_fill_colours, '1', '80')
-#
-#     return wb
-#
-# def return_baseline_data(project_name_list, data_key_list):
-#     '''
-#     returns values of interest across multiple ws for baseline values only.
-#     project_name_list: list of project names
-#     data_key_list: list of data keys containing values of interest.
-#     '''
-#     wb = Workbook()
-#
-#     for i, key in enumerate(data_key_list):
-#         '''worksheet is created for each project'''
-#         try:
-#             ws = wb.create_sheet(key[:29], i)  # creating worksheets
-#             ws.title = key[:29]
-#         except ValueError:
-#             if "/" in key:
-#                 newstr = key.replace("/", "")
-#                 ws = wb.create_sheet(newstr[:29], i)  # creating worksheets
-#                 ws.title = newstr[:29]  # title of worksheet
-#
-#         key_type = get_key_type(key)
-#         '''list project names, groups and stage in ws'''
-#         for y, project_name in enumerate(project_name_list):
-#
-#             # get project group info
-#             try:
-#                 group = list_of_masters_all[0].data[project_name]['DfT Group']
-#             except KeyError:
-#                 for m, master in enumerate(list_of_masters_all):
-#                     if project_name in master.projects:
-#                         group = list_of_masters_all[m].data[project_name]['DfT Group']
-#
-#             ws.cell(row=2 + y, column=1, value=group) # group info
-#             ws.cell(row=2 + y, column=2, value=project_name)  # project name returned
-#
-#             if key_type == 'benefits':
-#                 bc_index = benefits_bl_index
-#             else:
-#                 bc_index = costs_bl_index
-#
-#             for x in range(0, len(bc_index[project_name])):
-#                 index = bc_index[project_name][x]
-#                 try: # standard keys
-#                     value = list_of_masters_all[index].data[project_name][key]
-#                     if value is None:
-#                         ws.cell(row=2 + y, column=3 + x).value = 'md'
-#                     else:
-#                         ws.cell(row=2 + y, column=3 + x, value=value)
-#                 except KeyError:
-#                     try: # Milestones
-#                         index = milestone_bl_index[project_name][x]
-#                         milestones = all_milestone_data_bulk([project_name], list_of_masters_all[index])
-#                         value = tuple(milestones[project_name][key])[0]
-#                         if value is None:
-#                             ws.cell(row=2 + y, column=3 + x).value = 'md'
-#                         else:
-#                             ws.cell(row=2 + y, column=3 + x).value = value
-#                             ws.cell(row=2 + y, column=3 + x).number_format = 'dd/mm/yy'
-#                     except KeyError: # exception catches both standard and milestone keys
-#                         ws.cell(row=2 + y, column=3 + x).value = 'knc'
-#                     except IndexError:
-#                         pass
-#                 except TypeError:
-#                     ws.cell(row=2 + y, column=3 + x).value = 'pnr'
-#
-#         ws.cell(row=1, column=1, value='Group')
-#         ws.cell(row=1, column=2, value='Project')
-#         ws.cell(row=1, column=3, value='Latest')
-#         ws.cell(row=1, column=4, value='Last quarter')
-#         ws.cell(row=1, column=5, value='BL 1')
-#         ws.cell(row=1, column=6, value='BL 2')
-#         ws.cell(row=1, column=7, value='BL 3')
-#         ws.cell(row=1, column=8, value='BL 4')
-#         ws.cell(row=1, column=9, value='BL 5')
-#
-#         list_columns = list_column_ltrs[2:10] # hard coded so not ideal
-#
-#         if key in list_of_rag_keys:
-#             conditional_formatting(ws, list_columns, rag_txt_list_full, rag_txt_colours, rag_fill_colours, '1', '80')
-#
-#         conditional_formatting(ws, list_columns, gen_txt_list, gen_txt_colours, gen_fill_colours, '1', '80')
-#
-#     return wb
-#
-#
-# def simple_return_data(data_key_list, quarter_master):
-#     """
-#     Returns all data of interest into a excel wb.
-#     master: excel wb master from which data should be taken.
-#     data_key_list: list of data keys for which values should be returned.
-#     """
-#
-#     wb = Workbook()
-#     ws = wb.active
-#
-#     for i in range(len(list_of_masters_all)):
-#         if quarter_master == str(list_of_masters_all[i].quarter):
-#             master = list_of_masters_all[i]
-#
-#             '''list project names, groups and stage in ws'''
-#             for y, project_name in enumerate(master.projects):
-#
-#                 group = master.data[project_name]['DfT Group']
-#
-#                 ws.cell(row=2 + y, column=1, value=group) # group info
-#                 ws.cell(row=2 + y, column=2, value=project_name)  # project name returned
-#
-#                 for x, key in enumerate(data_key_list):
-#                     ws.cell(row=1, column=3 + x, value=key)
-#                     try: # standard keys
-#                         value = master.data[project_name][key]
-#                         if value is None:
-#                             ws.cell(row=2 + y, column=3 + x).value = 'md'
-#                         else:
-#                             ws.cell(row=2 + y, column=3 + x, value=value)
-#                         try:  # checks for change against last quarter
-#                             lst_value = list_of_masters_all[i+1].data[project_name][key]
-#                             if value != lst_value:
-#                                 ws.cell(row=2 + y, column=3 + x).fill = salmon_fill
-#                         except (KeyError, IndexError):
-#                             pass
-#                     except KeyError:
-#                         try: # milestone keys
-#                             milestones = all_milestone_data_bulk([project_name], master)
-#                             value = tuple(milestones[project_name][key])[0]
-#                             if value is None:
-#                                 ws.cell(row=2 + y, column=3 + x).value = 'md'
-#                             else:
-#                                 ws.cell(row=2 + y, column=3 + x).value = value
-#                                 ws.cell(row=2 + y, column=3 + x).number_format = 'dd/mm/yy'
-#                             try:  # loop checks if value has changed since last quarter
-#                                 old_milestones = all_milestone_data_bulk([project_name], list_of_masters_all[i+1])
-#                                 lst_value = tuple(old_milestones[project_name][key])[0]
-#                                 if value != lst_value:
-#                                     ws.cell(row=2 + y, column=3 + x).fill = salmon_fill
-#                             except (KeyError, IndexError):
-#                                 pass
-#                         except KeyError: # exception catches both standard and milestone keys
-#                             ws.cell(row=2 + y, column=3 + x).value = 'knc'
-#                         except TypeError:
-#                             ws.cell(row=2 + y, column=3 + x).value = 'pnr'
-#
-#             for z, key in enumerate(data_key_list):
-#                 if key in list_of_rag_keys:
-#                     conditional_formatting(ws, [list_column_ltrs[z+2]], rag_txt_list_full, rag_txt_colours, rag_fill_colours,
-#                                            '1', '60') # plus 2 in column ltrs as values start being placed in at col 2.
-#             '''quarter tag information'''
-#             ws.cell(row=1, column=1, value='Group')
-#             ws.cell(row=1, column=2, value='Projects')
-#
-#             conditional_formatting(ws, list_column_ltrs, gen_txt_list, gen_txt_colours, gen_fill_colours, '1', '60')
-#
-#     return wb
+def grey_conditional_formatting(ws):
+    '''
+    function applies grey conditional formatting for 'Not Reporting'.
+    :param worksheet: ws
+    :return: cf of sheet
+    '''
+
+    grey_text = Font(color="f0f0f0")
+    grey_fill = PatternFill(bgColor="f0f0f0")
+    dxf = DifferentialStyle(font=grey_text, fill=grey_fill)
+    rule = Rule(type="containsText", operator="containsText", text="Not reporting", dxf=dxf)
+    rule.formula = ['NOT(ISERROR(SEARCH("Not reporting",A1)))']
+    ws.conditional_formatting.add('A1:X80', rule)
+
+    grey_text = Font(color="cfcfea")
+    grey_fill = PatternFill(bgColor="cfcfea")
+    dxf = DifferentialStyle(font=grey_text, fill=grey_fill)
+    rule = Rule(type="containsText", operator="containsText", text="Data not collected", dxf=dxf)
+    rule.formula = ['NOT(ISERROR(SEARCH("Data not collected",A1)))']
+    ws.conditional_formatting.add('A1:X80', rule)
+
+    return ws
+
+
+def conditional_formatting(ws, list_columns, list_conditional_text, list_text_colours, list_background_colours,
+                           row_start, row_end):
+    for column in list_columns:
+        for i, txt in enumerate(list_conditional_text):
+            text = list_text_colours[i]
+            fill = list_background_colours[i]
+            dxf = DifferentialStyle(font=text, fill=fill)
+            rule = Rule(type="containsText", operator="containsText", text=txt, dxf=dxf)
+            for_rule_formula = 'NOT(ISERROR(SEARCH("' + txt + '",' + column + '1)))'
+            rule.formula = [for_rule_formula]
+            ws.conditional_formatting.add(column + row_start + ':' + column + row_end, rule)
+
+    return ws
+
+
+# data query stuff
+def return_data(master: Master,
+                milestones: MilestoneData,
+                project_group: List[str] or str,
+                data_key_list: List[str] or str):
+    """Returns project values across multiple masters for specified keys of interest:
+    project_names_list: list of project names
+    data_key_list: list of data keys
+    """
+    wb = Workbook()
+
+    for i, key in enumerate(data_key_list):
+        '''worksheet is created for each project'''
+        try:
+            ws = wb.create_sheet(key[:29], i)  # creating worksheets
+            ws.title = key[:29]
+        except ValueError:
+            if "/" in key:
+                newstr = key.replace("/", "")
+                ws = wb.create_sheet(newstr[:29], i)  # creating worksheets
+                ws.title = newstr[:29]  # title of worksheet
+
+        '''list project names, groups and stage in ws'''
+        for y, project_name in enumerate(project_group):
+            # get project group info
+            try:
+                group = master[0].data[project_name]['DfT Group']
+            except KeyError:
+                for m, master in enumerate(master):
+                    if project_name in master.projects:
+                        group = master[m].data[project_name]['DfT Group']
+
+            ws.cell(row=2 + y, column=1, value=group) # group info return
+            ws.cell(row=2 + y, column=2, value=project_name)  # project name returned
+
+            for x, master in enumerate(master):
+                if project_name in master.projects:
+                    try:
+                        #standard keys
+                        if key in master[x].data[project_name].keys():
+                            value = master[x].data[project_name][key]
+                            ws.cell(row=2 + y, column=3 + x, value=value) # returns value
+
+                            if value is None:
+                                ws.cell(row=2 + y, column=3 + x, value='md')
+
+                            try: # checks for change against last quarter
+                                lst_value = master[x + 1].data[project_name][key]
+                                if value != lst_value:
+                                    ws.cell(row=2 + y, column=3 + x).fill = SALMON_FILL
+                            except (KeyError, IndexError):
+                                pass
+
+                        # milestone keys
+                        else:
+                            get_milestone_date(project_name)
+                            milestones = all_milestone_data_bulk([project_name], master[x])
+                            value = tuple(milestones[project_name][key])[0]
+                            ws.cell(row=2 + y, column=3 + x, value=value)
+                            ws.cell(row=2 + y, column=3 + x).number_format = 'dd/mm/yy'
+                            if value is None:
+                                ws.cell(row=2 + y, column=3 + x, value='md')
+
+                            try:  # loop checks if value has changed since last quarter
+                                old_milestones = all_milestone_data_bulk([project_name], master[x + 1])
+                                lst_value = tuple(old_milestones[project_name][key])[0]
+                                if value != lst_value:
+                                    ws.cell(row=2 + y, column=3 + x).fill = SALMON_FILL
+                            except (KeyError, IndexError):
+                                pass
+
+                    except KeyError:
+                        if project_name in master.projects:
+                            #loop calculates if project was not reporting or data missing
+                            ws.cell(row=2 + y, column=3 + x, value='knc')
+                        else:
+                            ws.cell(row=2 + y, column=3 + x, value='pnr')
+
+                else:
+                    ws.cell(row=2 + y, column=3 + x, value='pnr')
+
+        '''quarter tag information'''
+        ws.cell(row=1, column=1, value='Group')
+        ws.cell(row=1, column=2, value='Projects')
+        quarter_labels = get_quarter_stamp(master)
+        for l, label in enumerate(quarter_labels):
+            ws.cell(row=1, column=l + 3, value=label)
+
+        list_columns = list_column_ltrs[2:len(master) + 2]
+
+        if key in list_of_rag_keys:
+            conditional_formatting(ws, list_columns, rag_txt_list_full, rag_txt_colours, rag_fill_colours, '1', '80')
+
+        conditional_formatting(ws, list_columns, gen_txt_list, gen_txt_colours, gen_fill_colours, '1', '80')
+
+    return wb
+
+def return_baseline_data(project_name_list, data_key_list):
+    '''
+    returns values of interest across multiple ws for baseline values only.
+    project_name_list: list of project names
+    data_key_list: list of data keys containing values of interest.
+    '''
+    wb = Workbook()
+
+    for i, key in enumerate(data_key_list):
+        '''worksheet is created for each project'''
+        try:
+            ws = wb.create_sheet(key[:29], i)  # creating worksheets
+            ws.title = key[:29]
+        except ValueError:
+            if "/" in key:
+                newstr = key.replace("/", "")
+                ws = wb.create_sheet(newstr[:29], i)  # creating worksheets
+                ws.title = newstr[:29]  # title of worksheet
+
+        key_type = get_key_type(key)
+        '''list project names, groups and stage in ws'''
+        for y, project_name in enumerate(project_name_list):
+
+            # get project group info
+            try:
+                group = list_of_masters_all[0].data[project_name]['DfT Group']
+            except KeyError:
+                for m, master in enumerate(list_of_masters_all):
+                    if project_name in master.projects:
+                        group = list_of_masters_all[m].data[project_name]['DfT Group']
+
+            ws.cell(row=2 + y, column=1, value=group) # group info
+            ws.cell(row=2 + y, column=2, value=project_name)  # project name returned
+
+            if key_type == 'benefits':
+                bc_index = benefits_bl_index
+            else:
+                bc_index = costs_bl_index
+
+            for x in range(0, len(bc_index[project_name])):
+                index = bc_index[project_name][x]
+                try: # standard keys
+                    value = list_of_masters_all[index].data[project_name][key]
+                    if value is None:
+                        ws.cell(row=2 + y, column=3 + x).value = 'md'
+                    else:
+                        ws.cell(row=2 + y, column=3 + x, value=value)
+                except KeyError:
+                    try: # Milestones
+                        index = milestone_bl_index[project_name][x]
+                        milestones = all_milestone_data_bulk([project_name], list_of_masters_all[index])
+                        value = tuple(milestones[project_name][key])[0]
+                        if value is None:
+                            ws.cell(row=2 + y, column=3 + x).value = 'md'
+                        else:
+                            ws.cell(row=2 + y, column=3 + x).value = value
+                            ws.cell(row=2 + y, column=3 + x).number_format = 'dd/mm/yy'
+                    except KeyError: # exception catches both standard and milestone keys
+                        ws.cell(row=2 + y, column=3 + x).value = 'knc'
+                    except IndexError:
+                        pass
+                except TypeError:
+                    ws.cell(row=2 + y, column=3 + x).value = 'pnr'
+
+        ws.cell(row=1, column=1, value='Group')
+        ws.cell(row=1, column=2, value='Project')
+        ws.cell(row=1, column=3, value='Latest')
+        ws.cell(row=1, column=4, value='Last quarter')
+        ws.cell(row=1, column=5, value='BL 1')
+        ws.cell(row=1, column=6, value='BL 2')
+        ws.cell(row=1, column=7, value='BL 3')
+        ws.cell(row=1, column=8, value='BL 4')
+        ws.cell(row=1, column=9, value='BL 5')
+
+        list_columns = list_column_ltrs[2:10] # hard coded so not ideal
+
+        if key in list_of_rag_keys:
+            conditional_formatting(ws, list_columns, rag_txt_list_full, rag_txt_colours, rag_fill_colours, '1', '80')
+
+        conditional_formatting(ws, list_columns, gen_txt_list, gen_txt_colours, gen_fill_colours, '1', '80')
+
+    return wb
+
+
+def simple_return_data(data_key_list, quarter_master):
+    """
+    Returns all data of interest into a excel wb.
+    master: excel wb master from which data should be taken.
+    data_key_list: list of data keys for which values should be returned.
+    """
+
+    wb = Workbook()
+    ws = wb.active
+
+    for i in range(len(list_of_masters_all)):
+        if quarter_master == str(list_of_masters_all[i].quarter):
+            master = list_of_masters_all[i]
+
+            '''list project names, groups and stage in ws'''
+            for y, project_name in enumerate(master.projects):
+
+                group = master.data[project_name]['DfT Group']
+
+                ws.cell(row=2 + y, column=1, value=group) # group info
+                ws.cell(row=2 + y, column=2, value=project_name)  # project name returned
+
+                for x, key in enumerate(data_key_list):
+                    ws.cell(row=1, column=3 + x, value=key)
+                    try: # standard keys
+                        value = master.data[project_name][key]
+                        if value is None:
+                            ws.cell(row=2 + y, column=3 + x).value = 'md'
+                        else:
+                            ws.cell(row=2 + y, column=3 + x, value=value)
+                        try:  # checks for change against last quarter
+                            lst_value = list_of_masters_all[i+1].data[project_name][key]
+                            if value != lst_value:
+                                ws.cell(row=2 + y, column=3 + x).fill = salmon_fill
+                        except (KeyError, IndexError):
+                            pass
+                    except KeyError:
+                        try: # milestone keys
+                            milestones = all_milestone_data_bulk([project_name], master)
+                            value = tuple(milestones[project_name][key])[0]
+                            if value is None:
+                                ws.cell(row=2 + y, column=3 + x).value = 'md'
+                            else:
+                                ws.cell(row=2 + y, column=3 + x).value = value
+                                ws.cell(row=2 + y, column=3 + x).number_format = 'dd/mm/yy'
+                            try:  # loop checks if value has changed since last quarter
+                                old_milestones = all_milestone_data_bulk([project_name], list_of_masters_all[i+1])
+                                lst_value = tuple(old_milestones[project_name][key])[0]
+                                if value != lst_value:
+                                    ws.cell(row=2 + y, column=3 + x).fill = salmon_fill
+                            except (KeyError, IndexError):
+                                pass
+                        except KeyError: # exception catches both standard and milestone keys
+                            ws.cell(row=2 + y, column=3 + x).value = 'knc'
+                        except TypeError:
+                            ws.cell(row=2 + y, column=3 + x).value = 'pnr'
+
+            for z, key in enumerate(data_key_list):
+                if key in list_of_rag_keys:
+                    conditional_formatting(ws, [list_column_ltrs[z+2]], rag_txt_list_full, rag_txt_colours, rag_fill_colours,
+                                           '1', '60') # plus 2 in column ltrs as values start being placed in at col 2.
+            '''quarter tag information'''
+            ws.cell(row=1, column=1, value='Group')
+            ws.cell(row=1, column=2, value='Projects')
+
+            conditional_formatting(ws, list_column_ltrs, gen_txt_list, gen_txt_colours, gen_fill_colours, '1', '60')
+
+    return wb
+
+
+# financial analysis stuff
+def place_complex_comparision_excel(master_data_latest, master_data_last, master_data_baseline):
+    '''
+    Function that places all information structured via the get_wlc_costs and get_yearly_costs programmes into an
+    excel spreadsheet. It does some calculations on the level of change that has taken place.
+    This function places in data for a chart that shows changes in financial profile between latest, last and baseline
+    :param master_data_latest: data representing latest quarter information
+    :param master_data_last: data representing last quarter information.
+    :param master_data_baseline: data representing baseline quarter information
+    :return: excel workbook
+    '''
+    wb = Workbook()
+
+    for i, key in enumerate(list(master_data_latest.keys())):
+        ws = wb.create_sheet(key, i)  # creating worksheets
+        ws.title = key  # title of worksheet
+
+        data_latest = master_data_latest[key]
+        data_last = master_data_last[key]
+        data_baseline = master_data_baseline[key]
+
+        for i, project_name in enumerate(data_latest):
+            '''place project names into ws'''
+            ws.cell(row=i+2, column=1).value = project_name
+
+            '''loop for placing data into ws. highlight changes between quarters in red'''
+            latest_value = data_latest[project_name]
+            ws.cell(row=i + 2, column=2).value = latest_value
+
+            '''comparision data against last quarter'''
+            if project_name in data_last.keys():
+                try:
+                    last_value = data_last[project_name]
+                    ws.cell(row=i + 2, column=3).value = last_value
+                    change = latest_value - last_value
+                    if last_value > 0:
+                        percent_change = (latest_value - last_value)/last_value
+                    else:
+                        percent_change = (latest_value - last_value)/(last_value + 1)
+                    ws.cell(row=i + 2, column=7).value = change
+                    ws.cell(row=i + 2, column=8).value = percent_change
+                    if change >= 100 or change <= -100:
+                        ws.cell(row=i + 2, column=7).font = red_text
+                    if percent_change >= 0.05 or percent_change <= -0.05:
+                        ws.cell(row=i + 2, column=8).font = red_text
+                except TypeError:
+                    ws.cell(row=i + 2, column=3).value = 'check project data'
+            else:
+                ws.cell(row=i + 2, column=3).value = 'None'
+
+            if project_name in data_baseline.keys():
+                try:
+                    last_value = data_last[project_name]
+                    baseline_value = data_baseline[project_name]
+                    ws.cell(row=i + 2, column=4).value = baseline_value
+                    change = last_value - baseline_value
+                    if baseline_value > 0:
+                        percent_change = (last_value - baseline_value) / baseline_value
+                    else:
+                        percent_change = (last_value - baseline_value) / (baseline_value + 1)
+                    ws.cell(row=i + 2, column=5).value = change
+                    ws.cell(row=i + 2, column=6).value = percent_change
+                    if change >= 100 or change <= -100:
+                        ws.cell(row=i + 2, column=5).font = red_text
+                    if percent_change >= 0.05 or percent_change <= -0.05:
+                        ws.cell(row=i + 2, column=6).font = red_text
+                except TypeError:
+                    ws.cell(row=i + 2, column=4).value = 'check project data'
+                except KeyError:
+                    ws.cell(row=i + 2, column=4).value = 'not reporting'
+            else:
+                ws.cell(row=i + 2, column=4).value = 'None'
+
+
+        # Note the ordering of data. Done in this manner so that data is displayed in graph in the correct way.
+        ws.cell(row=1, column=1).value = 'Project Name'
+        ws.cell(row=1, column=2).value = 'latest quarter (£m)'
+        ws.cell(row=1, column=3).value = 'last quarter (£m)'
+        ws.cell(row=1, column=4).value = 'baseline (£m)'
+        ws.cell(row=1, column=7).value = '£m change between latest and last quarter'
+        ws.cell(row=1, column=8).value = 'percentage change between latest and last quarter'
+        ws.cell(row=1, column=5).value = '£m change between last and baseline quarter'
+        ws.cell(row=1, column=6).value = 'percentage change between last and baseline quarter'
+
+    return wb
+
+def place_standard_comparision_excel(master_data_latest, master_data_baseline):
+    '''
+    Function that places all information structured via the get_wlc_costs and get_yearly_costs programmes into an
+    excel spreadsheet. It does some calculations on the level of change that has taken place.
+    This function places in data for a chart that shows changes in financial profile between latest and baseline.
+    :param master_data_latest: data representing latest quarter information
+    :param master_data_baseline: data representing baseline quarter information
+    :return: excel workbook
+    '''
+    wb = Workbook()
+
+    for i, key in enumerate(list(master_data_latest.keys())):
+        ws = wb.create_sheet(key, i)  # creating worksheets
+        ws.title = key  # title of worksheet
+
+        data_latest = master_data_latest[key]
+        data_baseline = master_data_baseline[key]
+
+        for i, project_name in enumerate(data_latest):
+            '''place project names into ws'''
+            ws.cell(row=i+2, column=1).value = project_name
+
+            '''loop for placing data into ws. highlight changes between quarters in red'''
+            latest_value = data_latest[project_name]
+            ws.cell(row=i + 2, column=2).value = latest_value
+
+            '''comparision data against last quarter'''
+            if project_name in data_baseline.keys():
+                try:
+                    baseline_value = data_baseline[project_name]
+                    ws.cell(row=i + 2, column=3).value = baseline_value
+                    change = latest_value - baseline_value
+                    if baseline_value > 0:
+                        percent_change = (latest_value - baseline_value)/baseline_value
+                    else:
+                        percent_change = (latest_value - baseline_value)/(baseline_value + 1)
+                    ws.cell(row=i + 2, column=4).value = change
+                    ws.cell(row=i + 2, column=5).value = percent_change
+                    if change >= 100 or change <= -100:
+                        ws.cell(row=i + 2, column=4).font = red_text
+                    if percent_change >= 0.05 or percent_change <= -0.05:
+                        ws.cell(row=i + 2, column=5).font = red_text
+                except TypeError:
+                    ws.cell(row=i + 2, column=3).value = 'check project data'
+            else:
+                ws.cell(row=i + 2, column=3).value = 'None'
+
+
+        ws.cell(row=1, column=1).value = 'Project Name'
+        ws.cell(row=1, column=2).value = 'latest quarter (£m)'
+        ws.cell(row=1, column=3).value = 'baseline (£m)'
+        ws.cell(row=1, column=4).value = '£m change between latest and baseline'
+        ws.cell(row=1, column=5).value = 'percentage change between latest and baseline'
+
+    return wb
+
+def get_wlc(project_name_list, wlc_key, index):
+    '''
+    Function that gets projects wlc cost information and returns it in a python dictionary format.
+    :param project_name_list: list of project names
+    :param wlc_key: project whole life cost (wlc) keys
+    :param index: index value for which master to use from the q_master_data_list . 0 is for latest, 1 last and
+    2 baseline. The actual index list q_master_list is set at a global level in this programme.
+    :return: a dictionary structured 'wlc: 'project_name': total
+    '''
+    upper_dictionary = {}
+    lower_dictionary = {}
+    for project_name in project_name_list:
+        try:
+            project_data = list_of_masters_all[costs_bl_index[project_name][index]].data[project_name]
+            total = project_data[wlc_key]
+            lower_dictionary[project_name] = total
+        except TypeError:
+            lower_dictionary[project_name] = 0
+
+    upper_dictionary['wlc'] = lower_dictionary
+
+    return upper_dictionary
+
+
+'''getting financial wlc cost breakdown'''
+latest_wlc = get_wlc(list_of_masters_all[0].projects, wlc_key, 0)
+last_wlc = get_wlc(list_of_masters_all[0].projects, wlc_key, 1)
+baseline_wlc = get_wlc(list_of_masters_all[0].projects, wlc_key, 2)
+
+'''creating excel outputs'''
+output_one = place_complex_comparision_excel(latest_wlc, last_wlc, baseline_wlc)
+output_two = place_complex_comparision_excel(latest_cost_profiles, last_cost_profiles, baseline_1_cost_profiles)
+output_three = place_standard_comparision_excel(latest_wlc, baseline_wlc)
+output_four = place_standard_comparision_excel(latest_cost_profiles, baseline_1_cost_profiles)
+
+'''INSTRUCTIONS FOR RUNNING PROGRAMME'''
+
+'''Valid file paths for all the below need to be provided'''
+
+'''ONE. Provide file path to where to save complex wlc breakdown'''
+output_one.save(root_path/'output/comparing_wlc_complex_q2_2021.xlsx')
+
+'''TWO. Provide file path to where to save complex yearly cost profile breakdown'''
+output_two.save(root_path/'output/comparing_cost_profiles_complex_q2_2021.xlsx')
+
+'''THREE. Provide file path to where to save standard wlc breakdown'''
+output_three.save(root_path/'output/comparing_wlc_standard_q2_2021.xlsx')
+
+'''FOUR. Provide file path to where to save standard yearly cost profile breakdown'''
+output_four.save(root_path/'output/comparing_cost_profiles_standard_q2_2021.xlsx')
