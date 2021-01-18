@@ -69,7 +69,25 @@
       <recent name="$PROJECT_DIR$/other" />
     </key>
   </component>
-  <component name="RunManager" selected="Python tests.pytest for test_data.test_putting_milestones_into_wb">
+  <component name="RunManager" selected="Python.matplotlib_chart">
+    <configuration name="matplotlib_chart" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="analysis_engine" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/project_analysis" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/project_analysis/matplotlib_chart.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="true" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="milestones_comparison_3_qrts_all" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="analysis_engine" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -194,22 +212,6 @@
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
-    <configuration name="pytest for test_data.test_vfm_analysis" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
-      <module name="analysis_engine" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <option name="SDK_HOME" value="$USER_HOME$/.virtualenvs/a_engine/bin/python" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="_new_keywords" value="&quot;&quot;" />
-      <option name="_new_parameters" value="&quot;&quot;" />
-      <option name="_new_additionalArguments" value="&quot;--tb\u003dshort&quot;" />
-      <option name="_new_target" value="&quot;test_data.test_vfm_analysis&quot;" />
-      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
-      <method v="2" />
-    </configuration>
     <configuration name="temp_tests" type="tests" factoryName="py.test">
       <module name="analysis_engine" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -266,17 +268,17 @@
       <item itemvalue="Python tests.test_all" />
       <item itemvalue="Python tests.test_data_all" />
       <item itemvalue="Python tests.pytest for test_data.test_compile_milestone_chart_with_filter" />
-      <item itemvalue="Python tests.pytest for test_data.test_vfm_analysis" />
       <item itemvalue="Python.milestones_comparison_3_qrts_all" />
       <item itemvalue="Python tests.pytest for test_data.test_putting_milestones_into_wb" />
+      <item itemvalue="Python.matplotlib_chart" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.matplotlib_chart" />
         <item itemvalue="Python tests.pytest for test_data.test_putting_milestones_into_wb" />
         <item itemvalue="Python.milestones_comparison_3_qrts_all" />
         <item itemvalue="Python tests.pytest for test_data.test_compile_milestone_chart_with_filter" />
         <item itemvalue="Python.risk_analysis" />
-        <item itemvalue="Python tests.pytest for test_data.test_vfm_analysis" />
       </list>
     </recent_temporary>
   </component>
