@@ -17,9 +17,9 @@ from datetime import date
 from typing import Dict, Union
 
 from openpyxl import load_workbook, Workbook, workbook
-from analysis.engine_functions import filter_gmpp
+from analysis_engine.engine_functions import filter_gmpp
 
-from analysis.data import root_path
+from analysis_engine.data import root_path
 from datamaps.api import project_data_from_master
 
 

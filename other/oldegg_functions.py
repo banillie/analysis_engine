@@ -4,9 +4,9 @@ from docx.oxml.ns import nsdecls
 
 '''
 
-Store of common functions found in all analysis engine
+Store of common functions found in all analysis_engine engine
 
-This is also where the date of BICC is set. This is the date from which much of the analysis is set.
+This is also where the date of BICC is set. This is the date from which much of the analysis_engine is set.
 NOTE. Python date format is (YYYY,MM,DD)
 
 '''
@@ -808,7 +808,7 @@ def compare_text_newandold(text_1, text_2, doc):
 
 
 def get_ben_totals(project_name, benefits_bl_index, list_of_masters_all):
-    '''gets benefits data to place into the bar chart element in the financial analysis graphs'''
+    '''gets benefits data to place into the bar chart element in the financial analysis_engine graphs'''
 
     ben_change_key_list = ['Pre-profile BEN Total',
                            "Total BEN Forecast - Total Monetised Benefits",

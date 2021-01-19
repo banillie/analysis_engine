@@ -1,7 +1,7 @@
 #  start of what was library/data
 
 from datamaps.api import project_data_from_master
-from analysis.engine_functions import baseline_information_bc, baseline_index, get_project_income_profile, \
+from analysis_engine.engine_functions import baseline_information_bc, baseline_index, get_project_income_profile, \
     get_project_cost_profile, get_all_project_names, baseline_information, project_all_milestones_dict, \
     project_time_difference
 from openpyxl.styles import Font, PatternFill
@@ -13,11 +13,11 @@ from pathlib import Path
 
 def _platform_docs_dir() -> Path:
     if platform.system() == "Linux":
-        return Path.home() / "Documents" / "analysis"
+        return Path.home() / "Documents" / "analysis_engine"
     if platform.system() == "Darwin":
-        return Path.home() / "Documents" / "analysis"
+        return Path.home() / "Documents" / "analysis_engine"
     else:
-        return Path.home() / "Documents" / "analysis"
+        return Path.home() / "Documents" / "analysis_engine"
 
 
 root_path = _platform_docs_dir()

@@ -244,7 +244,7 @@ IPDC_DATE = datetime.date(
     2021, 2, 22
 )  # ipdc date. Python date format is Year, Month, day
 
-# abbreviations. Used in analysis instead of full projects names
+# abbreviations. Used in analysis_engine instead of full projects names
 ABBREVIATION = {
     "2nd Generation UK Search and Rescue Aviation": "SARH2",
     "A12 Chelmsford to A120 widening": "A12",
@@ -3574,7 +3574,7 @@ def milestone_chart(
     except KeyError:
         pass
 
-    # Add line of analysis date, but only if in the time period
+    # Add line of analysis_engine date, but only if in the time period
     try:
         blue_line = kwargs["blue_line"]
         if blue_line == "Today":
@@ -3587,7 +3587,7 @@ def milestone_chart(
                 plt.figtext(
                     0.98,
                     0.01,
-                    "Line represents date analysis compiled",
+                    "Line represents date analysis_engine compiled",
                     horizontalalignment="right",
                     fontsize=10,
                     fontweight="bold",
@@ -4440,7 +4440,7 @@ def vfm_into_excel(vfm_data: VfMData) -> workbook:
     return wb
 
 
-# for speed_dial analysis
+# for speed_dial analysis_engine
 # degree_range, rot_text, and gauge all in early development. Code taken from
 # http://nicolasfauchereau.github.io/climatecode/posts/drawing-a-gauge-with-matplotlib/
 def degree_range(n):
@@ -4782,7 +4782,7 @@ def project_report_meta_data(
     doc.add_section(WD_SECTION_START.NEW_PAGE)
     paragraph = doc.add_paragraph()
     paragraph.alignment = WD_ALIGN_PARAGRAPH.RIGHT
-    paragraph.add_run("Annex A. High level MI data and analysis").bold = True
+    paragraph.add_run("Annex A. High level MI data and analysis_engine").bold = True
 
     """Costs meta data"""
     # this chuck is pretty messy because the data is messy
@@ -5544,7 +5544,7 @@ def run_p_reports(master: Master,
 #     return wb
 #
 #
-# # financial analysis stuff
+# # financial analysis_engine stuff
 # def place_complex_comparision_excel(master_data_latest, master_data_last, master_data_baseline):
 #     '''
 #     Function that places all information structured via the get_wlc_costs and get_yearly_costs programmes into an
@@ -5738,7 +5738,7 @@ def run_p_reports(master: Master,
 # output_four.save(root_path/'output/comparing_cost_profiles_standard_q2_2021.xlsx')
 #
 #
-# # possible use in milestone analysis
+# # possible use in milestone analysis_engine
 # PARLIAMENT = [
 #     "Bill",
 #     "bill",

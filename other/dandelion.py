@@ -9,7 +9,7 @@ the import statement.
 """
 
 from openpyxl import Workbook
-from analysis.data import list_of_masters_all, root_path, abbreviations
+from analysis_engine.data import list_of_masters_all, root_path, abbreviations
 
 def dandelion_data():
     '''

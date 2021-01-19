@@ -24,11 +24,11 @@ from openpyxl import load_workbook
 from openpyxl.styles import PatternFill, Font
 from openpyxl.styles.differential import DifferentialStyle
 from openpyxl.formatting.rule import Rule
-from analysis.data import list_of_masters_all, root_path, ipdc_date, milestone_bl_index, \
+from analysis_engine.data import list_of_masters_all, root_path, ipdc_date, milestone_bl_index, \
     costs_bl_index, benefits_bl_index, bc_index
-from analysis.engine_functions import all_milestone_data_bulk, convert_rag_text, convert_bc_stage_text, \
+from analysis_engine.engine_functions import all_milestone_data_bulk, convert_rag_text, convert_bc_stage_text, \
     project_time_difference, ap_p_milestone_data_bulk, concatenate_dates, highlight_close_dates_ipdc
-from analysis.data import spent_calculation
+from analysis_engine.data import spent_calculation
 
 def place_in_excel(wb):
     '''

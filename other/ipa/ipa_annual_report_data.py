@@ -11,7 +11,7 @@ from datamaps.api import project_data_from_master
 from openpyxl.styles import PatternFill, Font
 from openpyxl.styles.differential import DifferentialStyle
 from openpyxl.formatting.rule import Rule, IconSet, FormatObject
-from analysis.engine_functions import up_or_down
+from analysis_engine.engine_functions import up_or_down
 
 def cal_date_difference(milestone_date, old_milestone_date):
     '''

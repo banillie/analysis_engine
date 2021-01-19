@@ -5,7 +5,7 @@ This programme creates a master spreadsheet for commissioning templates.
 from openpyxl import load_workbook
 from datamaps.api import project_data_from_master
 from openpyxl.styles import Font
-from analysis.data import root_path, q1_2021
+from analysis_engine.data import root_path, q1_2021
 
 def create_master(workbook, project_name_list, commission_q_data, latest_q_data):
     ws = workbook.active
@@ -383,7 +383,7 @@ run.save(root_path/'output/commission_master_test_populated.xlsx')
 #     cell_key_list.append(v)
 
 # def amend_datamap(m_dict):
-#     wb = load_workbook('/home/will/Documents/analysis/input/new_dm.xlsx')
+#     wb = load_workbook('/home/will/Documents/analysis_engine/input/new_dm.xlsx')
 #
 #     ws = wb.active
 #
@@ -392,6 +392,6 @@ run.save(root_path/'output/commission_master_test_populated.xlsx')
 #             if ws.cell(row=i+2, column=1).value == keys:
 #                 ws.cell(row=i+2, column=5).value = m_dict.data['type'][keys]
 #
-#     wb.save('/home/will/Documents/analysis/input/new_dm.xlsx')
+#     wb.save('/home/will/Documents/analysis_engine/input/new_dm.xlsx')
 
 #amend_datamap(dm_master_dict)

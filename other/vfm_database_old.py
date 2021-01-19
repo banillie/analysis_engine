@@ -2,7 +2,7 @@
 #
 # from database.database import get_vfm_values, get_quarter_values, \
 #     create_vfm_table, insert_many_vfm_db
-# from analysis.data import get_master_data
+# from analysis_engine.data import get_master_data
 #
 # m = get_master_data()
 # vfm_db_list = get_vfm_values(m)
@@ -16,7 +16,7 @@
 #
 
 
-from analysis.data import get_master_data, root_path
+from analysis_engine.data import get_master_data, root_path
 from database.database import create_db, import_master_to_db
 import os
 from datamaps.api import project_data_from_master

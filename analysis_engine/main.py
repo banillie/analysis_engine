@@ -1,23 +1,23 @@
 """
-cli for analysis engine.
+cli for analysis_engine engine.
 currently working on number of different subcommands
 sub commands.. so far.
-vfm: is the name of the command to runs analysis
+vfm: is the name of the command to runs analysis_engine
 
 Options... so far.
 -group: an option for a particular dft group of projects. str. specific options.
 -stage: an option for a group of projects at a particular business case stage. str. specific options.
--quarter: specifies the quarter(s) for analysis. at least one str.
+-quarter: specifies the quarter(s) for analysis_engine. at least one str.
 
 -stage and -group cannot be entered at same time current. Can sort.
 
 Next steps:
-- explore possibility of there being a way to 'initiate' analysis engine so
+- explore possibility of there being a way to 'initiate' analysis_engine engine so
 master data is stored in memory and arguments run directly from it. rather
 than having to convert excel ws into python dict each time. This would also be
 a useful first step as lots of data checking is done as part of Master Class
 creation.
-- have cli so that it is analysis, rather than main.py
+- have cli so that it is analysis_engine, rather than main.py
 - packaged onto PyPI.
 
 """
@@ -34,7 +34,7 @@ from data import (
 
 
 def vfm(args):
-    print("compiling vfm analysis")
+    print("compiling vfm analysis_engine")
     m = Master(get_master_data(), get_project_information())
     vfm_m = VfMData(m)
     if args["quarters"]:
@@ -49,11 +49,11 @@ def vfm(args):
         vfm_m = VfMData(m, quarters=args["quarters"], group=args["group"])
     wb = vfm_into_excel(vfm_m)
     wb.save(root_path / "output/vfm.xlsx")
-    print("VfM analysis has been compiled. Enjoy!")
+    print("VfM analysis_engine has been compiled. Enjoy!")
 
 
 def milestones(args):
-    print("compiling milestone analysis")
+    print("compiling milestone analysis_engine")
     m = Master(get_master_data(), get_project_information())
     projects = m.project_stage["Q2 20/21"]["FBC"] + m.project_stage["Q2 20/21"][
         "OBC"] + [Projects.hs2_2b]
@@ -71,7 +71,7 @@ def summaries(args):
 
 def main():
     parser = argparse.ArgumentParser(prog='engine',
-        description='value for money analysis')
+        description='value for money analysis_engine')
     subparsers = parser.add_subparsers()
     parser_vfm = subparsers.add_parser('vfm',
                                        help="vfm help")
@@ -85,20 +85,20 @@ def main():
                         action='store',
                         nargs='+',
                         choices=["FBC", "OBC", "SOBC", "pre-SOBC"],
-                        help='Returns analysis for a group a projects at specified stage')
+                        help='Returns analysis_engine for a group a projects at specified stage')
     parser_vfm.add_argument('-g',
                         '--group',
                         type=str,
                         action='store',
                         nargs='+',
                         choices=["HSMRPG", "AMIS", "Rail", "RDM"],
-                        help='Returns analysis for specified DfT Group')
+                        help='Returns analysis_engine for specified DfT Group')
     parser_vfm.add_argument('-q',
                         '--quarters',
                         type=str,
                         action='store',
                         nargs='+',
-                        help='Returns analysis for specified quarters. Must be in format e.g Q3 19/20')
+                        help='Returns analysis_engine for specified quarters. Must be in format e.g Q3 19/20')
     # parser_milestones.add_argument()
     parser_vfm.set_defaults(func=vfm)
     parser_milestones.set_defaults(func=milestones)

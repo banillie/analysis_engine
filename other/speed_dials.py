@@ -1,10 +1,10 @@
 """
-Outputs analysis for speed_dials. Outputs are place in analysis/output. They are:
+Outputs analysis_engine for speed_dials. Outputs are place in analysis_engine/output. They are:
 - A word document titled dca_changes which specifies which project dca ratings have changed
 - matplotlib speed dial?
 """
 
-from analysis.data import (
+from analysis_engine.data import (
     Master,
     root_path,
     dca_changes_into_word,

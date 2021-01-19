@@ -21,15 +21,6 @@
   <component name="ChangeListManager">
     <list default="true" id="205bd717-e7d2-47dc-82c7-88a8dae3593c" name="Default Changelist" comment="change portfolio_financial_profile.py to include old bl profile data">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/analysis/DfT_commission_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/other/DfT_commission_data.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/analysis/gmpp_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/other/ipa/gmpp_data.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/analysis/ipa_annual_report_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/other/ipa/ipa_annual_report_data.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/analysis/ipdc_dashboards.py" beforeDir="false" afterPath="$PROJECT_DIR$/other/ipdc_dashboards.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/analysis/old_costs.py" beforeDir="false" afterPath="$PROJECT_DIR$/other/old_costs.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/analysis/oldegg_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/other/oldegg_data.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/analysis/oldegg_functions.py" beforeDir="false" afterPath="$PROJECT_DIR$/other/oldegg_functions.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/analysis/speed_dials.py" beforeDir="false" afterPath="$PROJECT_DIR$/other/speed_dials.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/temp_testing.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/temp_testing.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
