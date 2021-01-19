@@ -21,13 +21,15 @@
   <component name="ChangeListManager">
     <list default="true" id="205bd717-e7d2-47dc-82c7-88a8dae3593c" name="Default Changelist" comment="change portfolio_financial_profile.py to include old bl profile data">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/analysis/change_wb_master_keys.py" beforeDir="false" afterPath="$PROJECT_DIR$/other/change_wb_master_keys.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/analysis_engine/vfm_analysis_workings_old.py" beforeDir="false" afterPath="$PROJECT_DIR$/other/vfm_analysis_workings_old.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/analysis_engine/vfm_database_old.py" beforeDir="false" afterPath="$PROJECT_DIR$/other/vfm_database_old.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/database/database.py" beforeDir="false" afterPath="$PROJECT_DIR$/other/database/database.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/database/shedbase.py" beforeDir="false" afterPath="$PROJECT_DIR$/other/database/shedbase.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/conftest.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/conftest.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/test_database.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test_database.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/analysis/DfT_commission_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/other/DfT_commission_data.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/analysis/gmpp_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/other/ipa/gmpp_data.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/analysis/ipa_annual_report_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/other/ipa/ipa_annual_report_data.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/analysis/ipdc_dashboards.py" beforeDir="false" afterPath="$PROJECT_DIR$/other/ipdc_dashboards.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/analysis/old_costs.py" beforeDir="false" afterPath="$PROJECT_DIR$/other/old_costs.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/analysis/oldegg_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/other/oldegg_data.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/analysis/oldegg_functions.py" beforeDir="false" afterPath="$PROJECT_DIR$/other/oldegg_functions.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/analysis/speed_dials.py" beforeDir="false" afterPath="$PROJECT_DIR$/other/speed_dials.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/temp_testing.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/temp_testing.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -72,70 +74,13 @@
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/other" />
+      <recent name="$PROJECT_DIR$/other/ipa" />
       <recent name="$PROJECT_DIR$" />
       <recent name="$PROJECT_DIR$/analysis_engine" />
       <recent name="$PROJECT_DIR$/tests" />
-      <recent name="$PROJECT_DIR$/database" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.matplotlib_chart">
-    <configuration name="matplotlib_chart" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="analysis_engine" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/project_analysis" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/project_analysis/matplotlib_chart.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="true" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="milestones_comparison_3_qrts_all" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="analysis_engine" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/milestone_analysis" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/milestone_analysis/milestones_comparison_3_qrts_all.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="true" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="risk_analysis" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="analysis_engine" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/Risks" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Risks/risk_analysis.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="true" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
+  <component name="RunManager" selected="Python tests.test_data_all">
     <configuration name="vfm" type="PythonConfigurationType" factoryName="Python">
       <module name="analysis_engine" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -148,7 +93,7 @@
       <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/analysis_engine/main.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/analysis/main.py" />
       <option name="PARAMETERS" value="vfm" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -187,38 +132,6 @@
       <option name="_new_additionalArguments" value="&quot;&quot;" />
       <option name="_new_target" value="&quot;$PROJECT_DIR$/tests/test_database.py&quot;" />
       <option name="_new_targetType" value="&quot;PATH&quot;" />
-      <method v="2" />
-    </configuration>
-    <configuration name="pytest for test_data.test_compile_milestone_chart_with_filter" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
-      <module name="analysis_engine" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <option name="SDK_HOME" value="$USER_HOME$/.virtualenvs/a_engine/bin/python" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="_new_keywords" value="&quot;&quot;" />
-      <option name="_new_parameters" value="&quot;&quot;" />
-      <option name="_new_additionalArguments" value="&quot;--tb\u003dshort&quot;" />
-      <option name="_new_target" value="&quot;test_data.test_compile_milestone_chart_with_filter&quot;" />
-      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
-      <method v="2" />
-    </configuration>
-    <configuration name="pytest for test_data.test_putting_milestones_into_wb" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
-      <module name="analysis_engine" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <option name="SDK_HOME" value="$USER_HOME$/.virtualenvs/a_engine/bin/python" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="_new_keywords" value="&quot;&quot;" />
-      <option name="_new_parameters" value="&quot;&quot;" />
-      <option name="_new_additionalArguments" value="&quot;--tb\u003dshort&quot;" />
-      <option name="_new_target" value="&quot;test_data.test_putting_milestones_into_wb&quot;" />
-      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
     <configuration name="temp_tests" type="tests" factoryName="py.test">
@@ -271,25 +184,11 @@
     </configuration>
     <list>
       <item itemvalue="Python.vfm" />
-      <item itemvalue="Python.risk_analysis" />
       <item itemvalue="Python tests.all_dB_tests" />
       <item itemvalue="Python tests.temp_tests" />
       <item itemvalue="Python tests.test_all" />
       <item itemvalue="Python tests.test_data_all" />
-      <item itemvalue="Python tests.pytest for test_data.test_compile_milestone_chart_with_filter" />
-      <item itemvalue="Python.milestones_comparison_3_qrts_all" />
-      <item itemvalue="Python tests.pytest for test_data.test_putting_milestones_into_wb" />
-      <item itemvalue="Python.matplotlib_chart" />
     </list>
-    <recent_temporary>
-      <list>
-        <item itemvalue="Python.matplotlib_chart" />
-        <item itemvalue="Python tests.pytest for test_data.test_putting_milestones_into_wb" />
-        <item itemvalue="Python.milestones_comparison_3_qrts_all" />
-        <item itemvalue="Python tests.pytest for test_data.test_compile_milestone_chart_with_filter" />
-        <item itemvalue="Python.risk_analysis" />
-      </list>
-    </recent_temporary>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="SvnConfiguration">
