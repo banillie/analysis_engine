@@ -52,7 +52,7 @@ def get_master_data() -> List[
 ]:  # how specify a list of dictionaries?
     """Returns a list of dictionaries each containing quarter data"""
     master_data_list = [
-        # project_data_from_master(root_path / "core_data/master_3_2020.xlsx", 3, 2020),
+        project_data_from_master(root_path / "core_data/master_3_2020.xlsx", 3, 2020),
         project_data_from_master(root_path / "core_data/master_2_2020.xlsx", 2, 2020),
         project_data_from_master(root_path / "core_data/master_1_2020.xlsx", 1, 2020),
         project_data_from_master(root_path / "core_data/master_4_2019.xlsx", 4, 2019),

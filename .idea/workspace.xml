@@ -21,35 +21,8 @@
   <component name="ChangeListManager">
     <list default="true" id="205bd717-e7d2-47dc-82c7-88a8dae3593c" name="Default Changelist" comment="change portfolio_financial_profile.py to include old bl profile data">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/analysis_engine/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/analysis/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/analysis_engine/DfT_commission_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/analysis/DfT_commission_data.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/analysis_engine/LICENSE" beforeDir="false" afterPath="$PROJECT_DIR$/analysis/LICENSE" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/analysis_engine/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/analysis/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/analysis_engine/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/analysis/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/analysis_engine/change_wb_master_keys.py" beforeDir="false" afterPath="$PROJECT_DIR$/analysis/change_wb_master_keys.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/analysis_engine/compare_gmpp_changes.py" beforeDir="false" afterPath="$PROJECT_DIR$/analysis/compare_gmpp_changes.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/analysis_engine/cost_v_schedule_new.py" beforeDir="false" afterPath="$PROJECT_DIR$/analysis/cost_v_schedule_new.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/analysis_engine/create_test_files.py" beforeDir="false" afterPath="$PROJECT_DIR$/analysis/create_test_files.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/analysis_engine/dandelion.py" beforeDir="false" afterPath="$PROJECT_DIR$/analysis/dandelion.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/analysis_engine/data.py" beforeDir="false" afterPath="$PROJECT_DIR$/analysis/data.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/analysis_engine/dca_analysis.py" beforeDir="false" afterPath="$PROJECT_DIR$/analysis/dca_analysis.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/analysis_engine/gmpp_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/analysis/gmpp_data.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/analysis_engine/ipa_annual_report_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/analysis/ipa_annual_report_data.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/analysis_engine/ipdc_dashboards.py" beforeDir="false" afterPath="$PROJECT_DIR$/analysis/ipdc_dashboards.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/analysis_engine/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/analysis/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/analysis_engine/old_costs.py" beforeDir="false" afterPath="$PROJECT_DIR$/analysis/old_costs.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/analysis_engine/oldegg_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/analysis/oldegg_data.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/analysis_engine/oldegg_functions.py" beforeDir="false" afterPath="$PROJECT_DIR$/analysis/oldegg_functions.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/analysis_engine/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/analysis/requirements.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/analysis_engine/speed_dials.py" beforeDir="false" afterPath="$PROJECT_DIR$/analysis/speed_dials.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/conftest.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/conftest.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/temp_testing.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/temp_testing.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/test_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test_data.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/vfm/vfm_analysis.py" beforeDir="false" afterPath="$PROJECT_DIR$/vfm/vfm_analysis.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/vfm/vfm_analysis_workings_old.py" beforeDir="false" afterPath="$PROJECT_DIR$/vfm/vfm_analysis_workings_old.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/vfm/vfm_database_old.py" beforeDir="false" afterPath="$PROJECT_DIR$/vfm/vfm_database_old.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/vfm/vfm_graph_old.py" beforeDir="false" afterPath="$PROJECT_DIR$/vfm/vfm_graph_old.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/vfm/vfm_reporting_outputs_old.py" beforeDir="false" afterPath="$PROJECT_DIR$/vfm/vfm_reporting_outputs_old.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/analysis/data.py" beforeDir="false" afterPath="$PROJECT_DIR$/analysis/data.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/analysis/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/analysis/main.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

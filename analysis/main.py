@@ -28,7 +28,8 @@ import argparse
 from data import (
     get_master_data,
     Master,
-    get_project_information, VfMData, root_path, vfm_into_excel, MilestoneData, put_milestones_into_wb, Projects
+    get_project_information, VfMData, root_path, vfm_into_excel, MilestoneData, put_milestones_into_wb, Projects,
+    run_p_reports
 )
 
 
@@ -42,9 +43,9 @@ def vfm(args):
         vfm_m = VfMData(m, stage=args["stage"])
     if args["group"]:
         vfm_m = VfMData(m, group=args["group"])
-    if args["quarters"] and args["stage"] in ["FBC", "OBC", "SOBC", "pre-SOBC"]:
+    if args["quarters"] and args["stage"]:  # to test
         vfm_m = VfMData(m, quarters=args["quarters"], stage=args["stage"])
-    if args["quarters"] and args["group"] in ["HSMRPG", "AMIS", "Rail", "RDM"]:
+    if args["quarters"] and args["group"]:  # to test
         vfm_m = VfMData(m, quarters=args["quarters"], group=args["group"])
     wb = vfm_into_excel(vfm_m)
     wb.save(root_path / "output/vfm.xlsx")
@@ -62,6 +63,12 @@ def milestones(args):
     run.save(root_path / "output/milestone_data_output_with_notes.xlsx")
 
 
+def summaries(args):
+    print("compiling summaries")
+    m = Master(get_master_data(), get_project_information())
+    run_p_reports(m, m.dft_groups["Q3 20/21"]["RDM"])
+
+
 def main():
     parser = argparse.ArgumentParser(prog='engine',
         description='value for money analysis')
@@ -70,6 +77,8 @@ def main():
                                        help="vfm help")
     parser_milestones = subparsers.add_parser('milestones',
                                               help='milestone help')
+    parser_summaries = subparsers.add_parser('summaries',
+                                             help='summaries')
     parser_vfm.add_argument('-s',
                         '--stage',
                         type=str,
@@ -93,6 +102,7 @@ def main():
     # parser_milestones.add_argument()
     parser_vfm.set_defaults(func=vfm)
     parser_milestones.set_defaults(func=milestones)
+    parser_summaries.set_defaults(func=summaries)
     args = parser.parse_args()
     # print(vars(args))
     args.func(vars(args))
