@@ -4,7 +4,7 @@ import pytest
 from datamaps.api import project_data_from_master
 
 from analysis.data import open_word_doc
-from database.database import create_db
+from other.database.database import create_db
 
 
 @pytest.fixture

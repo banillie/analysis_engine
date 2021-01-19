@@ -1,7 +1,7 @@
 import sqlite3
 import pytest
-from database.database import import_master_to_db
-from database.shedbase import MilestoneData
+from other.database.database import import_master_to_db
+from other.database.shedbase import MilestoneData
 
 
 

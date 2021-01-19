@@ -20,9 +20,14 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="205bd717-e7d2-47dc-82c7-88a8dae3593c" name="Default Changelist" comment="change portfolio_financial_profile.py to include old bl profile data">
-      <change beforePath="$PROJECT_DIR$/vfm/vfm_analysis.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/vfm/vfm_analysis_workings_old.py" beforeDir="false" afterPath="$PROJECT_DIR$/analysis_engine/vfm_analysis_workings_old.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/vfm/vfm_reporting_outputs_old.py" beforeDir="false" afterPath="$PROJECT_DIR$/vfm/vfm_reporting_outputs_old.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/analysis/change_wb_master_keys.py" beforeDir="false" afterPath="$PROJECT_DIR$/other/change_wb_master_keys.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/analysis_engine/vfm_analysis_workings_old.py" beforeDir="false" afterPath="$PROJECT_DIR$/other/vfm_analysis_workings_old.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/analysis_engine/vfm_database_old.py" beforeDir="false" afterPath="$PROJECT_DIR$/other/vfm_database_old.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/database/database.py" beforeDir="false" afterPath="$PROJECT_DIR$/other/database/database.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/database/shedbase.py" beforeDir="false" afterPath="$PROJECT_DIR$/other/database/shedbase.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/conftest.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/conftest.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/test_database.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test_database.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -66,11 +71,11 @@
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/other" />
+      <recent name="$PROJECT_DIR$" />
       <recent name="$PROJECT_DIR$/analysis_engine" />
       <recent name="$PROJECT_DIR$/tests" />
       <recent name="$PROJECT_DIR$/database" />
-      <recent name="$PROJECT_DIR$/vfm" />
-      <recent name="$PROJECT_DIR$/other" />
     </key>
   </component>
   <component name="RunManager" selected="Python.matplotlib_chart">
