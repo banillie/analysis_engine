@@ -380,7 +380,7 @@ def test_saving_graph_to_word_doc_other(milestone_masters, project_info):
     save_graph(f, "testing", orientation="landscape")
 
 
-def test_dca_changes(project_info, dca_masters, word_doc):
+def test_dca_analysis(project_info, dca_masters, word_doc):
     m = Master(dca_masters, project_info)
     dca = DcaData(m)
     # assert dca.dca_count == {}
