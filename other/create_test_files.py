@@ -22,9 +22,7 @@ from analysis.data import root_path
 #                                             "tests/resources"
 #                                             "/test_master_4_2019.xlsx", 4, 2019)
 
-test_master_five = project_data_from_master("/home/will/code/python/analysis_engine/"
-                                            "tests/resources"
-                                            "/test_master_1_2020.xlsx", 1, 2020)
+test_master_five = project_data_from_master("/tests/resources/test_master_1_2020.xlsx", 1, 2020)
 
 test_master_data_list = [test_master_five]
 
@@ -40,9 +38,7 @@ test_master_data_list = [test_master_five]
 # test_wb_four = load_workbook("/home/will/code/python/analysis/"
 #                              "tests/resources"
 #                              "/test_master_4_2019.xlsx")
-test_wb_five = load_workbook("/home/will/code/python/analysis_engine/"
-                             "tests/resources"
-                             "/test_master_1_2020.xlsx")
+test_wb_five = load_workbook("/tests/resources/test_master_1_2020.xlsx")
 
 def get_excel_data_in_list(wb):
     """
