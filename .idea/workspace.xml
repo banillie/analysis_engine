@@ -20,9 +20,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="205bd717-e7d2-47dc-82c7-88a8dae3593c" name="Default Changelist" comment="change portfolio_financial_profile.py to include old bl profile data">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/analysis/data.py" beforeDir="false" afterPath="$PROJECT_DIR$/analysis/data.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/analysis/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/analysis/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/vfm/vfm_analysis.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/vfm/vfm_analysis_workings_old.py" beforeDir="false" afterPath="$PROJECT_DIR$/analysis_engine/vfm_analysis_workings_old.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/vfm/vfm_reporting_outputs_old.py" beforeDir="false" afterPath="$PROJECT_DIR$/vfm/vfm_reporting_outputs_old.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
