@@ -1,6 +1,6 @@
 #  code of running and compiling vfm data analysis each quarter.
 
-from analysis_engine.data import root_path, get_master_data
+from analysis.data import root_path, get_master_data
 from vfm.vfm_analysis_workings_old import compile_data
 
 

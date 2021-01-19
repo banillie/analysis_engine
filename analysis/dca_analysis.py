@@ -1,9 +1,9 @@
 """
-Outputs analysis for SRO confidence ratings. Output is placed in analysis_engine/output. The output is:
+Outputs analysis for SRO confidence ratings. Output is placed in analysis/output. The output is:
 - An excel workbook titled dca_data which provides a count of DCAs and their proportion of cost.
 """
 
-from analysis_engine.data import (
+from analysis.data import (
     Master,
     root_path,
     get_project_information,

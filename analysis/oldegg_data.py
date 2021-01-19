@@ -13,11 +13,11 @@ from pathlib import Path
 
 def _platform_docs_dir() -> Path:
     if platform.system() == "Linux":
-        return Path.home() / "Documents" / "analysis_engine"
+        return Path.home() / "Documents" / "analysis"
     if platform.system() == "Darwin":
-        return Path.home() / "Documents" / "analysis_engine"
+        return Path.home() / "Documents" / "analysis"
     else:
-        return Path.home() / "Documents" / "analysis_engine"
+        return Path.home() / "Documents" / "analysis"
 
 
 root_path = _platform_docs_dir()

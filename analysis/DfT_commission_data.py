@@ -383,7 +383,7 @@ run.save(root_path/'output/commission_master_test_populated.xlsx')
 #     cell_key_list.append(v)
 
 # def amend_datamap(m_dict):
-#     wb = load_workbook('/home/will/Documents/analysis_engine/input/new_dm.xlsx')
+#     wb = load_workbook('/home/will/Documents/analysis/input/new_dm.xlsx')
 #
 #     ws = wb.active
 #
@@ -392,6 +392,6 @@ run.save(root_path/'output/commission_master_test_populated.xlsx')
 #             if ws.cell(row=i+2, column=1).value == keys:
 #                 ws.cell(row=i+2, column=5).value = m_dict.data['type'][keys]
 #
-#     wb.save('/home/will/Documents/analysis_engine/input/new_dm.xlsx')
+#     wb.save('/home/will/Documents/analysis/input/new_dm.xlsx')
 
 #amend_datamap(dm_master_dict)

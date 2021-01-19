@@ -28,7 +28,7 @@ from analysis.data import list_of_masters_all, root_path, ipdc_date, milestone_b
     costs_bl_index, benefits_bl_index, bc_index
 from analysis.engine_functions import all_milestone_data_bulk, convert_rag_text, convert_bc_stage_text, \
     project_time_difference, ap_p_milestone_data_bulk, concatenate_dates, highlight_close_dates_ipdc
-from analysis_engine.data import spent_calculation
+from analysis.data import spent_calculation
 
 def place_in_excel(wb):
     '''

@@ -1382,6 +1382,17 @@ def get_milestone_date(
                 return milestone_dictionary[k]["Date"]
 
 
+def get_milestone_notes(
+    project_name: str,
+    milestone_dictionary: Dict[str, Union[datetime.date, str]],
+    milestone_name: str,
+) -> datetime:
+    for k in milestone_dictionary.keys():
+        if milestone_dictionary[k]["Project"] == project_name:
+            if milestone_dictionary[k]["Milestone"] == milestone_name:
+                return milestone_dictionary[k]["Notes"]
+
+
 class MilestoneData:
     def __init__(
         self,
@@ -2230,33 +2241,35 @@ def put_milestones_into_wb(milestones: MilestoneData) -> Workbook:
     row_num = 2
     for i, m in enumerate(milestones.key_names):
         if len(milestones.project_group) == 1:
-            ws.cell(row=row_num + i, column=1).value = milestones.project_group[0]  # project name
-            ws.cell(row=row_num + i, column=2).value = m  # milestone
+            project_name = milestones.project_group[0]
+            pm = m  # pm is project milestone
+            ws.cell(row=row_num + i, column=1).value = project_name
+            ws.cell(row=row_num + i, column=2).value = pm
         else:
-            ws.cell(row=row_num + i, column=1).value = m.split(",")[0]  # project name
-            ws.cell(row=row_num + i, column=2).value = m.split(",")[1][1:]  # milestone
+            project_name = m.split(",")[0]
+            pm = m.split(",")[1][1:]
+            ws.cell(row=row_num + i, column=1).value = project_name  # project name
+            ws.cell(row=row_num + i, column=2).value = pm  # milestone
         ws.cell(row=row_num + i, column=3).value = milestones.md_current[i]
             # .strftime("%d/%m/%Y")
         ws.cell(row=row_num + i, column=3).number_format = 'dd/mm/yy'
         try:
             ws.cell(row=row_num + i, column=4).value = milestones.md_last_po[i]
-                # .strftime("%d/%m/%Y")
             ws.cell(row=row_num + i, column=4).number_format = 'dd/mm/yy'
         except AttributeError:
             pass
         try:
             ws.cell(row=row_num + i, column=5).value = milestones.md_baseline_po[i]
-                # .strftime("%d/%m/%Y")
             ws.cell(row=row_num + i, column=5).number_format = 'dd/mm/yy'
         except AttributeError:
             pass
         try:
             ws.cell(row=row_num + i, column=6).value = milestones.md_baseline_two_po[i]
-                # .strftime("%d/%m/%Y")
             ws.cell(row=row_num + i, column=6).number_format = 'dd/mm/yy'
         except AttributeError:
             pass
-        # note =
+        notes = get_milestone_notes(project_name, milestones.current, pm)
+        ws.cell(row=row_num + i, column=7).value = notes
 
     ws.cell(row=1, column=1).value = 'Project'
     ws.cell(row=1, column=2).value = 'Milestone'
@@ -2264,7 +2277,7 @@ def put_milestones_into_wb(milestones: MilestoneData) -> Workbook:
     ws.cell(row=1, column=4).value = 'Last quarter'
     ws.cell(row=1, column=5).value = 'Baseline one'
     ws.cell(row=1, column=6).value = 'Baseline two'
-    # ws.cell(row=1, column=7).value = 'Notes'
+    ws.cell(row=1, column=7).value = 'Notes'
 
     return wb
 
@@ -5042,17 +5055,6 @@ def project_report_meta_data(
         [table.columns[0], table.columns[1], table.columns[2], table.columns[3]], 10
     )
     return doc
-
-
-def get_milestone_notes(
-    project_name: str,
-    milestone_dictionary: Dict[str, Union[datetime.date, str]],
-    milestone_name: str,
-) -> datetime:
-    for k in milestone_dictionary.keys():
-        if milestone_dictionary[k]["Project"] == project_name:
-            if milestone_dictionary[k]["Milestone"] == milestone_name:
-                return milestone_dictionary[k]["Notes"]
 
 
 def print_out_project_milestones(

@@ -3,7 +3,7 @@
 
 from openpyxl import Workbook
 import sqlite3
-from analysis_engine.data import vfm_matplotlib_graph, make_file_friendly
+from analysis.data import vfm_matplotlib_graph, make_file_friendly
 
 
 #  Places data in excel wb. Using python dictionary structure.

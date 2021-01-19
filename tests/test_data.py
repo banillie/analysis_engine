@@ -1,10 +1,10 @@
 """
-Tests for analysis_engine
+Tests for analysis
 """
 import os
 import datetime
 
-from analysis_engine.data import (
+from analysis.data import (
     Master,
     CostData,
     spent_calculation,

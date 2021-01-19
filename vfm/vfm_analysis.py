@@ -8,14 +8,14 @@ project. The final tab contains a 'count' as required for analysis.
 What is the analysis trying to achieve... need from user(s).
 
 Command line options
-analysis_engine run vfm analysis. Default is current and latest quarter, all projects.
+analysis run vfm analysis. Default is current and latest quarter, all projects.
 flags.
 - quarters. specify the quarters to be analysed
 - groups. specify particular groups e.g. business case stage, dft group
 - project. specify a particular project or group of projects.
 
 """
-from analysis_engine.data import (
+from analysis.data import (
     Master,
     root_path,
     get_project_information,

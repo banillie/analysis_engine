@@ -17,7 +17,7 @@ master data is stored in memory and arguments run directly from it. rather
 than having to convert excel ws into python dict each time. This would also be
 a useful first step as lots of data checking is done as part of Master Class
 creation.
-- have cli so that it is analysis_engine, rather than main.py
+- have cli so that it is analysis, rather than main.py
 - packaged onto PyPI.
 
 """
@@ -25,10 +25,10 @@ creation.
 import argparse
 
 
-from analysis_engine.data import (
+from data import (
     get_master_data,
     Master,
-    get_project_information, VfMData, root_path, vfm_into_excel
+    get_project_information, VfMData, root_path, vfm_into_excel, MilestoneData, put_milestones_into_wb, Projects
 )
 
 
@@ -51,12 +51,25 @@ def vfm(args):
     print("VfM analysis has been compiled. Enjoy!")
 
 
+def milestones(args):
+    print("compiling milestone analysis")
+    m = Master(get_master_data(), get_project_information())
+    projects = m.project_stage["Q2 20/21"]["FBC"] + m.project_stage["Q2 20/21"][
+        "OBC"] + [Projects.hs2_2b]
+    milestone_data = MilestoneData(m, projects)
+    milestone_data.filter_chart_info(milestone_type=["Approval", "Delivery"])
+    run = put_milestones_into_wb(milestone_data)
+    run.save(root_path / "output/milestone_data_output_with_notes.xlsx")
+
+
 def main():
     parser = argparse.ArgumentParser(prog='engine',
         description='value for money analysis')
     subparsers = parser.add_subparsers()
     parser_vfm = subparsers.add_parser('vfm',
                                        help="vfm help")
+    parser_milestones = subparsers.add_parser('milestones',
+                                              help='milestone help')
     parser_vfm.add_argument('-s',
                         '--stage',
                         type=str,
@@ -77,7 +90,9 @@ def main():
                         action='store',
                         nargs='+',
                         help='Returns analysis for specified quarters. Must be in format e.g Q3 19/20')
+    # parser_milestones.add_argument()
     parser_vfm.set_defaults(func=vfm)
+    parser_milestones.set_defaults(func=milestones)
     args = parser.parse_args()
     # print(vars(args))
     args.func(vars(args))
