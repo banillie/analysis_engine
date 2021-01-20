@@ -817,16 +817,16 @@ class Master:
                         g_list.append(p)
                 # messaging to clean up group data.
                 # TODO wrap into system messaging
-                # if group_type is None or group_type == "DfT":
-                #     if g_list:
-                #         for x in g_list:
-                #             print(
-                #                 str(quarter)
-                #                 + " "
-                #                 + str(x)
-                #                 + " DfT Group data needs cleaning. Currently "
-                #                 + str(group_type)
-                #             )
+                if group_type is None or group_type == "DfT":
+                    if g_list:
+                        for x in g_list:
+                            print(
+                                str(quarter)
+                                + " "
+                                + str(x)
+                                + " DfT Group data needs cleaning. Currently "
+                                + str(group_type)
+                            )
                 lower_g_dict[group_type] = g_list
             group_dict[quarter] = lower_g_dict
 
@@ -841,16 +841,16 @@ class Master:
                         s_list.append(p)
                 # messaging to clean up group data.
                 # TODO wrap into system messaging
-                # if stage_type is None:
-                #     if s_list:
-                #         for x in s_list:
-                #             print(
-                #                 str(quarter)
-                #                 + " "
-                #                 + str(x)
-                #                 + " IPDC stage data needs cleaning. Currently "
-                #                 + str(stage_type)
-                #             )
+                if stage_type is None:
+                    if s_list:
+                        for x in s_list:
+                            print(
+                                str(quarter)
+                                + " "
+                                + str(x)
+                                + " IPDC stage data needs cleaning. Currently "
+                                + str(stage_type)
+                            )
                 lower_s_dict[stage_type] = s_list
             stage_dict[quarter] = lower_s_dict
 
@@ -4025,8 +4025,10 @@ def risk_score(risk_impact: str, risk_likelihood: str) -> str:
 
 
 class RiskData:
-    def __init__(self, master: Master):
+    def __init__(self, master: Master,
+                 **kwargs):
         self.master = master
+        self.kwargs = kwargs
         self.risk_dictionary = {}
         self.risk_count = {}
         self.risk_impact_count = {}
@@ -4035,10 +4037,23 @@ class RiskData:
 
     def get_dictionary(self):
         quarter_dict = {}
-        for i in range(len(self.master.master_data)):
+        if "quarters" in self.kwargs:  # is keys() necessary
+            quarters = self.kwargs["quarters"]
+        else:
+            quarters = [self.master.quarter_list[0], self.master.quarter_list[1]]
+        for q in quarters:  # q is quarter
             project_dict = {}
-            try:
-                for project_name in self.master.master_data[i].projects:
+            i = self.master.quarter_list.index(q)  # i for index
+            group = self.master.master_data[i].projects  # why does this need to come first?
+            if "stage" in self.kwargs:
+                s_input = self.kwargs["stage"]
+                group = cal_group(s_input, self.master, q)
+            if "group" in self.kwargs:
+                g_input = self.kwargs["group"]
+                group = cal_group(g_input, self.master, q)
+            for project_name in group:
+                # project_dict = {}
+                try:
                     number_dict = {}
                     for x in range(1, 11):  # currently 10 risks
                         risk_list = []
@@ -4106,9 +4121,9 @@ class RiskData:
                             number_dict[x] = dict(risk_list)
 
                     project_dict[self.master.abbreviations[project_name]] = number_dict
-            except KeyError:  # handles dca_type e.g. schedule confidence key not present
-                pass
-            quarter_dict[str(self.master.master_data[i].quarter)] = project_dict
+                except KeyError:  # handles dca_type e.g. schedule confidence key not present
+                    pass
+                quarter_dict[str(self.master.master_data[i].quarter)] = project_dict
 
         self.risk_dictionary = quarter_dict
 
@@ -4149,15 +4164,13 @@ class RiskData:
         self.risk_impact_count = impact_output_dict
 
 
-def risks_into_excel(risk_data: RiskData, quarter: List[str] or str) -> workbook:
+def risks_into_excel(risk_data: RiskData) -> workbook:
     wb = Workbook()
 
-    quarter = string_conversion(quarter)
-
-    for q in quarter:
+    for q in risk_data.risk_dictionary.keys():
         start_row = 3
         ws = wb.create_sheet(
-            make_file_friendly(q + " all data")
+            make_file_friendly(str(q) + " all data")
         )  # creating worksheets. names restricted to 30 characters.
         ws.title = make_file_friendly(q + " all data")  # title of worksheet
 
