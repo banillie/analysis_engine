@@ -5244,9 +5244,24 @@ def compile_p_report(
 
 
 def run_p_reports(master: Master,
-                  projects: List[str] or str) -> None:
-    projects = string_conversion(projects)
-    for p in projects:
+                  project_information: Dict[str, Union[str, int]],
+                  **kwargs) -> None:
+
+    if "group" not in kwargs:
+        group = master.current_projects
+    else:
+        try:
+            group = cal_group(kwargs["group"], master, str(master.current_quarter))
+        except KeyError:
+            group = kwargs["group"]
+
+    for p in group:
+        if p not in project_information.projects:
+            for x in project_information.projects:
+                if p == project_information.data[x]["Abbreviations"]:
+                    p = x
+                    break
+        print("Compiling summary for " + p)
         report_doc = open_word_doc(root_path / "input/summary_temp.docx")
         qrt = make_file_friendly(str(master.master_data[0].quarter))
         output = compile_p_report(report_doc, get_project_information(), master, p)

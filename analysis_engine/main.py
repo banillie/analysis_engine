@@ -3,6 +3,8 @@ cli for analysis_engine engine.
 currently working on number of different subcommands
 sub commands.. so far.
 vfm: is the name of the command to runs analysis_engine
+summaries: in place but hard coded without options
+milestones: in place but hard coded without options
 
 Options... so far.
 -group: an option for a particular dft group of projects. str. specific options.
@@ -13,7 +15,7 @@ Options... so far.
 
 Next steps:
 - explore possibility of there being a way to 'initiate' analysis_engine engine so
-master data is stored in memory and arguments run directly from it. rather
+master data is stored in memory and subcommands run directly from it. rather
 than having to convert excel ws into python dict each time. This would also be
 a useful first step as lots of data checking is done as part of Master Class
 creation.
@@ -65,41 +67,55 @@ def milestones(args):
 
 def summaries(args):
     print("compiling summaries")
+    proj_info = get_project_information()
     m = Master(get_master_data(), get_project_information())
-    run_p_reports(m, m.dft_groups["Q3 20/21"]["RDM"])
+    if args["group"]:
+        run_p_reports(m, proj_info, group=args["group"])
+    else:
+        run_p_reports(m, proj_info)
 
 
 def main():
     parser = argparse.ArgumentParser(prog='engine',
-        description='value for money analysis_engine')
+                                     description='DfT Major Projects Portfolio Office analysis engine')
     subparsers = parser.add_subparsers()
+    # subparsers.metavar = '                '
     parser_vfm = subparsers.add_parser('vfm',
-                                       help="vfm help")
+                                       help="vfm analysis")
     parser_milestones = subparsers.add_parser('milestones',
-                                              help='milestone help')
+                                              help='milestone analysis')
     parser_summaries = subparsers.add_parser('summaries',
-                                             help='summaries')
-    parser_vfm.add_argument('-s',
-                        '--stage',
+                                             help='summary reports')
+    parser_vfm.add_argument('--stage',
                         type=str,
+                        metavar='',
                         action='store',
                         nargs='+',
                         choices=["FBC", "OBC", "SOBC", "pre-SOBC"],
-                        help='Returns analysis_engine for a group a projects at specified stage')
-    parser_vfm.add_argument('-g',
-                        '--group',
+                        help='Returns analysis for those projects at the specified planning stage(s). Must be one '
+                             'or combination of "FBC", "OBC", "SOBC", "pre-SOBC".')
+    parser_vfm.add_argument('--group',
                         type=str,
+                        metavar='',
                         action='store',
                         nargs='+',
                         choices=["HSMRPG", "AMIS", "Rail", "RDM"],
-                        help='Returns analysis_engine for specified DfT Group')
-    parser_vfm.add_argument('-q',
-                        '--quarters',
+                        help='Returns analysis for those projects in the specified DfT Group. Must be one or '
+                             'combination of "HSMRPG", "AMIS", "Rail", "RDM"')
+    parser_vfm.add_argument('--quarters',
                         type=str,
+                        metavar='',
                         action='store',
                         nargs='+',
-                        help='Returns analysis_engine for specified quarters. Must be in format e.g Q3 19/20')
-    # parser_milestones.add_argument()
+                        help='Returns analysis for specified quarters. Must be in format e.g Q3 19/20')
+    parser_summaries.add_argument('--group',
+                            type=str,
+                            metavar='',
+                            action='store',
+                            nargs='+',
+                            # choices=["HSMRPG", "AMIS", "Rail", "RDM"],
+                            help='Returns summaries for specified projects. User can either input DfT Group name; '
+                                 '"HSMRPG", "AMIS", "Rail", "RDM", or the project(s) acronym')
     parser_vfm.set_defaults(func=vfm)
     parser_milestones.set_defaults(func=milestones)
     parser_summaries.set_defaults(func=summaries)
