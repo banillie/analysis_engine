@@ -395,9 +395,6 @@ def test_dca_analysis(project_info, dca_masters, word_doc):
 def test_risk_analysis(project_info, risk_masters):
     m = Master(risk_masters, project_info)
     risk = RiskData(m, group=["Rail"])
-    # assert risk.risk_impact_count == {}
-    # assert risk.risk_count == {}
-    # assert risk.risk_dictionary == {}
     wb = risks_into_excel(risk)
     wb.save("resources/risks.xlsx")
 

@@ -177,10 +177,10 @@ def get_error_list(seq: List[str]):
     return [x for x in seq if not (x in seen or seen_add(x))]
 
 
-SALMON_FILL = PatternFill(start_color='FFFF8080',
-                          end_color='FFFF8080',
-                          fill_type='solid')
-'''Store of different colours'''
+SALMON_FILL = PatternFill(
+    start_color="FFFF8080", end_color="FFFF8080", fill_type="solid"
+)
+"""Store of different colours"""
 ag_text = Font(color="00a5b700")  # text same colour as background
 ag_fill = PatternFill(bgColor="00a5b700")
 ar_text = Font(color="00f97b31")  # text same colour as background
@@ -202,18 +202,48 @@ light_grey_fill = PatternFill(bgColor="0085929e")
 greyblue_text = Font(color="85c1e9")
 greyblue_fill = PatternFill(bgColor="85c1e9")
 
-salmon_fill = PatternFill(start_color='FFFF8080',
-                          end_color='FFFF8080',
-                          fill_type='solid')
+salmon_fill = PatternFill(
+    start_color="FFFF8080", end_color="FFFF8080", fill_type="solid"
+)
 
-'''Conditional formatting, cell colouring and text colouring'''
+"""Conditional formatting, cell colouring and text colouring"""
 # reference for column names when applying conditional fomatting
-list_column_ltrs = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l',
-                    'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'series_one', 'series_two', 'z']
+list_column_ltrs = [
+    "a",
+    "b",
+    "c",
+    "d",
+    "e",
+    "f",
+    "g",
+    "h",
+    "i",
+    "j",
+    "k",
+    "l",
+    "m",
+    "n",
+    "o",
+    "p",
+    "q",
+    "r",
+    "s",
+    "t",
+    "u",
+    "v",
+    "w",
+    "series_one",
+    "series_two",
+    "z",
+]
 # list of keys that have rag values for conditional formatting.
-list_of_rag_keys = ['SRO Schedule Confidence', 'Departmental DCA',
-                    'SRO Finance confidence', 'SRO Benefits RAG',
-                    'GMPP - IPA DCA']
+list_of_rag_keys = [
+    "SRO Schedule Confidence",
+    "Departmental DCA",
+    "SRO Finance confidence",
+    "SRO Benefits RAG",
+    "GMPP - IPA DCA",
+]
 
 # lists of text and backfround colours and list of values for conditional formating rules.
 rag_txt_colours = [ag_text, ar_text, red_text, green_text, amber_text]
@@ -222,7 +252,7 @@ rag_txt_list_acroynms = ["A/G", "A/R", "R", "G", "A"]
 rag_txt_list_full = ["Amber/Green", "Amber/Red", "Red", "Green", "Amber"]
 gen_txt_colours = [darkish_grey_text, light_grey_text, greyblue_text]
 gen_fill_colours = [darkish_grey_fill, light_grey_fill, greyblue_fill]
-gen_txt_list = ['md', 'pnr', 'knc']
+gen_txt_list = ["md", "pnr", "knc"]
 
 # for project summary pages
 SRO_CONF_TABLE_LIST = [
@@ -449,6 +479,7 @@ class Projects:
         nwe,
         brighton_ml,
     ]
+
 
 # Hard code and needs abstracting
 
@@ -794,13 +825,16 @@ class Master:
                     stage = BC_STAGE_DICT[master[p]["IPDC approval point"]]
                     raw_list.append(("group", dft_group))
                     raw_list.append(("stage", stage))
-                    lower_dict[p] = dict(
-                        raw_list
-                    )
+                    lower_dict[p] = dict(raw_list)
                     group_list.append(dft_group)
                     stage_list.append(stage)
                 except KeyError:
-                    print(str(master.quarter) + ": " + str(p) + " has reported an incorrect DfT Group value. Amend" )
+                    print(
+                        str(master.quarter)
+                        + ": "
+                        + str(p)
+                        + " has reported an incorrect DfT Group value. Amend"
+                    )
             raw_dict[str(master.quarter)] = lower_dict
 
         group_list = list(set(group_list))
@@ -862,7 +896,6 @@ class Master:
         for master in self.master_data:
             output_list.append(str(master.quarter))
         self.quarter_list = output_list
-
 
 
 #  check cdel cost profile
@@ -1699,9 +1732,7 @@ class MilestoneData:
             self.md_last_po = [x for x in self.md_last_po if x != "remove"]
             self.md_baseline = [x for x in self.md_baseline if x != "remove"]
             self.md_baseline_po = [x for x in self.md_baseline_po if x != "remove"]
-            self.md_baseline_two = [
-                x for x in self.md_baseline_two if x != "remove"
-            ]
+            self.md_baseline_two = [x for x in self.md_baseline_two if x != "remove"]
             self.md_baseline_two_po = [
                 x for x in self.md_baseline_two_po if x != "remove"
             ]
@@ -1737,9 +1768,7 @@ class MilestoneData:
             self.md_last_po = [x for x in self.md_last_po if x != "remove"]
             self.md_baseline = [x for x in self.md_baseline if x != "remove"]
             self.md_baseline_po = [x for x in self.md_baseline_po if x != "remove"]
-            self.md_baseline_two = [
-                x for x in self.md_baseline_two if x != "remove"
-            ]
+            self.md_baseline_two = [x for x in self.md_baseline_two if x != "remove"]
             self.md_baseline_two_po = [
                 x for x in self.md_baseline_two_po if x != "remove"
             ]
@@ -1770,9 +1799,7 @@ class MilestoneData:
         self.md_baseline = [x for x in self.md_baseline if x != "remove"]
         self.md_baseline_po = [x for x in self.md_baseline_po if x != "remove"]
         self.md_baseline_two = [x for x in self.md_baseline_two if x != "remove"]
-        self.md_baseline_two_po = [
-            x for x in self.md_baseline_two_po if x != "remove"
-        ]
+        self.md_baseline_two_po = [x for x in self.md_baseline_two_po if x != "remove"]
         self.type_list = [x for x in self.type_list if x != "remove"]
 
         self.max_date = max(
@@ -2251,33 +2278,33 @@ def put_milestones_into_wb(milestones: MilestoneData) -> Workbook:
             ws.cell(row=row_num + i, column=1).value = project_name  # project name
             ws.cell(row=row_num + i, column=2).value = pm  # milestone
         ws.cell(row=row_num + i, column=3).value = milestones.md_current[i]
-            # .strftime("%d/%m/%Y")
-        ws.cell(row=row_num + i, column=3).number_format = 'dd/mm/yy'
+        # .strftime("%d/%m/%Y")
+        ws.cell(row=row_num + i, column=3).number_format = "dd/mm/yy"
         try:
             ws.cell(row=row_num + i, column=4).value = milestones.md_last_po[i]
-            ws.cell(row=row_num + i, column=4).number_format = 'dd/mm/yy'
+            ws.cell(row=row_num + i, column=4).number_format = "dd/mm/yy"
         except AttributeError:
             pass
         try:
             ws.cell(row=row_num + i, column=5).value = milestones.md_baseline_po[i]
-            ws.cell(row=row_num + i, column=5).number_format = 'dd/mm/yy'
+            ws.cell(row=row_num + i, column=5).number_format = "dd/mm/yy"
         except AttributeError:
             pass
         try:
             ws.cell(row=row_num + i, column=6).value = milestones.md_baseline_two_po[i]
-            ws.cell(row=row_num + i, column=6).number_format = 'dd/mm/yy'
+            ws.cell(row=row_num + i, column=6).number_format = "dd/mm/yy"
         except AttributeError:
             pass
         notes = get_milestone_notes(project_name, milestones.current, pm)
         ws.cell(row=row_num + i, column=7).value = notes
 
-    ws.cell(row=1, column=1).value = 'Project'
-    ws.cell(row=1, column=2).value = 'Milestone'
-    ws.cell(row=1, column=3).value = 'Current date'
-    ws.cell(row=1, column=4).value = 'Last quarter'
-    ws.cell(row=1, column=5).value = 'Baseline one'
-    ws.cell(row=1, column=6).value = 'Baseline two'
-    ws.cell(row=1, column=7).value = 'Notes'
+    ws.cell(row=1, column=1).value = "Project"
+    ws.cell(row=1, column=2).value = "Milestone"
+    ws.cell(row=1, column=3).value = "Current date"
+    ws.cell(row=1, column=4).value = "Last quarter"
+    ws.cell(row=1, column=5).value = "Baseline one"
+    ws.cell(row=1, column=6).value = "Baseline two"
+    ws.cell(row=1, column=7).value = "Notes"
 
     return wb
 
@@ -4025,8 +4052,7 @@ def risk_score(risk_impact: str, risk_likelihood: str) -> str:
 
 
 class RiskData:
-    def __init__(self, master: Master,
-                 **kwargs):
+    def __init__(self, master: Master, **kwargs):
         self.master = master
         self.kwargs = kwargs
         self.risk_dictionary = {}
@@ -4044,7 +4070,9 @@ class RiskData:
         for q in quarters:  # q is quarter
             project_dict = {}
             i = self.master.quarter_list.index(q)  # i for index
-            group = self.master.master_data[i].projects  # why does this need to come first?
+            group = self.master.master_data[
+                i
+            ].projects  # why does this need to come first?
             if "stage" in self.kwargs:
                 s_input = self.kwargs["stage"]
                 group = cal_group(s_input, self.master, q)
@@ -4271,9 +4299,9 @@ VFM_CAT = [
 ]
 
 
-def cal_group(lists_input: List[str] or List[List[str]],
-              master: Master,
-              quarter: str) -> List[str]:
+def cal_group(
+    lists_input: List[str] or List[List[str]], master: Master, quarter: str
+) -> List[str]:
     if len(lists_input) > 1:
         group = []
         for g in lists_input:
@@ -4644,24 +4672,24 @@ def bubble_chart(ws, rag_count):
     chart.style = 18  # use a preset style
 
     # add the first series of data
-    amber_stop = 2 + rag_count['Amber']
-    xvalues = Reference(ws, min_col=3, min_row=3, max_row= amber_stop)
-    yvalues = Reference(ws, min_col=4, min_row=3, max_row= amber_stop)
-    size = Reference(ws, min_col=5, min_row=3, max_row= amber_stop)
+    amber_stop = 2 + rag_count["Amber"]
+    xvalues = Reference(ws, min_col=3, min_row=3, max_row=amber_stop)
+    yvalues = Reference(ws, min_col=4, min_row=3, max_row=amber_stop)
+    size = Reference(ws, min_col=5, min_row=3, max_row=amber_stop)
     series = Series(values=yvalues, xvalues=xvalues, zvalues=size, title="Amber")
     chart.series.append(series)
     series.graphicalProperties.solidFill = "fce553"
 
     # add the second
-    amber_g_stop = amber_stop + rag_count['Amber/Green']
-    xvalues = Reference(ws, min_col=3, min_row= amber_stop + 1, max_row= amber_g_stop)
-    yvalues = Reference(ws, min_col=4, min_row= amber_stop + 1, max_row= amber_g_stop)
-    size = Reference(ws, min_col=5, min_row= amber_stop + 1, max_row= amber_g_stop)
+    amber_g_stop = amber_stop + rag_count["Amber/Green"]
+    xvalues = Reference(ws, min_col=3, min_row=amber_stop + 1, max_row=amber_g_stop)
+    yvalues = Reference(ws, min_col=4, min_row=amber_stop + 1, max_row=amber_g_stop)
+    size = Reference(ws, min_col=5, min_row=amber_stop + 1, max_row=amber_g_stop)
     series = Series(values=yvalues, xvalues=xvalues, zvalues=size, title="Amber/Green")
     chart.series.append(series)
     series.graphicalProperties.solidFill = "a5b700"
 
-    amber_r_stop = amber_g_stop + rag_count['Amber/Red']
+    amber_r_stop = amber_g_stop + rag_count["Amber/Red"]
     xvalues = Reference(ws, min_col=3, min_row=amber_g_stop + 1, max_row=amber_r_stop)
     yvalues = Reference(ws, min_col=4, min_row=amber_g_stop + 1, max_row=amber_r_stop)
     size = Reference(ws, min_col=5, min_row=amber_g_stop + 1, max_row=amber_r_stop)
@@ -4669,7 +4697,7 @@ def bubble_chart(ws, rag_count):
     chart.series.append(series)
     series.graphicalProperties.solidFill = "f97b31"
 
-    green_stop = amber_r_stop + rag_count['Green']
+    green_stop = amber_r_stop + rag_count["Green"]
     xvalues = Reference(ws, min_col=3, min_row=amber_r_stop + 1, max_row=green_stop)
     yvalues = Reference(ws, min_col=4, min_row=amber_r_stop + 1, max_row=green_stop)
     size = Reference(ws, min_col=5, min_row=amber_r_stop + 1, max_row=green_stop)
@@ -4677,7 +4705,7 @@ def bubble_chart(ws, rag_count):
     chart.series.append(series)
     series.graphicalProperties.solidFill = "17960c"
 
-    red_stop = green_stop + rag_count['Red']
+    red_stop = green_stop + rag_count["Red"]
     xvalues = Reference(ws, min_col=3, min_row=green_stop + 1, max_row=red_stop)
     yvalues = Reference(ws, min_col=4, min_row=green_stop + 1, max_row=red_stop)
     size = Reference(ws, min_col=5, min_row=green_stop + 1, max_row=red_stop)
@@ -5239,7 +5267,10 @@ def compile_p_report(
     try:
         milestones.filter_chart_info(start_date="1/9/2020", end_date="30/12/2022")
         milestones_chart = milestone_chart(
-            milestones, blue_line="ipdc_date", title=ab + " schedule (2021 - 22)", show="No"
+            milestones,
+            blue_line="ipdc_date",
+            title=ab + " schedule (2021 - 22)",
+            show="No",
         )
         put_matplotlib_fig_into_word(doc, milestones_chart)
         # print_out_project_milestones(doc, milestones, project_name)
@@ -5247,7 +5278,10 @@ def compile_p_report(
         milestones = MilestoneData(master, project_name)
         milestones.filter_chart_info(start_date="1/9/2020", end_date="30/12/2024")
         milestones_chart = milestone_chart(
-            milestones, blue_line="ipdc_date", title=ab + " schedule (2021 - 24)", show="No"
+            milestones,
+            blue_line="ipdc_date",
+            title=ab + " schedule (2021 - 24)",
+            show="No",
         )
         put_matplotlib_fig_into_word(doc, milestones_chart)
     print_out_project_milestones(doc, milestones, project_name)
@@ -5256,9 +5290,9 @@ def compile_p_report(
     return doc
 
 
-def run_p_reports(master: Master,
-                  project_information: Dict[str, Union[str, int]],
-                  **kwargs) -> None:
+def run_p_reports(
+    master: Master, project_information: Dict[str, Union[str, int]], **kwargs
+) -> None:
 
     if "group" not in kwargs:
         group = master.current_projects
@@ -5278,7 +5312,9 @@ def run_p_reports(master: Master,
         report_doc = open_word_doc(root_path / "input/summary_temp.docx")
         qrt = make_file_friendly(str(master.master_data[0].quarter))
         output = compile_p_report(report_doc, get_project_information(), master, p)
-        output.save(root_path / "output/{}_report_{}.docx".format(p, qrt))  # add quarter here
+        output.save(
+            root_path / "output/{}_report_{}.docx".format(p, qrt)
+        )  # add quarter here
 
 
 # TODO refactor all code below
@@ -6256,4 +6292,3 @@ def run_p_reports(master: Master,
 #     ws.add_chart(chart, "I12")
 #
 #     return output_wb
-
