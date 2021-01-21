@@ -112,12 +112,23 @@ def summaries(args):
 
 
 def dca(args):
+    print("compiling dca analysis")
     m = Master(get_master_data(), get_project_information())
-    dca = DcaData(m)
-    # assert dca.dca_count == {}
-    quarter_list = ["Q4 19/20", "Q4 18/19"]
-    wb = dca_changes_into_excel(dca, quarter_list)
+    dca_m = DcaData(m)  # why does this need to come first and not as else statement below?
+    if args["quarters"]:
+        dca_m = DcaData(m, quarters=args["quarters"])
+    if args["stage"]:
+        dca_m = DcaData(m, stage=args["stage"])
+    if args["group"]:
+        dca_m = DcaData(m, group=args["group"])
+    if args["quarters"] and args["stage"]:  # to test
+        dca_m = DcaData(m, quarters=args["quarters"], stage=args["stage"])
+    if args["quarters"] and args["group"]:  # to test
+        dca_m = DcaData(m, quarters=args["quarters"], group=args["group"])
+
+    wb = dca_changes_into_excel(dca_m)
     wb.save(root_path / "output/dcas.xlsx")
+    print("DCA analysis has been compiled. Enjoy!")
 
 
 def main():
@@ -190,6 +201,34 @@ def main():
         'combination of "HSMRPG", "AMIS", "Rail", "RDM"',
     )
     parser_risks.add_argument(
+        "--quarters",
+        type=str,
+        metavar="",
+        action="store",
+        nargs="+",
+        help="Returns analysis for specified quarters. Must be in format e.g Q3 19/20",
+    )
+    parser_dca.add_argument(
+        "--stage",
+        type=str,
+        metavar="",
+        action="store",
+        nargs="+",
+        choices=["FBC", "OBC", "SOBC", "pre-SOBC"],
+        help="Returns analysis for those projects at the specified planning stage(s). Must be one "
+             'or combination of "FBC", "OBC", "SOBC", "pre-SOBC".',
+    )
+    parser_dca.add_argument(
+        "--group",
+        type=str,
+        metavar="",
+        action="store",
+        nargs="+",
+        choices=["HSMRPG", "AMIS", "Rail", "RDM"],
+        help="Returns analysis for those projects in the specified DfT Group. Must be one or "
+             'combination of "HSMRPG", "AMIS", "Rail", "RDM"',
+    )
+    parser_dca.add_argument(
         "--quarters",
         type=str,
         metavar="",

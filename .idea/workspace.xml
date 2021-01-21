@@ -21,7 +21,13 @@
   <component name="ChangeListManager">
     <list default="true" id="205bd717-e7d2-47dc-82c7-88a8dae3593c" name="Default Changelist" comment="change portfolio_financial_profile.py to include old bl profile data">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/analysis_engine/data.py" beforeDir="false" afterPath="$PROJECT_DIR$/analysis_engine/data.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/analysis_engine/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/analysis_engine/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/resources/dca_checks.docx" beforeDir="false" afterPath="$PROJECT_DIR$/tests/resources/dca_checks.docx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/resources/dca_print.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/tests/resources/dca_print.xlsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/resources/dcas.xlsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/resources/test_master_4_2017_dcas.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/tests/resources/test_master_4_2017_dcas.xlsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/test_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test_data.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -174,6 +180,22 @@
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
+    <configuration name="pytest for test_data.test_speedial_print_out" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
+      <module name="analysis_engine" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="$USER_HOME$/.virtualenvs/a_engine/bin/python" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="_new_keywords" value="&quot;&quot;" />
+      <option name="_new_parameters" value="&quot;&quot;" />
+      <option name="_new_additionalArguments" value="&quot;--tb\u003dshort&quot;" />
+      <option name="_new_target" value="&quot;test_data.test_speedial_print_out&quot;" />
+      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
+      <method v="2" />
+    </configuration>
     <configuration name="temp_tests" type="tests" factoryName="py.test">
       <module name="analysis_engine" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -231,10 +253,12 @@
       <item itemvalue="Python tests.pytest for test_data.test_creation_of_masters_class" />
       <item itemvalue="Python tests.pytest for test_data.test_risk_analysis" />
       <item itemvalue="Python tests.pytest for test_data.test_dca_analysis" />
+      <item itemvalue="Python tests.pytest for test_data.test_speedial_print_out" />
     </list>
     <recent_temporary>
       <list>
         <item itemvalue="Python tests.pytest for test_data.test_dca_analysis" />
+        <item itemvalue="Python tests.pytest for test_data.test_speedial_print_out" />
         <item itemvalue="Python tests.pytest for test_data.test_risk_analysis" />
         <item itemvalue="Python tests.pytest for test_data.test_creation_of_masters_class" />
       </list>
@@ -487,16 +511,5 @@
     <MESSAGE value="first commit no10_commission.py" />
     <MESSAGE value="change portfolio_financial_profile.py to include old bl profile data" />
     <option name="LAST_COMMIT_MESSAGE" value="change portfolio_financial_profile.py to include old bl profile data" />
-  </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/tests/test_data.py</url>
-          <line>385</line>
-          <option name="timeStamp" value="1" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
   </component>
 </project>

@@ -3760,11 +3760,10 @@ DCA_RATING_SCORES = {
 
 
 class DcaData:
-    def __init__(self,
-                 master: Master,
-                 **kwargs):
+    def __init__(self, master: Master, **kwargs):
         self.master = master
         self.kwargs = kwargs
+        self.quarters = []
         self.dca_dictionary = {}
         self.dca_changes = {}
         self.dca_count = {}
@@ -3774,10 +3773,10 @@ class DcaData:
     def get_dictionary(self) -> None:
         quarter_dict = {}
         if "quarters" in self.kwargs:  # is keys() necessary
-            quarters = self.kwargs["quarters"]
+            self.quarters = self.kwargs["quarters"]
         else:
-            quarters = [self.master.quarter_list[0], self.master.quarter_list[1]]
-        for q in quarters:  # q is quarter
+            self.quarters = [self.master.quarter_list[0], self.master.quarter_list[1]]
+        for q in self.quarters:  # q is quarter
             project_dict = {}
             i = self.master.quarter_list.index(q)  # i for index
             group = self.master.master_data[i].projects  # why does this need to come first?
@@ -3787,10 +3786,10 @@ class DcaData:
             if "group" in self.kwargs:
                 g_input = self.kwargs["group"]
                 group = cal_group(g_input, self.master, q)
-            try:
-                type_dict = {}
-                for dca_type in list(DCA_KEYS.values()):
-                    dca_dict = {}
+            type_dict = {}
+            for dca_type in list(DCA_KEYS.values()):
+                dca_dict = {}
+                try:  # here
                     for project_name in group:
                         colour = self.master.master_data[i].data[project_name][dca_type]
                         score = DCA_RATING_SCORES[
@@ -3808,8 +3807,8 @@ class DcaData:
                             dca_colour + t + cost_amount + quarter + dca_score
                         )
                     type_dict[dca_type] = dca_dict
-            except KeyError:  # handles dca_type e.g. schedule confidence key not present
-                pass
+                except KeyError:  # handles dca_type e.g. schedule confidence key not present
+                    pass
 
             quarter_dict[q] = type_dict
 
@@ -3819,21 +3818,21 @@ class DcaData:
         """compiles dictionary of changes in dca ratings when provided with two quarter arguments"""
 
         c_dict = {}
-        for dca_type in list(self.dca_dictionary[self.q_one].keys()):
+        for dca_type in list(DCA_KEYS.values()):
             lower_dict = {}
-            for project_name in list(self.dca_dictionary[self.q_one][dca_type].keys()):
+            for project_name in list(self.dca_dictionary[self.quarters[0]][dca_type].keys()):
                 t = [("Type", dca_type)]
                 try:
-                    dca_one_colour = self.dca_dictionary[quarter_one][dca_type][
+                    dca_one_colour = self.dca_dictionary[self.quarters[0]][dca_type][
                         project_name
                     ]["DCA"]
-                    dca_two_colour = self.dca_dictionary[quarter_two][dca_type][
+                    dca_two_colour = self.dca_dictionary[self.quarters[1]][dca_type][
                         project_name
                     ]["DCA"]
-                    dca_one_score = self.dca_dictionary[quarter_one][dca_type][
+                    dca_one_score = self.dca_dictionary[self.quarters[0]][dca_type][
                         project_name
                     ]["DCA score"]
-                    dca_two_score = self.dca_dictionary[quarter_two][dca_type][
+                    dca_two_score = self.dca_dictionary[self.quarters[1]][dca_type][
                         project_name
                     ]["DCA score"]
                     if dca_one_score == dca_two_score:
@@ -3990,12 +3989,12 @@ def dca_changes_into_word(dca_data: DcaData, doc: Document) -> Document:
     return doc
 
 
-def dca_changes_into_excel(dca_data: DcaData, quarter: List[str] or str) -> workbook:
+def dca_changes_into_excel(dca_data: DcaData) -> workbook:
     wb = Workbook()
 
-    quarter = string_conversion(quarter)
+    # quarter = string_conversion(quarter)
 
-    for q in quarter:
+    for q in dca_data.quarters:
         start_row = 3
         ws = wb.create_sheet(
             make_file_friendly(q)
