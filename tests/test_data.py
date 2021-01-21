@@ -384,12 +384,12 @@ def test_dca_analysis(project_info, dca_masters, word_doc):
     m = Master(dca_masters, project_info)
     dca = DcaData(m)
     # assert dca.dca_count == {}
-    dca.get_changes("Q4 19/20", "Q4 18/19")
-    dca_changes_into_word(dca, word_doc)
-    word_doc.save("resources/dca_checks.docx")
-    quarter_list = ["Q4 19/20", "Q4 18/19"]
-    wb = dca_changes_into_excel(dca, quarter_list)
-    wb.save("resources/dca_print.xlsx")
+    # dca.get_changes("Q4 19/20", "Q4 18/19")
+    # dca_changes_into_word(dca, word_doc)
+    # word_doc.save("resources/dca_checks.docx")
+    # quarter_list = ["Q4 19/20", "Q4 18/19"]
+    # wb = dca_changes_into_excel(dca, quarter_list)
+    # wb.save("resources/dca_print.xlsx")
 
 
 def test_risk_analysis(project_info, risk_masters):

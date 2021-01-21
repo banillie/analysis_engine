@@ -39,7 +39,7 @@ from data import (
     Projects,
     run_p_reports,
     RiskData,
-    risks_into_excel,
+    risks_into_excel, DcaData, dca_changes_into_excel,
 )
 
 
@@ -111,6 +111,15 @@ def summaries(args):
         run_p_reports(m, proj_info)
 
 
+def dca(args):
+    m = Master(get_master_data(), get_project_information())
+    dca = DcaData(m)
+    # assert dca.dca_count == {}
+    quarter_list = ["Q4 19/20", "Q4 18/19"]
+    wb = dca_changes_into_excel(dca, quarter_list)
+    wb.save(root_path / "output/dcas.xlsx")
+
+
 def main():
     parser = argparse.ArgumentParser(
         prog="engine", description="DfT Major Projects Portfolio Office analysis engine"
@@ -121,6 +130,7 @@ def main():
     parser_milestones = subparsers.add_parser("milestones", help="milestone analysis")
     parser_summaries = subparsers.add_parser("summaries", help="summary reports")
     parser_risks = subparsers.add_parser("risks", help="risk analysis")
+    parser_dca = subparsers.add_parser("dcas", help="dca analysis")
     parser_vfm.add_argument(
         "--stage",
         type=str,
@@ -192,6 +202,7 @@ def main():
     parser_milestones.set_defaults(func=milestones)
     parser_summaries.set_defaults(func=summaries)
     parser_risks.set_defaults(func=risks)
+    parser_dca.set_defaults(func=dca)
     args = parser.parse_args()
     # print(vars(args))
     args.func(vars(args))

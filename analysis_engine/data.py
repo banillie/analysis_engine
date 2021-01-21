@@ -2882,7 +2882,7 @@ def set_col_widths(word_table: table, widths: list) -> None:
             row.cells[idx].width = width
 
 
-def compare_text_new_and_old(text_1: str, text_2: str, doc: Document) -> None:
+def compare_text_new_and_old(text_1: str,  text_2: str, doc: Document) -> None:
     """compares two sets of text and highlights differences in red text."""
 
     comp = difflib.Differ()
@@ -3760,8 +3760,11 @@ DCA_RATING_SCORES = {
 
 
 class DcaData:
-    def __init__(self, master: Master):
+    def __init__(self,
+                 master: Master,
+                 **kwargs):
         self.master = master
+        self.kwargs = kwargs
         self.dca_dictionary = {}
         self.dca_changes = {}
         self.dca_count = {}
@@ -3769,16 +3772,26 @@ class DcaData:
         self.get_count()
 
     def get_dictionary(self) -> None:
-        """
-        collects all data for calculating changes in dca ratings.
-        """
         quarter_dict = {}
-        for i in range(len(self.master.master_data)):
+        if "quarters" in self.kwargs:  # is keys() necessary
+            quarters = self.kwargs["quarters"]
+        else:
+            quarters = [self.master.quarter_list[0], self.master.quarter_list[1]]
+        for q in quarters:  # q is quarter
+            project_dict = {}
+            i = self.master.quarter_list.index(q)  # i for index
+            group = self.master.master_data[i].projects  # why does this need to come first?
+            if "stage" in self.kwargs:
+                s_input = self.kwargs["stage"]
+                group = cal_group(s_input, self.master, q)
+            if "group" in self.kwargs:
+                g_input = self.kwargs["group"]
+                group = cal_group(g_input, self.master, q)
             try:
                 type_dict = {}
                 for dca_type in list(DCA_KEYS.values()):
                     dca_dict = {}
-                    for project_name in self.master.master_data[i].projects:
+                    for project_name in group:
                         colour = self.master.master_data[i].data[project_name][dca_type]
                         score = DCA_RATING_SCORES[
                             self.master.master_data[i].data[project_name][dca_type]
@@ -3798,14 +3811,12 @@ class DcaData:
             except KeyError:  # handles dca_type e.g. schedule confidence key not present
                 pass
 
-            quarter_dict[str(self.master.master_data[i].quarter)] = type_dict
+            quarter_dict[q] = type_dict
 
         self.dca_dictionary = quarter_dict
 
-    def get_changes(self, quarter_one: str, quarter_two: str) -> None:
+    def get_changes(self) -> None:
         """compiles dictionary of changes in dca ratings when provided with two quarter arguments"""
-        self.q_one = quarter_one
-        self.q_two = quarter_two
 
         c_dict = {}
         for dca_type in list(self.dca_dictionary[self.q_one].keys()):
