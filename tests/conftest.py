@@ -80,6 +80,11 @@ def basic_masters_dicts():
 
 
 @pytest.fixture()
+def basic_pickle():
+    return os.path.join(os.getcwd(), "resources/test_master.pickle")
+
+
+@pytest.fixture()
 def basic_masters_file_paths():
     file_paths = [
         os.path.join(os.getcwd(), "resources/"

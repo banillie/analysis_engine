@@ -39,13 +39,20 @@ from analysis_engine.data import (
     Projects,
     run_p_reports,
     RiskData,
-    risks_into_excel, DcaData, dca_changes_into_excel,
+    risks_into_excel, DcaData, dca_changes_into_excel, dca_changes_into_word, open_word_doc, Pickle, open_pickle_file,
 )
+
+
+def initiate(args):
+    print("creating a master data file for analysis_engine")
+    master = Master(get_master_data(), get_project_information())
+    path_str = str("{0}/core_data/master".format(root_path))
+    Pickle(master, path_str)
 
 
 def vfm(args):
     print("compiling vfm analysis_engine")
-    m = Master(get_master_data(), get_project_information())
+    m = open_pickle_file(str(root_path / "core_data/master.pickle"))
     vfm_m = VfMData(
         m
     )  # why does this need to come first and not as else statement below?
@@ -67,7 +74,7 @@ def vfm(args):
 
 def risks(args):
     print("compiling risk analysis_engine")
-    m = Master(get_master_data(), get_project_information())
+    m = open_pickle_file(str(root_path / "core_data/master.pickle"))
     risk_m = RiskData(
         m
     )  # why does this need to come first and not as else statement below?
@@ -89,7 +96,7 @@ def risks(args):
 
 def milestones(args):
     print("compiling milestone analysis_engine")
-    m = Master(get_master_data(), get_project_information())
+    m = open_pickle_file(str(root_path / "core_data/master.pickle"))
     projects = (
         m.project_stage["Q2 20/21"]["FBC"]
         + m.project_stage["Q2 20/21"]["OBC"]
@@ -103,17 +110,16 @@ def milestones(args):
 
 def summaries(args):
     print("compiling summaries")
-    proj_info = get_project_information()
-    m = Master(get_master_data(), get_project_information())
+    m = open_pickle_file(str(root_path / "core_data/master.pickle"))
     if args["group"]:
-        run_p_reports(m, proj_info, group=args["group"])
+        run_p_reports(m, m.project_information, group=args["group"])
     else:
-        run_p_reports(m, proj_info)
+        run_p_reports(m, m.project_information)
 
 
 def dca(args):
     print("compiling dca analysis")
-    m = Master(get_master_data(), get_project_information())
+    m = open_pickle_file(str(root_path / "core_data/master.pickle"))
     dca_m = DcaData(m)  # why does this need to come first and not as else statement below?
     if args["quarters"]:
         dca_m = DcaData(m, quarters=args["quarters"])
@@ -131,45 +137,128 @@ def dca(args):
     print("DCA analysis has been compiled. Enjoy!")
 
 
+def speedial(args):
+    print("compiling speed dial analysis")
+    m = open_pickle_file(str(root_path / "core_data/master.pickle"))
+    report_doc = open_word_doc(root_path / "input/summary_temp.docx")
+    dca_m = DcaData(m)  # why does this need to come first and not as else statement below?
+    if args["quarters"]:
+        dca_m = DcaData(m, quarters=args["quarters"])
+    if args["stage"]:
+        dca_m = DcaData(m, stage=args["stage"])
+    if args["group"]:
+        dca_m = DcaData(m, group=args["group"])
+    if args["quarters"] and args["stage"]:  # to test
+        dca_m = DcaData(m, quarters=args["quarters"], stage=args["stage"])
+    if args["quarters"] and args["group"]:  # to test
+        dca_m = DcaData(m, quarters=args["quarters"], group=args["group"])
+
+    dca_m.get_changes()
+    wb = dca_changes_into_word(dca_m, report_doc)
+    wb.save(root_path / "output/speed_dials.xlsx")
+    print("Speed dial analysis has been compiled. Enjoy!")
+
+
 def main():
     parser = argparse.ArgumentParser(
         prog="engine", description="DfT Major Projects Portfolio Office analysis engine"
     )
     subparsers = parser.add_subparsers()
     # subparsers.metavar = '                '
+    parser_initiate = subparsers.add_parser("initiate", help="creates a master data file")
     parser_vfm = subparsers.add_parser("vfm", help="vfm analysis")
     parser_milestones = subparsers.add_parser("milestones", help="milestone analysis")
     parser_summaries = subparsers.add_parser("summaries", help="summary reports")
     parser_risks = subparsers.add_parser("risks", help="risk analysis")
     parser_dca = subparsers.add_parser("dcas", help="dca analysis")
-    parser_vfm.add_argument(
-        "--stage",
-        type=str,
-        metavar="",
-        action="store",
-        nargs="+",
-        choices=["FBC", "OBC", "SOBC", "pre-SOBC"],
-        help="Returns analysis for those projects at the specified planning stage(s). Must be one "
-        'or combination of "FBC", "OBC", "SOBC", "pre-SOBC".',
-    )
-    parser_vfm.add_argument(
-        "--group",
-        type=str,
-        metavar="",
-        action="store",
-        nargs="+",
-        choices=["HSMRPG", "AMIS", "Rail", "RDM"],
-        help="Returns analysis for those projects in the specified DfT Group. Must be one or "
-        'combination of "HSMRPG", "AMIS", "Rail", "RDM"',
-    )
-    parser_vfm.add_argument(
-        "--quarters",
-        type=str,
-        metavar="",
-        action="store",
-        nargs="+",
-        help="Returns analysis for specified quarters. Must be in format e.g Q3 19/20",
-    )
+    parser_speedial = subparsers.add_parser("speedial", help="speed dial analysis")
+
+    # parser_vfm.add_argument(
+    #     "--stage",
+    #     type=str,
+    #     metavar="",
+    #     action="store",
+    #     nargs="+",
+    #     choices=["FBC", "OBC", "SOBC", "pre-SOBC"],
+    #     help="Returns analysis for those projects at the specified planning stage(s). Must be one "
+    #     'or combination of "FBC", "OBC", "SOBC", "pre-SOBC".',
+    # )
+    # parser_vfm.add_argument(
+    #     "--group",
+    #     type=str,
+    #     metavar="",
+    #     action="store",
+    #     nargs="+",
+    #     choices=["HSMRPG", "AMIS", "Rail", "RDM"],
+    #     help="Returns analysis for those projects in the specified DfT Group. Must be one or "
+    #     'combination of "HSMRPG", "AMIS", "Rail", "RDM"',
+    # )
+    # parser_vfm.add_argument(
+    #     "--quarters",
+    #     type=str,
+    #     metavar="",
+    #     action="store",
+    #     nargs="+",
+    #     help="Returns analysis for specified quarters. Must be in format e.g Q3 19/20",
+    # )
+
+    # parser_risks.add_argument(
+    #     "--stage",
+    #     type=str,
+    #     metavar="",
+    #     action="store",
+    #     nargs="+",
+    #     choices=["FBC", "OBC", "SOBC", "pre-SOBC"],
+    #     help="Returns analysis for those projects at the specified planning stage(s). Must be one "
+    #     'or combination of "FBC", "OBC", "SOBC", "pre-SOBC".',
+    # )
+    # parser_risks.add_argument(
+    #     "--group",
+    #     type=str,
+    #     metavar="",
+    #     action="store",
+    #     nargs="+",
+    #     choices=["HSMRPG", "AMIS", "Rail", "RDM"],
+    #     help="Returns analysis for those projects in the specified DfT Group. Must be one or "
+    #     'combination of "HSMRPG", "AMIS", "Rail", "RDM"',
+    # )
+    # parser_risks.add_argument(
+    #     "--quarters",
+    #     type=str,
+    #     metavar="",
+    #     action="store",
+    #     nargs="+",
+    #     help="Returns analysis for specified quarters. Must be in format e.g Q3 19/20",
+    # )
+    # parser_dca.add_argument(
+    #     "--stage",
+    #     type=str,
+    #     metavar="",
+    #     action="store",
+    #     nargs="+",
+    #     choices=["FBC", "OBC", "SOBC", "pre-SOBC"],
+    #     help="Returns analysis for those projects at the specified planning stage(s). Must be one "
+    #          'or combination of "FBC", "OBC", "SOBC", "pre-SOBC".',
+    # )
+    # parser_dca.add_argument(
+    #     "--group",
+    #     type=str,
+    #     metavar="",
+    #     action="store",
+    #     nargs="+",
+    #     choices=["HSMRPG", "AMIS", "Rail", "RDM"],
+    #     help="Returns analysis for those projects in the specified DfT Group. Must be one or "
+    #          'combination of "HSMRPG", "AMIS", "Rail", "RDM"',
+    # )
+    # parser_dca.add_argument(
+    #     "--quarters",
+    #     type=str,
+    #     metavar="",
+    #     action="store",
+    #     nargs="+",
+    #     help="Returns analysis for specified quarters. Must be in format e.g Q3 19/20",
+    # )
+
     parser_summaries.add_argument(
         "--group",
         type=str,
@@ -178,70 +267,45 @@ def main():
         nargs="+",
         # choices=["HSMRPG", "AMIS", "Rail", "RDM"],
         help="Returns summaries for specified projects. User can either input DfT Group name; "
-        '"HSMRPG", "AMIS", "Rail", "RDM", or the project(s) acronym',
+             '"HSMRPG", "AMIS", "Rail", "RDM", or the project(s) acronym',
     )
-    parser_risks.add_argument(
-        "--stage",
-        type=str,
-        metavar="",
-        action="store",
-        nargs="+",
-        choices=["FBC", "OBC", "SOBC", "pre-SOBC"],
-        help="Returns analysis for those projects at the specified planning stage(s). Must be one "
-        'or combination of "FBC", "OBC", "SOBC", "pre-SOBC".',
-    )
-    parser_risks.add_argument(
-        "--group",
-        type=str,
-        metavar="",
-        action="store",
-        nargs="+",
-        choices=["HSMRPG", "AMIS", "Rail", "RDM"],
-        help="Returns analysis for those projects in the specified DfT Group. Must be one or "
-        'combination of "HSMRPG", "AMIS", "Rail", "RDM"',
-    )
-    parser_risks.add_argument(
-        "--quarters",
-        type=str,
-        metavar="",
-        action="store",
-        nargs="+",
-        help="Returns analysis for specified quarters. Must be in format e.g Q3 19/20",
-    )
-    parser_dca.add_argument(
-        "--stage",
-        type=str,
-        metavar="",
-        action="store",
-        nargs="+",
-        choices=["FBC", "OBC", "SOBC", "pre-SOBC"],
-        help="Returns analysis for those projects at the specified planning stage(s). Must be one "
-             'or combination of "FBC", "OBC", "SOBC", "pre-SOBC".',
-    )
-    parser_dca.add_argument(
-        "--group",
-        type=str,
-        metavar="",
-        action="store",
-        nargs="+",
-        choices=["HSMRPG", "AMIS", "Rail", "RDM"],
-        help="Returns analysis for those projects in the specified DfT Group. Must be one or "
-             'combination of "HSMRPG", "AMIS", "Rail", "RDM"',
-    )
-    parser_dca.add_argument(
-        "--quarters",
-        type=str,
-        metavar="",
-        action="store",
-        nargs="+",
-        help="Returns analysis for specified quarters. Must be in format e.g Q3 19/20",
-    )
+    for sub in [parser_dca, parser_vfm, parser_risks, parser_speedial]:  # all sub-commands have the same optional args
+        sub.add_argument(
+            "--stage",
+            type=str,
+            metavar="",
+            action="store",
+            nargs="+",
+            choices=["FBC", "OBC", "SOBC", "pre-SOBC"],
+            help="Returns analysis for those projects at the specified planning stage(s). Must be one "
+                 'or combination of "FBC", "OBC", "SOBC", "pre-SOBC".',
+            )
+        sub.add_argument(
+            "--group",
+            type=str,
+            metavar="",
+            action="store",
+            nargs="+",
+            choices=["HSMRPG", "AMIS", "Rail", "RDM"],
+            help="Returns analysis for those projects in the specified DfT Group. Must be one or "
+                 'combination of "HSMRPG", "AMIS", "Rail", "RDM"',
+            )
+        sub.add_argument(
+            "--quarters",
+            type=str,
+            metavar="",
+            action="store",
+            nargs="+",
+            help="Returns analysis for specified quarters. Must be in format e.g Q3 19/20",
+            )
 
+    parser_initiate.set_defaults(func=initiate)
     parser_vfm.set_defaults(func=vfm)
     parser_milestones.set_defaults(func=milestones)
     parser_summaries.set_defaults(func=summaries)
     parser_risks.set_defaults(func=risks)
     parser_dca.set_defaults(func=dca)
+    parser_speedial.set_defaults(func=speedial)
     args = parser.parse_args()
     # print(vars(args))
     args.func(vars(args))

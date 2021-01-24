@@ -1,6 +1,7 @@
 import datetime
 import difflib
 import os
+import pickle
 import re
 import typing
 from collections import Counter
@@ -10,7 +11,6 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from datetime import timedelta, date
 
-import numpy
 from dateutil import parser
 import numpy as np
 from datamaps.api import project_data_from_master
@@ -851,16 +851,16 @@ class Master:
                         g_list.append(p)
                 # messaging to clean up group data.
                 # TODO wrap into system messaging
-                if group_type is None or group_type == "DfT":
-                    if g_list:
-                        for x in g_list:
-                            print(
-                                str(quarter)
-                                + " "
-                                + str(x)
-                                + " DfT Group data needs cleaning. Currently "
-                                + str(group_type)
-                            )
+                # if group_type is None or group_type == "DfT":
+                #     if g_list:
+                #         for x in g_list:
+                #             print(
+                #                 str(quarter)
+                #                 + " "
+                #                 + str(x)
+                #                 + " DfT Group data needs cleaning. Currently "
+                #                 + str(group_type)
+                #             )
                 lower_g_dict[group_type] = g_list
             group_dict[quarter] = lower_g_dict
 
@@ -875,16 +875,16 @@ class Master:
                         s_list.append(p)
                 # messaging to clean up group data.
                 # TODO wrap into system messaging
-                if stage_type is None:
-                    if s_list:
-                        for x in s_list:
-                            print(
-                                str(quarter)
-                                + " "
-                                + str(x)
-                                + " IPDC stage data needs cleaning. Currently "
-                                + str(stage_type)
-                            )
+                # if stage_type is None:
+                #     if s_list:
+                #         for x in s_list:
+                #             print(
+                #                 str(quarter)
+                #                 + " "
+                #                 + str(x)
+                #                 + " IPDC stage data needs cleaning. Currently "
+                #                 + str(stage_type)
+                #             )
                 lower_s_dict[stage_type] = s_list
             stage_dict[quarter] = lower_s_dict
 
@@ -6302,3 +6302,19 @@ def run_p_reports(
 #     ws.add_chart(chart, "I12")
 #
 #     return output_wb
+class Pickle:
+    def __init__(self,
+                 master: Master,
+                 save_path: str):
+        self.master = master
+        self.path = save_path
+        self.in_a_pickle()
+
+    def in_a_pickle(self) -> None:
+        with open(self.path + '.pickle', 'wb') as handle:
+            pickle.dump(self.master, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+
+def open_pickle_file(path):
+    with open(path, 'rb') as handle:
+        return pickle.load(handle)

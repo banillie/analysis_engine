@@ -20,13 +20,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="205bd717-e7d2-47dc-82c7-88a8dae3593c" name="Default Changelist" comment="change portfolio_financial_profile.py to include old bl profile data">
+      <change afterPath="$PROJECT_DIR$/other/pickel.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/analysis_engine/data.py" beforeDir="false" afterPath="$PROJECT_DIR$/analysis_engine/data.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/analysis_engine/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/analysis_engine/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/resources/dca_checks.docx" beforeDir="false" afterPath="$PROJECT_DIR$/tests/resources/dca_checks.docx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/resources/dca_print.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/tests/resources/dca_print.xlsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/resources/dcas.xlsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/resources/test_master_4_2017_dcas.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/tests/resources/test_master_4_2017_dcas.xlsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/conftest.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/conftest.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/resources/summary_temp_altered.docx" beforeDir="false" afterPath="$PROJECT_DIR$/tests/resources/summary_temp_altered.docx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tests/test_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test_data.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -66,7 +65,7 @@
   <component name="PropertiesComponent">
     <property name="ASKED_ADD_EXTERNAL_FILES" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/main.py" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/analysis_engine/data.py" />
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
   </component>
   <component name="RecentsManager">
@@ -78,7 +77,25 @@
       <recent name="$PROJECT_DIR$" />
     </key>
   </component>
-  <component name="RunManager" selected="Python tests.pytest for test_data.test_dca_analysis">
+  <component name="RunManager" selected="Python.pickel">
+    <configuration name="pickel" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="analysis_engine" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/other" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/other/pickel.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="true" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="vfm" type="PythonConfigurationType" factoryName="Python">
       <module name="analysis_engine" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -132,7 +149,7 @@
       <option name="_new_targetType" value="&quot;PATH&quot;" />
       <method v="2" />
     </configuration>
-    <configuration name="pytest for test_data.test_creation_of_masters_class" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
+    <configuration name="pytest for test_data.test_compile_milestone_chart" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
       <module name="analysis_engine" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -144,7 +161,7 @@
       <option name="_new_keywords" value="&quot;&quot;" />
       <option name="_new_parameters" value="&quot;&quot;" />
       <option name="_new_additionalArguments" value="&quot;--tb\u003dshort&quot;" />
-      <option name="_new_target" value="&quot;test_data.test_creation_of_masters_class&quot;" />
+      <option name="_new_target" value="&quot;test_data.test_compile_milestone_chart&quot;" />
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
@@ -164,7 +181,7 @@
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
-    <configuration name="pytest for test_data.test_risk_analysis" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
+    <configuration name="pytest for test_data.test_master_in_a_pickle" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
       <module name="analysis_engine" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -176,11 +193,11 @@
       <option name="_new_keywords" value="&quot;&quot;" />
       <option name="_new_parameters" value="&quot;&quot;" />
       <option name="_new_additionalArguments" value="&quot;--tb\u003dshort&quot;" />
-      <option name="_new_target" value="&quot;test_data.test_risk_analysis&quot;" />
+      <option name="_new_target" value="&quot;test_data.test_master_in_a_pickle&quot;" />
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
-    <configuration name="pytest for test_data.test_speedial_print_out" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
+    <configuration name="pytest for test_data.test_opening_a_pickle" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
       <module name="analysis_engine" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -192,7 +209,7 @@
       <option name="_new_keywords" value="&quot;&quot;" />
       <option name="_new_parameters" value="&quot;&quot;" />
       <option name="_new_additionalArguments" value="&quot;--tb\u003dshort&quot;" />
-      <option name="_new_target" value="&quot;test_data.test_speedial_print_out&quot;" />
+      <option name="_new_target" value="&quot;test_data.test_opening_a_pickle&quot;" />
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
@@ -246,21 +263,23 @@
     </configuration>
     <list>
       <item itemvalue="Python.vfm" />
+      <item itemvalue="Python.pickel" />
       <item itemvalue="Python tests.all_dB_tests" />
       <item itemvalue="Python tests.temp_tests" />
       <item itemvalue="Python tests.test_all" />
       <item itemvalue="Python tests.test_data_all" />
-      <item itemvalue="Python tests.pytest for test_data.test_creation_of_masters_class" />
-      <item itemvalue="Python tests.pytest for test_data.test_risk_analysis" />
       <item itemvalue="Python tests.pytest for test_data.test_dca_analysis" />
-      <item itemvalue="Python tests.pytest for test_data.test_speedial_print_out" />
+      <item itemvalue="Python tests.pytest for test_data.test_compile_milestone_chart" />
+      <item itemvalue="Python tests.pytest for test_data.test_master_in_a_pickle" />
+      <item itemvalue="Python tests.pytest for test_data.test_opening_a_pickle" />
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Python tests.pytest for test_data.test_dca_analysis" />
-        <item itemvalue="Python tests.pytest for test_data.test_speedial_print_out" />
-        <item itemvalue="Python tests.pytest for test_data.test_risk_analysis" />
-        <item itemvalue="Python tests.pytest for test_data.test_creation_of_masters_class" />
+        <item itemvalue="Python.pickel" />
+        <item itemvalue="Python tests.pytest for test_data.test_opening_a_pickle" />
+        <item itemvalue="Python tests.pytest for test_data.test_master_in_a_pickle" />
+        <item itemvalue="Python.pickel" />
+        <item itemvalue="Python.pickel" />
       </list>
     </recent_temporary>
   </component>

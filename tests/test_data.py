@@ -3,6 +3,7 @@ Tests for analysis_engine
 """
 import os
 import datetime
+import pickle
 
 from analysis_engine.data import (
     Master,
@@ -27,12 +28,24 @@ from analysis_engine.data import (
     change_word_doc_landscape,
     FIGURE_STYLE,
     MilestoneData,
-    milestone_chart, save_graph,
-    DCA_KEYS, dca_changes_into_word, dca_changes_into_excel, DcaData, RiskData, risks_into_excel, VfMData,
-    vfm_into_excel, sort_projects_by_dca, project_report_meta_data, print_out_project_milestones, put_milestones_into_wb
+    milestone_chart,
+    save_graph,
+    DCA_KEYS,
+    dca_changes_into_word,
+    dca_changes_into_excel,
+    DcaData,
+    RiskData,
+    risks_into_excel,
+    VfMData,
+    vfm_into_excel,
+    sort_projects_by_dca,
+    project_report_meta_data,
+    print_out_project_milestones,
+    put_milestones_into_wb, Pickle, open_pickle_file,
 )
 
 # test masters project names
+
 sot = "Sea of Tranquility"
 a11 = "Apollo 11"
 a13 = "Apollo 13"
@@ -40,6 +53,18 @@ f9 = "Falcon 9"
 columbia = "Columbia"
 mars = "Mars"
 group = [sot, a13, f9, columbia, mars]
+
+
+def test_master_in_a_pickle(basic_masters_dicts, project_info):
+    master = Master(basic_masters_dicts, project_info)
+    path_str = str("{0}/resources/test_master".format(os.path.join(os.getcwd())))
+    mickle = Pickle(master, path_str)
+    assert str(mickle.master.master_data[0].quarter) == "Q4 16/17"
+
+
+def test_opening_a_pickle(basic_pickle):
+    mickle = open_pickle_file(basic_pickle)
+    assert str(mickle.master_data[0].quarter) == "Q4 16/17"
 
 
 def test_creation_of_masters_class(basic_masters_dicts, project_info):
@@ -102,8 +127,8 @@ def test_open_word_doc(word_doc):
     word_doc.save("resources/summary_temp_altered.docx")
     var = word_doc.paragraphs[1].text
     assert (
-            "Because i'm still in love with you I want to see you dance again, "
-            "because i'm still in love with you on this harvest moon" == var
+        "Because i'm still in love with you I want to see you dance again, "
+        "because i'm still in love with you on this harvest moon" == var
     )
 
 
@@ -153,7 +178,7 @@ def test_project_cost_profile_chart(costs_masters, project_info):
 
 
 def test_project_cost_profile_chart_into_word_doc_one(
-        word_doc, costs_masters, project_info
+    word_doc, costs_masters, project_info
 ):
     master = Master(costs_masters, project_info)
     costs = CostData(master, f9)
@@ -164,7 +189,7 @@ def test_project_cost_profile_chart_into_word_doc_one(
 
 
 def test_total_cost_profile_chart_into_word_doc_one(
-        word_doc, costs_masters, project_info
+    word_doc, costs_masters, project_info
 ):
     master = Master(costs_masters, project_info)
     costs = CostData(master, f9)
@@ -181,7 +206,7 @@ def test_changing_word_doc_to_landscape(word_doc):
 
 
 def test_project_cost_profile_chart_into_word_doc_many(
-        word_doc, costs_masters, project_info
+    word_doc, costs_masters, project_info
 ):
     master = Master(costs_masters, project_info)
     for p in master.current_projects:
@@ -218,7 +243,7 @@ def test_get_group_cost_profile(costs_masters, project_info):
         51.87,
         0.6799999999999999,
         0.6799999999999999,
-        0.6799999999999999
+        0.6799999999999999,
     ]
 
 
@@ -271,7 +296,7 @@ def test_get_old_fy_cost_data(list_cost_masters_files, project_group_id_path):
 
 
 def test_placing_old_fy_cost_data_into_master_wbs(
-        list_cost_masters_files, project_old_fy_path
+    list_cost_masters_files, project_old_fy_path
 ):
     run_place_old_fy_data_into_masters(list_cost_masters_files, project_old_fy_path)
 
@@ -302,23 +327,23 @@ def test_get_gmpp_projects(project_info):
 
 
 # this method has probably now been superceded by save_graph
-def test_saving_cost_profile_graph_files(costs_masters, project_info):
-    master = Master(costs_masters, project_info)
-    costs = CostData(master, sot)
-    standard_profile(costs)
-    costs = CostData(master, group)
-    standard_profile(costs, title="Python", fig_size=FIGURE_STYLE[1])
+# def test_saving_cost_profile_graph_files(costs_masters, project_info):
+#     master = Master(costs_masters, project_info)
+#     costs = CostData(master, sot)
+#     standard_profile(costs)
+#     costs = CostData(master, group)
+#     standard_profile(costs, title="Python", fig_size=FIGURE_STYLE[1])
 
 
 # this method has probably now been superceded by save_graph
-def test_saving_total_cost_benefit_graph_files(costs_masters, project_info):
-    master = Master(costs_masters, project_info)
-    costs = CostData(master, f9)
-    benefits = BenefitsData(master, f9)
-    totals_chart(costs, benefits)
-    costs = CostData(master, group)
-    benefits = BenefitsData(master, group)
-    totals_chart(costs, benefits, title="Test Group")
+# def test_saving_total_cost_benefit_graph_files(costs_masters, project_info):
+#     master = Master(costs_masters, project_info)
+#     costs = CostData(master, f9)
+#     benefits = BenefitsData(master, f9)
+#     totals_chart(costs, benefits)
+#     costs = CostData(master, group)
+#     benefits = BenefitsData(master, group)
+#     totals_chart(costs, benefits, title="Test Group")
 
 
 def test_get_milestone_data(milestone_masters, project_info):
@@ -335,10 +360,14 @@ def test_get_milestone_chart_data(milestone_masters, project_info):
     assert len(milestones.md_last) == 8
 
 
-def test_compile_milestone_chart(milestone_masters, project_info):
+def test_compile_milestone_chart(milestone_masters, project_info, word_doc):
     master = Master(milestone_masters, project_info)
     milestones = MilestoneData(master, [sot, a11, a13])
-    milestone_chart(milestones, title="Group Test", fig_size=FIGURE_STYLE[1], blue_line="Today")
+    graph = milestone_chart(
+        milestones, title="Group Test", fig_size=FIGURE_STYLE[1], blue_line="Today"
+    )
+    put_matplotlib_fig_into_word(word_doc, graph)
+    word_doc.save("resources/summary_temp_altered.docx")
 
 
 def test_compile_milestone_chart_with_filter(milestone_masters, project_info):
@@ -351,7 +380,11 @@ def test_compile_milestone_chart_with_filter(milestone_masters, project_info):
 def test_removing_project_name_from_milestone_keys(milestone_masters, project_info):
     master = Master(milestone_masters, project_info)
     milestones = MilestoneData(master, sot)
-    assert milestones.key_names == ["Start of Project", 'Standard A', 'Inverted Cosmonauts']
+    assert milestones.key_names == [
+        "Start of Project",
+        "Standard A",
+        "Inverted Cosmonauts",
+    ]
 
 
 def test_putting_milestones_into_wb(milestone_masters, project_info):
@@ -367,17 +400,20 @@ def test_saving_graph_to_word_doc_one(word_doc, milestone_masters, project_info)
     milestones = MilestoneData(master, [sot, a11, a13])
     change_word_doc_landscape(word_doc)
     # milestones.filter_chart_info(start_date="1/1/2013", end_date="1/1/2014")
-    graph = milestone_chart(milestones, title="Group Test", blue_line="Today", show="No")
+    graph = milestone_chart(
+        milestones, title="Group Test", blue_line="Today", show="No"
+    )
     put_matplotlib_fig_into_word(word_doc, graph)
     word_doc.save("resources/summary_temp_altered.docx")
 
 
-def test_saving_graph_to_word_doc_other(milestone_masters, project_info):
-    master = Master(milestone_masters, project_info)
-    milestones = MilestoneData(master, [sot, a11, a13])
-    milestones.filter_chart_info(start_date="1/1/2013", end_date="1/1/2014")
-    f = milestone_chart(milestones, title="Group Test", fig_size=FIGURE_STYLE[1], blue_line="Today")
-    save_graph(f, "testing", orientation="landscape")
+#  hashed out. not saving to test/resources
+# def test_saving_graph_to_word_doc_other(milestone_masters, project_info):
+#     master = Master(milestone_masters, project_info)
+#     milestones = MilestoneData(master, [sot, a11, a13])
+#     milestones.filter_chart_info(start_date="1/1/2013", end_date="1/1/2014")
+#     f = milestone_chart(milestones, title="Group Test", fig_size=FIGURE_STYLE[1], blue_line="Today")
+#     save_graph(f, "testing", orientation="landscape")
 
 
 def test_dca_analysis(project_info, dca_masters, word_doc):
@@ -421,21 +457,25 @@ def test_getting_project_groups(project_info, basic_masters_dicts):
 
 def test_sorting_project_by_dca(project_info, dca_masters):
     rag_list = sort_projects_by_dca(dca_masters[0], group)
-    assert rag_list == [('Falcon 9', 'Amber'),
-                        ('Mars', 'Amber'),
-                        ('Apollo 13', 'Amber/Green'),
-                        ('Sea of Tranquility', 'Green'),
-                        ('Columbia', 'Green')]
+    assert rag_list == [
+        ("Falcon 9", "Amber"),
+        ("Mars", "Amber"),
+        ("Apollo 13", "Amber/Green"),
+        ("Sea of Tranquility", "Green"),
+        ("Columbia", "Green"),
+    ]
 
 
 def test_calculating_wlc_changes(costs_masters, project_info):
     master = Master(costs_masters, project_info)
     costs = CostData(master, master.current_projects)
-    assert costs.wlc_change == {'Apollo 13': {'baseline one': 0, 'last quarter': 0},
-                                'Columbia': {'baseline one': -43, 'last quarter': -43},
-                                'Falcon 9': {'baseline one': 5, 'last quarter': 5},
-                                'Mars': {'baseline one': 0},
-                                'Sea of Tranquility': {'baseline one': 54, 'last quarter': 54}}
+    assert costs.wlc_change == {
+        "Apollo 13": {"baseline one": 0, "last quarter": 0},
+        "Columbia": {"baseline one": -43, "last quarter": -43},
+        "Falcon 9": {"baseline one": 5, "last quarter": 5},
+        "Mars": {"baseline one": 0},
+        "Sea of Tranquility": {"baseline one": 54, "last quarter": 54},
+    }
 
 
 def test_calculating_schedule_changes(milestone_masters, project_info):
