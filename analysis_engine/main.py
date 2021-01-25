@@ -46,13 +46,13 @@ from analysis_engine.data import (
 def initiate(args):
     print("creating a master data file for analysis_engine")
     master = Master(get_master_data(), get_project_information())
-    path_str = str("{0}/core_data/master".format(root_path))
+    path_str = str("{0}/core_data/pickle/master".format(root_path))
     Pickle(master, path_str)
 
 
 def vfm(args):
     print("compiling vfm analysis_engine")
-    m = open_pickle_file(str(root_path / "core_data/master.pickle"))
+    m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
     vfm_m = VfMData(
         m
     )  # why does this need to come first and not as else statement below?
@@ -74,7 +74,7 @@ def vfm(args):
 
 def risks(args):
     print("compiling risk analysis_engine")
-    m = open_pickle_file(str(root_path / "core_data/master.pickle"))
+    m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
     risk_m = RiskData(
         m
     )  # why does this need to come first and not as else statement below?
@@ -96,7 +96,7 @@ def risks(args):
 
 def milestones(args):
     print("compiling milestone analysis_engine")
-    m = open_pickle_file(str(root_path / "core_data/master.pickle"))
+    m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
     projects = (
         m.project_stage["Q2 20/21"]["FBC"]
         + m.project_stage["Q2 20/21"]["OBC"]
@@ -110,7 +110,7 @@ def milestones(args):
 
 def summaries(args):
     print("compiling summaries")
-    m = open_pickle_file(str(root_path / "core_data/master.pickle"))
+    m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
     if args["group"]:
         run_p_reports(m, m.project_information, group=args["group"])
     else:
@@ -119,7 +119,7 @@ def summaries(args):
 
 def dca(args):
     print("compiling dca analysis")
-    m = open_pickle_file(str(root_path / "core_data/master.pickle"))
+    m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
     dca_m = DcaData(m)  # why does this need to come first and not as else statement below?
     if args["quarters"]:
         dca_m = DcaData(m, quarters=args["quarters"])
@@ -139,7 +139,7 @@ def dca(args):
 
 def speedial(args):
     print("compiling speed dial analysis")
-    m = open_pickle_file(str(root_path / "core_data/master.pickle"))
+    m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
     report_doc = open_word_doc(root_path / "input/summary_temp.docx")
     dca_m = DcaData(m)  # why does this need to come first and not as else statement below?
     if args["quarters"]:

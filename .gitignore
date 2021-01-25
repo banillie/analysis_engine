@@ -23,5 +23,5 @@ dist/
 build/
 **/#*
 **/*.egg-info/*:wq
-bcompiler_engine.egg-info
+analysis_engine.egg-info
 .nox
