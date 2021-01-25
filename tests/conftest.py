@@ -2,6 +2,7 @@ import os
 
 import pytest
 from datamaps.api import project_data_from_master
+from openpyxl import load_workbook
 
 from analysis_engine.data import open_word_doc
 from other.database.database import create_db
@@ -204,3 +205,8 @@ def list_test_masters_files():
         os.path.join(os.getcwd(), "resources/test_master_4_2017.xlsx"),
         os.path.join(os.getcwd(), "resources/test_master_4_2016.xlsx")
     ]
+
+
+@pytest.fixture()
+def dashboard_template():
+    return load_workbook(os.path.join(os.getcwd(), "resources/test_dashboards_master.xlsx"))

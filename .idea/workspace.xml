@@ -20,12 +20,16 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="205bd717-e7d2-47dc-82c7-88a8dae3593c" name="Default Changelist" comment="change portfolio_financial_profile.py to include old bl profile data">
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/analysis_engine.egg-info/PKG-INFO" beforeDir="false" afterPath="$PROJECT_DIR$/analysis_engine.egg-info/PKG-INFO" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/analysis_engine/data.py" beforeDir="false" afterPath="$PROJECT_DIR$/analysis_engine/data.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/analysis_engine/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/analysis_engine/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/setup.py" beforeDir="false" afterPath="$PROJECT_DIR$/setup.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/conftest.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/conftest.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/resources/cost_test_master_1_2020.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/tests/resources/cost_test_master_1_2020.xlsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/resources/cost_test_master_4_2018.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/tests/resources/cost_test_master_4_2018.xlsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/resources/cost_test_master_4_2019.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/tests/resources/cost_test_master_4_2019.xlsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/resources/milestones_test_master_4_2018.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/tests/resources/milestones_test_master_4_2018.xlsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/resources/milestones_test_master_4_2019.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/tests/resources/milestones_test_master_4_2019.xlsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/resources/summary_temp_altered.docx" beforeDir="false" afterPath="$PROJECT_DIR$/tests/resources/summary_temp_altered.docx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/test_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test_data.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -76,7 +80,7 @@
       <recent name="$PROJECT_DIR$" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.pickel">
+  <component name="RunManager" selected="Python tests.pytest for test_data.test_schedule_dashboard">
     <configuration name="pickel" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="analysis_engine" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -151,7 +155,7 @@
       <option name="_new_targetType" value="&quot;PATH&quot;" />
       <method v="2" />
     </configuration>
-    <configuration name="pytest for test_data.test_compile_milestone_chart" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
+    <configuration name="pytest for test_data.test_financial_dashboard" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
       <module name="analysis_engine" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -163,39 +167,7 @@
       <option name="_new_keywords" value="&quot;&quot;" />
       <option name="_new_parameters" value="&quot;&quot;" />
       <option name="_new_additionalArguments" value="&quot;--tb\u003dshort&quot;" />
-      <option name="_new_target" value="&quot;test_data.test_compile_milestone_chart&quot;" />
-      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
-      <method v="2" />
-    </configuration>
-    <configuration name="pytest for test_data.test_dca_analysis" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
-      <module name="analysis_engine" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <option name="SDK_HOME" value="$USER_HOME$/.virtualenvs/a_engine/bin/python" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="_new_keywords" value="&quot;&quot;" />
-      <option name="_new_parameters" value="&quot;&quot;" />
-      <option name="_new_additionalArguments" value="&quot;--tb\u003dshort&quot;" />
-      <option name="_new_target" value="&quot;test_data.test_dca_analysis&quot;" />
-      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
-      <method v="2" />
-    </configuration>
-    <configuration name="pytest for test_data.test_master_in_a_pickle" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
-      <module name="analysis_engine" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <option name="SDK_HOME" value="$USER_HOME$/.virtualenvs/a_engine/bin/python" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="_new_keywords" value="&quot;&quot;" />
-      <option name="_new_parameters" value="&quot;&quot;" />
-      <option name="_new_additionalArguments" value="&quot;--tb\u003dshort&quot;" />
-      <option name="_new_target" value="&quot;test_data.test_master_in_a_pickle&quot;" />
+      <option name="_new_target" value="&quot;test_data.test_financial_dashboard&quot;" />
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
@@ -212,6 +184,38 @@
       <option name="_new_parameters" value="&quot;&quot;" />
       <option name="_new_additionalArguments" value="&quot;--tb\u003dshort&quot;" />
       <option name="_new_target" value="&quot;test_data.test_opening_a_pickle&quot;" />
+      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
+      <method v="2" />
+    </configuration>
+    <configuration name="pytest for test_data.test_printout_of_milestones" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
+      <module name="analysis_engine" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="$USER_HOME$/.virtualenvs/a_engine/bin/python" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="_new_keywords" value="&quot;&quot;" />
+      <option name="_new_parameters" value="&quot;&quot;" />
+      <option name="_new_additionalArguments" value="&quot;--tb\u003dshort&quot;" />
+      <option name="_new_target" value="&quot;test_data.test_printout_of_milestones&quot;" />
+      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
+      <method v="2" />
+    </configuration>
+    <configuration name="pytest for test_data.test_schedule_dashboard" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
+      <module name="analysis_engine" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="$USER_HOME$/.virtualenvs/a_engine/bin/python" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="_new_keywords" value="&quot;&quot;" />
+      <option name="_new_parameters" value="&quot;&quot;" />
+      <option name="_new_additionalArguments" value="&quot;--tb\u003dshort&quot;" />
+      <option name="_new_target" value="&quot;test_data.test_schedule_dashboard&quot;" />
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
@@ -270,18 +274,18 @@
       <item itemvalue="Python tests.temp_tests" />
       <item itemvalue="Python tests.test_all" />
       <item itemvalue="Python tests.test_data_all" />
-      <item itemvalue="Python tests.pytest for test_data.test_dca_analysis" />
-      <item itemvalue="Python tests.pytest for test_data.test_compile_milestone_chart" />
-      <item itemvalue="Python tests.pytest for test_data.test_master_in_a_pickle" />
       <item itemvalue="Python tests.pytest for test_data.test_opening_a_pickle" />
+      <item itemvalue="Python tests.pytest for test_data.test_financial_dashboard" />
+      <item itemvalue="Python tests.pytest for test_data.test_printout_of_milestones" />
+      <item itemvalue="Python tests.pytest for test_data.test_schedule_dashboard" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Python tests.pytest for test_data.test_schedule_dashboard" />
+        <item itemvalue="Python tests.pytest for test_data.test_financial_dashboard" />
+        <item itemvalue="Python tests.pytest for test_data.test_printout_of_milestones" />
         <item itemvalue="Python.pickel" />
         <item itemvalue="Python tests.pytest for test_data.test_opening_a_pickle" />
-        <item itemvalue="Python tests.pytest for test_data.test_master_in_a_pickle" />
-        <item itemvalue="Python.pickel" />
-        <item itemvalue="Python.pickel" />
       </list>
     </recent_temporary>
   </component>
@@ -532,5 +536,16 @@
     <MESSAGE value="first commit no10_commission.py" />
     <MESSAGE value="change portfolio_financial_profile.py to include old bl profile data" />
     <option name="LAST_COMMIT_MESSAGE" value="change portfolio_financial_profile.py to include old bl profile data" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/analysis_engine/data.py</url>
+          <line>6544</line>
+          <option name="timeStamp" value="4" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>
