@@ -26,6 +26,7 @@ creation.
 
 import argparse
 
+from openpyxl import load_workbook
 
 from analysis_engine.data import (
     get_master_data,
@@ -40,6 +41,7 @@ from analysis_engine.data import (
     run_p_reports,
     RiskData,
     risks_into_excel, DcaData, dca_changes_into_excel, dca_changes_into_word, open_word_doc, Pickle, open_pickle_file,
+    ipdc_dashboard,
 )
 
 
@@ -117,6 +119,15 @@ def summaries(args):
         run_p_reports(m, m.project_information)
 
 
+def dashboard(args):
+    print("compiling ipdc dashboards")
+    dashboard_master = load_workbook(root_path / 'input/dashboards_master.xlsx')
+    m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
+    wb = ipdc_dashboard(m, dashboard_master)
+    wb.save(root_path / "output/completed_ipdc_dashboard.xlsx")
+    print("dashboard compiled. enjoy!")
+
+
 def dca(args):
     print("compiling dca analysis")
     m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
@@ -166,6 +177,7 @@ def main():
     subparsers = parser.add_subparsers()
     # subparsers.metavar = '                '
     parser_initiate = subparsers.add_parser("initiate", help="creates a master data file")
+    parser_dashboard = subparsers.add_parser("dashboards", help="ipdc dashboard")
     parser_vfm = subparsers.add_parser("vfm", help="vfm analysis")
     parser_milestones = subparsers.add_parser("milestones", help="milestone analysis")
     parser_summaries = subparsers.add_parser("summaries", help="summary reports")
@@ -300,6 +312,7 @@ def main():
             )
 
     parser_initiate.set_defaults(func=initiate)
+    parser_dashboard.set_defaults(func=dashboard)
     parser_vfm.set_defaults(func=vfm)
     parser_milestones.set_defaults(func=milestones)
     parser_summaries.set_defaults(func=summaries)
