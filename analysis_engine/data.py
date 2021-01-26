@@ -6328,14 +6328,14 @@ fill_colour_list = [ag_fill, ar_fill, red_fill, green_fill, amber_fill]
 rag_txt_list = ["A/G", "A/R", "R", "G", "A"]
 
 
-def concatenate_dates(date: date, ipdc_date: date):
+def concatenate_dates(date: date, IPDC_DATE: date):
     """
     function for converting dates into concatenated written time periods
     :param date: datetime.date
     :return: concatenated date
     """
     if date is not None:
-        a = (date - ipdc_date).days
+        a = (date - IPDC_DATE).days
         year = 365
         month = 30
         fortnight = 14
@@ -6399,16 +6399,16 @@ def concatenate_dates(date: date, ipdc_date: date):
             elif 14 <= a <= 20:
                 return ('2 weeks')
             elif 20 <= a <= 60:
-                if ipdc_date.month == date.month:
+                if IPDC_DATE.month == date.month:
                     return ('Later this mth')
-                elif (date.month - ipdc_date.month) == 1:
+                elif (date.month - IPDC_DATE.month) == 1:
                     return ('Next mth')
                 else:
                     return ('2 mths')
             elif -60 <= a <= -15:
-                if ipdc_date.month == date.month:
+                if IPDC_DATE.month == date.month:
                     return ('Earlier this mth')
-                elif (date.month - ipdc_date.month) == -1:
+                elif (date.month - IPDC_DATE.month) == -1:
                     return ('Last mth')
                 else:
                     return ('-2 mths')
@@ -6437,7 +6437,7 @@ def concatenate_dates(date: date, ipdc_date: date):
 
 def financial_dashboard(master: Master, wb: Workbook) -> Workbook:
     ws = wb.worksheets[0]
-    overall_ws = wb.worksheets[3]
+    # overall_ws = wb.worksheets[3]
 
     for row_num in range(2, ws.max_row + 1):
         project_name = ws.cell(row=row_num, column=3).value
@@ -6445,7 +6445,7 @@ def financial_dashboard(master: Master, wb: Workbook) -> Workbook:
             """BC Stage"""
             bc_stage = master.master_data[0].data[project_name]["IPDC approval point"]
             ws.cell(row=row_num, column=4).value = convert_bc_stage_text(bc_stage)
-            overall_ws.cell(row=row_num, column=3).value = convert_bc_stage_text(bc_stage)
+            # overall_ws.cell(row=row_num, column=3).value = convert_bc_stage_text(bc_stage)
             try:
                 bc_stage_lst_qrt = master.master_data[1].data[project_name][
                     "IPDC approval point"
@@ -6454,16 +6454,16 @@ def financial_dashboard(master: Master, wb: Workbook) -> Workbook:
                     ws.cell(row=row_num, column=4).font = Font(
                         name="Arial", size=10, color="00fc2525"
                     )
-                    overall_ws.cell(row=row_num, column=3).font = Font(
-                        name="Arial", size=10, color="00fc2525"
-                    )
+                    # overall_ws.cell(row=row_num, column=3).font = Font(
+                    #     name="Arial", size=10, color="00fc2525"
+                    # )
             except KeyError:
                 pass
 
             """planning stage"""
             plan_stage = master.master_data[0].data[project_name]["Project stage"]
             ws.cell(row=row_num, column=5).value = plan_stage
-            overall_ws.cell(row=row_num, column=4).value = plan_stage
+            # overall_ws.cell(row=row_num, column=4).value = plan_stage
             try:
                 plan_stage_lst_qrt = master.master_data[1].data[project_name][
                     "Project stage"
@@ -6472,16 +6472,16 @@ def financial_dashboard(master: Master, wb: Workbook) -> Workbook:
                     ws.cell(row=row_num, column=5).font = Font(
                         name="Arial", size=10, color="00fc2525"
                     )
-                    overall_ws.cell(row=row_num, column=4).font = Font(
-                        name="Arial", size=10, color="00fc2525"
-                    )
+                    # overall_ws.cell(row=row_num, column=4).font = Font(
+                    #     name="Arial", size=10, color="00fc2525"
+                    # )
             except KeyError:
                 pass
 
             """Total WLC"""
             wlc_now = master.master_data[0].data[project_name]["Total Forecast"]
             ws.cell(row=row_num, column=6).value = wlc_now
-            overall_ws.cell(row=row_num, column=5).value = wlc_now
+            # overall_ws.cell(row=row_num, column=5).value = wlc_now
             """WLC variance against lst quarter"""
             try:
                 wlc_lst_quarter = master.master_data[1].data[project_name][
@@ -6490,10 +6490,10 @@ def financial_dashboard(master: Master, wb: Workbook) -> Workbook:
                 diff_lst_qrt = wlc_now - wlc_lst_quarter
                 if float(diff_lst_qrt) > 0.49 or float(diff_lst_qrt) < -0.49:
                     ws.cell(row=row_num, column=7).value = diff_lst_qrt
-                    overall_ws.cell(row=row_num, column=6).value = diff_lst_qrt
+                    # overall_ws.cell(row=row_num, column=6).value = diff_lst_qrt
                 else:
                     ws.cell(row=row_num, column=7).value = "-"
-                    overall_ws.cell(row=row_num, column=6).value = "-"
+                    # overall_ws.cell(row=row_num, column=6).value = "-"
 
                 try:
                     percentage_change = ((wlc_now - wlc_lst_quarter) / wlc_now) * 100
@@ -6501,9 +6501,9 @@ def financial_dashboard(master: Master, wb: Workbook) -> Workbook:
                         ws.cell(row=row_num, column=7).font = Font(
                             name="Arial", size=10, color="00fc2525"
                         )
-                        overall_ws.cell(row=row_num, column=6).font = Font(
-                            name="Arial", size=10, color="00fc2525"
-                        )
+                        # overall_ws.cell(row=row_num, column=6).font = Font(
+                        #     name="Arial", size=10, color="00fc2525"
+                        # )
                 except ZeroDivisionError:
                     pass
 
@@ -6517,10 +6517,10 @@ def financial_dashboard(master: Master, wb: Workbook) -> Workbook:
                 diff_bl = wlc_now - wlc_baseline
                 if float(diff_bl) > 0.49 or float(diff_bl) < -0.49:
                     ws.cell(row=row_num, column=8).value = diff_bl
-                    overall_ws.cell(row=row_num, column=7).value = diff_bl
+                    # overall_ws.cell(row=row_num, column=7).value = diff_bl
                 else:
                     ws.cell(row=row_num, column=8).value = "-"
-                    overall_ws.cell(row=row_num, column=7).value = "-"
+                    # overall_ws.cell(row=row_num, column=7).value = "-"
             except TypeError:  # exception is here as some projects e.g. Hs2 phase 2b have (real) written into historical totals
                 pass
 
@@ -6530,9 +6530,9 @@ def financial_dashboard(master: Master, wb: Workbook) -> Workbook:
                     ws.cell(row=row_num, column=8).font = Font(
                         name="Arial", size=10, color="00fc2525"
                     )
-                    overall_ws.cell(row=row_num, column=7).font = Font(
-                        name="Arial", size=10, color="00fc2525"
-                    )
+                    # overall_ws.cell(row=row_num, column=7).font = Font(
+                    #     name="Arial", size=10, color="00fc2525"
+                    # )
 
             except (
                     ZeroDivisionError,
@@ -6648,58 +6648,67 @@ def schedule_dashboard(
                 pass
 
             """Next milestone name and variance"""
-            date = None
-            milestone = "None Scheduled"
-            for x in milestones.current.values():
-                if x["Project"] == master.abbreviations[project_name]:
-                    date = x["Date"]
-                    milestone = x["Milestone"]
-                    if date > IPDC_DATE:
-                        break
-            ws.cell(row=row_num, column=6).value = milestone
-            ws.cell(row=row_num, column=7).value = date
+            def get_next_milestone(p_name: str,
+                                   mils: MilestoneData) -> list:
 
-            lq_date = get_milestone_date(
-                project_name, milestones.last_quarter, milestone
-            )
+                for x in mils.current.values():
+                    if x["Project"] == p_name:
+                        d = x["Date"]
+                        ms = x["Milestone"]
+                        if d > IPDC_DATE:
+                            return [ms, d]
+
+            abb = master.abbreviations[project_name]
             try:
-                change = (date - lq_date).days
-                ws.cell(row=row_num, column=8).value = plus_minus_days(change)
-                if change > 25:
-                    ws.cell(row=row_num, column=8).font = Font(
-                        name="Arial", size=10, color="00fc2525"
-                    )
+                g = get_next_milestone(abb, milestones)
+                milestone = g[0]
+                date = g[1]
+                ws.cell(row=row_num, column=6).value = milestone
+                ws.cell(row=row_num, column=7).value = date
+
+                lq_date = get_milestone_date(
+                    abb, milestones.last_quarter, " " + milestone
+                )
+                try:
+                    change = (date - lq_date).days
+                    ws.cell(row=row_num, column=8).value = plus_minus_days(change)
+                    if change > 25:
+                        ws.cell(row=row_num, column=8).font = Font(
+                            name="Arial", size=10, color="00fc2525"
+                        )
+                except TypeError:
+                    pass
+                    # ws.cell(row=row_num, column=8).value = ""
+
+                bl_date = get_milestone_date(
+                    abb, milestones.baseline_dict, " " + milestone
+                )
+                try:
+                    change = (date - bl_date).days
+                    ws.cell(row=row_num, column=9).value = plus_minus_days(change)
+                    if change > 25:
+                        ws.cell(row=row_num, column=9).font = Font(
+                            name="Arial", size=10, color="00fc2525"
+                        )
+                except TypeError:
+                    pass
             except TypeError:
                 pass
-                # ws.cell(row=row_num, column=8).value = ""
-
-            bl_date = get_milestone_date(
-                project_name, milestones.baseline_dict, milestone
-            )
-            try:
-                change = (date - bl_date).days
-                ws.cell(row=row_num, column=9).value = plus_minus_days(change)
-                if change > 25:
-                    ws.cell(row=row_num, column=9).font = Font(
-                        name="Arial", size=10, color="00fc2525"
-                    )
-            except TypeError:
-                pass
-                # ws.cell(row=row_num, column=9).value = ""
 
             milestone_keys = [
-                "Start of Construction/build",
-                "Start of Operation",
-                "Full Operations",
-                "Project End Date",
-            ]
+                " Start of Construction/build",
+                " Start of Operation",
+                " Full Operations",
+                " Project End Date",
+            ]  # code legency needs a space at start of keys
             add_column = 0
             for m in milestone_keys:
-                current = get_milestone_date(project_name, milestones.current, m)
+                abb = master.abbreviations[project_name]
+                current = get_milestone_date(abb, milestones.current, m)
                 last_quarter = get_milestone_date(
-                    project_name, milestones.last_quarter, m
+                    abb, milestones.last_quarter, m
                 )
-                bl = get_milestone_date(project_name, milestones.baseline_dict, m)
+                bl = get_milestone_date(abb, milestones.baseline_dict, m)
                 ws.cell(row=row_num, column=10 + add_column).value = current
                 if current is not None and current < IPDC_DATE:
                     if m == "Full Operations":
@@ -7055,6 +7064,106 @@ def overall_dashboard(master: Master, wb: Workbook) -> Workbook:
     for row_num in range(2, ws.max_row + 1):
         project_name = ws.cell(row=row_num, column=2).value
         if project_name in master.current_projects:
+            """BC Stage"""
+            bc_stage = master.master_data[0].data[project_name]["IPDC approval point"]
+            # ws.cell(row=row_num, column=4).value = convert_bc_stage_text(bc_stage)
+            ws.cell(row=row_num, column=3).value = convert_bc_stage_text(bc_stage)
+            try:
+                bc_stage_lst_qrt = master.master_data[1].data[project_name][
+                    "IPDC approval point"
+                ]
+                if bc_stage != bc_stage_lst_qrt:
+                    # ws.cell(row=row_num, column=4).font = Font(
+                    #     name="Arial", size=10, color="00fc2525"
+                    # )
+                    ws.cell(row=row_num, column=3).font = Font(
+                        name="Arial", size=10, color="00fc2525"
+                    )
+            except KeyError:
+                pass
+
+            """planning stage"""
+            plan_stage = master.master_data[0].data[project_name]["Project stage"]
+            # ws.cell(row=row_num, column=5).value = plan_stage
+            ws.cell(row=row_num, column=4).value = plan_stage
+            try:
+                plan_stage_lst_qrt = master.master_data[1].data[project_name][
+                    "Project stage"
+                ]
+                if plan_stage != plan_stage_lst_qrt:
+                    # ws.cell(row=row_num, column=5).font = Font(
+                    #     name="Arial", size=10, color="00fc2525"
+                    # )
+                    ws.cell(row=row_num, column=4).font = Font(
+                        name="Arial", size=10, color="00fc2525"
+                    )
+            except KeyError:
+                pass
+
+            """Total WLC"""
+            wlc_now = master.master_data[0].data[project_name]["Total Forecast"]
+            # ws.cell(row=row_num, column=6).value = wlc_now
+            ws.cell(row=row_num, column=5).value = wlc_now
+            """WLC variance against lst quarter"""
+            try:
+                wlc_lst_quarter = master.master_data[1].data[project_name][
+                    "Total Forecast"
+                ]
+                diff_lst_qrt = wlc_now - wlc_lst_quarter
+                if float(diff_lst_qrt) > 0.49 or float(diff_lst_qrt) < -0.49:
+                    # ws.cell(row=row_num, column=7).value = diff_lst_qrt
+                    ws.cell(row=row_num, column=6).value = diff_lst_qrt
+                else:
+                    # ws.cell(row=row_num, column=7).value = "-"
+                    ws.cell(row=row_num, column=6).value = "-"
+
+                try:
+                    percentage_change = ((wlc_now - wlc_lst_quarter) / wlc_now) * 100
+                    if percentage_change > 5 or percentage_change < -5:
+                        # ws.cell(row=row_num, column=7).font = Font(
+                        #     name="Arial", size=10, color="00fc2525"
+                        # )
+                        ws.cell(row=row_num, column=6).font = Font(
+                            name="Arial", size=10, color="00fc2525"
+                        )
+                except ZeroDivisionError:
+                    pass
+
+            except KeyError:
+                ws.cell(row=row_num, column=6).value = "-"
+
+            """WLC variance against baseline quarter"""
+            bl = master.bl_index["ipdc_costs"][project_name][2]
+            wlc_baseline = master.master_data[bl].data[project_name]["Total Forecast"]
+            try:
+                diff_bl = wlc_now - wlc_baseline
+                if float(diff_bl) > 0.49 or float(diff_bl) < -0.49:
+                    # ws.cell(row=row_num, column=8).value = diff_bl
+                    ws.cell(row=row_num, column=7).value = diff_bl
+                else:
+                    # ws.cell(row=row_num, column=8).value = "-"
+                    ws.cell(row=row_num, column=7).value = "-"
+            except TypeError:  # exception is here as some projects e.g. Hs2 phase 2b have (real) written into historical totals
+                pass
+
+            try:
+                percentage_change = ((wlc_now - wlc_baseline) / wlc_now) * 100
+                if percentage_change > 5 or percentage_change < -5:
+                    # ws.cell(row=row_num, column=8).font = Font(
+                    #     name="Arial", size=10, color="00fc2525"
+                    # )
+                    ws.cell(row=row_num, column=7).font = Font(
+                        name="Arial", size=10, color="00fc2525"
+                    )
+
+            except (
+                    ZeroDivisionError,
+                    TypeError,
+            ):  # zerodivision error obvious, type error handling as above
+                pass
+
+
+
             try:
                 ws.cell(row=row_num, column=12).value = concatenate_dates(
                     master.master_data[0].data[project_name]["Last time at BICC"],
