@@ -372,7 +372,7 @@ def schedule_info(wb):
                 ws.cell(row=row_num, column=26).value = ''
 
     '''list of columns with conditional formatting'''
-    list_columns = ['v', 'w', 'series_one', 'series_two', 'z']
+    list_columns = ['v', 'w', 'x', 'y', 'z']
 
     '''same loop but the text is black. In addition these two loops go through the list_columns list above'''
     for column in list_columns:

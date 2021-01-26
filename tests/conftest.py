@@ -133,7 +133,7 @@ def diff_milestone_types():
 
 
 @pytest.fixture()
-def benefits_master():
+def benefits_masters():
     master = [
         project_data_from_master(os.path.join(os.getcwd(), "resources/"
                                                            "benefits_master_test_2_2020.xlsx"), 2, 2020),

@@ -41,7 +41,7 @@ from analysis_engine.data import (
     sort_projects_by_dca,
     project_report_meta_data,
     print_out_project_milestones,
-    put_milestones_into_wb, Pickle, open_pickle_file, financial_dashboard, schedule_dashboard,
+    put_milestones_into_wb, Pickle, open_pickle_file, financial_dashboard, schedule_dashboard, benefits_dashboard,
 )
 
 # test masters project names
@@ -509,11 +509,18 @@ def test_printout_of_milestones(word_doc, milestone_masters, project_info):
 def test_financial_dashboard(costs_masters, dashboard_template, project_info):
     m = Master(costs_masters, project_info)
     wb = financial_dashboard(m, dashboard_template)
-    wb.save("resources/test_dashboards_master.xlsx")
+    wb.save("resources/test_dashboards_master_altered.xlsx")
 
 
 def test_schedule_dashboard(milestone_masters, dashboard_template, project_info):
     m = Master(milestone_masters, project_info)
     milestones = MilestoneData(m, m.current_projects)
     milestones.filter_chart_info(milestone_type=["Approval", "Delivery"])
-    schedule_dashboard(m, milestones, dashboard_template)
+    wb = schedule_dashboard(m, milestones, dashboard_template)
+    wb.save("resources/test_dashboards_master_altered.xlsx")
+
+
+def test_benefits_dashboard(benefits_masters, dashboard_template, project_info):
+    m = Master(benefits_masters, project_info)
+    wb = benefits_dashboard(m, dashboard_template)
+    wb.save("resources/test_dashboards_master_altered.xlsx")

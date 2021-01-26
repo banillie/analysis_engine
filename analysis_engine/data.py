@@ -2828,7 +2828,7 @@ def put_matplotlib_fig_into_word(doc: Document, fig) -> None:
     plt.close()  # automatically closes figure so don't need to do manually.
 
 
-def convert_rag_text(dca_rating: str) -> None:
+def convert_rag_text(dca_rating: str) -> str:
     """Converts RAG name into a acronym"""
 
     if dca_rating == "Green":
@@ -5112,22 +5112,24 @@ def project_report_meta_data(
     return doc
 
 
+def plus_minus_days(change_value):
+    """mini function to place plus or minus sign before time delta
+    value in milestone_table function. Only need + signs to be added
+    as negative numbers have minus already"""
+    try:
+        if change_value > 0:
+            text = "+ " + str(change_value)
+        else:
+            text = str(change_value)
+    except TypeError:
+        text = change_value
+
+    return text
+
+
 def print_out_project_milestones(
     doc: Document, milestones: MilestoneData, project_name: str
 ) -> Document:
-    def plus_minus_days(change_value):
-        """mini function to place plus or minus sign before time delta
-        value in milestone_table function. Only need + signs to be added
-        as negative numbers have minus already"""
-        try:
-            if change_value > 0:
-                text = "+ " + str(change_value)
-            else:
-                text = str(change_value)
-        except TypeError:
-            text = change_value
-
-        return text
 
     # def get_milestone_notes(
     #         project_name: str,
@@ -6503,9 +6505,9 @@ def financial_dashboard(master: Master, wb: Workbook) -> Workbook:
     return wb
 
 
-def schedule_dashboard(master: Master,
-                  milestones: MilestoneData,
-                  wb: Workbook) -> Workbook:
+def schedule_dashboard(
+    master: Master, milestones: MilestoneData, wb: Workbook
+) -> Workbook:
 
     ws = wb.worksheets[1]
 
@@ -6525,6 +6527,7 @@ def schedule_dashboard(master: Master,
                     )
             except KeyError:
                 pass
+
             """stage"""
             plan_stage = master.master_data[0].data[project_name]["Project stage"]
             ws.cell(row=row_num, column=5).value = plan_stage
@@ -6541,477 +6544,379 @@ def schedule_dashboard(master: Master,
 
             """Next milestone name and variance"""
             date = None
-            milestone = 'None Scheduled'
+            milestone = "None Scheduled"
             for x in milestones.current.values():
                 if x["Project"] == master.abbreviations[project_name]:
                     date = x["Date"]
                     milestone = x["Milestone"]
                     if date > IPDC_DATE:
                         break
-                ws.cell(row=row_num, column=6).value = milestone
-                ws.cell(row=row_num, column=7).value = date
+            ws.cell(row=row_num, column=6).value = milestone
+            ws.cell(row=row_num, column=7).value = date
 
-            bl_date = get_milestone_date(project_name, milestones.baseline_dict, milestone)
+            lq_date = get_milestone_date(
+                project_name, milestones.last_quarter, milestone
+            )
             try:
-                ws.cell(row=row_num, column=8).value = date - bl_date
+                change = (date - lq_date).days
+                ws.cell(row=row_num, column=8).value = plus_minus_days(change)
+                if change > 25:
+                    ws.cell(row=row_num, column=8).font = Font(
+                        name="Arial", size=10, color="00fc2525"
+                    )
+            except TypeError:
+                pass
+                # ws.cell(row=row_num, column=8).value = ""
+
+            bl_date = get_milestone_date(
+                project_name, milestones.baseline_dict, milestone
+            )
+            try:
+                change = (date - bl_date).days
+                ws.cell(row=row_num, column=9).value = plus_minus_days(change)
+                if change > 25:
+                    ws.cell(row=row_num, column=9).font = Font(
+                        name="Arial", size=10, color="00fc2525"
+                    )
+            except TypeError:
+                pass
+                # ws.cell(row=row_num, column=9).value = ""
+
+            milestone_keys = [
+                "Start of Construction/build",
+                "Start of Operation",
+                "Full Operations",
+                "Project End Date",
+            ]
+            add_column = 0
+            for m in milestone_keys:
+                current = get_milestone_date(project_name, milestones.current, m)
+                last_quarter = get_milestone_date(
+                    project_name, milestones.last_quarter, m
+                )
+                bl = get_milestone_date(project_name, milestones.baseline_dict, m)
+                ws.cell(row=row_num, column=10 + add_column).value = current
+                if current is not None and current < IPDC_DATE:
+                    ws.cell(row=row_num, column=10 + add_column).value = "Completed"
+                try:
+                    last_change = (current - last_quarter).days
+                    ws.cell(
+                        row=row_num, column=11 + add_column
+                    ).value = plus_minus_days(last_change)
+                    if last_change is not None and last_change > 46:
+                        ws.cell(row=row_num, column=11 + add_column).font = Font(
+                            name="Arial", size=10, color="00fc2525"
+                        )
+                except TypeError:
+                    pass
+                try:
+                    bl_change = (current - bl).days
+                    ws.cell(
+                        row=row_num, column=12 + add_column
+                    ).value = plus_minus_days(bl_change)
+                    if bl_change is not None and bl_change > 85:
+                        ws.cell(row=row_num, column=12 + add_column).font = Font(
+                            name="Arial", size=10, color="00fc2525"
+                        )
+                except TypeError:
+                    pass
+                add_column += 3
+
+            """schedule DCA rating - this quarter"""
+            ws.cell(row=row_num, column=22).value = convert_rag_text(
+                master.master_data[0].data[project_name]["SRO Schedule Confidence"]
+            )
+            """schedule DCA rating - last qrt"""
+            try:
+                ws.cell(row=row_num, column=23).value = convert_rag_text(
+                    master.master_data[1].data[project_name]["SRO Schedule Confidence"]
+                )
+            except KeyError:
+                ws.cell(row=row_num, column=23).value = ""
+            """schedule DCA rating - 2 qrts ago"""
+            try:
+                ws.cell(row=row_num, column=24).value = convert_rag_text(
+                    master.master_data[2].data[project_name]["SRO Schedule Confidence"]
+                )
+            except (KeyError, IndexError):
+                ws.cell(row=row_num, column=24).value = ""
+            """schedule DCA rating - 3 qrts ago"""
+            try:
+                ws.cell(row=row_num, column=25).value = convert_rag_text(
+                    master.master_data[3].data[project_name]["SRO Schedule Confidence"]
+                )
+            except (KeyError, IndexError):
+                ws.cell(row=row_num, column=25).value = ""
+            """schedule DCA rating - baseline"""
+            bl_i = master.bl_index["ipdc_milestones"][project_name][2]
+            ws.cell(row=row_num, column=26).value = convert_rag_text(
+                master.master_data[bl_i].data[project_name]["SRO Schedule Confidence"]
+            )
+
+    """list of columns with conditional formatting"""
+    list_columns = ["v", "w", "x", "y", "z"]
+
+    """same loop but the text is black. In addition these two loops go through the list_columns list above"""
+    for column in list_columns:
+        for i, dca in enumerate(rag_txt_list):
+            text = black_text
+            fill = fill_colour_list[i]
+            dxf = DifferentialStyle(font=text, fill=fill)
+            rule = Rule(type="containsText", operator="containsText", text=dca, dxf=dxf)
+            for_rule_formula = 'NOT(ISERROR(SEARCH("' + dca + '",' + column + "5)))"
+            rule.formula = [for_rule_formula]
+            ws.conditional_formatting.add("" + column + "5:" + column + "60", rule)
+
+    for row_num in range(2, ws.max_row + 1):
+        for col_num in range(5, ws.max_column + 1):
+            if ws.cell(row=row_num, column=col_num).value == 0:
+                ws.cell(row=row_num, column=col_num).value = "-"
+
+    return wb
+
+
+def benefits_dashboard(master: Master, wb: Workbook) -> Workbook:
+
+    ws = wb.worksheets[2]
+
+    for row_num in range(2, ws.max_row + 1):
+        project_name = ws.cell(row=row_num, column=3).value
+        if project_name in master.current_projects:
+
+            """BICC approval point"""
+            bc_stage = master.master_data[0].data[project_name]["IPDC approval point"]
+            ws.cell(row=row_num, column=4).value = convert_bc_stage_text(bc_stage)
+            try:
+                bc_stage_lst_qrt = master.master_data[1].data[project_name][
+                    "IPDC approval point"
+                ]
+                if bc_stage != bc_stage_lst_qrt:
+                    ws.cell(row=row_num, column=4).font = Font(
+                        name="Arial", size=10, color="00fc2525"
+                    )
+            except TypeError:
+                pass
+            """Next stage"""
+            proj_stage = master.master_data[0].data[project_name]["Project stage"]
+            ws.cell(row=row_num, column=5).value = proj_stage
+            try:
+                proj_stage_lst_qrt = master.master_data[1].data[project_name][
+                    "Project stage"
+                ]
+                if proj_stage != proj_stage_lst_qrt:
+                    ws.cell(row=row_num, column=5).font = Font(
+                        name="Arial", size=10, color="00fc2525"
+                    )
             except TypeError:
                 pass
 
-            #         lst_qrt_diff = first_diff_data[project_name][next_milestone_name]
-            #         ws.cell(row=row_num, column=8).value = lst_qrt_diff
-            #         if lst_qrt_diff > 25:
-            #             ws.cell(row=row_num, column=8).font = Font(
-            #                 name="Arial", size=10, color="00fc2525"
-            #             )
-            #     except (TypeError, KeyError):
-            #         ws.cell(row=row_num, column=8).value = ""
-            #     try:
-            #         bl_qrt_diff = second_diff_data[project_name][next_milestone_name]
-            #         ws.cell(row=row_num, column=9).value = bl_qrt_diff
-            #         if bl_qrt_diff > 46:
-            #             ws.cell(row=row_num, column=9).font = Font(
-            #                 name="Arial", size=10, color="00fc2525"
-            #             )
-            #     except (TypeError, KeyError):
-            #         ws.cell(row=row_num, column=9).value = ""
-            # else:
-            #     pass
-            #
-            # """start of construction (soc) current date"""
-            # try:
-            #     current_soc = tuple(
-            #         current_milestones_all[project_name]["Start of Construction/build"]
-            #     )[0]
-            #     ws.cell(row=row_num, column=10).value = current_soc
-            #     if current_soc < ipdc_date:
-            #         ws.cell(row=row_num, column=10).value = "Completed"
-            # except (KeyError, TypeError):
-            #     ws.cell(row=row_num, column=10).value = ""
-            # """soc variance against lst quarter"""
-            # try:
-            #     soc_lst_qrt_diff = first_diff_data[project_name][
-            #         "Start of Construction/build"
-            #     ]
-            #     ws.cell(row=row_num, column=11).value = soc_lst_qrt_diff
-            #     if soc_lst_qrt_diff > 46:
-            #         ws.cell(row=row_num, column=11).font = Font(
-            #             name="Arial", size=10, color="00fc2525"
-            #         )
-            # except (KeyError, TypeError):
-            #     ws.cell(row=row_num, column=11).value = ""
-            # """soc variance against baseline"""
-            # try:
-            #     soc_bl_diff = second_diff_data[project_name][
-            #         "Start of Construction/build"
-            #     ]
-            #     ws.cell(row=row_num, column=12).value = soc_bl_diff
-            #     if soc_bl_diff > 85:
-            #         ws.cell(row=row_num, column=12).font = Font(
-            #             name="Arial", size=10, color="00fc2525"
-            #         )
-            # except (KeyError, TypeError):
-            #     ws.cell(row=row_num, column=12).value = ""
-            #
-            # """start of operation (sop) current date"""
-            # try:
-            #     current_sop = tuple(
-            #         current_milestones_all[project_name]["Start of Operation"]
-            #     )[0]
-            #     ws.cell(row=row_num, column=13).value = current_sop
-            #     if current_sop < ipdc_date:
-            #         ws.cell(row=row_num, column=13).value = "Completed"
-            # except (KeyError, TypeError):
-            #     ws.cell(row=row_num, column=13).value = ""
-            # """sop variance against lst quarter"""
-            # try:
-            #     sop_lst_qrt_diff = first_diff_data[project_name]["Start of Operation"]
-            #     ws.cell(row=row_num, column=14).value = sop_lst_qrt_diff
-            #     if sop_lst_qrt_diff > 46:
-            #         ws.cell(row=row_num, column=14).font = Font(
-            #             name="Arial", size=10, color="00fc2525"
-            #         )
-            # except (KeyError, TypeError):
-            #     ws.cell(row=row_num, column=14).value = ""
-            # """sop variance against baseline"""
-            # try:
-            #     sop_bl_diff = second_diff_data[project_name]["Start of Operation"]
-            #     ws.cell(row=row_num, column=15).value = sop_bl_diff
-            #     if sop_bl_diff > 86:
-            #         ws.cell(row=row_num, column=15).font = Font(
-            #             name="Arial", size=10, color="00fc2525"
-            #         )
-            # except (KeyError, TypeError):
-            #     ws.cell(row=row_num, column=15).value = ""
-            #
-            # """full operation current date"""
-            # try:
-            #     foc = tuple(current_milestones_all[project_name]["Full Operations"])[0]
-            #     ws.cell(row=row_num, column=16).value = foc
-            #     if foc < ipdc_date:
-            #         ws.cell(row=row_num, column=16).value = "Completed"
-            #     else:
-            #         ws.cell(row=row_num, column=16).value = foc
-            # except (KeyError, TypeError):
-            #     ws.cell(row=row_num, column=16).value = ""
-            #
-            # """fop against lst quarter"""
-            # try:
-            #     foc_lst_qrt_diff = first_diff_data[project_name]["Full Operations"]
-            #     ws.cell(row=row_num, column=17).value = foc_lst_qrt_diff
-            #     if foc_lst_qrt_diff > 46:
-            #         ws.cell(row=row_num, column=17).font = Font(
-            #             name="Arial", size=10, color="00fc2525"
-            #         )
-            # except (KeyError, TypeError):
-            #     ws.cell(row=row_num, column=17).value = ""
-            # """fop against baseline"""
-            # try:
-            #     foc_bl_diff = second_diff_data[project_name]["Full Operations"]
-            #     ws.cell(row=row_num, column=18).value = foc_bl_diff
-            #     if foc_bl_diff > 86:
-            #         ws.cell(row=row_num, column=18).font = Font(
-            #             name="Arial", size=10, color="00fc2525"
-            #         )
-            # except (KeyError, TypeError):
-            #     ws.cell(row=row_num, column=18).value = ""
-            #
-            # """project end date"""
-            # try:
-            #     ped = tuple(current_milestones_all[project_name]["Project End Date"])[0]
-            #     ws.cell(row=row_num, column=19).value = ped
-            # except (KeyError, TypeError):
-            #     ws.cell(row=row_num, column=19).value = ""
-            # """ped variance against lst quarter"""
-            # try:
-            #     ped_lst_qrt_diff = first_diff_data[project_name]["Project End Date"]
-            #     ws.cell(row=row_num, column=20).value = ped_lst_qrt_diff
-            #     if ped_lst_qrt_diff > 46:
-            #         ws.cell(row=row_num, column=20).font = Font(
-            #             name="Arial", size=10, color="00fc2525"
-            #         )
-            # except (KeyError, TypeError):
-            #     ws.cell(row=row_num, column=20).value = ""
-            # """ped variance against baseline"""
-            # try:
-            #     ped_bl_diff = second_diff_data[project_name]["Project End Date"]
-            #     ws.cell(row=row_num, column=21).value = ped_bl_diff
-            #     if ped_bl_diff > 86:
-            #         ws.cell(row=row_num, column=21).font = Font(
-            #             name="Arial", size=10, color="00fc2525"
-            #         )
-            # except (KeyError, TypeError):
-            #     ws.cell(row=row_num, column=21).value = ""
-            #
-            # """schedule DCA rating - this quarter"""
-            # ws.cell(row=row_num, column=22).value = convert_rag_text(
-            #     master[0].data[project_name]["SRO Schedule Confidence"]
-            # )
-            # """schedule DCA rating - last qrt"""
-            # try:
-            #     ws.cell(row=row_num, column=23).value = convert_rag_text(
-            #         master[1].data[project_name]["SRO Schedule Confidence"]
-            #     )
-            # except KeyError:
-            #     ws.cell(row=row_num, column=23).value = ""
-            # """schedule DCA rating - 2 qrts ago"""
-            # try:
-            #     ws.cell(row=row_num, column=24).value = convert_rag_text(
-            #         master[2].data[project_name]["SRO Schedule Confidence"]
-            #     )
-            # except KeyError:
-            #     ws.cell(row=row_num, column=24).value = ""
-            # """schedule DCA rating - 3 qrts ago"""
-            # try:
-            #     ws.cell(row=row_num, column=25).value = convert_rag_text(
-            #         master[3].data[project_name]["SRO Schedule Confidence"]
-            #     )
-            # except KeyError:
-            #     ws.cell(row=row_num, column=25).value = ""
-            # """schedule DCA rating - baseline"""
-            # try:
-            #     ws.cell(row=row_num, column=26).value = convert_rag_text(
-            #         master[milestone_bl_index[project_name][2]].data[
-            #             project_name
-            #         ]["SRO Schedule Confidence"]
-            #     )
-            # except:
-            #     ws.cell(row=row_num, column=26).value = ""
+            """initial bcr"""
+            initial_bcr = master.master_data[0].data[project_name][
+                "Initial Benefits Cost Ratio (BCR)"
+            ]
+            ws.cell(row=row_num, column=6).value = initial_bcr
+            """initial bcr baseline"""
+            bl_i = master.bl_index["ipdc_benefits"][project_name][2]
+            try:
+                baseline_initial_bcr = master[bl_i
+                ].data[project_name]["Initial Benefits Cost Ratio (BCR)"]
+                if baseline_initial_bcr != 0:
+                    ws.cell(row=row_num, column=7).value = baseline_initial_bcr
+                else:
+                    ws.cell(row=row_num, column=7).value = ""
+                if initial_bcr != baseline_initial_bcr:
+                    if baseline_initial_bcr is None:
+                        pass
+                    else:
+                        ws.cell(row=row_num, column=6).font = Font(
+                            name="Arial", size=10, color="00fc2525"
+                        )
+                        ws.cell(row=row_num, column=7).font = Font(
+                            name="Arial", size=10, color="00fc2525"
+                        )
+            except TypeError:
+                ws.cell(row=row_num, column=7).value = ""
 
-    # """list of columns with conditional formatting"""
-    # list_columns = ["v", "w", "series_one", "series_two", "z"]
+            """adjusted bcr"""
+            adjusted_bcr = master.master_data[0].data[project_name][
+                "Adjusted Benefits Cost Ratio (BCR)"
+            ]
+            ws.cell(row=row_num, column=8).value = adjusted_bcr
+            """adjusted bcr baseline"""
+            try:
+                baseline_adjusted_bcr = master[bl_i
+                ].data[project_name]["Adjusted Benefits Cost Ratio (BCR)"]
+                if baseline_adjusted_bcr != 0:
+                    ws.cell(row=row_num, column=9).value = baseline_adjusted_bcr
+                else:
+                    ws.cell(row=row_num, column=9).value = ""
+                if adjusted_bcr != baseline_adjusted_bcr:
+                    if baseline_adjusted_bcr is not None:
+                        ws.cell(row=row_num, column=8).font = Font(
+                            name="Arial", size=10, color="00fc2525"
+                        )
+                        ws.cell(row=row_num, column=9).font = Font(
+                            name="Arial", size=10, color="00fc2525"
+                        )
+            except TypeError:
+                ws.cell(row=row_num, column=9).value = ""
 
-    # """same loop but the text is black. In addition these two loops go through the list_columns list above"""
-    # for column in list_columns:
-    #     for i, dca in enumerate(rag_txt_list):
-    #         text = black_text
-    #         fill = fill_colour_list[i]
-    #         dxf = DifferentialStyle(font=text, fill=fill)
-    #         rule = Rule(type="containsText", operator="containsText", text=dca, dxf=dxf)
-    #         for_rule_formula = 'NOT(ISERROR(SEARCH("' + dca + '",' + column + "5)))"
-    #         rule.formula = [for_rule_formula]
-    #         ws.conditional_formatting.add("" + column + "5:" + column + "60", rule)
-    #
+            """vfm category now"""
+            if (
+                master.master_data[0].data[project_name]["VfM Category single entry"]
+                is None
+            ):
+                vfm_cat = (
+                    str(
+                        master.master_data[0].data[project_name][
+                            "VfM Category lower range"
+                        ]
+                    )
+                    + " - "
+                    + str(
+                        master.master_data[0].data[project_name][
+                            "VfM Category upper range"
+                        ]
+                    )
+                )
+                ws.cell(row=row_num, column=10).value = vfm_cat
+            else:
+                vfm_cat = master.master_data[0].data[project_name][
+                    "VfM Category single entry"
+                ]
+                ws.cell(row=row_num, column=10).value = vfm_cat
+
+            """vfm category baseline"""
+            try:
+                if (
+                    master.master_data[bl_i].data[
+                        project_name
+                    ]["VfM Category single entry"]
+                    is None
+                ):
+                    vfm_cat_baseline = (
+                        str(
+                            master.master_data[bl_i
+                            ].data[project_name]["VfM Category lower range"]
+                        )
+                        + " - "
+                        + str(
+                            master.master_data[bl_i
+                            ].data[project_name]["VfM Category upper range"]
+                        )
+                    )
+                    ws.cell(row=row_num, column=11).value = vfm_cat_baseline
+                else:
+                    vfm_cat_baseline = master.master_data[bl_i
+                    ].data[project_name]["VfM Category single entry"]
+                    ws.cell(row=row_num, column=11).value = vfm_cat_baseline
+
+            except KeyError:
+                try:
+                    vfm_cat_baseline = master.master_data[bl_i
+                    ].data[project_name]["VfM Category single entry"]
+                    ws.cell(row=row_num, column=11).value = vfm_cat_baseline
+                except KeyError:
+                    vfm_cat_baseline = master.master_data[bl_i
+                    ].data[project_name]["VfM Category"]
+                    ws.cell(row=row_num, column=11).value = vfm_cat_baseline
+
+            if vfm_cat != vfm_cat_baseline:
+                if vfm_cat_baseline is None:
+                    pass
+                else:
+                    ws.cell(row=row_num, column=10).font = Font(
+                        name="Arial", size=10, color="00fc2525"
+                    )
+                    ws.cell(row=row_num, column=11).font = Font(
+                        name="Arial", size=10, color="00fc2525"
+                    )
+
+            """total monetised benefits"""
+            tmb = master.master_data[0].data[project_name][
+                "Total BEN Forecast - Total Monetised Benefits"
+            ]
+            ws.cell(row=row_num, column=12).value = tmb
+            """tmb variance"""
+            baseline_tmb = master.master_data[bl_i].data[
+                project_name
+            ]["Total BEN Forecast - Total Monetised Benefits"]
+            tmb_variance = tmb - baseline_tmb
+            ws.cell(row=row_num, column=13).value = tmb_variance
+            if tmb_variance == 0:
+                ws.cell(row=row_num, column=13).value = "-"
+            try:
+                percentage_change = ((tmb - baseline_tmb) / tmb) * 100
+                if percentage_change > 5 or percentage_change < -5:
+                    ws.cell(row=row_num, column=13).font = Font(
+                        name="Arial", size=10, color="00fc2525"
+                    )
+            except ZeroDivisionError:
+                pass
+
+            # In year benefits
+            iyb = master.master_data[0].data[project_name]["BEN Forecast In-Year"]
+            ws.cell(row=row_num, column=14).value = iyb
+            # No iyb variance yet as this keys only present in Q2 2021 master.
+
+            """benefits DCA rating - this quarter"""
+            ws.cell(row=row_num, column=16).value = convert_rag_text(
+                master.master_data[0].data[project_name]["SRO Benefits RAG"]
+            )
+            """benefits DCA rating - last qrt"""
+            try:
+                ws.cell(row=row_num, column=17).value = convert_rag_text(
+                    master.master_data[1].data[project_name]["SRO Benefits RAG"]
+                )
+            except KeyError:
+                ws.cell(row=row_num, column=17).value = ""
+            """benefits DCA rating - 2 qrts ago"""
+            try:
+                ws.cell(row=row_num, column=18).value = convert_rag_text(
+                    master.master_data[2].data[project_name]["SRO Benefits RAG"]
+                )
+            except (KeyError, IndexError):
+                ws.cell(row=row_num, column=18).value = ""
+            """benefits DCA rating - 3 qrts ago"""
+            try:
+                ws.cell(row=row_num, column=19).value = convert_rag_text(
+                    master.master_data[3].data[project_name]["SRO Benefits RAG"]
+                )
+            except (KeyError, IndexError):
+                ws.cell(row=row_num, column=19).value = ""
+            """benefits DCA rating - baseline"""
+
+            ws.cell(row=row_num, column=20).value = convert_rag_text(
+                master.master_data[bl_i].data[project_name]["SRO Benefits RAG"])
+
+        """list of columns with conditional formatting"""
+        list_columns = ["p", "q", "r", "s", "t"]
+
+        """loops below place conditional formatting (cf) rules into the wb. There are two as the dashboard currently has
+        two distinct sections/headings, which do not require cf. Therefore, cf starts and ends at the stated rows. this
+        is hard code that will need to be changed should the position of information in the dashboard change. It is an
+        easy change however"""
+
+        """same loop but the text is black. In addition these two loops go through the list_columns list above"""
+        for column in list_columns:
+            for i, dca in enumerate(rag_txt_list):
+                text = black_text
+                fill = fill_colour_list[i]
+                dxf = DifferentialStyle(font=text, fill=fill)
+                rule = Rule(
+                    type="containsText", operator="containsText", text=dca, dxf=dxf
+                )
+                for_rule_formula = 'NOT(ISERROR(SEARCH("' + dca + '",' + column + "5)))"
+                rule.formula = [for_rule_formula]
+                ws.conditional_formatting.add("" + column + "5:" + column + "60", rule)
+
     # for row_num in range(2, ws.max_row + 1):
-    #     for col_num in range(5, ws.max_column + 1):
+    #     for col_num in range(5, ws.max_column+1):
     #         if ws.cell(row=row_num, column=col_num).value == 0:
-    #             ws.cell(row=row_num, column=col_num).value = "-"
+    #             ws.cell(row=row_num, column=col_num).value = '-'
 
-    # return wb
+    return wb
 
-
-# def benefits_info(wb):
-#
-#     ws = wb.worksheets[2]
-#
-#     for row_num in range(2, ws.max_row + 1):
-#         project_name = ws.cell(row=row_num, column=3).value
-#         if project_name in list_of_masters_all[0].projects:
-#
-#             """BICC approval point"""
-#             bc_stage = list_of_masters_all[0].data[project_name]["IPDC approval point"]
-#             ws.cell(row=row_num, column=4).value = convert_bc_stage_text(bc_stage)
-#             try:
-#                 bc_stage_lst_qrt = list_of_masters_all[1].data[project_name][
-#                     "IPDC approval point"
-#                 ]
-#                 if bc_stage != bc_stage_lst_qrt:
-#                     ws.cell(row=row_num, column=4).font = Font(
-#                         name="Arial", size=10, color="00fc2525"
-#                     )
-#             except:
-#                 pass
-#             """Next stage"""
-#             proj_stage = list_of_masters_all[0].data[project_name]["Project stage"]
-#             ws.cell(row=row_num, column=5).value = proj_stage
-#             try:
-#                 proj_stage_lst_qrt = list_of_masters_all[1].data[project_name][
-#                     "Project stage"
-#                 ]
-#                 if proj_stage != proj_stage_lst_qrt:
-#                     ws.cell(row=row_num, column=5).font = Font(
-#                         name="Arial", size=10, color="00fc2525"
-#                     )
-#             except:
-#                 pass
-#
-#             """initial bcr"""
-#             initial_bcr = list_of_masters_all[0].data[project_name][
-#                 "Initial Benefits Cost Ratio (BCR)"
-#             ]
-#             ws.cell(row=row_num, column=6).value = initial_bcr
-#             """initial bcr baseline"""
-#             try:
-#                 baseline_initial_bcr = list_of_masters_all[
-#                     benefits_bl_index[project_name][2]
-#                 ].data[project_name]["Initial Benefits Cost Ratio (BCR)"]
-#                 if baseline_initial_bcr != 0:
-#                     ws.cell(row=row_num, column=7).value = baseline_initial_bcr
-#                 else:
-#                     ws.cell(row=row_num, column=7).value = ""
-#                 if initial_bcr != baseline_initial_bcr:
-#                     if baseline_initial_bcr is None:
-#                         pass
-#                     else:
-#                         ws.cell(row=row_num, column=6).font = Font(
-#                             name="Arial", size=10, color="00fc2525"
-#                         )
-#                         ws.cell(row=row_num, column=7).font = Font(
-#                             name="Arial", size=10, color="00fc2525"
-#                         )
-#             except TypeError:
-#                 ws.cell(row=row_num, column=7).value = ""
-#
-#             """adjusted bcr"""
-#             adjusted_bcr = list_of_masters_all[0].data[project_name][
-#                 "Adjusted Benefits Cost Ratio (BCR)"
-#             ]
-#             ws.cell(row=row_num, column=8).value = adjusted_bcr
-#             """adjusted bcr baseline"""
-#             try:
-#                 baseline_adjusted_bcr = list_of_masters_all[
-#                     benefits_bl_index[project_name][2]
-#                 ].data[project_name]["Adjusted Benefits Cost Ratio (BCR)"]
-#                 if baseline_adjusted_bcr != 0:
-#                     ws.cell(row=row_num, column=9).value = baseline_adjusted_bcr
-#                 else:
-#                     ws.cell(row=row_num, column=9).value = ""
-#                 if adjusted_bcr != baseline_adjusted_bcr:
-#                     if baseline_adjusted_bcr is not None:
-#                         ws.cell(row=row_num, column=8).font = Font(
-#                             name="Arial", size=10, color="00fc2525"
-#                         )
-#                         ws.cell(row=row_num, column=9).font = Font(
-#                             name="Arial", size=10, color="00fc2525"
-#                         )
-#             except TypeError:
-#                 ws.cell(row=row_num, column=9).value = ""
-#
-#             """vfm category now"""
-#             if (
-#                 list_of_masters_all[0].data[project_name]["VfM Category single entry"]
-#                 is None
-#             ):
-#                 vfm_cat = (
-#                     str(
-#                         list_of_masters_all[0].data[project_name][
-#                             "VfM Category lower range"
-#                         ]
-#                     )
-#                     + " - "
-#                     + str(
-#                         list_of_masters_all[0].data[project_name][
-#                             "VfM Category upper range"
-#                         ]
-#                     )
-#                 )
-#                 ws.cell(row=row_num, column=10).value = vfm_cat
-#             else:
-#                 vfm_cat = list_of_masters_all[0].data[project_name][
-#                     "VfM Category single entry"
-#                 ]
-#                 ws.cell(row=row_num, column=10).value = vfm_cat
-#
-#             """vfm category baseline"""
-#             try:
-#                 if (
-#                     list_of_masters_all[benefits_bl_index[project_name][2]].data[
-#                         project_name
-#                     ]["VfM Category single entry"]
-#                     is None
-#                 ):
-#                     vfm_cat_baseline = (
-#                         str(
-#                             list_of_masters_all[
-#                                 benefits_bl_index[project_name][2]
-#                             ].data[project_name]["VfM Category lower range"]
-#                         )
-#                         + " - "
-#                         + str(
-#                             list_of_masters_all[
-#                                 benefits_bl_index[project_name][2]
-#                             ].data[project_name]["VfM Category upper range"]
-#                         )
-#                     )
-#                     ws.cell(row=row_num, column=11).value = vfm_cat_baseline
-#                 else:
-#                     vfm_cat_baseline = list_of_masters_all[
-#                         benefits_bl_index[project_name[2]]
-#                     ].data[project_name]["VfM Category single entry"]
-#                     ws.cell(row=row_num, column=11).value = vfm_cat_baseline
-#
-#             except KeyError:
-#                 try:
-#                     vfm_cat_baseline = list_of_masters_all[
-#                         benefits_bl_index[project_name][2]
-#                     ].data[project_name]["VfM Category single entry"]
-#                     ws.cell(row=row_num, column=11).value = vfm_cat_baseline
-#                 except KeyError:
-#                     vfm_cat_baseline = list_of_masters_all[
-#                         benefits_bl_index[project_name][2]
-#                     ].data[project_name]["VfM Category"]
-#                     ws.cell(row=row_num, column=11).value = vfm_cat_baseline
-#
-#             if vfm_cat != vfm_cat_baseline:
-#                 if vfm_cat_baseline is None:
-#                     pass
-#                 else:
-#                     ws.cell(row=row_num, column=10).font = Font(
-#                         name="Arial", size=10, color="00fc2525"
-#                     )
-#                     ws.cell(row=row_num, column=11).font = Font(
-#                         name="Arial", size=10, color="00fc2525"
-#                     )
-#
-#             """total monetised benefits"""
-#             tmb = list_of_masters_all[0].data[project_name][
-#                 "Total BEN Forecast - Total Monetised Benefits"
-#             ]
-#             ws.cell(row=row_num, column=12).value = tmb
-#             """tmb variance"""
-#             baseline_tmb = list_of_masters_all[benefits_bl_index[project_name][2]].data[
-#                 project_name
-#             ]["Total BEN Forecast - Total Monetised Benefits"]
-#             tmb_variance = tmb - baseline_tmb
-#             ws.cell(row=row_num, column=13).value = tmb_variance
-#             if tmb_variance == 0:
-#                 ws.cell(row=row_num, column=13).value = "-"
-#             try:
-#                 percentage_change = ((tmb - baseline_tmb) / tmb) * 100
-#                 if percentage_change > 5 or percentage_change < -5:
-#                     ws.cell(row=row_num, column=13).font = Font(
-#                         name="Arial", size=10, color="00fc2525"
-#                     )
-#             except ZeroDivisionError:
-#                 pass
-#
-#             # In year benefits
-#             iyb = list_of_masters_all[0].data[project_name]["BEN Forecast In-Year"]
-#             ws.cell(row=row_num, column=14).value = iyb
-#             # No iyb variance yet as this keys only present in Q2 2021 master.
-#
-#             """benefits DCA rating - this quarter"""
-#             ws.cell(row=row_num, column=16).value = convert_rag_text(
-#                 list_of_masters_all[0].data[project_name]["SRO Benefits RAG"]
-#             )
-#             """benefits DCA rating - last qrt"""
-#             try:
-#                 ws.cell(row=row_num, column=17).value = convert_rag_text(
-#                     list_of_masters_all[1].data[project_name]["SRO Benefits RAG"]
-#                 )
-#             except KeyError:
-#                 ws.cell(row=row_num, column=17).value = ""
-#             """benefits DCA rating - 2 qrts ago"""
-#             try:
-#                 ws.cell(row=row_num, column=18).value = convert_rag_text(
-#                     list_of_masters_all[2].data[project_name]["SRO Benefits RAG"]
-#                 )
-#             except KeyError:
-#                 ws.cell(row=row_num, column=18).value = ""
-#             """benefits DCA rating - 3 qrts ago"""
-#             try:
-#                 ws.cell(row=row_num, column=19).value = convert_rag_text(
-#                     list_of_masters_all[3].data[project_name]["SRO Benefits RAG"]
-#                 )
-#             except KeyError:
-#                 ws.cell(row=row_num, column=19).value = ""
-#             """benefits DCA rating - baseline"""
-#             try:
-#                 ws.cell(row=row_num, column=20).value = convert_rag_text(
-#                     list_of_masters_all[benefits_bl_index[project_name][2]].data[
-#                         project_name
-#                     ]["SRO Benefits RAG"]
-#                 )
-#             except:
-#                 ws.cell(row=row_num, column=20).value = ""
-#
-#         """list of columns with conditional formatting"""
-#         list_columns = ["p", "q", "r", "s", "t"]
-#
-#         """loops below place conditional formatting (cf) rules into the wb. There are two as the dashboard currently has
-#         two distinct sections/headings, which do not require cf. Therefore, cf starts and ends at the stated rows. this
-#         is hard code that will need to be changed should the position of information in the dashboard change. It is an
-#         easy change however"""
-#
-#         """same loop but the text is black. In addition these two loops go through the list_columns list above"""
-#         for column in list_columns:
-#             for i, dca in enumerate(rag_txt_list):
-#                 text = black_text
-#                 fill = fill_colour_list[i]
-#                 dxf = DifferentialStyle(font=text, fill=fill)
-#                 rule = Rule(
-#                     type="containsText", operator="containsText", text=dca, dxf=dxf
-#                 )
-#                 for_rule_formula = 'NOT(ISERROR(SEARCH("' + dca + '",' + column + "5)))"
-#                 rule.formula = [for_rule_formula]
-#                 ws.conditional_formatting.add("" + column + "5:" + column + "60", rule)
-#
-#     # for row_num in range(2, ws.max_row + 1):
-#     #     for col_num in range(5, ws.max_column+1):
-#     #         if ws.cell(row=row_num, column=col_num).value == 0:
-#     #             ws.cell(row=row_num, column=col_num).value = '-'
-#
-#     return wb
-#
 #
 # def overall_info(wb):
 #     ws = wb.worksheets[3]
