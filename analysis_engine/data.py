@@ -6614,7 +6614,7 @@ def schedule_dashboard(
         master: Master, milestones: MilestoneData, wb: Workbook
 ) -> Workbook:
     ws = wb.worksheets[1]
-    overall_ws = wb.worksheets[3]
+    # overall_ws = wb.worksheets[3]
 
     for row_num in range(2, ws.max_row + 1):
         project_name = ws.cell(row=row_num, column=3).value
@@ -6711,22 +6711,22 @@ def schedule_dashboard(
                 bl = get_milestone_date(abb, milestones.baseline_dict, m)
                 ws.cell(row=row_num, column=10 + add_column).value = current
                 if current is not None and current < IPDC_DATE:
-                    if m == "Full Operations":
-                        overall_ws.cell(row=row_num, column=9).value = "Completed"
+                    # if m == "Full Operations":
+                    #     overall_ws.cell(row=row_num, column=9).value = "Completed"
                     ws.cell(row=row_num, column=10 + add_column).value = "Completed"
                 try:
                     last_change = (current - last_quarter).days
-                    if m == "Full Operations":
-                        ws.cell(
-                            row=row_num, column=10).value = plus_minus_days(last_change)
+                    # if m == "Full Operations":
+                    #     ws.cell(
+                    #         row=row_num, column=10).value = plus_minus_days(last_change)
                     ws.cell(
                         row=row_num, column=11 + add_column
                     ).value = plus_minus_days(last_change)
                     if last_change is not None and last_change > 46:
-                        if m == "Full Operations":
-                            overall_ws.cell(row=row_num, column=10).font = Font(
-                                name="Arial", size=10, color="00fc2525"
-                            )
+                        # if m == "Full Operations":
+                        #     overall_ws.cell(row=row_num, column=10).font = Font(
+                        #         name="Arial", size=10, color="00fc2525"
+                        #     )
                         ws.cell(row=row_num, column=11 + add_column).font = Font(
                             name="Arial", size=10, color="00fc2525"
                         )
@@ -6734,18 +6734,18 @@ def schedule_dashboard(
                     pass
                 try:
                     bl_change = (current - bl).days
-                    if m == "Full Operations":
-                        overall_ws.cell(
-                            row=row_num, column=11
-                        ).value = plus_minus_days(bl_change)
+                    # if m == "Full Operations":
+                    #     overall_ws.cell(
+                    #         row=row_num, column=11
+                    #     ).value = plus_minus_days(bl_change)
                     ws.cell(
                         row=row_num, column=12 + add_column
                     ).value = plus_minus_days(bl_change)
                     if bl_change is not None and bl_change > 85:
-                        if m == "Full Operations":
-                            overall_ws.cell(row=row_num, column=11).font = Font(
-                                name="Arial", size=10, color="00fc2525"
-                            )
+                        # if m == "Full Operations":
+                        #     overall_ws.cell(row=row_num, column=11).font = Font(
+                        #         name="Arial", size=10, color="00fc2525"
+                        #     )
                         ws.cell(row=row_num, column=12 + add_column).font = Font(
                             name="Arial", size=10, color="00fc2525"
                         )
@@ -6811,7 +6811,7 @@ def schedule_dashboard(
 
 def benefits_dashboard(master: Master, wb: Workbook) -> Workbook:
     ws = wb.worksheets[2]
-    overall_ws = wb.worksheets[3]
+    # overall_ws = wb.worksheets[3]
 
     for row_num in range(2, ws.max_row + 1):
         project_name = ws.cell(row=row_num, column=3).value
@@ -6851,25 +6851,25 @@ def benefits_dashboard(master: Master, wb: Workbook) -> Workbook:
             ws.cell(row=row_num, column=6).value = initial_bcr
             """initial bcr baseline"""
             bl_i = master.bl_index["ipdc_benefits"][project_name][2]
-            try:
-                baseline_initial_bcr = master[bl_i
-                ].data[project_name]["Initial Benefits Cost Ratio (BCR)"]
-                if baseline_initial_bcr != 0:
-                    ws.cell(row=row_num, column=7).value = baseline_initial_bcr
-                else:
-                    ws.cell(row=row_num, column=7).value = ""
-                if initial_bcr != baseline_initial_bcr:
-                    if baseline_initial_bcr is None:
-                        pass
-                    else:
-                        ws.cell(row=row_num, column=6).font = Font(
-                            name="Arial", size=10, color="00fc2525"
-                        )
-                        ws.cell(row=row_num, column=7).font = Font(
-                            name="Arial", size=10, color="00fc2525"
-                        )
-            except TypeError:
+            # try:
+            baseline_initial_bcr = master.master_data[bl_i
+            ].data[project_name]["Initial Benefits Cost Ratio (BCR)"]
+            if baseline_initial_bcr != 0:
+                ws.cell(row=row_num, column=7).value = baseline_initial_bcr
+            else:
                 ws.cell(row=row_num, column=7).value = ""
+            if initial_bcr != baseline_initial_bcr:
+                if baseline_initial_bcr is None:
+                    pass
+                else:
+                    ws.cell(row=row_num, column=6).font = Font(
+                        name="Arial", size=10, color="00fc2525"
+                    )
+                    ws.cell(row=row_num, column=7).font = Font(
+                        name="Arial", size=10, color="00fc2525"
+                    )
+            # except TypeError:
+            #     ws.cell(row=row_num, column=7).value = ""
 
             """adjusted bcr"""
             adjusted_bcr = master.master_data[0].data[project_name][
@@ -6877,23 +6877,23 @@ def benefits_dashboard(master: Master, wb: Workbook) -> Workbook:
             ]
             ws.cell(row=row_num, column=8).value = adjusted_bcr
             """adjusted bcr baseline"""
-            try:
-                baseline_adjusted_bcr = master[bl_i
-                ].data[project_name]["Adjusted Benefits Cost Ratio (BCR)"]
-                if baseline_adjusted_bcr != 0:
-                    ws.cell(row=row_num, column=9).value = baseline_adjusted_bcr
-                else:
-                    ws.cell(row=row_num, column=9).value = ""
-                if adjusted_bcr != baseline_adjusted_bcr:
-                    if baseline_adjusted_bcr is not None:
-                        ws.cell(row=row_num, column=8).font = Font(
-                            name="Arial", size=10, color="00fc2525"
-                        )
-                        ws.cell(row=row_num, column=9).font = Font(
-                            name="Arial", size=10, color="00fc2525"
-                        )
-            except TypeError:
+            # try:
+            baseline_adjusted_bcr = master.master_data[bl_i
+            ].data[project_name]["Adjusted Benefits Cost Ratio (BCR)"]
+            if baseline_adjusted_bcr != 0:
+                ws.cell(row=row_num, column=9).value = baseline_adjusted_bcr
+            else:
                 ws.cell(row=row_num, column=9).value = ""
+            if adjusted_bcr != baseline_adjusted_bcr:
+                if baseline_adjusted_bcr is not None:
+                    ws.cell(row=row_num, column=8).font = Font(
+                        name="Arial", size=10, color="00fc2525"
+                    )
+                    ws.cell(row=row_num, column=9).font = Font(
+                        name="Arial", size=10, color="00fc2525"
+                    )
+            # except TypeError:
+            #     ws.cell(row=row_num, column=9).value = ""
 
             """vfm category now"""
             if (
@@ -6914,14 +6914,14 @@ def benefits_dashboard(master: Master, wb: Workbook) -> Workbook:
                 )
                 )
                 ws.cell(row=row_num, column=10).value = vfm_cat
-                overall_ws.cell(row=row_num, column=8).value = vfm_cat
+                # overall_ws.cell(row=row_num, column=8).value = vfm_cat
 
             else:
                 vfm_cat = master.master_data[0].data[project_name][
                     "VfM Category single entry"
                 ]
                 ws.cell(row=row_num, column=10).value = vfm_cat
-                overall_ws.cell(row=row_num, column=8).value = vfm_cat
+                # overall_ws.cell(row=row_num, column=8).value = vfm_cat
 
             """vfm category baseline"""
             try:
@@ -6968,9 +6968,9 @@ def benefits_dashboard(master: Master, wb: Workbook) -> Workbook:
                     ws.cell(row=row_num, column=11).font = Font(
                         name="Arial", size=10, color="00fc2525"
                     )
-                    overall_ws.cell(row=row_num, column=8).font = Font(
-                        name="Arial", size=10, color="00fc2525"
-                    )
+                    # overall_ws.cell(row=row_num, column=8).font = Font(
+                    #     name="Arial", size=10, color="00fc2525"
+                    # )
 
             """total monetised benefits"""
             tmb = master.master_data[0].data[project_name][
@@ -6997,7 +6997,19 @@ def benefits_dashboard(master: Master, wb: Workbook) -> Workbook:
             # In year benefits
             iyb = master.master_data[0].data[project_name]["BEN Forecast In-Year"]
             ws.cell(row=row_num, column=14).value = iyb
-            # No iyb variance yet as this keys only present in Q2 2021 master.
+            try:
+                iyb_bl = master.master_data[bl_i].data[project_name]["BEN Forecast In-Year"]
+                iyb_diff = iyb - iyb_bl
+                ws.cell(row=row_num, column=15).value = iyb_diff
+                if iyb_diff == 0:
+                    ws.cell(row=row_num, column=15).value = "-"
+                percentage_change = ((iyb - iyb_bl) / iyb) * 100
+                if percentage_change > 5 or percentage_change < -5:
+                    ws.cell(row=row_num, column=15).font = Font(
+                        name="Arial", size=10, color="00fc2525"
+                    )
+            except (KeyError, ZeroDivisionError):  # key only present from Q2 20/21
+                pass
 
             """benefits DCA rating - this quarter"""
             ws.cell(row=row_num, column=16).value = convert_rag_text(
@@ -7058,7 +7070,7 @@ def benefits_dashboard(master: Master, wb: Workbook) -> Workbook:
     return wb
 
 
-def overall_dashboard(master: Master, wb: Workbook) -> Workbook:
+def overall_dashboard(master: Master, milestones: MilestoneData, wb: Workbook) -> Workbook:
     ws = wb.worksheets[3]
 
     for row_num in range(2, ws.max_row + 1):
@@ -7162,7 +7174,109 @@ def overall_dashboard(master: Master, wb: Workbook) -> Workbook:
             ):  # zerodivision error obvious, type error handling as above
                 pass
 
+            """vfm category now"""
+            if (
+                    master.master_data[0].data[project_name]["VfM Category single entry"]
+                    is None
+            ):
+                vfm_cat = (
+                        str(
+                            master.master_data[0].data[project_name][
+                                "VfM Category lower range"
+                            ]
+                        )
+                        + " - "
+                        + str(
+                    master.master_data[0].data[project_name][
+                        "VfM Category upper range"
+                    ]
+                )
+                )
+                # ws.cell(row=row_num, column=10).value = vfm_cat
+                ws.cell(row=row_num, column=8).value = vfm_cat
 
+            else:
+                vfm_cat = master.master_data[0].data[project_name][
+                    "VfM Category single entry"
+                ]
+                # ws.cell(row=row_num, column=10).value = vfm_cat
+                ws.cell(row=row_num, column=8).value = vfm_cat
+
+            """vfm category baseline"""
+            bl_i = master.bl_index["ipdc_benefits"][project_name][2]
+            try:
+                if (
+                        master.master_data[bl_i].data[
+                            project_name
+                        ]["VfM Category single entry"]
+                        is None
+                ):
+                    vfm_cat_baseline = (
+                            str(
+                                master.master_data[bl_i
+                                ].data[project_name]["VfM Category lower range"]
+                            )
+                            + " - "
+                            + str(
+                        master.master_data[bl_i
+                        ].data[project_name]["VfM Category upper range"]
+                    )
+                    )
+                    # ws.cell(row=row_num, column=11).value = vfm_cat_baseline
+                else:
+                    vfm_cat_baseline = master.master_data[bl_i
+                    ].data[project_name]["VfM Category single entry"]
+                    # ws.cell(row=row_num, column=11).value = vfm_cat_baseline
+
+            except KeyError:
+                try:
+                    vfm_cat_baseline = master.master_data[bl_i
+                    ].data[project_name]["VfM Category single entry"]
+                    # ws.cell(row=row_num, column=11).value = vfm_cat_baseline
+                except KeyError:
+                    vfm_cat_baseline = master.master_data[bl_i
+                    ].data[project_name]["VfM Category"]
+                    # ws.cell(row=row_num, column=11).value = vfm_cat_baseline
+
+            if vfm_cat != vfm_cat_baseline:
+                if vfm_cat_baseline is None:
+                    pass
+                else:
+                    # ws.cell(row=row_num, column=10).font = Font(
+                    #     name="Arial", size=10, color="00fc2525"
+                    # )
+                    # ws.cell(row=row_num, column=11).font = Font(
+                    #     name="Arial", size=10, color="00fc2525"
+                    # )
+                    ws.cell(row=row_num, column=8).font = Font(
+                        name="Arial", size=8, color="00fc2525"
+                    )
+
+            abb = master.abbreviations[project_name]
+            current = get_milestone_date(abb, milestones.current, " Full Operations")
+            last_quarter = get_milestone_date(
+                abb, milestones.last_quarter, " Full Operations"
+            )
+            bl = get_milestone_date(abb, milestones.baseline_dict, " Full Operations")
+            ws.cell(row=row_num, column=9).value = current
+            if current is not None and current < IPDC_DATE:
+                ws.cell(row=row_num, column=9).value = "Completed"
+            try:
+                last_change = (current - last_quarter).days
+                ws.cell(row=row_num, column=10).value = plus_minus_days(last_change)
+                if last_change is not None and last_change > 46:
+                    ws.cell(row=row_num, column=10).font = Font(
+                            name="Arial", size=10, color="00fc2525")
+            except TypeError:
+                pass
+            try:
+                bl_change = (current - bl).days
+                ws.cell(row=row_num, column=11).value = plus_minus_days(bl_change)
+                if bl_change is not None and bl_change > 85:
+                    ws.cell(row=row_num, column=11).font = Font(
+                            name="Arial", size=10, color="00fc2525")
+            except TypeError:
+                pass
 
             try:
                 ws.cell(row=row_num, column=12).value = concatenate_dates(
@@ -7253,6 +7367,6 @@ def ipdc_dashboard(master: Master, wb: Workbook) -> Workbook:
 
     benefits_dashboard(master, wb)
 
-    overall_dashboard(master, wb)
+    overall_dashboard(master, milestone_class, wb)
 
     return wb
