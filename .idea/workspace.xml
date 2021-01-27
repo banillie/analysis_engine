@@ -21,8 +21,11 @@
   <component name="ChangeListManager">
     <list default="true" id="205bd717-e7d2-47dc-82c7-88a8dae3593c" name="Default Changelist" comment="change portfolio_financial_profile.py to include old bl profile data">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/analysis_engine.egg-info/PKG-INFO" beforeDir="false" afterPath="$PROJECT_DIR$/analysis_engine.egg-info/PKG-INFO" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/analysis_engine/data.py" beforeDir="false" afterPath="$PROJECT_DIR$/analysis_engine/data.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/resources/test_dashboards_master_altered.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/tests/resources/test_dashboards_master_altered.xlsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/analysis_engine/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/analysis_engine/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/resources/cut_down_master_4_2016.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/tests/resources/cut_down_master_4_2016.xlsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/test_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test_data.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -73,7 +76,7 @@
       <recent name="$PROJECT_DIR$" />
     </key>
   </component>
-  <component name="RunManager" selected="Python tests.pytest for test_data.test_benefits_dashboard">
+  <component name="RunManager" selected="Python tests.pytest for test_data.test_dandelion">
     <configuration name="vfm" type="PythonConfigurationType" factoryName="Python">
       <module name="analysis_engine" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -143,6 +146,22 @@
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
+    <configuration name="pytest for test_data.test_dandelion" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
+      <module name="analysis_engine" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="$USER_HOME$/.virtualenvs/a_engine/bin/python" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="_new_keywords" value="&quot;&quot;" />
+      <option name="_new_parameters" value="&quot;&quot;" />
+      <option name="_new_additionalArguments" value="&quot;--tb\u003dshort&quot;" />
+      <option name="_new_target" value="&quot;test_data.test_dandelion&quot;" />
+      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
+      <method v="2" />
+    </configuration>
     <configuration name="pytest for test_data.test_financial_dashboard" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
       <module name="analysis_engine" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -172,22 +191,6 @@
       <option name="_new_parameters" value="&quot;&quot;" />
       <option name="_new_additionalArguments" value="&quot;--tb\u003dshort&quot;" />
       <option name="_new_target" value="&quot;test_data.test_overall_dashboard&quot;" />
-      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
-      <method v="2" />
-    </configuration>
-    <configuration name="pytest for test_data.test_printout_of_milestones" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
-      <module name="analysis_engine" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <option name="SDK_HOME" value="$USER_HOME$/.virtualenvs/a_engine/bin/python" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="_new_keywords" value="&quot;&quot;" />
-      <option name="_new_parameters" value="&quot;&quot;" />
-      <option name="_new_additionalArguments" value="&quot;--tb\u003dshort&quot;" />
-      <option name="_new_target" value="&quot;test_data.test_printout_of_milestones&quot;" />
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
@@ -264,16 +267,16 @@
       <item itemvalue="Python tests.pytest for test_data.test_benefits_dashboard" />
       <item itemvalue="Python tests.pytest for test_data.test_financial_dashboard" />
       <item itemvalue="Python tests.pytest for test_data.test_overall_dashboard" />
-      <item itemvalue="Python tests.pytest for test_data.test_printout_of_milestones" />
       <item itemvalue="Python tests.pytest for test_data.test_schedule_dashboard" />
+      <item itemvalue="Python tests.pytest for test_data.test_dandelion" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Python tests.pytest for test_data.test_dandelion" />
         <item itemvalue="Python tests.pytest for test_data.test_benefits_dashboard" />
         <item itemvalue="Python tests.pytest for test_data.test_schedule_dashboard" />
         <item itemvalue="Python tests.pytest for test_data.test_financial_dashboard" />
         <item itemvalue="Python tests.pytest for test_data.test_overall_dashboard" />
-        <item itemvalue="Python tests.pytest for test_data.test_printout_of_milestones" />
       </list>
     </recent_temporary>
   </component>

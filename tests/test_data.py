@@ -42,7 +42,7 @@ from analysis_engine.data import (
     project_report_meta_data,
     print_out_project_milestones,
     put_milestones_into_wb, Pickle, open_pickle_file, financial_dashboard, schedule_dashboard, benefits_dashboard,
-    overall_dashboard,
+    overall_dashboard, dandelion_data,
 )
 
 # test masters project names
@@ -531,3 +531,9 @@ def test_overall_dashboard(basic_masters_dicts, dashboard_template, project_info
     m = Master(basic_masters_dicts, project_info)
     wb = overall_dashboard(m, dashboard_template)
     wb.save("resources/test_dashboards_master_altered.xlsx")
+
+
+def test_dandelion(basic_masters_dicts, project_info):
+    m = Master(basic_masters_dicts, project_info)
+    wb = dandelion_data(m)
+    wb.save("resources/test_dandelion_data.xlsx")

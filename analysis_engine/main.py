@@ -41,7 +41,7 @@ from analysis_engine.data import (
     run_p_reports,
     RiskData,
     risks_into_excel, DcaData, dca_changes_into_excel, dca_changes_into_word, open_word_doc, Pickle, open_pickle_file,
-    ipdc_dashboard,
+    ipdc_dashboard, dandelion_data,
 )
 
 
@@ -128,6 +128,14 @@ def dashboard(args):
     print("dashboard compiled. enjoy!")
 
 
+def dandelion(args):
+    print("compiling dandelion data")
+    m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
+    wb = dandelion_data(m)
+    wb.save(root_path / "output/dandelion_data.xlsx")
+    print("dandelion data compiled. enjoy!")
+
+
 def dca(args):
     print("compiling dca analysis")
     m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
@@ -178,6 +186,7 @@ def main():
     # subparsers.metavar = '                '
     parser_initiate = subparsers.add_parser("initiate", help="creates a master data file")
     parser_dashboard = subparsers.add_parser("dashboards", help="ipdc dashboard")
+    parser_dandelion = subparsers.add_parser("dandelion", help="data for dandelion graph")
     parser_vfm = subparsers.add_parser("vfm", help="vfm analysis")
     parser_milestones = subparsers.add_parser("milestones", help="milestone analysis")
     parser_summaries = subparsers.add_parser("summaries", help="summary reports")
@@ -313,6 +322,7 @@ def main():
 
     parser_initiate.set_defaults(func=initiate)
     parser_dashboard.set_defaults(func=dashboard)
+    parser_dandelion.set_defaults(func=dandelion)
     parser_vfm.set_defaults(func=vfm)
     parser_milestones.set_defaults(func=milestones)
     parser_summaries.set_defaults(func=summaries)

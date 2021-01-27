@@ -7370,3 +7370,39 @@ def ipdc_dashboard(master: Master, wb: Workbook) -> Workbook:
     overall_dashboard(master, milestone_class, wb)
 
     return wb
+
+
+def dandelion_data(master: Master) -> workbook:
+    """
+    Simple function that returns data required for the dandelion graph.
+    """
+
+    wb = Workbook()
+    ws = wb.active
+
+    for i, project_name in enumerate(master.current_projects):
+        ws.cell(row=2 + i, column=1).value = master.master_data[0].data[project_name]['DfT Group']
+        total = int(master.master_data[0].data[project_name]['Total Forecast'])
+        total_len = len(str(total))
+        try:
+            if total_len <= 3:
+                round_total = int(round(total, -1))
+                string_append = str(round_total) + 'm'
+            if total_len == 4:
+                round_total = int(round(total, -2))
+                string_append = str(round_total)[0] + ',' + str(round_total)[1] + 'bn'
+            if total_len == 5:
+                round_total = int(round(total, -2))
+                string_append = str(round_total)[:2] + ',' + str(round_total)[2] + 'bn'
+        except ValueError:
+            string_append = str(total)
+        ws.cell(row=2 + i, column=2).value = master.abbreviations[project_name] + ', £' + string_append
+        ws.cell(row=2 + i, column=3).value = total
+        ws.cell(row=2 + i, column=4).value = master.master_data[0].data[project_name]['Departmental DCA']
+
+    ws.cell(row=1, column=1).value = 'Group'
+    ws.cell(row=1, column=2).value = 'Project details'
+    ws.cell(row=1, column=3).value = 'WLC (forecast)'
+    ws.cell(row=1, column=4).value = 'DCA'
+
+    return wb
