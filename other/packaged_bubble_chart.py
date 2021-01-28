@@ -1,24 +1,33 @@
-"""From search matplotlib package bubble chart search"""
+"""From search matplotlib packed bubble chart search"""
 
 import numpy as np
 import matplotlib.pyplot as plt
 from analysis_engine.data import Master, open_pickle_file, root_path, convert_rag_text
 
 colour_dict = {
-    "A": "00fce553",
-    "A/G": "00a5b700",
-    "A/R": "00f97b31",
-    "R": "00fc2525",
-    "G": "0017960c",
-    "": "#808080"  # Gray if missing
+    "A": "#fce553",
+    "A/G": "#a5b700",
+    "A/R": "#f97b31",
+    "R": "#cb1f00",
+    "G": "#17960c",
+    "": "#808080",  # Gray if missing
+    "W": "#ffffff"
 }
+
+
+def get_names(master: Master, project_names: list, output_list: list):
+    for x in project_names:
+        t = master.abbreviations[x]
+        output_list.append(t)
+    output_list.append("total")
+    return output_list
 
 
 def get_cost(master: Master, project_names: list, output_list: list):
     for x in range(len(project_names)):
         t = master.master_data[0].data[project_names[x]]["Total Forecast"]
         output_list.append(t)
-
+    output_list.append(sum(output_list))
     return output_list
 
 
@@ -26,16 +35,22 @@ def get_colours(master: Master, project_names: list, output_list: list):
     for x in range(len(project_names)):
         c = convert_rag_text(master.master_data[0].data[project_names[x]]["Departmental DCA"])
         output_list.append(colour_dict[c])
-
+    output_list.append(colour_dict["W"])
     return output_list
 
 
-def browser_marker_share(master: Master):
+def project_share(master: Master, group: str):
     return {
-        "browsers": master.current_projects,
-        "market_share": get_cost(master, master.current_projects, []),
-        "colour": get_colours(master, master.current_projects, [])
+        "browsers": get_names(master, master.dft_groups[str(master.current_quarter)][group], []),
+        "market_share": get_cost(master, master.dft_groups[str(master.current_quarter)][group], []),
+        "color": get_colours(master, master.dft_groups[str(master.current_quarter)][group], [])
     }
+
+browser_market_share = {
+    'browsers': ['firefox', 'chrome', 'safari', 'edge', 'ie', 'opera'],
+    'market_share': [8.61, 69.55, 8.36, 4.12, 2.76, 2.43],
+    'color': ['#5A69AF', '#579E65', '#F9C784', '#FC944A', '#F24C00', '#00B825']
+}
 
 
 class BubbleChart:
@@ -61,9 +76,114 @@ class BubbleChart:
 
         # calculate initial grid layout for bubbles
         length = np.ceil(np.sqrt(len(self.bubbles)))
-        grid = np.arrange(length) * self.maxstep  # arrange might cause trouble
+        grid = np.arange(length) * self.maxstep  # arrange might cause trouble
         gx, gy = np.meshgrid(grid, grid)
         self.bubbles[:, 0] = gx.flatten()[:len(self.bubbles)]
+        self.bubbles[:, 1] = gy.flatten()[:len(self.bubbles)]
+
+        self.com = self.center_of_mass()
+
+    def center_of_mass(self):
+        return np.average(
+            self.bubbles[:, :2], axis=0, weights=self.bubbles[:, 3]
+        )
+
+    def center_distance(self, bubble, bubbles):
+        return np.hypot(bubble[0] - bubbles[:, 0],
+                        bubble[1] - bubbles[:, 1])
+
+    def outline_distance(self, bubble, bubbles):
+        center_distance = self.center_distance(bubble, bubbles)
+        return center_distance - bubble[2] - bubbles[:, 2] - self.bubble_spacing
+
+    def check_collisions(self, bubble, bubbles):
+        distance = self.outline_distance(bubble, bubbles)
+        return len(distance[distance < 0])
+
+    def collides_with(self, bubble, bubbles):
+        distance = self.outline_distance(bubble, bubbles)
+        idx_min = np.argmin(distance)
+        return idx_min if type(idx_min) == np.ndarray else [idx_min]
+
+    def collapse(self, n_iterations=50):
+        """
+        Move bubbles to the center of mass.
+
+        @param n_iterations: int, default: 50. Number of moves to perform.
+        @return:
+        """
+        for _i in range(n_iterations):
+            moves = 0
+            for i in range(len(self.bubbles)):
+                rest_bub = np.delete(self.bubbles, i, 0)
+                # try to move directly towards the center of mass
+                # direction vector from bubble to the center of mass
+                dir_vec = self.com - self.bubbles[i, :2]
+
+                # shorten direction vector to have length of 1
+                dir_vec = dir_vec / np.sqrt(dir_vec.dot(dir_vec))
+
+                # calculate new bubble position
+                new_point = self.bubbles[i, :2] + dir_vec * self.step_dist
+                new_bubble = np.append(new_point, self.bubbles[i, 2:4])
+
+                # check whether new bubble collides with other bubbles
+                if not self.check_collisions(new_bubble, rest_bub):
+                    self.bubbles[i, :] = new_bubble
+                    self.com = self.center_of_mass()
+                    moves += 1
+                else:
+                    # try to move around a bubble that you collide with
+                    # find colliding bubble
+                    for colliding in self.collides_with(new_bubble, rest_bub):
+                        # calculate direction vector
+                        dir_vec = rest_bub[colliding, :2] - self.bubbles[i, :2]
+                        dir_vec = dir_vec / np.sqrt(dir_vec.dot(dir_vec))
+                        # calculate orthogonal vector
+                        orth = np.array([dir_vec[1], -dir_vec[0]])
+                        # test which direction to go
+                        new_point1 = (self.bubbles[i, :2] + orth * self.step_dist)
+                        new_point2 = (self.bubbles[i, :2] - orth * self.step_dist)
+                        dist1 = self.center_distance(self.com, np.array([new_point1]))
+                        dist2 = self.center_distance(self.com, np.array([new_point2]))
+                        new_point = new_point1 if dist1 < dist2 else new_point2
+                        new_bubble = np.append(new_point, self.bubbles[i, 2:4])
+                        if not self.check_collisions(new_bubble, rest_bub):
+                            self.bubbles[i, :] = new_bubble
+                            self.com = self.center_of_mass()
+
+            if moves / len(self.bubbles) < 0.1:
+                self.step_dist = self.step_dist / 2
+
+    def plot(self, ax, labels, colors):
+        """
+        Draw the bubble plot.
+
+        @param ax: matplotlib.axes.Axes
+        @param labels: list. labels of the bubbles.
+        @param colors: list. colour of the bubbles.
+        @return:
+        """
+        for i in range(len(self.bubbles)):
+            circ = plt.Circle(
+                self.bubbles[i, :2], self.bubbles[i, 2], color=colors[i]
+            )
+            ax.add_patch(circ)
+            ax.text(*self.bubbles[i, :2], labels[i],
+                    horizontalalignment='center', verticalalignment='center')
+
 
 m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
-test = browser_marker_share(m)
+browser_market_share = project_share(m, "RDM")
+
+bubble_chart = BubbleChart(area=browser_market_share['market_share'],
+                           bubble_spacing=10)
+bubble_chart.collapse()
+fig, ax = plt.subplots(subplot_kw=dict(aspect="equal"))
+bubble_chart.plot(ax, browser_market_share['browsers'], browser_market_share['color'])
+ax.axis("off")
+ax.relim()
+ax.autoscale_view()
+# ax.set_title('IPDC portfolio')
+
+plt.show()
