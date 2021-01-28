@@ -41,7 +41,7 @@ from analysis_engine.data import (
     run_p_reports,
     RiskData,
     risks_into_excel, DcaData, dca_changes_into_excel, dca_changes_into_word, open_word_doc, Pickle, open_pickle_file,
-    ipdc_dashboard, dandelion_data,
+    ipdc_dashboard, dandelion_data, CostData, cost_v_schedule_chart,
 )
 
 
@@ -50,6 +50,18 @@ def initiate(args):
     master = Master(get_master_data(), get_project_information())
     path_str = str("{0}/core_data/pickle/master".format(root_path))
     Pickle(master, path_str)
+
+
+def run_general(args):
+    programme = args['subparser_name']
+    print("compiling " + programme + " analysis")
+    m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
+    if programme == 'matrix':
+        costs = CostData(m, m.current_projects)
+        miles = MilestoneData(m, m.current_projects)
+        miles.calculate_schedule_changes()
+        wb = cost_v_schedule_chart(miles, costs)
+        wb.save(root_path / "output/costs_schedule_matrix.xlsx")
 
 
 def vfm(args):
@@ -136,6 +148,15 @@ def dandelion(args):
     print("dandelion data compiled. enjoy!")
 
 
+# def cost_schedule(args):
+#     m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
+#     costs = CostData(m, m.current_projects)
+#     miles = MilestoneData(m, m.current_projects)
+#     miles.calculate_schedule_changes()
+#     wb = cost_v_schedule_chart(miles, costs)
+#     wb.save(root_path / "output/costs_schedule_matrix.xlsx")
+
+
 def dca(args):
     print("compiling dca analysis")
     m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
@@ -182,8 +203,8 @@ def main():
     parser = argparse.ArgumentParser(
         prog="engine", description="DfT Major Projects Portfolio Office analysis engine"
     )
-    subparsers = parser.add_subparsers()
-    # subparsers.metavar = '                '
+    subparsers = parser.add_subparsers(dest='subparser_name')
+    # subparsers.metavar = ''
     parser_initiate = subparsers.add_parser("initiate", help="creates a master data file")
     parser_dashboard = subparsers.add_parser("dashboards", help="ipdc dashboard")
     parser_dandelion = subparsers.add_parser("dandelion", help="data for dandelion graph")
@@ -193,6 +214,7 @@ def main():
     parser_risks = subparsers.add_parser("risks", help="risk analysis")
     parser_dca = subparsers.add_parser("dcas", help="dca analysis")
     parser_speedial = subparsers.add_parser("speedial", help="speed dial analysis")
+    parser_matrix = subparsers.add_parser("matrix", help="cost v schedule chart")
 
     # parser_vfm.add_argument(
     #     "--stage",
@@ -329,8 +351,9 @@ def main():
     parser_risks.set_defaults(func=risks)
     parser_dca.set_defaults(func=dca)
     parser_speedial.set_defaults(func=speedial)
+    parser_matrix.set_defaults(func=run_general)
     args = parser.parse_args()
-    # print(vars(args))
+    # print(vars(args)['subparser_name'])
     args.func(vars(args))
 
 

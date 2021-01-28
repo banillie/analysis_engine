@@ -497,14 +497,13 @@ def test_printout_of_milestones(word_doc, milestone_masters, project_info):
     word_doc.save("resources/summary_temp_altered.docx")
 
 
-# to write. structure for cli below.
-# def test_cost_schedule_matrix():
-#     m = Master(get_master_data(), get_project_information())
-#     costs = CostData(m, m.current_projects)
-#     milestones = MilestoneData(m, m.current_projects)
-#     milestones.calculate_schedule_changes()
-#     wb = cost_v_schedule_chart(milestones, costs)
-#     wb.save("resources/costs_schedule_matrix.xlsx")
+def test_cost_schedule_matrix():
+    m = Master(get_master_data(), get_project_information())
+    costs = CostData(m, m.current_projects)
+    milestones = MilestoneData(m, m.current_projects)
+    milestones.calculate_schedule_changes()
+    wb = cost_v_schedule_chart(milestones, costs)
+    wb.save("resources/costs_schedule_matrix.xlsx")
 
 
 def test_financial_dashboard(costs_masters, dashboard_template, project_info):
