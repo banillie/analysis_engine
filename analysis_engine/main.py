@@ -47,7 +47,7 @@ from analysis_engine.data import (
 
 
 def run_correct_args(m: Master,
-                     ae_class: MilestoneData or CostData or VfMData or DcaData,
+                     ae_class: MilestoneData or CostData or VfMData or DcaData or RiskData,
                      args: argparse.ArgumentParser
                      ) -> MilestoneData or CostData or VfMData or DcaData:
     if args["quarters"] and args["stage"]:  # to test
@@ -91,44 +91,28 @@ def run_general(args):
     if programme == 'vfm':
         c = run_correct_args(m, VfMData, args)  # c is class
         wb = vfm_into_excel(c)
+    if programme == 'risks':
+        c = run_correct_args(m, RiskData, args)
+        wb = risks_into_excel(c)
+    if programme == 'dcas':
+        c = run_correct_args(m, DcaData, args)
+        wb = dca_changes_into_excel(c)
+    if programme == 'speedial':
+        report_doc = open_word_doc(root_path / "input/summary_temp.docx")
+        c = run_correct_args(m, DcaData, args)
+        c.get_changes()
+        doc = dca_changes_into_word(c, report_doc)
+        doc.save(root_path / "output/{}.docx".format(programme))
+        print(programme + " analysis has been compiled. Enjoy!")
 
+    if programme != 'speedial':  # only excel outputs
+        wb.save(root_path / "output/{}.xlsx".format(programme))
+        print(programme + " analysis has been compiled. Enjoy!")
 
-    if programme == 'matrix':
-        costs = CostData(m, m.current_projects)
-        miles = MilestoneData(m, m.current_projects)
-        miles.calculate_schedule_changes()
-        wb = cost_v_schedule_chart(miles, costs)
-        wb.save(root_path / "output/costs_schedule_matrix.xlsx")
-
-    wb.save(root_path / "output/{}.xlsx".format(programme))
-    print(programme + " analysis has been compiled. Enjoy!")
-
-    # more work required here
+    # TODO optional_args produces a list of strings, each of which are to be in the output file name path.
     # optional_args = get_args_for_file(args)
     # wb.save(root_path / "output/{}_{}.xlsx".format(programme, optional_args))
     # print(programme + " analysis has been compiled. Enjoy!")
-
-
-def risks(args):
-    print("compiling risk analysis_engine")
-    m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
-    risk_m = RiskData(
-        m
-    )  # why does this need to come first and not as else statement below?
-    if args["quarters"]:
-        risk_m = RiskData(m, quarters=args["quarters"])
-    if args["stage"]:
-        risk_m = RiskData(m, stage=args["stage"])
-    if args["group"]:
-        risk_m = RiskData(m, group=args["group"])
-    if args["quarters"] and args["stage"]:  # to test
-        risk_m = RiskData(m, quarters=args["quarters"], stage=args["stage"])
-    if args["quarters"] and args["group"]:  # to test
-        risk_m = RiskData(m, quarters=args["quarters"], group=args["group"])
-
-    wb = risks_into_excel(risk_m)
-    wb.save(root_path / "output/risks.xlsx")
-    print("Risk analysis_engine has been compiled. Enjoy!")
 
 
 def milestones(args):
@@ -171,55 +155,15 @@ def dandelion(args):
     print("dandelion data compiled. enjoy!")
 
 
-# def cost_schedule(args):
-#     m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
-#     costs = CostData(m, m.current_projects)
-#     miles = MilestoneData(m, m.current_projects)
-#     miles.calculate_schedule_changes()
-#     wb = cost_v_schedule_chart(miles, costs)
-#     wb.save(root_path / "output/costs_schedule_matrix.xlsx")
-
-
-def dca(args):
-    print("compiling dca analysis")
+def matrix(args):
+    print("compiling cost and schedule matrix analysis")
     m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
-    dca_m = DcaData(m)  # why does this need to come first and not as else statement below?
-    if args["quarters"]:
-        dca_m = DcaData(m, quarters=args["quarters"])
-    if args["stage"]:
-        dca_m = DcaData(m, stage=args["stage"])
-    if args["group"]:
-        dca_m = DcaData(m, group=args["group"])
-    if args["quarters"] and args["stage"]:  # to test
-        dca_m = DcaData(m, quarters=args["quarters"], stage=args["stage"])
-    if args["quarters"] and args["group"]:  # to test
-        dca_m = DcaData(m, quarters=args["quarters"], group=args["group"])
-
-    wb = dca_changes_into_excel(dca_m)
-    wb.save(root_path / "output/dcas.xlsx")
-    print("DCA analysis has been compiled. Enjoy!")
-
-
-def speedial(args):
-    print("compiling speed dial analysis")
-    m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
-    report_doc = open_word_doc(root_path / "input/summary_temp.docx")
-    dca_m = DcaData(m)  # why does this need to come first and not as else statement below?
-    if args["quarters"]:
-        dca_m = DcaData(m, quarters=args["quarters"])
-    if args["stage"]:
-        dca_m = DcaData(m, stage=args["stage"])
-    if args["group"]:
-        dca_m = DcaData(m, group=args["group"])
-    if args["quarters"] and args["stage"]:  # to test
-        dca_m = DcaData(m, quarters=args["quarters"], stage=args["stage"])
-    if args["quarters"] and args["group"]:  # to test
-        dca_m = DcaData(m, quarters=args["quarters"], group=args["group"])
-
-    dca_m.get_changes()
-    wb = dca_changes_into_word(dca_m, report_doc)
-    wb.save(root_path / "output/speed_dials.xlsx")
-    print("Speed dial analysis has been compiled. Enjoy!")
+    costs = CostData(m, m.current_projects)
+    miles = MilestoneData(m, m.current_projects)
+    miles.calculate_schedule_changes()
+    wb = cost_v_schedule_chart(miles, costs)
+    wb.save(root_path / "output/costs_schedule_matrix.xlsx")
+    print("Cost and schedule matrix compiled. Enjoy!")
 
 
 def main():
@@ -227,7 +171,6 @@ def main():
         prog="engine", description="DfT Major Projects Portfolio Office analysis engine"
     )
     subparsers = parser.add_subparsers(dest='subparser_name')
-    # subparsers.metavar = ''
     parser_initiate = subparsers.add_parser("initiate", help="creates a master data file")
     parser_dashboard = subparsers.add_parser("dashboards", help="ipdc dashboard")
     parser_dandelion = subparsers.add_parser("dandelion", help="data for dandelion graph")
@@ -331,11 +274,13 @@ def main():
         metavar="",
         action="store",
         nargs="+",
-        # choices=["HSMRPG", "AMIS", "Rail", "RDM"],
         help="Returns summaries for specified projects. User can either input DfT Group name; "
              '"HSMRPG", "AMIS", "Rail", "RDM", or the project(s) acronym',
     )
-    for sub in [parser_dca, parser_vfm, parser_risks, parser_speedial]:  # all sub-commands have the same optional args
+
+    for sub in [parser_dca, parser_vfm, parser_risks, parser_speedial]:
+        # all sub-commands have the same optional args. This is working
+        # but prob could be refactored.
         sub.add_argument(
             "--stage",
             type=str,
@@ -371,12 +316,12 @@ def main():
     parser_vfm.set_defaults(func=run_general)
     parser_milestones.set_defaults(func=milestones)
     parser_summaries.set_defaults(func=summaries)
-    parser_risks.set_defaults(func=risks)
-    parser_dca.set_defaults(func=dca)
-    parser_speedial.set_defaults(func=speedial)
-    parser_matrix.set_defaults(func=run_general)
+    parser_risks.set_defaults(func=run_general)
+    parser_dca.set_defaults(func=run_general)
+    parser_speedial.set_defaults(func=run_general)
+    parser_matrix.set_defaults(func=matrix)
     args = parser.parse_args()
-    # print(vars(args)['subparser_name'])
+    # print(vars(args))
     args.func(vars(args))
 
 

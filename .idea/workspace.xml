@@ -21,7 +21,6 @@
   <component name="ChangeListManager">
     <list default="true" id="205bd717-e7d2-47dc-82c7-88a8dae3593c" name="Default Changelist" comment="change portfolio_financial_profile.py to include old bl profile data">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/analysis_engine/data.py" beforeDir="false" afterPath="$PROJECT_DIR$/analysis_engine/data.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/analysis_engine/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/analysis_engine/main.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
