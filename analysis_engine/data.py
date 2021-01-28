@@ -27,6 +27,8 @@ from docx.shared import Pt, Cm, RGBColor, Inches
 from matplotlib import cm, pyplot as plt
 from matplotlib.patches import Wedge, Rectangle, Circle
 from openpyxl import load_workbook, Workbook
+from openpyxl.chart import BubbleChart, Reference
+from openpyxl.chart.series import Series
 from openpyxl.styles import Font, PatternFill
 from openpyxl.styles.differential import DifferentialStyle
 from openpyxl.formatting import Rule
@@ -4680,7 +4682,7 @@ def sort_projects_by_dca(
     return rag_list_sorted
 
 
-def bubble_chart(ws, rag_count):
+def bubble_chart_old(ws, rag_count):
     chart = BubbleChart()
     chart.style = 18  # use a preset style
 
@@ -4689,7 +4691,8 @@ def bubble_chart(ws, rag_count):
     xvalues = Reference(ws, min_col=3, min_row=3, max_row=amber_stop)
     yvalues = Reference(ws, min_col=4, min_row=3, max_row=amber_stop)
     size = Reference(ws, min_col=5, min_row=3, max_row=amber_stop)
-    series = Series(values=yvalues, xvalues=xvalues, zvalues=size, title="Amber")
+    series = Series(yVal=yvalues, xVal=xvalues, bubbleSize=size)
+                    # , tagname="Amber")
     chart.series.append(series)
     series.graphicalProperties.solidFill = "fce553"
 
@@ -4726,7 +4729,7 @@ def bubble_chart(ws, rag_count):
     chart.series.append(series)
     series.graphicalProperties.solidFill = "cb1f00"
 
-    ws.add_chart(chart, "E1")
+    ws.add_chart(chart, "L2")
 
     return ws
 
@@ -4735,11 +4738,14 @@ def cost_v_schedule_chart(milestones: MilestoneData, costs: CostData):
     rags = []
     for project_name in milestones.project_group:
         rag = milestones.master.master_data[0].data[project_name]["Departmental DCA"]
-        rags.append((project_name, rag))
+        if rag is not None:
+            rags.append((project_name, rag))
+        else:
+            print(project_name + " has not reported an SRO RAG Confidence so it will not be included. Check data")
 
     rags = sorted(rags, key=lambda x: x[1])
 
-    rag_count = Counter(x[1] for x in rags)
+    rag_c = Counter(x[1] for x in rags)  # rag_c is rag_count
 
     wb = Workbook()
     ws = wb.active
@@ -4774,7 +4780,7 @@ def cost_v_schedule_chart(milestones: MilestoneData, costs: CostData):
             "end key"
         ]
 
-    # bubble_chart(ws, rag_occurrence)
+    # bubble_chart(ws, rag_c)
 
     return wb
 
@@ -7437,3 +7443,5 @@ def dandelion_data(master: Master) -> workbook:
     ws.cell(row=1, column=4).value = "DCA"
 
     return wb
+
+
