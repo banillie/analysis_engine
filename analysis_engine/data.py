@@ -4397,14 +4397,14 @@ class VfMData:
                 cat_count = 0
                 total_count = 0
                 for y, project in enumerate(list(self.vfm_dictionary[quarter].keys())):
+                    proj_cat = self.vfm_dictionary[quarter][project][
+                        "VfM Category single entry"
+                    ]
                     try:
                         project_pvc = self.vfm_dictionary[quarter][project][
                             "Present Value Cost (PVC)"
                         ]
                         total_pvc_count += project_pvc
-                        proj_cat = self.vfm_dictionary[quarter][project][
-                            "VfM Category single entry"
-                        ]
                         if proj_cat == cat:
                             cat_pvc_count += project_pvc
                     except TypeError:
@@ -4413,18 +4413,18 @@ class VfMData:
                                 quarter + " " + project + " PVC data needs checking"
                             )
                             pass
-                    proj_cat = self.vfm_dictionary[quarter][project][
-                        "VfM Category single entry"
-                    ]
+                    # proj_cat = self.vfm_dictionary[quarter][project][
+                    #     "VfM Category single entry"
+                    # ]
                     if proj_cat is not None:
                         total_count += 1
                         if proj_cat == cat:
                             cat_count += 1
                     if proj_cat is None:
-                        if i == 0:
-                            error_list.append(
-                                quarter + " " + project + " VfM Category is None"
-                            )
+                        # if i == 0:
+                        error_list.append(
+                            quarter + " " + project + " VfM Category is None"
+                        )
 
                 pvc_list.append((cat, cat_pvc_count))
                 cat_list.append((cat, cat_count))

@@ -25,6 +25,7 @@ creation.
 """
 
 import argparse
+import itertools
 
 from openpyxl import load_workbook
 
@@ -41,8 +42,39 @@ from analysis_engine.data import (
     run_p_reports,
     RiskData,
     risks_into_excel, DcaData, dca_changes_into_excel, dca_changes_into_word, open_word_doc, Pickle, open_pickle_file,
-    ipdc_dashboard, dandelion_data, CostData, cost_v_schedule_chart,
+    ipdc_dashboard, dandelion_data, CostData, cost_v_schedule_chart, make_file_friendly,
 )
+
+
+def run_correct_args(m: Master,
+                     ae_class: MilestoneData or CostData or VfMData or DcaData,
+                     args: argparse.ArgumentParser
+                     ) -> MilestoneData or CostData or VfMData or DcaData:
+    if args["quarters"] and args["stage"]:  # to test
+        data = ae_class(m, quarters=args["quarters"], stage=args["stage"])
+    elif args["quarters"] and args["group"]:  # to test
+        data = ae_class(m, quarters=args["quarters"], group=args["group"])
+    elif args["quarters"]:
+        data = ae_class(m, quarters=args["quarters"])
+    elif args["stage"]:
+        data = ae_class(m, stage=args["stage"])
+    elif args["group"]:
+        data = ae_class(m, group=args["group"])
+    else:
+        data = ae_class(m)
+
+    return data
+
+
+def get_args_for_file(args: argparse) -> list:
+    l = []  # l is list
+    for x in args.values():
+        if x is not None:
+            ffx = make_file_friendly(x)  # ffx
+            l.append(ffx)
+    l = l[1:-1]  # get rid of builtin_function_or_method
+    unpack = itertools.chain.from_iterable(l)
+    return list(unpack)
 
 
 def initiate(args):
@@ -56,6 +88,11 @@ def run_general(args):
     programme = args['subparser_name']
     print("compiling " + programme + " analysis")
     m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
+    if programme == 'vfm':
+        c = run_correct_args(m, VfMData, args)  # c is class
+        wb = vfm_into_excel(c)
+
+
     if programme == 'matrix':
         costs = CostData(m, m.current_projects)
         miles = MilestoneData(m, m.current_projects)
@@ -63,27 +100,13 @@ def run_general(args):
         wb = cost_v_schedule_chart(miles, costs)
         wb.save(root_path / "output/costs_schedule_matrix.xlsx")
 
+    wb.save(root_path / "output/{}.xlsx".format(programme))
+    print(programme + " analysis has been compiled. Enjoy!")
 
-def vfm(args):
-    print("compiling vfm analysis_engine")
-    m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
-    vfm_m = VfMData(
-        m
-    )  # why does this need to come first and not as else statement below?
-    if args["quarters"]:
-        vfm_m = VfMData(m, quarters=args["quarters"])
-    if args["stage"]:
-        vfm_m = VfMData(m, stage=args["stage"])
-    if args["group"]:
-        vfm_m = VfMData(m, group=args["group"])
-    if args["quarters"] and args["stage"]:  # to test
-        vfm_m = VfMData(m, quarters=args["quarters"], stage=args["stage"])
-    if args["quarters"] and args["group"]:  # to test
-        vfm_m = VfMData(m, quarters=args["quarters"], group=args["group"])
-
-    wb = vfm_into_excel(vfm_m)
-    wb.save(root_path / "output/vfm.xlsx")
-    print("VfM analysis_engine has been compiled. Enjoy!")
+    # more work required here
+    # optional_args = get_args_for_file(args)
+    # wb.save(root_path / "output/{}_{}.xlsx".format(programme, optional_args))
+    # print(programme + " analysis has been compiled. Enjoy!")
 
 
 def risks(args):
@@ -345,7 +368,7 @@ def main():
     parser_initiate.set_defaults(func=initiate)
     parser_dashboard.set_defaults(func=dashboard)
     parser_dandelion.set_defaults(func=dandelion)
-    parser_vfm.set_defaults(func=vfm)
+    parser_vfm.set_defaults(func=run_general)
     parser_milestones.set_defaults(func=milestones)
     parser_summaries.set_defaults(func=summaries)
     parser_risks.set_defaults(func=risks)
