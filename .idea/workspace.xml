@@ -21,7 +21,10 @@
   <component name="ChangeListManager">
     <list default="true" id="205bd717-e7d2-47dc-82c7-88a8dae3593c" name="Default Changelist" comment="change portfolio_financial_profile.py to include old bl profile data">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/analysis_engine/data.py" beforeDir="false" afterPath="$PROJECT_DIR$/analysis_engine/data.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/analysis_engine/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/analysis_engine/main.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/other/packaged_bubble_chart.py" beforeDir="false" afterPath="$PROJECT_DIR$/other/packaged_bubble_chart.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/test_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test_data.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -72,7 +75,7 @@
       <recent name="$PROJECT_DIR$" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.packaged_bubble_chart">
+  <component name="RunManager" selected="Python tests.pytest for test_data.test_dandelion">
     <configuration name="packaged_bubble_chart" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="analysis_engine" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -258,6 +261,7 @@
     </configuration>
     <list>
       <item itemvalue="Python.vfm" />
+      <item itemvalue="Python.packaged_bubble_chart" />
       <item itemvalue="Python tests.all_dB_tests" />
       <item itemvalue="Python tests.temp_tests" />
       <item itemvalue="Python tests.test_all" />
@@ -266,12 +270,11 @@
       <item itemvalue="Python tests.pytest for test_data.test_financial_dashboard" />
       <item itemvalue="Python tests.pytest for test_data.test_schedule_dashboard" />
       <item itemvalue="Python tests.pytest for test_data.test_dandelion" />
-      <item itemvalue="Python.packaged_bubble_chart" />
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.packaged_bubble_chart" />
         <item itemvalue="Python tests.pytest for test_data.test_dandelion" />
+        <item itemvalue="Python.packaged_bubble_chart" />
         <item itemvalue="Python tests.pytest for test_data.test_benefits_dashboard" />
         <item itemvalue="Python tests.pytest for test_data.test_schedule_dashboard" />
         <item itemvalue="Python tests.pytest for test_data.test_financial_dashboard" />
@@ -525,16 +528,5 @@
     <MESSAGE value="first commit no10_commission.py" />
     <MESSAGE value="change portfolio_financial_profile.py to include old bl profile data" />
     <option name="LAST_COMMIT_MESSAGE" value="change portfolio_financial_profile.py to include old bl profile data" />
-  </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/other/packaged_bubble_chart.py</url>
-          <line>174</line>
-          <option name="timeStamp" value="13" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
   </component>
 </project>

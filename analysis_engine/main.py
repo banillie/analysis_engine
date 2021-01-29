@@ -42,7 +42,8 @@ from analysis_engine.data import (
     run_p_reports,
     RiskData,
     risks_into_excel, DcaData, dca_changes_into_excel, dca_changes_into_word, open_word_doc, Pickle, open_pickle_file,
-    ipdc_dashboard, dandelion_data, CostData, cost_v_schedule_chart, make_file_friendly,
+    ipdc_dashboard, CostData, cost_v_schedule_chart, make_file_friendly, DandelionData,
+    dandelion_data_into_wb, run_dandelion_matplotlib_chart,
 )
 
 
@@ -50,17 +51,20 @@ def run_correct_args(m: Master,
                      ae_class: MilestoneData or CostData or VfMData or DcaData or RiskData,
                      args: argparse.ArgumentParser
                      ) -> MilestoneData or CostData or VfMData or DcaData:
-    if args["quarters"] and args["stage"]:  # to test
-        data = ae_class(m, quarters=args["quarters"], stage=args["stage"])
-    elif args["quarters"] and args["group"]:  # to test
-        data = ae_class(m, quarters=args["quarters"], group=args["group"])
-    elif args["quarters"]:
-        data = ae_class(m, quarters=args["quarters"])
-    elif args["stage"]:
-        data = ae_class(m, stage=args["stage"])
-    elif args["group"]:
-        data = ae_class(m, group=args["group"])
-    else:
+    try:  # acts as partition for subcommand options
+        if args["quarters"] and args["stage"]:  # to test
+            data = ae_class(m, quarters=args["quarters"], stage=args["stage"])
+        elif args["quarters"] and args["group"]:  # to test
+            data = ae_class(m, quarters=args["quarters"], group=args["group"])
+        elif args["quarters"]:
+            data = ae_class(m, quarters=args["quarters"])
+        elif args["stage"]:
+            data = ae_class(m, stage=args["stage"])
+        elif args["group"]:
+            data = ae_class(m, group=args["group"])
+        else:
+            data = ae_class(m)
+    except KeyError:
         data = ae_class(m)
 
     return data
@@ -104,6 +108,10 @@ def run_general(args):
         doc = dca_changes_into_word(c, report_doc)
         doc.save(root_path / "output/{}.docx".format(programme))
         print(programme + " analysis has been compiled. Enjoy!")
+    if programme == 'dandelion':
+        c = run_correct_args(m, DandelionData, args)
+        wb = dandelion_data_into_wb(c)
+        run_dandelion_matplotlib_chart(c)
 
     if programme != 'speedial':  # only excel outputs
         wb.save(root_path / "output/{}.xlsx".format(programme))
@@ -147,12 +155,13 @@ def dashboard(args):
     print("dashboard compiled. enjoy!")
 
 
-def dandelion(args):
-    print("compiling dandelion data")
-    m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
-    wb = dandelion_data(m)
-    wb.save(root_path / "output/dandelion_data.xlsx")
-    print("dandelion data compiled. enjoy!")
+# def dandelion(args):
+#     print("compiling dandelion data")
+#     m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
+#     dand = DandelionData()
+#     wb = dandelion_data(m)
+#     wb.save(root_path / "output/dandelion_data.xlsx")
+#     print("dandelion data compiled. enjoy!")
 
 
 def matrix(args):
@@ -278,7 +287,7 @@ def main():
              '"HSMRPG", "AMIS", "Rail", "RDM", or the project(s) acronym',
     )
 
-    for sub in [parser_dca, parser_vfm, parser_risks, parser_speedial]:
+    for sub in [parser_dca, parser_vfm, parser_risks, parser_speedial, parser_dandelion]:
         # all sub-commands have the same optional args. This is working
         # but prob could be refactored.
         sub.add_argument(
@@ -312,7 +321,7 @@ def main():
 
     parser_initiate.set_defaults(func=initiate)
     parser_dashboard.set_defaults(func=dashboard)
-    parser_dandelion.set_defaults(func=dandelion)
+    parser_dandelion.set_defaults(func=run_general)
     parser_vfm.set_defaults(func=run_general)
     parser_milestones.set_defaults(func=milestones)
     parser_summaries.set_defaults(func=summaries)

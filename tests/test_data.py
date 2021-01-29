@@ -42,7 +42,7 @@ from analysis_engine.data import (
     project_report_meta_data,
     print_out_project_milestones,
     put_milestones_into_wb, Pickle, open_pickle_file, financial_dashboard, schedule_dashboard, benefits_dashboard,
-    overall_dashboard, dandelion_data,
+    overall_dashboard, DandelionData, dandelion_data_into_wb,
 )
 
 # test masters project names
@@ -497,13 +497,13 @@ def test_printout_of_milestones(word_doc, milestone_masters, project_info):
     word_doc.save("resources/summary_temp_altered.docx")
 
 
-def test_cost_schedule_matrix():
-    m = Master(get_master_data(), get_project_information())
-    costs = CostData(m, m.current_projects)
-    milestones = MilestoneData(m, m.current_projects)
-    milestones.calculate_schedule_changes()
-    wb = cost_v_schedule_chart(milestones, costs)
-    wb.save("resources/costs_schedule_matrix.xlsx")
+# def test_cost_schedule_matrix():
+#     m = Master(get_master_data(), get_project_information())
+#     costs = CostData(m, m.current_projects)
+#     milestones = MilestoneData(m, m.current_projects)
+#     milestones.calculate_schedule_changes()
+#     wb = cost_v_schedule_chart(milestones, costs)
+#     wb.save("resources/costs_schedule_matrix.xlsx")
 
 
 def test_financial_dashboard(costs_masters, dashboard_template, project_info):
@@ -534,5 +534,6 @@ def test_overall_dashboard(basic_masters_dicts, dashboard_template, project_info
 
 def test_dandelion(basic_masters_dicts, project_info):
     m = Master(basic_masters_dicts, project_info)
-    wb = dandelion_data(m)
-    wb.save("resources/test_dandelion_data.xlsx")
+    dand = DandelionData(m, group=["Rail"])
+    dandelion_data_into_wb(dand)
+    # wb.save("resources/test_dandelion_data.xlsx")
