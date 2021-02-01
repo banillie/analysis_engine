@@ -43,7 +43,7 @@ from analysis_engine.data import (
     RiskData,
     risks_into_excel, DcaData, dca_changes_into_excel, dca_changes_into_word, open_word_doc, Pickle, open_pickle_file,
     ipdc_dashboard, CostData, cost_v_schedule_chart_into_wb, make_file_friendly, DandelionData,
-    dandelion_data_into_wb, run_dandelion_matplotlib_chart,
+    dandelion_data_into_wb, run_dandelion_matplotlib_chart, put_matplotlib_fig_into_word,
 )
 
 
@@ -51,21 +51,21 @@ def run_correct_args(m: Master,
                      ae_class: MilestoneData or CostData or VfMData or DcaData or RiskData,
                      args: argparse.ArgumentParser
                      ) -> MilestoneData or CostData or VfMData or DcaData:
-    try:  # acts as partition for subcommand options
-        if args["quarters"] and args["stage"]:  # to test
-            data = ae_class(m, quarters=args["quarters"], stage=args["stage"])
-        elif args["quarters"] and args["group"]:  # to test
-            data = ae_class(m, quarters=args["quarters"], group=args["group"])
-        elif args["quarters"]:
-            data = ae_class(m, quarters=args["quarters"])
-        elif args["stage"]:
-            data = ae_class(m, stage=args["stage"])
-        elif args["group"]:
-            data = ae_class(m, group=args["group"])
-        else:
-            data = ae_class(m)
-    except KeyError:
+    # try:  # acts as partition for subcommand options
+    if args["quarters"] and args["stage"]:  # to test
+        data = ae_class(m, quarters=args["quarters"], stage=args["stage"])
+    elif args["quarters"] and args["group"]:  # to test
+        data = ae_class(m, quarters=args["quarters"], group=args["group"])
+    elif args["quarters"]:
+        data = ae_class(m, quarters=args["quarters"])
+    elif args["stage"]:
+        data = ae_class(m, stage=args["stage"])
+    elif args["group"]:
+        data = ae_class(m, group=args["group"])
+    else:
         data = ae_class(m)
+    # except KeyError:
+    #     data = ae_class(m)
 
     return data
 
@@ -109,9 +109,12 @@ def run_general(args):
         doc.save(root_path / "output/{}.docx".format(programme))
         print(programme + " analysis has been compiled. Enjoy!")
     if programme == 'dandelion':
+        report_doc = open_word_doc(root_path / "input/summary_temp.docx")
         c = run_correct_args(m, DandelionData, args)
         wb = dandelion_data_into_wb(c)
-        run_dandelion_matplotlib_chart(c)
+        graph = run_dandelion_matplotlib_chart(c)
+        put_matplotlib_fig_into_word(report_doc, graph, size=4, transparent=True)
+        report_doc.save(root_path / "output/dandelion_output.docx")
 
     if programme != 'speedial':  # only excel outputs
         wb.save(root_path / "output/{}.xlsx".format(programme))
@@ -126,15 +129,15 @@ def run_general(args):
 def milestones(args):
     print("compiling milestone analysis_engine")
     m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
-    projects = (
-        m.project_stage["Q2 20/21"]["FBC"]
-        + m.project_stage["Q2 20/21"]["OBC"]
-        + [Projects.hs2_2b]
-    )
-    milestone_data = MilestoneData(m, projects)
+    # projects = (
+    #     m.project_stage["Q2 20/21"]["FBC"]
+    #     + m.project_stage["Q2 20/21"]["OBC"]
+    #     + [Projects.hs2_2b]
+    # )
+    milestone_data = MilestoneData(m, m.current_projects)
     milestone_data.filter_chart_info(milestone_type=["Approval", "Delivery"])
     run = put_milestones_into_wb(milestone_data)
-    run.save(root_path / "output/milestone_data_output_with_notes.xlsx")
+    run.save(root_path / "output/milestone_data_output_with_notes_q3.xlsx")
 
 
 def summaries(args):
@@ -310,6 +313,7 @@ def main():
             help="Returns analysis for those projects in the specified DfT Group. Must be one or "
                  'combination of "HSMRPG", "AMIS", "Rail", "RDM"',
             )
+        # no quarters in dandelion yet
         sub.add_argument(
             "--quarters",
             type=str,

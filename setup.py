@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="analysis_engine",
-    version="0.0.3",
+    version="0.0.4",
     author="Will Grant",
     author_email="will.granty@yahoo.co.uk",
     description="Analysis for the UK Department for Transport's major projects portfolio",

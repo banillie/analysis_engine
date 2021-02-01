@@ -251,7 +251,7 @@ def test_get_group_cost_profile(costs_masters, project_info):
 def test_get_group_cost_profile_chart(costs_masters, project_info):
     master = Master(costs_masters, project_info)
     costs = CostData(master, master.current_projects)
-    cost_profile_graph(costs, title="Group Test", show="No")
+    cost_profile_graph(costs, title="Group Test")
 
 
 def test_get_project_total_cost_calculations_for_project(costs_masters, project_info):
@@ -532,9 +532,11 @@ def test_overall_dashboard(basic_masters_dicts, dashboard_template, project_info
     wb.save("resources/test_dashboards_master_altered.xlsx")
 
 
-def test_dandelion(basic_masters_dicts, project_info):
+def test_dandelion(basic_masters_dicts, project_info, word_doc):
     m = Master(basic_masters_dicts, project_info)
     dand = DandelionData(m, group=["Rail"])
     wb = dandelion_data_into_wb(dand)
     wb.save("resources/test_dandelion_data.xlsx")
-    run_dandelion_matplotlib_chart(dand)
+    graph = run_dandelion_matplotlib_chart(dand)
+    put_matplotlib_fig_into_word(word_doc, graph, size=4, transparent=False)
+    word_doc.save("resources/test_dandelion_output.docx")

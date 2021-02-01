@@ -2788,11 +2788,18 @@ def change_word_doc_portrait(doc: Document) -> Document:
     return doc
 
 
-def put_matplotlib_fig_into_word(doc: Document, fig) -> None:
+def put_matplotlib_fig_into_word(doc: Document, fig: plt.figure, **kwargs) -> None:
     """Places line graph cost profile into word document"""
     # Place fig in word doc.
-    fig.savefig("cost_profile.png")
-    doc.add_picture("cost_profile.png", width=Inches(8))  # to place nicely in doc
+    if kwargs["transparent"]:
+        fig.savefig("cost_profile.png", transparent=True)
+    else:
+        fig.savefig("cost_profile.png")
+    if kwargs["size"]:
+        s = kwargs["size"]
+        doc.add_picture("cost_profile.png", width=Inches(s))
+    else:
+        doc.add_picture("cost_profile.png", width=Inches(8))  # to place nicely in doc
     os.remove("cost_profile.png")
     plt.close()  # automatically closes figure so don't need to do manually.
 
@@ -7618,7 +7625,7 @@ class DandelionChart:
             )
 
 
-def run_dandelion_matplotlib_chart(dandelion: DandelionData):
+def run_dandelion_matplotlib_chart(dandelion: DandelionData) -> plt.figure:
     bubble_chart = DandelionChart(area=dandelion.d_data["cost"], bubble_spacing=20)
     bubble_chart.collapse()
     fig, ax = plt.subplots(subplot_kw=dict(aspect="equal"))
@@ -7627,4 +7634,5 @@ def run_dandelion_matplotlib_chart(dandelion: DandelionData):
     ax.relim()
     ax.autoscale_view()
     # ax.set_title('IPDC portfolio')
-    plt.show()
+    # plt.show()
+    return fig
