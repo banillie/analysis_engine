@@ -1,3 +1,0 @@
-[console_scripts]
-analysis = analysis_engine.main:main
-
