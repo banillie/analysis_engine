@@ -27,8 +27,8 @@ from docx.shared import Pt, Cm, RGBColor, Inches
 from matplotlib import cm, pyplot as plt
 from matplotlib.patches import Wedge, Rectangle, Circle
 from openpyxl import load_workbook, Workbook
-from openpyxl.chart import BubbleChart, Reference
-from openpyxl.chart.series import Series
+from openpyxl.chart import BubbleChart, Reference, Series
+# from openpyxl.chart.series import Series
 from openpyxl.styles import Font, PatternFill
 from openpyxl.styles.differential import DifferentialStyle
 from openpyxl.formatting import Rule
@@ -1880,7 +1880,7 @@ class MilestoneData:
                     # is removed from the key_name via remove_project_name function as
                     # part of get chart info.
                     if len(self.project_group) == 1:
-                        current_key_list.append(key)
+                        current_key_list.append(" " + key)
             for last_key in self.key_names_last:
                 p = last_key.split(",")[0]
                 milestone_key_last = last_key.split(",")[1]
@@ -1915,39 +1915,6 @@ class MilestoneData:
                 "last",
             )
             lower_dict = {**b_dict, **l_dict}
-
-            # baseline_schedule_info = []
-            # for b_key in reversed(baseline_key_list):
-            #     if b_key in current_key_list:
-            #         sop = get_milestone_date(project_name, self.baseline, " Start of Project")
-            #         if sop is None:
-            #             sop = get_milestone_date(project_name, self.current, baseline_key_list[0])
-            #             baseline_schedule_info.append(("start key", baseline_key_list[0]))
-            #         else:
-            #             baseline_schedule_info.append(("start key", " Start of Project"))
-            #         baseline_schedule_info.append(("start", sop))
-            #         baseline_schedule_info.append(("end key", b_key))
-            #         date = get_milestone_date(project_name, self.current, b_key)
-            #         baseline_schedule_info.append(("end current date", date))
-            #         b_date = get_milestone_date(project_name, self.baseline, b_key)
-            #         baseline_schedule_info.append(("end baseline date", b_date))
-            #         project_length = (b_date - sop).days
-            #         baseline_schedule_info.append(("project length", project_length))
-            #         change = (date - b_date).days
-            #         baseline_schedule_info.append(("change", change))
-            #         p_change = int((change / project_length) * 100)
-            #         baseline_schedule_info.append(("percent change", p_change))
-            #         lower_dict["baseline"] = dict(baseline_schedule_info)
-            #         break
-
-            # last_schedule_info = []
-            # for l_key in reversed(last_key_list):
-            #     last_schedule_info.append(("start key", sop))
-            #     if l_key in current_key_list:
-            #         date = get_milestone_date(project_name, self.current, l_key)
-            #         l_date = get_milestone_date(project_name, self.last_quarter, l_key)
-            #         lower_dict["last"] = l_key
-            #         break
 
             output_dict[project_name] = lower_dict
 
@@ -4682,8 +4649,53 @@ def sort_projects_by_dca(
     return rag_list_sorted
 
 
-def bubble_chart_old(ws, rag_count):
-    chart = DandelionChart()
+COLOUR_DICT = {
+    "A": "#fce553",
+    "A/G": "#a5b700",
+    "A/R": "#f97b31",
+    "R": "#cb1f00",
+    "G": "#17960c",
+    "": "#808080",  # Gray if missing
+    "W": "#ffffff",
+}
+
+
+def cost_schedule_scatter_chart_matplotlib(milestones: MilestoneData, costs: CostData):
+    sc_list = []
+    cc_list = []
+    volume_list = []
+    colour_list = []
+    for project_name in milestones.project_group:
+        ab = milestones.master.abbreviations[project_name]
+        sc = milestones.schedule_change[ab]["baseline"]["percent change"]  #sc schedule change
+        cc = costs.wlc_change[project_name]["baseline one"]  #cc cost change
+        volume = costs.master.master_data[0].data[project_name]["Total Forecast"]
+        colour = COLOUR_DICT[convert_rag_text(costs.master.master_data[0].data[project_name]["Departmental DCA"])]
+        if sc > 5 or cc > 5:
+            sc_list.append(sc)
+            cc_list.append(cc)
+            volume_list.append(np.sqrt(volume)*5)
+            colour_list.append(colour)
+        else:
+            pass
+
+    fig, ax = plt.subplots()
+    ax.scatter(sc_list, cc_list, c=colour_list, s=volume_list, alpha=0.5)
+
+    ax.set_xlabel('Schedule', fontsize=15)
+    ax.set_ylabel('Costs', fontsize=15)
+    ax.set_title('Volume and percent change')
+    plt.ylim(-75, 75)
+    plt.xlim(-60, 60)
+
+    ax.grid(True)
+    fig.tight_layout()
+
+    plt.show()
+
+
+def cost_schedule_scatter_chart_excel(ws, rag_count):
+    chart = BubbleChart()
     chart.style = 18  # use a preset style
 
     # add the first series of data
@@ -4691,8 +4703,7 @@ def bubble_chart_old(ws, rag_count):
     xvalues = Reference(ws, min_col=3, min_row=3, max_row=amber_stop)
     yvalues = Reference(ws, min_col=4, min_row=3, max_row=amber_stop)
     size = Reference(ws, min_col=5, min_row=3, max_row=amber_stop)
-    series = Series(yVal=yvalues, xVal=xvalues, bubbleSize=size)
-    # , tagname="Amber")
+    series = Series(values=yvalues, xvalues=xvalues, zvalues=size, title="Amber")
     chart.series.append(series)
     series.graphicalProperties.solidFill = "fce553"
 
@@ -4734,7 +4745,10 @@ def bubble_chart_old(ws, rag_count):
     return ws
 
 
-def cost_v_schedule_chart(milestones: MilestoneData, costs: CostData):
+def cost_v_schedule_chart_into_wb(milestones: MilestoneData, costs: CostData):
+    wb = Workbook()
+    ws = wb.active
+
     rags = []
     for project_name in milestones.project_group:
         rag = milestones.master.master_data[0].data[project_name]["Departmental DCA"]
@@ -4746,9 +4760,6 @@ def cost_v_schedule_chart(milestones: MilestoneData, costs: CostData):
     rags = sorted(rags, key=lambda x: x[1])
 
     rag_c = Counter(x[1] for x in rags)  # rag_c is rag_count
-
-    wb = Workbook()
-    ws = wb.active
 
     ws.cell(row=2, column=2).value = "Project Name"
     ws.cell(row=2, column=3).value = "Schedule change"
@@ -4780,7 +4791,8 @@ def cost_v_schedule_chart(milestones: MilestoneData, costs: CostData):
             "end key"
         ]
 
-    # bubble_chart(ws, rag_c)
+    cost_schedule_scatter_chart_excel(ws, rag_c)
+    cost_schedule_scatter_chart_matplotlib(milestones, costs)
 
     return wb
 
@@ -7395,17 +7407,6 @@ def ipdc_dashboard(master: Master, wb: Workbook) -> Workbook:
     return wb
 
 
-colour_dict = {
-    "A": "#fce553",
-    "A/G": "#a5b700",
-    "A/R": "#f97b31",
-    "R": "#cb1f00",
-    "G": "#17960c",
-    "": "#808080",  # Gray if missing
-    "W": "#ffffff",
-}
-
-
 def dandelion_project_text(number: int, project: str) -> str:
     total_len = len(str(int(number)))
     try:
@@ -7463,7 +7464,7 @@ class DandelionData:
             proj_info = abb + ",\n" + c_str
             total += cost
             rag = self.master.master_data[0].data[p]["Departmental DCA"]
-            colour = colour_dict[convert_rag_text(rag)]
+            colour = COLOUR_DICT[convert_rag_text(rag)]
             data.append((proj_info, cost, colour, rag))
         data.sort(key=lambda x: x[1])
         # place = int(len(output_list) / 2)

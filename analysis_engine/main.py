@@ -42,7 +42,7 @@ from analysis_engine.data import (
     run_p_reports,
     RiskData,
     risks_into_excel, DcaData, dca_changes_into_excel, dca_changes_into_word, open_word_doc, Pickle, open_pickle_file,
-    ipdc_dashboard, CostData, cost_v_schedule_chart, make_file_friendly, DandelionData,
+    ipdc_dashboard, CostData, cost_v_schedule_chart_into_wb, make_file_friendly, DandelionData,
     dandelion_data_into_wb, run_dandelion_matplotlib_chart,
 )
 
@@ -170,7 +170,7 @@ def matrix(args):
     costs = CostData(m, m.current_projects)
     miles = MilestoneData(m, m.current_projects)
     miles.calculate_schedule_changes()
-    wb = cost_v_schedule_chart(miles, costs)
+    wb = cost_v_schedule_chart_into_wb(miles, costs)
     wb.save(root_path / "output/costs_schedule_matrix.xlsx")
     print("Cost and schedule matrix compiled. Enjoy!")
 
