@@ -204,9 +204,6 @@ light_grey_fill = PatternFill(bgColor="0085929e")
 greyblue_text = Font(color="85c1e9")
 greyblue_fill = PatternFill(bgColor="85c1e9")
 
-salmon_fill = PatternFill(
-    start_color="FFFF8080", end_color="FFFF8080", fill_type="solid"
-)
 
 """Conditional formatting, cell colouring and text colouring"""
 # reference for column names when applying conditional fomatting
@@ -276,227 +273,7 @@ IPDC_DATE = datetime.date(
     2021, 2, 22
 )  # ipdc date. Python date format is Year, Month, day
 
-# abbreviations. Used in analysis_engine instead of full projects names
-ABBREVIATION = {
-    "2nd Generation UK Search and Rescue Aviation": "SARH2",
-    "A12 Chelmsford to A120 widening": "A12",
-    "A14 Cambridge to Huntingdon Improvement Scheme": "A14",
-    "A303 Amesbury to Berwick Down": "A303",
-    "A358 Taunton to Southfields Dualling": "A358",
-    "A417 Air Balloon": "A417",
-    "A428 Black Cat to Caxton Gibbet": "A428",
-    "A66 Northern Trans-Pennine": "A66",
-    "Crossrail Programme": "Crossrail",
-    "East Coast Digital Programme": "ECDP",
-    "East Coast Mainline Programme": "ECMP",
-    "East West Rail Programme (Central Section)": "EWR (Central)",
-    "East West Rail Programme (Western Section)": "EWR (Western)",
-    "East West Rail Configuration State 1": "EWR Config 1",
-    "East West Rail Configuration State 2": "EWR Config 2",
-    "East West Rail Configuration State 3": "EWR Config 3",
-    "Future Theory Test Service (FTTS)": "FTTS",
-    "Great Western Route Modernisation (GWRM) including electrification": "GWRM",
-    "Heathrow Expansion": "HEP",
-    "Hexagon": "Hexagon",
-    "High Speed Rail Programme (HS2)": "HS2 Prog",
-    "HS2 Phase 2b": "HS2 2b",
-    "HS2 Phase1": "HS2 1",
-    "HS2 Phase2a": "HS2 2a",
-    "Integrated and Smart Ticketing - creating an account based back office": "IST",
-    "Intercity Express Programme": "IEP",
-    "Lower Thames Crossing": "LTC",
-    "M4 Junctions 3 to 12 Smart Motorway": "M4",
-    "Manchester North West Quadrant": "MNWQ",
-    "Midland Main Line Programme": "MML Prog",
-    "Midlands Rail Hub": "Mid Rail Hub",
-    "North Western Electrification": "NWE",
-    "Northern Powerhouse Rail": "NPR",
-    "Oxford-Cambridge Expressway": "Ox-Cam Expressway",
-    "Rail Franchising Programme": "Rail Franchising",
-    "South West Route Capacity": "SWRC",
-    "Thameslink Programme": "Thameslink",
-    "Transpennine Route Upgrade (TRU)": "TRU",
-    "Western Rail Link to Heathrow": "WRLtH",
-}
 
-
-class Projects:
-    # project names as variables
-    a12 = "A12 Chelmsford to A120 widening"
-    a14 = "A14 Cambridge to Huntingdon Improvement Scheme"
-    a303 = "A303 Amesbury to Berwick Down"
-    a385 = "A358 Taunton to Southfields Dualling"
-    a417 = "A417 Air Balloon"
-    a428 = "A428 Black Cat to Caxton Gibbet"
-    a66 = "A66 Northern Trans-Pennine"
-    brighton_ml = "Brighton Mainline Upgrade Programme"
-    cvs = "Commercial Vehicle Services (CVS)"
-    east_coast_digital = "East Coast Digital Programme"
-    east_coast_mainline = "East Coast Mainline Programme"
-    em_franchise = "East Midlands Franchise"
-    ewr_central = "East West Rail Programme (Central Section)"
-    ewr_western = "East West Rail Programme (Western Section)"
-    ewr_config1 = "East West Rail Configuration State 1"
-    ewr_config2 = "East West Rail Configuration State 2"
-    ewr_config3 = "East West Rail Configuration State 3"
-    ftts = "Future Theory Test Service (FTTS)"
-    heathrow_expansion = "Heathrow Expansion"
-    hexagon = "Hexagon"
-    hs2_programme = "High Speed Rail Programme (HS2)"
-    hs2_2b = "HS2 Phase 2b"
-    hs2_1 = "HS2 Phase1"
-    hs2_2a = "HS2 Phase2a"
-    ist = "Integrated and Smart Ticketing - creating an account based back office"
-    lower_thames_crossing = "Lower Thames Crossing"
-    m4 = "M4 Junctions 3 to 12 Smart Motorway"
-    manchester_north_west_quad = "Manchester North West Quadrant"
-    midland_mainline = "Midland Main Line Programme"
-    midlands_rail_hub = "Midlands Rail Hub"
-    north_of_england = "North of England Programme"
-    northern_powerhouse = "Northern Powerhouse Rail"
-    nwe = "North Western Electrification"
-    ox_cam_expressway = "Oxford-Cambridge Expressway"
-    rail_franchising = "Rail Franchising Programme"
-    west_coast_partnership = "West Coast Partnership Franchise"
-    crossrail = "Crossrail Programme"
-    gwrm = "Great Western Route Modernisation (GWRM) including electrification"
-    iep = "Intercity Express Programme"
-    sarh2 = "2nd Generation UK Search and Rescue Aviation"
-    south_west_route_capacity = "South West Route Capacity"
-    thameslink = "Thameslink Programme"
-    tru = "Transpennine Route Upgrade"
-    wrlth = "Western Rail Link to Heathrow"
-
-    # lists of projects names in groups
-    he = [lower_thames_crossing, a303, a14, a66, a12, m4, a428, a417, a385]
-    rail = [
-        crossrail,
-        thameslink,
-        iep,
-        east_coast_mainline,
-        east_coast_digital,
-        midland_mainline,
-        nwe,
-        south_west_route_capacity,
-        brighton_ml,
-        midlands_rail_hub,
-        gwrm,
-        tru,
-        wrlth,
-    ]
-    hs2 = [hs2_1, hs2_2a, hs2_2b]
-    hsmrpg = [
-        hs2_1,
-        hs2_2a,
-        hs2_2b,
-        ewr_config1,
-        ewr_config2,
-        ewr_config3,
-        hexagon,
-        northern_powerhouse,
-    ]
-    ewr = [ewr_config1, ewr_config2, ewr_config3]
-    dvsa = [ftts, ist]
-    all_not_hs2 = [
-        "2nd Generation UK Search and Rescue Aviation",
-        "A12 Chelmsford to A120 widening",
-        "A14 Cambridge to Huntingdon Improvement Scheme",
-        "A303 Amesbury to Berwick Down",
-        "A358 Taunton to Southfields Dualling",
-        "A417 Air Balloon",
-        "A428 Black Cat to Caxton Gibbet",
-        "A66 Northern Trans-Pennine",
-        "Brighton Mainline Upgrade Programme",
-        "Crossrail Programme",
-        "East Coast Digital Programme",
-        "East Coast Mainline Programme",
-        "East West Rail Configuration State 1",
-        "East West Rail Configuration State 2",
-        "East West Rail Configuration State 3",
-        "Future Theory Test Service (FTTS)",
-        "Great Western Route Modernisation (GWRM) including electrification",
-        "Hexagon",
-        "Integrated and Smart Ticketing - creating an account based back office",
-        "Intercity Express Programme",
-        "Lower Thames Crossing",
-        "M4 Junctions 3 to 12 Smart Motorway",
-        "Midland Main Line Programme",
-        "Midlands Rail Hub",
-        "North Western Electrification",
-        "Northern Powerhouse Rail",
-        "Rail Franchising Programme",
-        "South West Route Capacity",
-        "Thameslink Programme",
-        "Transpennine Route Upgrade",
-        "Western Rail Link to Heathrow",
-    ]
-    fbc_stage = [
-        hs2_1,
-        crossrail,
-        east_coast_mainline,
-        iep,
-        thameslink,
-        south_west_route_capacity,
-        hexagon,
-        gwrm,
-        nwe,
-        midland_mainline,
-        m4,
-        a14,
-        ewr_config1,
-    ]
-    obc_stage = [
-        lower_thames_crossing,
-        hs2_2a,
-        tru,
-        east_coast_digital,
-        a303,
-        a12,
-        a428,
-        a417,
-        a385,
-        ftts,
-    ]
-    sobc_stage = [
-        hs2_2b,
-        brighton_ml,
-        ewr_config3,
-        sarh2,
-        midlands_rail_hub,
-        wrlth,
-        a66,
-        ewr_config2,
-    ]
-    rail_infrastructure = [
-        crossrail,
-        iep,
-        gwrm,
-        midland_mainline,
-        midlands_rail_hub,
-        thameslink,
-        east_coast_mainline,
-        tru,
-        wrlth,
-        south_west_route_capacity,
-        nwe,
-        brighton_ml,
-    ]
-
-
-# Hard code and needs abstracting
-
-LIST_OF_GROUPS = [  # master.current_projects,
-    Projects.he,
-    Projects.rail,
-    Projects.rail_franchising,
-    Projects.hs2,
-    Projects.hsmrpg,
-    Projects.sarh2,
-    Projects.all_not_hs2,
-    Projects.fbc_stage,
-    Projects.obc_stage,
-    Projects.sobc_stage,
-]
 LIST_OF_TITLES = [
     "ALL",
     "HE",
@@ -547,18 +324,19 @@ DFT_GROUP_DICT = {
     "High Speed Rail Group": "HSMRPG",
     "International Security and Environment": "AMIS",
     "Transport for London": "Rail",
-    "DVSA": "RDM",
-    "Roads Places and Environment Group": "RDM",
+    "DVSA": "RPE",
+    "Roads Places and Environment Group": "RPE",
     "ISG": "AMIS",
     "HSMRPG": "HSMRPG",
     "DfT": "DfT",
-    "RDM": "RDM",
+    # "RDM": "RDM",
     "Rail Group": "Rail",
-    "Highways England": "RDM",
+    "Highways England": "RPE",
     "Rail": "Rail",
-    "Roads Devolution & Motoring": "RDM",
+    "Roads Devolution & Motoring": "RPE",
     "AMIS": "AMIS",
     None: None,
+    "RDM": "RPE"
 }
 YEAR_LIST = [
     "16-17",
@@ -853,16 +631,16 @@ class Master:
                         g_list.append(p)
                 # messaging to clean up group data.
                 # TODO wrap into system messaging
-                # if group_type is None or group_type == "DfT":
-                #     if g_list:
-                #         for x in g_list:
-                #             print(
-                #                 str(quarter)
-                #                 + " "
-                #                 + str(x)
-                #                 + " DfT Group data needs cleaning. Currently "
-                #                 + str(group_type)
-                #             )
+                if group_type is None or group_type == "DfT":
+                    if g_list:
+                        for x in g_list:
+                            print(
+                                str(quarter)
+                                + " "
+                                + str(x)
+                                + " DfT Group data needs cleaning. Currently "
+                                + str(group_type)
+                            )
                 lower_g_dict[group_type] = g_list
             group_dict[quarter] = lower_g_dict
 
@@ -877,16 +655,16 @@ class Master:
                         s_list.append(p)
                 # messaging to clean up group data.
                 # TODO wrap into system messaging
-                # if stage_type is None:
-                #     if s_list:
-                #         for x in s_list:
-                #             print(
-                #                 str(quarter)
-                #                 + " "
-                #                 + str(x)
-                #                 + " IPDC stage data needs cleaning. Currently "
-                #                 + str(stage_type)
-                #             )
+                if stage_type is None:
+                    if s_list:
+                        for x in s_list:
+                            print(
+                                str(quarter)
+                                + " "
+                                + str(x)
+                                + " IPDC stage data needs cleaning. Currently "
+                                + str(stage_type)
+                            )
                 lower_s_dict[stage_type] = s_list
             stage_dict[quarter] = lower_s_dict
 
@@ -905,12 +683,15 @@ class CostData:
     def __init__(
             self,
             master: Master,
-            project_group: List[str] or str,
+            # project_group: List[str] or str,
             baseline_type: str = "ipdc_costs",
+            **kwargs
     ):
         self.master = master
-        self.project_group = project_group
+        # self.project_group = project_group
         self.baseline_type = baseline_type
+        self.kwargs = kwargs
+        self.group = self.get_group()
         self.cat_spent = []
         self.cat_profiled = []
         self.cat_unprofiled = []
@@ -931,6 +712,18 @@ class CostData:
         self.get_cost_profile()
         self.calculate_wlc_change()
 
+    def get_group(self) -> List[str]:
+        if "stage" in self.kwargs:
+            s_input = self.kwargs["stage"]
+            group = cal_group(s_input, self.master, str(self.master.current_quarter))
+        elif "group" in self.kwargs:
+            g_input = self.kwargs["group"]
+            group = cal_group(g_input, self.master, str(self.master.current_quarter))
+        else:
+            group = self.master.master_data[0].projects
+
+        return group
+
     def get_cost_totals(self) -> None:
         """Returns lists containing the sum total of group (of projects) costs,
         sliced in different ways. Cumbersome for loop used at the moment, but
@@ -948,12 +741,13 @@ class CostData:
         group_cdel_unprofiled = 0
         group_ngov_unprofiled = 0
 
-        self.project_group = string_conversion(self.project_group)
+        # self.project_group = string_conversion(self.project_group)
+
 
         for i in range(3):
             for x, key in enumerate(COST_TYPE_KEY_LIST):
                 group_total = 0
-                for project_name in self.project_group:
+                for project_name in self.group:
                     cost_bl_index = self.master.bl_index[self.baseline_type][
                         project_name
                     ]
@@ -1082,8 +876,6 @@ class CostData:
         ngov_current_profile = []
         missing_projects = []
 
-        self.project_group = string_conversion(self.project_group)
-
         for i in range(5):
             yearly_profile = []
             rdel_yearly_profile = []
@@ -1095,7 +887,7 @@ class CostData:
                 cdel_total = 0
                 ngov_total = 0
                 for cost_type in COST_KEY_LIST:
-                    for project_name in self.project_group:
+                    for project_name in self.group:
                         project_bl_index = self.master.bl_index[self.baseline_type][
                             project_name
                         ]
@@ -1208,7 +1000,7 @@ class CostData:
         """calculates changes in whole life cost of project. Current against baselines"""
 
         wlc_change_dict = {}
-        for project_name in self.project_group:
+        for project_name in self.group:
             wlc_list = []
             current_wlc = self.master.master_data[0].data[project_name][
                 "Total Forecast"
@@ -2332,6 +2124,29 @@ def set_figure_size(graph_type: str) -> Tuple[int, int]:
         return 11.69, 8.20
 
 
+def cost_profile_into_wb(cost_master: CostData) -> Workbook:
+    wb = Workbook()
+    ws = wb.active
+
+    row_num = 2
+    for i, c in enumerate(cost_master.current_profile):
+        ws.cell(row=row_num + i, column=1).value = YEAR_LIST[i]
+        ws.cell(row=row_num + i, column=2).value = c
+        ws.cell(row=row_num + i, column=3).value = cost_master.last_profile[i]
+        ws.cell(row=row_num + i, column=4).value = cost_master.baseline_profile_one[i]
+        ws.cell(row=row_num + i, column=5).value = cost_master.baseline_profile_two[i]
+        ws.cell(row=row_num + i, column=6).value = cost_master.baseline_profile_three[i]
+
+    ws.cell(row=1, column=1).value = "F/Y"
+    ws.cell(row=1, column=2).value = "Current"
+    ws.cell(row=1, column=3).value = "Last"
+    ws.cell(row=1, column=4).value = "Baseline one"
+    ws.cell(row=1, column=5).value = "Baseline two"
+    ws.cell(row=1, column=6).value = "Baseline three"
+
+    return wb
+
+
 def cost_profile_graph(cost_master: CostData, **kwargs) -> plt.figure:
     """Compiles a matplotlib line chart for costs of GROUP of projects contained within cost_master class"""
 
@@ -2346,9 +2161,9 @@ def cost_profile_graph(cost_master: CostData, **kwargs) -> plt.figure:
         pass
 
     # title
-    if len(cost_master.project_group) == 1:
+    if len(cost_master.group) == 1:
         title = (
-                cost_master.master.abbreviations[cost_master.project_group[0]]
+                cost_master.master.abbreviations[cost_master.group[0]]
                 + " cost profile change"
         )
     else:
@@ -3755,15 +3570,14 @@ class DcaData:
         for q in self.quarters:  # q is quarter
             project_dict = {}
             i = self.master.quarter_list.index(q)  # i for index
-            group = self.master.master_data[
-                i
-            ].projects  # why does this need to come first?
             if "stage" in self.kwargs:
                 s_input = self.kwargs["stage"]
                 group = cal_group(s_input, self.master, q)
-            if "group" in self.kwargs:
+            elif "group" in self.kwargs:
                 g_input = self.kwargs["group"]
                 group = cal_group(g_input, self.master, q)
+            else:
+                group = self.master.master_data[i].projects
             type_dict = {}
             for dca_type in list(DCA_KEYS.values()):
                 dca_dict = {}
@@ -4292,20 +4106,34 @@ VFM_CAT = [
 def cal_group(
         lists_input: List[str] or List[List[str]], master: Master, quarter: str
 ) -> List[str]:
+    group = []
     if len(lists_input) > 1:
-        group = []
         for g in lists_input:
             try:
                 local_g = master.project_stage[quarter][g]
                 group += local_g
             except KeyError:
-                local_g = master.dft_groups[quarter][g]
-                group += local_g
+                try:
+                    local_g = master.dft_groups[quarter][g]
+                    group += local_g
+                except KeyError:
+                    if g in master.abbreviations:
+                        group.append(g)
+                    else:
+                        print(g + " not recognised please enter a correct project name")
+
     else:
         try:
             group = master.project_stage[quarter][lists_input[0]]
         except KeyError:
-            group = master.dft_groups[quarter][lists_input[0]]
+            try:
+                group = master.dft_groups[quarter][lists_input[0]]
+            except KeyError:
+                p = lists_input[0]  # p is project
+                if p in master.abbreviations:
+                    group.append(p)
+                else:
+                    print(p + " not recognised please enter a correct project name")
 
     return group
 
@@ -4687,7 +4515,8 @@ def cost_schedule_scatter_chart_matplotlib(milestones: MilestoneData, costs: Cos
             pass
 
     fig, ax = plt.subplots()
-    ax.scatter(sc_list, cc_list, c=colour_list, s=volume_list, alpha=0.5)
+    ax.scatter(sc_list, cc_list, c=colour_list, s=volume_list)
+    # , alpha=0.5)
 
     ax.set_xlabel('Schedule', fontsize=15)
     ax.set_ylabel('Costs', fontsize=15)

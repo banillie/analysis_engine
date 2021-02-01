@@ -38,19 +38,31 @@ from analysis_engine.data import (
     vfm_into_excel,
     MilestoneData,
     put_milestones_into_wb,
-    Projects,
     run_p_reports,
     RiskData,
-    risks_into_excel, DcaData, dca_changes_into_excel, dca_changes_into_word, open_word_doc, Pickle, open_pickle_file,
-    ipdc_dashboard, CostData, cost_v_schedule_chart_into_wb, make_file_friendly, DandelionData,
-    dandelion_data_into_wb, run_dandelion_matplotlib_chart, put_matplotlib_fig_into_word,
+    risks_into_excel,
+    DcaData,
+    dca_changes_into_excel,
+    dca_changes_into_word,
+    open_word_doc,
+    Pickle,
+    open_pickle_file,
+    ipdc_dashboard,
+    CostData,
+    cost_v_schedule_chart_into_wb,
+    make_file_friendly,
+    DandelionData,
+    dandelion_data_into_wb,
+    run_dandelion_matplotlib_chart,
+    put_matplotlib_fig_into_word, cost_profile_into_wb, cost_profile_graph,
 )
 
 
-def run_correct_args(m: Master,
-                     ae_class: MilestoneData or CostData or VfMData or DcaData or RiskData,
-                     args: argparse.ArgumentParser
-                     ) -> MilestoneData or CostData or VfMData or DcaData:
+def run_correct_args(
+    m: Master,
+    ae_class: MilestoneData or CostData or VfMData or DcaData or RiskData,
+    args: argparse.ArgumentParser,
+) -> MilestoneData or CostData or VfMData or DcaData:
     # try:  # acts as partition for subcommand options
     if args["quarters"] and args["stage"]:  # to test
         data = ae_class(m, quarters=args["quarters"], stage=args["stage"])
@@ -89,34 +101,38 @@ def initiate(args):
 
 
 def run_general(args):
-    programme = args['subparser_name']
+    programme = args["subparser_name"]
     print("compiling " + programme + " analysis")
     m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
-    if programme == 'vfm':
+    if programme == "vfm":
         c = run_correct_args(m, VfMData, args)  # c is class
         wb = vfm_into_excel(c)
-    if programme == 'risks':
+    if programme == "risks":
         c = run_correct_args(m, RiskData, args)
         wb = risks_into_excel(c)
-    if programme == 'dcas':
+    if programme == "dcas":
         c = run_correct_args(m, DcaData, args)
         wb = dca_changes_into_excel(c)
-    if programme == 'speedial':
+    if programme == "speedial":
         report_doc = open_word_doc(root_path / "input/summary_temp.docx")
         c = run_correct_args(m, DcaData, args)
         c.get_changes()
         doc = dca_changes_into_word(c, report_doc)
         doc.save(root_path / "output/{}.docx".format(programme))
         print(programme + " analysis has been compiled. Enjoy!")
-    if programme == 'dandelion':
+    if programme == "dandelion":
         report_doc = open_word_doc(root_path / "input/summary_temp.docx")
         c = run_correct_args(m, DandelionData, args)
         wb = dandelion_data_into_wb(c)
         graph = run_dandelion_matplotlib_chart(c)
         put_matplotlib_fig_into_word(report_doc, graph, size=4, transparent=True)
         report_doc.save(root_path / "output/dandelion_output.docx")
+    if programme == "costs":
+        c = run_correct_args(m, CostData, args)
+        wb = cost_profile_into_wb(c)
+        cost_profile_graph(c)
 
-    if programme != 'speedial':  # only excel outputs
+    if programme != "speedial":  # only excel outputs
         wb.save(root_path / "output/{}.xlsx".format(programme))
         print(programme + " analysis has been compiled. Enjoy!")
 
@@ -151,20 +167,11 @@ def summaries(args):
 
 def dashboard(args):
     print("compiling ipdc dashboards")
-    dashboard_master = load_workbook(root_path / 'input/dashboards_master.xlsx')
+    dashboard_master = load_workbook(root_path / "input/dashboards_master.xlsx")
     m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
     wb = ipdc_dashboard(m, dashboard_master)
     wb.save(root_path / "output/completed_ipdc_dashboard.xlsx")
     print("dashboard compiled. enjoy!")
-
-
-# def dandelion(args):
-#     print("compiling dandelion data")
-#     m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
-#     dand = DandelionData()
-#     wb = dandelion_data(m)
-#     wb.save(root_path / "output/dandelion_data.xlsx")
-#     print("dandelion data compiled. enjoy!")
 
 
 def matrix(args):
@@ -182,10 +189,15 @@ def main():
     parser = argparse.ArgumentParser(
         prog="engine", description="DfT Major Projects Portfolio Office analysis engine"
     )
-    subparsers = parser.add_subparsers(dest='subparser_name')
-    parser_initiate = subparsers.add_parser("initiate", help="creates a master data file")
+    subparsers = parser.add_subparsers(dest="subparser_name")
+    parser_initiate = subparsers.add_parser(
+        "initiate", help="creates a master data file"
+    )
     parser_dashboard = subparsers.add_parser("dashboards", help="ipdc dashboard")
-    parser_dandelion = subparsers.add_parser("dandelion", help="data for dandelion graph")
+    parser_dandelion = subparsers.add_parser(
+        "dandelion", help="dandelion graph (early version) and data"
+    )
+    parser_costs = subparsers.add_parser("costs", help="cost analysis")
     parser_vfm = subparsers.add_parser("vfm", help="vfm analysis")
     parser_milestones = subparsers.add_parser("milestones", help="milestone analysis")
     parser_summaries = subparsers.add_parser("summaries", help="summary reports")
@@ -287,10 +299,17 @@ def main():
         action="store",
         nargs="+",
         help="Returns summaries for specified projects. User can either input DfT Group name; "
-             '"HSMRPG", "AMIS", "Rail", "RDM", or the project(s) acronym',
+        '"HSMRPG", "AMIS", "Rail", "RPE", or the project(s) acronym',
     )
 
-    for sub in [parser_dca, parser_vfm, parser_risks, parser_speedial, parser_dandelion]:
+    for sub in [
+        parser_dca,
+        parser_vfm,
+        parser_risks,
+        parser_speedial,
+        parser_dandelion,
+        parser_costs
+    ]:
         # all sub-commands have the same optional args. This is working
         # but prob could be refactored.
         sub.add_argument(
@@ -301,18 +320,18 @@ def main():
             nargs="+",
             choices=["FBC", "OBC", "SOBC", "pre-SOBC"],
             help="Returns analysis for those projects at the specified planning stage(s). Must be one "
-                 'or combination of "FBC", "OBC", "SOBC", "pre-SOBC".',
-            )
+            'or combination of "FBC", "OBC", "SOBC", "pre-SOBC".',
+        )
         sub.add_argument(
             "--group",
             type=str,
             metavar="",
             action="store",
             nargs="+",
-            choices=["HSMRPG", "AMIS", "Rail", "RDM"],
+            choices=["HSMRPG", "AMIS", "Rail", "RPE"],
             help="Returns analysis for those projects in the specified DfT Group. Must be one or "
-                 'combination of "HSMRPG", "AMIS", "Rail", "RDM"',
-            )
+            'combination of "HSMRPG", "AMIS", "Rail", "RPE"',
+        )
         # no quarters in dandelion yet
         sub.add_argument(
             "--quarters",
@@ -321,11 +340,12 @@ def main():
             action="store",
             nargs="+",
             help="Returns analysis for specified quarters. Must be in format e.g Q3 19/20",
-            )
+        )
 
     parser_initiate.set_defaults(func=initiate)
     parser_dashboard.set_defaults(func=dashboard)
     parser_dandelion.set_defaults(func=run_general)
+    parser_costs.set_defaults(func=run_general)
     parser_vfm.set_defaults(func=run_general)
     parser_milestones.set_defaults(func=milestones)
     parser_summaries.set_defaults(func=summaries)

@@ -42,7 +42,8 @@ from analysis_engine.data import (
     project_report_meta_data,
     print_out_project_milestones,
     put_milestones_into_wb, Pickle, open_pickle_file, financial_dashboard, schedule_dashboard, benefits_dashboard,
-    overall_dashboard, DandelionData, dandelion_data_into_wb, run_dandelion_matplotlib_chart, cost_v_schedule_chart_into_wb,
+    overall_dashboard, DandelionData, dandelion_data_into_wb, run_dandelion_matplotlib_chart,
+    cost_v_schedule_chart_into_wb, cost_profile_into_wb,
 )
 
 # test masters project names
@@ -168,14 +169,21 @@ def test_project_report_meta_data(word_doc, project_info, two_masters):
 def test_get_project_cost_profile(costs_masters, project_info):
     master = Master(costs_masters, project_info)
     # master.check_baselines()
-    costs = CostData(master, f9)
+    costs = CostData(master, group=[f9])
     assert len(costs.current_profile) == 24
 
 
 def test_project_cost_profile_chart(costs_masters, project_info):
     master = Master(costs_masters, project_info)
-    costs = CostData(master, f9)
+    costs = CostData(master, group=[f9])
     cost_profile_graph(costs)
+
+
+def test_project_cost_profile_into_wb(costs_masters, project_info):
+    master = Master(costs_masters, project_info)
+    costs = CostData(master, group=group)
+    wb = cost_profile_into_wb(costs)
+    wb.save("resources/test_cost_profile_output.xlsx")
 
 
 def test_project_cost_profile_chart_into_word_doc_one(
@@ -443,7 +451,7 @@ def test_risk_analysis(project_info, risk_masters):
 def test_vfm_analysis(project_info, vfm_masters):
     m = Master(vfm_masters, project_info)
     quarter_list = ["Q1 20/21", "Q4 19/20"]
-    vfm = VfMData(m, quarters=quarter_list, stage=["FBC", "OBC"])
+    vfm = VfMData(m, group=["RPE"])
     wb = vfm_into_excel(vfm)
     wb.save("resources/vfm.xlsx")
 
