@@ -1,6 +1,7 @@
 """
 Tests for analysis_engine
 """
+import csv
 import os
 import datetime
 import pickle
@@ -43,7 +44,7 @@ from analysis_engine.data import (
     print_out_project_milestones,
     put_milestones_into_wb, Pickle, open_pickle_file, financial_dashboard, schedule_dashboard, benefits_dashboard,
     overall_dashboard, DandelionData, dandelion_data_into_wb, run_dandelion_matplotlib_chart,
-    cost_v_schedule_chart_into_wb, cost_profile_into_wb,
+    cost_v_schedule_chart_into_wb, cost_profile_into_wb, simple_return_data, get_data_query_key_names,
 )
 
 # test masters project names
@@ -169,7 +170,7 @@ def test_project_report_meta_data(word_doc, project_info, two_masters):
 def test_get_project_cost_profile(costs_masters, project_info):
     master = Master(costs_masters, project_info)
     # master.check_baselines()
-    costs = CostData(master)
+    costs = CostData(master, group=[f9])
     assert len(costs.current_profile) == 24
 
 
@@ -355,18 +356,26 @@ def test_get_gmpp_projects(project_info):
 #     totals_chart(costs, benefits, title="Test Group")
 
 
-def test_get_milestone_data(milestone_masters, project_info):
+def test_get_milestone_data_bl(milestone_masters, project_info):
     master = Master(milestone_masters, project_info)
-    milestones = MilestoneData(master, [sot, a11, a13])
+    milestones = MilestoneData(master, group=[sot, a11, a13])
+    milestones.get_milestones_bl()
+    assert isinstance(milestones.current, (dict,))
+
+
+def test_get_milestone_data_all(milestone_masters, project_info):
+    m = Master(milestone_masters, project_info)
+    milestones = MilestoneData(m, quarters=["Q4 19/20", "Q4 18/19"])
+    milestones.get_milestones_all()
     assert isinstance(milestones.current, (dict,))
 
 
 def test_get_milestone_chart_data(milestone_masters, project_info):
     master = Master(milestone_masters, project_info)
-    milestones = MilestoneData(master, [sot, a11, a13])
-    assert len(milestones.key_names) == 8
-    assert len(milestones.md_current) == 8
-    assert len(milestones.md_last) == 8
+    milestones = MilestoneData(master, group=[sot, a11, a13])
+    assert len(milestones.key_names) == 11
+    assert len(milestones.md_current) == 11
+    assert len(milestones.md_last) == 11
 
 
 def test_compile_milestone_chart(milestone_masters, project_info, word_doc):
@@ -548,3 +557,20 @@ def test_dandelion(basic_masters_dicts, project_info, word_doc):
     graph = run_dandelion_matplotlib_chart(dand)
     put_matplotlib_fig_into_word(word_doc, graph, size=4, transparent=False)
     word_doc.save("resources/test_dandelion_output.docx")
+
+
+def test_data_queries_non_milestone(basic_masters_dicts, project_info):
+    m = Master(basic_masters_dicts, project_info)
+    wb = simple_return_data(m, keys=["Total Forecast"])
+    wb.save("resources/test_date_query.xlsx")
+
+
+def test_data_queries_milestones(milestone_masters, project_info):
+    m = Master(milestone_masters, project_info)
+    wb = simple_return_data(m, keys=["Full Operations"])
+    wb.save("resources/test_date_query_milestones.xlsx")
+
+
+def test_open_csv_file(key_file):
+    l = get_data_query_key_names(key_file)
+    assert

@@ -54,7 +54,8 @@ from analysis_engine.data import (
     DandelionData,
     dandelion_data_into_wb,
     run_dandelion_matplotlib_chart,
-    put_matplotlib_fig_into_word, cost_profile_into_wb, cost_profile_graph,
+    put_matplotlib_fig_into_word, cost_profile_into_wb, cost_profile_graph, simple_return_data,
+    get_data_query_key_names,
 )
 
 
@@ -185,6 +186,20 @@ def matrix(args):
     print("Cost and schedule matrix compiled. Enjoy!")
 
 
+def query(args):
+    print("Getting data")
+    m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
+    if args["keys"]:
+        wb = simple_return_data(m, keys=args["keys"])
+        wb.save(root_path / "output/data_query.xlsx")
+        print("Data compiled. Enjoy!")
+    else:
+        l = get_data_query_key_names(root_path / "input/key_names.csv")
+        wb = simple_return_data(m, keys=l)
+        wb.save(root_path / "output/data_query.xlsx")
+        print("Data compiled using key_names cvs file. Enjoy")
+
+
 def main():
     parser = argparse.ArgumentParser(
         prog="engine", description="DfT Major Projects Portfolio Office analysis engine"
@@ -205,92 +220,7 @@ def main():
     parser_dca = subparsers.add_parser("dcas", help="dca analysis")
     parser_speedial = subparsers.add_parser("speedial", help="speed dial analysis")
     parser_matrix = subparsers.add_parser("matrix", help="cost v schedule chart")
-
-    # parser_vfm.add_argument(
-    #     "--stage",
-    #     type=str,
-    #     metavar="",
-    #     action="store",
-    #     nargs="+",
-    #     choices=["FBC", "OBC", "SOBC", "pre-SOBC"],
-    #     help="Returns analysis for those projects at the specified planning stage(s). Must be one "
-    #     'or combination of "FBC", "OBC", "SOBC", "pre-SOBC".',
-    # )
-    # parser_vfm.add_argument(
-    #     "--group",
-    #     type=str,
-    #     metavar="",
-    #     action="store",
-    #     nargs="+",
-    #     choices=["HSMRPG", "AMIS", "Rail", "RDM"],
-    #     help="Returns analysis for those projects in the specified DfT Group. Must be one or "
-    #     'combination of "HSMRPG", "AMIS", "Rail", "RDM"',
-    # )
-    # parser_vfm.add_argument(
-    #     "--quarters",
-    #     type=str,
-    #     metavar="",
-    #     action="store",
-    #     nargs="+",
-    #     help="Returns analysis for specified quarters. Must be in format e.g Q3 19/20",
-    # )
-
-    # parser_risks.add_argument(
-    #     "--stage",
-    #     type=str,
-    #     metavar="",
-    #     action="store",
-    #     nargs="+",
-    #     choices=["FBC", "OBC", "SOBC", "pre-SOBC"],
-    #     help="Returns analysis for those projects at the specified planning stage(s). Must be one "
-    #     'or combination of "FBC", "OBC", "SOBC", "pre-SOBC".',
-    # )
-    # parser_risks.add_argument(
-    #     "--group",
-    #     type=str,
-    #     metavar="",
-    #     action="store",
-    #     nargs="+",
-    #     choices=["HSMRPG", "AMIS", "Rail", "RDM"],
-    #     help="Returns analysis for those projects in the specified DfT Group. Must be one or "
-    #     'combination of "HSMRPG", "AMIS", "Rail", "RDM"',
-    # )
-    # parser_risks.add_argument(
-    #     "--quarters",
-    #     type=str,
-    #     metavar="",
-    #     action="store",
-    #     nargs="+",
-    #     help="Returns analysis for specified quarters. Must be in format e.g Q3 19/20",
-    # )
-    # parser_dca.add_argument(
-    #     "--stage",
-    #     type=str,
-    #     metavar="",
-    #     action="store",
-    #     nargs="+",
-    #     choices=["FBC", "OBC", "SOBC", "pre-SOBC"],
-    #     help="Returns analysis for those projects at the specified planning stage(s). Must be one "
-    #          'or combination of "FBC", "OBC", "SOBC", "pre-SOBC".',
-    # )
-    # parser_dca.add_argument(
-    #     "--group",
-    #     type=str,
-    #     metavar="",
-    #     action="store",
-    #     nargs="+",
-    #     choices=["HSMRPG", "AMIS", "Rail", "RDM"],
-    #     help="Returns analysis for those projects in the specified DfT Group. Must be one or "
-    #          'combination of "HSMRPG", "AMIS", "Rail", "RDM"',
-    # )
-    # parser_dca.add_argument(
-    #     "--quarters",
-    #     type=str,
-    #     metavar="",
-    #     action="store",
-    #     nargs="+",
-    #     help="Returns analysis for specified quarters. Must be in format e.g Q3 19/20",
-    # )
+    parser_data_query = subparsers.add_parser("query", help="return data from core data")
 
     parser_summaries.add_argument(
         "--group",
@@ -300,6 +230,15 @@ def main():
         nargs="+",
         help="Returns summaries for specified projects. User can either input DfT Group name; "
         '"HSMRPG", "AMIS", "Rail", "RPE", or the project(s) acronym',
+    )
+
+    parser_data_query.add_argument(
+        "--keys",
+        type=str,
+        metavar='Key Name',
+        action="store",
+        nargs="+",
+        help="Returns the specified data keys."
     )
 
     for sub in [
@@ -353,6 +292,7 @@ def main():
     parser_dca.set_defaults(func=run_general)
     parser_speedial.set_defaults(func=run_general)
     parser_matrix.set_defaults(func=matrix)
+    parser_data_query.set_defaults(func=query)
     args = parser.parse_args()
     # print(vars(args))
     args.func(vars(args))

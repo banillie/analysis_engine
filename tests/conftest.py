@@ -210,3 +210,8 @@ def list_test_masters_files():
 @pytest.fixture()
 def dashboard_template():
     return load_workbook(os.path.join(os.getcwd(), "resources/test_dashboards_master.xlsx"))
+
+
+@pytest.fixture()
+def key_file():
+    return os.path.join(os.getcwd(), "resources/test_key_names.csv")

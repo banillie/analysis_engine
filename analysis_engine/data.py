@@ -1,3 +1,4 @@
+import csv
 import datetime
 import difflib
 import os
@@ -1211,12 +1212,14 @@ def remove_none_types(input_list):
 def get_milestone_date(
         project_name: str,
         milestone_dictionary: Dict[str, Union[datetime.date, str]],
+        quarter_bl: str,
         milestone_name: str,
 ) -> datetime:
-    for k in milestone_dictionary.keys():
-        if milestone_dictionary[k]["Project"] == project_name:
-            if milestone_dictionary[k]["Milestone"] == milestone_name[1:]:
-                return milestone_dictionary[k]["Date"]
+    m_dict = milestone_dictionary[quarter_bl]
+    for k in m_dict.keys():
+        if m_dict[k]["Project"] == project_name:
+            if m_dict[k]["Milestone"] == milestone_name[1:]:
+                return m_dict[k]["Date"]
 
 
 def get_milestone_notes(
@@ -1234,12 +1237,15 @@ class MilestoneData:
     def __init__(
             self,
             master: Master,
-            project_group: List[str] or str,
+            # project_group: List[str] or str,
             baseline_type: str = "ipdc_milestones",
+            **kwargs
     ):
         self.master = master
-        self.project_group = project_group
+        self.group = []
+        self.kwargs = kwargs
         self.baseline_type = baseline_type
+        self.all_milestones = {}
         self.current = {}
         self.last_quarter = {}
         self.baseline_dict = {}
@@ -1264,22 +1270,23 @@ class MilestoneData:
         self.schedule_change = {}
         self.schedule_key_last = None
         self.schedule_key_baseline = None
-        self.get_milestones()
-        self.get_chart_info()
+        # self.get_milestones_bl()
+        # self.get_chart_info()
         # self.calculate_schedule_changes()
 
-    def get_milestones(self) -> None:
+    def get_milestones_bl(self) -> None:
         """
         Creates project milestone dictionaries for current, last_quarter, and
         baselines when provided with group and baseline type.
         """
 
-        self.project_group = string_conversion(self.project_group)
+        self.group = get_group(self.master, str(self.master.current_quarter), self.kwargs)
+        # self.project_group = string_conversion(self.project_group)
 
         for bl in range(4):
             lower_dict = {}
             raw_list = []
-            for project_name in self.project_group:
+            for project_name in self.group:
                 project_list = []
                 milestone_bl_index = self.master.bl_index[self.baseline_type][
                     project_name
@@ -1410,6 +1417,137 @@ class MilestoneData:
                 self.baseline_two = lower_dict
                 self.ordered_list_bl_two = sorted_list
 
+    def get_milestones_all(self) -> None:
+        quarter_dict = {}
+        if "quarters" in self.kwargs.keys():
+            quarters = self.kwargs["quarters"]
+        else:
+            quarters = [self.master.quarter_list[0], self.master.quarter_list[1]]
+
+        for q in quarters:
+            self.group = get_group(self.master, q, self.kwargs)
+            ind = self.master.quarter_list.index(q)  # ind for index
+            lower_dict = {}
+            raw_list = []
+            for project_name in self.group:
+                project_list = []
+                try:
+                    p_data = self.master.master_data[ind].data[
+                        project_name
+                    ]
+                # IndexError handles len of project bl index.
+                # TypeError handles None Type present if project not reporting last quarter
+                except (IndexError, TypeError):
+                    continue
+
+                # i loops below removes None Milestone names and rejects non-datetime date values.
+                for i in range(1, 50):
+                    try:
+                        t = [
+                            ("Project", self.master.abbreviations[project_name]),
+                            ("Milestone", p_data["Approval MM" + str(i)]),
+                            ("Type", "Approval"),
+                            (
+                                "Date",
+                                p_data["Approval MM" + str(i) + " Forecast / Actual"],
+                            ),
+                            ("Notes", p_data["Approval MM" + str(i) + " Notes"]),
+                        ]
+                        milestone_info_handling(project_list, t)
+                        t = [
+                            ("Project", self.master.abbreviations[project_name]),
+                            ("Milestone", p_data["Assurance MM" + str(i)]),
+                            ("Type", "Assurance"),
+                            (
+                                "Date",
+                                p_data["Assurance MM" + str(i) + " Forecast - Actual"],
+                            ),
+                            ("Notes", p_data["Assurance MM" + str(i) + " Notes"]),
+                        ]
+                        milestone_info_handling(project_list, t)
+                    except KeyError:  # handles inconsistent keys naming for approval milestones.
+                        try:
+                            t = [
+                                ("Project", self.master.abbreviations[project_name]),
+                                ("Milestone", p_data["Approval MM" + str(i)]),
+                                ("Type", "Approval"),
+                                (
+                                    "Date",
+                                    p_data[
+                                        "Approval MM" + str(i) + " Forecast - Actual"
+                                        ],
+                                ),
+                                ("Notes", p_data["Approval MM" + str(i) + " Notes"]),
+                            ]
+                            milestone_info_handling(project_list, t)
+                        except KeyError:
+                            pass
+
+                # handles inconsistent number of Milestone. could be incorporated above.
+                for i in range(18, 67):
+                    try:
+                        t = [
+                            ("Project", self.master.abbreviations[project_name]),
+                            ("Milestone", p_data["Project MM" + str(i)]),
+                            ("Type", "Delivery"),
+                            (
+                                "Date",
+                                p_data["Project MM" + str(i) + " Forecast - Actual"],
+                            ),
+                            ("Notes", p_data["Project MM" + str(i) + " Notes"]),
+                        ]
+                        milestone_info_handling(project_list, t)
+                    except KeyError:
+                        pass
+
+                # change in Q3. Some milestones collected via HMT approval section.
+                # this loop picks them up
+                # TODO check these are coming through in q3 data
+                for i in range(1, 4):
+                    try:
+                        t = [
+                            ("Project", self.master.abbreviations[project_name]),
+                            ("Milestone", p_data["HMT Approval " + str(i)]),
+                            ("Type", "Approval"),
+                            (
+                                "Date",
+                                p_data["HMT Approval " + str(i) + " Forecast / Actual"],
+                            ),
+                            ("Notes", p_data["HMT Approval " + str(i) + " Notes"]),
+                        ]
+                        milestone_info_handling(project_list, t)
+                    except KeyError:
+                        pass
+
+                # loop to stop keys names being the same. Done at project level.
+                # not particularly concise code.
+                upper_counter_list = []
+                for entry in project_list:
+                    upper_counter_list.append(entry[1][1])
+                upper_count = Counter(upper_counter_list)
+                lower_counter_list = []
+                for entry in project_list:
+                    if upper_count[entry[1][1]] > 1:
+                        lower_counter_list.append(entry[1][1])
+                        lower_count = Counter(lower_counter_list)
+                        new_milestone_key = (
+                                entry[1][1] + " (" + str(lower_count[entry[1][1]]) + ")"
+                        )
+                        entry[1] = ("Milestone", new_milestone_key)
+                        raw_list.append(entry)
+                    else:
+                        raw_list.append(entry)
+
+            # puts the list in chronological order
+            sorted_list = sorted(raw_list, key=lambda k: (k[3][1] is None, k[3][1]))
+
+            for r in range(len(sorted_list)):
+                lower_dict["Milestone " + str(r)] = dict(sorted_list[r])
+
+            quarter_dict[q] = lower_dict
+
+        self.all_milestones = quarter_dict
+
     def get_chart_info(self) -> None:
         """returns data lists for matplotlib chart"""
         # Note this code could refactored so that it collects all milestones
@@ -1474,9 +1612,9 @@ class MilestoneData:
                 md_baseline_two.append(m_date)
                 md_baseline_two_po.append(None)
 
-        if len(self.project_group) == 1:
+        if len(self.group) == 1:
             key_names = remove_project_name(
-                self.master.abbreviations[self.project_group[0]], key_names
+                self.master.abbreviations[self.group[0]], key_names
             )
         else:
             pass
@@ -2171,18 +2309,18 @@ def cost_profile_graph(cost_master: CostData, **kwargs) -> plt.figure:
         pass
 
     # title
-    if len(cost_master.group) == 1:
-        title = (
-                cost_master.master.abbreviations[cost_master.group[0]]
-                + " cost profile change"
-        )
-    else:
-        try:
-            title = kwargs["title"] + " cost profile change"
-        except KeyError:
-            pass
-            title = ""
-            print("You need to provide a title for this chart")
+    # if len(cost_master.group) == 1:
+    title = (cost_master.kwargs["group"][0]
+            # cost_master.master.abbreviations[cost_master.group[0]]
+            + " cost profile change"
+    )
+    # else:
+    #     try:
+    #         title = kwargs["title"] + " cost profile change"
+    #     except KeyError:
+    #         pass
+    #         title = ""
+    #         print("You need to provide a title for this chart")
 
     plt.suptitle(title, fontweight="bold", fontsize=25)
 
@@ -2753,17 +2891,21 @@ def total_costs_benefits_bar_chart(
         pass
 
     # cost profile charts.
-    if len(cost_master.project_group) == 1:
-        title = (
-                cost_master.master.abbreviations[cost_master.project_group[0]]
-                + " cost and benefit totals"
-        )
-    else:
-        try:
-            title = kwargs["title"] + " cost and benefit totals"
-        except KeyError:
-            title = ""
-            print("You need to provide a title for this chart")
+    title = (cost_master.kwargs["group"][0]
+             # cost_master.master.abbreviations[cost_master.group[0]]
+             + " cost and benefit totals"
+             )
+    # if len(cost_master.project_group) == 1:
+    #     title = (
+    #             cost_master.master.abbreviations[cost_master.project_group[0]]
+    #             + " cost and benefit totals"
+    #     )
+    # else:
+    #     try:
+    #         title = kwargs["title"] + " cost and benefit totals"
+    #     except KeyError:
+    #         title = ""
+    #         print("You need to provide a title for this chart")
 
     plt.suptitle(title, fontweight="bold", fontsize=25)
     plt.xticks(size=12)
@@ -5123,15 +5265,15 @@ def compile_p_report(
     key_contacts(doc, master, project_name)
     dca_table(doc, master, project_name)
     dca_narratives(doc, master, project_name)
-    costs = CostData(master, project_name)
+    costs = CostData(master, group=[project_name])
     benefits = BenefitsData(master, project_name)
     milestones = MilestoneData(master, project_name)
     project_report_meta_data(doc, costs, milestones, benefits, project_name)
     change_word_doc_landscape(doc)
     cost_profile = cost_profile_graph(costs, show="No")
-    put_matplotlib_fig_into_word(doc, cost_profile)
+    put_matplotlib_fig_into_word(doc, cost_profile, transparent=False, size=8)
     total_profile = total_costs_benefits_bar_chart(costs, benefits, show="No")
-    put_matplotlib_fig_into_word(doc, total_profile)
+    put_matplotlib_fig_into_word(doc, total_profile, transparent=False, size=8)
     #  handling of no milestones within filtered period.
     ab = master.abbreviations[project_name]
     try:
@@ -5142,7 +5284,7 @@ def compile_p_report(
             title=ab + " schedule (2021 - 22)",
             show="No",
         )
-        put_matplotlib_fig_into_word(doc, milestones_chart)
+        put_matplotlib_fig_into_word(doc, milestones_chart, transparent=False, size=8)
         # print_out_project_milestones(doc, milestones, project_name)
     except ValueError:  # extends the time period.
         milestones = MilestoneData(master, project_name)
@@ -5211,19 +5353,19 @@ def run_p_reports(
 #     return ws
 #
 #
-# def conditional_formatting(ws, list_columns, list_conditional_text, list_text_colours, list_background_colours,
-#                            row_start, row_end):
-#     for column in list_columns:
-#         for i, txt in enumerate(list_conditional_text):
-#             text = list_text_colours[i]
-#             fill = list_background_colours[i]
-#             dxf = DifferentialStyle(font=text, fill=fill)
-#             rule = Rule(type="containsText", operator="containsText", text=txt, dxf=dxf)
-#             for_rule_formula = 'NOT(ISERROR(SEARCH("' + txt + '",' + column + '1)))'
-#             rule.formula = [for_rule_formula]
-#             ws.conditional_formatting.add(column + row_start + ':' + column + row_end, rule)
-#
-#     return ws
+def conditional_formatting(ws, list_columns, list_conditional_text, list_text_colours, list_background_colours,
+                           row_start, row_end):
+    for column in list_columns:
+        for i, txt in enumerate(list_conditional_text):
+            text = list_text_colours[i]
+            fill = list_background_colours[i]
+            dxf = DifferentialStyle(font=text, fill=fill)
+            rule = Rule(type="containsText", operator="containsText", text=txt, dxf=dxf)
+            for_rule_formula = 'NOT(ISERROR(SEARCH("' + txt + '",' + column + '1)))'
+            rule.formula = [for_rule_formula]
+            ws.conditional_formatting.add(column + row_start + ':' + column + row_end, rule)
+
+    return ws
 #
 #
 # # data query stuff
@@ -5405,76 +5547,91 @@ def run_p_reports(
 #         conditional_formatting(ws, list_columns, gen_txt_list, gen_txt_colours, gen_fill_colours, '1', '80')
 #
 #     return wb
-#
-#
-# def simple_return_data(data_key_list, quarter_master):
-#     """
-#     Returns all data of interest into a excel wb.
-#     master: excel wb master from which data should be taken.
-#     data_key_list: list of data keys for which values should be returned.
-#     """
-#
-#     wb = Workbook()
-#     ws = wb.active
-#
-#     for i in range(len(list_of_masters_all)):
-#         if quarter_master == str(list_of_masters_all[i].quarter):
-#             master = list_of_masters_all[i]
-#
-#             '''list project names, groups and stage in ws'''
-#             for y, project_name in enumerate(master.projects):
-#
-#                 group = master.data[project_name]['DfT Group']
-#
-#                 ws.cell(row=2 + y, column=1, value=group) # group info
-#                 ws.cell(row=2 + y, column=2, value=project_name)  # project name returned
-#
-#                 for x, key in enumerate(data_key_list):
-#                     ws.cell(row=1, column=3 + x, value=key)
-#                     try: # standard keys
-#                         value = master.data[project_name][key]
-#                         if value is None:
-#                             ws.cell(row=2 + y, column=3 + x).value = 'md'
-#                         else:
-#                             ws.cell(row=2 + y, column=3 + x, value=value)
-#                         try:  # checks for change against last quarter
-#                             lst_value = list_of_masters_all[i+1].data[project_name][key]
-#                             if value != lst_value:
-#                                 ws.cell(row=2 + y, column=3 + x).fill = salmon_fill
-#                         except (KeyError, IndexError):
-#                             pass
-#                     except KeyError:
-#                         try: # milestone keys
-#                             milestones = all_milestone_data_bulk([project_name], master)
-#                             value = tuple(milestones[project_name][key])[0]
-#                             if value is None:
-#                                 ws.cell(row=2 + y, column=3 + x).value = 'md'
-#                             else:
-#                                 ws.cell(row=2 + y, column=3 + x).value = value
-#                                 ws.cell(row=2 + y, column=3 + x).number_format = 'dd/mm/yy'
-#                             try:  # loop checks if value has changed since last quarter
-#                                 old_milestones = all_milestone_data_bulk([project_name], list_of_masters_all[i+1])
-#                                 lst_value = tuple(old_milestones[project_name][key])[0]
-#                                 if value != lst_value:
-#                                     ws.cell(row=2 + y, column=3 + x).fill = salmon_fill
-#                             except (KeyError, IndexError):
-#                                 pass
-#                         except KeyError: # exception catches both standard and milestone keys
-#                             ws.cell(row=2 + y, column=3 + x).value = 'knc'
-#                         except TypeError:
-#                             ws.cell(row=2 + y, column=3 + x).value = 'pnr'
-#
-#             for z, key in enumerate(data_key_list):
-#                 if key in list_of_rag_keys:
-#                     conditional_formatting(ws, [list_column_ltrs[z+2]], rag_txt_list_full, rag_txt_colours, rag_fill_colours,
-#                                            '1', '60') # plus 2 in column ltrs as values start being placed in at col 2.
-#             '''quarter tag information'''
-#             ws.cell(row=1, column=1, value='Group')
-#             ws.cell(row=1, column=2, value='Projects')
-#
-#             conditional_formatting(ws, list_column_ltrs, gen_txt_list, gen_txt_colours, gen_fill_colours, '1', '60')
-#
-#     return wb
+
+
+def get_data_query_key_names(key_file: csv) -> List[str]:
+    key_list = []
+    with open(key_file) as csv_file:
+        csv_reader = csv.reader(csv_file, delimiter=',')
+        for row in csv_reader:
+            key_list.append(row[0])
+    return key_list[1:]
+
+
+def simple_return_data(master: Master, **kwargs) -> Workbook:
+    """
+    Returns all data of interest into a excel wb.
+    master: excel wb master from which data should be taken.
+    data_key_list: list of data keys for which values should be returned.
+    """
+
+    wb = Workbook()
+    ws = wb.active
+
+    if "quarters" in kwargs.keys():
+        quarters = kwargs["quarters"]
+    else:
+        quarters = [str(master.current_quarter)]
+
+    for q in quarters:
+        i = master.quarter_list.index(q)
+
+        '''list project names, groups and stage in ws'''
+        for y, project_name in enumerate(master.master_data[i].projects):
+            abb = master.abbreviations[project_name]
+            ws.cell(row=2 + y, column=1).value = DFT_GROUP_DICT[master.master_data[i].data[project_name]['DfT Group']]
+            ws.cell(row=2 + y, column=2).value = master.abbreviations[project_name]
+
+            for x, key in enumerate(kwargs["keys"]):
+                ws.cell(row=1, column=3 + x, value=key)
+                try:  # standard keys
+                    value = master.master_data[i].data[project_name][key]
+                    if value is None:
+                        ws.cell(row=2 + y, column=3 + x).value = 'md'
+                    else:
+                        ws.cell(row=2 + y, column=3 + x, value=value)
+                    # try:  # checks for change against last quarter
+                    #     lst_value = master.master_data[i+1].data[project_name][key]
+                    #     if value != lst_value:
+                    #         ws.cell(row=2 + y, column=3 + x).fill = SALMON_FILL
+                    # except (KeyError, IndexError):
+                    #     pass
+                except KeyError:
+                    # try:  # milestone keys
+                    milestones = MilestoneData(master, quarters=[q])
+                    milestones.get_milestones_all()
+                    date = get_milestone_date(abb, milestones.all_milestones, q, ' ' + key)
+                    if date is None:
+                        ws.cell(row=2 + y, column=3 + x).value = 'md'
+                    else:
+                        ws.cell(row=2 + y, column=3 + x).value = date
+                        ws.cell(row=2 + y, column=3 + x).number_format = 'dd/mm/yy'
+                    # try:  # loop checks if value has changed since last quarter
+                    #     lst_quarter = master.quarter_list[i-1]
+                    #     lst_date = get_milestone_date(abb, milestones, ' ' + key)
+                    #     if date != lst_date:
+                    #         ws.cell(row=2 + y, column=3 + x).fill = SALMON_FILL
+                    # except (KeyError, IndexError):
+                    #     pass
+                    # except KeyError: # exception catches both standard and milestone keys
+                    #     ws.cell(row=2 + y, column=3 + x).value = 'knc'
+                    # except TypeError:
+                    #     ws.cell(row=2 + y, column=3 + x).value = 'pnr'
+
+    ws.cell(row=1, column=1).value = "Group"
+    ws.cell(row=1, column=2).value = "Project"
+
+        # for z, key in enumerate(kwargs["keys"]):
+        #     if key in list_of_rag_keys:
+        #         conditional_formatting(ws, [list_column_ltrs[z+2]], rag_txt_list_full, rag_txt_colours, rag_fill_colours,
+        #                                '1', '60') # plus 2 in column ltrs as values start being placed in at col 2.
+        # '''quarter tag information'''
+        # ws.cell(row=1, column=1, value='Group')
+        # ws.cell(row=1, column=2, value='Projects')
+        #
+        # conditional_formatting(ws, list_column_ltrs, gen_txt_list, gen_txt_colours, gen_fill_colours, '1', '60')
+
+    return wb
 #
 #
 # # financial analysis_engine stuff
