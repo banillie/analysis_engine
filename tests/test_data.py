@@ -44,7 +44,7 @@ from analysis_engine.data import (
     print_out_project_milestones,
     put_milestones_into_wb, Pickle, open_pickle_file, financial_dashboard, schedule_dashboard, benefits_dashboard,
     overall_dashboard, DandelionData, dandelion_data_into_wb, run_dandelion_matplotlib_chart,
-    cost_v_schedule_chart_into_wb, cost_profile_into_wb, simple_return_data, get_data_query_key_names,
+    cost_v_schedule_chart_into_wb, cost_profile_into_wb, data_query_into_wb, get_data_query_key_names,
 )
 
 # test masters project names
@@ -561,16 +561,16 @@ def test_dandelion(basic_masters_dicts, project_info, word_doc):
 
 def test_data_queries_non_milestone(basic_masters_dicts, project_info):
     m = Master(basic_masters_dicts, project_info)
-    wb = simple_return_data(m, keys=["Total Forecast"])
-    wb.save("resources/test_date_query.xlsx")
+    wb = data_query_into_wb(m, keys=["Total Forecast"], quarters=['Q4 18/19', 'Q4 17/18', 'Q4 16/17'])
+    wb.save("resources/test_data_query.xlsx")
 
 
 def test_data_queries_milestones(milestone_masters, project_info):
     m = Master(milestone_masters, project_info)
-    wb = simple_return_data(m, keys=["Full Operations"])
-    wb.save("resources/test_date_query_milestones.xlsx")
+    wb = data_query_into_wb(m, keys=["Full Operations"], quarters=["Q4 19/20", "Q4 18/19"])
+    wb.save("resources/test_data_query_milestones.xlsx")
 
 
 def test_open_csv_file(key_file):
     l = get_data_query_key_names(key_file)
-    assert
+    assert isinstance(l, (list,))

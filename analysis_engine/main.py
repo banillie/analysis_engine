@@ -54,7 +54,7 @@ from analysis_engine.data import (
     DandelionData,
     dandelion_data_into_wb,
     run_dandelion_matplotlib_chart,
-    put_matplotlib_fig_into_word, cost_profile_into_wb, cost_profile_graph, simple_return_data,
+    put_matplotlib_fig_into_word, cost_profile_into_wb, cost_profile_graph, data_query_into_wb,
     get_data_query_key_names,
 )
 
@@ -190,14 +190,19 @@ def query(args):
     print("Getting data")
     m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
     if args["keys"]:
-        wb = simple_return_data(m, keys=args["keys"])
+        wb = data_query_into_wb(m, keys=args["keys"])
         wb.save(root_path / "output/data_query.xlsx")
         print("Data compiled. Enjoy!")
+    elif args["file_name"] and args["quarters"]:
+        l = get_data_query_key_names(root_path / "input/{}.csv".format(args["file_name"]))
+        wb = data_query_into_wb(m, keys=l, quarters=args["quarters"])
+        wb.save(root_path / "output/data_query.xlsx")
+        print("Data compiled using " + args["file_name"] + ".cvs file. Enjoy!")
     else:
         l = get_data_query_key_names(root_path / "input/key_names.csv")
-        wb = simple_return_data(m, keys=l)
+        wb = data_query_into_wb(m, keys=l)
         wb.save(root_path / "output/data_query.xlsx")
-        print("Data compiled using key_names cvs file. Enjoy")
+        print("Data compiled using key_names cvs file. Enjoy!")
 
 
 def main():
@@ -241,13 +246,21 @@ def main():
         help="Returns the specified data keys."
     )
 
+    parser_data_query.add_argument(
+        "--file_name",
+        type=str,
+        action="store",
+        help="provide name of csc file contain key names"
+    )
+
     for sub in [
         parser_dca,
         parser_vfm,
         parser_risks,
         parser_speedial,
         parser_dandelion,
-        parser_costs
+        parser_costs,
+        parser_data_query
     ]:
         # all sub-commands have the same optional args. This is working
         # but prob could be refactored.
