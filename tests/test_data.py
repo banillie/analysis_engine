@@ -169,7 +169,7 @@ def test_project_report_meta_data(word_doc, project_info, two_masters):
 def test_get_project_cost_profile(costs_masters, project_info):
     master = Master(costs_masters, project_info)
     # master.check_baselines()
-    costs = CostData(master, group=[f9])
+    costs = CostData(master)
     assert len(costs.current_profile) == 24
 
 

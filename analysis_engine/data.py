@@ -678,20 +678,28 @@ class Master:
         self.quarter_list = output_list
 
 
-#  check cdel cost profile
+def get_group(master: Master, quarter: str,  kwargs) -> List[str]:
+    qrt_index = master.quarter_list.index(quarter)
+    if "stage" in kwargs:
+        group = cal_group(kwargs["stage"], master, quarter)
+    elif "group" in kwargs:
+        group = cal_group(kwargs["group"], master, quarter)
+    else:
+        group = master.master_data[qrt_index].projects
+
+    return group
+
+
 class CostData:
     def __init__(
             self,
             master: Master,
-            # project_group: List[str] or str,
             baseline_type: str = "ipdc_costs",
             **kwargs
     ):
         self.master = master
-        # self.project_group = project_group
         self.baseline_type = baseline_type
         self.kwargs = kwargs
-        self.group = self.get_group()
         self.cat_spent = []
         self.cat_profiled = []
         self.cat_unprofiled = []
@@ -712,17 +720,17 @@ class CostData:
         self.get_cost_profile()
         self.calculate_wlc_change()
 
-    def get_group(self) -> List[str]:
-        if "stage" in self.kwargs:
-            s_input = self.kwargs["stage"]
-            group = cal_group(s_input, self.master, str(self.master.current_quarter))
-        elif "group" in self.kwargs:
-            g_input = self.kwargs["group"]
-            group = cal_group(g_input, self.master, str(self.master.current_quarter))
-        else:
-            group = self.master.master_data[0].projects
-
-        return group
+    # def get_group(self) -> List[str]:
+    #     if "stage" in self.kwargs:
+    #         s_input = self.kwargs["stage"]
+    #         group = cal_group(s_input, self.master, str(self.master.current_quarter))
+    #     elif "group" in self.kwargs:
+    #         g_input = self.kwargs["group"]
+    #         group = cal_group(g_input, self.master, str(self.master.current_quarter))
+    #     else:
+    #         group = self.master.master_data[0].projects
+    #
+    #     return group
 
     def get_cost_totals(self) -> None:
         """Returns lists containing the sum total of group (of projects) costs,
@@ -741,13 +749,12 @@ class CostData:
         group_cdel_unprofiled = 0
         group_ngov_unprofiled = 0
 
-        # self.project_group = string_conversion(self.project_group)
-
+        group = get_group(self.master, str(self.master.current_quarter), self.kwargs)
 
         for i in range(3):
             for x, key in enumerate(COST_TYPE_KEY_LIST):
                 group_total = 0
-                for project_name in self.group:
+                for project_name in group:
                     cost_bl_index = self.master.bl_index[self.baseline_type][
                         project_name
                     ]
@@ -876,6 +883,8 @@ class CostData:
         ngov_current_profile = []
         missing_projects = []
 
+        group = get_group(self.master, str(self.master.current_quarter), self.kwargs)
+
         for i in range(5):
             yearly_profile = []
             rdel_yearly_profile = []
@@ -887,7 +896,7 @@ class CostData:
                 cdel_total = 0
                 ngov_total = 0
                 for cost_type in COST_KEY_LIST:
-                    for project_name in self.group:
+                    for project_name in group:
                         project_bl_index = self.master.bl_index[self.baseline_type][
                             project_name
                         ]
@@ -999,8 +1008,9 @@ class CostData:
     def calculate_wlc_change(self) -> None:
         """calculates changes in whole life cost of project. Current against baselines"""
 
+        group = get_group(self.master, str(self.master.current_quarter), self.kwargs)
         wlc_change_dict = {}
-        for project_name in self.group:
+        for project_name in group:
             wlc_list = []
             current_wlc = self.master.master_data[0].data[project_name][
                 "Total Forecast"
@@ -3570,14 +3580,7 @@ class DcaData:
         for q in self.quarters:  # q is quarter
             project_dict = {}
             i = self.master.quarter_list.index(q)  # i for index
-            if "stage" in self.kwargs:
-                s_input = self.kwargs["stage"]
-                group = cal_group(s_input, self.master, q)
-            elif "group" in self.kwargs:
-                g_input = self.kwargs["group"]
-                group = cal_group(g_input, self.master, q)
-            else:
-                group = self.master.master_data[i].projects
+            group = get_group(self.master, q, self.kwargs)
             type_dict = {}
             for dca_type in list(DCA_KEYS.values()):
                 dca_dict = {}
