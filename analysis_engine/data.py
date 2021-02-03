@@ -1228,19 +1228,20 @@ def get_milestone_date(
 def get_milestone_notes(
     project_name: str,
     milestone_dictionary: Dict[str, Union[datetime.date, str]],
-    milestone_name: str,
+    quarter_bl: str,
+    milestone_name: str
 ) -> datetime:
-    for k in milestone_dictionary.keys():
-        if milestone_dictionary[k]["Project"] == project_name:
-            if milestone_dictionary[k]["Milestone"] == milestone_name:
-                return milestone_dictionary[k]["Notes"]
+    m_dict = milestone_dictionary[quarter_bl]
+    for k in m_dict.keys():
+        if m_dict[k]["Project"] == project_name:
+            if m_dict[k]["Milestone"] == milestone_name:
+                return m_dict[k]["Notes"]
 
 
 class MilestoneData:
     def __init__(
         self,
         master: Master,
-        # project_group: List[str] or str,
         baseline_type: str = "ipdc_milestones",
         **kwargs,
     ):
@@ -1248,11 +1249,11 @@ class MilestoneData:
         self.group = []
         self.kwargs = kwargs
         self.baseline_type = baseline_type
-        self.all_milestones = {}
-        self.current = {}
-        self.last_quarter = {}
-        self.baseline_dict = {}
-        self.baseline_two = {}
+        self.milestone_dict = {}
+        # self.current = {}
+        # self.last_quarter = {}
+        # self.baseline_dict = {}
+        # self.baseline_two = {}
         self.ordered_list_current = []
         self.ordered_list_last = []
         self.ordered_list_bl = []
@@ -1273,8 +1274,10 @@ class MilestoneData:
         self.schedule_change = {}
         self.schedule_key_last = None
         self.schedule_key_baseline = None
-        # self.get_milestones_bl()
-        # self.get_chart_info()
+        if "baseline" in kwargs:
+            self.get_milestones_bl()
+        if "quarters" in kwargs:
+            self.get_milestones_all()
         # self.calculate_schedule_changes()
 
     def get_milestones_bl(self) -> None:
@@ -1286,9 +1289,9 @@ class MilestoneData:
         self.group = get_group(
             self.master, str(self.master.current_quarter), self.kwargs
         )
-        # self.project_group = string_conversion(self.project_group)
-
-        for bl in range(4):
+        bl_dict = {}
+        bl_list = ["current", "last", "bl_one", "bl_two", "bl_three"]
+        for idx, bl in enumerate(bl_list):
             lower_dict = {}
             raw_list = []
             for project_name in self.group:
@@ -1297,7 +1300,7 @@ class MilestoneData:
                     project_name
                 ]
                 try:
-                    p_data = self.master.master_data[milestone_bl_index[bl]].data[
+                    p_data = self.master.master_data[milestone_bl_index[idx]].data[
                         project_name
                     ]
                 # IndexError handles len of project bl index.
@@ -1409,18 +1412,21 @@ class MilestoneData:
             for r in range(len(sorted_list)):
                 lower_dict["Milestone " + str(r)] = dict(sorted_list[r])
 
-            if bl == 0:
-                self.current = lower_dict
-                self.ordered_list_current = sorted_list
-            if bl == 1:
-                self.last_quarter = lower_dict
-                self.ordered_list_last = sorted_list
-            if bl == 2:
-                self.baseline_dict = lower_dict
-                self.ordered_list_bl = sorted_list
-            if bl == 3:
-                self.baseline_two = lower_dict
-                self.ordered_list_bl_two = sorted_list
+            # if bl == 0:
+            #     self.current = lower_dict
+            #     self.ordered_list_current = sorted_list
+            # if bl == 1:
+            #     self.last_quarter = lower_dict
+            #     self.ordered_list_last = sorted_list
+            # if bl == 2:
+            #     self.baseline_dict = lower_dict
+            #     self.ordered_list_bl = sorted_list
+            # if bl == 3:
+            #     self.baseline_two = lower_dict
+            #     self.ordered_list_bl_two = sorted_list
+
+            bl_dict[bl] = lower_dict
+        self.milestone_dict = bl_dict
 
     def get_milestones_all(self) -> None:
         quarter_dict = {}
@@ -1549,7 +1555,7 @@ class MilestoneData:
 
             quarter_dict[q] = lower_dict
 
-        self.all_milestones = quarter_dict
+        self.milestone_dict = quarter_dict
 
     def get_chart_info(self) -> None:
         """returns data lists for matplotlib chart"""
@@ -1568,7 +1574,9 @@ class MilestoneData:
         md_baseline_two = []
         type_list = []
 
-        for m in self.current.values():
+        m_dict_keys = list(self.milestone_dict.keys())
+
+        for m in self.milestone_dict[m_dict_keys[0]].values():
             m_project = m["Project"]
             m_name = m["Milestone"]
             m_date = m["Date"]
@@ -1580,40 +1588,44 @@ class MilestoneData:
             # In two loops below NoneType has to be replaced with a datetime object
             # due to matplotlib being unable to handle NoneTypes when milestone_chart
             # is created. Haven't been able to find a solution to this.
-            m_last_date = None
-            for m_last in self.last_quarter.values():
-                if m_last["Project"] == m_project:
-                    if m_last["Milestone"] == m_name:
-                        key_names_last.append(m_project + ", " + m_name)
-                        m_last_date = m_last["Date"]
-                        md_last.append(m_last_date)
-                        md_last_po.append(m_last_date)
-            if m_last_date is None:
-                md_last.append(m_date)
-                md_last_po.append(None)
+            try:
+                m_last_date = None
+                for m_last in self.milestone_dict[m_dict_keys[1]].values():
+                    if m_last["Project"] == m_project:
+                        if m_last["Milestone"] == m_name:
+                            key_names_last.append(m_project + ", " + m_name)
+                            m_last_date = m_last["Date"]
+                            md_last.append(m_last_date)
+                            md_last_po.append(m_last_date)
+                if m_last_date is None:
+                    md_last.append(m_date)
+                    md_last_po.append(None)
 
-            m_bl_date = None
-            for m_bl in self.baseline_dict.values():
-                if m_bl["Project"] == m_project:
-                    if m_bl["Milestone"] == m_name:
-                        keys_names_baseline.append(m_project + ", " + m_name)
-                        m_bl_date = m_bl["Date"]
-                        md_baseline.append(m_bl_date)
-                        md_baseline_po.append(m_bl_date)
-            if m_bl_date is None:
-                md_baseline.append(m_date)
-                md_baseline_po.append(None)
+                m_bl_date = None
+                for m_bl in self.milestone_dict[m_dict_keys[2]].values():
+                    if m_bl["Project"] == m_project:
+                        if m_bl["Milestone"] == m_name:
+                            keys_names_baseline.append(m_project + ", " + m_name)
+                            m_bl_date = m_bl["Date"]
+                            md_baseline.append(m_bl_date)
+                            md_baseline_po.append(m_bl_date)
+                if m_bl_date is None:
+                    md_baseline.append(m_date)
+                    md_baseline_po.append(None)
 
-            m_bl_two_date = None
-            for m_bl_two in self.baseline_two.values():
-                if m_bl_two["Project"] == m_project:
-                    if m_bl_two["Milestone"] == m_name:
-                        m_bl_two_date = m_bl_two["Date"]
-                        md_baseline_two.append(m_bl_two_date)
-                        md_baseline_two_po.append(m_bl_two_date)
-            if m_bl_two_date is None:
-                md_baseline_two.append(m_date)
-                md_baseline_two_po.append(None)
+                m_bl_two_date = None
+                for m_bl_two in self.milestone_dict[m_dict_keys[3]].values():
+                    if m_bl_two["Project"] == m_project:
+                        if m_bl_two["Milestone"] == m_name:
+                            m_bl_two_date = m_bl_two["Date"]
+                            md_baseline_two.append(m_bl_two_date)
+                            md_baseline_two_po.append(m_bl_two_date)
+                if m_bl_two_date is None:
+                    md_baseline_two.append(m_date)
+                    md_baseline_two_po.append(None)
+
+            except IndexError:
+                pass
 
         if len(self.group) == 1:
             key_names = remove_project_name(
@@ -1763,36 +1775,36 @@ class MilestoneData:
         """calculates the changes in project schedules. If standard key for calculation
         not available it using the best next one available"""
 
-        self.project_group = string_conversion(self.project_group)
         self.filter_chart_info(milestone_type=["Delivery", "Approval"])
+        m_dict_keys = list(self.milestone_dict.keys())
 
         def schedule_info(
             project_name: str,
             other_key_list: List[str],
             c_key_list: List[str],
-            other_dict: dict,
-            current_dict: dict,
-            dict_label: str,
+            miles_dict: dict,
+            dict_l_current: str,
+            dict_l_other: str,
         ):
             output_dict = {}
             schedule_info = []
             for key in reversed(other_key_list):
                 if key in c_key_list:
                     sop = get_milestone_date(
-                        project_name, other_dict, " Start of Project"
+                        project_name, miles_dict, dict_l_other, " Start of Project"
                     )
                     if sop is None:
                         sop = get_milestone_date(
-                            project_name, current_dict, other_key_list[0]
+                            project_name, miles_dict, dict_l_current, other_key_list[0]
                         )
                         schedule_info.append(("start key", other_key_list[0]))
                     else:
                         schedule_info.append(("start key", " Start of Project"))
                     schedule_info.append(("start", sop))
                     schedule_info.append(("end key", key))
-                    date = get_milestone_date(project_name, current_dict, key)
+                    date = get_milestone_date(project_name, miles_dict, dict_l_current, key)
                     schedule_info.append(("end current date", date))
-                    other_date = get_milestone_date(project_name, other_dict, key)
+                    other_date = get_milestone_date(project_name, miles_dict, dict_l_other, key)
                     schedule_info.append(("end other date", other_date))
                     project_length = (other_date - sop).days
                     schedule_info.append(("project length", project_length))
@@ -1800,13 +1812,13 @@ class MilestoneData:
                     schedule_info.append(("change", change))
                     p_change = int((change / project_length) * 100)
                     schedule_info.append(("percent change", p_change))
-                    output_dict[dict_label] = dict(schedule_info)
+                    output_dict[dict_l_other] = dict(schedule_info)
                     break
 
             return output_dict
 
         output_dict = {}
-        for project_name in self.project_group:
+        for project_name in self.group:
             project_name = self.master.abbreviations[project_name]
             current_key_list = []
             last_key_list = []
@@ -1822,7 +1834,7 @@ class MilestoneData:
                     # patch of single project group. In this instance the project name
                     # is removed from the key_name via remove_project_name function as
                     # part of get chart info.
-                    if len(self.project_group) == 1:
+                    if len(self.group) == 1:
                         current_key_list.append(" " + key)
             for last_key in self.key_names_last:
                 p = last_key.split(",")[0]
@@ -1845,17 +1857,17 @@ class MilestoneData:
                 project_name,
                 baseline_key_list,
                 current_key_list,
-                self.baseline_dict,
-                self.current,
-                "baseline",
+                self.milestone_dict,
+                m_dict_keys[0],
+                m_dict_keys[2],
             )
             l_dict = schedule_info(
                 project_name,
                 last_key_list,
                 current_key_list,
-                self.last_quarter,
-                self.current,
-                "last",
+                self.milestone_dict,
+                m_dict_keys[0],
+                m_dict_keys[1],
             )
             lower_dict = {**b_dict, **l_dict}
 
@@ -2179,8 +2191,8 @@ def put_milestones_into_wb(milestones: MilestoneData) -> Workbook:
 
     row_num = 2
     for i, m in enumerate(milestones.key_names):
-        if len(milestones.project_group) == 1:
-            project_name = milestones.project_group[0]
+        if len(milestones.group) == 1:
+            project_name = milestones.group[0]
             pm = m  # pm is project milestone
             ws.cell(row=row_num + i, column=1).value = project_name
             ws.cell(row=row_num + i, column=2).value = pm
@@ -2207,7 +2219,7 @@ def put_milestones_into_wb(milestones: MilestoneData) -> Workbook:
             ws.cell(row=row_num + i, column=6).number_format = "dd/mm/yy"
         except AttributeError:
             pass
-        notes = get_milestone_notes(project_name, milestones.current, pm)
+        notes = get_milestone_notes(project_name, milestones.milestone_dict, "current", pm)
         ws.cell(row=row_num + i, column=7).value = notes
 
     ws.cell(row=1, column=1).value = "Project"
@@ -2265,7 +2277,7 @@ def vfm_matplotlib_graph(labels, current_qrt, last_qrt, title):
 
     fig.savefig(root_path / "output/{}.png".format(title), bbox_inches="tight")
 
-    plt.show()
+    # plt.show()
 
 
 def set_figure_size(graph_type: str) -> Tuple[int, int]:
@@ -2425,10 +2437,10 @@ def cost_profile_graph(cost_master: CostData, **kwargs) -> plt.figure:
 
     fig.tight_layout(rect=[0, 0.03, 1, 0.95])  # size/fit of chart
 
-    try:
-        kwargs["show"] == "No"
-    except KeyError:
-        plt.show()
+    # try:
+    #     kwargs["show"] == "No"
+    # except KeyError:
+    # plt.show()
 
     return fig
 
@@ -2547,7 +2559,7 @@ def cost_profile_baseline_graph(
         "Fig 2 - current cost type profile", loc="left", fontsize=8, fontweight="bold"
     )
 
-    plt.show()
+    # plt.show()
 
     return fig
 
@@ -2758,11 +2770,11 @@ def change_word_doc_portrait(doc: Document) -> Document:
 def put_matplotlib_fig_into_word(doc: Document, fig: plt.figure, **kwargs) -> None:
     """Places line graph cost profile into word document"""
     # Place fig in word doc.
-    if kwargs["transparent"]:
+    if "transparent" in kwargs:
         fig.savefig("cost_profile.png", transparent=True)
     else:
         fig.savefig("cost_profile.png")
-    if kwargs["size"]:
+    if "size" in kwargs:
         s = kwargs["size"]
         doc.add_picture("cost_profile.png", width=Inches(s))
     else:
@@ -3073,10 +3085,10 @@ def total_costs_benefits_bar_chart(
 
     fig.tight_layout(rect=[0, 0.03, 1, 0.95])  # size/fit of chart
 
-    try:
-        kwargs["show"] == "No"
-    except KeyError:
-        plt.show()
+    # try:
+    #     kwargs["show"] == "No"
+    # except KeyError:
+    # plt.show()
 
     return fig
 
@@ -3402,20 +3414,25 @@ def milestone_chart(
         pass
 
     # title
-    if len(milestone_data.project_group) == 1:
-        try:
-            title = kwargs["title"]
-        except KeyError:
-            title = (
-                milestone_data.master.abbreviations[milestone_data.project_group[0]]
-                + " Schedule"
-            )
-    else:
-        try:
-            title = kwargs["title"]
-        except KeyError:
-            pass
-            print("You need to provide a title for this chart")
+    title = (
+            milestone_data.kwargs["group"][0]
+            # cost_master.master.abbreviations[cost_master.group[0]]
+            + " schedule"
+    )
+    # if len(milestone_data.project_group) == 1:
+    #     try:
+    #         title = kwargs["title"]
+    #     except KeyError:
+    #         title = (
+    #             milestone_data.master.abbreviations[milestone_data.project_group[0]]
+    #             + " Schedule"
+    #         )
+    # else:
+    #     try:
+    #         title = kwargs["title"]
+    #     except KeyError:
+    #         pass
+    #         print("You need to provide a title for this chart")
 
     fig.suptitle(title, fontweight="bold", fontsize=25)
 
@@ -3585,10 +3602,10 @@ def milestone_chart(
     # fig.canvas.draw()
     fig.tight_layout(rect=[0, 0.03, 1, 0.95])  # for title
 
-    try:
-        kwargs["show"] == "No"
-    except KeyError:
-        plt.show()
+    # try:
+    #     kwargs["show"] == "No"
+    # except KeyError:
+    # plt.show()
 
     return fig
 
@@ -3761,6 +3778,7 @@ class DcaData:
 
         c_dict = {}
         for dca_type in list(DCA_KEYS.values()):
+            print(dca_type)
             lower_dict = {}
             for project_name in list(
                 self.dca_dictionary[self.quarters[0]][dca_type].keys()
@@ -4280,7 +4298,7 @@ def cal_group(
                 group = master.dft_groups[quarter][lists_input[0]]
             except KeyError:
                 p = lists_input[0]  # p is project
-                if p in master.abbreviations:
+                if p in master.abbreviations or master.project_information[0].projects:
                     group.append(p)
                 else:
                     print(p + " not recognised please enter a correct project name")
@@ -4650,9 +4668,9 @@ def cost_schedule_scatter_chart_matplotlib(milestones: MilestoneData, costs: Cos
     cc_list = []
     volume_list = []
     colour_list = []
-    for project_name in milestones.project_group:
+    for project_name in milestones.group:
         ab = milestones.master.abbreviations[project_name]
-        sc = milestones.schedule_change[ab]["baseline"][
+        sc = milestones.schedule_change[ab]["bl_one"][
             "percent change"
         ]  # sc schedule change
         cc = costs.wlc_change[project_name]["baseline one"]  # cc cost change
@@ -4683,7 +4701,7 @@ def cost_schedule_scatter_chart_matplotlib(milestones: MilestoneData, costs: Cos
     ax.grid(True)
     fig.tight_layout()
 
-    plt.show()
+    # plt.show()
 
 
 def cost_schedule_scatter_chart_excel(ws, rag_count):
@@ -4742,7 +4760,7 @@ def cost_v_schedule_chart_into_wb(milestones: MilestoneData, costs: CostData):
     ws = wb.active
 
     rags = []
-    for project_name in milestones.project_group:
+    for project_name in milestones.group:
         rag = milestones.master.master_data[0].data[project_name]["Departmental DCA"]
         if rag is not None:
             rags.append((project_name, rag))
@@ -4767,7 +4785,7 @@ def cost_v_schedule_chart_into_wb(milestones: MilestoneData, costs: CostData):
     for x, project_name in enumerate(rags):
         ab = milestones.master.abbreviations[project_name[0]]
         ws.cell(row=x + 3, column=2).value = ab
-        ws.cell(row=x + 3, column=3).value = milestones.schedule_change[ab]["baseline"][
+        ws.cell(row=x + 3, column=3).value = milestones.schedule_change[ab]["bl_one"][
             "percent change"
         ]
         ws.cell(row=x + 3, column=4).value = costs.wlc_change[project_name[0]][
@@ -4779,10 +4797,10 @@ def cost_v_schedule_chart_into_wb(milestones: MilestoneData, costs: CostData):
         ws.cell(row=x + 3, column=6).value = costs.master.master_data[0].data[
             project_name[0]
         ]["Departmental DCA"]
-        ws.cell(row=x + 3, column=7).value = milestones.schedule_change[ab]["baseline"][
+        ws.cell(row=x + 3, column=7).value = milestones.schedule_change[ab]["bl_one"][
             "start key"
         ]
-        ws.cell(row=x + 3, column=8).value = milestones.schedule_change[ab]["baseline"][
+        ws.cell(row=x + 3, column=8).value = milestones.schedule_change[ab]["bl_one"][
             "end key"
         ]
 
@@ -4839,11 +4857,14 @@ def make_text_red(columns: list) -> None:
 
 def project_report_meta_data(
     doc: Document,
-    costs: CostData,
-    milestones: MilestoneData,
-    benefits: BenefitsData,
+    master: Master,
     project_name: str,
 ):
+    costs = CostData(master, group=[project_name])
+    milestones = MilestoneData(master, group=[project_name])
+    milestones.get_milestones_bl()
+    milestones.get_chart_info()
+    benefits = BenefitsData(master, project_name)
     """Meta data table"""
     doc.add_section(WD_SECTION_START.NEW_PAGE)
     paragraph = doc.add_paragraph()
@@ -5008,7 +5029,7 @@ def project_report_meta_data(
     hdr_cells = table.rows[0].cells
     hdr_cells[0].text = "Start date:"
     try:
-        start_project = get_milestone_date(abb, milestones.current, " Start of Project")
+        start_project = get_milestone_date(abb, milestones.milestone_dict, "current",  " Start of Project")
         hdr_cells[1].text = start_project.strftime("%d/%m/%Y")
     except KeyError:
         hdr_cells[1].text = "Not reported"
@@ -5016,7 +5037,7 @@ def project_report_meta_data(
         hdr_cells[1].text = "Not reported"
     hdr_cells[2].text = "Start of operations:"
     try:
-        start_ops = get_milestone_date(abb, milestones.current, " Start of Operation")
+        start_ops = get_milestone_date(abb, milestones.milestone_dict, "current", " Start of Operation")
         hdr_cells[3].text = start_ops.strftime("%d/%m/%Y")
     except KeyError:
         hdr_cells[3].text = "Not reported"
@@ -5026,7 +5047,7 @@ def project_report_meta_data(
     row_cells[0].text = "Start of construction:"
     try:
         start_con = get_milestone_date(
-            abb, milestones.current, " Start of Construction/build"
+            abb, milestones.milestone_dict, "current", " Start of Construction/build"
         )
         row_cells[1].text = start_con.strftime("%d/%m/%Y")
     except KeyError:
@@ -5035,7 +5056,7 @@ def project_report_meta_data(
         row_cells[1].text = "Not reported"
     row_cells[2].text = "Full Operations:"  # check
     try:
-        full_ops = get_milestone_date(abb, milestones.current, " Full Operations")
+        full_ops = get_milestone_date(abb, milestones.milestone_dict, "current", " Full Operations")
         row_cells[3].text = full_ops.strftime("%d/%m/%Y")
     except KeyError:
         row_cells[3].text = "Not reported"
@@ -5187,7 +5208,7 @@ def print_out_project_milestones(
         except TypeError:
             row_cells[3].text = "Not reported"
         try:
-            row_cells[4].text = get_milestone_notes(ab, milestones.current, m)
+            row_cells[4].text = get_milestone_notes(ab, milestones.milestone_dict, "current", m)
             paragraph = row_cells[4].paragraphs[0]
             run = paragraph.runs
             font = run[0].font
@@ -5281,8 +5302,8 @@ def compile_p_report(
     dca_narratives(doc, master, project_name)
     costs = CostData(master, group=[project_name])
     benefits = BenefitsData(master, project_name)
-    milestones = MilestoneData(master, project_name)
-    project_report_meta_data(doc, costs, milestones, benefits, project_name)
+    milestones = MilestoneData(master, group=[project_name])
+    project_report_meta_data(doc, master, project_name)
     change_word_doc_landscape(doc)
     cost_profile = cost_profile_graph(costs, show="No")
     put_matplotlib_fig_into_word(doc, cost_profile, transparent=False, size=8)
@@ -5291,6 +5312,8 @@ def compile_p_report(
     #  handling of no milestones within filtered period.
     ab = master.abbreviations[project_name]
     try:
+        milestones.get_milestones_bl()
+        milestones.get_chart_info()
         milestones.filter_chart_info(start_date="1/9/2020", end_date="30/12/2022")
         milestones_chart = milestone_chart(
             milestones,
@@ -5302,6 +5325,8 @@ def compile_p_report(
         # print_out_project_milestones(doc, milestones, project_name)
     except ValueError:  # extends the time period.
         milestones = MilestoneData(master, project_name)
+        milestones.get_milestones_bl()
+        milestones.get_chart_info()
         milestones.filter_chart_info(start_date="1/9/2020", end_date="30/12/2024")
         milestones_chart = milestone_chart(
             milestones,
@@ -5640,7 +5665,7 @@ def data_query_into_wb(master: Master, **kwargs) -> Workbook:
                         pass
                 except KeyError:  # milestone keys
                     date = get_milestone_date(
-                        abb, milestones_one.all_milestones, q, " " + key
+                        abb, milestones_one.milestone_dict, q, " " + key
                     )
                     if date is None:
                         ws.cell(row=2 + y, column=3 + x).value = "md"
@@ -5650,7 +5675,7 @@ def data_query_into_wb(master: Master, **kwargs) -> Workbook:
                         ws.cell(row=2 + y, column=3 + x).number_format = "dd/mm/yy"
                     try:  # checks for changes against next master in loop
                         lst_date = get_milestone_date(
-                            abb, milestones_two.all_milestones, quarters[z + 1], " " + key
+                            abb, milestones_two.milestone_dict, quarters[z + 1], " " + key
                         )
                         if date != lst_date:
                             ws.cell(row=2 + y, column=3 + x).fill = SALMON_FILL
@@ -6723,7 +6748,7 @@ def schedule_dashboard(
 
             def get_next_milestone(p_name: str, mils: MilestoneData) -> list:
 
-                for x in mils.current.values():
+                for x in mils.milestone_dict["current"].values():
                     if x["Project"] == p_name:
                         d = x["Date"]
                         ms = x["Milestone"]
@@ -6739,7 +6764,7 @@ def schedule_dashboard(
                 ws.cell(row=row_num, column=7).value = date
 
                 lq_date = get_milestone_date(
-                    abb, milestones.last_quarter, " " + milestone
+                    abb, milestones.milestone_dict, "last", " " + milestone
                 )
                 try:
                     change = (date - lq_date).days
@@ -6753,7 +6778,7 @@ def schedule_dashboard(
                     # ws.cell(row=row_num, column=8).value = ""
 
                 bl_date = get_milestone_date(
-                    abb, milestones.baseline_dict, " " + milestone
+                    abb, milestones.milestone_dict, "bl_one", " " + milestone
                 )
                 try:
                     change = (date - bl_date).days
@@ -6776,9 +6801,9 @@ def schedule_dashboard(
             add_column = 0
             for m in milestone_keys:
                 abb = master.abbreviations[project_name]
-                current = get_milestone_date(abb, milestones.current, m)
-                last_quarter = get_milestone_date(abb, milestones.last_quarter, m)
-                bl = get_milestone_date(abb, milestones.baseline_dict, m)
+                current = get_milestone_date(abb, milestones.milestone_dict, "current", m)
+                last_quarter = get_milestone_date(abb, milestones.milestone_dict, "last", m)
+                bl = get_milestone_date(abb, milestones.milestone_dict, "bl_one", m)
                 ws.cell(row=row_num, column=10 + add_column).value = current
                 if current is not None and current < IPDC_DATE:
                     # if m == "Full Operations":
@@ -7342,11 +7367,11 @@ def overall_dashboard(
                     )
 
             abb = master.abbreviations[project_name]
-            current = get_milestone_date(abb, milestones.current, " Full Operations")
+            current = get_milestone_date(abb, milestones.milestone_dict, "current", " Full Operations")
             last_quarter = get_milestone_date(
-                abb, milestones.last_quarter, " Full Operations"
+                abb, milestones.milestone_dict, "last", " Full Operations"
             )
-            bl = get_milestone_date(abb, milestones.baseline_dict, " Full Operations")
+            bl = get_milestone_date(abb, milestones.milestone_dict, "bl_one", " Full Operations")
             ws.cell(row=row_num, column=9).value = current
             if current is not None and current < IPDC_DATE:
                 ws.cell(row=row_num, column=9).value = "Completed"
@@ -7450,7 +7475,9 @@ def overall_dashboard(
 def ipdc_dashboard(master: Master, wb: Workbook) -> Workbook:
     financial_dashboard(master, wb)
 
-    milestone_class = MilestoneData(master, master.current_projects)
+    milestone_class = MilestoneData(master, group=master.current_projects)
+    milestone_class.get_milestones_bl()
+    milestone_class.get_chart_info()
     milestone_class.filter_chart_info(milestone_type=["Approval", "Delivery"])
     schedule_dashboard(master, milestone_class, wb)
 
@@ -7684,6 +7711,6 @@ def run_dandelion_matplotlib_chart(dandelion: DandelionData) -> plt.figure:
     ax.axis("off")
     ax.relim()
     ax.autoscale_view()
-    # ax.set_title('IPDC portfolio')
+    # ax.set_title(str(DandelionData.)
     # plt.show()
     return fig
