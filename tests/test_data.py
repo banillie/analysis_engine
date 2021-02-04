@@ -356,7 +356,7 @@ def test_get_gmpp_projects(project_info):
 def test_get_milestone_data_bl(milestone_masters, project_info):
     master = Master(milestone_masters, project_info)
     milestones = MilestoneData(master, group=[sot, a11, a13])
-    milestones.get_milestones_bl()
+    milestones.get_milestones()
     assert isinstance(milestones.milestone_dict["current"], (dict,))
 
 
@@ -370,7 +370,7 @@ def test_get_milestone_data_all(milestone_masters, project_info):
 def test_get_milestone_chart_data(milestone_masters, project_info):
     master = Master(milestone_masters, project_info)
     milestones = MilestoneData(master, group=[sot, a11, a13])
-    milestones.get_milestones_bl()
+    milestones.get_milestones()
     milestones.get_chart_info()
     assert len(milestones.key_names) == 11
     assert len(milestones.md_current) == 11
@@ -379,9 +379,7 @@ def test_get_milestone_chart_data(milestone_masters, project_info):
 
 def test_compile_milestone_chart(milestone_masters, project_info, word_doc):
     master = Master(milestone_masters, project_info)
-    milestones = MilestoneData(master, group=[sot, a11, a13])
-    milestones.get_milestones_bl()
-    milestones.get_chart_info()
+    milestones = MilestoneData(master, group=[sot], quarter=["Q4 19/20", "Q4 18/19"])
     graph = milestone_chart(
         milestones, title="Group Test", fig_size=FIGURE_STYLE[1], blue_line="Today"
     )
@@ -391,9 +389,7 @@ def test_compile_milestone_chart(milestone_masters, project_info, word_doc):
 
 def test_compile_milestone_chart_with_filter(milestone_masters, project_info):
     master = Master(milestone_masters, project_info)
-    milestones = MilestoneData(master, group=[sot, a11, a13])
-    milestones.get_milestones_bl()
-    milestones.get_chart_info()
+    milestones = MilestoneData(master, group=[sot, a11, a13], baseline=None)
     milestones.filter_chart_info(start_date="1/1/2013", end_date="1/1/2014")
     milestone_chart(milestones, title="Group Test", fig_size=FIGURE_STYLE[1])
 
@@ -401,7 +397,7 @@ def test_compile_milestone_chart_with_filter(milestone_masters, project_info):
 def test_removing_project_name_from_milestone_keys(milestone_masters, project_info):
     master = Master(milestone_masters, project_info)
     milestones = MilestoneData(master, group=[sot])
-    milestones.get_milestones_bl()
+    milestones.get_milestones()
     milestones.get_chart_info()
     assert milestones.key_names == [
         "Start of Project",
@@ -413,10 +409,8 @@ def test_removing_project_name_from_milestone_keys(milestone_masters, project_in
 
 def test_putting_milestones_into_wb(milestone_masters, project_info):
     mst = Master(milestone_masters, project_info)
-    milestones = MilestoneData(mst, group=[a13])
-    milestones.get_milestones_bl()
-    milestones.get_chart_info()
-    milestones.filter_chart_info(milestone_type=["Approval", "Delivery"])
+    milestones = MilestoneData(mst, group=group, baseline=None)
+    # milestones.filter_chart_info(milestone_type=["Approval", "Delivery"])
     wb = put_milestones_into_wb(milestones)
     wb.save("resources/milestone_data_output_test.xlsx")
 
@@ -424,7 +418,7 @@ def test_putting_milestones_into_wb(milestone_masters, project_info):
 def test_saving_graph_to_word_doc_one(word_doc, milestone_masters, project_info):
     master = Master(milestone_masters, project_info)
     milestones = MilestoneData(master, group=[sot, a11, a13])
-    milestones.get_milestones_bl()
+    milestones.get_milestones()
     milestones.get_chart_info()
     change_word_doc_landscape(word_doc)
     # milestones.filter_chart_info(start_date="1/1/2013", end_date="1/1/2014")
@@ -509,7 +503,7 @@ def test_calculating_wlc_changes(costs_masters, project_info):
 def test_calculating_schedule_changes(milestone_masters, project_info):
     master = Master(milestone_masters, project_info)
     milestones = MilestoneData(master, group=[sot, a11, a13])
-    milestones.get_milestones_bl()
+    milestones.get_milestones()
     milestones.get_chart_info()
     milestones.calculate_schedule_changes()
     assert isinstance(milestones.schedule_change, (dict,))
@@ -530,7 +524,7 @@ def test_cost_schedule_matrix(two_masters, project_info):
     m = Master(two_masters, project_info)
     costs = CostData(m, group=m.current_projects)
     milestones = MilestoneData(m, group=m.current_projects)
-    milestones.get_milestones_bl()
+    milestones.get_milestones()
     milestones.get_chart_info()
     milestones.calculate_schedule_changes()
     wb = cost_v_schedule_chart_into_wb(milestones, costs)
@@ -546,7 +540,7 @@ def test_financial_dashboard(costs_masters, dashboard_template, project_info):
 def test_schedule_dashboard(milestone_masters, dashboard_template, project_info):
     m = Master(milestone_masters, project_info)
     milestones = MilestoneData(m, group=m.current_projects)
-    milestones.get_milestones_bl()
+    milestones.get_milestones()
     milestones.get_chart_info()
     milestones.filter_chart_info(milestone_type=["Approval", "Delivery"])
     wb = schedule_dashboard(m, milestones, dashboard_template)
@@ -561,8 +555,8 @@ def test_benefits_dashboard(benefits_masters, dashboard_template, project_info):
 
 def test_overall_dashboard(two_masters, dashboard_template, project_info):
     m = Master(two_masters, project_info)
-    milestones = MilestoneData(m)
-    milestones.get_milestones_bl()
+    milestones = MilestoneData(m, baseline=None)
+    # milestones.get_milestones(baseline=[])
     wb = overall_dashboard(m, milestones, dashboard_template)
     wb.save("resources/test_dashboards_master_altered.xlsx")
 

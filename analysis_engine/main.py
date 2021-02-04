@@ -60,7 +60,7 @@ from analysis_engine.data import (
     cost_profile_graph,
     data_query_into_wb,
     get_data_query_key_names,
-    ProjectNameError
+    ProjectNameError, milestone_chart
 )
 
 import logging
@@ -123,43 +123,50 @@ def run_general(args):
     programme = args["subparser_name"]
     print("compiling " + programme + " analysis")
     m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
-    if programme == "vfm":
-        c = run_correct_args(m, VfMData, args)  # c is class
-        wb = vfm_into_excel(c)
-    if programme == "risks":
-        c = run_correct_args(m, RiskData, args)
-        wb = risks_into_excel(c)
-    if programme == "dcas":
-        c = run_correct_args(m, DcaData, args)
-        wb = dca_changes_into_excel(c)
-    if programme == "speedial":
-        doc = open_word_doc(root_path / "input/summary_temp.docx")
-        c = run_correct_args(m, DcaData, args)
-        c.get_changes()
-        doc = dca_changes_into_word(c, doc)
-        doc.save(root_path / "output/{}.docx".format(programme))
-        print(programme + " analysis has been compiled. Enjoy!")
-    if programme == "dandelion":
-        doc = open_word_doc(root_path / "input/summary_temp.docx")
-        c = run_correct_args(m, DandelionData, args)
-        wb = dandelion_data_into_wb(c)
-        graph = run_dandelion_matplotlib_chart(c)
-        put_matplotlib_fig_into_word(doc, graph, size=4, transparent=True)
-        doc.save(root_path / "output/dandelion_output.docx")
-    if programme == "costs":
-        doc = open_word_doc(root_path / "input/summary_temp.docx")
-        c = run_correct_args(m, CostData, args)
-        wb = cost_profile_into_wb(c)
-        if args["title"]:
-            graph = cost_profile_graph(c, title=args["title"])
-        else:
-            graph = cost_profile_graph(c)
-        put_matplotlib_fig_into_word(doc, graph, size=6, transparent=False)
-        doc.save(root_path / "output/costs_chart.docx")
+    try:
+        if programme == "vfm":
+            c = run_correct_args(m, VfMData, args)  # c is class
+            wb = vfm_into_excel(c)
+        if programme == "risks":
+            c = run_correct_args(m, RiskData, args)
+            wb = risks_into_excel(c)
+        if programme == "dcas":
+            c = run_correct_args(m, DcaData, args)
+            wb = dca_changes_into_excel(c)
+        if programme == "speedial":
+            doc = open_word_doc(root_path / "input/summary_temp.docx")
+            c = run_correct_args(m, DcaData, args)
+            c.get_changes()
+            doc = dca_changes_into_word(c, doc)
+            doc.save(root_path / "output/{}.docx".format(programme))
+            print(programme + " analysis has been compiled. Enjoy!")
+        if programme == "dandelion":
+            doc = open_word_doc(root_path / "input/summary_temp.docx")
+            c = run_correct_args(m, DandelionData, args)
+            wb = dandelion_data_into_wb(c)
+            graph = run_dandelion_matplotlib_chart(c)
+            put_matplotlib_fig_into_word(doc, graph, size=4, transparent=True)
+            doc.save(root_path / "output/dandelion_output.docx")
+        if programme == "costs":
+            doc = open_word_doc(root_path / "input/summary_temp.docx")
+            c = run_correct_args(m, CostData, args)
+            wb = cost_profile_into_wb(c)
+            if args["title"]:
+                graph = cost_profile_graph(c, title=args["title"])
+            else:
+                graph = cost_profile_graph(c)
+            put_matplotlib_fig_into_word(doc, graph, size=6, transparent=False)
+            doc.save(root_path / "output/costs_chart.docx")
+        # if programme == "milestones":
+        #     c = run_correct_args(m, MilestoneData, args)
+        #
 
-    if programme != "speedial":  # only excel outputs
-        wb.save(root_path / "output/{}.xlsx".format(programme))
-        print(programme + " analysis has been compiled. Enjoy!")
+        if programme != "speedial":  # only excel outputs
+            wb.save(root_path / "output/{}.xlsx".format(programme))
+            print(programme + " analysis has been compiled. Enjoy!")
+    except ProjectNameError as e:
+        logger.critical(e)
+        sys.exit(1)
 
     # TODO optional_args produces a list of strings, each of which are to be in the output file name path.
     # optional_args = get_args_for_file(args)
@@ -170,15 +177,26 @@ def run_general(args):
 def milestones(args):
     print("compiling milestone analysis_engine")
     m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
+    if args["baselines"] and args["group"]:
+        if args["baselines"] == ["all"]:
+            milestones = MilestoneData(m, group=args["group"], baseline=None)
+        else:
+            print(args)
+            milestones = MilestoneData(m, group=args["group"], baseline=args["baselines"])
+    if args["start_date"] and args["end_date"]:
+        milestones.filter_chart_info(start_date=args["start_date"][0], end_date=args["end_date"][0])
     # projects = (
     #     m.project_stage["Q2 20/21"]["FBC"]
     #     + m.project_stage["Q2 20/21"]["OBC"]
     #     + [Projects.hs2_2b]
     # )
-    milestone_data = MilestoneData(m, m.current_projects)
-    milestone_data.filter_chart_info(milestone_type=["Approval", "Delivery"])
-    run = put_milestones_into_wb(milestone_data)
-    run.save(root_path / "output/milestone_data_output_with_notes_q3.xlsx")
+    # milestone_data = MilestoneData(m, group=m.current_projects, baseline=None)
+    # milestone_data.filter_chart_info(milestone_type=["Approval", "Delivery"])
+    wb = put_milestones_into_wb(milestones)
+    wb.save(root_path / "output/milestone_data_output.xlsx")
+    milestone_chart(milestones)
+
+
 
 
 def summaries(args):
@@ -248,8 +266,11 @@ def main():
         "costs",
         help="cost profile graph and data (early version --quarters will not work).",
     )
+    parser_milestones = subparsers.add_parser(
+        "milestones",
+        help="milestone schedule graphs and data (early version needs more testing)"
+    )
     parser_vfm = subparsers.add_parser("vfm", help="vfm analysis")
-    parser_milestones = subparsers.add_parser("milestones", help="milestone analysis")
     parser_summaries = subparsers.add_parser("summaries", help="summary reports")
     parser_risks = subparsers.add_parser("risks", help="risk analysis")
     parser_dca = subparsers.add_parser("dcas", help="dca analysis")
@@ -288,6 +309,35 @@ def main():
     parser_costs.add_argument(
         "--title", type=str, action="store", help="provide a title for chart. Optional"
     )
+
+    parser_milestones.add_argument(
+        "--baselines",
+        type=str,
+        metavar="",
+        action="store",
+        nargs="+",
+        choices=["current", "last", "bl_one", "bl_two", "bl_three", "all"],
+        help="Returns analysis for specified baselines. Must be in correct format",
+    )
+
+    parser_milestones.add_argument(
+        "--start_date",
+        type=str,
+        metavar="",
+        action="store",
+        nargs=1,
+        help="Start date for analysis",
+    )
+
+    parser_milestones.add_argument(
+        "--end_date",
+        type=str,
+        metavar="",
+        action="store",
+        nargs=1,
+        help="Start date for analysis",
+    )
+
     for sub in [
         parser_dca,
         parser_vfm,
@@ -296,6 +346,7 @@ def main():
         parser_dandelion,
         parser_costs,
         parser_data_query,
+        parser_milestones,
     ]:
         # all sub-commands have the same optional args. This is working
         # but prob could be refactored.
