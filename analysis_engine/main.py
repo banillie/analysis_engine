@@ -26,6 +26,7 @@ creation.
 
 import argparse
 import itertools
+import sys
 
 from openpyxl import load_workbook
 
@@ -59,8 +60,17 @@ from analysis_engine.data import (
     cost_profile_graph,
     data_query_into_wb,
     get_data_query_key_names,
+    ProjectNameError
 )
 
+import logging
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s: %(levelname)s - %(message)s",
+    datefmt="%d-%b-%y %H:%M:%S",
+)
+logger = logging.getLogger(__name__)
 
 def run_correct_args(
         m: Master,
@@ -99,7 +109,12 @@ def get_args_for_file(args: argparse) -> list:
 
 def initiate(args):
     print("creating a master data file for analysis_engine")
-    master = Master(get_master_data(), get_project_information())
+    try:
+        master = Master(get_master_data(), get_project_information())
+    except ProjectNameError as e:
+        logger.critical(e)
+        sys.exit(1)
+
     path_str = str("{0}/core_data/pickle/master".format(root_path))
     Pickle(master, path_str)
 

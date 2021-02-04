@@ -4,6 +4,7 @@ import difflib
 import os
 import pickle
 import re
+import sys
 import typing
 from collections import Counter
 from typing import List, Dict, Union, Optional, Tuple
@@ -40,6 +41,25 @@ from openpyxl.styles.differential import DifferentialStyle
 
 from openpyxl.workbook import workbook
 from textwrap import wrap
+
+
+import logging
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s: %(levelname)s - %(message)s",
+    datefmt="%d-%b-%y %H:%M:%S",
+)
+logger = logging.getLogger(__name__)
+
+# debug
+# info
+# warning
+# critical
+
+
+class ProjectNameError(Exception):
+    pass
 
 
 def _platform_docs_dir() -> Path:
@@ -188,9 +208,7 @@ def get_error_list(seq: List[str]):
 SALMON_FILL = PatternFill(
     start_color="FFFF8080", end_color="FFFF8080", fill_type="solid"
 )
-AMBER_FILL = PatternFill(
-    start_color="FFBF00", end_color="FFBF00", fill_type="solid"
-)
+AMBER_FILL = PatternFill(start_color="FFBF00", end_color="FFBF00", fill_type="solid")
 """Store of different colours"""
 ag_text = Font(color="00a5b700")  # text same colour as background
 ag_fill = PatternFill(bgColor="00a5b700")
@@ -462,7 +480,6 @@ class Master:
         self.current_quarter = self.master_data[0].quarter
         self.current_projects = self.master_data[0].projects
         self.abbreviations = {}
-        self.get_project_abbreviations()
         self.bl_info = {}
         self.bl_index = {}
         self.dft_groups = {}
@@ -471,6 +488,7 @@ class Master:
         self.get_quarter_list()
         self.get_baseline_data()
         self.check_project_information()
+        self.get_project_abbreviations()
         self.check_baselines()
         self.get_project_groups()
 
@@ -489,17 +507,20 @@ class Master:
         """gets the abbreviations for all current projects.
         held in the project info document"""
         output_dict = {}
+        error_case = []
         for p in self.project_information.projects:
             abb = self.project_information[p]["Abbreviations"]
             output_dict[p] = {"abb": abb, "full name": p}
             if abb is None:
-                # cleaning abbreviations here.
-                # TODO wrap into system messaging
-                print(
-                    "No abbreviation provided for "
-                    + str(p)
-                    + " this could cause the programme to crash. Please update the project information document."
-                )
+                error_case.append(p)
+
+        if error_case:
+            for p in error_case:
+                logger.critical("No abbreviation provided for " + p + ".")
+            raise ProjectNameError(
+                "Abbreviations must be provided for all projects in project_info. Program stopping. Please amend"
+            )
+
         self.abbreviations = output_dict
 
     def get_baseline_data(self) -> None:
@@ -556,24 +577,24 @@ class Master:
         self.bl_info = baseline_info
         self.bl_index = baseline_index
 
-    # def get_current_projects(self) -> List[str]:
-    #     """Returns a list of all the project names in the latest master"""
-    #     return self.master_data[0].projects
-
     def check_project_information(self) -> None:
         """Checks that project names in master are present/the same as in project info.
         Stops the programme if not"""
+        error_cases = []
         for p in self.current_projects:
             if p not in self.project_information.projects:
-                print(
-                    p
-                    + " is not in the projects information document. Project names must be identical "
-                    " in both documents. Programme stopping. Please amend."
-                )
-                break
-            else:
-                if p == self.current_projects[-1]:
-                    print("The latest master and project information match")
+                error_cases.append(p)
+
+        if error_cases:
+            for p in error_cases:
+                logger.critical(p + " has not been found in the project_info document.")
+            raise ProjectNameError(
+                "Project names in "
+                + str(self.master_data[0].quarter)
+                + " master and project_info must match. Program stopping. Please amend."
+            )
+        else:
+            logger.info("The latest master and project information match")
 
     def check_baselines(self) -> None:
         """checks that projects have the correct baseline information. stops the
@@ -1229,7 +1250,7 @@ def get_milestone_notes(
     project_name: str,
     milestone_dictionary: Dict[str, Union[datetime.date, str]],
     quarter_bl: str,
-    milestone_name: str
+    milestone_name: str,
 ) -> datetime:
     m_dict = milestone_dictionary[quarter_bl]
     for k in m_dict.keys():
@@ -1309,10 +1330,11 @@ class MilestoneData:
                     continue
 
                 # i loops below removes None Milestone names and rejects non-datetime date values.
+                p = self.master.abbreviations[project_name]["abb"]
                 for i in range(1, 50):
                     try:
                         t = [
-                            ("Project", self.master.abbreviations[project_name]),
+                            ("Project", p),
                             ("Milestone", p_data["Approval MM" + str(i)]),
                             ("Type", "Approval"),
                             (
@@ -1323,7 +1345,7 @@ class MilestoneData:
                         ]
                         milestone_info_handling(project_list, t)
                         t = [
-                            ("Project", self.master.abbreviations[project_name]),
+                            ("Project", p),
                             ("Milestone", p_data["Assurance MM" + str(i)]),
                             ("Type", "Assurance"),
                             (
@@ -1336,7 +1358,7 @@ class MilestoneData:
                     except KeyError:  # handles inconsistent keys naming for approval milestones.
                         try:
                             t = [
-                                ("Project", self.master.abbreviations[project_name]),
+                                ("Project", p),
                                 ("Milestone", p_data["Approval MM" + str(i)]),
                                 ("Type", "Approval"),
                                 (
@@ -1355,7 +1377,7 @@ class MilestoneData:
                 for i in range(18, 67):
                     try:
                         t = [
-                            ("Project", self.master.abbreviations[project_name]),
+                            ("Project", p),
                             ("Milestone", p_data["Project MM" + str(i)]),
                             ("Type", "Delivery"),
                             (
@@ -1374,7 +1396,7 @@ class MilestoneData:
                 for i in range(1, 4):
                     try:
                         t = [
-                            ("Project", self.master.abbreviations[project_name]),
+                            ("Project", p),
                             ("Milestone", p_data["HMT Approval " + str(i)]),
                             ("Type", "Approval"),
                             (
@@ -1412,19 +1434,6 @@ class MilestoneData:
             for r in range(len(sorted_list)):
                 lower_dict["Milestone " + str(r)] = dict(sorted_list[r])
 
-            # if bl == 0:
-            #     self.current = lower_dict
-            #     self.ordered_list_current = sorted_list
-            # if bl == 1:
-            #     self.last_quarter = lower_dict
-            #     self.ordered_list_last = sorted_list
-            # if bl == 2:
-            #     self.baseline_dict = lower_dict
-            #     self.ordered_list_bl = sorted_list
-            # if bl == 3:
-            #     self.baseline_two = lower_dict
-            #     self.ordered_list_bl_two = sorted_list
-
             bl_dict[bl] = lower_dict
         self.milestone_dict = bl_dict
 
@@ -1450,10 +1459,11 @@ class MilestoneData:
                     continue
 
                 # i loops below removes None Milestone names and rejects non-datetime date values.
+                p = self.master.abbreviations[project_name]["abb"]
                 for i in range(1, 50):
                     try:
                         t = [
-                            ("Project", self.master.abbreviations[project_name]),
+                            ("Project", p),
                             ("Milestone", p_data["Approval MM" + str(i)]),
                             ("Type", "Approval"),
                             (
@@ -1464,7 +1474,7 @@ class MilestoneData:
                         ]
                         milestone_info_handling(project_list, t)
                         t = [
-                            ("Project", self.master.abbreviations[project_name]),
+                            ("Project", p),
                             ("Milestone", p_data["Assurance MM" + str(i)]),
                             ("Type", "Assurance"),
                             (
@@ -1477,7 +1487,7 @@ class MilestoneData:
                     except KeyError:  # handles inconsistent keys naming for approval milestones.
                         try:
                             t = [
-                                ("Project", self.master.abbreviations[project_name]),
+                                ("Project", p),
                                 ("Milestone", p_data["Approval MM" + str(i)]),
                                 ("Type", "Approval"),
                                 (
@@ -1496,7 +1506,7 @@ class MilestoneData:
                 for i in range(18, 67):
                     try:
                         t = [
-                            ("Project", self.master.abbreviations[project_name]),
+                            ("Project", p),
                             ("Milestone", p_data["Project MM" + str(i)]),
                             ("Type", "Delivery"),
                             (
@@ -1515,7 +1525,7 @@ class MilestoneData:
                 for i in range(1, 4):
                     try:
                         t = [
-                            ("Project", self.master.abbreviations[project_name]),
+                            ("Project", p),
                             ("Milestone", p_data["HMT Approval " + str(i)]),
                             ("Type", "Approval"),
                             (
@@ -1802,9 +1812,13 @@ class MilestoneData:
                         schedule_info.append(("start key", " Start of Project"))
                     schedule_info.append(("start", sop))
                     schedule_info.append(("end key", key))
-                    date = get_milestone_date(project_name, miles_dict, dict_l_current, key)
+                    date = get_milestone_date(
+                        project_name, miles_dict, dict_l_current, key
+                    )
                     schedule_info.append(("end current date", date))
-                    other_date = get_milestone_date(project_name, miles_dict, dict_l_other, key)
+                    other_date = get_milestone_date(
+                        project_name, miles_dict, dict_l_other, key
+                    )
                     schedule_info.append(("end other date", other_date))
                     project_length = (other_date - sop).days
                     schedule_info.append(("project length", project_length))
@@ -2219,7 +2233,9 @@ def put_milestones_into_wb(milestones: MilestoneData) -> Workbook:
             ws.cell(row=row_num + i, column=6).number_format = "dd/mm/yy"
         except AttributeError:
             pass
-        notes = get_milestone_notes(project_name, milestones.milestone_dict, "current", pm)
+        notes = get_milestone_notes(
+            project_name, milestones.milestone_dict, "current", pm
+        )
         ws.cell(row=row_num + i, column=7).value = notes
 
     ws.cell(row=1, column=1).value = "Project"
@@ -2328,10 +2344,7 @@ def cost_profile_graph(cost_master: CostData, **kwargs) -> plt.figure:
         if cost_master.kwargs["group"] == cost_master.master.current_projects:
             title = "Portfolio cost profile"
         else:
-            title = (
-                cost_master.kwargs["group"][0]
-                + " cost profile"
-            )
+            title = cost_master.kwargs["group"][0] + " cost profile"
 
     plt.suptitle(title, fontweight="bold", fontsize=25)
 
@@ -3410,9 +3423,9 @@ def milestone_chart(
 
     # title
     title = (
-            milestone_data.kwargs["group"][0]
-            # cost_master.master.abbreviations[cost_master.group[0]]
-            + " schedule"
+        milestone_data.kwargs["group"][0]
+        # cost_master.master.abbreviations[cost_master.group[0]]
+        + " schedule"
     )
     # if len(milestone_data.project_group) == 1:
     #     try:
@@ -3757,7 +3770,7 @@ class DcaData:
                         t = [("Type", dca_type)]
                         cost_amount = [("Costs", costs)]
                         quarter = [("Quarter", str(self.master.master_data[i].quarter))]
-                        dca_dict[self.master.abbreviations[project_name]] = dict(
+                        dca_dict[self.master.abbreviations[project_name]["abb"]] = dict(
                             dca_colour + t + cost_amount + quarter + dca_score
                         )
                     type_dict[dca_type] = dca_dict
@@ -3773,7 +3786,6 @@ class DcaData:
 
         c_dict = {}
         for dca_type in list(DCA_KEYS.values()):
-            print(dca_type)
             lower_dict = {}
             for project_name in list(
                 self.dca_dictionary[self.quarters[0]][dca_type].keys()
@@ -3818,8 +3830,12 @@ class DcaData:
                         ]
                         change = [("Change", "Down")]
                 except TypeError:  # This picks up None types
-                    status = [("Status", "Missing")]
-                    change = [("Change", "Unknown")]
+                    if dca_one_colour:  # if project not reporting dca previous quarter
+                        status = [("Status", "New entry")]
+                        change = [("Change", "New entry")]
+                    else:
+                        status = [("Status", "Missing")]
+                        change = [("Change", "Unknown")]
                 except KeyError:  # This picks up projects not being present in the quarters being analysed.
                     status = [("Status", "New entry")]
                     change = [("Change", "New entry")]
@@ -4115,7 +4131,7 @@ class RiskData:
 
                             number_dict[x] = dict(risk_list)
 
-                    project_dict[self.master.abbreviations[project_name]] = number_dict
+                    project_dict[self.master.abbreviations[project_name]["abb"]] = number_dict
                 except KeyError:  # handles dca_type e.g. schedule confidence key not present
                     pass
                 quarter_dict[str(self.master.master_data[i].quarter)] = project_dict
@@ -4426,7 +4442,7 @@ def vfm_into_excel(vfm_data: VfMData) -> workbook:
         for i, project_name in enumerate(list(vfm_data.vfm_dictionary[q].keys())):
             ws.cell(row=start_row + i, column=2).value = vfm_data.master.abbreviations[
                 project_name
-            ]
+            ]["abb"]
             for x, key in enumerate(
                 list(vfm_data.vfm_dictionary[q][project_name].keys())
             ):
@@ -4667,7 +4683,7 @@ def cost_schedule_scatter_chart_matplotlib(milestones: MilestoneData, costs: Cos
     volume_list = []
     colour_list = []
     for project_name in milestones.group:
-        ab = milestones.master.abbreviations[project_name]
+        ab = milestones.master.abbreviations[project_name]["abb"]
         sc = milestones.schedule_change[ab]["bl_one"][
             "percent change"
         ]  # sc schedule change
@@ -4781,7 +4797,7 @@ def cost_v_schedule_chart_into_wb(milestones: MilestoneData, costs: CostData):
     ws.cell(row=2, column=8).value = "End key"
 
     for x, project_name in enumerate(rags):
-        ab = milestones.master.abbreviations[project_name[0]]
+        ab = milestones.master.abbreviations[project_name[0]]["abb"]
         ws.cell(row=x + 3, column=2).value = ab
         ws.cell(row=x + 3, column=3).value = milestones.schedule_change[ab]["bl_one"][
             "percent change"
@@ -5017,7 +5033,7 @@ def project_report_meta_data(
     make_text_red([table.columns[1], table.columns[3]])  # make 'not reported red'
 
     """Milestone/Stage meta data"""
-    abb = milestones.master.abbreviations[project_name]
+    abb = milestones.master.abbreviations[project_name]["abb"]
     doc.add_paragraph()
     run = doc.add_paragraph().add_run("Schedule/Milestones")
     font = run.font
@@ -5027,7 +5043,9 @@ def project_report_meta_data(
     hdr_cells = table.rows[0].cells
     hdr_cells[0].text = "Start date:"
     try:
-        start_project = get_milestone_date(abb, milestones.milestone_dict, "current",  " Start of Project")
+        start_project = get_milestone_date(
+            abb, milestones.milestone_dict, "current", " Start of Project"
+        )
         hdr_cells[1].text = start_project.strftime("%d/%m/%Y")
     except KeyError:
         hdr_cells[1].text = "Not reported"
@@ -5035,7 +5053,9 @@ def project_report_meta_data(
         hdr_cells[1].text = "Not reported"
     hdr_cells[2].text = "Start of operations:"
     try:
-        start_ops = get_milestone_date(abb, milestones.milestone_dict, "current", " Start of Operation")
+        start_ops = get_milestone_date(
+            abb, milestones.milestone_dict, "current", " Start of Operation"
+        )
         hdr_cells[3].text = start_ops.strftime("%d/%m/%Y")
     except KeyError:
         hdr_cells[3].text = "Not reported"
@@ -5054,7 +5074,9 @@ def project_report_meta_data(
         row_cells[1].text = "Not reported"
     row_cells[2].text = "Full Operations:"  # check
     try:
-        full_ops = get_milestone_date(abb, milestones.milestone_dict, "current", " Full Operations")
+        full_ops = get_milestone_date(
+            abb, milestones.milestone_dict, "current", " Full Operations"
+        )
         row_cells[3].text = full_ops.strftime("%d/%m/%Y")
     except KeyError:
         row_cells[3].text = "Not reported"
@@ -5172,14 +5194,14 @@ def print_out_project_milestones(
 
     doc.add_section(WD_SECTION_START.NEW_PAGE)
     # table heading
-    ab = milestones.master.abbreviations[project_name]
+    ab = milestones.master.abbreviations[project_name]["abb"]
     doc.add_paragraph().add_run(str(ab + " milestone table (2021 - 22)")).bold = True
     # some_text = 'The below table presents all project reported remaining high-level milestones, with six months grace ' \
     # 'from close of the current quarter. Milestones are sorted in chronological order. Changes in milestones' \
     # ' dates in comparison to last quarter and baseline have been calculated and are provided.'
     # doc.add_paragraph().add_run(str(some_text)).italic = True
 
-    ab = milestones.master.abbreviations[project_name]
+    ab = milestones.master.abbreviations[project_name]["abb"]
 
     table = doc.add_table(rows=1, cols=5)
     hdr_cells = table.rows[0].cells
@@ -5206,7 +5228,9 @@ def print_out_project_milestones(
         except TypeError:
             row_cells[3].text = "Not reported"
         try:
-            row_cells[4].text = get_milestone_notes(ab, milestones.milestone_dict, "current", m)
+            row_cells[4].text = get_milestone_notes(
+                ab, milestones.milestone_dict, "current", m
+            )
             paragraph = row_cells[4].paragraphs[0]
             run = paragraph.runs
             font = run[0].font
@@ -5308,7 +5332,7 @@ def compile_p_report(
     total_profile = total_costs_benefits_bar_chart(costs, benefits, show="No")
     put_matplotlib_fig_into_word(doc, total_profile, transparent=False, size=8)
     #  handling of no milestones within filtered period.
-    ab = master.abbreviations[project_name]
+    ab = master.abbreviations[project_name]["abb"]
     try:
         milestones.get_milestones_bl()
         milestones.get_chart_info()
@@ -5340,22 +5364,17 @@ def compile_p_report(
 
 
 def run_p_reports(
-    master: Master, project_information: Dict[str, Union[str, int]], **kwargs
+    master: Master, **kwargs
 ) -> None:
-    if "group" not in kwargs:
-        group = master.current_projects
-    else:
-        try:
-            group = cal_group(kwargs["group"], master, str(master.current_quarter))
-        except KeyError:
-            group = kwargs["group"]
+
+    group = get_group(master, str(master.current_quarter), kwargs)
 
     for p in group:
-        if p not in project_information.projects:
-            for x in project_information.projects:
-                if p == project_information.data[x]["Abbreviations"]:
-                    p = x
-                    break
+        # if p not in project_information.projects:
+        #     for x in project_information.projects:
+        #         if p == project_information.data[x]["Abbreviations"]:
+        #             p = x
+        #             break
         print("Compiling summary for " + p)
         report_doc = open_word_doc(root_path / "input/summary_temp.docx")
         qrt = make_file_friendly(str(master.master_data[0].quarter))
@@ -5637,11 +5656,11 @@ def data_query_into_wb(master: Master, **kwargs) -> Workbook:
 
         """list project names, groups and stage in ws"""
         for y, project_name in enumerate(group):
-            abb = master.abbreviations[project_name]
+            abb = master.abbreviations[project_name]["abb"]
             ws.cell(row=2 + y, column=1).value = DFT_GROUP_DICT[
                 master.master_data[i].data[project_name]["DfT Group"]
             ]
-            ws.cell(row=2 + y, column=2).value = master.abbreviations[project_name]
+            ws.cell(row=2 + y, column=2).value = master.abbreviations[project_name]["abb"]
 
             for x, key in enumerate(kwargs["keys"]):
                 ws.cell(row=1, column=3 + x, value=key)
@@ -5673,7 +5692,10 @@ def data_query_into_wb(master: Master, **kwargs) -> Workbook:
                         ws.cell(row=2 + y, column=3 + x).number_format = "dd/mm/yy"
                     try:  # checks for changes against next master in loop
                         lst_date = get_milestone_date(
-                            abb, milestones_two.milestone_dict, quarters[z + 1], " " + key
+                            abb,
+                            milestones_two.milestone_dict,
+                            quarters[z + 1],
+                            " " + key,
                         )
                         if date != lst_date:
                             ws.cell(row=2 + y, column=3 + x).fill = SALMON_FILL
@@ -6753,7 +6775,7 @@ def schedule_dashboard(
                         if d > IPDC_DATE:
                             return [ms, d]
 
-            abb = master.abbreviations[project_name]
+            abb = master.abbreviations[project_name]["abb"]
             try:
                 g = get_next_milestone(abb, milestones)
                 milestone = g[0]
@@ -6798,9 +6820,13 @@ def schedule_dashboard(
             ]  # code legency needs a space at start of keys
             add_column = 0
             for m in milestone_keys:
-                abb = master.abbreviations[project_name]
-                current = get_milestone_date(abb, milestones.milestone_dict, "current", m)
-                last_quarter = get_milestone_date(abb, milestones.milestone_dict, "last", m)
+                abb = master.abbreviations[project_name]["abb"]
+                current = get_milestone_date(
+                    abb, milestones.milestone_dict, "current", m
+                )
+                last_quarter = get_milestone_date(
+                    abb, milestones.milestone_dict, "last", m
+                )
                 bl = get_milestone_date(abb, milestones.milestone_dict, "bl_one", m)
                 ws.cell(row=row_num, column=10 + add_column).value = current
                 if current is not None and current < IPDC_DATE:
@@ -7364,12 +7390,16 @@ def overall_dashboard(
                         name="Arial", size=8, color="00fc2525"
                     )
 
-            abb = master.abbreviations[project_name]
-            current = get_milestone_date(abb, milestones.milestone_dict, "current", " Full Operations")
+            abb = master.abbreviations[project_name]["abb"]
+            current = get_milestone_date(
+                abb, milestones.milestone_dict, "current", " Full Operations"
+            )
             last_quarter = get_milestone_date(
                 abb, milestones.milestone_dict, "last", " Full Operations"
             )
-            bl = get_milestone_date(abb, milestones.milestone_dict, "bl_one", " Full Operations")
+            bl = get_milestone_date(
+                abb, milestones.milestone_dict, "bl_one", " Full Operations"
+            )
             ws.cell(row=row_num, column=9).value = current
             if current is not None and current < IPDC_DATE:
                 ws.cell(row=row_num, column=9).value = "Completed"
@@ -7541,7 +7571,7 @@ class DandelionData:
         data = []
         total = 0
         for p in group:
-            abb = self.master.abbreviations[p]  # abbreviations
+            abb = self.master.abbreviations[p]["abb"]  # abbreviations
             cost = self.master.master_data[0].data[p]["Total Forecast"]
             c_str = dandelion_project_text(cost, p)  # cost_string
             proj_info = abb + ",\n" + c_str
