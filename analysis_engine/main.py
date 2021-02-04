@@ -54,15 +54,18 @@ from analysis_engine.data import (
     DandelionData,
     dandelion_data_into_wb,
     run_dandelion_matplotlib_chart,
-    put_matplotlib_fig_into_word, cost_profile_into_wb, cost_profile_graph, data_query_into_wb,
+    put_matplotlib_fig_into_word,
+    cost_profile_into_wb,
+    cost_profile_graph,
+    data_query_into_wb,
     get_data_query_key_names,
 )
 
 
 def run_correct_args(
-    m: Master,
-    ae_class: MilestoneData or CostData or VfMData or DcaData or RiskData,
-    args: argparse.ArgumentParser,
+        m: Master,
+        ae_class: MilestoneData or CostData or VfMData or DcaData or RiskData,
+        args: argparse.ArgumentParser,
 ) -> MilestoneData or CostData or VfMData or DcaData:
     # try:  # acts as partition for subcommand options
     if args["quarters"] and args["stage"]:  # to test
@@ -72,11 +75,11 @@ def run_correct_args(
     elif args["quarters"]:
         data = ae_class(m, quarters=args["quarters"])
     elif args["stage"]:
-        data = ae_class(m, stage=args["stage"])
+        data = ae_class(m, group=args["stage"])
     elif args["group"]:
         data = ae_class(m, group=args["group"])
     else:
-        data = ae_class(m)
+        data = ae_class(m, group=m.current_projects)
     # except KeyError:
     #     data = ae_class(m)
 
@@ -115,23 +118,29 @@ def run_general(args):
         c = run_correct_args(m, DcaData, args)
         wb = dca_changes_into_excel(c)
     if programme == "speedial":
-        report_doc = open_word_doc(root_path / "input/summary_temp.docx")
+        doc = open_word_doc(root_path / "input/summary_temp.docx")
         c = run_correct_args(m, DcaData, args)
         c.get_changes()
-        doc = dca_changes_into_word(c, report_doc)
+        doc = dca_changes_into_word(c, doc)
         doc.save(root_path / "output/{}.docx".format(programme))
         print(programme + " analysis has been compiled. Enjoy!")
     if programme == "dandelion":
-        report_doc = open_word_doc(root_path / "input/summary_temp.docx")
+        doc = open_word_doc(root_path / "input/summary_temp.docx")
         c = run_correct_args(m, DandelionData, args)
         wb = dandelion_data_into_wb(c)
         graph = run_dandelion_matplotlib_chart(c)
-        put_matplotlib_fig_into_word(report_doc, graph, size=4, transparent=True)
-        report_doc.save(root_path / "output/dandelion_output.docx")
+        put_matplotlib_fig_into_word(doc, graph, size=4, transparent=True)
+        doc.save(root_path / "output/dandelion_output.docx")
     if programme == "costs":
+        doc = open_word_doc(root_path / "input/summary_temp.docx")
         c = run_correct_args(m, CostData, args)
         wb = cost_profile_into_wb(c)
-        cost_profile_graph(c)
+        if args["title"]:
+            graph = cost_profile_graph(c, title=args["title"])
+        else:
+            graph = cost_profile_graph(c)
+        put_matplotlib_fig_into_word(doc, graph, size=6, transparent=False)
+        doc.save(root_path / "output/costs_chart.docx")
 
     if programme != "speedial":  # only excel outputs
         wb.save(root_path / "output/{}.xlsx".format(programme))
@@ -194,7 +203,9 @@ def query(args):
         wb.save(root_path / "output/data_query.xlsx")
         print("Data compiled. Enjoy!")
     elif args["file_name"] and args["quarters"]:
-        l = get_data_query_key_names(root_path / "input/{}.csv".format(args["file_name"]))
+        l = get_data_query_key_names(
+            root_path / "input/{}.csv".format(args["file_name"])
+        )
         wb = data_query_into_wb(m, keys=l, quarters=args["quarters"])
         wb.save(root_path / "output/data_query.xlsx")
         print("Data compiled using " + args["file_name"] + ".cvs file. Enjoy!")
@@ -215,9 +226,13 @@ def main():
     )
     parser_dashboard = subparsers.add_parser("dashboards", help="ipdc dashboard")
     parser_dandelion = subparsers.add_parser(
-        "dandelion", help="dandelion graph (early version) and data"
+        "dandelion",
+        help="dandelion graph and data (early version --quarters will not work).",
     )
-    parser_costs = subparsers.add_parser("costs", help="cost analysis")
+    parser_costs = subparsers.add_parser(
+        "costs",
+        help="cost profile graph and data (early version --quarters will not work).",
+    )
     parser_vfm = subparsers.add_parser("vfm", help="vfm analysis")
     parser_milestones = subparsers.add_parser("milestones", help="milestone analysis")
     parser_summaries = subparsers.add_parser("summaries", help="summary reports")
@@ -225,7 +240,9 @@ def main():
     parser_dca = subparsers.add_parser("dcas", help="dca analysis")
     parser_speedial = subparsers.add_parser("speedial", help="speed dial analysis")
     parser_matrix = subparsers.add_parser("matrix", help="cost v schedule chart")
-    parser_data_query = subparsers.add_parser("query", help="return data from core data")
+    parser_data_query = subparsers.add_parser(
+        "query", help="return data from core data"
+    )
 
     parser_summaries.add_argument(
         "--group",
@@ -233,26 +250,29 @@ def main():
         metavar="",
         action="store",
         nargs="+",
-        help="Returns summaries for specified projects. User can either input DfT Group name; "
-        '"HSMRPG", "AMIS", "Rail", "RPE", or the project(s) acronym',
+        help="Returns summaries for specified project(s). User can either input DfT Group name; "
+             '"HSMRPG", "AMIS", "Rail", "RPE", or the project(s) acronym',
     )
 
     parser_data_query.add_argument(
         "--keys",
         type=str,
-        metavar='Key Name',
+        metavar="Key Name",
         action="store",
         nargs="+",
-        help="Returns the specified data keys."
+        help="Returns the specified data keys.",
     )
 
     parser_data_query.add_argument(
         "--file_name",
         type=str,
         action="store",
-        help="provide name of csc file contain key names"
+        help="provide name of csc file contain key names",
     )
 
+    parser_costs.add_argument(
+        "--title", type=str, action="store", help="provide a title for chart. Optional"
+    )
     for sub in [
         parser_dca,
         parser_vfm,
@@ -260,7 +280,7 @@ def main():
         parser_speedial,
         parser_dandelion,
         parser_costs,
-        parser_data_query
+        parser_data_query,
     ]:
         # all sub-commands have the same optional args. This is working
         # but prob could be refactored.
@@ -272,7 +292,7 @@ def main():
             nargs="+",
             choices=["FBC", "OBC", "SOBC", "pre-SOBC"],
             help="Returns analysis for those projects at the specified planning stage(s). Must be one "
-            'or combination of "FBC", "OBC", "SOBC", "pre-SOBC".',
+                 'or combination of "FBC", "OBC", "SOBC", "pre-SOBC".',
         )
         sub.add_argument(
             "--group",
@@ -280,9 +300,9 @@ def main():
             metavar="",
             action="store",
             nargs="+",
-            choices=["HSMRPG", "AMIS", "Rail", "RPE"],
-            help="Returns analysis for those projects in the specified DfT Group. Must be one or "
-            'combination of "HSMRPG", "AMIS", "Rail", "RPE"',
+            # choices=["HSMRPG", "AMIS", "Rail", "RPE"],
+            help="Returns summaries for specified project(s). User can either input DfT Group name; "
+                 '"HSMRPG", "AMIS", "Rail", "RPE", or the project(s) acronym',
         )
         # no quarters in dandelion yet
         sub.add_argument(

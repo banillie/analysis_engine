@@ -491,7 +491,7 @@ class Master:
         output_dict = {}
         for p in self.project_information.projects:
             abb = self.project_information[p]["Abbreviations"]
-            output_dict[p] = abb
+            output_dict[p] = {"abb": abb, "full name": p}
             if abb is None:
                 # cleaning abbreviations here.
                 # TODO wrap into system messaging
@@ -2316,27 +2316,22 @@ def cost_profile_graph(cost_master: CostData, **kwargs) -> plt.figure:
     fig, (ax1) = plt.subplots(1)  # two subplots for this chart
 
     # fig size
-    try:
-        fig_size = kwargs["fig_size"]
-        fig.set_size_inches(set_figure_size(fig_size))
-    except KeyError:
+    if "fig_size" in kwargs:
+        fig.set_size_inches(set_figure_size(kwargs["fig_size"]))
+    else:
         fig.set_size_inches(set_figure_size(FIGURE_STYLE[2]))
-        pass
 
     # title
-    # if len(cost_master.group) == 1:
-    title = (
-        cost_master.kwargs["group"][0]
-        # cost_master.master.abbreviations[cost_master.group[0]]
-        + " cost profile change"
-    )
-    # else:
-    #     try:
-    #         title = kwargs["title"] + " cost profile change"
-    #     except KeyError:
-    #         pass
-    #         title = ""
-    #         print("You need to provide a title for this chart")
+    if "title" in kwargs:
+        title = kwargs["title"]
+    else:
+        if cost_master.kwargs["group"] == cost_master.master.current_projects:
+            title = "Portfolio cost profile"
+        else:
+            title = (
+                cost_master.kwargs["group"][0]
+                + " cost profile"
+            )
 
     plt.suptitle(title, fontweight="bold", fontsize=25)
 
@@ -2440,7 +2435,7 @@ def cost_profile_graph(cost_master: CostData, **kwargs) -> plt.figure:
     # try:
     #     kwargs["show"] == "No"
     # except KeyError:
-    # plt.show()
+    plt.show()
 
     return fig
 
@@ -4296,12 +4291,15 @@ def cal_group(
         except KeyError:
             try:
                 group = master.dft_groups[quarter][lists_input[0]]
-            except KeyError:
-                p = lists_input[0]  # p is project
-                if p in master.abbreviations or master.project_information[0].projects:
-                    group.append(p)
-                else:
-                    print(p + " not recognised please enter a correct project name")
+            except KeyError:  # handling of full names and abbreviations
+                p = lists_input[0]
+                try:
+                    group.append(master.abbreviations[p]["full name"])
+                except KeyError:
+                    for name in master.abbreviations.keys():
+                        if p == master.abbreviations[name]["abb"]:
+                            group.append(master.abbreviations[name]["full name"])
+                    # Need handling here for name not found
 
     return group
 

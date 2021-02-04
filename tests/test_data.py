@@ -256,7 +256,7 @@ def test_get_group_cost_profile(costs_masters, project_info):
 
 def test_get_group_cost_profile_chart(costs_masters, project_info):
     master = Master(costs_masters, project_info)
-    costs = CostData(master, group=master.current_projects)
+    costs = CostData(master)
     cost_profile_graph(costs, title="Group Test")
 
 
