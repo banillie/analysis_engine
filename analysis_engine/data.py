@@ -2522,7 +2522,7 @@ def cost_profile_graph(cost_master: CostData, **kwargs) -> plt.figure:
     # try:
     #     kwargs["show"] == "No"
     # except KeyError:
-    plt.show()
+    # plt.show()
 
     return fig
 
@@ -3521,7 +3521,11 @@ def milestone_chart(
                 final_labels.append(l)
         return final_labels
 
-    m_key_names = handle_long_keys(milestones.sorted_milestone_dict[milestones.iter_list[0]]["names"])
+    if len(milestones.group) == 1:
+        m_key_names = remove_project_name_from_milestone_key(milestones.group[0], milestones.sorted_milestone_dict[milestones.iter_list[0]]["names"])
+        m_key_names = handle_long_keys(m_key_names)
+    else:
+        m_key_names = handle_long_keys(milestones.sorted_milestone_dict[milestones.iter_list[0]]["names"])
 
     try:
         ax1.scatter(milestones.sorted_milestone_dict[milestones.iter_list[2]]["g_dates"], m_key_names, label=milestones.iter_list[2], s=200)
@@ -3654,7 +3658,7 @@ def milestone_chart(
     # try:
     #     kwargs["show"] == "No"
     # except KeyError:
-    plt.show()
+    # plt.show()
 
     return fig
 
@@ -5186,15 +5190,6 @@ def plus_minus_days(change_value):
 def print_out_project_milestones(
     doc: Document, milestones: MilestoneData, project_name: str
 ) -> Document:
-    # def get_milestone_notes(
-    #         project_name: str,
-    #         milestone_dictionary: Dict[str, Union[datetime.date, str]],
-    #         milestone_name: str,
-    # ) -> datetime:
-    #     for k in milestone_dictionary.keys():
-    #         if milestone_dictionary[k]["Project"] == project_name:
-    #             if milestone_dictionary[k]["Milestone"] == milestone_name:
-    #                 return milestone_dictionary[k]["Notes"]
 
     doc.add_section(WD_SECTION_START.NEW_PAGE)
     # table heading
@@ -5218,16 +5213,16 @@ def print_out_project_milestones(
     for i, m in enumerate(milestones.sorted_milestone_dict[milestones.iter_list[0]]["names"]):
         row_cells = table.add_row().cells
         row_cells[0].text = m
-        row_cells[1].text = milestones.sorted_milestone_dict[milestones.iter_list[0]]["r_date"].strftime("%d/%m/%Y")
+        row_cells[1].text = milestones.sorted_milestone_dict[milestones.iter_list[0]]["r_dates"][i].strftime("%d/%m/%Y")
         try:
             row_cells[2].text = plus_minus_days(
-                (milestones.sorted_milestone_dict[milestones.iter_list[0]]["r_date"] - milestones.sorted_milestone_dict[milestones.iter_list[1]]["r_date"]).days
+                (milestones.sorted_milestone_dict[milestones.iter_list[0]]["r_dates"][i] - milestones.sorted_milestone_dict[milestones.iter_list[1]]["r_dates"][i]).days
             )
         except TypeError:
             row_cells[2].text = "Not reported"
         try:
             row_cells[3].text = plus_minus_days(
-                (milestones.sorted_milestone_dict[milestones.iter_list[0]]["r_date"] - milestones.sorted_milestone_dict[milestones.iter_list[2]]["r_date"]).days
+                (milestones.sorted_milestone_dict[milestones.iter_list[0]]["r_dates"][i] - milestones.sorted_milestone_dict[milestones.iter_list[2]]["r_dates"][i]).days
             )
         except TypeError:
             row_cells[3].text = "Not reported"
@@ -5650,10 +5645,10 @@ def data_query_into_wb(master: Master, **kwargs) -> Workbook:
         ws.title = make_file_friendly(q)  # title of worksheet
         group = get_group(master, q, kwargs)
 
-        milestones_one = MilestoneData(master, quarters=[q])
+        milestones_one = MilestoneData(master, quarter=[q])
         # milestones_one.get_milestones_all()
         try:
-            milestones_two = MilestoneData(master, quarters=[quarters[z + 1]])
+            milestones_two = MilestoneData(master, quarter=[quarters[z + 1]])
             # milestones_two.get_milestones_all()
         except IndexError:
             pass

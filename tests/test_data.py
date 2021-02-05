@@ -45,6 +45,7 @@ from analysis_engine.data import (
     put_milestones_into_wb, Pickle, open_pickle_file, financial_dashboard, schedule_dashboard, benefits_dashboard,
     overall_dashboard, DandelionData, dandelion_data_into_wb, run_dandelion_matplotlib_chart,
     cost_v_schedule_chart_into_wb, cost_profile_into_wb, data_query_into_wb, get_data_query_key_names,
+    remove_project_name_from_milestone_key,
 )
 
 # test masters project names
@@ -391,8 +392,10 @@ def test_compile_milestone_chart_with_filter(milestone_masters, project_info):
 # failing. needs refactor
 def test_removing_project_name_from_milestone_keys(milestone_masters, project_info):
     master = Master(milestone_masters, project_info)
-    milestones = MilestoneData(master, group=[sot])
-    assert milestones.key_names == [
+    milestones = MilestoneData(master, group=[sot], baseline='all')
+    key_names = milestones.sorted_milestone_dict['current']['names']
+    key_names = remove_project_name_from_milestone_key("SoT", key_names)
+    assert key_names == [
         "Start of Project",
         "Standard A",
         "Inverted Cosmonauts",
@@ -409,7 +412,7 @@ def test_putting_milestones_into_wb(milestone_masters, project_info):
 
 def test_saving_graph_to_word_doc_one(word_doc, milestone_masters, project_info):
     master = Master(milestone_masters, project_info)
-    milestones = MilestoneData(master, group=[sot, a11, a13])
+    milestones = MilestoneData(master, group=[sot, a11, a13], baseline="standard")
     change_word_doc_landscape(word_doc)
     # milestones.filter_chart_info(start_date="1/1/2013", end_date="1/1/2014")
     graph = milestone_chart(
@@ -501,12 +504,9 @@ def test_calculating_schedule_changes(milestone_masters, project_info):
 
 def test_printout_of_milestones(word_doc, milestone_masters, project_info):
     master = Master(milestone_masters, project_info)
-    milestones = MilestoneData(master, sot)
+    milestones = MilestoneData(master, group=[sot], baseline="all")
     change_word_doc_landscape(word_doc)
     print_out_project_milestones(word_doc, milestones, sot)
-    # milestones.filter_chart_info(start_date="1/1/2013", end_date="1/1/2014")
-    # graph = milestone_chart(milestones, title="Group Test", blue_line="Today", show="No")
-    # put_matplotlib_fig_into_word(word_doc, graph)
     word_doc.save("resources/summary_temp_altered.docx")
 
 
@@ -529,9 +529,7 @@ def test_financial_dashboard(costs_masters, dashboard_template, project_info):
 
 def test_schedule_dashboard(milestone_masters, dashboard_template, project_info):
     m = Master(milestone_masters, project_info)
-    milestones = MilestoneData(m, group=m.current_projects)
-    milestones.get_milestones()
-    milestones.get_chart_info()
+    milestones = MilestoneData(m, group=m.current_projects, baseline="all")
     milestones.filter_chart_info(milestone_type=["Approval", "Delivery"])
     wb = schedule_dashboard(m, milestones, dashboard_template)
     wb.save("resources/test_dashboards_master_altered.xlsx")
