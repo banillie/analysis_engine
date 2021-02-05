@@ -42,9 +42,20 @@ from analysis_engine.data import (
     sort_projects_by_dca,
     project_report_meta_data,
     print_out_project_milestones,
-    put_milestones_into_wb, Pickle, open_pickle_file, financial_dashboard, schedule_dashboard, benefits_dashboard,
-    overall_dashboard, DandelionData, dandelion_data_into_wb, run_dandelion_matplotlib_chart,
-    cost_v_schedule_chart_into_wb, cost_profile_into_wb, data_query_into_wb, get_data_query_key_names,
+    put_milestones_into_wb,
+    Pickle,
+    open_pickle_file,
+    financial_dashboard,
+    schedule_dashboard,
+    benefits_dashboard,
+    overall_dashboard,
+    DandelionData,
+    dandelion_data_into_wb,
+    run_dandelion_matplotlib_chart,
+    cost_v_schedule_chart_into_wb,
+    cost_profile_into_wb,
+    data_query_into_wb,
+    get_data_query_key_names,
     remove_project_name_from_milestone_key,
 )
 
@@ -102,12 +113,14 @@ def test_get_current_project_names(basic_masters_dicts, project_info):
 
 def test_get_project_abbreviations(basic_masters_dicts, project_info):
     master = Master(basic_masters_dicts, project_info)
-    assert master.abbreviations == {'Apollo 11': {'abb': 'A11', 'full name': 'Apollo 11'},
- 'Apollo 13': {'abb': 'A13', 'full name': 'Apollo 13'},
- 'Columbia': {'abb': 'Columbia', 'full name': 'Columbia'},
- 'Falcon 9': {'abb': 'F9', 'full name': 'Falcon 9'},
- 'Mars': {'abb': 'Mars', 'full name': 'Mars'},
- 'Sea of Tranquility': {'abb': 'SoT', 'full name': 'Sea of Tranquility'}}
+    assert master.abbreviations == {
+        "Apollo 11": {"abb": "A11", "full name": "Apollo 11"},
+        "Apollo 13": {"abb": "A13", "full name": "Apollo 13"},
+        "Columbia": {"abb": "Columbia", "full name": "Columbia"},
+        "Falcon 9": {"abb": "F9", "full name": "Falcon 9"},
+        "Mars": {"abb": "Mars", "full name": "Mars"},
+        "Sea of Tranquility": {"abb": "SoT", "full name": "Sea of Tranquility"},
+    }
 
 
 # assert expected error message
@@ -354,7 +367,7 @@ def test_get_gmpp_projects(project_info):
 
 def test_get_milestone_data_bl(milestone_masters, project_info):
     master = Master(milestone_masters, project_info)
-    milestones = MilestoneData(master, group=[sot, a11, a13], baseline='all')
+    milestones = MilestoneData(master, group=[sot, a11, a13], baseline="all")
     assert isinstance(milestones.milestone_dict["current"], (dict,))
 
 
@@ -367,9 +380,15 @@ def test_get_milestone_data_all(milestone_masters, project_info):
 def test_get_milestone_chart_data(milestone_masters, project_info):
     master = Master(milestone_masters, project_info)
     milestones = MilestoneData(master, group=[sot, a11, a13], baseline="standard")
-    assert len(milestones.sorted_milestone_dict[milestones.iter_list[0]]["g_dates"]) == 11
-    assert len(milestones.sorted_milestone_dict[milestones.iter_list[1]]["g_dates"]) == 11
-    assert len(milestones.sorted_milestone_dict[milestones.iter_list[2]]["g_dates"]) == 11
+    assert (
+        len(milestones.sorted_milestone_dict[milestones.iter_list[0]]["g_dates"]) == 11
+    )
+    assert (
+        len(milestones.sorted_milestone_dict[milestones.iter_list[1]]["g_dates"]) == 11
+    )
+    assert (
+        len(milestones.sorted_milestone_dict[milestones.iter_list[2]]["g_dates"]) == 11
+    )
 
 
 def test_compile_milestone_chart(milestone_masters, project_info, word_doc):
@@ -392,14 +411,14 @@ def test_compile_milestone_chart_with_filter(milestone_masters, project_info):
 # failing. needs refactor
 def test_removing_project_name_from_milestone_keys(milestone_masters, project_info):
     master = Master(milestone_masters, project_info)
-    milestones = MilestoneData(master, group=[sot], baseline='all')
-    key_names = milestones.sorted_milestone_dict['current']['names']
+    milestones = MilestoneData(master, group=[sot], baseline="all")
+    key_names = milestones.sorted_milestone_dict["current"]["names"]
     key_names = remove_project_name_from_milestone_key("SoT", key_names)
     assert key_names == [
         "Start of Project",
         "Standard A",
         "Inverted Cosmonauts",
-        "Start of Construction/build"
+        "Start of Construction/build",
     ]
 
 
@@ -415,9 +434,7 @@ def test_saving_graph_to_word_doc_one(word_doc, milestone_masters, project_info)
     milestones = MilestoneData(master, group=[sot, a11, a13], baseline="standard")
     change_word_doc_landscape(word_doc)
     # milestones.filter_chart_info(start_date="1/1/2013", end_date="1/1/2014")
-    graph = milestone_chart(
-        milestones, title="Group Test", blue_line="Today"
-    )
+    graph = milestone_chart(milestones, title="Group Test", blue_line="Today")
     put_matplotlib_fig_into_word(word_doc, graph)
     word_doc.save("resources/summary_temp_altered.docx")
 
@@ -561,13 +578,17 @@ def test_dandelion(basic_masters_dicts, project_info, word_doc):
 
 def test_data_queries_non_milestone(basic_masters_dicts, project_info):
     m = Master(basic_masters_dicts, project_info)
-    wb = data_query_into_wb(m, keys=["Total Forecast"], quarters=['Q4 18/19', 'Q4 17/18', 'Q4 16/17'])
+    wb = data_query_into_wb(
+        m, keys=["Total Forecast"], quarters=["Q4 18/19", "Q4 17/18", "Q4 16/17"]
+    )
     wb.save("resources/test_data_query.xlsx")
 
 
 def test_data_queries_milestones(milestone_masters, project_info):
     m = Master(milestone_masters, project_info)
-    wb = data_query_into_wb(m, keys=["Full Operations"], quarters=["Q4 19/20", "Q4 18/19"])
+    wb = data_query_into_wb(
+        m, keys=["Full Operations"], quarters=["Q4 19/20", "Q4 18/19"]
+    )
     wb.save("resources/test_data_query_milestones.xlsx")
 
 

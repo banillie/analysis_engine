@@ -60,7 +60,8 @@ from analysis_engine.data import (
     cost_profile_graph,
     data_query_into_wb,
     get_data_query_key_names,
-    ProjectNameError, milestone_chart
+    ProjectNameError,
+    milestone_chart,
 )
 
 import logging
@@ -72,10 +73,11 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+
 def run_correct_args(
-        m: Master,
-        ae_class: MilestoneData or CostData or VfMData or DcaData or RiskData,
-        args: argparse.ArgumentParser,
+    m: Master,
+    ae_class: MilestoneData or CostData or VfMData or DcaData or RiskData,
+    args: argparse.ArgumentParser,
 ) -> MilestoneData or CostData or VfMData or DcaData:
     # try:  # acts as partition for subcommand options
     if args["quarters"] and args["stage"]:  # to test
@@ -182,7 +184,9 @@ def milestones(args):
             if args["baselines"] == ["all"]:
                 milestones = MilestoneData(m, group=args["group"], baseline=None)
             else:
-                milestones = MilestoneData(m, group=args["group"], baseline=args["baselines"])
+                milestones = MilestoneData(
+                    m, group=args["group"], baseline=args["baselines"]
+                )
         if args["dates"]:
             sd, ed = zip(args["dates"])  # hack refine
             milestones.filter_chart_info(start_date=sd[0], end_date=ed[0])
@@ -199,8 +203,6 @@ def milestones(args):
     except ProjectNameError as e:
         logger.critical(e)
         sys.exit(1)
-
-
 
 
 def summaries(args):
@@ -272,7 +274,7 @@ def main():
     )
     parser_milestones = subparsers.add_parser(
         "milestones",
-        help="milestone schedule graphs and data (early version needs more testing)"
+        help="milestone schedule graphs and data (early version needs more testing)",
     )
     parser_vfm = subparsers.add_parser("vfm", help="vfm analysis")
     parser_summaries = subparsers.add_parser("summaries", help="summary reports")
@@ -291,7 +293,7 @@ def main():
         action="store",
         nargs="+",
         help="Returns summaries for specified project(s). User can either input DfT Group name; "
-             '"HSMRPG", "AMIS", "Rail", "RPE", or the project(s) acronym',
+        '"HSMRPG", "AMIS", "Rail", "RPE", or the project(s) acronym',
     )
 
     parser_data_query.add_argument(
@@ -330,7 +332,10 @@ def main():
         metavar="",
         action="store",
         nargs=2,
-        help="dates for analysis. Must provide start date and then end date in format e.g.""1/1/2021" "1/1/2022""."
+        help="dates for analysis. Must provide start date and then end date in format e.g."
+        "1/1/2021"
+        "1/1/2022"
+        ".",
     )
 
     for sub in [
@@ -353,7 +358,7 @@ def main():
             nargs="+",
             choices=["FBC", "OBC", "SOBC", "pre-SOBC"],
             help="Returns analysis for those projects at the specified planning stage(s). Must be one "
-                 'or combination of "FBC", "OBC", "SOBC", "pre-SOBC".',
+            'or combination of "FBC", "OBC", "SOBC", "pre-SOBC".',
         )
         sub.add_argument(
             "--group",
@@ -363,7 +368,7 @@ def main():
             nargs="+",
             # choices=["HSMRPG", "AMIS", "Rail", "RPE"],
             help="Returns summaries for specified project(s). User can either input DfT Group name; "
-                 '"HSMRPG", "AMIS", "Rail", "RPE", or the project(s) acronym',
+            '"HSMRPG", "AMIS", "Rail", "RPE", or the project(s) acronym',
         )
         # no quarters in dandelion yet
         sub.add_argument(

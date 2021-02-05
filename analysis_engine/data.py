@@ -726,7 +726,7 @@ def get_group(master: Master, quarter: str, kwargs) -> List[str]:
 
 # futher thinking required for handling here.
 def cal_group(
-        lists_input: List[str] or List[List[str]], master: Master, quarter: str
+    lists_input: List[str] or List[List[str]], master: Master, quarter: str
 ) -> List[str]:
     error_case = []
     group = []
@@ -767,7 +767,9 @@ def cal_group(
     if error_case:
         for p in error_case:
             logger.critical(p + " not a recognised project or group")
-        raise ProjectNameError("Program stopping. Please check project or group name and re-enter.")
+        raise ProjectNameError(
+            "Program stopping. Please check project or group name and re-enter."
+        )
 
     return group
 
@@ -1273,8 +1275,8 @@ def milestone_info_handling(output_list: list, t_list: list) -> list:
 
 
 def remove_project_name_from_milestone_key(
-        project_name: str,
-        milestone_key_list: List[str]) -> List[str]:
+    project_name: str, milestone_key_list: List[str]
+) -> List[str]:
     """In this instance project_name is the abbreviation"""
     output_list = []
     for key in milestone_key_list:
@@ -1346,20 +1348,25 @@ class MilestoneData:
             self.group = get_group(
                 self.master, str(self.master.current_quarter), self.kwargs
             )
-            if self.kwargs['baseline'] == 'standard':
+            if self.kwargs["baseline"] == "standard":
                 self.iter_list = ["current", "last", "bl_one"]
-            elif self.kwargs['baseline'] == 'all':
+            elif self.kwargs["baseline"] == "all":
                 self.iter_list = ["current", "last", "bl_one", "bl_two", "bl_three"]
             else:
                 self.iter_list = self.kwargs["baseline"]
 
         elif "quarter" in self.kwargs:
-            if self.kwargs['quarter'] == 'standard':
-                self.iter_list = [self.master.quarter_list[0], self.master.quarter_list[1]]
+            if self.kwargs["quarter"] == "standard":
+                self.iter_list = [
+                    self.master.quarter_list[0],
+                    self.master.quarter_list[1],
+                ]
             else:
                 self.iter_list = self.kwargs["quarter"]
 
-        for idx, bl in enumerate(self.iter_list):   # bl means baseline and name should chang
+        for idx, bl in enumerate(
+            self.iter_list
+        ):  # bl means baseline and name should chang
             lower_dict = {}
             raw_list = []
             if "quarter" in self.kwargs:
@@ -1513,7 +1520,10 @@ class MilestoneData:
                 n = None
                 d = None
                 for x in self.milestone_dict[i].values():
-                    if x["Project"] == v["Project"] and x["Milestone"] == v["Milestone"]:
+                    if (
+                        x["Project"] == v["Project"]
+                        and x["Milestone"] == v["Milestone"]
+                    ):
                         p = x["Project"]
                         n = x["Milestone"]
                         join = p + ", " + n
@@ -1532,9 +1542,14 @@ class MilestoneData:
                     g_dates.append(v["Date"])
                     r_dates.append(None)
 
-            output_dict[i] = {"names": key_names, "g_dates": g_dates, "r_dates": r_dates}
+            output_dict[i] = {
+                "names": key_names,
+                "g_dates": g_dates,
+                "r_dates": r_dates,
+            }
 
         self.sorted_milestone_dict = output_dict
+
     # def get_chart_info_old(self) -> None:
     #     """returns data lists for matplotlib chart"""
     #     # Note this code could refactored so that it collects all milestones
@@ -1635,10 +1650,7 @@ class MilestoneData:
     #         + remove_none_types(self.md_baseline)
     #     )
 
-    def filter_chart_info(
-        self,
-        **filter_kwargs
-    ):
+    def filter_chart_info(self, **filter_kwargs):
         # bug handling required in the event that there are no milestones with the filter.
         # i.e. the filter returns no milestones.
         filtered_dict = {}
@@ -1691,7 +1703,11 @@ class MilestoneData:
                         filtered_dict["Milestone " + str(i)] = v
                         continue
 
-        elif "type" in filter_kwargs and "key" in filter_kwargs and "dates" in filter_kwargs:
+        elif (
+            "type" in filter_kwargs
+            and "key" in filter_kwargs
+            and "dates" in filter_kwargs
+        ):
             start_date, end_date = zip(*filter_kwargs["dates"])
             start = parser.parse(start_date, dayfirst=True)
             end = parser.parse(end_date, dayfirst=True)
@@ -1711,8 +1727,6 @@ class MilestoneData:
 
         self.milestone_dict = output_dict
         self.get_chart_info()
-
-
 
         #         pass
         #     else:
@@ -2273,7 +2287,9 @@ def put_milestones_into_wb(milestones: MilestoneData) -> Workbook:
     ws = wb.active
 
     row_num = 2
-    for i, m in enumerate(milestones.sorted_milestone_dict[milestones.iter_list[0]]["names"]):
+    for i, m in enumerate(
+        milestones.sorted_milestone_dict[milestones.iter_list[0]]["names"]
+    ):
         if len(milestones.group) == 1:
             project_name = milestones.group[0]
             pm = m  # pm is project milestone
@@ -2284,21 +2300,35 @@ def put_milestones_into_wb(milestones: MilestoneData) -> Workbook:
             pm = m.split(",")[1][1:]
             ws.cell(row=row_num + i, column=1).value = project_name  # project name
             ws.cell(row=row_num + i, column=2).value = pm  # milestone
-        ws.cell(row=row_num + i, column=3).value = milestones.sorted_milestone_dict[milestones.iter_list[0]]["r_dates"][i]
+        ws.cell(row=row_num + i, column=3).value = milestones.sorted_milestone_dict[
+            milestones.iter_list[0]
+        ]["r_dates"][i]
         # .strftime("%d/%m/%Y")
         ws.cell(row=row_num + i, column=3).number_format = "dd/mm/yy"
         try:
-            ws.cell(row=row_num + i, column=4).value = milestones.sorted_milestone_dict[milestones.iter_list[1]]["r_dates"][i]
+            ws.cell(row=row_num + i, column=4).value = milestones.sorted_milestone_dict[
+                milestones.iter_list[1]
+            ]["r_dates"][i]
             ws.cell(row=row_num + i, column=4).number_format = "dd/mm/yy"
         except AttributeError:
             pass
         try:
-            ws.cell(row=row_num + i, column=5).value = milestones.sorted_milestone_dict[milestones.iter_list[2]]["r_dates"][i]
+            ws.cell(row=row_num + i, column=5).value = milestones.sorted_milestone_dict[
+                milestones.iter_list[2]
+            ]["r_dates"][i]
             ws.cell(row=row_num + i, column=5).number_format = "dd/mm/yy"
         except AttributeError:
             pass
         try:
-            ws.cell(row=row_num + i, column=6).value = milestones.milestones.sorted_milestone_dict[milestones.iter_list[3]]["r_dates"][i]
+            ws.cell(
+                row=row_num + i, column=6
+            ).value = milestones.milestones.sorted_milestone_dict[
+                milestones.iter_list[3]
+            ][
+                "r_dates"
+            ][
+                i
+            ]
             ws.cell(row=row_num + i, column=6).number_format = "dd/mm/yy"
         except AttributeError:
             pass
@@ -3485,9 +3515,9 @@ def calculate_max_min_date(milestones: MilestoneData, **kwargs) -> int:
     for i in milestones.sorted_milestone_dict.keys():
         m_list += milestones.sorted_milestone_dict[i]["g_dates"]
 
-    if kwargs["value"] == 'max':
+    if kwargs["value"] == "max":
         return max(m_list)
-    if kwargs["value"] == 'min':
+    if kwargs["value"] == "min":
         return min(m_list)
 
 
@@ -3522,20 +3552,40 @@ def milestone_chart(
         return final_labels
 
     if len(milestones.group) == 1:
-        m_key_names = remove_project_name_from_milestone_key(milestones.group[0], milestones.sorted_milestone_dict[milestones.iter_list[0]]["names"])
+        m_key_names = remove_project_name_from_milestone_key(
+            milestones.group[0],
+            milestones.sorted_milestone_dict[milestones.iter_list[0]]["names"],
+        )
         m_key_names = handle_long_keys(m_key_names)
     else:
-        m_key_names = handle_long_keys(milestones.sorted_milestone_dict[milestones.iter_list[0]]["names"])
+        m_key_names = handle_long_keys(
+            milestones.sorted_milestone_dict[milestones.iter_list[0]]["names"]
+        )
 
     try:
-        ax1.scatter(milestones.sorted_milestone_dict[milestones.iter_list[2]]["g_dates"], m_key_names, label=milestones.iter_list[2], s=200)
+        ax1.scatter(
+            milestones.sorted_milestone_dict[milestones.iter_list[2]]["g_dates"],
+            m_key_names,
+            label=milestones.iter_list[2],
+            s=200,
+        )
     except IndexError:  # maybe IndexError also
         pass
     try:
-        ax1.scatter(milestones.sorted_milestone_dict[milestones.iter_list[1]]["g_dates"], m_key_names, label=milestones.iter_list[1], s=200)
+        ax1.scatter(
+            milestones.sorted_milestone_dict[milestones.iter_list[1]]["g_dates"],
+            m_key_names,
+            label=milestones.iter_list[1],
+            s=200,
+        )
     except IndexError:
         pass
-    ax1.scatter(milestones.sorted_milestone_dict[milestones.iter_list[0]]["g_dates"], m_key_names, label=milestones.iter_list[0], s=200)
+    ax1.scatter(
+        milestones.sorted_milestone_dict[milestones.iter_list[0]]["g_dates"],
+        m_key_names,
+        label=milestones.iter_list[0],
+        s=200,
+    )
 
     # ax1.scatter(*do_mask(milestone_data.md_current, milestone_data.key_names), label="Current", zorder=10, c='g')
     # ax1.scatter(*do_mask(milestone_data.md_last, milestone_data.key_names), label="Last quarter", zorder=5, c='orange')
@@ -3623,11 +3673,7 @@ def milestone_chart(
     try:
         blue_line = kwargs["blue_line"]
         if blue_line == "Today":
-            if (
-                min_date
-                <= datetime.date.today()
-                <= max_date
-            ):
+            if min_date <= datetime.date.today() <= max_date:
                 plt.axvline(datetime.date.today())
                 plt.figtext(
                     0.98,
@@ -3765,7 +3811,7 @@ DCA_KEYS = {
     "FINANCE": "SRO Finance confidence",
     "BENEFITS": "SRO Benefits RAG",
     "SCHEDULE": "SRO Schedule Confidence",
-    "RESOURCE": "Overall Resource DCA - Now"
+    "RESOURCE": "Overall Resource DCA - Now",
 }
 
 DCA_RATING_SCORES = {
@@ -4177,7 +4223,9 @@ class RiskData:
 
                             number_dict[x] = dict(risk_list)
 
-                    project_dict[self.master.abbreviations[project_name]["abb"]] = number_dict
+                    project_dict[
+                        self.master.abbreviations[project_name]["abb"]
+                    ] = number_dict
                 except KeyError:  # handles dca_type e.g. schedule confidence key not present
                     pass
                 quarter_dict[str(self.master.master_data[i].quarter)] = project_dict
@@ -5210,19 +5258,37 @@ def print_out_project_milestones(
     hdr_cells[3].text = "Change from baseline"
     hdr_cells[4].text = "Notes"
 
-    for i, m in enumerate(milestones.sorted_milestone_dict[milestones.iter_list[0]]["names"]):
+    for i, m in enumerate(
+        milestones.sorted_milestone_dict[milestones.iter_list[0]]["names"]
+    ):
         row_cells = table.add_row().cells
         row_cells[0].text = m
-        row_cells[1].text = milestones.sorted_milestone_dict[milestones.iter_list[0]]["r_dates"][i].strftime("%d/%m/%Y")
+        row_cells[1].text = milestones.sorted_milestone_dict[milestones.iter_list[0]][
+            "r_dates"
+        ][i].strftime("%d/%m/%Y")
         try:
             row_cells[2].text = plus_minus_days(
-                (milestones.sorted_milestone_dict[milestones.iter_list[0]]["r_dates"][i] - milestones.sorted_milestone_dict[milestones.iter_list[1]]["r_dates"][i]).days
+                (
+                    milestones.sorted_milestone_dict[milestones.iter_list[0]][
+                        "r_dates"
+                    ][i]
+                    - milestones.sorted_milestone_dict[milestones.iter_list[1]][
+                        "r_dates"
+                    ][i]
+                ).days
             )
         except TypeError:
             row_cells[2].text = "Not reported"
         try:
             row_cells[3].text = plus_minus_days(
-                (milestones.sorted_milestone_dict[milestones.iter_list[0]]["r_dates"][i] - milestones.sorted_milestone_dict[milestones.iter_list[2]]["r_dates"][i]).days
+                (
+                    milestones.sorted_milestone_dict[milestones.iter_list[0]][
+                        "r_dates"
+                    ][i]
+                    - milestones.sorted_milestone_dict[milestones.iter_list[2]][
+                        "r_dates"
+                    ][i]
+                ).days
             )
         except TypeError:
             row_cells[3].text = "Not reported"
@@ -5362,9 +5428,7 @@ def compile_p_report(
     return doc
 
 
-def run_p_reports(
-    master: Master, **kwargs
-) -> None:
+def run_p_reports(master: Master, **kwargs) -> None:
 
     group = get_group(master, str(master.current_quarter), kwargs)
 
@@ -5659,7 +5723,9 @@ def data_query_into_wb(master: Master, **kwargs) -> Workbook:
             ws.cell(row=2 + y, column=1).value = DFT_GROUP_DICT[
                 master.master_data[i].data[project_name]["DfT Group"]
             ]
-            ws.cell(row=2 + y, column=2).value = master.abbreviations[project_name]["abb"]
+            ws.cell(row=2 + y, column=2).value = master.abbreviations[project_name][
+                "abb"
+            ]
 
             for x, key in enumerate(kwargs["keys"]):
                 ws.cell(row=1, column=3 + x, value=key)
