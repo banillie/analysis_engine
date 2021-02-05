@@ -101,14 +101,12 @@ def test_get_current_project_names(basic_masters_dicts, project_info):
 
 def test_get_project_abbreviations(basic_masters_dicts, project_info):
     master = Master(basic_masters_dicts, project_info)
-    assert master.abbreviations == {
-        "Apollo 11": "A11",
-        "Apollo 13": "A13",
-        "Columbia": "Columbia",
-        "Falcon 9": "F9",
-        "Mars": "Mars",
-        "Sea of Tranquility": "SoT",
-    }
+    assert master.abbreviations == {'Apollo 11': {'abb': 'A11', 'full name': 'Apollo 11'},
+ 'Apollo 13': {'abb': 'A13', 'full name': 'Apollo 13'},
+ 'Columbia': {'abb': 'Columbia', 'full name': 'Columbia'},
+ 'Falcon 9': {'abb': 'F9', 'full name': 'Falcon 9'},
+ 'Mars': {'abb': 'Mars', 'full name': 'Mars'},
+ 'Sea of Tranquility': {'abb': 'SoT', 'full name': 'Sea of Tranquility'}}
 
 
 # assert expected error message
@@ -355,26 +353,22 @@ def test_get_gmpp_projects(project_info):
 
 def test_get_milestone_data_bl(milestone_masters, project_info):
     master = Master(milestone_masters, project_info)
-    milestones = MilestoneData(master, group=[sot, a11, a13])
-    milestones.get_milestones()
+    milestones = MilestoneData(master, group=[sot, a11, a13], baseline='all')
     assert isinstance(milestones.milestone_dict["current"], (dict,))
 
 
 def test_get_milestone_data_all(milestone_masters, project_info):
     m = Master(milestone_masters, project_info)
-    milestones = MilestoneData(m, quarters=["Q4 19/20", "Q4 18/19"])
-    milestones.get_milestones_all()
+    milestones = MilestoneData(m, quarter=["Q4 19/20", "Q4 18/19"])
     assert isinstance(milestones.milestone_dict["Q4 19/20"], (dict,))
 
 
 def test_get_milestone_chart_data(milestone_masters, project_info):
     master = Master(milestone_masters, project_info)
-    milestones = MilestoneData(master, group=[sot, a11, a13])
-    milestones.get_milestones()
-    milestones.get_chart_info()
-    assert len(milestones.key_names) == 11
-    assert len(milestones.md_current) == 11
-    assert len(milestones.md_last) == 11
+    milestones = MilestoneData(master, group=[sot, a11, a13], baseline="standard")
+    assert len(milestones.sorted_milestone_dict[milestones.iter_list[0]]["g_dates"]) == 11
+    assert len(milestones.sorted_milestone_dict[milestones.iter_list[1]]["g_dates"]) == 11
+    assert len(milestones.sorted_milestone_dict[milestones.iter_list[2]]["g_dates"]) == 11
 
 
 def test_compile_milestone_chart(milestone_masters, project_info, word_doc):
@@ -389,16 +383,15 @@ def test_compile_milestone_chart(milestone_masters, project_info, word_doc):
 
 def test_compile_milestone_chart_with_filter(milestone_masters, project_info):
     master = Master(milestone_masters, project_info)
-    milestones = MilestoneData(master, group=[sot, a11, a13], baseline=None)
-    milestones.filter_chart_info(start_date="1/1/2013", end_date="1/1/2014")
+    milestones = MilestoneData(master, group=[sot, a11, a13], baseline="current")
+    milestones.filter_chart_info(dates=["1/1/2013", "1/1/2014"])
     milestone_chart(milestones, title="Group Test", fig_size=FIGURE_STYLE[1])
 
 
+# failing. needs refactor
 def test_removing_project_name_from_milestone_keys(milestone_masters, project_info):
     master = Master(milestone_masters, project_info)
     milestones = MilestoneData(master, group=[sot])
-    milestones.get_milestones()
-    milestones.get_chart_info()
     assert milestones.key_names == [
         "Start of Project",
         "Standard A",
@@ -409,8 +402,7 @@ def test_removing_project_name_from_milestone_keys(milestone_masters, project_in
 
 def test_putting_milestones_into_wb(milestone_masters, project_info):
     mst = Master(milestone_masters, project_info)
-    milestones = MilestoneData(mst, group=group, baseline=None)
-    # milestones.filter_chart_info(milestone_type=["Approval", "Delivery"])
+    milestones = MilestoneData(mst, group=group, baseline="standard")
     wb = put_milestones_into_wb(milestones)
     wb.save("resources/milestone_data_output_test.xlsx")
 
@@ -418,8 +410,6 @@ def test_putting_milestones_into_wb(milestone_masters, project_info):
 def test_saving_graph_to_word_doc_one(word_doc, milestone_masters, project_info):
     master = Master(milestone_masters, project_info)
     milestones = MilestoneData(master, group=[sot, a11, a13])
-    milestones.get_milestones()
-    milestones.get_chart_info()
     change_word_doc_landscape(word_doc)
     # milestones.filter_chart_info(start_date="1/1/2013", end_date="1/1/2014")
     graph = milestone_chart(
@@ -555,7 +545,7 @@ def test_benefits_dashboard(benefits_masters, dashboard_template, project_info):
 
 def test_overall_dashboard(two_masters, dashboard_template, project_info):
     m = Master(two_masters, project_info)
-    milestones = MilestoneData(m, baseline=None)
+    milestones = MilestoneData(m, baseline="all")
     # milestones.get_milestones(baseline=[])
     wb = overall_dashboard(m, milestones, dashboard_template)
     wb.save("resources/test_dashboards_master_altered.xlsx")

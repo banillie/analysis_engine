@@ -177,24 +177,28 @@ def run_general(args):
 def milestones(args):
     print("compiling milestone analysis_engine")
     m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
-    if args["baselines"] and args["group"]:
-        if args["baselines"] == ["all"]:
-            milestones = MilestoneData(m, group=args["group"], baseline=None)
-        else:
-            print(args)
-            milestones = MilestoneData(m, group=args["group"], baseline=args["baselines"])
-    if args["start_date"] and args["end_date"]:
-        milestones.filter_chart_info(start_date=args["start_date"][0], end_date=args["end_date"][0])
-    # projects = (
-    #     m.project_stage["Q2 20/21"]["FBC"]
-    #     + m.project_stage["Q2 20/21"]["OBC"]
-    #     + [Projects.hs2_2b]
-    # )
-    # milestone_data = MilestoneData(m, group=m.current_projects, baseline=None)
-    # milestone_data.filter_chart_info(milestone_type=["Approval", "Delivery"])
-    wb = put_milestones_into_wb(milestones)
-    wb.save(root_path / "output/milestone_data_output.xlsx")
-    milestone_chart(milestones)
+    try:
+        if args["baselines"] and args["group"]:
+            if args["baselines"] == ["all"]:
+                milestones = MilestoneData(m, group=args["group"], baseline=None)
+            else:
+                milestones = MilestoneData(m, group=args["group"], baseline=args["baselines"])
+        if args["dates"]:
+            sd, ed = zip(args["dates"])  # hack refine
+            milestones.filter_chart_info(start_date=sd[0], end_date=ed[0])
+        # projects = (
+        #     m.project_stage["Q2 20/21"]["FBC"]
+        #     + m.project_stage["Q2 20/21"]["OBC"]
+        #     + [Projects.hs2_2b]
+        # )
+        # milestone_data = MilestoneData(m, group=m.current_projects, baseline=None)
+        # milestone_data.filter_chart_info(milestone_type=["Approval", "Delivery"])
+        wb = put_milestones_into_wb(milestones)
+        wb.save(root_path / "output/milestone_data_output.xlsx")
+        milestone_chart(milestones)
+    except ProjectNameError as e:
+        logger.critical(e)
+        sys.exit(1)
 
 
 
@@ -321,21 +325,12 @@ def main():
     )
 
     parser_milestones.add_argument(
-        "--start_date",
+        "--dates",
         type=str,
         metavar="",
         action="store",
-        nargs=1,
-        help="Start date for analysis",
-    )
-
-    parser_milestones.add_argument(
-        "--end_date",
-        type=str,
-        metavar="",
-        action="store",
-        nargs=1,
-        help="Start date for analysis",
+        nargs=2,
+        help="dates for analysis. Must provide start date and then end date in format e.g.""1/1/2021" "1/1/2022""."
     )
 
     for sub in [

@@ -480,6 +480,7 @@ class Master:
         self.current_quarter = self.master_data[0].quarter
         self.current_projects = self.master_data[0].projects
         self.abbreviations = {}
+        self.full_names = {}
         self.bl_info = {}
         self.bl_index = {}
         self.dft_groups = {}
@@ -506,11 +507,13 @@ class Master:
     def get_project_abbreviations(self) -> None:
         """gets the abbreviations for all current projects.
         held in the project info document"""
-        output_dict = {}
+        abb_dict = {}
+        fn_dict = {}
         error_case = []
         for p in self.project_information.projects:
             abb = self.project_information[p]["Abbreviations"]
-            output_dict[p] = {"abb": abb, "full name": p}
+            abb_dict[p] = {"abb": abb, "full name": p}
+            fn_dict[abb] = p
             if abb is None:
                 error_case.append(p)
 
@@ -521,7 +524,8 @@ class Master:
                 "Abbreviations must be provided for all projects in project_info. Program stopping. Please amend"
             )
 
-        self.abbreviations = output_dict
+        self.abbreviations = abb_dict
+        self.full_names = fn_dict
 
     def get_baseline_data(self) -> None:
         """
@@ -724,6 +728,7 @@ def get_group(master: Master, quarter: str, kwargs) -> List[str]:
 def cal_group(
         lists_input: List[str] or List[List[str]], master: Master, quarter: str
 ) -> List[str]:
+    error_case = []
     group = []
     if len(lists_input) > 1:
         for g in lists_input:
@@ -738,27 +743,31 @@ def cal_group(
                     try:
                         group.append(master.abbreviations[g]["full name"])
                     except KeyError:
-                        for name in master.abbreviations.keys():
-                            if g == master.abbreviations[name]["abb"]:
-                                group.append(master.abbreviations[name]["full name"])
+                        try:
+                            group.append(master.full_names[g])
+                        except KeyError:
+                            error_case.append(g)
 
     else:
+        p = lists_input[0]
         try:
-            group = master.project_stage[quarter][lists_input[0]]
+            group = master.project_stage[quarter][p]
         except KeyError:
             try:
-                group = master.dft_groups[quarter][lists_input[0]]
+                group = master.dft_groups[quarter][p]
             except KeyError:  # handling of full names and abbreviations
-                p = lists_input[0]
                 try:
                     group.append(master.abbreviations[p]["full name"])
                 except KeyError:
-                    for name in master.abbreviations.keys():
-                        if p == master.abbreviations[name]["abb"]:
-                            group.append(master.abbreviations[name]["full name"])
-        if not group:
-            logger.critical(lists_input[0] + " not a recognised project or group")
-            raise ProjectNameError("Program stopping. Please check project or group name and re-enter.")
+                    try:
+                        group.append(master.full_names[p])
+                    except KeyError:
+                        error_case.append(p)
+
+    if error_case:
+        for p in error_case:
+            logger.critical(p + " not a recognised project or group")
+        raise ProjectNameError("Program stopping. Please check project or group name and re-enter.")
 
     return group
 
@@ -1263,7 +1272,9 @@ def milestone_info_handling(output_list: list, t_list: list) -> list:
                 pass
 
 
-def remove_project_name(project_name: str, milestone_key_list: List[str]) -> List[str]:
+def remove_project_name_from_milestone_key(
+        project_name: str,
+        milestone_key_list: List[str]) -> List[str]:
     """In this instance project_name is the abbreviation"""
     output_list = []
     for key in milestone_key_list:
@@ -1315,25 +1326,7 @@ class MilestoneData:
         self.kwargs = kwargs
         self.baseline_type = baseline_type
         self.milestone_dict = {}
-        # self.current = {}
-        # self.last_quarter = {}
-        # self.baseline_dict = {}
-        # self.baseline_two = {}
-        self.ordered_list_current = []
-        self.ordered_list_last = []
-        self.ordered_list_bl = []
-        self.ordered_list_bl_two = []
-        self.key_names = []
-        self.key_names_last = []
-        self.key_names_baseline = []
-        self.type_list = []
-        self.md_current = []
-        self.md_last = []
-        self.md_last_po = []  # po is print out
-        self.md_baseline = []
-        self.md_baseline_po = []
-        self.md_baseline_two = []
-        self.md_baseline_two_po = []
+        self.sorted_milestone_dict = {}
         self.max_date = None
         self.min_date = None
         self.schedule_change = {}
@@ -1353,16 +1346,18 @@ class MilestoneData:
             self.group = get_group(
                 self.master, str(self.master.current_quarter), self.kwargs
             )
-            if self.kwargs["baseline"]:
-                self.iter_list = self.kwargs["baseline"]
-            else:
+            if self.kwargs['baseline'] == 'standard':
+                self.iter_list = ["current", "last", "bl_one"]
+            elif self.kwargs['baseline'] == 'all':
                 self.iter_list = ["current", "last", "bl_one", "bl_two", "bl_three"]
+            else:
+                self.iter_list = self.kwargs["baseline"]
 
         elif "quarter" in self.kwargs:
-            if self.kwargs["quarter"]:
-                self.iter_list = self.kwargs["quarter"]
-            else:
+            if self.kwargs['quarter'] == 'standard':
                 self.iter_list = [self.master.quarter_list[0], self.master.quarter_list[1]]
+            else:
+                self.iter_list = self.kwargs["quarter"]
 
         for idx, bl in enumerate(self.iter_list):   # bl means baseline and name should chang
             lower_dict = {}
@@ -1502,352 +1497,358 @@ class MilestoneData:
             bl_dict[bl] = lower_dict
         self.milestone_dict = bl_dict
 
-    # def get_milestones_all(self) -> None:
-    #     quarter_dict = {}
-    #     if "quarters" in self.kwargs.keys():
-    #         quarters = self.kwargs["quarters"]
-    #     else:
-    #         quarters = [self.master.quarter_list[0], self.master.quarter_list[1]]
-    #
-    #     for q in quarters:
-    #         self.group = get_group(self.master, q, self.kwargs)
-    #         ind = self.master.quarter_list.index(q)  # ind for index
-    #         lower_dict = {}
-    #         raw_list = []
-    #         for project_name in self.group:
-    #             project_list = []
-    #             try:
-    #                 p_data = self.master.master_data[ind].data[project_name]
-    #             # IndexError handles len of project bl index.
-    #             # TypeError handles None Type present if project not reporting last quarter
-    #             except (IndexError, TypeError):
-    #                 continue
-    #
-    #             # i loops below removes None Milestone names and rejects non-datetime date values.
-    #             p = self.master.abbreviations[project_name]["abb"]
-    #             for i in range(1, 50):
-    #                 try:
-    #                     t = [
-    #                         ("Project", p),
-    #                         ("Milestone", p_data["Approval MM" + str(i)]),
-    #                         ("Type", "Approval"),
-    #                         (
-    #                             "Date",
-    #                             p_data["Approval MM" + str(i) + " Forecast / Actual"],
-    #                         ),
-    #                         ("Notes", p_data["Approval MM" + str(i) + " Notes"]),
-    #                     ]
-    #                     milestone_info_handling(project_list, t)
-    #                     t = [
-    #                         ("Project", p),
-    #                         ("Milestone", p_data["Assurance MM" + str(i)]),
-    #                         ("Type", "Assurance"),
-    #                         (
-    #                             "Date",
-    #                             p_data["Assurance MM" + str(i) + " Forecast - Actual"],
-    #                         ),
-    #                         ("Notes", p_data["Assurance MM" + str(i) + " Notes"]),
-    #                     ]
-    #                     milestone_info_handling(project_list, t)
-    #                 except KeyError:  # handles inconsistent keys naming for approval milestones.
-    #                     try:
-    #                         t = [
-    #                             ("Project", p),
-    #                             ("Milestone", p_data["Approval MM" + str(i)]),
-    #                             ("Type", "Approval"),
-    #                             (
-    #                                 "Date",
-    #                                 p_data[
-    #                                     "Approval MM" + str(i) + " Forecast - Actual"
-    #                                 ],
-    #                             ),
-    #                             ("Notes", p_data["Approval MM" + str(i) + " Notes"]),
-    #                         ]
-    #                         milestone_info_handling(project_list, t)
-    #                     except KeyError:
-    #                         pass
-    #
-    #             # handles inconsistent number of Milestone. could be incorporated above.
-    #             for i in range(18, 67):
-    #                 try:
-    #                     t = [
-    #                         ("Project", p),
-    #                         ("Milestone", p_data["Project MM" + str(i)]),
-    #                         ("Type", "Delivery"),
-    #                         (
-    #                             "Date",
-    #                             p_data["Project MM" + str(i) + " Forecast - Actual"],
-    #                         ),
-    #                         ("Notes", p_data["Project MM" + str(i) + " Notes"]),
-    #                     ]
-    #                     milestone_info_handling(project_list, t)
-    #                 except KeyError:
-    #                     pass
-    #
-    #             # change in Q3. Some milestones collected via HMT approval section.
-    #             # this loop picks them up
-    #             # TODO check these are coming through in q3 data
-    #             for i in range(1, 4):
-    #                 try:
-    #                     t = [
-    #                         ("Project", p),
-    #                         ("Milestone", p_data["HMT Approval " + str(i)]),
-    #                         ("Type", "Approval"),
-    #                         (
-    #                             "Date",
-    #                             p_data["HMT Approval " + str(i) + " Forecast / Actual"],
-    #                         ),
-    #                         ("Notes", p_data["HMT Approval " + str(i) + " Notes"]),
-    #                     ]
-    #                     milestone_info_handling(project_list, t)
-    #                 except KeyError:
-    #                     pass
-    #
-    #             # loop to stop keys names being the same. Done at project level.
-    #             # not particularly concise code.
-    #             upper_counter_list = []
-    #             for entry in project_list:
-    #                 upper_counter_list.append(entry[1][1])
-    #             upper_count = Counter(upper_counter_list)
-    #             lower_counter_list = []
-    #             for entry in project_list:
-    #                 if upper_count[entry[1][1]] > 1:
-    #                     lower_counter_list.append(entry[1][1])
-    #                     lower_count = Counter(lower_counter_list)
-    #                     new_milestone_key = (
-    #                         entry[1][1] + " (" + str(lower_count[entry[1][1]]) + ")"
-    #                     )
-    #                     entry[1] = ("Milestone", new_milestone_key)
-    #                     raw_list.append(entry)
-    #                 else:
-    #                     raw_list.append(entry)
-    #
-    #         # puts the list in chronological order
-    #         sorted_list = sorted(raw_list, key=lambda k: (k[3][1] is None, k[3][1]))
-    #
-    #         for r in range(len(sorted_list)):
-    #             lower_dict["Milestone " + str(r)] = dict(sorted_list[r])
-    #
-    #         quarter_dict[q] = lower_dict
-    #
-    #     self.milestone_dict = quarter_dict
-
     def get_chart_info(self) -> None:
         """returns data lists for matplotlib chart"""
         # Note this code could refactored so that it collects all milestones
         # reported across current, last and baseline. At the moment it only
         # uses milestones that are present in the current quarter.
-        key_names = []
-        key_names_last = []
-        keys_names_baseline = []
-        md_current = []
-        md_last = []
-        md_last_po = []  # po is for printout
-        md_baseline = []
-        md_baseline_po = []
-        md_baseline_two_po = []
-        md_baseline_two = []
-        type_list = []
 
-        m_dict_keys = list(self.milestone_dict.keys())
+        output_dict = {}
+        for i in self.milestone_dict:
+            key_names = []
+            g_dates = []  # graph dates
+            r_dates = []  # raw dates
+            for v in self.milestone_dict[self.iter_list[0]].values():
+                p = None
+                n = None
+                d = None
+                for x in self.milestone_dict[i].values():
+                    if x["Project"] == v["Project"] and x["Milestone"] == v["Milestone"]:
+                        p = x["Project"]
+                        n = x["Milestone"]
+                        join = p + ", " + n
+                        # if join not in key_names:  # stop duplicates
+                        key_names.append(join)
+                        d = x["Date"]
+                        g_dates.append(d)
+                        r_dates.append(d)
+                        break
+                if p is None and n is None and d is None:
+                    p = v["Project"]
+                    n = v["Milestone"]
+                    join = p + ", " + n
+                    # if join not in key_names:
+                    key_names.append(join)
+                    g_dates.append(v["Date"])
+                    r_dates.append(None)
 
-        for m in self.milestone_dict[m_dict_keys[0]].values():
-            m_project = m["Project"]
-            m_name = m["Milestone"]
-            m_date = m["Date"]
-            m_type = m["Type"]
-            key_names.append(m_project + ", " + m_name)
-            md_current.append(m_date)
-            type_list.append(m_type)
+            output_dict[i] = {"names": key_names, "g_dates": g_dates, "r_dates": r_dates}
 
-            # In two loops below NoneType has to be replaced with a datetime object
-            # due to matplotlib being unable to handle NoneTypes when milestone_chart
-            # is created. Haven't been able to find a solution to this.
-            try:
-                m_last_date = None
-                for m_last in self.milestone_dict[m_dict_keys[1]].values():
-                    if m_last["Project"] == m_project:
-                        if m_last["Milestone"] == m_name:
-                            key_names_last.append(m_project + ", " + m_name)
-                            m_last_date = m_last["Date"]
-                            md_last.append(m_last_date)
-                            md_last_po.append(m_last_date)
-                            continue
-                if m_last_date is None:
-                    md_last.append(m_date)
-                    md_last_po.append(None)
-
-                m_bl_date = None
-                for m_bl in self.milestone_dict[m_dict_keys[2]].values():
-                    if m_bl["Project"] == m_project:
-                        if m_bl["Milestone"] == m_name:
-                            keys_names_baseline.append(m_project + ", " + m_name)
-                            m_bl_date = m_bl["Date"]
-                            md_baseline.append(m_bl_date)
-                            md_baseline_po.append(m_bl_date)
-                            continue
-                if m_bl_date is None:
-                    md_baseline.append(m_date)
-                    md_baseline_po.append(None)
-
-                m_bl_two_date = None
-                for m_bl_two in self.milestone_dict[m_dict_keys[3]].values():
-                    if m_bl_two["Project"] == m_project:
-                        if m_bl_two["Milestone"] == m_name:
-                            m_bl_two_date = m_bl_two["Date"]
-                            md_baseline_two.append(m_bl_two_date)
-                            md_baseline_two_po.append(m_bl_two_date)
-                            continue
-                if m_bl_two_date is None:
-                    md_baseline_two.append(m_date)
-                    md_baseline_two_po.append(None)
-
-            except IndexError:
-                pass
-
-        if len(self.group) == 1:
-            key_names = remove_project_name(
-                self.master.abbreviations[self.group[0]]["abb"], key_names
-            )
-        else:
-            pass
-
-        self.key_names = key_names
-        self.key_names_last = key_names_last
-        self.key_names_baseline = keys_names_baseline
-        self.md_current = md_current
-        self.md_last = md_last
-        self.md_last_po = md_last_po
-        self.md_baseline = md_baseline
-        self.md_baseline_po = md_baseline_po
-        self.md_baseline_two = md_baseline_two
-        self.md_baseline_two_po = md_baseline_two_po
-        self.type_list = type_list
-        self.max_date = max(
-            remove_none_types(self.md_current)
-            + remove_none_types(self.md_last)
-            + remove_none_types(self.md_baseline)
-        )
-        self.min_date = min(
-            remove_none_types(self.md_current)
-            + remove_none_types(self.md_last)
-            + remove_none_types(self.md_baseline)
-        )
+        self.sorted_milestone_dict = output_dict
+    # def get_chart_info_old(self) -> None:
+    #     """returns data lists for matplotlib chart"""
+    #     # Note this code could refactored so that it collects all milestones
+    #     # reported across current, last and baseline. At the moment it only
+    #     # uses milestones that are present in the current quarter.
+    #     key_names = []
+    #     key_names_last = []
+    #     keys_names_baseline = []
+    #     md_current = []
+    #     md_last = []
+    #     md_last_po = []  # po is for printout
+    #     md_baseline = []
+    #     md_baseline_po = []
+    #     md_baseline_two_po = []
+    #     md_baseline_two = []
+    #     type_list = []
+    #
+    #     for m in self.milestone_dict[self.iter_list[0]].values():
+    #         m_project = m["Project"]
+    #         m_name = m["Milestone"]
+    #         m_date = m["Date"]
+    #         m_type = m["Type"]
+    #         key_names.append(m_project + ", " + m_name)
+    #         md_current.append(m_date)
+    #         type_list.append(m_type)
+    #
+    #         # In two loops below NoneType has to be replaced with a datetime object
+    #         # due to matplotlib being unable to handle NoneTypes when milestone_chart
+    #         # is created. Haven't been able to find a solution to this.
+    #         try:
+    #             m_last_date = None
+    #             for m_last in self.milestone_dict[self.iter_list[1]].values():
+    #                 if m_last["Project"] == m_project:
+    #                     if m_last["Milestone"] == m_name:
+    #                         key_names_last.append(m_project + ", " + m_name)
+    #                         m_last_date = m_last["Date"]
+    #                         md_last.append(m_last_date)
+    #                         md_last_po.append(m_last_date)
+    #                         continue
+    #             if m_last_date is None:
+    #                 md_last.append(m_date)
+    #                 md_last_po.append(None)
+    #
+    #             m_bl_date = None
+    #             for m_bl in self.milestone_dict[self.iter_list[2]].values():
+    #                 if m_bl["Project"] == m_project:
+    #                     if m_bl["Milestone"] == m_name:
+    #                         keys_names_baseline.append(m_project + ", " + m_name)
+    #                         m_bl_date = m_bl["Date"]
+    #                         md_baseline.append(m_bl_date)
+    #                         md_baseline_po.append(m_bl_date)
+    #                         continue
+    #             if m_bl_date is None:
+    #                 md_baseline.append(m_date)
+    #                 md_baseline_po.append(None)
+    #
+    #             m_bl_two_date = None
+    #             for m_bl_two in self.milestone_dict[self.iter_list[3]].values():
+    #                 if m_bl_two["Project"] == m_project:
+    #                     if m_bl_two["Milestone"] == m_name:
+    #                         m_bl_two_date = m_bl_two["Date"]
+    #                         md_baseline_two.append(m_bl_two_date)
+    #                         md_baseline_two_po.append(m_bl_two_date)
+    #                         continue
+    #             if m_bl_two_date is None:
+    #                 md_baseline_two.append(m_date)
+    #                 md_baseline_two_po.append(None)
+    #
+    #         except IndexError:
+    #             pass
+    #
+    #     if len(self.group) == 1:
+    #         key_names = remove_project_name_from_milestone_key(
+    #             self.master.abbreviations[self.group[0]]["abb"], key_names
+    #         )
+    #     else:
+    #         pass
+    #
+    #     self.key_names = key_names
+    #     self.key_names_last = key_names_last
+    #     self.key_names_baseline = keys_names_baseline
+    #     self.md_current = md_current
+    #     self.md_last = md_last
+    #     self.md_last_po = md_last_po
+    #     self.md_baseline = md_baseline
+    #     self.md_baseline_po = md_baseline_po
+    #     self.md_baseline_two = md_baseline_two
+    #     self.md_baseline_two_po = md_baseline_two_po
+    #     self.type_list = type_list
+    #     self.max_date = max(
+    #         remove_none_types(self.md_current)
+    #         + remove_none_types(self.md_last)
+    #         + remove_none_types(self.md_baseline)
+    #     )
+    #     self.min_date = min(
+    #         remove_none_types(self.md_current)
+    #         + remove_none_types(self.md_last)
+    #         + remove_none_types(self.md_baseline)
+    #     )
 
     def filter_chart_info(
         self,
-        milestone_type: str or List[str] = "All",
-        key_of_interest: str or List[str] = None,
-        start_date: str = "1/1/2000",
-        end_date: str = "1/1/2041",
+        **filter_kwargs
     ):
         # bug handling required in the event that there are no milestones with the filter.
         # i.e. the filter returns no milestones.
+        filtered_dict = {}
 
-        #  Filter milestone type
-        milestone_type = string_conversion(milestone_type)
-        if milestone_type != ["All"]:  # needs to be list as per string conversion
-            for i, v in enumerate(self.type_list):
-                if v not in milestone_type:
-                    self.key_names[i] = "remove"
-                    self.md_current[i] = "remove"
-                    self.md_last[i] = "remove"
-                    self.md_last_po[i] = "remove"
-                    self.md_baseline[i] = "remove"
-                    self.md_baseline_po[i] = "remove"
-                    self.md_baseline_two[i] = "remove"
-                    self.md_baseline_two_po[i] = "remove"
-                    self.type_list[i] = "remove"
-                else:
-                    pass
+        if "type" in filter_kwargs:
+            for i, v in enumerate(self.milestone_dict[self.iter_list[0]].values()):
+                if v["Type"] in filter_kwargs["type"]:
+                    filtered_dict["Milestone " + str(i)] = v
+                    continue
 
-            self.key_names = [x for x in self.key_names if x != "remove"]
-            self.md_current = [x for x in self.md_current if x != "remove"]
-            self.md_last = [x for x in self.md_last if x != "remove"]
-            self.md_last_po = [x for x in self.md_last_po if x != "remove"]
-            self.md_baseline = [x for x in self.md_baseline if x != "remove"]
-            self.md_baseline_po = [x for x in self.md_baseline_po if x != "remove"]
-            self.md_baseline_two = [x for x in self.md_baseline_two if x != "remove"]
-            self.md_baseline_two_po = [
-                x for x in self.md_baseline_two_po if x != "remove"
-            ]
-            self.type_list = [x for x in self.type_list if x != "remove"]
-        else:
-            pass
+        elif "key" in filter_kwargs:
+            for i, v in enumerate(self.milestone_dict[self.iter_list[0]].values()):
+                if v["Milestone"] in filter_kwargs["type"]:
+                    filtered_dict["Milestone " + str(i)] = v
+                    continue
 
-        #  Filter milestone names of interest
-        key_of_interest = string_conversion(key_of_interest)
-        filtered_list = []
-        if key_of_interest is not None:
-            # if developed further clearly good use regex
-            for s in key_of_interest:  # s is string
-                for v in self.key_names:  # v is value
-                    if s in v:
-                        filtered_list.append(v)
-            for i, v in enumerate(self.key_names):  # fv is filtered value
-                if v not in filtered_list:
-                    self.key_names[i] = "remove"
-                    self.md_current[i] = "remove"
-                    self.md_last[i] = "remove"
-                    self.md_last_po[i] = "remove"
-                    self.md_baseline[i] = "remove"
-                    self.md_baseline_po[i] = "remove"
-                    self.md_baseline_two[i] = "remove"
-                    self.md_baseline_two_po[i] = "remove"
-                    self.type_list[i] = "remove"
-                else:
-                    pass
-            self.key_names = [x for x in self.key_names if x != "remove"]
-            self.md_current = [x for x in self.md_current if x != "remove"]
-            self.md_last = [x for x in self.md_last if x != "remove"]
-            self.md_last_po = [x for x in self.md_last_po if x != "remove"]
-            self.md_baseline = [x for x in self.md_baseline if x != "remove"]
-            self.md_baseline_po = [x for x in self.md_baseline_po if x != "remove"]
-            self.md_baseline_two = [x for x in self.md_baseline_two if x != "remove"]
-            self.md_baseline_two_po = [
-                x for x in self.md_baseline_two_po if x != "remove"
-            ]
-            self.type_list = [x for x in self.type_list if x != "remove"]
-        else:
-            pass
+        elif "dates" in filter_kwargs:
+            start_date, end_date = zip(filter_kwargs["dates"])
+            start = parser.parse(start_date[0], dayfirst=True)
+            end = parser.parse(end_date[0], dayfirst=True)
+            for i, v in enumerate(self.milestone_dict[self.iter_list[0]].values()):
+                if start.date() <= v["Date"] <= end.date():
+                    filtered_dict["Milestone " + str(i)] = v
+                    continue
 
-        #  Filter milestones based on date.
-        start = parser.parse(start_date, dayfirst=True)
-        end = parser.parse(end_date, dayfirst=True)
-        for i, d in enumerate(self.md_current):
-            if start.date() <= d <= end.date():
-                pass
+        elif "type" in filter_kwargs and "key" in filter_kwargs:
+            for i, v in enumerate(self.milestone_dict[self.iter_list[0]].values()):
+                if v["Type"] in filter_kwargs["type"]:
+                    if v["Milestone"] in filter_kwargs["keys"]:
+                        filtered_dict["Milestone " + str(i)] = v
+                        continue
+
+        elif "type" in filter_kwargs and "dates" in filter_kwargs:
+            start_date, end_date = zip(*filter_kwargs["dates"])
+            start = parser.parse(start_date, dayfirst=True)
+            end = parser.parse(end_date, dayfirst=True)
+            for i, v in enumerate(self.milestone_dict[self.iter_list[0]].values()):
+                if v["Type"] in filter_kwargs["type"]:
+                    if start.date() <= v["Dates"] <= end.date():
+                        filtered_dict["Milestone " + str(i)] = v
+                        continue
+
+        elif "key" in filter_kwargs and "dates" in filter_kwargs:
+            start_date, end_date = zip(*filter_kwargs["dates"])
+            start = parser.parse(start_date, dayfirst=True)
+            end = parser.parse(end_date, dayfirst=True)
+            for i, v in enumerate(self.milestone_dict[self.iter_list[0]].values()):
+                if v["Milestone"] in filter_kwargs["keys"]:
+                    if start.date() <= v["Date"] <= end.date():
+                        filtered_dict["Milestone " + str(i)] = v
+                        continue
+
+        elif "type" in filter_kwargs and "key" in filter_kwargs and "dates" in filter_kwargs:
+            start_date, end_date = zip(*filter_kwargs["dates"])
+            start = parser.parse(start_date, dayfirst=True)
+            end = parser.parse(end_date, dayfirst=True)
+            for i, v in enumerate(self.milestone_dict[self.iter_list[0]].values()):
+                if v["Type"] in filter_kwargs["type"]:
+                    if v["Milestone"] in filter_kwargs["keys"]:
+                        if start.date() <= filter_kwargs["dates"] <= end.date():
+                            filtered_dict["Milestone " + str(i)] = v
+                            continue
+
+        output_dict = {}
+        for dict in self.milestone_dict.keys():
+            if dict == self.iter_list[0]:
+                output_dict[dict] = filtered_dict
             else:
-                self.key_names[i] = "remove"
-                self.md_current[i] = "remove"
-                self.md_last[i] = "remove"
-                self.md_last_po[i] = "remove"
-                self.md_baseline[i] = "remove"  # HERE
-                self.md_baseline_po[i] = "remove"
-                self.md_baseline_two[i] = "remove"
-                self.md_baseline_two_po[i] = "remove"
-                self.type_list[i] = "remove"
-        self.key_names = [x for x in self.key_names if x != "remove"]
-        self.md_current = [x for x in self.md_current if x != "remove"]
-        self.md_last = [x for x in self.md_last if x != "remove"]
-        self.md_last_po = [x for x in self.md_last_po if x != "remove"]
-        self.md_baseline = [x for x in self.md_baseline if x != "remove"]
-        self.md_baseline_po = [x for x in self.md_baseline_po if x != "remove"]
-        self.md_baseline_two = [x for x in self.md_baseline_two if x != "remove"]
-        self.md_baseline_two_po = [x for x in self.md_baseline_two_po if x != "remove"]
-        self.type_list = [x for x in self.type_list if x != "remove"]
+                output_dict[dict] = self.milestone_dict[dict]
 
-        self.max_date = max(
-            remove_none_types(self.md_current)
-            + remove_none_types(self.md_last)
-            + remove_none_types(self.md_baseline)
-        )
+        self.milestone_dict = output_dict
+        self.get_chart_info()
 
-        self.min_date = min(
-            remove_none_types(self.md_current)
-            + remove_none_types(self.md_last)
-            + remove_none_types(self.md_baseline)
-        )
+
+
+        #         pass
+        #     else:
+        #         self.key_names[i] = "remove"
+        #         self.md_current[i] = "remove"
+        #         self.md_last[i] = "remove"
+        #         self.md_last_po[i] = "remove"
+        #         self.md_baseline[i] = "remove"  # HERE
+        #         self.md_baseline_po[i] = "remove"
+        #         self.md_baseline_two[i] = "remove"
+        #         self.md_baseline_two_po[i] = "remove"
+        #         self.type_list[i] = "remove"
+        # self.key_names = [x for x in self.key_names if x != "remove"]
+        # self.md_current = [x for x in self.md_current if x != "remove"]
+        # self.md_last = [x for x in self.md_last if x != "remove"]
+        # self.md_last_po = [x for x in self.md_last_po if x != "remove"]
+        # self.md_baseline = [x for x in self.md_baseline if x != "remove"]
+        # self.md_baseline_po = [x for x in self.md_baseline_po if x != "remove"]
+        # self.md_baseline_two = [x for x in self.md_baseline_two if x != "remove"]
+        # self.md_baseline_two_po = [x for x in self.md_baseline_two_po if x != "remove"]
+        # self.type_list = [x for x in self.type_list if x != "remove"]
+
+    # def filter_chart_info_old(
+    #     self,
+    #     milestone_type: str or List[str] = "All",
+    #     key_of_interest: str or List[str] = None,
+    #     start_date: str = "1/1/2000",
+    #     end_date: str = "1/1/2041",
+    # ):
+    #     # bug handling required in the event that there are no milestones with the filter.
+    #     # i.e. the filter returns no milestones.
+    #
+    #     #  Filter milestone type
+    #     milestone_type = string_conversion(milestone_type)
+    #     if milestone_type != ["All"]:  # needs to be list as per string conversion
+    #         for i, v in enumerate(self.type_list):
+    #             if v not in milestone_type:
+    #                 self.key_names[i] = "remove"
+    #                 self.md_current[i] = "remove"
+    #                 self.md_last[i] = "remove"
+    #                 self.md_last_po[i] = "remove"
+    #                 self.md_baseline[i] = "remove"
+    #                 self.md_baseline_po[i] = "remove"
+    #                 self.md_baseline_two[i] = "remove"
+    #                 self.md_baseline_two_po[i] = "remove"
+    #                 self.type_list[i] = "remove"
+    #             else:
+    #                 pass
+    #
+    #         self.key_names = [x for x in self.key_names if x != "remove"]
+    #         self.md_current = [x for x in self.md_current if x != "remove"]
+    #         self.md_last = [x for x in self.md_last if x != "remove"]
+    #         self.md_last_po = [x for x in self.md_last_po if x != "remove"]
+    #         self.md_baseline = [x for x in self.md_baseline if x != "remove"]
+    #         self.md_baseline_po = [x for x in self.md_baseline_po if x != "remove"]
+    #         self.md_baseline_two = [x for x in self.md_baseline_two if x != "remove"]
+    #         self.md_baseline_two_po = [
+    #             x for x in self.md_baseline_two_po if x != "remove"
+    #         ]
+    #         self.type_list = [x for x in self.type_list if x != "remove"]
+    #     else:
+    #         pass
+    #
+    #     #  Filter milestone names of interest
+    #     key_of_interest = string_conversion(key_of_interest)
+    #     filtered_list = []
+    #     if key_of_interest is not None:
+    #         # if developed further clearly good use regex
+    #         for s in key_of_interest:  # s is string
+    #             for v in self.key_names:  # v is value
+    #                 if s in v:
+    #                     filtered_list.append(v)
+    #         for i, v in enumerate(self.key_names):  # fv is filtered value
+    #             if v not in filtered_list:
+    #                 self.key_names[i] = "remove"
+    #                 self.md_current[i] = "remove"
+    #                 self.md_last[i] = "remove"
+    #                 self.md_last_po[i] = "remove"
+    #                 self.md_baseline[i] = "remove"
+    #                 self.md_baseline_po[i] = "remove"
+    #                 self.md_baseline_two[i] = "remove"
+    #                 self.md_baseline_two_po[i] = "remove"
+    #                 self.type_list[i] = "remove"
+    #             else:
+    #                 pass
+    #         self.key_names = [x for x in self.key_names if x != "remove"]
+    #         self.md_current = [x for x in self.md_current if x != "remove"]
+    #         self.md_last = [x for x in self.md_last if x != "remove"]
+    #         self.md_last_po = [x for x in self.md_last_po if x != "remove"]
+    #         self.md_baseline = [x for x in self.md_baseline if x != "remove"]
+    #         self.md_baseline_po = [x for x in self.md_baseline_po if x != "remove"]
+    #         self.md_baseline_two = [x for x in self.md_baseline_two if x != "remove"]
+    #         self.md_baseline_two_po = [
+    #             x for x in self.md_baseline_two_po if x != "remove"
+    #         ]
+    #         self.type_list = [x for x in self.type_list if x != "remove"]
+    #     else:
+    #         pass
+    #
+    #     #  Filter milestones based on date.
+    #     start = parser.parse(start_date, dayfirst=True)
+    #     end = parser.parse(end_date, dayfirst=True)
+    #     for i, d in enumerate(self.md_current):
+    #         if start.date() <= d <= end.date():
+    #             pass
+    #         else:
+    #             self.key_names[i] = "remove"
+    #             self.md_current[i] = "remove"
+    #             self.md_last[i] = "remove"
+    #             self.md_last_po[i] = "remove"
+    #             self.md_baseline[i] = "remove"  # HERE
+    #             self.md_baseline_po[i] = "remove"
+    #             self.md_baseline_two[i] = "remove"
+    #             self.md_baseline_two_po[i] = "remove"
+    #             self.type_list[i] = "remove"
+    #     self.key_names = [x for x in self.key_names if x != "remove"]
+    #     self.md_current = [x for x in self.md_current if x != "remove"]
+    #     self.md_last = [x for x in self.md_last if x != "remove"]
+    #     self.md_last_po = [x for x in self.md_last_po if x != "remove"]
+    #     self.md_baseline = [x for x in self.md_baseline if x != "remove"]
+    #     self.md_baseline_po = [x for x in self.md_baseline_po if x != "remove"]
+    #     self.md_baseline_two = [x for x in self.md_baseline_two if x != "remove"]
+    #     self.md_baseline_two_po = [x for x in self.md_baseline_two_po if x != "remove"]
+    #     self.type_list = [x for x in self.type_list if x != "remove"]
+    #
+    #     self.max_date = max(
+    #         remove_none_types(self.md_current)
+    #         + remove_none_types(self.md_last)
+    #         + remove_none_types(self.md_baseline)
+    #     )
+    #
+    #     self.min_date = min(
+    #         remove_none_types(self.md_current)
+    #         + remove_none_types(self.md_last)
+    #         + remove_none_types(self.md_baseline)
+    #     )
 
     def calculate_schedule_changes(self) -> None:
         """calculates the changes in project schedules. If standard key for calculation
@@ -2272,7 +2273,7 @@ def put_milestones_into_wb(milestones: MilestoneData) -> Workbook:
     ws = wb.active
 
     row_num = 2
-    for i, m in enumerate(milestones.key_names):
+    for i, m in enumerate(milestones.sorted_milestone_dict[milestones.iter_list[0]]["names"]):
         if len(milestones.group) == 1:
             project_name = milestones.group[0]
             pm = m  # pm is project milestone
@@ -2283,21 +2284,21 @@ def put_milestones_into_wb(milestones: MilestoneData) -> Workbook:
             pm = m.split(",")[1][1:]
             ws.cell(row=row_num + i, column=1).value = project_name  # project name
             ws.cell(row=row_num + i, column=2).value = pm  # milestone
-        ws.cell(row=row_num + i, column=3).value = milestones.md_current[i]
+        ws.cell(row=row_num + i, column=3).value = milestones.sorted_milestone_dict[milestones.iter_list[0]]["r_dates"][i]
         # .strftime("%d/%m/%Y")
         ws.cell(row=row_num + i, column=3).number_format = "dd/mm/yy"
         try:
-            ws.cell(row=row_num + i, column=4).value = milestones.md_last_po[i]
+            ws.cell(row=row_num + i, column=4).value = milestones.sorted_milestone_dict[milestones.iter_list[1]]["r_dates"][i]
             ws.cell(row=row_num + i, column=4).number_format = "dd/mm/yy"
         except AttributeError:
             pass
         try:
-            ws.cell(row=row_num + i, column=5).value = milestones.md_baseline_po[i]
+            ws.cell(row=row_num + i, column=5).value = milestones.sorted_milestone_dict[milestones.iter_list[2]]["r_dates"][i]
             ws.cell(row=row_num + i, column=5).number_format = "dd/mm/yy"
         except AttributeError:
             pass
         try:
-            ws.cell(row=row_num + i, column=6).value = milestones.md_baseline_two_po[i]
+            ws.cell(row=row_num + i, column=6).value = milestones.milestones.sorted_milestone_dict[milestones.iter_list[3]]["r_dates"][i]
             ws.cell(row=row_num + i, column=6).number_format = "dd/mm/yy"
         except AttributeError:
             pass
@@ -3479,6 +3480,17 @@ def do_mask(x: List[datetime.date], y: List[datetime.date]):
     return np.array(x)[mask], np.array(y)[mask]
 
 
+def calculate_max_min_date(milestones: MilestoneData, **kwargs) -> int:
+    m_list = []
+    for i in milestones.sorted_milestone_dict.keys():
+        m_list += milestones.sorted_milestone_dict[i]["g_dates"]
+
+    if kwargs["value"] == 'max':
+        return max(m_list)
+    if kwargs["value"] == 'min':
+        return min(m_list)
+
+
 def milestone_chart(
     milestones: MilestoneData,
     **kwargs,
@@ -3509,52 +3521,17 @@ def milestone_chart(
                 final_labels.append(l)
         return final_labels
 
-    m_key_names = handle_long_keys(milestones.key_names)
+    m_key_names = handle_long_keys(milestones.sorted_milestone_dict[milestones.iter_list[0]]["names"])
 
-    # convert lists into numpy arrays.
-    # milestone_data.md_baseline = np.array(milestone_data.md_baseline)
-    # milestone_data.md_last = np.array(milestone_data.md_last)
-    # milestone_data.md_current = np.array(milestone_data.md_current)
-
-    # fom stackoverflow, Since plotting series as a scatter plot, the order
-    # is not crucial. index nparrays for non-zero elements. not using at moment.
-    # idx_three = milestone_data.md_current.nonzero()[0].tolist()
-    # ax1.scatter(
-    #     milestone_data.md_current[idx_three],
-    #     np.array(milestone_data.key_names)[idx_three],
-    #     label="Current",
-    #     zorder=10,
-    #     c='g'
-    # )
-    # idx_two = milestone_data.md_last.nonzero()[0].tolist()
-    # ax1.scatter(
-    #     milestone_data.md_last[idx_two],
-    #     np.array(milestone_data.key_names)[idx_two],
-    #     label="Last quarter",
-    #     zorder=5,
-    #     c='orange'
-    # )
-    # idx = milestone_data.md_baseline.nonzero()[0].tolist()
-    # ax1.scatter(
-    #     milestone_data.md_baseline[idx],
-    #     np.array(milestone_data.key_names)[idx],
-    #     label="Baseline",
-    #     zorder=1,
-    #     c='b'
-    # )
-
-    # this method does not handle NoneTypes. Therefore get_chart_info returns md_current
-    # instead of NoneTypes. Works fine, but underlying data is incorrect. Although this is
-    # hidden from the user, preference for not making data wrong. but using at the moment.
     try:
-        ax1.scatter(milestones.md_baseline, m_key_names, label=milestones.iter_list[2], s=200)
+        ax1.scatter(milestones.sorted_milestone_dict[milestones.iter_list[2]]["g_dates"], m_key_names, label=milestones.iter_list[2], s=200)
     except IndexError:  # maybe IndexError also
         pass
     try:
-        ax1.scatter(milestones.md_last, m_key_names, label=milestones.iter_list[1], s=200)
+        ax1.scatter(milestones.sorted_milestone_dict[milestones.iter_list[1]]["g_dates"], m_key_names, label=milestones.iter_list[1], s=200)
     except IndexError:
         pass
-    ax1.scatter(milestones.md_current, m_key_names, label=milestones.iter_list[0], s=200)
+    ax1.scatter(milestones.sorted_milestone_dict[milestones.iter_list[0]]["g_dates"], m_key_names, label=milestones.iter_list[0], s=200)
 
     # ax1.scatter(*do_mask(milestone_data.md_current, milestone_data.key_names), label="Current", zorder=10, c='g')
     # ax1.scatter(*do_mask(milestone_data.md_last, milestone_data.key_names), label="Last quarter", zorder=5, c='orange')
@@ -3574,7 +3551,10 @@ def milestone_chart(
 
     """calculate the length of the time period covered in chart.
     Not perfect as baseline dates can distort."""
-    td = (milestones.max_date - milestones.min_date).days
+
+    max_date = calculate_max_min_date(milestones, value="max")
+    min_date = calculate_max_min_date(milestones, value="min")
+    td = (max_date - min_date).days
     if td >= 365 * 3:
         ax1.xaxis.set_major_locator(years)
         ax1.xaxis.set_minor_locator(months)
@@ -3640,9 +3620,9 @@ def milestone_chart(
         blue_line = kwargs["blue_line"]
         if blue_line == "Today":
             if (
-                milestones.min_date
+                min_date
                 <= datetime.date.today()
-                <= milestones.max_date
+                <= max_date
             ):
                 plt.axvline(datetime.date.today())
                 plt.figtext(
@@ -3654,7 +3634,7 @@ def milestone_chart(
                     fontweight="bold",
                 )
         if blue_line == "ipdc_date":
-            if milestones.min_date <= IPDC_DATE <= milestones.max_date:
+            if min_date <= IPDC_DATE <= max_date:
                 plt.axvline(IPDC_DATE)
                 plt.figtext(
                     0.98,
@@ -5235,19 +5215,19 @@ def print_out_project_milestones(
     hdr_cells[3].text = "Change from baseline"
     hdr_cells[4].text = "Notes"
 
-    for i, m in enumerate(milestones.key_names):
+    for i, m in enumerate(milestones.sorted_milestone_dict[milestones.iter_list[0]]["names"]):
         row_cells = table.add_row().cells
         row_cells[0].text = m
-        row_cells[1].text = milestones.md_current[i].strftime("%d/%m/%Y")
+        row_cells[1].text = milestones.sorted_milestone_dict[milestones.iter_list[0]]["r_date"].strftime("%d/%m/%Y")
         try:
             row_cells[2].text = plus_minus_days(
-                (milestones.md_current[i] - milestones.md_last_po[i]).days
+                (milestones.sorted_milestone_dict[milestones.iter_list[0]]["r_date"] - milestones.sorted_milestone_dict[milestones.iter_list[1]]["r_date"]).days
             )
         except TypeError:
             row_cells[2].text = "Not reported"
         try:
             row_cells[3].text = plus_minus_days(
-                (milestones.md_current[i] - milestones.md_baseline_po[i]).days
+                (milestones.sorted_milestone_dict[milestones.iter_list[0]]["r_date"] - milestones.sorted_milestone_dict[milestones.iter_list[2]]["r_date"]).days
             )
         except TypeError:
             row_cells[3].text = "Not reported"
@@ -5671,10 +5651,10 @@ def data_query_into_wb(master: Master, **kwargs) -> Workbook:
         group = get_group(master, q, kwargs)
 
         milestones_one = MilestoneData(master, quarters=[q])
-        milestones_one.get_milestones_all()
+        # milestones_one.get_milestones_all()
         try:
             milestones_two = MilestoneData(master, quarters=[quarters[z + 1]])
-            milestones_two.get_milestones_all()
+            # milestones_two.get_milestones_all()
         except IndexError:
             pass
 
@@ -6792,7 +6772,7 @@ def schedule_dashboard(
 
             def get_next_milestone(p_name: str, mils: MilestoneData) -> list:
 
-                for x in mils.milestone_dict["current"].values():
+                for x in mils.milestone_dict[milestones.iter_list[0]].values():
                     if x["Project"] == p_name:
                         d = x["Date"]
                         ms = x["Milestone"]
