@@ -79,21 +79,24 @@ def run_correct_args(
     ae_class: MilestoneData or CostData or VfMData or DcaData or RiskData,
     args: argparse.ArgumentParser,
 ) -> MilestoneData or CostData or VfMData or DcaData:
-    # try:  # acts as partition for subcommand options
-    if args["quarters"] and args["stage"]:  # to test
-        data = ae_class(m, quarters=args["quarters"], stage=args["stage"])
-    elif args["quarters"] and args["group"]:  # to test
-        data = ae_class(m, quarters=args["quarters"], group=args["group"])
+    if args["quarters"] and args["stage"]:
+        data = ae_class(m, quarter=args["quarters"], stage=args["stage"])
+    elif args["quarters"] and args["group"]:
+        data = ae_class(m, quarter=args["quarters"], group=args["group"])
+    elif args["baselines"] and args["stage"]:
+        data = ae_class(m, baseline=args["baselines"], stage=args["stage"])
+    elif args["baselines"] and args["group"]:
+        data = ae_class(m, baseline=args["baselines"], group=args["group"])
+    elif args["baselines"]:
+        data = ae_class(m, baseline=args["baselines"])
     elif args["quarters"]:
-        data = ae_class(m, quarters=args["quarters"])
+        data = ae_class(m, quarter=args["quarters"])
     elif args["stage"]:
-        data = ae_class(m, group=args["stage"])
+        data = ae_class(m, quarter="standard", group=args["stage"])
     elif args["group"]:
-        data = ae_class(m, group=args["group"])
+        data = ae_class(m, quarter="standard", group=args["group"])
     else:
-        data = ae_class(m, group=m.current_projects)
-    # except KeyError:
-    #     data = ae_class(m)
+        data = ae_class(m, baseline="standard")
 
     return data
 
@@ -146,22 +149,24 @@ def run_general(args):
             doc = open_word_doc(root_path / "input/summary_temp.docx")
             c = run_correct_args(m, DandelionData, args)
             wb = dandelion_data_into_wb(c)
-            graph = run_dandelion_matplotlib_chart(c)
-            put_matplotlib_fig_into_word(doc, graph, size=4, transparent=True)
-            doc.save(root_path / "output/dandelion_output.docx")
+            if args['chart']:
+                for i in c.iter_list:
+                    graph = run_dandelion_matplotlib_chart(c.d_data[i], chart=True)
+                    if args['chart'] == 'save':
+                        put_matplotlib_fig_into_word(doc, graph, size=6, transparent=True)
+                        doc.save(root_path / "output/dandelion_chart.docx")
         if programme == "costs":
             doc = open_word_doc(root_path / "input/summary_temp.docx")
             c = run_correct_args(m, CostData, args)
             wb = cost_profile_into_wb(c)
-            if args["title"]:
-                graph = cost_profile_graph(c, title=args["title"])
-            else:
-                graph = cost_profile_graph(c)
-            put_matplotlib_fig_into_word(doc, graph, size=6, transparent=False)
-            doc.save(root_path / "output/costs_chart.docx")
-        # if programme == "milestones":
-        #     c = run_correct_args(m, MilestoneData, args)
-        #
+            if args['chart']:
+                if args["title"]:
+                    graph = cost_profile_graph(c, title=args["title"], chart=True)
+                else:
+                    graph = cost_profile_graph(c, chart=True)
+                if args['chart'] == 'save':
+                    put_matplotlib_fig_into_word(doc, graph, size=6, transparent=False)
+                    doc.save(root_path / "output/costs_chart.docx")
 
         if programme != "speedial":  # only excel outputs
             wb.save(root_path / "output/{}.xlsx".format(programme))
@@ -266,7 +271,7 @@ def main():
     parser_dashboard = subparsers.add_parser("dashboards", help="ipdc dashboard")
     parser_dandelion = subparsers.add_parser(
         "dandelion",
-        help="dandelion graph and data (early version --quarters will not work).",
+        help="dandelion graph and data (early version of graph output).",
     )
     parser_costs = subparsers.add_parser(
         "costs",
@@ -326,6 +331,26 @@ def main():
         help="Returns analysis for specified baselines. Must be in correct format",
     )
 
+    parser_costs.add_argument(
+        "--baselines",
+        type=str,
+        metavar="",
+        action="store",
+        nargs="+",
+        choices=["current", "last", "bl_one", "bl_two", "bl_three", "all"],
+        help="Returns analysis for specified baselines. Must be in correct format",
+    )
+
+    parser_dandelion.add_argument(
+        "--baselines",
+        type=str,
+        metavar="",
+        action="store",
+        nargs="+",
+        choices=["current", "last", "bl_one", "bl_two", "bl_three", "all"],
+        help="Returns analysis for specified baselines. Must be in correct format",
+    )
+
     parser_milestones.add_argument(
         "--dates",
         type=str,
@@ -336,6 +361,22 @@ def main():
         "1/1/2021"
         "1/1/2022"
         ".",
+    )
+
+    parser_dandelion.add_argument(
+        "--chart",
+        type=str,
+        action="store",
+        choices=['show', 'save'],
+        help="options for building and saving graph output. Commands are 'show' or 'save' "
+    )
+
+    parser_costs.add_argument(
+        "--chart",
+        type=str,
+        action="store",
+        choices=['show', 'save'],
+        help="options for building and saving graph output. Commands are 'show' or 'save' "
     )
 
     for sub in [

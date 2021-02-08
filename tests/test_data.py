@@ -178,20 +178,19 @@ def test_project_report_meta_data(word_doc, project_info, two_masters):
 
 def test_get_project_cost_profile(costs_masters, project_info):
     master = Master(costs_masters, project_info)
-    # master.check_baselines()
-    costs = CostData(master, group=[f9])
-    assert len(costs.current_profile) == 24
+    costs = CostData(master, group=[f9], baseline='standard')
+    assert len(costs.c_profiles['current']['prof']) == 24
 
 
 def test_project_cost_profile_chart(costs_masters, project_info):
     master = Master(costs_masters, project_info)
-    costs = CostData(master, group=[f9])
-    cost_profile_graph(costs)
+    costs = CostData(master, stage=[f9], baseline='standard')
+    cost_profile_graph(costs, chart='show')
 
 
 def test_project_cost_profile_into_wb(costs_masters, project_info):
     master = Master(costs_masters, project_info)
-    costs = CostData(master, group=group)
+    costs = CostData(master, baseline='standard')
     wb = cost_profile_into_wb(costs)
     wb.save("resources/test_cost_profile_output.xlsx")
 
@@ -435,7 +434,7 @@ def test_saving_graph_to_word_doc_one(word_doc, milestone_masters, project_info)
     change_word_doc_landscape(word_doc)
     # milestones.filter_chart_info(start_date="1/1/2013", end_date="1/1/2014")
     graph = milestone_chart(milestones, title="Group Test", blue_line="Today")
-    put_matplotlib_fig_into_word(word_doc, graph)
+    put_matplotlib_fig_into_word(word_doc, graph, size=2)
     word_doc.save("resources/summary_temp_altered.docx")
 
 
@@ -546,7 +545,7 @@ def test_financial_dashboard(costs_masters, dashboard_template, project_info):
 
 def test_schedule_dashboard(milestone_masters, dashboard_template, project_info):
     m = Master(milestone_masters, project_info)
-    milestones = MilestoneData(m, group=m.current_projects, baseline="all")
+    milestones = MilestoneData(m, baseline="all")
     milestones.filter_chart_info(milestone_type=["Approval", "Delivery"])
     wb = schedule_dashboard(m, milestones, dashboard_template)
     wb.save("resources/test_dashboards_master_altered.xlsx")
