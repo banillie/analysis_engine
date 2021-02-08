@@ -1,10 +1,11 @@
 from analysis_engine.data import open_pickle_file, root_path, DcaData, CostData, MilestoneData, \
-    cost_v_schedule_chart_into_wb, RiskData, DandelionData
+    cost_v_schedule_chart_into_wb, RiskData, DandelionData, VfMData
 
 # print("compiling cost and schedule matrix analysis")
 m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
 # dandelion = DandelionData(m, quarter="standard")
-costs = CostData(m, baseline='all')
+# costs = CostData(m, baseline='all')
+vfm = VfMData(m, quarter=['standard'])
 # dca = DcaData(m)
 # dca.get_changes()
 # risk = RiskData(m, group=["Rail"])

@@ -472,8 +472,7 @@ def test_risk_analysis(project_info, risk_masters):
 
 def test_vfm_analysis(project_info, vfm_masters):
     m = Master(vfm_masters, project_info)
-    quarter_list = ["Q1 20/21", "Q4 19/20"]
-    vfm = VfMData(m, group=["RPE"])
+    vfm = VfMData(m, quarter=['standard'])
     wb = vfm_into_excel(vfm)
     wb.save("resources/vfm.xlsx")
 

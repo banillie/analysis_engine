@@ -484,6 +484,7 @@ class Master:
         self.bl_info = {}
         self.bl_index = {}
         self.dft_groups = {}
+        self.project_group = {}
         self.project_stage = {}
         self.quarter_list = []
         self.get_quarter_list()
@@ -783,21 +784,6 @@ class CostData:
         self.iter_list = []
         self.c_totals = {}
         self.c_profiles = {}
-        # self.cat_spent = []
-        # self.cat_profiled = []
-        # self.cat_unprofiled = []
-        # self.spent = []
-        # self.profiled = []
-        # self.unprofiled = []
-        # self.current_profile = []
-        # self.last_profile = []
-        # self.baseline_profile_one = []
-        # self.baseline_profile_two = []
-        # self.baseline_profile_three = []
-        # self.rdel_profile = []
-        # self.cdel_profile = []
-        # self.ngov_profile = []
-        # self.y_scale_max = 0
         self.wlc_change = {}
         self.get_cost_totals()
         self.get_cost_profile()
@@ -832,7 +818,7 @@ class CostData:
                 self.iter_list = self.kwargs["baseline"]
 
         elif "quarter" in self.kwargs:
-            if self.kwargs["quarter"] == "standard":
+            if self.kwargs["quarter"] == ["standard"]:
                 self.iter_list = [
                     self.master.quarter_list[0],
                     self.master.quarter_list[1],
@@ -963,7 +949,7 @@ class CostData:
             self.group = get_group(
                 self.master, str(self.master.current_quarter), self.kwargs
             )
-            if self.kwargs["baseline"] == "standard":
+            if self.kwargs["baseline"] == ["standard"]:
                 self.iter_list = ["current", "last", "bl_one"]
             elif self.kwargs["baseline"] == ["all"]:
                 self.iter_list = ["current", "last", "bl_one", "bl_two", "bl_three"]
@@ -971,7 +957,7 @@ class CostData:
                 self.iter_list = self.kwargs["baseline"]
 
         elif "quarter" in self.kwargs:
-            if self.kwargs["quarter"] == "standard":
+            if self.kwargs["quarter"] == ["standard"]:
                 self.iter_list = [
                     self.master.quarter_list[0],
                     self.master.quarter_list[1],
@@ -2289,9 +2275,9 @@ def cost_profile_graph(costs: CostData, **kwargs) -> plt.figure:
     fig = set_fig_size(kwargs, fig)
 
     # title
-    title = get_chart_title(costs, kwargs)
+    # title = get_chart_title(costs, kwargs)
 
-    plt.suptitle(title, fontweight="bold", fontsize=25)
+    plt.suptitle("example", fontweight="bold", fontsize=25)
 
     # Overall cost profile chart
     for i in reversed(costs.iter_list):
@@ -2302,36 +2288,6 @@ def cost_profile_graph(costs: CostData, **kwargs) -> plt.figure:
             linewidth=5.0,
             marker="o",
         )
-    # try:
-    #     ax1.plot(
-    #         YEAR_LIST,
-    #         np.array(costs.c_profiles[costs.iter_list[3]]['prof']),  # baseline profile
-    #         label=costs.iter_list[3],
-    #         linewidth=5.0,
-    #         marker="o",
-    #     )
-    #
-    # ax1.plot(
-    #     YEAR_LIST,
-    #     np.array(costs.c_profiles[costs.iter_list[2]]['prof']),  # baseline profile
-    #     label=costs.iter_list[2],
-    #     linewidth=5.0,
-    #     marker="o",
-    # )
-    # ax1.plot(
-    #         YEAR_LIST,
-    #         np.array(costs.c_profiles[costs.iter_list[1]]['prof']),  # last quarter profile
-    #         label=costs.iter_list[1],
-    #         linewidth=5.0,
-    #         marker="o",
-    # )
-    # ax1.plot(
-    #     YEAR_LIST,
-    #     np.array(costs.c_profiles[costs.iter_list[0]]['prof']),  # current profile
-    #     label=costs.iter_list[0],
-    #     linewidth=5.0,
-    #     marker="o",
-    # )
 
     # Chart styling
     plt.xticks(rotation=45, size=14)
@@ -4227,45 +4183,69 @@ class VfMData:
         **kwargs,
     ):
         self.master = master
+        self.iter_list = []
+        self.baseline_type = "ipdc_benefits"
         self.kwargs = kwargs
+        self.group = []
         self.vfm_dictionary = {}
         self.vfm_cat_count = {}
         self.vfm_cat_pvc = {}
         self.get_dictionary()
         self.get_count()
 
-    # TODO kwargs error handling. e.g wrong stage or group entered or kwargs return empty lists.
     def get_dictionary(self) -> None:
+        if "baseline" in self.kwargs:
+            self.group = get_group(
+                self.master, str(self.master.current_quarter), self.kwargs
+            )
+            if self.kwargs["baseline"] == ["standard"]:
+                self.iter_list = ["current", "last", "bl_one"]
+            elif self.kwargs["baseline"] == ["all"]:
+                self.iter_list = ["current", "last", "bl_one", "bl_two", "bl_three"]
+            else:
+                self.iter_list = self.kwargs["baseline"]
+
+        elif "quarter" in self.kwargs:
+            if self.kwargs["quarter"] == ["standard"]:
+                self.iter_list = [
+                    self.master.quarter_list[0],
+                    self.master.quarter_list[1],
+                ]
+            else:
+                self.iter_list = self.kwargs["quarter"]
+
         quarter_dict = {}
-        if "quarters" in self.kwargs.keys():
-            quarters = self.kwargs["quarters"]
-        else:
-            quarters = [self.master.quarter_list[0], self.master.quarter_list[1]]
-        for q in quarters:  # q is quarter
+
+        for idx, tp in enumerate(self.iter_list):
             project_dict = {}
-            i = self.master.quarter_list.index(q)  # i for index
-            if "stage" in self.kwargs.keys():
-                s_input = self.kwargs["stage"]
-                group = cal_group(s_input, self.master, q)
-            if "group" in self.kwargs.keys():
-                g_input = self.kwargs["group"]
-                group = cal_group(g_input, self.master, q)
-            if "stage" not in self.kwargs.keys() and "group" not in self.kwargs.keys():
-                group = self.master.master_data[i].projects
-            for project_name in group:
+            if "quarter" in self.kwargs:
+                self.group = get_group(self.master, str(tp), self.kwargs)
+                q_idx = self.master.quarter_list.index(tp)
+            for p in self.group:
+                if "baseline" in self.kwargs:
+                    bl_index = self.master.bl_index[self.baseline_type][p]
+                    try:
+                        p_data = self.master.master_data[bl_index[idx]].data[p]
+                    except (IndexError, TypeError):
+                        # IndexError some p bls only three in this instance oldest bl is taken
+                        # TypeError some p last is None
+                        p_data = self.master.master_data[bl_index[-1]].data[p]
+                elif "quarter" in self.kwargs:
+                    p_data = self.master.master_data[q_idx].data[p]
                 vfm_list = []
+                vfm = ("Group", DFT_GROUP_DICT[p_data["DfT Group"]])
+                vfm_list.append(vfm)
                 for vfm_type in VFM_LIST:
                     try:
                         vfm = (
-                            vfm_type,
-                            self.master.master_data[i].data[project_name][vfm_type],
+                            vfm_type, p_data[vfm_type],
                         )
                         vfm_list.append(vfm)
                     except KeyError:  # vfm range keys not in all masters
                         pass
 
-                project_dict[project_name] = dict(vfm_list)
-            quarter_dict[str(self.master.master_data[i].quarter)] = project_dict
+                project_dict[p] = dict(vfm_list)
+            quarter_dict[tp] = project_dict
 
         self.vfm_dictionary = quarter_dict
 
@@ -4331,44 +4311,41 @@ class VfMData:
 def vfm_into_excel(vfm_data: VfMData) -> workbook:
     wb = Workbook()
 
-    # quarter = string_conversion(quarter)
-
-    for q in vfm_data.vfm_dictionary.keys():
+    for quarter in vfm_data.vfm_dictionary.keys():
         start_row = 3
         ws = wb.create_sheet(
-            make_file_friendly(q)
+            make_file_friendly(quarter)
         )  # creating worksheets. names restricted to 30 characters.
-        ws.title = make_file_friendly(q)  # title of worksheet
-        for i, project_name in enumerate(list(vfm_data.vfm_dictionary[q].keys())):
-            ws.cell(row=start_row + i, column=2).value = vfm_data.master.abbreviations[
-                project_name
-            ]["abb"]
+        ws.title = make_file_friendly(quarter)  # title of worksheet
+        for i, project_name in enumerate(list(vfm_data.vfm_dictionary[quarter].keys())):
+            abb = vfm_data.master.abbreviations[project_name]["abb"]
+            ws.cell(row=start_row + i, column=2).value = abb
             for x, key in enumerate(
-                list(vfm_data.vfm_dictionary[q][project_name].keys())
+                list(vfm_data.vfm_dictionary[quarter][project_name].keys())
             ):
                 ws.cell(row=2, column=3 + x).value = key
                 ws.cell(
                     row=start_row + i, column=3 + x
-                ).value = vfm_data.vfm_dictionary[q][project_name][key]
+                ).value = vfm_data.vfm_dictionary[quarter][project_name][key]
 
         ws.cell(row=2, column=2).value = "Project/Programme"
 
     start_row = 4
     ws = wb.create_sheet("Count")
     ws.title = "Count"
-    for x, q in enumerate(vfm_data.vfm_dictionary.keys()):
-        ws.cell(row=3, column=3 + x).value = q
-        ws.cell(row=3 + 12, column=3 + x).value = q
+    for x, quarter in enumerate(vfm_data.vfm_dictionary.keys()):
+        ws.cell(row=3, column=3 + x).value = quarter
+        ws.cell(row=3 + 12, column=3 + x).value = quarter
         for i, cat in enumerate(VFM_CAT):
             ws.cell(row=start_row + i, column=2).value = cat
             ws.cell(row=start_row + i + 12, column=2).value = cat
             try:
                 ws.cell(row=start_row + i, column=3 + x).value = vfm_data.vfm_cat_pvc[
-                    q
+                    quarter
                 ][cat]
                 ws.cell(
                     row=start_row + i + 12, column=3 + x
-                ).value = vfm_data.vfm_cat_count[q][cat]
+                ).value = vfm_data.vfm_cat_count[quarter][cat]
             except KeyError:
                 pass
 

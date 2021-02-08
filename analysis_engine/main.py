@@ -92,11 +92,11 @@ def run_correct_args(
     elif args["quarters"]:
         data = ae_class(m, quarter=args["quarters"])
     elif args["stage"]:
-        data = ae_class(m, quarter="standard", group=args["stage"])
+        data = ae_class(m, quarter=["standard"], group=args["stage"])
     elif args["group"]:
-        data = ae_class(m, quarter="standard", group=args["group"])
+        data = ae_class(m, quarter=["standard"], group=args["group"])
     else:
-        data = ae_class(m, baseline="standard")
+        data = ae_class(m, quarter=["standard"])
 
     return data
 
@@ -351,16 +351,23 @@ def main():
         help="Returns analysis for specified baselines. Must be in correct format",
     )
 
+    parser_vfm.add_argument(
+        "--baselines",
+        type=str,
+        metavar="",
+        action="store",
+        nargs="+",
+        choices=["current", "last", "bl_one", "bl_two", "bl_three", "all"],
+        help="Returns analysis for specified baselines. Must be in correct format",
+    )
+
     parser_milestones.add_argument(
         "--dates",
         type=str,
         metavar="",
         action="store",
         nargs=2,
-        help="dates for analysis. Must provide start date and then end date in format e.g."
-        "1/1/2021"
-        "1/1/2022"
-        ".",
+        help="dates for analysis. Must provide start date and then end date in format e.g. '1/1/2021' '1/1/2022'.",
     )
 
     parser_dandelion.add_argument(
