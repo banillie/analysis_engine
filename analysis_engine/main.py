@@ -331,6 +331,16 @@ def main():
         help="Returns analysis for specified baselines. Must be in correct format",
     )
 
+    parser_risks.add_argument(
+        "--baselines",
+        type=str,
+        metavar="",
+        action="store",
+        nargs="+",
+        choices=["current", "last", "bl_one", "bl_two", "bl_three", "all"],
+        help="Returns analysis for specified baselines. Must be in correct format",
+    )
+
     parser_costs.add_argument(
         "--baselines",
         type=str,

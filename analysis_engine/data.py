@@ -3930,6 +3930,9 @@ class RiskData:
     def __init__(self, master: Master, **kwargs):
         self.master = master
         self.kwargs = kwargs
+        self.iter_list = []
+        self.baseline_type = "ipdc_costs"
+        self.group = []
         self.risk_dictionary = {}
         self.risk_count = {}
         self.risk_impact_count = {}
@@ -3938,34 +3941,55 @@ class RiskData:
 
     def get_dictionary(self):
         quarter_dict = {}
-        if "quarters" in self.kwargs:  # is keys() necessary
-            quarters = self.kwargs["quarters"]
-        else:
-            quarters = [self.master.quarter_list[0], self.master.quarter_list[1]]
-        for q in quarters:  # q is quarter
+        if "baseline" in self.kwargs:
+            self.group = get_group(
+                self.master, str(self.master.current_quarter), self.kwargs
+            )
+            if self.kwargs["baseline"] == ["standard"]:
+                self.iter_list = ["current", "last", "bl_one"]
+            elif self.kwargs["baseline"] == ["all"]:
+                self.iter_list = ["current", "last", "bl_one", "bl_two", "bl_three"]
+            else:
+                self.iter_list = self.kwargs["baseline"]
+
+        elif "quarter" in self.kwargs:
+            if self.kwargs["quarter"] == ["standard"]:
+                self.iter_list = [
+                    self.master.quarter_list[0],
+                    self.master.quarter_list[1],
+                ]
+            else:
+                self.iter_list = self.kwargs["quarter"]
+
+        for idx, tp in enumerate(self.iter_list):
             project_dict = {}
-            i = self.master.quarter_list.index(q)  # i for index
-            group = self.master.master_data[
-                i
-            ].projects  # why does this need to come first?
-            if "stage" in self.kwargs:
-                s_input = self.kwargs["stage"]
-                group = cal_group(s_input, self.master, q)
-            if "group" in self.kwargs:
-                g_input = self.kwargs["group"]
-                group = cal_group(g_input, self.master, q)
-            for project_name in group:
+            if "quarter" in self.kwargs:
+                self.group = get_group(self.master, str(tp), self.kwargs)
+                q_idx = self.master.quarter_list.index(tp)
+            for p in self.group:
                 # project_dict = {}
+                if "baseline" in self.kwargs:
+                    bl_index = self.master.bl_index[self.baseline_type][p]
+                    try:
+                        p_data = self.master.master_data[bl_index[idx]].data[p]
+                    except (IndexError, TypeError):
+                        # IndexError some p bls only three in this instance oldest bl is taken
+                        # TypeError some p last is None
+                        p_data = self.master.master_data[bl_index[-1]].data[p]
+                elif "quarter" in self.kwargs:
+                    p_data = self.master.master_data[q_idx].data[p]
                 try:
                     number_dict = {}
                     for x in range(1, 11):  # currently 10 risks
                         risk_list = []
+                        risk = ("Group", DFT_GROUP_DICT[p_data["DfT Group"]])
+                        risk_list.append(risk)
                         for risk_type in RISK_LIST:
+
                             try:
                                 amended_risk_type = risk_type + str(x)
                                 risk = (
-                                    risk_type,
-                                    self.master.master_data[i].data[project_name][
+                                    risk_type, p_data[
                                         amended_risk_type
                                     ],
                                 )
@@ -3976,8 +4000,7 @@ class RiskData:
                                         risk_type[:4] + str(x) + risk_type[3:]
                                     )
                                     risk = (
-                                        risk_type,
-                                        self.master.master_data[i].data[project_name][
+                                        risk_type, p_data[
                                             amended_risk_type
                                         ],
                                     )
@@ -3995,13 +4018,8 @@ class RiskData:
                                                 + str(x)
                                                 + "BRD Residual Likelihood"[3:]
                                             )
-                                            score = risk_score(
-                                                self.master.master_data[i].data[
-                                                    project_name
-                                                ][impact],
-                                                self.master.master_data[i].data[
-                                                    project_name
-                                                ][likelihoood],
+                                            score = risk_score(p_data[impact],
+                                                p_data[likelihoood],
                                             )
                                             risk = (
                                                 "Severity Score Risk Category",
@@ -4014,7 +4032,7 @@ class RiskData:
                                         else:
                                             print(
                                                 "check "
-                                                + project_name
+                                                + p
                                                 + " "
                                                 + str(x)
                                                 + " "
@@ -4024,11 +4042,11 @@ class RiskData:
                             number_dict[x] = dict(risk_list)
 
                     project_dict[
-                        self.master.abbreviations[project_name]["abb"]
+                        self.master.abbreviations[p]["abb"]
                     ] = number_dict
-                except KeyError:  # handles dca_type e.g. schedule confidence key not present
+                except KeyError:
                     pass
-                quarter_dict[str(self.master.master_data[i].quarter)] = project_dict
+                quarter_dict[tp] = project_dict
 
         self.risk_dictionary = quarter_dict
 
@@ -4091,6 +4109,7 @@ def risks_into_excel(risk_data: RiskData) -> workbook:
                 ):
                     break
                 else:
+                    ws.cell(row=start_row + 1 + x, column=1).value = risk_data.risk_dictionary[q][project_name][number]["Group"]
                     ws.cell(row=start_row + 1 + x, column=2).value = project_name
                     ws.cell(row=start_row + 1 + x, column=3).value = str(number)
                     for i in range(len(RISK_LIST)):
@@ -4109,6 +4128,7 @@ def risks_into_excel(risk_data: RiskData) -> workbook:
 
         for i in range(len(RISK_LIST)):
             ws.cell(row=3, column=4 + i).value = RISK_LIST[i]
+        ws.cell(row=3, column=1).value = "DfT Group"
         ws.cell(row=3, column=2).value = "Project Name"
         ws.cell(row=3, column=3).value = "Risk Number"
 
