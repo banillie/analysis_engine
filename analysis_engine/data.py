@@ -2240,6 +2240,47 @@ def set_fig_size(kwargs, fig: plt.figure) -> plt.figure:
     return fig
 
 
+def get_chart_title(costs: CostData, chart_kwargs) -> str:
+    if "title" in chart_kwargs:
+        title = chart_kwargs["title"]
+    else:
+        if "group" in costs.kwargs:
+            if costs.group == costs.master.current_projects:
+                title = "Portfolio cost profile"
+            elif costs.kwargs["group"] in list(DFT_GROUP_DICT.keys()):
+                if len(costs.kwargs['group']) == 1:
+                    title = costs.kwargs["group"][0] + " cost profile"
+                else:
+                    logger.info('provide a name for this chart')
+                    title = 'user to provide'
+            else:
+                if len(costs.kwargs['group']) == 1:
+                    title = costs.kwargs["group"][0] + " cost profile"
+                else:
+                    logger.info('provide a name for this chart')
+                    title = 'user to provide'
+        elif "stage" in costs.kwargs:
+            if costs.group == costs.master.current_projects:
+                title = "Portfolio cost profile"
+            elif costs.kwargs["stage"] in list(DFT_GROUP_DICT.keys()):
+                if len(costs.kwargs['stage']) == 1:
+                    title = costs.kwargs["stage"][0] + " cost profile"
+                else:
+                    logger.info('provide a name for this chart')
+                    title = 'user to provide'
+            else:
+                if len(costs.kwargs['stage']) == 1:
+                    title = costs.kwargs["stage"][0] + " cost profile"
+                else:
+                    logger.info('provide a name for this chart')
+                    title = 'user to provide'
+        else:
+            if costs.group == costs.master.current_projects:
+                title = "Portfolio cost profile"
+
+    return title
+
+
 def cost_profile_graph(costs: CostData, **kwargs) -> plt.figure:
     """Compiles a matplotlib line chart for costs of GROUP of projects contained within cost_master class"""
 
@@ -2248,21 +2289,7 @@ def cost_profile_graph(costs: CostData, **kwargs) -> plt.figure:
     fig = set_fig_size(kwargs, fig)
 
     # title
-    if "title" in kwargs:
-        title = kwargs["title"]
-    else:
-        if "group" in costs.kwargs or "stage" in costs.kwargs:
-            if costs.group == costs.master.current_projects:
-                title = "Portfolio cost profile"
-            elif costs.kwargs["group"] in list(DFT_GROUP_DICT.keys()):
-                title = costs.kwargs["group"][0] + " cost profile"
-            elif costs.kwargs in list(BC_STAGE_DICT.keys()):
-                title = costs.kwargs["stage"][0] + " cost profile"
-            else:
-                title = costs.kwargs["group"][0] + " cost profile"
-        else:
-            if costs.group == costs.master.current_projects:
-                title = "Portfolio cost profile"
+    title = get_chart_title(costs, kwargs)
 
     plt.suptitle(title, fontweight="bold", fontsize=25)
 
