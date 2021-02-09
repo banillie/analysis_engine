@@ -214,9 +214,9 @@ def summaries(args):
     print("compiling summaries")
     m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
     if args["group"]:
-        run_p_reports(m, m.project_information, group=args["group"])
+        run_p_reports(m, group=args["group"], baseline=["standard"])
     else:
-        run_p_reports(m, m.project_information)
+        run_p_reports(m, baseline=["standard"])
 
 
 def dashboard(args):
@@ -275,7 +275,7 @@ def main():
     )
     parser_costs = subparsers.add_parser(
         "costs",
-        help="cost profile graph and data (early version --quarters will not work).",
+        help="cost profile graph and data (early version needs more testing).",
     )
     parser_milestones = subparsers.add_parser(
         "milestones",
@@ -322,6 +322,26 @@ def main():
     )
 
     parser_milestones.add_argument(
+        "--baselines",
+        type=str,
+        metavar="",
+        action="store",
+        nargs="+",
+        choices=["current", "last", "bl_one", "bl_two", "bl_three", "all"],
+        help="Returns analysis for specified baselines. Must be in correct format",
+    )
+
+    parser_speedial.add_argument(
+        "--baselines",
+        type=str,
+        metavar="",
+        action="store",
+        nargs="+",
+        choices=["current", "last", "bl_one", "bl_two", "bl_three", "all"],
+        help="Returns analysis for specified baselines. Must be in correct format",
+    )
+
+    parser_dca.add_argument(
         "--baselines",
         type=str,
         metavar="",

@@ -229,7 +229,7 @@ def test_project_cost_profile_chart_into_word_doc_many(
     master = Master(costs_masters, project_info)
     for p in master.current_projects:
         costs = CostData(master, group=[p])
-        graph = cost_profile_graph(costs, show="No")
+        graph = cost_profile_graph(costs, chart=True)
         put_matplotlib_fig_into_word(word_doc, graph)
         word_doc.save("resources/summary_temp_altered.docx")
 
@@ -267,23 +267,23 @@ def test_get_group_cost_profile(costs_masters, project_info):
 
 def test_get_group_cost_profile_chart(costs_masters, project_info):
     master = Master(costs_masters, project_info)
-    costs = CostData(master)
-    cost_profile_graph(costs, title="Group Test")
+    costs = CostData(master, quarter=["standard"])
+    cost_profile_graph(costs)
 
 
 def test_get_project_total_cost_calculations_for_project(costs_masters, project_info):
     master = Master(costs_masters, project_info)
-    costs = CostData(master, group=[f9])
-    assert costs.spent == [471, 188, 188]
-    assert costs.profiled == [6281, 6204, 6204]
-    assert costs.unprofiled == [0, 0, 0]
+    costs = CostData(master, group=[f9], baseline=["standard"])
+    assert costs.c_totals[costs.iter_list[0]]["spent"] == [471, 188, 188]
+    assert costs.c_totals[costs.iter_list[0]]["prof"] == [6281, 6204, 6204]
+    assert costs.c_totals[costs.iter_list[0]]["unprof"] == [0, 0, 0]
 
 
 def test_get_project_total_costs_benefits_bar_chart(costs_masters, project_info):
     master = Master(costs_masters, project_info)
-    costs = CostData(master, group=[mars])
-    benefits = BenefitsData(master, mars)
-    total_costs_benefits_bar_chart(costs, benefits, show="No")
+    costs = CostData(master, group=[f9], baseline=["standard"])
+    benefits = BenefitsData(master, f9)
+    total_costs_benefits_bar_chart(costs, benefits, chart=True)
 
 
 def test_get_group_total_cost_calculations(costs_masters, project_info):
@@ -449,8 +449,7 @@ def test_saving_graph_to_word_doc_one(word_doc, milestone_masters, project_info)
 
 def test_dca_analysis(project_info, dca_masters, word_doc):
     m = Master(dca_masters, project_info)
-    quarter_list = ["Q4 17/18"]
-    dca = DcaData(m, quarters=quarter_list)
+    dca = DcaData(m, quarter=["standard"])
     wb = dca_changes_into_excel(dca)
     wb.save("resources/dca_print.xlsx")
 

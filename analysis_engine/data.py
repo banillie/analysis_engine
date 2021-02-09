@@ -413,6 +413,17 @@ COST_TYPE_KEY_LIST = [
         "Unprofiled Forecast Non-Gov",
     ),
 ]
+
+SPENT_KEYS = ["Pre-profile RDEL",
+        "Pre-profile CDEL Forecast one off new costs",
+        "Pre-profile Forecast Non-Gov"]
+PROFILE_KEYS = ["Total RDEL Forecast Total",
+        "Total CDEL Forecast one off new costs",
+        "Non-Gov Total Forecast"]
+UNPROFILE_KEYS = ["Unprofiled RDEL Forecast Total",
+        "Unprofiled CDEL Forecast one off new costs",
+        "Unprofiled Forecast Non-Gov"]
+
 BEN_KEY_LIST = [
     "Pre-profile BEN Total",
     "Total BEN Forecast - Total Monetised Benefits",
@@ -713,68 +724,6 @@ class Master:
         self.quarter_list = output_list
 
 
-def get_group(master: Master, quarter: str, kwargs) -> List[str]:
-    qrt_index = master.quarter_list.index(quarter)
-    if "stage" in kwargs:
-        group = cal_group(kwargs["stage"], master, quarter)
-    elif "group" in kwargs:
-        group = cal_group(kwargs["group"], master, quarter)
-    else:
-        group = master.master_data[qrt_index].projects
-
-    return group
-
-
-# futher thinking required for handling here.
-def cal_group(
-    lists_input: List[str] or List[List[str]], master: Master, quarter: str
-) -> List[str]:
-    error_case = []
-    group = []
-    if len(lists_input) > 1:
-        for g in lists_input:
-            try:
-                local_g = master.project_stage[quarter][g]
-                group += local_g
-            except KeyError:
-                try:
-                    local_g = master.dft_groups[quarter][g]
-                    group += local_g
-                except KeyError:
-                    try:
-                        group.append(master.abbreviations[g]["full name"])
-                    except KeyError:
-                        try:
-                            group.append(master.full_names[g])
-                        except KeyError:
-                            error_case.append(g)
-
-    else:
-        p = lists_input[0]
-        try:
-            group = master.project_stage[quarter][p]
-        except KeyError:
-            try:
-                group = master.dft_groups[quarter][p]
-            except KeyError:  # handling of full names and abbreviations
-                try:
-                    group.append(master.abbreviations[p]["full name"])
-                except KeyError:
-                    try:
-                        group.append(master.full_names[p])
-                    except KeyError:
-                        error_case.append(p)
-
-    if error_case:
-        for p in error_case:
-            logger.critical(p + " not a recognised project or group")
-        raise ProjectNameError(
-            "Program stopping. Please check project or group name and re-enter."
-        )
-
-    return group
-
-
 class CostData:
     def __init__(self, master: Master, **kwargs):
         self.master = master
@@ -787,7 +736,31 @@ class CostData:
         self.wlc_change = {}
         self.get_cost_totals()
         self.get_cost_profile()
-        self.calculate_wlc_change()
+        # self.calculate_wlc_change()
+
+    def get_cost_totals_new(self):
+        # spent = 0
+        # profiled = 0
+        # unprofiled = 0
+        p_dict = {}
+        for p in self.master.current_projects:
+            spent = 0
+            profiled = 0
+            unprofiled = 0
+            for i in SPENT_KEYS:
+                spent += self.master.master_data[0].data[p][i]
+            for i in PROFILE_KEYS:
+                profiled += self.master.master_data[0].data[p][i]
+            for i in UNPROFILE_KEYS:
+                unprofiled += self.master.master_data[0].data[p][i]
+            profiled = profiled - (spent + unprofiled)
+            total = self.master.master_data[0].data[p]["Total Forecast"]
+            p_dict[p] = {"spent": spent,
+                         "profiled": profiled,
+                         "unprofiled": unprofiled,
+                         "total": total}
+
+        self.c_totals = p_dict
 
     def get_cost_totals(self) -> None:
         """Returns lists containing the sum total of group (of projects) costs,
@@ -796,54 +769,25 @@ class CostData:
         spent = []
         profiled = []
         unprofiled = []
-        group_rdel_spent = 0
-        group_cdel_spent = 0
-        group_ngov_spent = 0
-        group_rdel_profiled = 0
-        group_cdel_profiled = 0
-        group_ngov_profiled = 0
-        group_rdel_unprofiled = 0
-        group_cdel_unprofiled = 0
-        group_ngov_unprofiled = 0
+        # overall_total = 0
+        spent_rdel = 0
+        spent_cdel = 0
+        spent_ngov = 0
+        prof_rdel = 0
+        prof_cdel = 0
+        prof_ngov = 0
+        unprof_rdel = 0
+        unprof_cdel = 0
+        unprof_ngov = 0
 
-        if "baseline" in self.kwargs:
-            self.group = get_group(
-                self.master, str(self.master.current_quarter), self.kwargs
-            )
-            if self.kwargs["baseline"] == ["standard"]:
-                self.iter_list = ["current", "last", "bl_one"]
-            elif self.kwargs["baseline"] == ["all"]:  # HERE
-                self.iter_list = ["current", "last", "bl_one", "bl_two", "bl_three"]
-            else:
-                self.iter_list = self.kwargs["baseline"]
-
-        elif "quarter" in self.kwargs:
-            if self.kwargs["quarter"] == ["standard"]:
-                self.iter_list = [
-                    self.master.quarter_list[0],
-                    self.master.quarter_list[1],
-                ]
-            else:
-                self.iter_list = self.kwargs["quarter"]
-
+        self.iter_list = get_iter_list(self.kwargs, self.master)
         lower_dict = {}
-        for idx, tp in enumerate(self.iter_list):
+        for tp in self.iter_list:
+            self.group = get_group(self.master, tp, self.kwargs)
             for x, key in enumerate(COST_TYPE_KEY_LIST):
-                group_total = 0
-                if "quarter" in self.kwargs:
-                    self.group = get_group(self.master, str(tp), self.kwargs)
-                    q_idx = self.master.quarter_list.index(str(tp))
+                overall_total = 0
                 for project_name in self.group:
-                    if "baseline" in self.kwargs:
-                        cost_bl_index = self.master.bl_index[self.baseline_type][
-                            project_name
-                        ]
-                        try:
-                            p_data = self.master.master_data[cost_bl_index[idx]].data[project_name]
-                        except (IndexError, TypeError):
-                            continue
-                    elif "quarter" in self.kwargs:
-                        p_data = self.master.master_data[q_idx].data[project_name]
+                    p_data = get_correct_p_data(self.kwargs, self.master, self.baseline_type, project_name, tp)
                     try:
                         rdel = p_data[key[0]]
                         if rdel is None:
@@ -855,15 +799,15 @@ class CostData:
                         if ngov is None:
                             ngov = 0
                         total = round(rdel + cdel + ngov)
-                        group_total += total
+                        overall_total += total
                     except TypeError:  # handle None types, which are present if project not reporting last quarter.
                         rdel = 0
                         cdel = 0
                         ngov = 0
                         total = 0
-                        group_total += total
+                        overall_total += total
 
-                    if idx == 0:  # current quarter
+                    if self.iter_list.index(tp) == 0:  # current quarter
                         if x == 0:  # spent
                             try:  # handling for spend to date figures which are not present in all masters
                                 rdel_std = p_data["20-21 RDEL STD one off new costs"]
@@ -875,21 +819,21 @@ class CostData:
                                 ngov_std = p_data["20-21 CDEL STD Non Gov costs"]
                                 if ngov_std is None:
                                     ngov_std = 0
-                                group_rdel_spent += round(rdel + rdel_std)
-                                group_cdel_spent += round(cdel + cdel_std)
-                                group_ngov_spent += round(ngov + ngov_std)
+                                spent_rdel += round(rdel + rdel_std)
+                                spent_cdel += round(cdel + cdel_std)
+                                spent_ngov += round(ngov + ngov_std)
                             except KeyError:
-                                group_rdel_spent += rdel
-                                group_cdel_spent += cdel
-                                group_ngov_spent += ngov
+                                spent_rdel += rdel
+                                spent_cdel += cdel
+                                spent_ngov += ngov
                         if x == 1:  # profiled
-                            group_rdel_profiled += rdel
-                            group_cdel_profiled += cdel
-                            group_ngov_profiled += ngov
+                            prof_rdel += rdel
+                            prof_cdel += cdel
+                            prof_ngov += ngov
                         if x == 2:  # unprofiled
-                            group_rdel_unprofiled += rdel
-                            group_cdel_unprofiled += cdel
-                            group_ngov_unprofiled += ngov
+                            unprof_rdel += rdel
+                            unprof_cdel += cdel
+                            unprof_ngov += ngov
 
                 if x == 0:  # spent
                     try:  # handling for spend to date figures which are not present in all masters
@@ -901,79 +845,49 @@ class CostData:
                             cdel_std,
                             ngov_std,
                         ]  # converts none types to zero
-                        for s, std in enumerate(std_list):
-                            if std is None:
-                                std_list[s] = 0
-                        spent.append(round(group_total + sum(std_list)))
+                        std_list = filter(None, std_list)
+                        spent.append(round(overall_total + sum(std_list)))
                     except (
                         KeyError,
                         TypeError,
                     ):  # Note. TypeError here as projects may have no baseline
-                        spent.append(group_total)
+                        spent.append(overall_total)
                 if x == 1:  # profiled
-                    profiled.append(group_total)
+                    profiled.append(overall_total)
                 if x == 2:  # unprofiled
-                    unprofiled.append(group_total)
+                    unprofiled.append(overall_total)
 
-            cat_spent = [group_rdel_spent, group_cdel_spent, group_ngov_spent]
-            cat_profiled = [group_rdel_profiled, group_cdel_profiled, group_ngov_profiled]
+            cat_spent = [spent_rdel, spent_cdel, spent_ngov]
+            cat_profiled = [prof_rdel, prof_cdel, prof_ngov]
             cat_unprofiled = [
-                group_rdel_unprofiled,
-                group_cdel_unprofiled,
-                group_ngov_unprofiled,
+                unprof_rdel,
+                unprof_cdel,
+                unprof_ngov,
             ]
-            final_cat_profiled = calculate_profiled(cat_profiled, cat_spent, cat_unprofiled)
+            cat_profiled = calculate_profiled(cat_profiled, cat_spent, cat_unprofiled)
 
-            all_profiled = calculate_profiled(profiled, spent, unprofiled)
+            adj_profiled = calculate_profiled(profiled, spent, unprofiled)  # adjusted profiled
             lower_dict[tp] = {"cat_spent": cat_spent,
-                              "cat_prof": final_cat_profiled,
+                              "cat_prof": cat_profiled,
                               "cat_unprof": cat_unprofiled,
                               "spent": spent,
-                              "prof": all_profiled,
-                              "unprof": unprofiled}
+                              "prof": adj_profiled,
+                              "unprof": unprofiled,
+                              "total": profiled}
 
         self.c_totals = lower_dict
-        # self.cat_spent = cat_spent
-        # self.cat_profiled = final_cat_profiled
-        # self.cat_unprofiled = cat_unprofiled
-        # self.spent = spent
-        # self.profiled = all_profiled
-        # self.unprofiled = unprofiled
-        # self.y_scale_max = max(profiled)  # calc elsewhere
 
     def get_cost_profile(self) -> None:
         """Returns several lists which contain the sum of different cost profiles for the group of project
         contained with the master"""
-
-        if "baseline" in self.kwargs:
-            self.group = get_group(
-                self.master, str(self.master.current_quarter), self.kwargs
-            )
-            if self.kwargs["baseline"] == ["standard"]:
-                self.iter_list = ["current", "last", "bl_one"]
-            elif self.kwargs["baseline"] == ["all"]:
-                self.iter_list = ["current", "last", "bl_one", "bl_two", "bl_three"]
-            else:
-                self.iter_list = self.kwargs["baseline"]
-
-        elif "quarter" in self.kwargs:
-            if self.kwargs["quarter"] == ["standard"]:
-                self.iter_list = [
-                    self.master.quarter_list[0],
-                    self.master.quarter_list[1],
-                ]
-            else:
-                self.iter_list = self.kwargs["quarter"]
-
+        self.iter_list = get_iter_list(self.kwargs, self.master)
         lower_dict = {}
-        for idx, tp in enumerate(self.iter_list):
+        for tp in self.iter_list:
             yearly_profile = []
             rdel_yearly_profile = []
             cdel_yearly_profile = []
             ngov_yearly_profile = []
-            if "quarter" in self.kwargs:
-                self.group = get_group(self.master, str(tp), self.kwargs)
-                q_idx = self.master.quarter_list.index(str(tp))
+            self.group = get_group(self.master, tp, self.kwargs)
             for year in YEAR_LIST:
                 cost_total = 0
                 rdel_total = 0
@@ -981,16 +895,7 @@ class CostData:
                 ngov_total = 0
                 for cost_type in COST_KEY_LIST:
                     for p in self.group:
-                        if "baseline" in self.kwargs:
-                            bl_index = self.master.bl_index[self.baseline_type][p]
-                            try:
-                                p_data = self.master.master_data[bl_index[idx]].data[p]
-                            except (IndexError, TypeError):
-                                # IndexError some p bls only three in this instance oldest bl is taken
-                                # TypeError some p last is None
-                                p_data = self.master.master_data[bl_index[-1]].data[p]
-                        elif "quarter" in self.kwargs:
-                            p_data = self.master.master_data[q_idx].data[p]
+                        p_data = get_correct_p_data(self.kwargs, self.master, self.baseline_type, p, tp)
                         try:
                             cost = p_data[year + cost_type]
                             if cost is None:
@@ -1053,6 +958,32 @@ class CostData:
             wlc_change_dict[project_name] = dict(wlc_list)
 
         self.wlc_change = wlc_change_dict
+
+
+def put_cost_totals_into_wb(costs: CostData) -> workbook:
+    wb = Workbook()
+    ws = wb.active
+
+    for i, p in enumerate(costs.c_totals.keys()):
+        ws.cell(row=i+2, column=1).value = p
+        ws.cell(row=i + 2, column=2).value = costs.c_totals[p]["spent"]
+        ws.cell(row=i + 2, column=3).value = costs.c_totals[p]["profiled"]
+        ws.cell(row=i + 2, column=4).value = costs.c_totals[p]["unprofiled"]
+        s = int(costs.c_totals[p]["spent"] + costs.c_totals[p]["profiled"] + costs.c_totals[p]["unprofiled"])
+        ws.cell(row=i + 2, column=5).value = s
+        total = int(costs.c_totals[p]["total"])
+        ws.cell(row=i + 2, column=6).value = total
+        if s != total:
+            ws.cell(row=i + 2, column=5).fill = SALMON_FILL
+
+    ws.cell(row=1, column=1).value = 'project'
+    ws.cell(row=1, column=2).value = 'spent'
+    ws.cell(row=1, column=3).value = 'profiled'
+    ws.cell(row=1, column=4).value = 'unprofiled'
+    ws.cell(row=1, column=5).value = 'sum'
+    ws.cell(row=1, column=6).value = 'total wlc'
+
+    return wb
 
 
 class BenefitsData:
@@ -1286,15 +1217,15 @@ class MilestoneData:
             self.group = get_group(
                 self.master, str(self.master.current_quarter), self.kwargs
             )
-            if self.kwargs["baseline"] == "standard":
+            if self.kwargs["baseline"] == ["standard"]:
                 self.iter_list = ["current", "last", "bl_one"]
-            elif self.kwargs["baseline"] == "all":
+            elif self.kwargs["baseline"] == ["all"]:
                 self.iter_list = ["current", "last", "bl_one", "bl_two", "bl_three"]
             else:
                 self.iter_list = self.kwargs["baseline"]
 
         elif "quarter" in self.kwargs:
-            if self.kwargs["quarter"] == "standard":
+            if self.kwargs["quarter"] == ["standard"]:
                 self.iter_list = [
                     self.master.quarter_list[0],
                     self.master.quarter_list[1],
@@ -2263,6 +2194,9 @@ def get_chart_title(costs: CostData, chart_kwargs) -> str:
         else:
             if costs.group == costs.master.current_projects:
                 title = "Portfolio cost profile"
+            else:
+                logger.info('provide a name for this chart')
+                title = 'user to provide'
 
     return title
 
@@ -2275,9 +2209,9 @@ def cost_profile_graph(costs: CostData, **kwargs) -> plt.figure:
     fig = set_fig_size(kwargs, fig)
 
     # title
-    # title = get_chart_title(costs, kwargs)
+    title = get_chart_title(costs, kwargs)
 
-    plt.suptitle("example", fontweight="bold", fontsize=25)
+    plt.suptitle(title, fontweight="bold", fontsize=25)
 
     # Overall cost profile chart
     for i in reversed(costs.iter_list):
@@ -2806,7 +2740,7 @@ def make_file_friendly(quarter_str: str) -> str:
 
 
 def total_costs_benefits_bar_chart(
-    cost_master: CostData, ben_master: BenefitsData, **kwargs
+    costs: CostData, ben_master: BenefitsData, **kwargs
 ) -> plt.figure:
     """compiles a matplotlib bar chart which shows total project costs"""
     fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2)  # four sub plots
@@ -2820,9 +2754,9 @@ def total_costs_benefits_bar_chart(
 
     # cost profile charts.
     title = (
-        cost_master.kwargs["group"][0]
-        # cost_master.master.abbreviations[cost_master.group[0]]
-        + " cost and benefit totals"
+            costs.kwargs["group"][0]
+            # cost_master.master.abbreviations[cost_master.group[0]]
+            + " cost and benefit totals"
     )
     # if len(cost_master.project_group) == 1:
     #     title = (
@@ -2841,28 +2775,29 @@ def total_costs_benefits_bar_chart(
     plt.yticks(size=10)
 
     # Y AXIS SCALE MAX
+
     highest_int = max(
-        [cost_master.y_scale_max, ben_master.y_scale_max, ben_master.economic_max]
+        [costs.c_totals[costs.iter_list[0]]["total"][0], ben_master.y_scale_max, ben_master.economic_max]
     )  # check in refactor
     y_max = highest_int + percentage(5, highest_int)
     ax1.set_ylim(0, y_max)
 
     # COST SPENT, PROFILED AND UNPROFILED
-    labels = ["Latest", "Last quarter", "Baseline"]
+    labels = costs.iter_list
     width = 0.5
-    ax1.bar(labels, np.array(cost_master.spent), width, label="Spent")
+    ax1.bar(labels, np.array(costs.c_totals[labels[0]]["spent"]), width, label="Spent")
     ax1.bar(
         labels,
-        np.array(cost_master.profiled),
+        np.array(costs.c_totals[labels[0]]["prof"]),
         width,
-        bottom=np.array(cost_master.spent),
+        bottom=np.array(costs.c_totals[labels[0]]["spent"]),
         label="Profiled",
     )
     ax1.bar(
         labels,
-        np.array(cost_master.unprofiled),
+        np.array(costs.c_totals[labels[0]]["unprof"]),
         width,
-        bottom=np.array(cost_master.spent) + np.array(cost_master.profiled),
+        bottom=np.array(costs.c_totals[labels[0]]["spent"]) + np.array(costs.c_totals[labels[0]]["prof"]),
         label="Unprofiled",
     )
     ax1.legend(prop={"size": 10})
@@ -2884,19 +2819,19 @@ def total_costs_benefits_bar_chart(
     # RDEL, CDEL AND NON-GOV TOTALS BAR CHART
     labels = ["RDEL", "CDEL", "Non Gov"]
     width = 0.5
-    ax2.bar(labels, np.array(cost_master.cat_spent), width, label="Spent")
+    ax2.bar(labels, np.array(costs.c_totals[costs.iter_list[0]]["cat_spent"]), width, label="Spent")
     ax2.bar(
         labels,
-        np.array(cost_master.cat_profiled),
+        np.array(costs.c_totals[costs.iter_list[0]]["cat_prof"]),
         width,
-        bottom=np.array(cost_master.cat_spent),
+        bottom=np.array(costs.c_totals[costs.iter_list[0]]["cat_spent"]),
         label="Profiled",
     )
     ax2.bar(
         labels,
-        np.array(cost_master.cat_unprofiled),
+        np.array(costs.c_totals[costs.iter_list[0]]["cat_unprof"]),
         width,
-        bottom=np.array(cost_master.cat_spent) + np.array(cost_master.cat_profiled),
+        bottom=np.array(costs.c_totals[costs.iter_list[0]]["cat_spent"]) + np.array(costs.c_totals[costs.iter_list[0]]["cat_prof"]),
         label="Unprofiled",
     )
     ax2.legend(prop={"size": 10})
@@ -2997,10 +2932,9 @@ def total_costs_benefits_bar_chart(
 
     fig.tight_layout(rect=[0, 0.03, 1, 0.95])  # size/fit of chart
 
-    # try:
-    #     kwargs["show"] == "No"
-    # except KeyError:
-    # plt.show()
+    if "chart" in kwargs:
+        if kwargs["chart"]:
+            plt.show()
 
     return fig
 
@@ -3624,11 +3558,149 @@ DCA_RATING_SCORES = {
 }
 
 
+def get_iter_list(class_kwargs, master: Master) -> List[str]:
+    iter_list = []
+    if "baseline" in class_kwargs:
+        if class_kwargs["baseline"] == ["standard"]:
+            iter_list = ["current", "last", "bl_one"]
+        elif class_kwargs["baseline"] == ["all"]:
+            iter_list = ["current", "last", "bl_one", "bl_two", "bl_three"]
+        elif class_kwargs["baseline"] == ["standard"]:
+            iter_list = ["current", "last", "bl_one"]
+        else:
+            iter_list = class_kwargs["baseline"]
+
+    elif "quarter" in class_kwargs:
+        if class_kwargs["quarter"] == ["standard"]:
+            iter_list = [
+                master.quarter_list[0],
+                master.quarter_list[1],
+            ]
+        else:
+            iter_list = class_kwargs["quarter"]
+
+    return iter_list
+
+# unnecessary not in use. data straight to get group
+# def get_group_to_iterate(class_kwargs, master: Master, tp: str) -> List[str]:
+#     if "baseline" in class_kwargs:
+#         return get_group(
+#             master, tp, class_kwargs
+#         )
+#     elif "quarter" in class_kwargs:
+#         return get_group(master, tp, class_kwargs)
+
+
+def get_group(master: Master, tp: str, class_kwargs) -> List[str]:
+    if "baseline" in class_kwargs:
+        tp_indx = 0   # baseline uses latest project group only
+    elif "quarter" in class_kwargs:
+        tp_indx = master.quarter_list.index(tp)
+
+    if "stage" in class_kwargs:
+        group = cal_group(class_kwargs["stage"], master, tp_indx)
+    elif "group" in class_kwargs:
+        group = cal_group(class_kwargs["group"], master, tp_indx)
+    else:
+        group = master.master_data[tp_indx].projects
+
+    return group
+
+
+def cal_group(
+    input_list: List[str] or List[List[str]],
+    master: Master,
+    tp_indx: int
+) -> List[str]:
+
+    error_case = []
+    output = []
+    if any(isinstance(x, list) for x in input_list):
+        inner_list = [item for sublist in input_list for item in sublist]
+    else:
+        inner_list = input_list
+    q_str = master.quarter_list[tp_indx]  # quarter string
+    # if len(inner_list) > 1
+    for pg in inner_list:  # pg is project/group
+        try:
+            local_g = master.project_stage[q_str][pg]
+            output += local_g
+        except KeyError:
+            try:
+                local_g = master.dft_groups[q_str][pg]
+                output += local_g
+            except KeyError:
+                try:
+                    output.append(master.abbreviations[pg]["full name"])
+                except KeyError:
+                    try:
+                        output.append(master.full_names[pg])
+                    except KeyError:
+                        error_case.append(pg)
+
+    # else:
+    #     p = inner_list[0]
+    #     try:
+    #         output = master.project_stage[quarter][p]
+    #     except KeyError:
+    #         try:
+    #             output = master.dft_groups[quarter][p]
+    #         except KeyError:  # handling of full names and abbreviations
+    #             try:
+    #                 output.append(master.abbreviations[p]["full name"])
+    #             except KeyError:
+    #                 try:
+    #                     output.append(master.full_names[p])
+    #                 except KeyError:
+    #                     error_case.append(p)
+
+    if error_case:
+        for p in error_case:
+            logger.critical(p + " not a recognised project or group")
+        raise ProjectNameError(
+            "Program stopping. Please check project or group name and re-enter."
+        )
+
+    return output
+
+
+def get_correct_p_data(class_kwargs,
+                       master: Master,
+                       baseline_type: str,
+                       project_name: str,
+                       time_period: str) -> Dict[str, Union[str, int, datetime.date, float]]:
+    if "baseline" in class_kwargs:
+        bl_index = master.bl_index[baseline_type][project_name]
+        tp_idx = bl_iter_list.index(time_period)
+        try:
+            return master.master_data[bl_index[tp_idx]].data[
+                project_name
+            ]
+        # IndexError handles len of project bl index.
+        # TypeError handles None Type present if project not reporting last quarter
+        except (IndexError, TypeError):
+            return None
+
+    elif "quarter" in class_kwargs:
+        tp_idx = master.quarter_list.index(time_period)
+        try:
+            return master.master_data[tp_idx].data[project_name]
+        # IndexError handles len of project bl index.
+        # TypeError handles None Type present if project not reporting last quarter
+        except (IndexError, TypeError):
+            return None
+
+
+bl_iter_list = ["current", "last", "bl_one", "bl_two", "bl_three"]
+
+
 class DcaData:
     def __init__(self, master: Master, **kwargs):
         self.master = master
         self.kwargs = kwargs
-        self.quarters = []
+        self.group = []
+        self.baseline_type = 'ipdc_costs'
+        self.iter_list = []
         self.dca_dictionary = {}
         self.dca_changes = {}
         self.dca_count = {}
@@ -3636,32 +3708,26 @@ class DcaData:
         self.get_count()
 
     def get_dictionary(self) -> None:
+        self.iter_list = get_iter_list(self.kwargs, self.master)
         quarter_dict = {}
-        if "quarters" in self.kwargs:  # is keys() necessary
-            self.quarters = self.kwargs["quarters"]
-        else:
-            self.quarters = [self.master.quarter_list[0], self.master.quarter_list[1]]
-        for q in self.quarters:  # q is quarter
-            project_dict = {}
-            i = self.master.quarter_list.index(q)  # i for index
-            group = get_group(self.master, q, self.kwargs)
+        for tp in self.iter_list:
+            self.group = get_group(self.master, tp, self.kwargs)
             type_dict = {}
             for dca_type in list(DCA_KEYS.values()):
                 dca_dict = {}
-                try:  # here
-                    for project_name in group:
-                        colour = self.master.master_data[i].data[project_name][dca_type]
-                        score = DCA_RATING_SCORES[
-                            self.master.master_data[i].data[project_name][dca_type]
-                        ]
-                        costs = self.master.master_data[i].data[project_name][
-                            "Total Forecast"
-                        ]
+                try:
+                    for project_name in self.group:
+                        p_data = get_correct_p_data(self.kwargs, self.master, self.baseline_type, project_name, tp)
+                        if p_data is None:
+                            continue
+                        colour = p_data[dca_type]
+                        score = DCA_RATING_SCORES[p_data[dca_type]]
+                        costs = p_data["Total Forecast"]
                         dca_colour = [("DCA", colour)]
                         dca_score = [("DCA score", score)]
                         t = [("Type", dca_type)]
                         cost_amount = [("Costs", costs)]
-                        quarter = [("Quarter", str(self.master.master_data[i].quarter))]
+                        quarter = [("Quarter", tp)]
                         dca_dict[self.master.abbreviations[project_name]["abb"]] = dict(
                             dca_colour + t + cost_amount + quarter + dca_score
                         )
@@ -3669,7 +3735,7 @@ class DcaData:
                 except KeyError:  # handles dca_type e.g. schedule confidence key not present
                     pass
 
-            quarter_dict[q] = type_dict
+            quarter_dict[tp] = type_dict
 
         self.dca_dictionary = quarter_dict
 
@@ -3680,20 +3746,20 @@ class DcaData:
         for dca_type in list(DCA_KEYS.values()):
             lower_dict = {}
             for project_name in list(
-                self.dca_dictionary[self.quarters[0]][dca_type].keys()
+                self.dca_dictionary[self.iter_list[0]][dca_type].keys()
             ):
                 t = [("Type", dca_type)]
                 try:
-                    dca_one_colour = self.dca_dictionary[self.quarters[0]][dca_type][
+                    dca_one_colour = self.dca_dictionary[self.iter_list[0]][dca_type][
                         project_name
                     ]["DCA"]
-                    dca_two_colour = self.dca_dictionary[self.quarters[1]][dca_type][
+                    dca_two_colour = self.dca_dictionary[self.iter_list[1]][dca_type][
                         project_name
                     ]["DCA"]
-                    dca_one_score = self.dca_dictionary[self.quarters[0]][dca_type][
+                    dca_one_score = self.dca_dictionary[self.iter_list[0]][dca_type][
                         project_name
                     ]["DCA score"]
-                    dca_two_score = self.dca_dictionary[self.quarters[1]][dca_type][
+                    dca_two_score = self.dca_dictionary[self.iter_list[1]][dca_type][
                         project_name
                     ]["DCA score"]
                     if dca_one_score == dca_two_score:
@@ -3794,6 +3860,11 @@ class DcaData:
 
 
 def dca_changes_into_word(dca_data: DcaData, doc: Document) -> Document:
+
+    header = "Showing changes between " + str(dca_data.iter_list[0]) + " and " + str(dca_data.iter_list[1]) + "."
+    top = doc.add_paragraph()
+    top.add_run(header).bold = True
+
     for i, dca_type in enumerate(list(dca_data.dca_changes.keys())):
         if i != 0:
             doc.add_section(WD_SECTION_START.NEW_PAGE)
@@ -3857,29 +3928,27 @@ def dca_changes_into_word(dca_data: DcaData, doc: Document) -> Document:
 def dca_changes_into_excel(dca_data: DcaData) -> workbook:
     wb = Workbook()
 
-    # quarter = string_conversion(quarter)
-
-    for q in dca_data.quarters:
+    for tp in dca_data.dca_dictionary.keys():
         start_row = 3
         ws = wb.create_sheet(
-            make_file_friendly(q)
+            make_file_friendly(tp)
         )  # creating worksheets. names restricted to 30 characters.
-        ws.title = make_file_friendly(q)  # title of worksheet
-        for i, dca_type in enumerate(list(dca_data.dca_count[q].keys())):
+        ws.title = make_file_friendly(tp)  # title of worksheet
+        for i, dca_type in enumerate(list(dca_data.dca_count[tp].keys())):
             ws.cell(row=start_row + i, column=2).value = dca_type
             ws.cell(row=start_row + i, column=3).value = "Count"
             ws.cell(row=start_row + i, column=4).value = "Costs"
             ws.cell(row=start_row + i, column=5).value = "Proportion costs"
-            for x, colour in enumerate(list(dca_data.dca_count[q][dca_type].keys())):
+            for x, colour in enumerate(list(dca_data.dca_count[tp][dca_type].keys())):
                 ws.cell(row=start_row + i + x + 1, column=2).value = colour
                 ws.cell(row=start_row + i + x + 1, column=3).value = (
-                    dca_data.dca_count[q][dca_type][colour]
+                    dca_data.dca_count[tp][dca_type][colour]
                 )[0]
                 ws.cell(row=start_row + i + x + 1, column=4).value = (
-                    dca_data.dca_count[q][dca_type][colour]
+                    dca_data.dca_count[tp][dca_type][colour]
                 )[1]
                 ws.cell(row=start_row + i + x + 1, column=5).value = (
-                    dca_data.dca_count[q][dca_type][colour]
+                    dca_data.dca_count[tp][dca_type][colour]
                 )[2]
                 if colour is None:
                     ws.cell(row=start_row + i + x + 1, column=2).value = "None"
@@ -4768,14 +4837,11 @@ def make_text_red(columns: list) -> None:
 
 def project_report_meta_data(
     doc: Document,
-    master: Master,
+    costs: CostData,
+    milestones: MilestoneData,
+    benefits: BenefitsData,
     project_name: str,
 ):
-    costs = CostData(master, group=[project_name])
-    milestones = MilestoneData(master, group=[project_name])
-    milestones.get_milestones()
-    milestones.get_chart_info()
-    benefits = BenefitsData(master, project_name)
     """Meta data table"""
     doc.add_section(WD_SECTION_START.NEW_PAGE)
     paragraph = doc.add_paragraph()
@@ -4797,18 +4863,16 @@ def project_report_meta_data(
         + "m"
     )
     hdr_cells[2].text = "Spent:"
-    # spent = spent_calculation(costs.master.master_data[0], project_name)
-    hdr_cells[3].text = "£" + str(round(costs.spent[0])) + "m"
+    hdr_cells[3].text = "£" + str(round(costs.c_totals[costs.iter_list[0]]["spent"][0])) + "m"
     row_cells = t.add_row().cells
     row_cells[0].text = "RDEL Total:"
     rdel_total = costs.master.master_data[0].data[project_name][
         "Total RDEL Forecast Total"
     ]
-    # sum(costs.rdel_profile[4:])
     row_cells[1].text = "£" + str(round(rdel_total)) + "m"
     row_cells[2].text = "Profiled:"
     row_cells[3].text = (
-        "£" + str(round(costs.profiled[0])) + "m"
+        "£" + str(round(costs.c_totals[costs.iter_list[0]]["prof"][0])) + "m"
     )  # first in list is current
     row_cells = t.add_row().cells
     cdel_total = costs.master.master_data[0].data[project_name][
@@ -4818,7 +4882,7 @@ def project_report_meta_data(
     row_cells[0].text = "CDEL Total:"
     row_cells[1].text = "£" + str(round(cdel_total)) + "m"
     row_cells[2].text = "Unprofiled:"
-    row_cells[3].text = "£" + str(round(costs.unprofiled[0])) + "m"
+    row_cells[3].text = "£" + str(round(costs.c_totals[costs.iter_list[0]]["unprof"][0])) + "m"
     row_cells = t.add_row().cells
     n_gov_total = costs.master.master_data[0].data[project_name][
         "Non-Gov Total Forecast"
@@ -5228,10 +5292,10 @@ def compile_p_report(
     key_contacts(doc, master, project_name)
     dca_table(doc, master, project_name)
     dca_narratives(doc, master, project_name)
-    costs = CostData(master, group=[project_name])
+    costs = CostData(master, group=[project_name], baseline=["standard"])
     benefits = BenefitsData(master, project_name)
-    milestones = MilestoneData(master, group=[project_name])
-    project_report_meta_data(doc, master, project_name)
+    milestones = MilestoneData(master, group=[project_name], baseline=["standard"])
+    project_report_meta_data(doc, costs, milestones, benefits, project_name)
     change_word_doc_landscape(doc)
     cost_profile = cost_profile_graph(costs, show="No")
     put_matplotlib_fig_into_word(doc, cost_profile, transparent=False, size=8)
@@ -5240,9 +5304,9 @@ def compile_p_report(
     #  handling of no milestones within filtered period.
     ab = master.abbreviations[project_name]["abb"]
     try:
-        milestones.get_milestones()
-        milestones.get_chart_info()
-        milestones.filter_chart_info(start_date="1/9/2020", end_date="30/12/2022")
+        # milestones.get_milestones()
+        # milestones.get_chart_info()
+        milestones.filter_chart_info(dates=["1/9/2020", "30/12/2022"])
         milestones_chart = milestone_chart(
             milestones,
             blue_line="ipdc_date",
@@ -5253,9 +5317,9 @@ def compile_p_report(
         # print_out_project_milestones(doc, milestones, project_name)
     except ValueError:  # extends the time period.
         milestones = MilestoneData(master, project_name)
-        milestones.get_milestones()
-        milestones.get_chart_info()
-        milestones.filter_chart_info(start_date="1/9/2020", end_date="30/12/2024")
+        # milestones.get_milestones()
+        # milestones.get_chart_info()
+        milestones.filter_chart_info(dates=["1/9/2020", "30/12/2024"])
         milestones_chart = milestone_chart(
             milestones,
             blue_line="ipdc_date",
@@ -5274,11 +5338,6 @@ def run_p_reports(master: Master, **kwargs) -> None:
     group = get_group(master, str(master.current_quarter), kwargs)
 
     for p in group:
-        # if p not in project_information.projects:
-        #     for x in project_information.projects:
-        #         if p == project_information.data[x]["Abbreviations"]:
-        #             p = x
-        #             break
         print("Compiling summary for " + p)
         report_doc = open_word_doc(root_path / "input/summary_temp.docx")
         qrt = make_file_friendly(str(master.master_data[0].quarter))
@@ -7465,7 +7524,7 @@ class DandelionData:
                 self.iter_list = self.kwargs["baseline"]
 
         elif "quarter" in self.kwargs:
-            if self.kwargs["quarter"] == "standard":
+            if self.kwargs["quarter"] == ["standard"]:
                 self.iter_list = [
                     self.master.quarter_list[0],
                     self.master.quarter_list[1],
