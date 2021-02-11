@@ -378,7 +378,7 @@ def test_get_milestone_data_all(milestone_masters, project_info):
 
 def test_get_milestone_chart_data(milestone_masters, project_info):
     master = Master(milestone_masters, project_info)
-    milestones = MilestoneData(master, group=[sot, a11, a13], baseline="standard")
+    milestones = MilestoneData(master, group=[sot, a11, a13], baseline=["standard"])
     assert (
         len(milestones.sorted_milestone_dict[milestones.iter_list[0]]["g_dates"]) == 11
     )
@@ -402,7 +402,7 @@ def test_compile_milestone_chart(milestone_masters, project_info, word_doc):
 
 def test_compile_milestone_chart_with_filter(milestone_masters, project_info):
     master = Master(milestone_masters, project_info)
-    milestones = MilestoneData(master, group=[sot, a11, a13], baseline="current")
+    milestones = MilestoneData(master, group=[sot, a11, a13], baseline=["current"])
     milestones.filter_chart_info(dates=["1/1/2013", "1/1/2014"])
     milestone_chart(milestones, title="Group Test", fig_size=FIGURE_STYLE[1])
 
@@ -423,7 +423,7 @@ def test_removing_project_name_from_milestone_keys(milestone_masters, project_in
 
 def test_putting_milestones_into_wb(milestone_masters, project_info):
     mst = Master(milestone_masters, project_info)
-    milestones = MilestoneData(mst, group=group, baseline="standard")
+    milestones = MilestoneData(mst, group=[group], baseline=["standard"])
     wb = put_milestones_into_wb(milestones)
     wb.save("resources/milestone_data_output_test.xlsx")
 

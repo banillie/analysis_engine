@@ -1242,57 +1242,17 @@ class MilestoneData:
         Creates project milestone dictionaries for current, last_quarter, and
         baselines when provided with group and baseline type.
         """
-        bl_dict = {}
-        if "baseline" in self.kwargs:
-            self.group = get_group(
-                self.master, str(self.master.current_quarter), self.kwargs
-            )
-            if self.kwargs["baseline"] == ["standard"]:
-                self.iter_list = ["current", "last", "bl_one"]
-            elif self.kwargs["baseline"] == ["all"]:
-                self.iter_list = ["current", "last", "bl_one", "bl_two", "bl_three"]
-            else:
-                self.iter_list = self.kwargs["baseline"]
-
-        elif "quarter" in self.kwargs:
-            if self.kwargs["quarter"] == ["standard"]:
-                self.iter_list = [
-                    self.master.quarter_list[0],
-                    self.master.quarter_list[1],
-                ]
-            else:
-                self.iter_list = self.kwargs["quarter"]
-
-        for idx, bl in enumerate(
-            self.iter_list
-        ):  # bl means baseline and name should chang
+        m_dict = {}
+        self.iter_list = get_iter_list(self.kwargs, self.master)
+        for tp in self.iter_list:  # tp time period
             lower_dict = {}
             raw_list = []
-            if "quarter" in self.kwargs:
-                self.group = get_group(self.master, str(bl), self.kwargs)
-                q_idx = self.master.quarter_list.index(str(bl))
-
+            self.group = get_group(self.master, tp, self.kwargs)
             for project_name in self.group:
                 project_list = []
-                if "baseline" in self.kwargs:
-                    milestone_bl_index = self.master.bl_index[self.baseline_type][project_name]
-                    try:
-                        p_data = self.master.master_data[milestone_bl_index[idx]].data[
-                            project_name
-                        ]
-                    # IndexError handles len of project bl index.
-                    # TypeError handles None Type present if project not reporting last quarter
-                    except (IndexError, TypeError):
-                        continue
-
-                elif "quarter" in self.kwargs:
-                    try:
-                        p_data = self.master.master_data[q_idx].data[project_name]
-                    # IndexError handles len of project bl index.
-                    # TypeError handles None Type present if project not reporting last quarter
-                    except (IndexError, TypeError):
-                        continue
-
+                p_data = get_correct_p_data(self.kwargs, self.master, self.baseline_type, project_name, tp)
+                if p_data is None:
+                    continue
                 # i loops below removes None Milestone names and rejects non-datetime date values.
                 p = self.master.abbreviations[project_name]["abb"]
                 for i in range(1, 50):
@@ -1398,8 +1358,8 @@ class MilestoneData:
             for r in range(len(sorted_list)):
                 lower_dict["Milestone " + str(r)] = dict(sorted_list[r])
 
-            bl_dict[bl] = lower_dict
-        self.milestone_dict = bl_dict
+            m_dict[tp] = lower_dict
+        self.milestone_dict = m_dict
 
     def get_chart_info(self) -> None:
         """returns data lists for matplotlib chart"""
@@ -2052,63 +2012,55 @@ def put_milestones_into_wb(milestones: MilestoneData) -> Workbook:
     ws = wb.active
 
     row_num = 2
-    for i, m in enumerate(
-        milestones.sorted_milestone_dict[milestones.iter_list[0]]["names"]
-    ):
-        if len(milestones.group) == 1:
-            project_name = milestones.group[0]
-            pm = m  # pm is project milestone
-            ws.cell(row=row_num + i, column=1).value = project_name
-            ws.cell(row=row_num + i, column=2).value = pm
-        else:
-            project_name = m.split(",")[0]
-            pm = m.split(",")[1][1:]
-            ws.cell(row=row_num + i, column=1).value = project_name  # project name
-            ws.cell(row=row_num + i, column=2).value = pm  # milestone
-        ws.cell(row=row_num + i, column=3).value = milestones.sorted_milestone_dict[
-            milestones.iter_list[0]
-        ]["r_dates"][i]
-        # .strftime("%d/%m/%Y")
-        ws.cell(row=row_num + i, column=3).number_format = "dd/mm/yy"
-        try:
-            ws.cell(row=row_num + i, column=4).value = milestones.sorted_milestone_dict[
-                milestones.iter_list[1]
-            ]["r_dates"][i]
-            ws.cell(row=row_num + i, column=4).number_format = "dd/mm/yy"
-        except AttributeError:
-            pass
-        try:
-            ws.cell(row=row_num + i, column=5).value = milestones.sorted_milestone_dict[
-                milestones.iter_list[2]
-            ]["r_dates"][i]
-            ws.cell(row=row_num + i, column=5).number_format = "dd/mm/yy"
-        except AttributeError:
-            pass
-        try:
-            ws.cell(
-                row=row_num + i, column=6
-            ).value = milestones.milestones.sorted_milestone_dict[
-                milestones.iter_list[3]
-            ][
-                "r_dates"
-            ][
-                i
-            ]
-            ws.cell(row=row_num + i, column=6).number_format = "dd/mm/yy"
-        except AttributeError:
-            pass
-        notes = get_milestone_notes(
-            project_name, milestones.milestone_dict, "current", pm
-        )
-        ws.cell(row=row_num + i, column=7).value = notes
+    ms_names = milestones.sorted_milestone_dict[milestones.iter_list[0]]["names"]
+    for i, m in enumerate(ms_names):
+        for x, tp in enumerate(milestones.iter_list):
+            if len(milestones.group) == 1:
+                project_name = milestones.group[0]
+                pm = m  # pm is project milestone
+                ws.cell(row=row_num + i, column=1).value = project_name
+                ws.cell(row=row_num + i, column=2).value = pm
+            else:
+                project_name = m.split(",")[0]
+                pm = m.split(",")[1][1:]
+                ws.cell(row=row_num + i, column=1).value = project_name  # project name
+                ws.cell(row=row_num + i, column=2).value = pm  # milestone
+            ms_date = milestones.sorted_milestone_dict[tp]["r_dates"][i]
+            ws.cell(row=row_num + i, column=3 + x).value = ms_date
+            ws.cell(row=row_num + i, column=3 + x).number_format = "dd/mm/yy"
+            # try:
+            # ws.cell(row=row_num + i, column=4).value = milestones.sorted_milestone_dict[x]["r_dates"][i]
+            # ws.cell(row=row_num + i, column=4).number_format = "dd/mm/yy"
+            # except AttributeError:
+            #     pass
+            # try:
+            #     ws.cell(row=row_num + i, column=5).value = milestones.sorted_milestone_dict[
+            #         milestones.iter_list[2]
+            #     ]["r_dates"][i]
+            #     ws.cell(row=row_num + i, column=5).number_format = "dd/mm/yy"
+            # except AttributeError:
+            #     pass
+            # try:
+            #     ws.cell(
+            #         row=row_num + i, column=6
+            #     ).value = milestones.milestones.sorted_milestone_dict[
+            #         milestones.iter_list[3]
+            #     ][
+            #         "r_dates"
+            #     ][
+            #         i
+            #     ]
+            #     ws.cell(row=row_num + i, column=6).number_format = "dd/mm/yy"
+            # except AttributeError:
+            #     pass
+            notes = milestones.sorted_milestone_dict[tp]["notes"][i]
+            ws.cell(row=row_num + i, column=len(milestones.iter_list) + 3).value = notes
 
     ws.cell(row=1, column=1).value = "Project"
     ws.cell(row=1, column=2).value = "Milestone"
-    ws.cell(row=1, column=3).value = "Current date"
-    ws.cell(row=1, column=4).value = "Last quarter"
-    ws.cell(row=1, column=5).value = "Baseline one"
-    ws.cell(row=1, column=6).value = "Baseline two"
-    ws.cell(row=1, column=7).value = "Notes"
+    for x, tp in enumerate(milestones.iter_list):
+        ws.cell(row=1, column=3 + x).value = tp
+    ws.cell(row=1, column=len(milestones.iter_list) + 3).value = "Notes"
 
     return wb
 
@@ -3468,10 +3420,9 @@ def milestone_chart(
     # fig.canvas.draw()
     fig.tight_layout(rect=[0, 0.03, 1, 0.95])  # for title
 
-    # try:
-    #     kwargs["show"] == "No"
-    # except KeyError:
-    # plt.show()
+    if "chart" in kwargs:
+        if kwargs["chart"]:
+            plt.show()
 
     return fig
 
