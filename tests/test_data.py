@@ -518,7 +518,7 @@ def test_calculating_schedule_changes(milestone_masters, project_info):
 
 def test_printout_of_milestones(word_doc, milestone_masters, project_info):
     master = Master(milestone_masters, project_info)
-    milestones = MilestoneData(master, group=[sot], baseline="all")
+    milestones = MilestoneData(master, group=[sot], baseline=["standard"])
     change_word_doc_landscape(word_doc)
     print_out_project_milestones(word_doc, milestones, sot)
     word_doc.save("resources/summary_temp_altered.docx")

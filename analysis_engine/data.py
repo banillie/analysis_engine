@@ -734,9 +734,11 @@ class CostData:
         self.c_totals = {}
         self.c_profiles = {}
         self.wlc_change = {}
+        # self.stack_p = {}
         self.get_cost_totals()
         self.get_cost_profile()
         # self.calculate_wlc_change()
+        # self.get_stackplot_data()
 
     def get_cost_totals_new(self):
         # spent = 0
@@ -835,27 +837,27 @@ class CostData:
                             unprof_cdel += cdel
                             unprof_ngov += ngov
 
-                if x == 0:  # spent
-                    try:  # handling for spend to date figures which are not present in all masters
-                        rdel_std = p_data["20-21 RDEL STD one off new costs"]
-                        cdel_std = p_data["20-21 CDEL STD one off new costs"]
-                        ngov_std = p_data["20-21 CDEL STD Non Gov costs"]
-                        std_list = [
-                            rdel_std,
-                            cdel_std,
-                            ngov_std,
-                        ]  # converts none types to zero
-                        std_list = filter(None, std_list)
-                        spent.append(round(overall_total + sum(std_list)))
-                    except (
-                        KeyError,
-                        TypeError,
-                    ):  # Note. TypeError here as projects may have no baseline
-                        spent.append(overall_total)
-                if x == 1:  # profiled
-                    profiled.append(overall_total)
-                if x == 2:  # unprofiled
-                    unprofiled.append(overall_total)
+                    if x == 0:  # spent
+                        try:  # handling for spend to date figures which are not present in all masters
+                            rdel_std = p_data["20-21 RDEL STD one off new costs"]
+                            cdel_std = p_data["20-21 CDEL STD one off new costs"]
+                            ngov_std = p_data["20-21 CDEL STD Non Gov costs"]
+                            std_list = [
+                                rdel_std,
+                                cdel_std,
+                                ngov_std,
+                            ]  # converts none types to zero
+                            std_list = filter(None, std_list)
+                            spent.append(round(overall_total + sum(std_list)))
+                        except (
+                            KeyError,
+                            TypeError,
+                        ):  # Note. TypeError here as projects may have no baseline
+                            spent.append(overall_total)
+                    if x == 1:  # profiled
+                        profiled.append(overall_total)
+                    if x == 2:  # unprofiled
+                        unprofiled.append(overall_total)
 
             cat_spent = [spent_rdel, spent_cdel, spent_ngov]
             cat_profiled = [prof_rdel, prof_cdel, prof_ngov]
@@ -922,6 +924,7 @@ class CostData:
                 cdel_yearly_profile.append(cdel_total)
                 ngov_yearly_profile.append(ngov_total)
             lower_dict[tp] = {"prof": yearly_profile,
+                              "prof_ra": moving_average(yearly_profile, 2),
                               "rdel": rdel_yearly_profile,
                               "cdel": cdel_yearly_profile,
                               "ngov": ngov_yearly_profile}
@@ -959,6 +962,29 @@ class CostData:
 
         self.wlc_change = wlc_change_dict
 
+    # def get_stackplot_data(self, sp_kwargs) -> None:
+    #     if "type" in sp_kwargs:
+    #         sp_dict = {}  # stacked plot dict
+    #         if sp_kwargs["type"] == "comp":  # composition
+    #             for g in sp_kwargs:  # group list
+    #                 costs = CostData(master, group=[g], quarter=[quarter])
+    #                 sp_dict[g] = costs.c_profiles[quarter]["prof"]
+    #
+    #             s_list = []  # stack list
+    #             for i in range(len(g_list)):
+    #                 s_list.append([sp_dict[g_list[i]]])
+    #             y = np.vstack(s_list)
+    #             labels = g_list
+    #
+    #         elif kwargs["type"] == "cat":  # category
+    #             costs = CostData(master, group=[g_list], quarter=[quarter])
+    #             cat_list = ["cdel", "rdel", "ngov"]
+    #             s_list = []
+    #             for i in range(len(cat_list)):
+    #                 s_list.append([costs.c_profiles[quarter][cat_list[i]]])
+    #             y = np.vstack(s_list)
+    #             labels = cat_list
+
 
 def put_cost_totals_into_wb(costs: CostData) -> workbook:
     wb = Workbook()
@@ -984,6 +1010,10 @@ def put_cost_totals_into_wb(costs: CostData) -> workbook:
     ws.cell(row=1, column=6).value = 'total wlc'
 
     return wb
+
+
+def moving_average(x, w):
+    return np.convolve(x, np.ones(w), 'valid') / w
 
 
 class BenefitsData:
@@ -1174,10 +1204,10 @@ def get_milestone_date(
 def get_milestone_notes(
     project_name: str,
     milestone_dictionary: Dict[str, Union[datetime.date, str]],
-    quarter_bl: str,
+    tp: str,  # time period
     milestone_name: str,
 ) -> datetime:
-    m_dict = milestone_dictionary[quarter_bl]
+    m_dict = milestone_dictionary[tp]
     for k in m_dict.keys():
         if m_dict[k]["Project"] == project_name:
             if m_dict[k]["Milestone"] == milestone_name:
@@ -1382,37 +1412,41 @@ class MilestoneData:
             key_names = []
             g_dates = []  # graph dates
             r_dates = []  # raw dates
+            notes = []
             for v in self.milestone_dict[self.iter_list[0]].values():
-                p = None
-                n = None
-                d = None
+                p = None  # project
+                mn = None  # milestone name
+                d = None  # date
                 for x in self.milestone_dict[i].values():
                     if (
                         x["Project"] == v["Project"]
                         and x["Milestone"] == v["Milestone"]
                     ):
                         p = x["Project"]
-                        n = x["Milestone"]
-                        join = p + ", " + n
+                        mn = x["Milestone"]
+                        join = p + ", " + mn
                         # if join not in key_names:  # stop duplicates
                         key_names.append(join)
                         d = x["Date"]
                         g_dates.append(d)
                         r_dates.append(d)
+                        notes.append(x["Notes"])
                         break
-                if p is None and n is None and d is None:
+                if p is None and mn is None and d is None:
                     p = v["Project"]
-                    n = v["Milestone"]
-                    join = p + ", " + n
+                    mn = v["Milestone"]
+                    join = p + ", " + mn
                     # if join not in key_names:
                     key_names.append(join)
                     g_dates.append(v["Date"])
                     r_dates.append(None)
+                    notes.append(None)
 
             output_dict[i] = {
                 "names": key_names,
                 "g_dates": g_dates,
                 "r_dates": r_dates,
+                "notes": notes
             }
 
         self.sorted_milestone_dict = output_dict
@@ -2128,7 +2162,7 @@ def vfm_matplotlib_graph(labels, current_qrt, last_qrt, title):
 
 def set_figure_size(graph_type: str) -> Tuple[int, int]:
     if graph_type == "half_horizontal":
-        return 11.69, 4.10
+        return 11.69, 5.10
     if graph_type == "full_horizontal":
         return 11.69, 8.20
 
@@ -3264,16 +3298,15 @@ def milestone_chart(
 
     fig = set_fig_size(kwargs, fig)
 
-    # title
-    if "title" in kwargs:
-        title = kwargs["title"]
-    else:
-        if milestones.kwargs["group"] == milestones.master.current_projects:
-            title = "Portfolio cost profile"
-        else:
-            title = milestones.kwargs["group"][0] + " cost profile"
+    # # title
+    # if "title" in kwargs:
+    #     title = kwargs["title"]
+    # else:
+    #     if milestones.kwargs["group"] == milestones.master.current_projects:
+    #         title = "Portfolio cost profile"
+    #     else:
+    #         title = milestones.kwargs["group"][0] + " cost profile"
 
-    fig.suptitle(title, fontweight="bold", fontsize=25)
 
     def handle_long_keys(key_names: List[str]) -> List[str]:
         labels = ["\n".join(wrap(l, 40)) for l in key_names]
@@ -3602,7 +3635,7 @@ def get_group(master: Master, tp: str, class_kwargs) -> List[str]:
     elif "group" in class_kwargs:
         group = cal_group(class_kwargs["group"], master, tp_indx)
     else:
-        group = master.master_data[tp_indx].projects
+        group = cal_group(master.master_data[tp_indx].projects, master, tp_indx)  # in case some project to remove
 
     return group
 
@@ -3620,7 +3653,6 @@ def cal_group(
     else:
         inner_list = input_list
     q_str = master.quarter_list[tp_indx]  # quarter string
-    # if len(inner_list) > 1
     for pg in inner_list:  # pg is project/group
         try:
             local_g = master.project_stage[q_str][pg]
@@ -3638,22 +3670,6 @@ def cal_group(
                     except KeyError:
                         error_case.append(pg)
 
-    # else:
-    #     p = inner_list[0]
-    #     try:
-    #         output = master.project_stage[quarter][p]
-    #     except KeyError:
-    #         try:
-    #             output = master.dft_groups[quarter][p]
-    #         except KeyError:  # handling of full names and abbreviations
-    #             try:
-    #                 output.append(master.abbreviations[p]["full name"])
-    #             except KeyError:
-    #                 try:
-    #                     output.append(master.full_names[p])
-    #                 except KeyError:
-    #                     error_case.append(p)
-
     if error_case:
         for p in error_case:
             logger.critical(p + " not a recognised project or group")
@@ -3661,6 +3677,16 @@ def cal_group(
             "Program stopping. Please check project or group name and re-enter."
         )
 
+    # try:
+    #     output.remove('Rail Franchising Programme')
+    #     logger.info('Rail Franchising Programme' + ' removed from group')
+    # except ValueError:
+    #     pass
+    # try:
+    #     output.remove('Northern Powerhouse Rail')
+    #     logger.info('Northern Powerhouse Rail' + ' removed from group')
+    # except ValueError:
+    #     pass
     return output
 
 
@@ -5148,10 +5174,6 @@ def print_out_project_milestones(
     # table heading
     ab = milestones.master.abbreviations[project_name]["abb"]
     doc.add_paragraph().add_run(str(ab + " milestone table (2021 - 22)")).bold = True
-    # some_text = 'The below table presents all project reported remaining high-level milestones, with six months grace ' \
-    # 'from close of the current quarter. Milestones are sorted in chronological order. Changes in milestones' \
-    # ' dates in comparison to last quarter and baseline have been calculated and are provided.'
-    # doc.add_paragraph().add_run(str(some_text)).italic = True
 
     ab = milestones.master.abbreviations[project_name]["abb"]
 
@@ -5198,9 +5220,7 @@ def print_out_project_milestones(
         except TypeError:
             row_cells[3].text = "Not reported"
         try:
-            row_cells[4].text = get_milestone_notes(
-                ab, milestones.milestone_dict, "current", m
-            )
+            row_cells[4].text = milestones.sorted_milestone_dict[milestones.iter_list[0]]["notes"][i]
             paragraph = row_cells[4].paragraphs[0]
             run = paragraph.runs
             font = run[0].font
@@ -7730,3 +7750,88 @@ def run_dandelion_matplotlib_chart(dandelion: Dict[str, list], **kwargs) -> plt.
         if kwargs["chart"]:
             plt.show()
     return fig
+
+
+def get_stackplot_data(master: Master, g_list: List[str], quarter: str, **kwargs) -> plt.figure:
+    # sp_dict = {}  # stacked plot dict
+    # if "type" in kwargs:
+    sp_dict = {}  # stacked plot dict
+    if kwargs["type"] == "comp":  # composition
+        for g in g_list:  # group list
+            costs = CostData(master, group=[g], quarter=[quarter])
+            sp_dict[g] = costs.c_profiles[quarter]["prof"]
+
+    return sp_dict
+        # elif kwargs["type"] == "cat":  # category
+        #     costs = CostData(master, group=[g_list], quarter=[quarter])
+        #     cat_list = ["cdel", "rdel", "ngov"]
+        #     s_list = []
+        #     for i in range(len(cat_list)):
+        #         sp_dict[i]
+        #         s_list.append([costs.c_profiles[quarter][cat_list[i]]])
+
+
+def put_stackplot_data_into_wb(sp_data: Dict) -> workbook:
+    wb = Workbook()
+    ws = wb.active
+
+    for x, g in enumerate(sp_data.keys()):
+        ws.cell(row=1, column=2 + x).value = g
+        for i, pv in enumerate(sp_data[g]):
+            ws.cell(row=2 + i, column=1).value = YEAR_LIST[i]
+            ws.cell(row=2 + i, column=2 + x).value = pv
+
+    ws.cell(row=1, column=1).value = "Year"
+
+    wb.save(root_path / "output/sp_data_all.xlsx")
+
+
+def stackplot_graph(master: Master, g_list: List[str], quarter: str, **kwargs) -> plt.figure:
+    if "type" in kwargs:
+        sp_dict = {}  # stacked plot dict
+        if kwargs["type"] == "comp":  # composition
+            for g in g_list:  # group list
+                costs = CostData(master, group=[g], quarter=[quarter])
+                sp_dict[g] = costs.c_profiles[quarter]["prof"]
+
+            s_list = []  # stack list
+            for i in range(len(g_list)):
+                s_list.append([sp_dict[g_list[i]]])
+            y = np.vstack(s_list)
+            labels = g_list
+
+        elif kwargs["type"] == "cat":  # category
+            costs = CostData(master, group=[g_list], quarter=[quarter])
+            cat_list = ["cdel", "rdel", "ngov"]
+            s_list = []
+            for i in range(len(cat_list)):
+                s_list.append([costs.c_profiles[quarter][cat_list[i]]])
+            y = np.vstack(s_list)
+            labels = cat_list
+
+        # fig, ax = plt.subplots()
+        # ax.stackplot(x, y1, y2, y3, y4, labels=labels)
+        # ax.legend(loc='upper left')
+        # plt.show()
+    x = YEAR_LIST
+    fig, ax = plt.subplots()
+    fig = set_fig_size(kwargs, fig)
+    ax.stackplot(x, y, labels=labels)
+    ax.legend(loc='upper left')
+
+    # Chart styling
+    fig.suptitle('Portfolio cost profile per group', fontweight="bold", fontsize=15)
+    plt.xticks(rotation=45, size=10)
+    plt.yticks(size=10)
+    ax.set_ylabel("Cost (£m)")
+    ylab1 = ax.yaxis.get_label()
+    ylab1.set_style("italic")
+    ylab1.set_size(12)
+    ax.grid(color="grey", linestyle="-", linewidth=0.2)
+    # ax.legend(prop={"size": 12})
+
+    plt.show()
+    return fig
+    # fig.savefig(root_path /"output/portfolio_cost_composition_cat.png")
+
+

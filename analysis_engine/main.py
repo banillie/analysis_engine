@@ -193,6 +193,7 @@ def milestones(args):
                     m, group=args["group"], baseline=args["baselines"]
                 )
         if args["dates"]:
+            milestones = MilestoneData(m, baseline=["standard"])
             sd, ed = zip(args["dates"])  # hack refine
             milestones.filter_chart_info(start_date=sd[0], end_date=ed[0])
         # projects = (
@@ -327,7 +328,7 @@ def main():
         metavar="",
         action="store",
         nargs="+",
-        choices=["current", "last", "bl_one", "bl_two", "bl_three", "all"],
+        choices=["current", "last", "bl_one", "bl_two", "bl_three", "standard", "all"],
         help="Returns analysis for specified baselines. Must be in correct format",
     )
 
@@ -367,7 +368,7 @@ def main():
         metavar="",
         action="store",
         nargs="+",
-        choices=["current", "last", "bl_one", "bl_two", "bl_three", "all"],
+        choices=["current", "last", "bl_one", "bl_two", "bl_three", "standard", "all"],
         help="Returns analysis for specified baselines. Must be in correct format",
     )
 
