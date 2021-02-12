@@ -56,7 +56,7 @@ from analysis_engine.data import (
     cost_profile_into_wb,
     data_query_into_wb,
     get_data_query_key_names,
-    remove_project_name_from_milestone_key,
+    remove_project_name_from_milestone_key, get_cost_stackplot_data, cost_stackplot_graph,
 )
 
 # test masters project names
@@ -268,7 +268,13 @@ def test_get_group_cost_profile(costs_masters, project_info):
 def test_get_group_cost_profile_chart(costs_masters, project_info):
     master = Master(costs_masters, project_info)
     costs = CostData(master, quarter=["standard"])
-    cost_profile_graph(costs)
+    cost_profile_graph(costs, chart=True)
+
+
+def test_get_stackplot_costs_chart(costs_masters, project_info):
+    m = Master(costs_masters, project_info)
+    sp = get_cost_stackplot_data(m, group, "Q1 20/21", type="cat")
+    cost_stackplot_graph(sp)
 
 
 def test_get_project_total_cost_calculations_for_project(costs_masters, project_info):

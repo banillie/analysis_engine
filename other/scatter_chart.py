@@ -2,7 +2,7 @@ import numpy as np
 
 from analysis_engine.data import open_pickle_file, root_path, DcaData, CostData, MilestoneData, \
     cost_v_schedule_chart_into_wb, RiskData, DandelionData, VfMData, put_cost_totals_into_wb, \
-    put_matplotlib_fig_into_word, open_word_doc, FIGURE_STYLE, get_stackplot_data, put_stackplot_data_into_wb
+    put_matplotlib_fig_into_word, open_word_doc, FIGURE_STYLE, get_cost_stackplot_data, put_stackplot_data_into_wb
 
 # print("compiling cost and schedule matrix analysis")
 m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
@@ -11,7 +11,7 @@ m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
 
 # g = m.dft_groups["Q3 20/21"]["Rail"]
 group_list = ['HSMRPG', 'Rail', 'RPE', 'AMIS']
-c = get_stackplot_data(m, group_list, "Q3 20/21", type="comp")
+c = get_cost_stackplot_data(m, group_list, "Q3 20/21", type="comp")
 put_stackplot_data_into_wb(c)
 # doc = open_word_doc(root_path / "input/summary_temp_landscape.docx")
 # put_matplotlib_fig_into_word(doc, c, size=8, transparent=False)

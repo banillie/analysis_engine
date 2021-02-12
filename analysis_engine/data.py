@@ -7703,23 +7703,19 @@ def run_dandelion_matplotlib_chart(dandelion: Dict[str, list], **kwargs) -> plt.
     return fig
 
 
-def get_stackplot_data(master: Master, g_list: List[str], quarter: str, **kwargs) -> plt.figure:
-    # sp_dict = {}  # stacked plot dict
-    # if "type" in kwargs:
+def get_cost_stackplot_data(master: Master, g_list: List[str], quarter: str, **kwargs) -> plt.figure:
     sp_dict = {}  # stacked plot dict
     if kwargs["type"] == "comp":  # composition
         for g in g_list:  # group list
             costs = CostData(master, group=[g], quarter=[quarter])
             sp_dict[g] = costs.c_profiles[quarter]["prof"]
+    elif kwargs["type"] == "cat":  # category
+        costs = CostData(master, group=[g_list], quarter=[quarter])
+        cat_list = ["cdel", "rdel", "ngov"]
+        for c in cat_list:
+            sp_dict[c] = costs.c_profiles[quarter][c]
 
     return sp_dict
-        # elif kwargs["type"] == "cat":  # category
-        #     costs = CostData(master, group=[g_list], quarter=[quarter])
-        #     cat_list = ["cdel", "rdel", "ngov"]
-        #     s_list = []
-        #     for i in range(len(cat_list)):
-        #         sp_dict[i]
-        #         s_list.append([costs.c_profiles[quarter][cat_list[i]]])
 
 
 def put_stackplot_data_into_wb(sp_data: Dict) -> workbook:
@@ -7737,41 +7733,23 @@ def put_stackplot_data_into_wb(sp_data: Dict) -> workbook:
     wb.save(root_path / "output/sp_data_all.xlsx")
 
 
-def stackplot_graph(master: Master, g_list: List[str], quarter: str, **kwargs) -> plt.figure:
-    if "type" in kwargs:
-        sp_dict = {}  # stacked plot dict
-        if kwargs["type"] == "comp":  # composition
-            for g in g_list:  # group list
-                costs = CostData(master, group=[g], quarter=[quarter])
-                sp_dict[g] = costs.c_profiles[quarter]["prof"]
+def cost_stackplot_graph(sp_dict: Dict[str, float], **chart_kwargs) -> plt.figure:
+    sp_list = []  # stackplot list
+    labels = list(sp_dict.keys())
+    for g in labels:
+        sp_list.append(sp_dict[g])
+    y = np.vstack(sp_list)
 
-            s_list = []  # stack list
-            for i in range(len(g_list)):
-                s_list.append([sp_dict[g_list[i]]])
-            y = np.vstack(s_list)
-            labels = g_list
-
-        elif kwargs["type"] == "cat":  # category
-            costs = CostData(master, group=[g_list], quarter=[quarter])
-            cat_list = ["cdel", "rdel", "ngov"]
-            s_list = []
-            for i in range(len(cat_list)):
-                s_list.append([costs.c_profiles[quarter][cat_list[i]]])
-            y = np.vstack(s_list)
-            labels = cat_list
-
-        # fig, ax = plt.subplots()
-        # ax.stackplot(x, y1, y2, y3, y4, labels=labels)
-        # ax.legend(loc='upper left')
-        # plt.show()
     x = YEAR_LIST
     fig, ax = plt.subplots()
-    fig = set_fig_size(kwargs, fig)
     ax.stackplot(x, y, labels=labels)
     ax.legend(loc='upper left')
 
+    if "size" in chart_kwargs:
+        fig = set_fig_size(chart_kwargs["size"], fig)
+
     # Chart styling
-    fig.suptitle('Portfolio cost profile per group', fontweight="bold", fontsize=15)
+    fig.suptitle('stackplot example', fontweight="bold", fontsize=15)
     plt.xticks(rotation=45, size=10)
     plt.yticks(size=10)
     ax.set_ylabel("Cost (£m)")

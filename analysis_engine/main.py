@@ -61,7 +61,7 @@ from analysis_engine.data import (
     data_query_into_wb,
     get_data_query_key_names,
     ProjectNameError,
-    milestone_chart,
+    milestone_chart, get_cost_stackplot_data, cost_stackplot_graph, cal_group,
 )
 
 import logging
@@ -267,6 +267,17 @@ def matrix(args):
     print("Cost and schedule matrix compiled. Enjoy!")
 
 
+def costs_sp(args):
+    print("compiling cost stackplot")
+    m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
+    if args["group"]:
+        g = cal_group(args["group"], m, 0)
+        sp = get_cost_stackplot_data(m, g, "Q3 20/21", type="comp")
+    else:
+        sp = get_cost_stackplot_data(m, ['HSMRPG', 'Rail', 'RPE', 'AMIS'], "Q3 20/21", type="comp")
+    cost_stackplot_graph(sp)
+
+
 def query(args):
     print("Getting data")
     m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
@@ -303,7 +314,11 @@ def main():
     )
     parser_costs = subparsers.add_parser(
         "costs",
-        help="cost profile graph and data (early version needs more testing).",
+        help="cost trend profile graph and data (early version needs more testing).",
+    )
+    parser_costs_sp = subparsers.add_parser(
+        "costs_sp",
+        help="cost stackplot graph and data (early version needs more testing).",
     )
     parser_milestones = subparsers.add_parser(
         "milestones",
@@ -327,6 +342,16 @@ def main():
         nargs="+",
         help="Returns summaries for specified project(s). User can either input DfT Group name; "
         '"HSMRPG", "AMIS", "Rail", "RPE", or the project(s) acronym',
+    )
+
+    parser_costs_sp.add_argument(
+        "--group",
+        type=str,
+        metavar="",
+        action="store",
+        nargs="+",
+        help="Returns summaries for specified project(s). User can either input DfT Group name; "
+             '"HSMRPG", "AMIS", "Rail", "RPE", or the project(s) acronym',
     )
 
     parser_data_query.add_argument(
@@ -506,6 +531,7 @@ def main():
     parser_speedial.set_defaults(func=run_general)
     parser_matrix.set_defaults(func=matrix)
     parser_data_query.set_defaults(func=query)
+    parser_costs_sp.set_defaults(func=costs_sp)
     args = parser.parse_args()
     # print(vars(args))
     args.func(vars(args))
