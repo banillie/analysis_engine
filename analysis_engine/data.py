@@ -7432,7 +7432,7 @@ def overall_dashboard(
 def ipdc_dashboard(master: Master, wb: Workbook) -> Workbook:
     financial_dashboard(master, wb)
 
-    milestone_class = MilestoneData(master, baseline='all')
+    milestone_class = MilestoneData(master, baseline=['standard'])
     milestone_class.filter_chart_info(type=["Approval", "Delivery"])
     schedule_dashboard(master, milestone_class, wb)
 

@@ -268,15 +268,18 @@ def matrix(args):
 
 
 def costs_sp(args):
-    print("compiling cost stackplot")
-    m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
-    if args["group"]:
-        g = cal_group(args["group"], m, 0)
-        sp = get_cost_stackplot_data(m, g, "Q3 20/21", type="comp")
-    else:
-        sp = get_cost_stackplot_data(m, ['HSMRPG', 'Rail', 'RPE', 'AMIS'], "Q3 20/21", type="comp")
-    cost_stackplot_graph(sp)
-
+    try:
+        print("compiling cost stackplot")
+        m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
+        if args["group"]:
+            g = cal_group(args["group"], m, 0)
+            sp = get_cost_stackplot_data(m, g, "Q3 20/21", type="comp")
+        else:
+            sp = get_cost_stackplot_data(m, ['HSMRPG', 'Rail', 'RPE', 'AMIS'], "Q3 20/21", type="comp")
+        cost_stackplot_graph(sp)
+    except ProjectNameError as e:
+        logger.critical(e)
+        sys.exit(1)
 
 def query(args):
     print("Getting data")

@@ -549,7 +549,7 @@ def test_financial_dashboard(costs_masters, dashboard_template, project_info):
 
 def test_schedule_dashboard(milestone_masters, dashboard_template, project_info):
     m = Master(milestone_masters, project_info)
-    milestones = MilestoneData(m, baseline="all")
+    milestones = MilestoneData(m, baseline=["all"])
     milestones.filter_chart_info(milestone_type=["Approval", "Delivery"])
     wb = schedule_dashboard(m, milestones, dashboard_template)
     wb.save("resources/test_dashboards_master_altered.xlsx")
