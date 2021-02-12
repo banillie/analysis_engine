@@ -184,44 +184,44 @@ def run_general(args):
 def milestones(args):
     print("compiling milestone analysis_engine")
     m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
+    # print(args)
     try:
         # options "baselines" "quarters" "group" "dates" "stage"
         # bls
-        if args["baselines"]:
-            ms = MilestoneData(m, baseline=args["baselines"])
-        elif args["baselines"] and args["group"]:
-            ms = MilestoneData(m, group=args["group"], baseline=args["baselines"])
-        elif args["baselines"] and args["dates"]:
-            ms = MilestoneData(m, baseline=args["baselines"])
+        if args["baselines"] and args["stage"] and args["dates"]:
+            ms = MilestoneData(m, group=args["stage"], baseline=args["baselines"])
             ms.filter_chart_info(dates=args["dates"])
         elif args["baselines"] and args["group"] and args["dates"]:
             ms = MilestoneData(m, group=args["group"], baseline=args["baselines"])
             ms.filter_chart_info(dates=args["dates"])
-        elif args["baselines"] and args["stage"] and args["dates"]:
-            ms = MilestoneData(m, group=args["stage"], baseline=args["baselines"])
+        elif args["baselines"] and args["dates"]:
+            ms = MilestoneData(m, baseline=args["baselines"])
             ms.filter_chart_info(dates=args["dates"])
+        elif args["baselines"] and args["group"]:
+            ms = MilestoneData(m, group=args["group"], baseline=args["baselines"])
+        elif args["baselines"]:
+            ms = MilestoneData(m, baseline=args["baselines"])
         # quarters
-        elif args["quarters"]:
-            ms = MilestoneData(m, quarter=args["quarters"])
+        elif args["quarters"] and args["stage"] and args["dates"]:
+            ms = MilestoneData(m, group=args["stage"], quarter=args["quarters"])
+            ms.filter_chart_info(dates=args["dates"])
+        elif args["quarters"] and args["group"] and args["dates"]:
+            ms = MilestoneData(m, group=args["group"], quarter=args["quarters"])
+            ms.filter_chart_info(dates=args["dates"])
         elif args["quarters"] and args["group"]:
             ms = MilestoneData(m, group=args["group"], quarter=args["quarters"])
         elif args["quarters"] and args["dates"]:
             ms = MilestoneData(m, quarter=args["quarters"])
             ms.filter_chart_info(dates=args["dates"])
-        elif args["quarters"] and args["group"] and args["dates"]:
-            ms = MilestoneData(m, group=args["group"], quarter=args["quarters"])
-            ms.filter_chart_info(dates=args["dates"])
-        elif args["quarters"] and args["stage"] and args["dates"]:
-            ms = MilestoneData(m, group=args["stage"], quarter=args["quarters"])
-            ms.filter_chart_info(dates=args["dates"])
+        elif args["quarters"]:
+            ms = MilestoneData(m, quarter=args["quarters"])
         # dates
-        elif args["dates"]:
-            ms = MilestoneData(m, quarter=["standard"])
-            ms.filter_chart_info(dates=args["dates"])
         elif args["dates"] and args["group"]:
             ms = MilestoneData(m, quarter=["standard"], group=args["group"])
             ms.filter_chart_info(dates=args["dates"])
-
+        elif args["dates"]:
+            ms = MilestoneData(m, quarter=["standard"])
+            ms.filter_chart_info(dates=args["dates"])
         else:
             ms = MilestoneData(m, quarter=["standard"])
 
@@ -234,6 +234,7 @@ def milestones(args):
         logger.critical(e)
         sys.exit(1)
     except Warning:
+        logger.critical("To many milestone for chart. Stopping")
         sys.exit(1)
 
 
