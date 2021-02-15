@@ -56,7 +56,7 @@ from analysis_engine.data import (
     cost_profile_into_wb,
     data_query_into_wb,
     get_data_query_key_names,
-    remove_project_name_from_milestone_key, get_cost_stackplot_data, cost_stackplot_graph,
+    remove_project_name_from_milestone_key, get_cost_stackplot_data, cost_stackplot_graph, get_group,
 )
 
 # test masters project names
@@ -184,7 +184,7 @@ def test_get_project_cost_profile(costs_masters, project_info):
 
 def test_project_cost_profile_chart(costs_masters, project_info):
     master = Master(costs_masters, project_info)
-    costs = CostData(master, stage=[f9], baseline='standard')
+    costs = CostData(master, remove=[f9], baseline=['standard'])
     cost_profile_graph(costs, chart='show')
 
 
@@ -236,8 +236,8 @@ def test_project_cost_profile_chart_into_word_doc_many(
 
 def test_get_group_cost_profile(costs_masters, project_info):
     master = Master(costs_masters, project_info)
-    costs = CostData(master, group=master.current_projects)
-    assert costs.current_profile == [
+    costs = CostData(master, group=[master.current_projects], quarter=["standard"])
+    assert costs.c_profiles["Q1 20/21"]["prof"] == [
         15.45,
         932.8199999999999,
         798.1,
@@ -300,7 +300,7 @@ def test_get_group_total_cost_calculations(costs_masters, project_info):
 
 def test_get_group_total_cost_and_bens_chart(costs_masters, project_info):
     master = Master(costs_masters, project_info)
-    costs = CostData(master, group=master.current_projects)
+    costs = CostData(master, group=[master.current_projects])
     benefits = BenefitsData(master, master.current_projects)
     total_costs_benefits_bar_chart(costs, benefits, title="Total Group", show="No")
 
@@ -598,3 +598,10 @@ def test_data_queries_milestones(milestone_masters, project_info):
 def test_open_csv_file(key_file):
     l = get_data_query_key_names(key_file)
     assert isinstance(l, (list,))
+
+
+def test_cal_group_including_removing(milestone_masters, project_info):
+    m = Master(milestone_masters, project_info)
+    kwargs = {"baseline": "current", "remove": ["Mars"]}
+    group = get_group(m, "current", kwargs)
+    assert group == ['Sea of Tranquility', 'Apollo 11', 'Apollo 13', 'Falcon 9', 'Columbia']

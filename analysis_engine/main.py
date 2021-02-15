@@ -87,6 +87,8 @@ def run_correct_args(
         data = ae_class(m, baseline=args["baselines"], stage=args["stage"])
     elif args["baselines"] and args["group"]:
         data = ae_class(m, baseline=args["baselines"], group=args["group"])
+    elif args["baselines"] and args["remove"]:  # HERE
+        data = ae_class(m, baseline=args["baselines"], remove=args["remove"])
     elif args["baselines"]:
         data = ae_class(m, baseline=args["baselines"])
     elif args["quarters"]:
@@ -280,6 +282,7 @@ def costs_sp(args):
     except ProjectNameError as e:
         logger.critical(e)
         sys.exit(1)
+
 
 def query(args):
     print("Getting data")
@@ -520,6 +523,16 @@ def main():
             action="store",
             nargs="+",
             help="Returns analysis for specified quarters. Must be in format e.g Q3 19/20",
+        )
+        sub.add_argument(
+            "--remove",
+            type=str,
+            metavar="",
+            action="store",
+            nargs="+",
+            # choices=["HSMRPG", "AMIS", "Rail", "RPE"],
+            help="Removes specified projects from analysis. User can either input DfT Group name; "
+                 '"HSMRPG", "AMIS", "Rail", "RPE", or the project(s) acronym',
         )
 
     parser_initiate.set_defaults(func=initiate)
