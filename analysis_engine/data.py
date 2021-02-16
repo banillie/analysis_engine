@@ -3593,7 +3593,7 @@ def get_group(master: Master, tp: str, class_kwargs) -> List[str]:
         group = cal_group(master.master_data[tp_indx].projects, master, tp_indx)  # in case some project to remove
 
     if "remove" in class_kwargs:
-        group = remove_from_group(group, class_kwargs["remove"], master, tp_indx)
+        group = remove_from_group(group, class_kwargs["remove"], master, tp_indx, class_kwargs)
 
     return group
 
@@ -3641,7 +3641,8 @@ def remove_from_group(
         pg_list: List[str],
         remove_list: List[str] or List[list[str]],
         master: Master,
-        tp_index: int
+        tp_index: int,
+        c_kwargs  # class_kwargs
 ) -> List[str]:
     if any(isinstance(x, list) for x in remove_list):
         remove_list = [item for sublist in remove_list for item in sublist]
@@ -3663,15 +3664,21 @@ def remove_from_group(
                 except KeyError:
                     try:
                         pg_list.remove(master.full_names[pg])
-                    except KeyError:
+                    except (ValueError, KeyError):
                         error_case.append(pg)
 
     if error_case:
-        for p in error_case:
-            logger.critical(p + " not removed. Check you are entering correct name.")
-        raise ProjectNameError(
-            "Program stopping. Please check project or group name and re-enter."
-        )
+        if "baseline" in c_kwargs:
+            for p in error_case:
+                logger.critical(p + " not a recognised.")
+            raise ProjectNameError(
+                'Program stopping. Please check the "remove" entry and re-enter.'
+            )
+        if "quarter" in c_kwargs:
+            for p in error_case:
+                logger.info(p + " not a recognised or not present in " + q_str + "."
+                         ' So not removed from the data for that quarter. Make sure the '
+                            '"remove" entry is correct.')
 
     return pg_list
 

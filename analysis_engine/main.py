@@ -79,16 +79,30 @@ def run_correct_args(
     ae_class: MilestoneData or CostData or VfMData or DcaData or RiskData,
     args: argparse.ArgumentParser,
 ) -> MilestoneData or CostData or VfMData or DcaData:
-    if args["quarters"] and args["stage"]:
+    if args["quarters"] and args["stage"] and args["remove"]:
+        data = ae_class(m, quarter=args["quarters"], stage=args["stage"], remove=args["remove"])
+    elif args["quarters"] and args["group"] and args["remove"]:
+        data = ae_class(m, quarter=args["quarters"], group=args["group"], remove=args["remove"])
+    elif args["quarters"] and args["stage"]:
         data = ae_class(m, quarter=args["quarters"], stage=args["stage"])
     elif args["quarters"] and args["group"]:
         data = ae_class(m, quarter=args["quarters"], group=args["group"])
+    elif args["quarters"] and args["remove"]:
+        data = ae_class(m, quarter=args["quarters"], remove=args["remove"])
+    elif args["baselines"] and args["stage"] and args["remove"]:
+        data = ae_class(m, baseline=args["baselines"], stage=args["stage"], remove=args["remove"])
+    elif args["baselines"] and args["group"] and args["remove"]:
+        data = ae_class(m, baseline=args["baselines"], group=args["group"], remove=args["remove"])
     elif args["baselines"] and args["stage"]:
         data = ae_class(m, baseline=args["baselines"], stage=args["stage"])
     elif args["baselines"] and args["group"]:
         data = ae_class(m, baseline=args["baselines"], group=args["group"])
-    elif args["baselines"] and args["remove"]:  # HERE
+    elif args["baselines"] and args["remove"]:
         data = ae_class(m, baseline=args["baselines"], remove=args["remove"])
+    elif args["stage"] and args["remove"]:
+        data = ae_class(m, quarter=["standard"], group=args["stage"], remove=args["remove"])
+    elif args["group"] and args["remove"]:
+        data = ae_class(m, quarter=["standard"], group=args["group"], remove=args["remove"])
     elif args["baselines"]:
         data = ae_class(m, baseline=args["baselines"])
     elif args["quarters"]:
@@ -310,6 +324,7 @@ def main():
         prog="engine", description="DfT Major Projects Portfolio Office analysis engine"
     )
     subparsers = parser.add_subparsers(dest="subparser_name")
+    subparsers.metavar = "subcommand                "
     parser_initiate = subparsers.add_parser(
         "initiate", help="creates a master data file"
     )
@@ -340,24 +355,129 @@ def main():
         "query", help="return data from core data"
     )
 
-    parser_summaries.add_argument(
-        "--group",
-        type=str,
-        metavar="",
-        action="store",
-        nargs="+",
-        help="Returns summaries for specified project(s). User can either input DfT Group name; "
-        '"HSMRPG", "AMIS", "Rail", "RPE", or the project(s) acronym',
-    )
+    # Arguments
+    # stage
+    for sub in [
+        parser_dca,
+        parser_vfm,
+        parser_risks,
+        parser_speedial,
+        parser_dandelion,
+        parser_costs,
+        parser_data_query,
+        parser_milestones,
+    ]:
+        sub.add_argument(
+            "--stage",
+            type=str,
+            metavar="",
+            action="store",
+            nargs="+",
+            choices=["FBC", "OBC", "SOBC", "pre-SOBC"],
+            help="Returns analysis for only those projects at the specified planning stage(s). User must enter one "
+            'or combination of "FBC", "OBC", "SOBC", "pre-SOBC".',
+        )
+    # group
+    for sub in [
+        parser_dca,
+        parser_vfm,
+        parser_risks,
+        parser_speedial,
+        parser_dandelion,
+        parser_costs,
+        parser_data_query,
+        parser_milestones,
+        parser_summaries,
+        parser_costs_sp,
+    ]:
+        sub.add_argument(
+            "--group",
+            type=str,
+            metavar="",
+            action="store",
+            nargs="+",
+            # choices=["HSMRPG", "AMIS", "Rail", "RPE"],
+            help="Returns analysis for specified project(s), only. User must enter one or a combination of "
+                 'DfT Group names; "HSMRPG", "AMIS", "Rail", "RPE", or the project(s) acronym or full name.',
+        )
+    # remove
+    for sub in [
+        parser_dca,
+        parser_vfm,
+        parser_risks,
+        parser_speedial,
+        parser_dandelion,
+        parser_costs,
+        parser_data_query,
+        parser_milestones,
+    ]:
+        sub.add_argument(
+            "--remove",
+            type=str,
+            metavar="",
+            action="store",
+            nargs="+",
+            # choices=["HSMRPG", "AMIS", "Rail", "RPE"],
+            help="Removes specified projects from analysis. User must enter one or a combination of either"
+                 " a recognised DfT Group name, a recognised planning stage or the project(s) acronym or full"
+                 " name.",
+        )
+    # quarter
+    for sub in [
+        parser_dca,
+        parser_vfm,
+        parser_risks,
+        parser_speedial,
+        parser_dandelion,
+        parser_costs,
+        parser_data_query,
+        parser_milestones,
+    ]:
+        sub.add_argument(
+            "--quarters",
+            type=str,
+            metavar="",
+            action="store",
+            nargs="+",
+            help='Returns analysis for specified quarters. User must use correct format e.g "Q3 19/20"',
+        )
+    # baseline
+    for sub in [
+        parser_dca,
+        parser_vfm,
+        parser_risks,
+        parser_speedial,
+        parser_dandelion,
+        parser_costs,
+        parser_data_query,
+        parser_milestones,
+    ]:
+        sub.add_argument(
+            "--baselines",
+            type=str,
+            metavar="",
+            action="store",
+            nargs="+",
+            choices=["current", "last", "bl_one", "bl_two", "bl_three", "standard", "all"],
+            help="Returns analysis for specified baselines. User must use correct format"
+                 ' which are "current", "last", "bl_one", "bl_two", "bl_three", "standard", "all".'
+                 ' The "all" option returns all, "standard" returns first three'
+        )
 
-    parser_costs_sp.add_argument(
-        "--group",
-        type=str,
-        metavar="",
-        action="store",
-        nargs="+",
-        help="Returns summaries for specified project(s). User can either input DfT Group name; "
-             '"HSMRPG", "AMIS", "Rail", "RPE", or the project(s) acronym',
+    # chart
+    for sub in [parser_dandelion, parser_costs, parser_milestones]:
+        sub.add_argument(
+            "--chart",
+            type=str,
+            metavar="",
+            action="store",
+            choices=['show', 'save'],
+            help="options for building and saving graph output. Commands are 'show' or 'save' "
+        )
+
+    # title
+    parser_costs.add_argument(
+        "--title", type=str, action="store", help="provide a title for chart. Optional"
     )
 
     parser_data_query.add_argument(
@@ -376,80 +496,6 @@ def main():
         help="provide name of csc file contain key names",
     )
 
-    parser_costs.add_argument(
-        "--title", type=str, action="store", help="provide a title for chart. Optional"
-    )
-
-    parser_milestones.add_argument(
-        "--baselines",
-        type=str,
-        metavar="",
-        action="store",
-        nargs="+",
-        choices=["current", "last", "bl_one", "bl_two", "bl_three", "standard", "all"],
-        help="Returns analysis for specified baselines. Must be in correct format",
-    )
-
-    parser_speedial.add_argument(
-        "--baselines",
-        type=str,
-        metavar="",
-        action="store",
-        nargs="+",
-        choices=["current", "last", "bl_one", "bl_two", "bl_three", "all"],
-        help="Returns analysis for specified baselines. Must be in correct format",
-    )
-
-    parser_dca.add_argument(
-        "--baselines",
-        type=str,
-        metavar="",
-        action="store",
-        nargs="+",
-        choices=["current", "last", "bl_one", "bl_two", "bl_three", "all"],
-        help="Returns analysis for specified baselines. Must be in correct format",
-    )
-
-    parser_risks.add_argument(
-        "--baselines",
-        type=str,
-        metavar="",
-        action="store",
-        nargs="+",
-        choices=["current", "last", "bl_one", "bl_two", "bl_three", "all"],
-        help="Returns analysis for specified baselines. Must be in correct format",
-    )
-
-    parser_costs.add_argument(
-        "--baselines",
-        type=str,
-        metavar="",
-        action="store",
-        nargs="+",
-        choices=["current", "last", "bl_one", "bl_two", "bl_three", "standard", "all"],
-        help="Returns analysis for specified baselines. Must be in correct format",
-    )
-
-    parser_dandelion.add_argument(
-        "--baselines",
-        type=str,
-        metavar="",
-        action="store",
-        nargs="+",
-        choices=["current", "last", "bl_one", "bl_two", "bl_three", "all"],
-        help="Returns analysis for specified baselines. Must be in correct format",
-    )
-
-    parser_vfm.add_argument(
-        "--baselines",
-        type=str,
-        metavar="",
-        action="store",
-        nargs="+",
-        choices=["current", "last", "bl_one", "bl_two", "bl_three", "all"],
-        help="Returns analysis for specified baselines. Must be in correct format",
-    )
-
     parser_milestones.add_argument(
         "--dates",
         type=str,
@@ -459,81 +505,58 @@ def main():
         help="dates for analysis. Must provide start date and then end date in format e.g. '1/1/2021' '1/1/2022'.",
     )
 
-    parser_dandelion.add_argument(
-        "--chart",
-        type=str,
-        action="store",
-        choices=['show', 'save'],
-        help="options for building and saving graph output. Commands are 'show' or 'save' "
-    )
 
-    parser_costs.add_argument(
-        "--chart",
-        type=str,
-        action="store",
-        choices=['show', 'save'],
-        help="options for building and saving graph output. Commands are 'show' or 'save' "
-    )
-
-    parser_milestones.add_argument(
-        "--chart",
-        type=str,
-        action="store",
-        choices=['show', 'save'],
-        help="options for building and saving graph output. Commands are 'show' or 'save' "
-    )
-
-    for sub in [
-        parser_dca,
-        parser_vfm,
-        parser_risks,
-        parser_speedial,
-        parser_dandelion,
-        parser_costs,
-        parser_data_query,
-        parser_milestones,
-    ]:
-        # all sub-commands have the same optional args. This is working
-        # but prob could be refactored.
-        sub.add_argument(
-            "--stage",
-            type=str,
-            metavar="",
-            action="store",
-            nargs="+",
-            choices=["FBC", "OBC", "SOBC", "pre-SOBC"],
-            help="Returns analysis for those projects at the specified planning stage(s). Must be one "
-            'or combination of "FBC", "OBC", "SOBC", "pre-SOBC".',
-        )
-        sub.add_argument(
-            "--group",
-            type=str,
-            metavar="",
-            action="store",
-            nargs="+",
-            # choices=["HSMRPG", "AMIS", "Rail", "RPE"],
-            help="Returns summaries for specified project(s). User can either input DfT Group name; "
-            '"HSMRPG", "AMIS", "Rail", "RPE", or the project(s) acronym',
-        )
-        # no quarters in dandelion yet
-        sub.add_argument(
-            "--quarters",
-            type=str,
-            metavar="",
-            action="store",
-            nargs="+",
-            help="Returns analysis for specified quarters. Must be in format e.g Q3 19/20",
-        )
-        sub.add_argument(
-            "--remove",
-            type=str,
-            metavar="",
-            action="store",
-            nargs="+",
-            # choices=["HSMRPG", "AMIS", "Rail", "RPE"],
-            help="Removes specified projects from analysis. User can either input DfT Group name; "
-                 '"HSMRPG", "AMIS", "Rail", "RPE", or the project(s) acronym',
-        )
+    # for sub in [
+    #     parser_dca,
+    #     parser_vfm,
+    #     parser_risks,
+    #     parser_speedial,
+    #     parser_dandelion,
+    #     parser_costs,
+    #     parser_data_query,
+    #     parser_milestones,
+    # ]:
+    #     # all sub-commands have the same optional args. This is working
+    #     # but prob could be refactored.
+    #     sub.add_argument(
+    #         "--stage",
+    #         type=str,
+    #         metavar="",
+    #         action="store",
+    #         nargs="+",
+    #         choices=["FBC", "OBC", "SOBC", "pre-SOBC"],
+    #         help="Returns analysis for those projects at the specified planning stage(s). Must be one "
+    #         'or combination of "FBC", "OBC", "SOBC", "pre-SOBC".',
+    #     )
+    #     sub.add_argument(
+    #         "--group",
+    #         type=str,
+    #         metavar="",
+    #         action="store",
+    #         nargs="+",
+    #         # choices=["HSMRPG", "AMIS", "Rail", "RPE"],
+    #         help="Returns summaries for specified project(s). User can either input DfT Group name; "
+    #         '"HSMRPG", "AMIS", "Rail", "RPE", or the project(s) acronym',
+    #     )
+    #     # no quarters in dandelion yet
+    #     sub.add_argument(
+    #         "--quarters",
+    #         type=str,
+    #         metavar="",
+    #         action="store",
+    #         nargs="+",
+    #         help="Returns analysis for specified quarters. Must be in format e.g Q3 19/20",
+    #     )
+    #     sub.add_argument(
+    #         "--remove",
+    #         type=str,
+    #         metavar="",
+    #         action="store",
+    #         nargs="+",
+    #         # choices=["HSMRPG", "AMIS", "Rail", "RPE"],
+    #         help="Removes specified projects from analysis. User can either input DfT Group name; "
+    #              '"HSMRPG", "AMIS", "Rail", "RPE", or the project(s) acronym"',
+    #     )
 
     parser_initiate.set_defaults(func=initiate)
     parser_dashboard.set_defaults(func=dashboard)
