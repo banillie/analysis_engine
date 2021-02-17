@@ -269,6 +269,10 @@ def milestones(args):
             ms = MilestoneData(m, group=args["stage"], quarter=args["quarters"])
             ms.filter_chart_info(dates=args["dates"], type=args["type"])
 
+        elif args["quarters"] and args["group"] and args["dates"] and args["type"]:
+            ms = MilestoneData(m, group=args["group"], quarter=args["quarters"])
+            ms.filter_chart_info(dates=args["dates"], type=args["type"])
+
         elif args["quarters"] and args["stage"] and args["dates"]:
             ms = MilestoneData(m, group=args["stage"], quarter=args["quarters"])
             ms.filter_chart_info(dates=args["dates"])
@@ -310,12 +314,15 @@ def milestones(args):
         elif args["dates"] and args["group"]:
             ms = MilestoneData(m, quarter=["standard"], group=args["group"])
             ms.filter_chart_info(dates=args["dates"])
+
         elif args["dates"] and args["stage"]:
             ms = MilestoneData(m, quarter=["standard"], group=args["stage"])
             ms.filter_chart_info(dates=args["dates"])
+
         elif args["type"] and args["stage"]:
             ms = MilestoneData(m, quarter=["standard"], group=args["stage"])
             ms.filter_chart_info(type=args["type"])
+
         elif args["type"] and args["group"]:
             ms = MilestoneData(m, quarter=["standard"], group=args["group"])
             ms.filter_chart_info(type=args["type"])
@@ -413,7 +420,7 @@ def costs_sp(args):
         logger.critical(e)
         sys.exit(1)
 
-
+# HERE
 def query(args):
     print("Getting data")
     m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
