@@ -61,7 +61,10 @@ from analysis_engine.data import (
     data_query_into_wb,
     get_data_query_key_names,
     ProjectNameError,
-    milestone_chart, get_cost_stackplot_data, cost_stackplot_graph, cal_group,
+    milestone_chart,
+    get_cost_stackplot_data,
+    cost_stackplot_graph,
+    cal_group,
 )
 
 import logging
@@ -80,9 +83,13 @@ def run_correct_args(
     args: argparse.ArgumentParser,
 ) -> MilestoneData or CostData or VfMData or DcaData:
     if args["quarters"] and args["stage"] and args["remove"]:
-        data = ae_class(m, quarter=args["quarters"], stage=args["stage"], remove=args["remove"])
+        data = ae_class(
+            m, quarter=args["quarters"], stage=args["stage"], remove=args["remove"]
+        )
     elif args["quarters"] and args["group"] and args["remove"]:
-        data = ae_class(m, quarter=args["quarters"], group=args["group"], remove=args["remove"])
+        data = ae_class(
+            m, quarter=args["quarters"], group=args["group"], remove=args["remove"]
+        )
     elif args["quarters"] and args["stage"]:
         data = ae_class(m, quarter=args["quarters"], stage=args["stage"])
     elif args["quarters"] and args["group"]:
@@ -90,9 +97,13 @@ def run_correct_args(
     elif args["quarters"] and args["remove"]:
         data = ae_class(m, quarter=args["quarters"], remove=args["remove"])
     elif args["baselines"] and args["stage"] and args["remove"]:
-        data = ae_class(m, baseline=args["baselines"], stage=args["stage"], remove=args["remove"])
+        data = ae_class(
+            m, baseline=args["baselines"], stage=args["stage"], remove=args["remove"]
+        )
     elif args["baselines"] and args["group"] and args["remove"]:
-        data = ae_class(m, baseline=args["baselines"], group=args["group"], remove=args["remove"])
+        data = ae_class(
+            m, baseline=args["baselines"], group=args["group"], remove=args["remove"]
+        )
     elif args["baselines"] and args["stage"]:
         data = ae_class(m, baseline=args["baselines"], stage=args["stage"])
     elif args["baselines"] and args["group"]:
@@ -100,9 +111,13 @@ def run_correct_args(
     elif args["baselines"] and args["remove"]:
         data = ae_class(m, baseline=args["baselines"], remove=args["remove"])
     elif args["stage"] and args["remove"]:
-        data = ae_class(m, quarter=["standard"], group=args["stage"], remove=args["remove"])
+        data = ae_class(
+            m, quarter=["standard"], group=args["stage"], remove=args["remove"]
+        )
     elif args["group"] and args["remove"]:
-        data = ae_class(m, quarter=["standard"], group=args["group"], remove=args["remove"])
+        data = ae_class(
+            m, quarter=["standard"], group=args["group"], remove=args["remove"]
+        )
     elif args["baselines"]:
         data = ae_class(m, baseline=args["baselines"])
     elif args["quarters"]:
@@ -165,22 +180,24 @@ def run_general(args):
             doc = open_word_doc(root_path / "input/summary_temp.docx")
             c = run_correct_args(m, DandelionData, args)
             wb = dandelion_data_into_wb(c)
-            if args['chart']:
+            if args["chart"]:
                 for i in c.iter_list:
                     graph = run_dandelion_matplotlib_chart(c.d_data[i], chart=True)
-                    if args['chart'] == 'save':
-                        put_matplotlib_fig_into_word(doc, graph, size=6, transparent=True)
+                    if args["chart"] == "save":
+                        put_matplotlib_fig_into_word(
+                            doc, graph, size=6, transparent=True
+                        )
                         doc.save(root_path / "output/dandelion_chart.docx")
         if programme == "costs":
             doc = open_word_doc(root_path / "input/summary_temp.docx")
             c = run_correct_args(m, CostData, args)
             wb = cost_profile_into_wb(c)
-            if args['chart']:
+            if args["chart"]:
                 if args["title"]:
                     graph = cost_profile_graph(c, title=args["title"], chart=True)
                 else:
                     graph = cost_profile_graph(c, chart=True)
-                if args['chart'] == 'save':
+                if args["chart"] == "save":
                     put_matplotlib_fig_into_word(doc, graph, size=6, transparent=False)
                     doc.save(root_path / "output/costs_chart.docx")
 
@@ -247,16 +264,22 @@ def milestones(args):
         if args["chart"]:
             if args["title"] and args["blue_line"]:
                 if args["blue_line"] == "today":
-                    graph = milestone_chart(ms, title=args["title"], blue_line="Today", chart=True)
+                    graph = milestone_chart(
+                        ms, title=args["title"], blue_line="Today", chart=True
+                    )
                 elif args["blue_line"] == "ipdc":
-                    graph = milestone_chart(ms, title=args["title"], blue_line="ipdc_date", chart=True)
+                    graph = milestone_chart(
+                        ms, title=args["title"], blue_line="ipdc_date", chart=True
+                    )
                 else:
-                    graph = milestone_chart(ms, title=args["title"], blue_line=args["blue_line"], chart=True)
+                    graph = milestone_chart(
+                        ms, title=args["title"], blue_line=args["blue_line"], chart=True
+                    )
             elif args["title"]:
                 graph = milestone_chart(ms, title=args["title"], chart=True)
             else:
                 graph = milestone_chart(ms, chart=True)
-            if args['chart'] == 'save':
+            if args["chart"] == "save":
                 doc = open_word_doc(root_path / "input/summary_temp_landscape.docx")
                 put_matplotlib_fig_into_word(doc, graph, size=8, transparent=False)
                 doc.save(root_path / "output/milestones_chart.docx")
@@ -306,7 +329,9 @@ def costs_sp(args):
             g = cal_group(args["group"], m, 0)
             sp = get_cost_stackplot_data(m, g, "Q3 20/21", type="comp")
         else:
-            sp = get_cost_stackplot_data(m, ['HSMRPG', 'Rail', 'RPE', 'AMIS'], "Q3 20/21", type="comp")
+            sp = get_cost_stackplot_data(
+                m, ["HSMRPG", "Rail", "RPE", "AMIS"], "Q3 20/21", type="comp"
+            )
         cost_stackplot_graph(sp)
     except ProjectNameError as e:
         logger.critical(e)
@@ -413,7 +438,7 @@ def main():
             nargs="+",
             # choices=["HSMRPG", "AMIS", "Rail", "RPE"],
             help="Returns analysis for specified project(s), only. User must enter one or a combination of "
-                 'DfT Group names; "HSMRPG", "AMIS", "Rail", "RPE", or the project(s) acronym or full name.',
+            'DfT Group names; "HSMRPG", "AMIS", "Rail", "RPE", or the project(s) acronym or full name.',
         )
     # remove
     for sub in [
@@ -434,8 +459,8 @@ def main():
             nargs="+",
             # choices=["HSMRPG", "AMIS", "Rail", "RPE"],
             help="Removes specified projects from analysis. User must enter one or a combination of either"
-                 " a recognised DfT Group name, a recognised planning stage or the project(s) acronym or full"
-                 " name.",
+            " a recognised DfT Group name, a recognised planning stage or the project(s) acronym or full"
+            " name.",
         )
     # quarter
     for sub in [
@@ -473,10 +498,18 @@ def main():
             metavar="",
             action="store",
             nargs="+",
-            choices=["current", "last", "bl_one", "bl_two", "bl_three", "standard", "all"],
+            choices=[
+                "current",
+                "last",
+                "bl_one",
+                "bl_two",
+                "bl_three",
+                "standard",
+                "all",
+            ],
             help="Returns analysis for specified baselines. User must use correct format"
-                 ' which are "current", "last", "bl_one", "bl_two", "bl_three", "standard", "all".'
-                 ' The "all" option returns all, "standard" returns first three'
+            ' which are "current", "last", "bl_one", "bl_two", "bl_three", "standard", "all".'
+            ' The "all" option returns all, "standard" returns first three',
         )
 
     # chart
@@ -486,14 +519,17 @@ def main():
             type=str,
             metavar="",
             action="store",
-            choices=['show', 'save'],
-            help="options for building and saving graph output. Commands are 'show' or 'save' "
+            choices=["show", "save"],
+            help="options for building and saving graph output. Commands are 'show' or 'save' ",
         )
 
     # title
     for sub in [parser_costs, parser_milestones]:
         sub.add_argument(
-            "--title", type=str, action="store", help="provide a title for chart. Optional"
+            "--title",
+            type=str,
+            action="store",
+            help="provide a title for chart. Optional",
         )
 
     parser_milestones.add_argument(
@@ -509,7 +545,8 @@ def main():
         "--blue_line",
         type=str,
         action="store",
-        help='Insert blue line into chart to represent a date. Options are "today" "ipdc" or a date in correct format e.g. "1/1/2021".')
+        help='Insert blue line into chart to represent a date. Options are "today" "ipdc" or a date in correct format e.g. "1/1/2021".',
+    )
 
     parser_data_query.add_argument(
         "--keys",
@@ -526,9 +563,6 @@ def main():
         action="store",
         help="provide name of csc file contain key names",
     )
-
-
-
 
     # for sub in [
     #     parser_dca,
