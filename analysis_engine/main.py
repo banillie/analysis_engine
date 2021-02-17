@@ -202,8 +202,6 @@ def milestones(args):
     m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
     # print(args)
     try:
-        # options "baselines" "quarters" "group" "dates" "stage"
-        # bls
         if args["baselines"] and args["stage"] and args["dates"]:
             ms = MilestoneData(m, group=args["stage"], baseline=args["baselines"])
             ms.filter_chart_info(dates=args["dates"])
@@ -246,8 +244,16 @@ def milestones(args):
         wb = put_milestones_into_wb(ms)
         wb.save(root_path / "output/milestone_data_output.xlsx")
 
-        if args['chart']:
-            milestone_chart(ms, chart=True)
+        if args["chart"]:
+            if args["title"]:
+                graph = milestone_chart(ms, title=args["title"], chart=True)
+            else:
+                graph = milestone_chart(ms, chart=True)
+            if args['chart'] == 'save':
+                doc = open_word_doc(root_path / "input/summary_temp_landscape.docx")
+                put_matplotlib_fig_into_word(doc, graph, size=8, transparent=False)
+                doc.save(root_path / "output/milestones_chart.docx")
+
     except ProjectNameError as e:
         logger.critical(e)
         sys.exit(1)
@@ -478,9 +484,10 @@ def main():
         )
 
     # title
-    parser_costs.add_argument(
-        "--title", type=str, action="store", help="provide a title for chart. Optional"
-    )
+    for sub in [parser_costs, parser_milestones]:
+        sub.add_argument(
+            "--title", type=str, action="store", help="provide a title for chart. Optional"
+        )
 
     parser_data_query.add_argument(
         "--keys",
