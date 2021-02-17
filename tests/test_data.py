@@ -413,10 +413,9 @@ def test_compile_milestone_chart_with_filter(milestone_masters, project_info):
     milestone_chart(milestones, title="Group Test", fig_size=FIGURE_STYLE[1])
 
 
-# failing. needs refactor
 def test_removing_project_name_from_milestone_keys(milestone_masters, project_info):
     master = Master(milestone_masters, project_info)
-    milestones = MilestoneData(master, group=[sot], baseline="all")
+    milestones = MilestoneData(master, group=[sot], baseline=["all"])
     key_names = milestones.sorted_milestone_dict["current"]["names"]
     key_names = remove_project_name_from_milestone_key("SoT", key_names)
     assert key_names == [
@@ -429,7 +428,7 @@ def test_removing_project_name_from_milestone_keys(milestone_masters, project_in
 
 def test_putting_milestones_into_wb(milestone_masters, project_info):
     mst = Master(milestone_masters, project_info)
-    milestones = MilestoneData(mst, group=[group], baseline=["standard"])
+    milestones = MilestoneData(mst, group=[sot], baseline=["standard"])
     wb = put_milestones_into_wb(milestones)
     wb.save("resources/milestone_data_output_test.xlsx")
 

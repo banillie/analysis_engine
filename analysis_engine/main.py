@@ -238,6 +238,8 @@ def milestones(args):
         elif args["dates"]:
             ms = MilestoneData(m, quarter=["standard"])
             ms.filter_chart_info(dates=args["dates"])
+        elif args["group"]:
+            ms = MilestoneData(m, quarter=["standard"], group=args["group"])
         else:
             ms = MilestoneData(m, quarter=["standard"])
 
@@ -245,7 +247,7 @@ def milestones(args):
         wb.save(root_path / "output/milestone_data_output.xlsx")
 
         if args['chart']:
-            milestone_chart(ms, title="test", chart=True)
+            milestone_chart(ms, chart=True)
     except ProjectNameError as e:
         logger.critical(e)
         sys.exit(1)

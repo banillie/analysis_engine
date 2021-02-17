@@ -2010,13 +2010,16 @@ def put_milestones_into_wb(milestones: MilestoneData) -> Workbook:
 
     row_num = 2
     ms_names = milestones.sorted_milestone_dict[milestones.iter_list[0]]["names"]
+    if len(milestones.group) == 1:
+        pn = milestones.master.abbreviations[milestones.group[0]]["abb"]  # pn project name
+        ms_names = remove_project_name_from_milestone_key(pn, ms_names)
+
     for i, m in enumerate(ms_names):
         for x, tp in enumerate(milestones.iter_list):
             if len(milestones.group) == 1:
                 project_name = milestones.group[0]
-                pm = m  # pm is project milestone
                 ws.cell(row=row_num + i, column=1).value = project_name
-                ws.cell(row=row_num + i, column=2).value = pm
+                ws.cell(row=row_num + i, column=2).value = m
             else:
                 project_name = m.split(",")[0]
                 pm = m.split(",")[1][1:]
@@ -2140,46 +2143,29 @@ def set_fig_size(kwargs, fig: plt.figure) -> plt.figure:
     return fig
 
 
-def get_chart_title(costs: CostData, chart_kwargs) -> str:
-    if "title" in chart_kwargs:
+def get_chart_title(data_class: CostData or MilestoneData,
+                    chart_kwargs,
+                    title_end) -> str:
+    if set(data_class.group) == set(data_class.master.current_projects):
+        title = "Portfolio " + title_end
+    elif "title" in chart_kwargs:
         title = chart_kwargs["title"]
-    else:
-        if "group" in costs.kwargs:
-            if costs.group == costs.master.current_projects:
-                title = "Portfolio cost profile"
-            elif costs.kwargs["group"] in list(DFT_GROUP_DICT.keys()):
-                if len(costs.kwargs['group']) == 1:
-                    title = costs.kwargs["group"][0] + " cost profile"
-                else:
-                    logger.info('provide a name for this chart')
-                    title = 'user to provide'
-            else:
-                if len(costs.kwargs['group']) == 1:
-                    title = costs.kwargs["group"][0] + " cost profile"
-                else:
-                    logger.info('provide a name for this chart')
-                    title = 'user to provide'
-        elif "stage" in costs.kwargs:
-            if costs.group == costs.master.current_projects:
-                title = "Portfolio cost profile"
-            elif costs.kwargs["stage"] in list(DFT_GROUP_DICT.keys()):
-                if len(costs.kwargs['stage']) == 1:
-                    title = costs.kwargs["stage"][0] + " cost profile"
-                else:
-                    logger.info('provide a name for this chart')
-                    title = 'user to provide'
-            else:
-                if len(costs.kwargs['stage']) == 1:
-                    title = costs.kwargs["stage"][0] + " cost profile"
-                else:
-                    logger.info('provide a name for this chart')
-                    title = 'user to provide'
+    elif "group" in data_class.kwargs:
+        if data_class.group == data_class.master.current_projects:
+            title = "Portfolio " + title_end
+        elif len(data_class.kwargs["group"]) == 1:
+            title = data_class.kwargs["group"][0] + " " + title_end
         else:
-            if costs.group == costs.master.current_projects:
-                title = "Portfolio cost profile"
-            else:
-                logger.info('provide a name for this chart')
-                title = 'user to provide'
+            logger.info('Please provide a title for this chart using --title.')
+            title = 'user to provide'
+    elif "stage" in data_class.kwargs:
+        if data_class.group == data_class.master.current_projects:
+            title = "Portfolio " + title_end
+        elif len(data_class.kwargs["stage"]) == 1:
+            title = data_class.kwargs["stage"][0] + " " + title_end
+        else:
+            logger.info('Please provide a title for this chart using --title.')
+            title = 'user to provide'
 
     return title
 
@@ -2192,7 +2178,7 @@ def cost_profile_graph(costs: CostData, **kwargs) -> plt.figure:
     fig = set_fig_size(kwargs, fig)
 
     # title
-    title = get_chart_title(costs, kwargs)
+    title = get_chart_title(costs, kwargs, "cost profile trend")
 
     plt.suptitle(title, fontweight="bold", fontsize=25)
 
@@ -3239,88 +3225,70 @@ def calculate_max_min_date(milestones: MilestoneData, **kwargs) -> int:
         return min(m_list)
 
 
+def handle_long_keys(key_names: List[str]) -> List[str]:
+    # helper function for milestone chart
+    labels = ["\n".join(wrap(l, 40)) for l in key_names]
+    final_labels = []
+    for l in labels:
+        if len(l) > 70:
+            final_labels.append(l[:70])
+        else:
+            final_labels.append(l)
+    return final_labels
+
+
 def milestone_chart(
         milestones: MilestoneData,
         **kwargs,
 ) -> plt.figure:
-    # build scatter chart
     fig, ax1 = plt.subplots()
-
     fig = set_fig_size(kwargs, fig)
 
-    # # title
-    # if "title" in kwargs:
-    #     title = kwargs["title"]
-    # else:
-    #     if milestones.kwargs["group"] == milestones.master.current_projects:
-    #         title = "Portfolio cost profile"
-    #     else:
-    #         title = milestones.kwargs["group"][0] + " cost profile"
+    title = get_chart_title(milestones, kwargs, "schedule")
+    plt.suptitle(title, fontweight="bold", fontsize=20)
 
-    def handle_long_keys(key_names: List[str]) -> List[str]:
-        labels = ["\n".join(wrap(l, 40)) for l in key_names]
-        final_labels = []
-        for l in labels:
-            if len(l) > 70:
-                final_labels.append(l[:70])
-            else:
-                final_labels.append(l)
-        return final_labels
-
+    ms_names = milestones.sorted_milestone_dict[milestones.iter_list[0]]["names"]
     if len(milestones.group) == 1:
-        m_key_names = remove_project_name_from_milestone_key(
-            milestones.group[0],
-            milestones.sorted_milestone_dict[milestones.iter_list[0]]["names"],
-        )
-        m_key_names = handle_long_keys(m_key_names)
-    else:
-        m_key_names = handle_long_keys(
-            milestones.sorted_milestone_dict[milestones.iter_list[0]]["names"]
+        pn = milestones.master.abbreviations[milestones.group[0]]["abb"]
+        ms_names = remove_project_name_from_milestone_key(pn, ms_names)
+
+    ms_names = handle_long_keys(ms_names)
+
+    # for i in reversed(milestones.iter_list):
+    #     ax1.scatter(
+    #         milestones.sorted_milestone_dict[i]["g_dates"],
+    #         ms_names,
+    #         label=i,
+    #         s=200,
+    #     )
+
+    for i in reversed(milestones.iter_list):
+        ax1.scatter(
+            milestones.sorted_milestone_dict[i]["g_dates"],
+            ms_names,
+            label=i,
+            s=200,
         )
 
-    try:
-        ax1.scatter(
-            milestones.sorted_milestone_dict[milestones.iter_list[2]]["g_dates"],
-            m_key_names,
-            label=milestones.iter_list[2],
-            s=200,
-        )
-    except IndexError:  # maybe IndexError also
-        pass
-    try:
-        ax1.scatter(
-            milestones.sorted_milestone_dict[milestones.iter_list[1]]["g_dates"],
-            m_key_names,
-            label=milestones.iter_list[1],
-            s=200,
-        )
-    except IndexError:
-        pass
-    ax1.scatter(
-        milestones.sorted_milestone_dict[milestones.iter_list[0]]["g_dates"],
-        m_key_names,
-        label=milestones.iter_list[0],
-        s=200,
-    )
+    ax1.legend(prop={"size": 14})  # insert legend
+    plt.yticks(size=10)
+    # reverse series_two axis so order is earliest to oldest
+    ax1 = plt.gca()
+    ax1.set_ylim(ax1.get_ylim()[::-1])
+    ax1.yaxis.grid()  # horizontal lines
+    ax1.set_axisbelow(True)
+
 
     # ax1.scatter(*do_mask(milestone_data.md_current, milestone_data.key_names), label="Current", zorder=10, c='g')
     # ax1.scatter(*do_mask(milestone_data.md_last, milestone_data.key_names), label="Last quarter", zorder=5, c='orange')
     # ax1.scatter(*do_mask(milestone_data.md_baseline, milestone_data.key_names), label="Baseline", zorder=1, c='b')
 
-    # format the series_one ticks
     years = mdates.YearLocator()  # every year
     months = mdates.MonthLocator()  # every month
+    weeks = mdates.WeekdayLocator()
     years_fmt = mdates.DateFormatter("%Y")
     months_fmt = mdates.DateFormatter("%b")
-    # ax1.xaxis.set_major_locator(years)
-    # ax1.xaxis.set_minor_locator(months)
-    # ax1.xaxis.set_major_formatter(years_fmt)
-    # ax1.xaxis.set_minor_formatter(months_fmt)
-    # plt.setp(ax1.xaxis.get_minorticklabels(), rotation=45)
-    # plt.setp(ax1.xaxis.get_majorticklabels(), rotation=45, weight="bold")
-
-    """calculate the length of the time period covered in chart.
-    Not perfect as baseline dates can distort."""
+    weeks_fmt = mdates.DateFormatter("%d")
 
     max_date = calculate_max_min_date(milestones, value="max")
     min_date = calculate_max_min_date(milestones, value="min")
@@ -3329,64 +3297,29 @@ def milestone_chart(
         ax1.xaxis.set_major_locator(years)
         ax1.xaxis.set_minor_locator(months)
         ax1.xaxis.set_major_formatter(years_fmt)
-        # ax1.xaxis.set_minor_formatter(months_fmt)
-        plt.setp(ax1.xaxis.get_minorticklabels(), rotation=45, size=14)
-        plt.setp(ax1.xaxis.get_majorticklabels(), rotation=45, weight="bold", size=16)
-
-        # scaling series_one axis. Keeping for now in case useful.
-        # series_one axis value to no more than three months after last latest milestone date, or three months
-        # before first latest milestone date. Hack, can be improved. Text highlights movements off chart.
-        # x_max = milestone_data.md_current[-1] + timedelta(days=90)
-        # x_min = milestone_data.md_current[0] - timedelta(days=90)
-        # for date in milestone_data.md_baseline:
-        #     if date > x_max:
-        #         ax1.set_xlim(x_min, x_max)
-        #         plt.figtext(
-        #             0.98,
-        #             0.03,
-        #             "Check full schedule to see all milestone movements",
-        #             horizontalalignment="right",
-        #             fontsize=6,
-        #             fontweight="bold",
-        #         )
-        #     if date < x_min:
-        #         ax1.set_xlim(x_min, x_max)
-        #         plt.figtext(
-        #             0.98,
-        #             0.03,
-        #             "Check full schedule to see all milestone movements",
-        #             horizontalalignment="right",
-        #             fontsize=6,
-        #             fontweight="bold",
-        #         )
-    else:
+        plt.setp(ax1.xaxis.get_minorticklabels(), rotation=45, size=12)
+        plt.setp(ax1.xaxis.get_majorticklabels(), rotation=45, weight="bold", size=14)
+    if 365*3 >= td >= 90:
         ax1.xaxis.set_major_locator(years)
         ax1.xaxis.set_minor_locator(months)
         ax1.xaxis.set_major_formatter(years_fmt)
         ax1.xaxis.set_minor_formatter(months_fmt)
-        plt.setp(ax1.xaxis.get_minorticklabels(), rotation=45, size=14)
-        plt.setp(ax1.xaxis.get_majorticklabels(), rotation=45, weight="bold", size=16)
+        plt.setp(ax1.xaxis.get_minorticklabels(), rotation=45, size=12)
+        plt.setp(ax1.xaxis.get_majorticklabels(), rotation=45, weight="bold", size=14)
+    else:
+        ax1.xaxis.set_major_locator(months)
+        ax1.xaxis.set_minor_locator(weeks)
+        ax1.xaxis.set_major_formatter(months_fmt)
+        ax1.xaxis.set_minor_formatter(weeks_fmt)
+        plt.setp(ax1.xaxis.get_minorticklabels(), rotation=45, size=12)
+        plt.setp(ax1.xaxis.get_majorticklabels(), rotation=45, weight="bold", size=14)
 
-    ax1.legend(prop={"size": 14})  # insert legend
-
-    # plt.xticks(rotation=45, size=14)
-    plt.yticks(size=12)
-
-    # reverse series_two axis so order is earliest to oldest
-    ax1 = plt.gca()
-    ax1.set_ylim(ax1.get_ylim()[::-1])
-    # ax1.tick_params(axis="series_two", which="major", labelsize=7)  # matplotlib version issue
-    ax1.yaxis.grid()  # horizontal lines
-    ax1.set_axisbelow(True)
-
-    try:
+    if "show_keys" in kwargs:
         if kwargs["show_keys"] == "no":
             ax1.get_yaxis().set_visible(False)
-    except KeyError:
-        pass
 
     # Add line of analysis_engine date, but only if in the time period
-    try:
+    if "blue_line" in kwargs:
         blue_line = kwargs["blue_line"]
         if blue_line == "Today":
             if min_date <= datetime.date.today() <= max_date:
@@ -3410,11 +3343,8 @@ def milestone_chart(
                     fontsize=10,
                     fontweight="bold",
                 )
-    except KeyError:
-        pass
 
     # size of chart and fit
-    # fig.canvas.draw()
     fig.tight_layout(rect=[0, 0.03, 1, 0.95])  # for title
 
     if "chart" in kwargs:
@@ -3422,10 +3352,6 @@ def milestone_chart(
             plt.show()
 
     return fig
-
-    # fig.savefig(root_path / 'output/{}.png'.format(graph_title), bbox_inches='tight')
-
-    # plt.close() #automatically closes figure so don't need to do manually.
 
 
 # def compile_all_profiles():
@@ -3590,7 +3516,7 @@ def get_group(master: Master, tp: str, class_kwargs) -> List[str]:
     elif "group" in class_kwargs:
         group = cal_group(class_kwargs["group"], master, tp_indx)
     else:
-        group = cal_group(master.master_data[tp_indx].projects, master, tp_indx)  # in case some project to remove
+        group = master.current_projects
 
     if "remove" in class_kwargs:
         group = remove_from_group(group, class_kwargs["remove"], master, tp_indx, class_kwargs)
@@ -3677,8 +3603,8 @@ def remove_from_group(
         if "quarter" in c_kwargs:
             for p in error_case:
                 logger.info(p + " not a recognised or not present in " + q_str + "."
-                         ' So not removed from the data for that quarter. Make sure the '
-                            '"remove" entry is correct.')
+                                                                                 ' So not removed from the data for that quarter. Make sure the '
+                                                                                 '"remove" entry is correct.')
 
     return pg_list
 
