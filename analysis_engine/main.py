@@ -245,7 +245,14 @@ def milestones(args):
         wb.save(root_path / "output/milestone_data_output.xlsx")
 
         if args["chart"]:
-            if args["title"]:
+            if args["title"] and args["blue_line"]:
+                if args["blue_line"] == "today":
+                    graph = milestone_chart(ms, title=args["title"], blue_line="Today", chart=True)
+                elif args["blue_line"] == "ipdc":
+                    graph = milestone_chart(ms, title=args["title"], blue_line="ipdc_date", chart=True)
+                else:
+                    graph = milestone_chart(ms, title=args["title"], blue_line=args["blue_line"], chart=True)
+            elif args["title"]:
                 graph = milestone_chart(ms, title=args["title"], chart=True)
             else:
                 graph = milestone_chart(ms, chart=True)
@@ -489,6 +496,21 @@ def main():
             "--title", type=str, action="store", help="provide a title for chart. Optional"
         )
 
+    parser_milestones.add_argument(
+        "--dates",
+        type=str,
+        metavar="",
+        action="store",
+        nargs=2,
+        help="dates for analysis. Must provide start date and then end date in format e.g. '1/1/2021' '1/1/2022'.",
+    )
+
+    parser_milestones.add_argument(
+        "--blue_line",
+        type=str,
+        action="store",
+        help='Insert blue line into chart to represent a date. Options are "today" "ipdc" or a date in correct format e.g. "1/1/2021".')
+
     parser_data_query.add_argument(
         "--keys",
         type=str,
@@ -505,14 +527,7 @@ def main():
         help="provide name of csc file contain key names",
     )
 
-    parser_milestones.add_argument(
-        "--dates",
-        type=str,
-        metavar="",
-        action="store",
-        nargs=2,
-        help="dates for analysis. Must provide start date and then end date in format e.g. '1/1/2021' '1/1/2022'.",
-    )
+
 
 
     # for sub in [

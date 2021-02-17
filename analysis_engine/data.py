@@ -3299,7 +3299,7 @@ def milestone_chart(
         ax1.xaxis.set_major_formatter(years_fmt)
         plt.setp(ax1.xaxis.get_minorticklabels(), rotation=45, size=12)
         plt.setp(ax1.xaxis.get_majorticklabels(), rotation=45, weight="bold", size=14)
-    if 365*3 >= td >= 90:
+    elif 365*3 >= td >= 90:
         ax1.xaxis.set_major_locator(years)
         ax1.xaxis.set_minor_locator(months)
         ax1.xaxis.set_major_formatter(years_fmt)
@@ -3327,7 +3327,7 @@ def milestone_chart(
                 plt.figtext(
                     0.98,
                     0.01,
-                    "Line represents date analysis_engine compiled",
+                    "Line represents date chart compiled",
                     horizontalalignment="right",
                     fontsize=10,
                     fontweight="bold",
@@ -3338,7 +3338,19 @@ def milestone_chart(
                 plt.figtext(
                     0.98,
                     0.01,
-                    "Line represents PfM report at IPDC",
+                    "Line represents IPDC date",
+                    horizontalalignment="right",
+                    fontsize=10,
+                    fontweight="bold",
+                )
+        if isinstance(blue_line, str):
+            line_date = parser.parse(blue_line, dayfirst=True)
+            if min_date <= line_date.date() <= max_date:
+                plt.axvline(line_date.date())
+                plt.figtext(
+                    0.98,
+                    0.01,
+                    "Line represents " + blue_line,
                     horizontalalignment="right",
                     fontsize=10,
                     fontweight="bold",
