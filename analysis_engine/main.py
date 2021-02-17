@@ -219,42 +219,118 @@ def milestones(args):
     m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
     # print(args)
     try:
-        if args["baselines"] and args["stage"] and args["dates"]:
+        if args["baselines"] and args["stage"] and args["dates"] and args["type"]:
+            ms = MilestoneData(m, group=args["stage"], baseline=args["baselines"])
+            ms.filter_chart_info(dates=args["dates"], type=args["type"])
+
+        elif args["baselines"] and args["group"] and args["dates"] and args["type"]:
+            ms = MilestoneData(m, group=args["group"], baseline=args["baselines"])
+            ms.filter_chart_info(dates=args["dates"], type=args["type"])
+
+        elif args["baselines"] and args["stage"] and args["dates"]:
             ms = MilestoneData(m, group=args["stage"], baseline=args["baselines"])
             ms.filter_chart_info(dates=args["dates"])
+
         elif args["baselines"] and args["group"] and args["dates"]:
             ms = MilestoneData(m, group=args["group"], baseline=args["baselines"])
             ms.filter_chart_info(dates=args["dates"])
+
+        elif args["baselines"] and args["dates"] and args["type"]:
+            ms = MilestoneData(m, baseline=args["baselines"])
+            ms.filter_chart_info(dates=args["dates"], type=args["type"])
+
+        elif args["baselines"] and args["group"] and args["type"]:
+            ms = MilestoneData(m, group=args["group"], baseline=args["baselines"])
+            ms.filter_chart_info(type=args["type"])
+
+        elif args["baselines"] and args["stage"] and args["type"]:
+            ms = MilestoneData(m, group=args["stage"], baseline=args["baselines"])
+            ms.filter_chart_info(type=args["type"])
+
         elif args["baselines"] and args["dates"]:
             ms = MilestoneData(m, baseline=args["baselines"])
             ms.filter_chart_info(dates=args["dates"])
+
+        elif args["baselines"] and args["type"]:
+            ms = MilestoneData(m, baseline=args["baselines"])
+            ms.filter_chart_info(type=args["type"])
+
         elif args["baselines"] and args["group"]:
             ms = MilestoneData(m, group=args["group"], baseline=args["baselines"])
+
+        elif args["baselines"] and args["stage"]:
+            ms = MilestoneData(m, group=args["stage"], baseline=args["baselines"])
+
         elif args["baselines"]:
             ms = MilestoneData(m, baseline=args["baselines"])
+
         # quarters
+        elif args["quarters"] and args["stage"] and args["dates"] and args["type"]:
+            ms = MilestoneData(m, group=args["stage"], quarter=args["quarters"])
+            ms.filter_chart_info(dates=args["dates"], type=args["type"])
+
         elif args["quarters"] and args["stage"] and args["dates"]:
             ms = MilestoneData(m, group=args["stage"], quarter=args["quarters"])
             ms.filter_chart_info(dates=args["dates"])
+
+        elif args["quarters"] and args["stage"] and args["type"]:
+            ms = MilestoneData(m, group=args["stage"], quarter=args["quarters"])
+            ms.filter_chart_info(type=args["type"])
+
         elif args["quarters"] and args["group"] and args["dates"]:
             ms = MilestoneData(m, group=args["group"], quarter=args["quarters"])
             ms.filter_chart_info(dates=args["dates"])
-        elif args["quarters"] and args["group"]:
+
+        elif args["quarters"] and args["group"] and args["type"]:
             ms = MilestoneData(m, group=args["group"], quarter=args["quarters"])
+            ms.filter_chart_info(type=args["type"])
+
+        elif args["quarters"] and args["dates"] and args["type"]:
+            ms = MilestoneData(m, group=args["stage"], quarter=args["quarters"])
+            ms.filter_chart_info(dates=args["dates"], type=args["type"])
+
+        elif args["quarters"] and args["type"]:
+            ms = MilestoneData(m, quarter=args["quarters"])
+            ms.filter_chart_info(dates=args["type"])
+
         elif args["quarters"] and args["dates"]:
             ms = MilestoneData(m, quarter=args["quarters"])
             ms.filter_chart_info(dates=args["dates"])
+
+        elif args["quarters"] and args["group"]:
+            ms = MilestoneData(m, group=args["group"], quarter=args["quarters"])
+
+        elif args["quarters"] and args["stage"]:
+            ms = MilestoneData(m, group=args["stage"], quarter=args["quarters"])
+
         elif args["quarters"]:
             ms = MilestoneData(m, quarter=args["quarters"])
+
         # dates
         elif args["dates"] and args["group"]:
             ms = MilestoneData(m, quarter=["standard"], group=args["group"])
             ms.filter_chart_info(dates=args["dates"])
+        elif args["dates"] and args["stage"]:
+            ms = MilestoneData(m, quarter=["standard"], group=args["stage"])
+            ms.filter_chart_info(dates=args["dates"])
+        elif args["type"] and args["stage"]:
+            ms = MilestoneData(m, quarter=["standard"], group=args["stage"])
+            ms.filter_chart_info(type=args["type"])
+        elif args["type"] and args["group"]:
+            ms = MilestoneData(m, quarter=["standard"], group=args["group"])
+            ms.filter_chart_info(type=args["type"])
+
+        elif args["type"]:
+            ms = MilestoneData(m, quarter=["standard"])
+            ms.filter_chart_info(dates=args["type"])
         elif args["dates"]:
             ms = MilestoneData(m, quarter=["standard"])
             ms.filter_chart_info(dates=args["dates"])
         elif args["group"]:
             ms = MilestoneData(m, quarter=["standard"], group=args["group"])
+        elif args["stage"]:
+            ms = MilestoneData(m, quarter=["standard"], group=args["stage"])
+
         else:
             ms = MilestoneData(m, quarter=["standard"])
 
@@ -404,7 +480,7 @@ def main():
         parser_speedial,
         parser_dandelion,
         parser_costs,
-        parser_data_query,
+        # parser_data_query,
         parser_milestones,
     ]:
         sub.add_argument(
@@ -425,7 +501,7 @@ def main():
         parser_speedial,
         parser_dandelion,
         parser_costs,
-        parser_data_query,
+        # parser_data_query,
         parser_milestones,
         parser_summaries,
         parser_costs_sp,
@@ -436,7 +512,6 @@ def main():
             metavar="",
             action="store",
             nargs="+",
-            # choices=["HSMRPG", "AMIS", "Rail", "RPE"],
             help="Returns analysis for specified project(s), only. User must enter one or a combination of "
             'DfT Group names; "HSMRPG", "AMIS", "Rail", "RPE", or the project(s) acronym or full name.',
         )
@@ -448,7 +523,7 @@ def main():
         parser_speedial,
         parser_dandelion,
         parser_costs,
-        parser_data_query,
+        # parser_data_query,
         parser_milestones,
     ]:
         sub.add_argument(
@@ -457,7 +532,6 @@ def main():
             metavar="",
             action="store",
             nargs="+",
-            # choices=["HSMRPG", "AMIS", "Rail", "RPE"],
             help="Removes specified projects from analysis. User must enter one or a combination of either"
             " a recognised DfT Group name, a recognised planning stage or the project(s) acronym or full"
             " name.",
@@ -489,7 +563,7 @@ def main():
         parser_speedial,
         parser_dandelion,
         parser_costs,
-        parser_data_query,
+        # parser_data_query,
         parser_milestones,
     ]:
         sub.add_argument(
@@ -512,6 +586,25 @@ def main():
             ' The "all" option returns all, "standard" returns first three',
         )
 
+    parser_milestones.add_argument(
+        "--type",
+        type=str,
+        metavar="",
+        action="store",
+        nargs="+",
+        choices=["Approval", "Assurance", "Delivery"],
+        help="Returns analysis for specified type of milestones."
+    )
+
+    parser_milestones.add_argument(
+        "--dates",
+        type=str,
+        metavar="",
+        action="store",
+        nargs=2,
+        help="dates for analysis. Must provide start date and then end date in format e.g. '1/1/2021' '1/1/2022'.",
+    )
+
     # chart
     for sub in [parser_dandelion, parser_costs, parser_milestones]:
         sub.add_argument(
@@ -528,22 +621,15 @@ def main():
         sub.add_argument(
             "--title",
             type=str,
+            metavar="",
             action="store",
             help="provide a title for chart. Optional",
         )
 
     parser_milestones.add_argument(
-        "--dates",
-        type=str,
-        metavar="",
-        action="store",
-        nargs=2,
-        help="dates for analysis. Must provide start date and then end date in format e.g. '1/1/2021' '1/1/2022'.",
-    )
-
-    parser_milestones.add_argument(
         "--blue_line",
         type=str,
+        metavar="",
         action="store",
         help='Insert blue line into chart to represent a date. Options are "today" "ipdc" or a date in correct format e.g. "1/1/2021".',
     )

@@ -665,7 +665,7 @@ class Master:
         stage_list = list(set(stage_list))
 
         group_dict = {}
-        for quarter in raw_dict.keys():
+        for i, quarter in enumerate(raw_dict.keys()):
             lower_g_dict = {}
             for group_type in group_list:
                 g_list = []
@@ -686,6 +686,14 @@ class Master:
                                 + str(group_type)
                             )
                 lower_g_dict[group_type] = g_list
+
+            gmpp_list = []
+            for p in self.master_data[i].projects:
+                gmpp = self.master_data[i].data[p]["GMPP - IPA ID Number"]
+                if gmpp is not None:
+                    gmpp_list.append(p)
+                lower_g_dict["GMPP"] = gmpp_list
+
             group_dict[quarter] = lower_g_dict
 
         stage_dict = {}
@@ -1512,8 +1520,49 @@ class MilestoneData:
         # bug handling required in the event that there are no milestones with the filter.
         # i.e. the filter returns no milestones.
         filtered_dict = {}
+        if (
+                "type" in filter_kwargs
+                and "key" in filter_kwargs
+                and "dates" in filter_kwargs
+        ):
+            start_date, end_date = zip(*filter_kwargs["dates"])
+            start = parser.parse(start_date, dayfirst=True)
+            end = parser.parse(end_date, dayfirst=True)
+            for i, v in enumerate(self.milestone_dict[self.iter_list[0]].values()):
+                if v["Type"] in filter_kwargs["type"]:
+                    if v["Milestone"] in filter_kwargs["keys"]:
+                        if start.date() <= filter_kwargs["dates"] <= end.date():
+                            filtered_dict["Milestone " + str(i)] = v
+                            continue
 
-        if "type" in filter_kwargs:
+        elif "type" in filter_kwargs and "key" in filter_kwargs:
+            for i, v in enumerate(self.milestone_dict[self.iter_list[0]].values()):
+                if v["Type"] in filter_kwargs["type"]:
+                    if v["Milestone"] in filter_kwargs["keys"]:
+                        filtered_dict["Milestone " + str(i)] = v
+                        continue
+
+        elif "type" in filter_kwargs and "dates" in filter_kwargs:
+            start_date, end_date = zip(filter_kwargs["dates"])
+            start = parser.parse(start_date[0], dayfirst=True)
+            end = parser.parse(end_date[0], dayfirst=True)
+            for i, v in enumerate(self.milestone_dict[self.iter_list[0]].values()):
+                if v["Type"] in filter_kwargs["type"]:
+                    if start.date() <= v["Date"] <= end.date():
+                        filtered_dict["Milestone " + str(i)] = v
+                        continue
+
+        elif "key" in filter_kwargs and "dates" in filter_kwargs:
+            start_date, end_date = zip(filter_kwargs["dates"])
+            start = parser.parse(start_date, dayfirst=True)
+            end = parser.parse(end_date, dayfirst=True)
+            for i, v in enumerate(self.milestone_dict[self.iter_list[0]].values()):
+                if v["Milestone"] in filter_kwargs["keys"]:
+                    if start.date() <= v["Date"] <= end.date():
+                        filtered_dict["Milestone " + str(i)] = v
+                        continue
+
+        elif "type" in filter_kwargs:
             for i, v in enumerate(self.milestone_dict[self.iter_list[0]].values()):
                 if v["Type"] in filter_kwargs["type"]:
                     filtered_dict["Milestone " + str(i)] = v
@@ -1534,47 +1583,8 @@ class MilestoneData:
                     filtered_dict["Milestone " + str(i)] = v
                     continue
 
-        elif "type" in filter_kwargs and "key" in filter_kwargs:
-            for i, v in enumerate(self.milestone_dict[self.iter_list[0]].values()):
-                if v["Type"] in filter_kwargs["type"]:
-                    if v["Milestone"] in filter_kwargs["keys"]:
-                        filtered_dict["Milestone " + str(i)] = v
-                        continue
 
-        elif "type" in filter_kwargs and "dates" in filter_kwargs:
-            start_date, end_date = zip(*filter_kwargs["dates"])
-            start = parser.parse(start_date, dayfirst=True)
-            end = parser.parse(end_date, dayfirst=True)
-            for i, v in enumerate(self.milestone_dict[self.iter_list[0]].values()):
-                if v["Type"] in filter_kwargs["type"]:
-                    if start.date() <= v["Dates"] <= end.date():
-                        filtered_dict["Milestone " + str(i)] = v
-                        continue
 
-        elif "key" in filter_kwargs and "dates" in filter_kwargs:
-            start_date, end_date = zip(*filter_kwargs["dates"])
-            start = parser.parse(start_date, dayfirst=True)
-            end = parser.parse(end_date, dayfirst=True)
-            for i, v in enumerate(self.milestone_dict[self.iter_list[0]].values()):
-                if v["Milestone"] in filter_kwargs["keys"]:
-                    if start.date() <= v["Date"] <= end.date():
-                        filtered_dict["Milestone " + str(i)] = v
-                        continue
-
-        elif (
-                "type" in filter_kwargs
-                and "key" in filter_kwargs
-                and "dates" in filter_kwargs
-        ):
-            start_date, end_date = zip(*filter_kwargs["dates"])
-            start = parser.parse(start_date, dayfirst=True)
-            end = parser.parse(end_date, dayfirst=True)
-            for i, v in enumerate(self.milestone_dict[self.iter_list[0]].values()):
-                if v["Type"] in filter_kwargs["type"]:
-                    if v["Milestone"] in filter_kwargs["keys"]:
-                        if start.date() <= filter_kwargs["dates"] <= end.date():
-                            filtered_dict["Milestone " + str(i)] = v
-                            continue
 
         output_dict = {}
         for dict in self.milestone_dict.keys():

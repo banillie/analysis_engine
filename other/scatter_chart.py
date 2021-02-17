@@ -10,9 +10,9 @@ m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
 # d = {}
 
 # g = m.dft_groups["Q3 20/21"]["Rail"]
-group_list = ['HSMRPG', 'Rail', 'RPE', 'AMIS']
-c = get_cost_stackplot_data(m, group_list, "Q3 20/21", type="comp")
-put_stackplot_data_into_wb(c)
+# group_list = ['HSMRPG', 'Rail', 'RPE', 'AMIS']
+# c = get_cost_stackplot_data(m, group_list, "Q3 20/21", type="comp")
+# put_stackplot_data_into_wb(c)
 # doc = open_word_doc(root_path / "input/summary_temp_landscape.docx")
 # put_matplotlib_fig_into_word(doc, c, size=8, transparent=False)
 # doc.save(root_path /"output/portfolio_cost_comp_cat_no_rf_npr.docx")
