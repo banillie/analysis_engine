@@ -290,7 +290,7 @@ def milestones(args):
             ms.filter_chart_info(type=args["type"])
 
         elif args["quarters"] and args["dates"] and args["type"]:
-            ms = MilestoneData(m, group=args["stage"], quarter=args["quarters"])
+            ms = MilestoneData(m, quarter=args["quarters"])
             ms.filter_chart_info(dates=args["dates"], type=args["type"])
 
         elif args["quarters"] and args["type"]:

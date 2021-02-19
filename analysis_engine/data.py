@@ -2156,10 +2156,10 @@ def set_fig_size(kwargs, fig: plt.figure) -> plt.figure:
 def get_chart_title(data_class: CostData or MilestoneData,
                     chart_kwargs,
                     title_end) -> str:
-    if set(data_class.group) == set(data_class.master.current_projects):
-        title = "Portfolio " + title_end
-    elif "title" in chart_kwargs:
+    if "title" in chart_kwargs:
         title = chart_kwargs["title"]
+    elif set(data_class.group) == set(data_class.master.current_projects):
+        title = "Portfolio " + title_end
     elif "group" in data_class.kwargs:
         if data_class.group == data_class.master.current_projects:
             title = "Portfolio " + title_end
