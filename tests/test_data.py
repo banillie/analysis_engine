@@ -56,7 +56,8 @@ from analysis_engine.data import (
     cost_profile_into_wb,
     data_query_into_wb,
     get_data_query_key_names,
-    remove_project_name_from_milestone_key, get_cost_stackplot_data, cost_stackplot_graph, get_group, make_a_dandelion,
+    remove_project_name_from_milestone_key, get_cost_stackplot_data, cost_stackplot_graph, get_group,
+    make_a_dandelion_manual, make_a_dandelion_auto,
 )
 
 # test masters project names
@@ -570,12 +571,19 @@ def test_overall_dashboard(two_masters, dashboard_template, project_info):
 
 def test_dandelion(basic_masters_dicts, project_info, word_doc):
     m = Master(basic_masters_dicts, project_info)
-    dand = DandelionData(m, group=["Rail"])
+    dand = DandelionData(m)
     wb = dandelion_data_into_wb(dand)
     wb.save("resources/test_dandelion_data.xlsx")
     graph = run_dandelion_matplotlib_chart(dand)
     put_matplotlib_fig_into_word(word_doc, graph, size=4, transparent=False)
     word_doc.save("resources/test_dandelion_output.docx")
+
+
+def test_dandelion_two(basic_masters_dicts, project_info, word_doc):
+    m = Master(basic_masters_dicts, project_info)
+    d_data = DandelionData(m)
+    dlion = make_a_dandelion_auto(d_data)
+
 
 
 def test_data_queries_non_milestone(basic_masters_dicts, project_info):
@@ -606,7 +614,7 @@ def test_cal_group_including_removing(milestone_masters, project_info):
     assert group == ['Sea of Tranquility', 'Apollo 11', 'Apollo 13', 'Falcon 9', 'Columbia']
 
 
-def test_build_dandelion_graph(build_dandelion, word_doc_landscape):
-    dlion = make_a_dandelion(build_dandelion)
+def test_build_dandelion_graph_manual(build_dandelion, word_doc_landscape):
+    dlion = make_a_dandelion_manual(build_dandelion)
     put_matplotlib_fig_into_word(word_doc_landscape, dlion, size=7.5)
     word_doc_landscape.save("resources/dlion_mpl.docx")

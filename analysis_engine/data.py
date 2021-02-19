@@ -1,6 +1,7 @@
 import csv
 import datetime
 import difflib
+import math
 import os
 import pickle
 import re
@@ -2599,7 +2600,7 @@ def put_matplotlib_fig_into_word(doc: Document, fig: plt.figure or plt, **kwargs
     if "transparent" in kwargs:
         fig.savefig("cost_profile.png", transparent=True)
     else:
-        fig.savefig("cost_profile.png", bbox_inches='tight')
+        fig.savefig("cost_profile.png")
     if "size" in kwargs:
         s = kwargs["size"]
         doc.add_picture("cost_profile.png", width=Inches(s))
@@ -7475,7 +7476,9 @@ class DandelionData:
         self.group = []
         self.iter_list = []
         self.d_data = {}
-        self.get_data()
+        self.d_list = []
+        # self.get_data()
+        self.get_data_two()
 
     def get_data(self) -> None:
 
@@ -7533,6 +7536,29 @@ class DandelionData:
             projects, pi, c, r, a, g = zip(*data)  # pi is project_info, c is colour and r is rag
             lower_dict[tp] = {"projects": projects, "cost": pi, "colour": c, "rag": r, "abb": a, "group": g}
         self.d_data = lower_dict
+
+    def get_data_two(self):
+        d_list = []
+        self.group = self.master.master_data[0].projects
+        g_list = ["Rail"]
+        for g in g_list:
+            lg = self.master.dft_groups["Q3 20/21"][g]  # local group
+            ang = 360/len(lg)
+            ang_list = []
+            total = 0
+            for i in range(len(lg)+1):
+                ang_list.append(ang*i)
+            for i, p in enumerate(lg):
+                p_data = self.master.master_data[0].data[p]
+                x_axis = 0 + 100 * math.cos(math.radians(ang_list[i+1]))
+                y_axis = 0 + 100 * math.sin(math.radians(ang_list[i+1]))
+                b_size = p_data["Total Forecast"]
+                total += b_size
+                rag = p_data["Departmental DCA"]
+                colour = COLOUR_DICT[convert_rag_text(rag)]
+                d_list.append(((x_axis, y_axis), math.sqrt(b_size) / 5, colour))
+            d_list.append(((0, 0), math.sqrt(total) / 5, "#808080"))
+        self.d_list = d_list
 
 
 def dandelion_data_into_wb(d_data: DandelionData) -> workbook:
@@ -7760,7 +7786,7 @@ def cost_stackplot_graph(sp_dict: Dict[str, float], **chart_kwargs) -> plt.figur
     # fig.savefig(root_path /"output/portfolio_cost_composition_cat.png")
 
 
-def make_a_dandelion(wb: Union[str, bytes, os.PathLike]):
+def make_a_dandelion_manual(wb: Union[str, bytes, os.PathLike]):
     wb = load_workbook(wb, data_only=True)
     ws = wb.active
 
@@ -7783,5 +7809,18 @@ def make_a_dandelion(wb: Union[str, bytes, os.PathLike]):
     plt.axis('off')
 
     # plt.show()
+
+    return plt
+
+
+def make_a_dandelion_auto(dlion_data: DandelionData):
+    plt.figure(figsize=(20, 10))
+    for c in range(len(dlion_data.d_list)):
+        circle = plt.Circle(dlion_data.d_list[c][0], radius=dlion_data.d_list[c][1], fc=dlion_data.d_list[c][2])
+        plt.gca().add_patch(circle)
+    plt.axis('scaled')
+    # plt.axis('off')
+
+    plt.show()
 
     return plt
