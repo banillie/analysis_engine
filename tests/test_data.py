@@ -56,7 +56,7 @@ from analysis_engine.data import (
     cost_profile_into_wb,
     data_query_into_wb,
     get_data_query_key_names,
-    remove_project_name_from_milestone_key, get_cost_stackplot_data, cost_stackplot_graph, get_group,
+    remove_project_name_from_milestone_key, get_cost_stackplot_data, cost_stackplot_graph, get_group, make_a_dandelion,
 )
 
 # test masters project names
@@ -604,3 +604,9 @@ def test_cal_group_including_removing(milestone_masters, project_info):
     kwargs = {"baseline": "current", "remove": ["Mars"]}
     group = get_group(m, "current", kwargs)
     assert group == ['Sea of Tranquility', 'Apollo 11', 'Apollo 13', 'Falcon 9', 'Columbia']
+
+
+def test_build_dandelion_graph(build_dandelion, word_doc_landscape):
+    dlion = make_a_dandelion(build_dandelion)
+    put_matplotlib_fig_into_word(word_doc_landscape, dlion, size=7.5)
+    word_doc_landscape.save("resources/dlion_mpl.docx")

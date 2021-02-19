@@ -6,6 +6,7 @@ import pickle
 import re
 import sys
 import typing
+import random
 from collections import Counter
 from typing import List, Dict, Union, Optional, Tuple
 
@@ -2592,13 +2593,13 @@ def change_word_doc_portrait(doc: Document) -> Document:
     return doc
 
 
-def put_matplotlib_fig_into_word(doc: Document, fig: plt.figure, **kwargs) -> None:
+def put_matplotlib_fig_into_word(doc: Document, fig: plt.figure or plt, **kwargs) -> None:
     """Places line graph cost profile into word document"""
     # Place fig in word doc.
     if "transparent" in kwargs:
         fig.savefig("cost_profile.png", transparent=True)
     else:
-        fig.savefig("cost_profile.png")
+        fig.savefig("cost_profile.png", bbox_inches='tight')
     if "size" in kwargs:
         s = kwargs["size"]
         doc.add_picture("cost_profile.png", width=Inches(s))
@@ -7757,3 +7758,30 @@ def cost_stackplot_graph(sp_dict: Dict[str, float], **chart_kwargs) -> plt.figur
     plt.show()
     return fig
     # fig.savefig(root_path /"output/portfolio_cost_composition_cat.png")
+
+
+def make_a_dandelion(wb: Union[str, bytes, os.PathLike]):
+    wb = load_workbook(wb, data_only=True)
+    ws = wb.active
+
+    d_list = []  # data list
+    for row_num in range(3, ws.max_row + 1):
+        x_axis = ws.cell(row=row_num, column=5).value
+        y_axis = ws.cell(row=row_num, column=6).value
+        b_size = ws.cell(row=row_num, column=13).value
+        colour = random.choice(list(COLOUR_DICT.values()))
+        d_list.append(((x_axis, y_axis), b_size/10, colour))
+
+    # fig = plt.figure()
+    # d_list.insert(0, ((515, 450), 455, 'r'))
+    # , ((590, 422), 52, 'g')]
+    plt.figure(figsize=(20, 10))
+    for c in range(len(d_list)):
+        circle = plt.Circle(d_list[c][0], radius=d_list[c][1], fc=d_list[c][2])
+        plt.gca().add_patch(circle)
+    plt.axis('scaled')
+    plt.axis('off')
+
+    # plt.show()
+
+    return plt

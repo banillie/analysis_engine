@@ -24,6 +24,13 @@ def word_doc():
 
 
 @pytest.fixture
+def word_doc_landscape():
+    wd_path = os.path.join(os.getcwd(), "resources/summary_temp_landscape.docx")
+    doc = open_word_doc(wd_path)
+    return doc
+
+
+@pytest.fixture
 def contact_master():
     return [project_data_from_master(os.path.join(os.getcwd(), "resources/"
                                                                "contact_info_master_3_2019.xlsx"), 3, 2019),
@@ -215,3 +222,8 @@ def dashboard_template():
 @pytest.fixture()
 def key_file():
     return os.path.join(os.getcwd(), "resources/test_key_names.csv")
+
+
+@pytest.fixture()
+def build_dandelion():
+    return os.path.join(os.getcwd(), "resources/dandelion_build.xlsm")
