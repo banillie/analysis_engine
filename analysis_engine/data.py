@@ -2600,7 +2600,7 @@ def put_matplotlib_fig_into_word(doc: Document, fig: plt.figure or plt, **kwargs
     if "transparent" in kwargs:
         fig.savefig("cost_profile.png", transparent=True)
     else:
-        fig.savefig("cost_profile.png")
+        fig.savefig("cost_profile.png", bbox_inches="tight")
     if "size" in kwargs:
         s = kwargs["size"]
         doc.add_picture("cost_profile.png", width=Inches(s))
@@ -7540,25 +7540,81 @@ class DandelionData:
     def get_data_two(self):
         d_list = []
         self.group = self.master.master_data[0].projects
-        g_list = ["Rail"]
-        for g in g_list:
-            lg = self.master.dft_groups["Q3 20/21"][g]  # local group
+        input_g_list = ["HSMRPG", "Rail", "AMIS", "RPE"]  # first outer circle
+
+        # cal group angle
+        g_ang = 270/len(input_g_list)  # group angle
+        g_ang_list = []
+        for i in range(6):
+            g_ang_list.append(g_ang * i)
+        del g_ang_list[4]
+
+        dft_g_list = []
+        dft_g_dict = {}
+        dft_l_group_dict = {}
+        p_total = 0  # portfolio total
+        for i, g in enumerate(input_g_list):
+            dft_l_group = self.master.dft_groups["Q3 20/21"][g]
+            g_total = 0
+            dft_l_group_list = []
+            for p in dft_l_group:
+                p_data = self.master.master_data[0].data[p]
+                b_size = p_data["Total Forecast"]
+                rag = p_data["Departmental DCA"]
+                colour = COLOUR_DICT[convert_rag_text(rag)]
+                g_total += b_size
+                dft_l_group_list.append((math.sqrt(b_size) / 4, colour, p))
+            # group data
+            x_axis = 0 + 300 * math.cos(math.radians(g_ang_list[i + 1]))
+            y_axis = 0 + 200 * math.sin(math.radians(g_ang_list[i + 1]))
+            dft_g_list.append(((x_axis, y_axis), math.sqrt(g_total) / 7, "#F5F5F5", g))
+            dft_g_dict[g] = [(x_axis, y_axis)]
+            # project data
+            dft_l_group_dict[g] = sorted(dft_l_group_list)
+            #portfolio data
+            p_total += g_total
+        dft_g_list.append(((0, 0), math.sqrt(p_total) / 7, "r", "Portfolio"))
+
+        for g in dft_l_group_dict.keys():
+            lg = dft_l_group_dict[g]  # local group
             ang = 360/len(lg)
             ang_list = []
-            total = 0
             for i in range(len(lg)+1):
                 ang_list.append(ang*i)
             for i, p in enumerate(lg):
-                p_data = self.master.master_data[0].data[p]
-                x_axis = 0 + 100 * math.cos(math.radians(ang_list[i+1]))
-                y_axis = 0 + 100 * math.sin(math.radians(ang_list[i+1]))
-                b_size = p_data["Total Forecast"]
-                total += b_size
-                rag = p_data["Departmental DCA"]
-                colour = COLOUR_DICT[convert_rag_text(rag)]
-                d_list.append(((x_axis, y_axis), math.sqrt(b_size) / 5, colour))
-            d_list.append(((0, 0), math.sqrt(total) / 5, "#808080"))
-        self.d_list = d_list
+                # p_data = self.master.master_data[0].data[p]
+                a = dft_g_dict[g][0][0]
+                b = dft_g_dict[g][0][1]
+                print(a, b)
+                x_axis = a + 50 * math.cos(math.radians(ang_list[i+1]))
+                y_axis = b + 50 * math.sin(math.radians(ang_list[i+1]))
+                b_size = p[0]
+                # total += b_size
+                # rag = p[1]
+                colour = p[1]
+                name = p[2]
+                dft_g_list.append(((x_axis, y_axis), b_size, colour, name))
+
+        # for stackoverflow answer
+        # for g in g_list:
+        #     lg = self.master.dft_groups["Q3 20/21"][g]  # local group
+        #     ang = 360/len(lg)
+        #     ang_list = []
+        #     total = 0
+        #     for i in range(len(lg)+1):
+        #         ang_list.append(ang*i)
+        #     for i, p in enumerate(lg):
+        #         p_data = self.master.master_data[0].data[p]
+        #         x_axis = 0 + 150 * math.cos(math.radians(ang_list[i+1]))
+        #         y_axis = 0 + 100 * math.sin(math.radians(ang_list[i+1]))
+        #         b_size = p_data["Total Forecast"]
+        #         total += b_size
+        #         rag = p_data["Departmental DCA"]
+        #         colour = COLOUR_DICT[convert_rag_text(rag)]
+        #         d_list.append(((x_axis, y_axis), math.sqrt(b_size) / 5, colour))
+        #     d_list.append(((0, 0), math.sqrt(total) / 5, "#808080"))
+
+        self.d_list = dft_g_list
 
 
 def dandelion_data_into_wb(d_data: DandelionData) -> workbook:
@@ -7815,9 +7871,15 @@ def make_a_dandelion_manual(wb: Union[str, bytes, os.PathLike]):
 
 def make_a_dandelion_auto(dlion_data: DandelionData):
     plt.figure(figsize=(20, 10))
+    # fig, ax = plt.subplots()
+    # # ax = fig.add_subplot()
     for c in range(len(dlion_data.d_list)):
+        # circle = plt.Circle(dlion_data.d_list[c][0], radius=dlion_data.d_list[c][1], fc='y')
         circle = plt.Circle(dlion_data.d_list[c][0], radius=dlion_data.d_list[c][1], fc=dlion_data.d_list[c][2])
+        # ax.add_patch(circle)
+        # label = ax.annotate(dlion_data.d_list[c][3], xy=dlion_data.d_list[c][0], ha="center")
         plt.gca().add_patch(circle)
+
     plt.axis('scaled')
     # plt.axis('off')
 
