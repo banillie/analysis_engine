@@ -11,9 +11,9 @@ m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
 # d = {}
 d_data = DandelionData(m)
 dlion = make_a_dandelion_auto(d_data)
-# doc = open_word_doc(root_path / "input/summary_temp_landscape.docx")
-# put_matplotlib_fig_into_word(doc, dlion, size=7.5)
-# doc.save(root_path / "output/dlion_test.docx")
+doc = open_word_doc(root_path / "input/summary_temp_landscape.docx")
+put_matplotlib_fig_into_word(doc, dlion, size=7.5)
+doc.save(root_path / "output/dlion_test.docx")
 
 # g = m.dft_groups["Q3 20/21"]["Rail"]
 # group_list = ['HSMRPG', 'Rail', 'RPE', 'AMIS']

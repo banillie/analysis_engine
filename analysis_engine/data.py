@@ -2600,7 +2600,8 @@ def put_matplotlib_fig_into_word(doc: Document, fig: plt.figure or plt, **kwargs
     if "transparent" in kwargs:
         fig.savefig("cost_profile.png", transparent=True)
     else:
-        fig.savefig("cost_profile.png", bbox_inches="tight")
+        fig.savefig("cost_profile.png")
+        # fig.savefig("cost_profile.png", bbox_inches="tight")
     if "size" in kwargs:
         s = kwargs["size"]
         doc.add_picture("cost_profile.png", width=Inches(s))
@@ -7596,7 +7597,6 @@ class DandelionData:
                 else:
                     x_axis = a + (dft_g_dict[g][1] + 50) * math.cos(math.radians(ang_list[i + 1]))
                     y_axis = b + (dft_g_dict[g][1] + 50) * math.sin(math.radians(ang_list[i + 1]))
-                print(ang_list[i+1], p[2])
                 b_size = p[0]
                 colour = p[1]
                 name = p[2]
@@ -7886,7 +7886,7 @@ def make_a_dandelion_manual(wb: Union[str, bytes, os.PathLike]):
 
 
 def make_a_dandelion_auto(dlion_data: DandelionData):
-    plt.figure(figsize=(20, 10))
+    plt.figure(figsize=(20, 10), dpi=300)
     fig, ax = plt.subplots()
     # ax = fig.add_subplot()
     for c in range(len(dlion_data.d_list)):
@@ -7897,11 +7897,11 @@ def make_a_dandelion_auto(dlion_data: DandelionData):
                             linestyle=dlion_data.d_list[c][4],
                             ec=dlion_data.d_list[c][5])  # edge colour
         ax.add_patch(circle)
-        label = ax.annotate(dlion_data.d_list[c][3],
-                            xy=dlion_data.d_list[c][0],
-                            horizontalalignment=dlion_data.d_list[c][6][0],
-                            verticalalignment=dlion_data.d_list[c][6][1])
-                            # ha="left")
+        ax.annotate(dlion_data.d_list[c][3],
+                    xy=dlion_data.d_list[c][0],
+                    # fontsize=1,
+                    horizontalalignment=dlion_data.d_list[c][6][0],
+                    verticalalignment=dlion_data.d_list[c][6][1])
         # plt.gca().add_patch(circle)
 
     plt.axis('scaled')
@@ -7909,4 +7909,4 @@ def make_a_dandelion_auto(dlion_data: DandelionData):
 
     # plt.show()
 
-    return fig
+    return plt
