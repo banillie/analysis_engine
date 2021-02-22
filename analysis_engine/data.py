@@ -7538,10 +7538,9 @@ class DandelionData:
         self.d_data = lower_dict
 
     def get_data_two(self):
-        d_list = []
         self.group = self.master.master_data[0].projects
         input_g_list = ["HSMRPG", "Rail", "AMIS", "RPE"]  # first outer circle
-
+        # input_g_list = ["FBC", "OBC", "SOBC", "pre-SOBC"]  # first outer circle
         # cal group angle
         g_ang = 270/len(input_g_list)  # group angle
         g_ang_list = []
@@ -7563,17 +7562,24 @@ class DandelionData:
                 rag = p_data["Departmental DCA"]
                 colour = COLOUR_DICT[convert_rag_text(rag)]
                 g_total += b_size
-                dft_l_group_list.append((math.sqrt(b_size) / 4, colour, p))
+                dft_l_group_list.append((math.sqrt(b_size) / 4, colour, self.master.abbreviations[p]['abb']))
             # group data
-            x_axis = 0 + 300 * math.cos(math.radians(g_ang_list[i + 1]))
-            y_axis = 0 + 200 * math.sin(math.radians(g_ang_list[i + 1]))
-            dft_g_list.append(((x_axis, y_axis), math.sqrt(g_total) / 7, "#F5F5F5", g))
-            dft_g_dict[g] = [(x_axis, y_axis)]
+            x_axis = 0 + 400 * math.cos(math.radians(g_ang_list[i + 1]))
+            y_axis = 0 + 300 * math.sin(math.radians(g_ang_list[i + 1]))
+            # list is tuple axis point, bubble size, colour, line style, line color, text position
+            dft_g_list.append(((x_axis, y_axis),
+                               math.sqrt(g_total)/4,
+                               "#FFFFFF",
+                               g,
+                               'dashed',
+                               'grey',
+                               ('center', 'center')))
+            dft_g_dict[g] = [(x_axis, y_axis), math.sqrt(g_total) / 3]  # used for placement of circles
             # project data
-            dft_l_group_dict[g] = sorted(dft_l_group_list)
+            dft_l_group_dict[g] = list(reversed(sorted(dft_l_group_list)))
             #portfolio data
             p_total += g_total
-        dft_g_list.append(((0, 0), math.sqrt(p_total) / 7, "r", "Portfolio"))
+        dft_g_list.append(((0, 0), math.sqrt(p_total) / 4, "#cb1f00", "Portfolio", "solid", "#cb1f00", ('center', 'center')))
 
         for g in dft_l_group_dict.keys():
             lg = dft_l_group_dict[g]  # local group
@@ -7582,18 +7588,27 @@ class DandelionData:
             for i in range(len(lg)+1):
                 ang_list.append(ang*i)
             for i, p in enumerate(lg):
-                # p_data = self.master.master_data[0].data[p]
                 a = dft_g_dict[g][0][0]
                 b = dft_g_dict[g][0][1]
-                print(a, b)
-                x_axis = a + 50 * math.cos(math.radians(ang_list[i+1]))
-                y_axis = b + 50 * math.sin(math.radians(ang_list[i+1]))
+                if len(lg) <= 8:
+                    x_axis = a + dft_g_dict[g][1] * math.cos(math.radians(ang_list[i+1]))
+                    y_axis = b + dft_g_dict[g][1] * math.sin(math.radians(ang_list[i+1]))
+                else:
+                    x_axis = a + (dft_g_dict[g][1] + 50) * math.cos(math.radians(ang_list[i + 1]))
+                    y_axis = b + (dft_g_dict[g][1] + 50) * math.sin(math.radians(ang_list[i + 1]))
+                print(ang_list[i+1], p[2])
                 b_size = p[0]
-                # total += b_size
-                # rag = p[1]
                 colour = p[1]
                 name = p[2]
-                dft_g_list.append(((x_axis, y_axis), b_size, colour, name))
+                if 280 >= ang_list[i+1] >= 80:
+                    text_angle = ('right', 'bottom')
+                if 100 >= ang_list[i+1] or ang_list[i+1] >= 260:
+                    text_angle = ('left', 'bottom')
+                if 279 >= ang_list[i+1] >= 261:
+                    text_angle = ('center', 'top')
+                if 99 >= ang_list[i+1] >= 81:
+                    text_angle = ('center', 'bottom')
+                dft_g_list.append(((x_axis, y_axis), b_size, colour, name, "solid", colour, text_angle))
 
         # for stackoverflow answer
         # for g in g_list:
@@ -7852,37 +7867,46 @@ def make_a_dandelion_manual(wb: Union[str, bytes, os.PathLike]):
         y_axis = ws.cell(row=row_num, column=6).value
         b_size = ws.cell(row=row_num, column=13).value
         colour = random.choice(list(COLOUR_DICT.values()))
-        d_list.append(((x_axis, y_axis), b_size/10, colour))
+        d_list.append(((x_axis, y_axis), b_size/10, colour, '-'))
 
     # fig = plt.figure()
     # d_list.insert(0, ((515, 450), 455, 'r'))
     # , ((590, 422), 52, 'g')]
     plt.figure(figsize=(20, 10))
     for c in range(len(d_list)):
-        circle = plt.Circle(d_list[c][0], radius=d_list[c][1], fc=d_list[c][2])
+        # circle = plt.Circle(d_list[c][0], radius=d_list[c][1], fc=d_list[c][2], linestyle='-')
+        circle = plt.Circle(d_list[c][0], radius=d_list[c][1], linestyle='--', fill=False)
         plt.gca().add_patch(circle)
     plt.axis('scaled')
     plt.axis('off')
 
-    # plt.show()
+    plt.show()
 
     return plt
 
 
 def make_a_dandelion_auto(dlion_data: DandelionData):
     plt.figure(figsize=(20, 10))
-    # fig, ax = plt.subplots()
-    # # ax = fig.add_subplot()
+    fig, ax = plt.subplots()
+    # ax = fig.add_subplot()
     for c in range(len(dlion_data.d_list)):
         # circle = plt.Circle(dlion_data.d_list[c][0], radius=dlion_data.d_list[c][1], fc='y')
-        circle = plt.Circle(dlion_data.d_list[c][0], radius=dlion_data.d_list[c][1], fc=dlion_data.d_list[c][2])
-        # ax.add_patch(circle)
-        # label = ax.annotate(dlion_data.d_list[c][3], xy=dlion_data.d_list[c][0], ha="center")
-        plt.gca().add_patch(circle)
+        circle = plt.Circle(dlion_data.d_list[c][0],
+                            radius=dlion_data.d_list[c][1],
+                            fc=dlion_data.d_list[c][2],  # face colour
+                            linestyle=dlion_data.d_list[c][4],
+                            ec=dlion_data.d_list[c][5])  # edge colour
+        ax.add_patch(circle)
+        label = ax.annotate(dlion_data.d_list[c][3],
+                            xy=dlion_data.d_list[c][0],
+                            horizontalalignment=dlion_data.d_list[c][6][0],
+                            verticalalignment=dlion_data.d_list[c][6][1])
+                            # ha="left")
+        # plt.gca().add_patch(circle)
 
     plt.axis('scaled')
-    # plt.axis('off')
+    plt.axis('off')
 
-    plt.show()
+    # plt.show()
 
-    return plt
+    return fig
