@@ -2600,14 +2600,14 @@ def put_matplotlib_fig_into_word(doc: Document, fig: plt.figure or plt, **kwargs
     if "transparent" in kwargs:
         fig.savefig("cost_profile.png", transparent=True)
     else:
-        fig.savefig("cost_profile.png")
+        fig.savefig("cost_profile.png", dpi=300, bbox_inches="tight")
         # fig.savefig("cost_profile.png", bbox_inches="tight")
     if "size" in kwargs:
         s = kwargs["size"]
         doc.add_picture("cost_profile.png", width=Inches(s))
     else:
         doc.add_picture("cost_profile.png", width=Inches(8))  # to place nicely in doc
-    os.remove("cost_profile.png")
+    # os.remove("cost_profile.png")
     plt.close()  # automatically closes figure so don't need to do manually.
 
 
@@ -7886,7 +7886,8 @@ def make_a_dandelion_manual(wb: Union[str, bytes, os.PathLike]):
 
 
 def make_a_dandelion_auto(dlion_data: DandelionData):
-    plt.figure(figsize=(20, 10), dpi=300)
+    # plt.figure(figsize=(20, 10), dpi=300)
+    # plt.figure(dpi=300)
     fig, ax = plt.subplots()
     # ax = fig.add_subplot()
     for c in range(len(dlion_data.d_list)):
@@ -7899,7 +7900,7 @@ def make_a_dandelion_auto(dlion_data: DandelionData):
         ax.add_patch(circle)
         ax.annotate(dlion_data.d_list[c][3],
                     xy=dlion_data.d_list[c][0],
-                    # fontsize=1,
+                    fontsize=7,
                     horizontalalignment=dlion_data.d_list[c][6][0],
                     verticalalignment=dlion_data.d_list[c][6][1])
         # plt.gca().add_patch(circle)
@@ -7907,6 +7908,6 @@ def make_a_dandelion_auto(dlion_data: DandelionData):
     plt.axis('scaled')
     plt.axis('off')
 
-    # plt.show()
+    plt.show()
 
     return plt
