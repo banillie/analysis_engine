@@ -2598,17 +2598,36 @@ def put_matplotlib_fig_into_word(doc: Document, fig: plt.figure or plt, **kwargs
     """Places line graph cost profile into word document"""
     # Place fig in word doc.
     if "transparent" in kwargs:
-        fig.savefig("cost_profile.png", transparent=True)
+        fig.savefig("fig.png", transparent=True)
     else:
-        fig.savefig("cost_profile.png", dpi=300, bbox_inches="tight")
+        fig.savefig("fig.png")
+        # fig.savefig("cost_profile.png", dpi=300)
         # fig.savefig("cost_profile.png", bbox_inches="tight")
     if "size" in kwargs:
         s = kwargs["size"]
-        doc.add_picture("cost_profile.png", width=Inches(s))
+        doc.add_picture("fig.png", width=Inches(s))
     else:
-        doc.add_picture("cost_profile.png", width=Inches(8))  # to place nicely in doc
-    # os.remove("cost_profile.png")
+        doc.add_picture("fig.png", width=Inches(8))  # to place nicely in doc
+    os.remove("fig.png")
     plt.close()  # automatically closes figure so don't need to do manually.
+
+
+# def put_dandelion_matplotlib_fig_into_word(doc: Document, fig: plt.figure or plt, **kwargs) -> None:
+#     """Places line graph cost profile into word document"""
+#     # Place fig in word doc.
+#     if "transparent" in kwargs:
+#         fig.savefig("fig.pdf", transparent=True)
+#     else:
+#         fig.savefig("fig.pdf")
+#         # fig.savefig("cost_profile.png", dpi=300)
+#         # fig.savefig("cost_profile.png", bbox_inches="tight")
+#     if "size" in kwargs:
+#         s = kwargs["size"]
+#         doc.add_picture("fig.pdf", width=Inches(s))
+#     else:
+#         doc.add_picture("fig.pdf", width=Inches(8))  # to place nicely in doc
+#     os.remove("fig.pdf")
+#     plt.close()  # automatically closes figure so don't need to do manually.
 
 
 def convert_rag_text(dca_rating: str) -> str:
@@ -7886,12 +7905,10 @@ def make_a_dandelion_manual(wb: Union[str, bytes, os.PathLike]):
 
 
 def make_a_dandelion_auto(dlion_data: DandelionData):
-    # plt.figure(figsize=(20, 10), dpi=300)
-    # plt.figure(dpi=300)
     fig, ax = plt.subplots()
-    # ax = fig.add_subplot()
+    # plt.figure(figsize=(20, 10))
+    # fig(dpi=600)
     for c in range(len(dlion_data.d_list)):
-        # circle = plt.Circle(dlion_data.d_list[c][0], radius=dlion_data.d_list[c][1], fc='y')
         circle = plt.Circle(dlion_data.d_list[c][0],
                             radius=dlion_data.d_list[c][1],
                             fc=dlion_data.d_list[c][2],  # face colour
@@ -7900,14 +7917,18 @@ def make_a_dandelion_auto(dlion_data: DandelionData):
         ax.add_patch(circle)
         ax.annotate(dlion_data.d_list[c][3],
                     xy=dlion_data.d_list[c][0],
-                    fontsize=7,
+                    fontsize=6,
                     horizontalalignment=dlion_data.d_list[c][6][0],
                     verticalalignment=dlion_data.d_list[c][6][1])
         # plt.gca().add_patch(circle)
 
     plt.axis('scaled')
     plt.axis('off')
-
+    fig.savefig(root_path / "output/dandelion.pdf", transparent=True)
     plt.show()
 
-    return plt
+    # return plt
+
+
+def convert_pdf_to_png():
+    pass
