@@ -46,6 +46,8 @@ from textwrap import wrap
 
 import logging
 
+from pdf2image import convert_from_path
+
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s: %(levelname)s - %(message)s",
@@ -2595,39 +2597,23 @@ def change_word_doc_portrait(doc: Document) -> Document:
 
 
 def put_matplotlib_fig_into_word(doc: Document, fig: plt.figure or plt, **kwargs) -> None:
-    """Places line graph cost profile into word document"""
+    """Does rendering of matplotlib graph into word. Best method I could find for
+    maintain high quality render output it to firstly save as pdf and then convert
+    to jpeg!"""
     # Place fig in word doc.
-    if "transparent" in kwargs:
-        fig.savefig("fig.png", transparent=True)
-    else:
-        fig.savefig("fig.png")
-        # fig.savefig("cost_profile.png", dpi=300)
-        # fig.savefig("cost_profile.png", bbox_inches="tight")
+    fig.savefig("fig.pdf")
+    # fig.savefig("cost_profile.png", dpi=300)
+    # fig.savefig("cost_profile.png", bbox_inches="tight")
+    page = convert_from_path("fig.pdf", 500)
+    page[0].save("fig.jpeg", 'JPEG')
     if "size" in kwargs:
         s = kwargs["size"]
-        doc.add_picture("fig.png", width=Inches(s))
+        doc.add_picture("fig.jpeg", width=Inches(s))
     else:
-        doc.add_picture("fig.png", width=Inches(8))  # to place nicely in doc
-    os.remove("fig.png")
+        doc.add_picture("fig.jpeg", width=Inches(8))  # to place nicely in doc
+    os.remove("fig.jpeg")
+    os.remove("fig.pdf")
     plt.close()  # automatically closes figure so don't need to do manually.
-
-
-# def put_dandelion_matplotlib_fig_into_word(doc: Document, fig: plt.figure or plt, **kwargs) -> None:
-#     """Places line graph cost profile into word document"""
-#     # Place fig in word doc.
-#     if "transparent" in kwargs:
-#         fig.savefig("fig.pdf", transparent=True)
-#     else:
-#         fig.savefig("fig.pdf")
-#         # fig.savefig("cost_profile.png", dpi=300)
-#         # fig.savefig("cost_profile.png", bbox_inches="tight")
-#     if "size" in kwargs:
-#         s = kwargs["size"]
-#         doc.add_picture("fig.pdf", width=Inches(s))
-#     else:
-#         doc.add_picture("fig.pdf", width=Inches(8))  # to place nicely in doc
-#     os.remove("fig.pdf")
-#     plt.close()  # automatically closes figure so don't need to do manually.
 
 
 def convert_rag_text(dca_rating: str) -> str:
@@ -7493,160 +7479,142 @@ class DandelionData:
         self.master = master
         self.kwargs = kwargs
         self.baseline_type = "ipdc_costs"
-        self.group = []
+        self.group = ["HSMRPG", "Rail", "AMIS", "RPE"]
         self.iter_list = []
         self.d_data = {}
         self.d_list = []
-        # self.get_data()
-        self.get_data_two()
+        self.get_data()
 
-    def get_data(self) -> None:
+    # def get_data_old(self) -> None:
+    #
+    #     if "baseline" in self.kwargs:
+    #         self.group = get_group(
+    #             self.master, str(self.master.current_quarter), self.kwargs
+    #         )
+    #         if self.kwargs["baseline"] == "standard":
+    #             self.iter_list = ["current", "last", "bl_one"]
+    #         elif self.kwargs["baseline"] == "all":
+    #             self.iter_list = ["current", "last", "bl_one", "bl_two", "bl_three"]
+    #         else:
+    #             self.iter_list = self.kwargs["baseline"]
+    #
+    #     elif "quarter" in self.kwargs:
+    #         if self.kwargs["quarter"] == ["standard"]:
+    #             self.iter_list = [
+    #                 self.master.quarter_list[0],
+    #                 self.master.quarter_list[1],
+    #             ]
+    #         else:
+    #             self.iter_list = self.kwargs["quarter"]
+    #
+    #     lower_dict = {}
+    #     for idx, tp in enumerate(self.iter_list):  # tp is time period
+    #         data = []
+    #         total = 0
+    #         if "quarter" in self.kwargs:
+    #             self.group = get_group(self.master, str(tp), self.kwargs)
+    #             q_idx = self.master.quarter_list.index(str(tp))
+    #         for p in self.group:
+    #             if "baseline" in self.kwargs:
+    #                 bl_index = self.master.bl_index[self.baseline_type][p]
+    #                 try:
+    #                     p_data = self.master.master_data[bl_index[idx]].data[p]
+    #                 except IndexError:  # some p bls only three
+    #                     continue
+    #             elif "quarter" in self.kwargs:
+    #                 p_data = self.master.master_data[q_idx].data[p]
+    #             abb = self.master.abbreviations[p]["abb"]  # abbreviations
+    #             cost = p_data["Total Forecast"]
+    #             c_str = dandelion_project_text(cost, p)  # cost_string
+    #             proj_info = abb + ",\n" + c_str
+    #             total += cost
+    #             rag = p_data["Departmental DCA"]
+    #             colour = COLOUR_DICT[convert_rag_text(rag)]
+    #             group = DFT_GROUP_DICT[p_data["DfT Group"]]
+    #             data.append((proj_info, cost, colour, rag, abb, group))
+    #         data.sort(key=lambda x: x[1])
+    #         # r_data = reversed(data)
+    #         # place = int(len(output_list) / 2)
+    #         # output_list.insert(place, ("total", total, colour_dict["W"]))
+    #         # return reversed(output_list)
+    #         # return output_list
+    #         projects, pi, c, r, a, g = zip(*data)  # pi is project_info, c is colour and r is rag
+    #         lower_dict[tp] = {"projects": projects, "cost": pi, "colour": c, "rag": r, "abb": a, "group": g}
+    #     self.d_data = lower_dict
 
-        if "baseline" in self.kwargs:
-            self.group = get_group(
-                self.master, str(self.master.current_quarter), self.kwargs
-            )
-            if self.kwargs["baseline"] == "standard":
-                self.iter_list = ["current", "last", "bl_one"]
-            elif self.kwargs["baseline"] == "all":
-                self.iter_list = ["current", "last", "bl_one", "bl_two", "bl_three"]
-            else:
-                self.iter_list = self.kwargs["baseline"]
+    def get_data(self):
+        self.iter_list = get_iter_list(self.kwargs, self.master)
+        for tp in self.iter_list:
+            # input_g_list = ["HSMRPG", "Rail", "AMIS", "RPE"]  # first outer circle
+            # input_g_list = ["FBC", "OBC", "SOBC", "pre-SOBC"]  # first outer circle
+            # cal group angle
+            g_ang = 270/len(self.group)  # group angle
+            g_ang_list = []
+            for i in range(6):
+                g_ang_list.append(g_ang * i)
+            del g_ang_list[4]
 
-        elif "quarter" in self.kwargs:
-            if self.kwargs["quarter"] == ["standard"]:
-                self.iter_list = [
-                    self.master.quarter_list[0],
-                    self.master.quarter_list[1],
-                ]
-            else:
-                self.iter_list = self.kwargs["quarter"]
+            dft_g_list = []
+            dft_g_dict = {}
+            dft_l_group_dict = {}
+            p_total = 0  # portfolio total
+            for i, g in enumerate(self.group):
+                dft_l_group = self.master.dft_groups[tp][g]
+                # self.group = get_group(self.master, tp, self.kwargs)
+                g_total = 0
+                dft_l_group_list = []
+                for p in dft_l_group:
+                    p_data = get_correct_p_data(self.kwargs, self.master, self.baseline_type, p, tp)
+                    b_size = p_data["Total Forecast"]
+                    rag = p_data["Departmental DCA"]
+                    colour = COLOUR_DICT[convert_rag_text(rag)]
+                    g_total += b_size
+                    dft_l_group_list.append((math.sqrt(b_size) / 4, colour, self.master.abbreviations[p]['abb']))
+                # group data
+                x_axis = 0 + 400 * math.cos(math.radians(g_ang_list[i + 1]))
+                y_axis = 0 + 300 * math.sin(math.radians(g_ang_list[i + 1]))
+                # list is tuple axis point, bubble size, colour, line style, line color, text position
+                dft_g_list.append(((x_axis, y_axis),
+                                   math.sqrt(g_total)/4,
+                                   "#FFFFFF",
+                                   g,
+                                   'dashed',
+                                   'grey',
+                                   ('center', 'center')))
+                dft_g_dict[g] = [(x_axis, y_axis), math.sqrt(g_total) / 3]  # used for placement of circles
+                # project data
+                dft_l_group_dict[g] = list(reversed(sorted(dft_l_group_list)))
+                # portfolio data
+                p_total += g_total
+            dft_g_list.append(((0, 0), math.sqrt(p_total) / 4, "#cb1f00", "Portfolio", "solid", "#cb1f00", ('center', 'center')))
 
-        lower_dict = {}
-        for idx, tp in enumerate(self.iter_list):  # tp is time period
-            data = []
-            total = 0
-            if "quarter" in self.kwargs:
-                self.group = get_group(self.master, str(tp), self.kwargs)
-                q_idx = self.master.quarter_list.index(str(tp))
-            for p in self.group:
-                if "baseline" in self.kwargs:
-                    bl_index = self.master.bl_index[self.baseline_type][p]
-                    try:
-                        p_data = self.master.master_data[bl_index[idx]].data[p]
-                    except IndexError:  # some p bls only three
-                        continue
-                elif "quarter" in self.kwargs:
-                    p_data = self.master.master_data[q_idx].data[p]
-                abb = self.master.abbreviations[p]["abb"]  # abbreviations
-                cost = p_data["Total Forecast"]
-                c_str = dandelion_project_text(cost, p)  # cost_string
-                proj_info = abb + ",\n" + c_str
-                total += cost
-                rag = p_data["Departmental DCA"]
-                colour = COLOUR_DICT[convert_rag_text(rag)]
-                group = DFT_GROUP_DICT[p_data["DfT Group"]]
-                data.append((proj_info, cost, colour, rag, abb, group))
-            data.sort(key=lambda x: x[1])
-            # r_data = reversed(data)
-            # place = int(len(output_list) / 2)
-            # output_list.insert(place, ("total", total, colour_dict["W"]))
-            # return reversed(output_list)
-            # return output_list
-            projects, pi, c, r, a, g = zip(*data)  # pi is project_info, c is colour and r is rag
-            lower_dict[tp] = {"projects": projects, "cost": pi, "colour": c, "rag": r, "abb": a, "group": g}
-        self.d_data = lower_dict
-
-    def get_data_two(self):
-        self.group = self.master.master_data[0].projects
-        input_g_list = ["HSMRPG", "Rail", "AMIS", "RPE"]  # first outer circle
-        # input_g_list = ["FBC", "OBC", "SOBC", "pre-SOBC"]  # first outer circle
-        # cal group angle
-        g_ang = 270/len(input_g_list)  # group angle
-        g_ang_list = []
-        for i in range(6):
-            g_ang_list.append(g_ang * i)
-        del g_ang_list[4]
-
-        dft_g_list = []
-        dft_g_dict = {}
-        dft_l_group_dict = {}
-        p_total = 0  # portfolio total
-        for i, g in enumerate(input_g_list):
-            dft_l_group = self.master.dft_groups["Q3 20/21"][g]
-            g_total = 0
-            dft_l_group_list = []
-            for p in dft_l_group:
-                p_data = self.master.master_data[0].data[p]
-                b_size = p_data["Total Forecast"]
-                rag = p_data["Departmental DCA"]
-                colour = COLOUR_DICT[convert_rag_text(rag)]
-                g_total += b_size
-                dft_l_group_list.append((math.sqrt(b_size) / 4, colour, self.master.abbreviations[p]['abb']))
-            # group data
-            x_axis = 0 + 400 * math.cos(math.radians(g_ang_list[i + 1]))
-            y_axis = 0 + 300 * math.sin(math.radians(g_ang_list[i + 1]))
-            # list is tuple axis point, bubble size, colour, line style, line color, text position
-            dft_g_list.append(((x_axis, y_axis),
-                               math.sqrt(g_total)/4,
-                               "#FFFFFF",
-                               g,
-                               'dashed',
-                               'grey',
-                               ('center', 'center')))
-            dft_g_dict[g] = [(x_axis, y_axis), math.sqrt(g_total) / 3]  # used for placement of circles
-            # project data
-            dft_l_group_dict[g] = list(reversed(sorted(dft_l_group_list)))
-            #portfolio data
-            p_total += g_total
-        dft_g_list.append(((0, 0), math.sqrt(p_total) / 4, "#cb1f00", "Portfolio", "solid", "#cb1f00", ('center', 'center')))
-
-        for g in dft_l_group_dict.keys():
-            lg = dft_l_group_dict[g]  # local group
-            ang = 360/len(lg)
-            ang_list = []
-            for i in range(len(lg)+1):
-                ang_list.append(ang*i)
-            for i, p in enumerate(lg):
-                a = dft_g_dict[g][0][0]
-                b = dft_g_dict[g][0][1]
-                if len(lg) <= 8:
-                    x_axis = a + dft_g_dict[g][1] * math.cos(math.radians(ang_list[i+1]))
-                    y_axis = b + dft_g_dict[g][1] * math.sin(math.radians(ang_list[i+1]))
-                else:
-                    x_axis = a + (dft_g_dict[g][1] + 50) * math.cos(math.radians(ang_list[i + 1]))
-                    y_axis = b + (dft_g_dict[g][1] + 50) * math.sin(math.radians(ang_list[i + 1]))
-                b_size = p[0]
-                colour = p[1]
-                name = p[2]
-                if 280 >= ang_list[i+1] >= 80:
-                    text_angle = ('right', 'bottom')
-                if 100 >= ang_list[i+1] or ang_list[i+1] >= 260:
-                    text_angle = ('left', 'bottom')
-                if 279 >= ang_list[i+1] >= 261:
-                    text_angle = ('center', 'top')
-                if 99 >= ang_list[i+1] >= 81:
-                    text_angle = ('center', 'bottom')
-                dft_g_list.append(((x_axis, y_axis), b_size, colour, name, "solid", colour, text_angle))
-
-        # for stackoverflow answer
-        # for g in g_list:
-        #     lg = self.master.dft_groups["Q3 20/21"][g]  # local group
-        #     ang = 360/len(lg)
-        #     ang_list = []
-        #     total = 0
-        #     for i in range(len(lg)+1):
-        #         ang_list.append(ang*i)
-        #     for i, p in enumerate(lg):
-        #         p_data = self.master.master_data[0].data[p]
-        #         x_axis = 0 + 150 * math.cos(math.radians(ang_list[i+1]))
-        #         y_axis = 0 + 100 * math.sin(math.radians(ang_list[i+1]))
-        #         b_size = p_data["Total Forecast"]
-        #         total += b_size
-        #         rag = p_data["Departmental DCA"]
-        #         colour = COLOUR_DICT[convert_rag_text(rag)]
-        #         d_list.append(((x_axis, y_axis), math.sqrt(b_size) / 5, colour))
-        #     d_list.append(((0, 0), math.sqrt(total) / 5, "#808080"))
+            for g in dft_l_group_dict.keys():
+                lg = dft_l_group_dict[g]  # local group
+                ang = 360/len(lg)
+                ang_list = []
+                for i in range(len(lg)+1):
+                    ang_list.append(ang*i)
+                for i, p in enumerate(lg):
+                    a = dft_g_dict[g][0][0]
+                    b = dft_g_dict[g][0][1]
+                    if len(lg) <= 8:
+                        x_axis = a + dft_g_dict[g][1] * math.cos(math.radians(ang_list[i+1]))
+                        y_axis = b + dft_g_dict[g][1] * math.sin(math.radians(ang_list[i+1]))
+                    else:
+                        x_axis = a + (dft_g_dict[g][1] + 50) * math.cos(math.radians(ang_list[i + 1]))
+                        y_axis = b + (dft_g_dict[g][1] + 50) * math.sin(math.radians(ang_list[i + 1]))
+                    b_size = p[0]
+                    colour = p[1]
+                    name = p[2]
+                    if 280 >= ang_list[i+1] >= 80:
+                        text_angle = ('right', 'bottom')
+                    if 100 >= ang_list[i+1] or ang_list[i+1] >= 260:
+                        text_angle = ('left', 'bottom')
+                    if 279 >= ang_list[i+1] >= 261:
+                        text_angle = ('center', 'top')
+                    if 99 >= ang_list[i+1] >= 81:
+                        text_angle = ('center', 'bottom')
+                    dft_g_list.append(((x_axis, y_axis), b_size, colour, name, "solid", colour, text_angle))
 
         self.d_list = dft_g_list
 
@@ -7907,7 +7875,6 @@ def make_a_dandelion_manual(wb: Union[str, bytes, os.PathLike]):
 def make_a_dandelion_auto(dlion_data: DandelionData):
     fig, ax = plt.subplots()
     # plt.figure(figsize=(20, 10))
-    # fig(dpi=600)
     for c in range(len(dlion_data.d_list)):
         circle = plt.Circle(dlion_data.d_list[c][0],
                             radius=dlion_data.d_list[c][1],
@@ -7924,11 +7891,34 @@ def make_a_dandelion_auto(dlion_data: DandelionData):
 
     plt.axis('scaled')
     plt.axis('off')
-    fig.savefig(root_path / "output/dandelion.pdf", transparent=True)
     plt.show()
 
-    # return plt
+    return plt
 
 
-def convert_pdf_to_png():
-    pass
+# posted on stackexchange
+# def circles_posted_matplotlib(c_list: List[int]):
+#     g_d_list = []  # graph data list
+#     for g in c_list:
+#         # create length of circle list. In this instance
+#         # i'm multiplying by 8 each time but could be any number.
+#         lg = [g] * (8*g)
+#         ang = 360/len(lg)  # calculate the angle of each entry in circle list.
+#         ang_list = []
+#         for i in range(len(lg)+1):
+#             ang_list.append(ang*i)
+#         for i, c in enumerate(lg):
+#             # calculate the x and y axis points or each circle. in this instance
+#             # i'm expanding circles by multiples of ten but could be any number.
+#             x_axis = 0 + (10*g) * math.cos(math.radians(ang_list[i+1]))
+#             y_axis = 0 + (10*g) * math.sin(math.radians(ang_list[i+1]))
+#             # tuple structure ((axis tuple), circle size, circle colour)
+#             g_d_list.append(((x_axis, y_axis), 1, 'r'))
+#
+#     fig, ax = plt.subplots()
+#     for c in range(len(g_d_list)):
+#         circle = plt.Circle(g_d_list[c][0], radius=g_d_list[c][1], fc=g_d_list[c][2])
+#         ax.add_patch(circle)
+#     plt.axis('scaled')
+#     plt.axis('off')  # optional if you don't want to show axis
+#     plt.show()

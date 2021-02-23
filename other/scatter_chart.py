@@ -1,4 +1,7 @@
-import numpy as np
+import math
+# import numpy as np
+from typing import List
+from matplotlib import pyplot as plt
 
 from analysis_engine.data import open_pickle_file, root_path, DcaData, CostData, MilestoneData, \
     cost_v_schedule_chart_into_wb, RiskData, DandelionData, VfMData, put_cost_totals_into_wb, \
@@ -7,13 +10,16 @@ from analysis_engine.data import open_pickle_file, root_path, DcaData, CostData,
 
 m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
 # dandelion = DandelionData(m, quarter="standard")
-d_data = DandelionData(m)
-make_a_dandelion_auto(d_data)
-
-# doc = open_word_doc(root_path / "input/summary_temp_landscape.docx")
-# put_dandelion_matplotlib_fig_into_word(doc, dlion, size=7.5)
-# doc.save(root_path / "output/dlion_graph.docx")
+d_data = DandelionData(m, quarter=["Q3 19/20"], group=["HSMRPG", "Rail", "AMIS", "RPE"])
+d_lion = make_a_dandelion_auto(d_data)
+doc = open_word_doc(root_path / "input/summary_temp_landscape.docx")
+put_matplotlib_fig_into_word(doc, d_lion, size=7.5)
+doc.save(root_path / "output/dlion_graph.docx")
 
 # def moving_average(x, w):
 #     return np.convolve(x, np.ones(w), 'valid') / w
+from pdf2image import convert_from_path
+
+
+
 
