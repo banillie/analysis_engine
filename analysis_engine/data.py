@@ -1169,7 +1169,9 @@ def milestone_info_handling(output_list: list, t_list: list) -> list:
     """helper function for handling and cleaning up milestone date generated
     via MilestoneDate class. Removes none type milestone names and non date
     string values"""
-    if t_list[1][1] is not None:
+    if t_list[1][1] is None or t_list[1][1] == 'Project - Business Case End Date':
+        pass
+    else:
         if isinstance(t_list[3][1], datetime.date):
             return output_list.append(t_list)
         else:
@@ -3535,16 +3537,23 @@ def get_tp_index(master: Master, tp: str, class_kwargs):
         return master.quarter_list.index(tp)
 
 
-def get_group(master: Master, tp: str, class_kwargs) -> List[str]:
+def get_group(master: Master, tp: str, class_kwargs, group_indx = None) -> List[str]:
     if "baseline" in class_kwargs:
         tp_indx = 0  # baseline uses latest project group only
     elif "quarter" in class_kwargs:
         tp_indx = master.quarter_list.index(tp)
 
     if "stage" in class_kwargs:
-        group = cal_group(class_kwargs["stage"], master, tp_indx)
+        if group_indx or group_indx == 0:
+            group = cal_group(class_kwargs["stage"], master, tp_indx, group_indx)
+        else:
+            group = cal_group(class_kwargs["stage"], master, tp_indx)
     elif "group" in class_kwargs:
-        group = cal_group(class_kwargs["group"], master, tp_indx)
+        if group_indx or group_indx == 0:
+            group = cal_group(class_kwargs["group"], master, tp_indx, group_indx)
+        else:
+            group = cal_group(class_kwargs["group"], master, tp_indx)
+
     else:
         group = master.current_projects
 
@@ -3557,10 +3566,13 @@ def get_group(master: Master, tp: str, class_kwargs) -> List[str]:
 def cal_group(
         input_list: List[str] or List[List[str]],
         master: Master,
-        tp_indx: int
+        tp_indx: int,
+        input_list_indx = None,
 ) -> List[str]:
     error_case = []
     output = []
+    if input_list_indx or input_list_indx == 0:
+        input_list = [input_list[input_list_indx]]
     if any(isinstance(x, list) for x in input_list):
         inner_list = [item for sublist in input_list for item in sublist]
     else:
@@ -7479,7 +7491,7 @@ class DandelionData:
         self.master = master
         self.kwargs = kwargs
         self.baseline_type = "ipdc_costs"
-        self.group = ["HSMRPG", "Rail", "AMIS", "RPE"]
+        self.group = []
         self.iter_list = []
         self.d_data = {}
         self.d_list = []
@@ -7543,29 +7555,44 @@ class DandelionData:
     #     self.d_data = lower_dict
 
     def get_data(self):
+        #  for dandelion need groups of groups.
+        if "group" in self.kwargs:
+            self.group = self.kwargs["group"]
+        elif "stage" in self.kwargs:
+            self.group = self.kwargs["stage"]
+
         self.iter_list = get_iter_list(self.kwargs, self.master)
         for tp in self.iter_list:
-            # input_g_list = ["HSMRPG", "Rail", "AMIS", "RPE"]  # first outer circle
-            # input_g_list = ["FBC", "OBC", "SOBC", "pre-SOBC"]  # first outer circle
             # cal group angle
             g_ang = 270/len(self.group)  # group angle
             g_ang_list = []
             for i in range(6):
                 g_ang_list.append(g_ang * i)
             del g_ang_list[4]
-
             dft_g_list = []
             dft_g_dict = {}
             dft_l_group_dict = {}
             p_total = 0  # portfolio total
             for i, g in enumerate(self.group):
-                dft_l_group = self.master.dft_groups[tp][g]
-                # self.group = get_group(self.master, tp, self.kwargs)
+                dft_l_group = get_group(self.master, tp, self.kwargs, i)
                 g_total = 0
                 dft_l_group_list = []
                 for p in dft_l_group:
                     p_data = get_correct_p_data(self.kwargs, self.master, self.baseline_type, p, tp)
-                    b_size = p_data["Total Forecast"]
+                    if "meta" in self.kwargs:
+                        try:
+                            if self.kwargs["meta"] == "remaining":
+                                costs_data = CostData(self.master, quarter=[tp], group=[p])
+                                b_size = costs_data.c_totals[tp]["prof"][0] + costs_data.c_totals[tp]["unprof"][0]
+                            elif self.kwargs["meta"] == "spent":
+                                costs_data = CostData(self.master, quarter=[tp], group=[p])
+                                b_size = costs_data.c_totals[tp]["spent"][0]
+                            else:
+                                b_size = p_data[self.kwargs["meta"]]
+                        except KeyError:
+                            logger.critical(self.kwargs["meta"] + " not recognised")
+                    else:
+                        b_size = p_data["Total Forecast"]
                     rag = p_data["Departmental DCA"]
                     colour = COLOUR_DICT[convert_rag_text(rag)]
                     g_total += b_size
@@ -7872,9 +7899,11 @@ def make_a_dandelion_manual(wb: Union[str, bytes, os.PathLike]):
     return plt
 
 
-def make_a_dandelion_auto(dlion_data: DandelionData):
+def make_a_dandelion_auto(dlion_data: DandelionData, **kwargs):
     fig, ax = plt.subplots()
     # plt.figure(figsize=(20, 10))
+    title = get_chart_title(dlion_data, kwargs, "dandelion")
+    plt.suptitle(title, fontweight="bold", fontsize=10)
     for c in range(len(dlion_data.d_list)):
         circle = plt.Circle(dlion_data.d_list[c][0],
                             radius=dlion_data.d_list[c][1],
