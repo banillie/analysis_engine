@@ -1589,9 +1589,6 @@ class MilestoneData:
                     filtered_dict["Milestone " + str(i)] = v
                     continue
 
-
-
-
         output_dict = {}
         for dict in self.milestone_dict.keys():
             if dict == self.iter_list[0]:
@@ -2476,7 +2473,7 @@ def key_contacts(doc: Document, master: Master, project_name: str) -> None:
 
     pd_phone = master.master_data[0].data[project_name]["PD Phone No."]
     if pd_phone is None:
-        pd_phone = "TBC"
+        pd_phone = "phone: tbc"
 
     doc.add_paragraph(
         "PD: " + str(pd_name) + ", " + str(pd_email) + ", " + str(pd_phone)
@@ -2484,7 +2481,7 @@ def key_contacts(doc: Document, master: Master, project_name: str) -> None:
 
     contact_name = master.master_data[0].data[project_name]["Working Contact Name"]
     if contact_name is None:
-        contact_name = "TBC"
+        contact_name = "tbc"
 
     contact_email = master.master_data[0].data[project_name]["Working Contact Email"]
     if contact_email is None:
@@ -2494,7 +2491,7 @@ def key_contacts(doc: Document, master: Master, project_name: str) -> None:
         "Working Contact Telephone"
     ]
     if contact_phone is None:
-        contact_phone = "TBC"
+        contact_phone = "phone: tbc"
 
     doc.add_paragraph(
         "PfM reporting lead: "
@@ -2512,9 +2509,19 @@ def dca_table(doc: Document, master: Master, project_name: str) -> None:
     hdr_cells = w_table.rows[0].cells
     hdr_cells[0].text = "Delivery confidence"
     hdr_cells[1].text = "This quarter"
-    hdr_cells[2].text = str(master.master_data[1].quarter)
-    hdr_cells[3].text = str(master.master_data[2].quarter)
-    hdr_cells[4].text = str(master.master_data[3].quarter)
+    # hard code is due to setting up data_bridge
+    try:
+        hdr_cells[2].text = str(master.master_data[1].quarter)
+    except IndexError:
+        hdr_cells[2].text = "Q2 20/21"
+    try:
+        hdr_cells[3].text = str(master.master_data[2].quarter)
+    except IndexError:
+        hdr_cells[3].text = "Q1 20/21"
+    try:
+        hdr_cells[4].text = str(master.master_data[3].quarter)
+    except IndexError:
+        hdr_cells[4].text = "Q4 19/20"
 
     for x, dca_key in enumerate(SRO_CONF_KEY_LIST):
         row_cells = w_table.add_row().cells
@@ -2566,14 +2573,18 @@ def dca_narratives(doc: Document, master: Master, project_name: str) -> None:
     ]
 
     for x in range(len(headings_list)):
-        doc.add_paragraph().add_run(str(headings_list[x])).bold = True
-        text_one = str(master.master_data[0].data[project_name][narrative_keys_list[x]])
-        try:
-            text_two = str(
-                master.master_data[1].data[project_name][narrative_keys_list[x]]
-            )
+        try:  # overall try statement relates to data_bridge
+            text_one = str(master.master_data[0].data[project_name][narrative_keys_list[x]])
+            try:
+                text_two = str(
+                    master.master_data[1].data[project_name][narrative_keys_list[x]]
+                )
+            except (KeyError, IndexError):  # index error relates to data_bridge
+                text_two = text_one
         except KeyError:
-            text_two = text_one
+            break
+
+        doc.add_paragraph().add_run(str(headings_list[x])).bold = True
 
         # There are two options here for comparing text. Have left this for now.
         # compare_text_showall(dca_a, dca_b, doc)
@@ -3298,7 +3309,6 @@ def milestone_chart(
     ax1.yaxis.grid()  # horizontal lines
     ax1.set_axisbelow(True)
 
-
     # ax1.scatter(*do_mask(milestone_data.md_current, milestone_data.key_names), label="Current", zorder=10, c='g')
     # ax1.scatter(*do_mask(milestone_data.md_last, milestone_data.key_names), label="Last quarter", zorder=5, c='orange')
     # ax1.scatter(*do_mask(milestone_data.md_baseline, milestone_data.key_names), label="Baseline", zorder=1, c='b')
@@ -3319,7 +3329,7 @@ def milestone_chart(
         ax1.xaxis.set_major_formatter(years_fmt)
         plt.setp(ax1.xaxis.get_minorticklabels(), rotation=45, size=12)
         plt.setp(ax1.xaxis.get_majorticklabels(), rotation=45, weight="bold", size=14)
-    elif 365*3 >= td >= 90:
+    elif 365 * 3 >= td >= 90:
         ax1.xaxis.set_major_locator(years)
         ax1.xaxis.set_minor_locator(months)
         ax1.xaxis.set_major_formatter(years_fmt)
@@ -3537,7 +3547,7 @@ def get_tp_index(master: Master, tp: str, class_kwargs):
         return master.quarter_list.index(tp)
 
 
-def get_group(master: Master, tp: str, class_kwargs, group_indx = None) -> List[str]:
+def get_group(master: Master, tp: str, class_kwargs, group_indx=None) -> List[str]:
     if "baseline" in class_kwargs:
         tp_indx = 0  # baseline uses latest project group only
     elif "quarter" in class_kwargs:
@@ -3567,7 +3577,7 @@ def cal_group(
         input_list: List[str] or List[List[str]],
         master: Master,
         tp_indx: int,
-        input_list_indx = None,
+        input_list_indx=None,
 ) -> List[str]:
     error_case = []
     output = []
@@ -7564,7 +7574,7 @@ class DandelionData:
         self.iter_list = get_iter_list(self.kwargs, self.master)
         for tp in self.iter_list:
             # cal group angle
-            g_ang = 270/len(self.group)  # group angle
+            g_ang = 270 / len(self.group)  # group angle
             g_ang_list = []
             for i in range(6):
                 g_ang_list.append(g_ang * i)
@@ -7602,7 +7612,7 @@ class DandelionData:
                 y_axis = 0 + 300 * math.sin(math.radians(g_ang_list[i + 1]))
                 # list is tuple axis point, bubble size, colour, line style, line color, text position
                 dft_g_list.append(((x_axis, y_axis),
-                                   math.sqrt(g_total)/4,
+                                   math.sqrt(g_total) / 4,
                                    "#FFFFFF",
                                    g,
                                    'dashed',
@@ -7613,33 +7623,34 @@ class DandelionData:
                 dft_l_group_dict[g] = list(reversed(sorted(dft_l_group_list)))
                 # portfolio data
                 p_total += g_total
-            dft_g_list.append(((0, 0), math.sqrt(p_total) / 4, "#cb1f00", "Portfolio", "solid", "#cb1f00", ('center', 'center')))
+            dft_g_list.append(
+                ((0, 0), math.sqrt(p_total) / 4, "#cb1f00", "Portfolio", "solid", "#cb1f00", ('center', 'center')))
 
             for g in dft_l_group_dict.keys():
                 lg = dft_l_group_dict[g]  # local group
-                ang = 360/len(lg)
+                ang = 360 / len(lg)
                 ang_list = []
-                for i in range(len(lg)+1):
-                    ang_list.append(ang*i)
+                for i in range(len(lg) + 1):
+                    ang_list.append(ang * i)
                 for i, p in enumerate(lg):
                     a = dft_g_dict[g][0][0]
                     b = dft_g_dict[g][0][1]
                     if len(lg) <= 8:
-                        x_axis = a + dft_g_dict[g][1] * math.cos(math.radians(ang_list[i+1]))
-                        y_axis = b + dft_g_dict[g][1] * math.sin(math.radians(ang_list[i+1]))
+                        x_axis = a + dft_g_dict[g][1] * math.cos(math.radians(ang_list[i + 1]))
+                        y_axis = b + dft_g_dict[g][1] * math.sin(math.radians(ang_list[i + 1]))
                     else:
                         x_axis = a + (dft_g_dict[g][1] + 50) * math.cos(math.radians(ang_list[i + 1]))
                         y_axis = b + (dft_g_dict[g][1] + 50) * math.sin(math.radians(ang_list[i + 1]))
                     b_size = p[0]
                     colour = p[1]
                     name = p[2]
-                    if 280 >= ang_list[i+1] >= 80:
+                    if 280 >= ang_list[i + 1] >= 80:
                         text_angle = ('right', 'bottom')
-                    if 100 >= ang_list[i+1] or ang_list[i+1] >= 260:
+                    if 100 >= ang_list[i + 1] or ang_list[i + 1] >= 260:
                         text_angle = ('left', 'bottom')
-                    if 279 >= ang_list[i+1] >= 261:
+                    if 279 >= ang_list[i + 1] >= 261:
                         text_angle = ('center', 'top')
-                    if 99 >= ang_list[i+1] >= 81:
+                    if 99 >= ang_list[i + 1] >= 81:
                         text_angle = ('center', 'bottom')
                     dft_g_list.append(((x_axis, y_axis), b_size, colour, name, "solid", colour, text_angle))
 
@@ -7881,7 +7892,7 @@ def make_a_dandelion_manual(wb: Union[str, bytes, os.PathLike]):
         y_axis = ws.cell(row=row_num, column=6).value
         b_size = ws.cell(row=row_num, column=13).value
         colour = random.choice(list(COLOUR_DICT.values()))
-        d_list.append(((x_axis, y_axis), b_size/10, colour, '-'))
+        d_list.append(((x_axis, y_axis), b_size / 10, colour, '-'))
 
     # fig = plt.figure()
     # d_list.insert(0, ((515, 450), 455, 'r'))
@@ -7923,7 +7934,6 @@ def make_a_dandelion_auto(dlion_data: DandelionData, **kwargs):
     plt.show()
 
     return plt
-
 
 # posted on stackexchange
 # def circles_posted_matplotlib(c_list: List[int]):
