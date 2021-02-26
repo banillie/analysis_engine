@@ -470,7 +470,7 @@ def test_speedial_print_out(project_info, dca_masters, word_doc):
 
 def test_risk_analysis(project_info, risk_masters):
     m = Master(risk_masters, project_info)
-    risk = RiskData(m, group=["Rail"])
+    risk = RiskData(m, group=["Rail"], quarter=["standard"])
     wb = risks_into_excel(risk)
     wb.save("resources/risks.xlsx")
 
