@@ -4238,44 +4238,15 @@ class VfMData:
         self.get_count()
 
     def get_dictionary(self) -> None:
-        if "baseline" in self.kwargs:
-            self.group = get_group(
-                self.master, str(self.master.current_quarter), self.kwargs
-            )
-            if self.kwargs["baseline"] == ["standard"]:
-                self.iter_list = ["current", "last", "bl_one"]
-            elif self.kwargs["baseline"] == ["all"]:
-                self.iter_list = ["current", "last", "bl_one", "bl_two", "bl_three"]
-            else:
-                self.iter_list = self.kwargs["baseline"]
-
-        elif "quarter" in self.kwargs:
-            if self.kwargs["quarter"] == ["standard"]:
-                self.iter_list = [
-                    self.master.quarter_list[0],
-                    self.master.quarter_list[1],
-                ]
-            else:
-                self.iter_list = self.kwargs["quarter"]
-
         quarter_dict = {}
-
-        for idx, tp in enumerate(self.iter_list):
+        self.iter_list = get_iter_list(self.kwargs, self.master)
+        for tp in self.iter_list:
             project_dict = {}
-            if "quarter" in self.kwargs:
-                self.group = get_group(self.master, str(tp), self.kwargs)
-                q_idx = self.master.quarter_list.index(tp)
+            self.group = get_group(self.master, tp, self.kwargs)
             for p in self.group:
-                if "baseline" in self.kwargs:
-                    bl_index = self.master.bl_index[self.baseline_type][p]
-                    try:
-                        p_data = self.master.master_data[bl_index[idx]].data[p]
-                    except (IndexError, TypeError):
-                        # IndexError some p bls only three in this instance oldest bl is taken
-                        # TypeError some p last is None
-                        p_data = self.master.master_data[bl_index[-1]].data[p]
-                elif "quarter" in self.kwargs:
-                    p_data = self.master.master_data[q_idx].data[p]
+                p_data = get_correct_p_data(self.kwargs, self.master, self.baseline_type, p, tp)
+                if p_data is None:
+                    continue
                 vfm_list = []
                 vfm = ("Group", DFT_GROUP_DICT[p_data["DfT Group"]])
                 vfm_list.append(vfm)
