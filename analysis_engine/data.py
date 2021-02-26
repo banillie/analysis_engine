@@ -5032,13 +5032,13 @@ def project_report_meta_data(
     )
     hdr_cells[2].text = "Benefits delivered:"
     hdr_cells[3].text = (
-            "£" + str(round(benefits.delivered[0])) + "m"
+            "£" + str(round(benefits.b_totals[benefits.iter_list[0]]["delivered"][0])) + "m"
     )  # first in list is current
     row_cells = table.add_row().cells
     row_cells[0].text = "Benefits profiled:"
-    row_cells[1].text = "£" + str(round(benefits.profiled[0])) + "m"
+    row_cells[1].text = "£" + str(round(benefits.b_totals[benefits.iter_list[0]]["prof"][0])) + "m"
     row_cells[2].text = "Benefits unprofiled:"
-    row_cells[3].text = "£" + str(round(benefits.unprofiled[0])) + "m"
+    row_cells[3].text = "£" + str(round(benefits.b_totals[benefits.iter_list[0]]["unprof"][0])) + "m"
 
     # set column width
     column_widths = (Cm(4), Cm(3), Cm(4), Cm(3))

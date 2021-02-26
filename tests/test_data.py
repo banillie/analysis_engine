@@ -173,25 +173,28 @@ def test_word_doc_dca_narratives(word_doc, project_info, dca_masters):
 
 def test_project_report_meta_data(word_doc, project_info, two_masters):
     master = Master(two_masters, project_info)
-    project_report_meta_data(word_doc, master, "Falcon 9")
+    c = CostData(master, quarter=["standard"])
+    m = MilestoneData(master, quarter=["standard"])
+    b = BenefitsData(master, quarter=["standard"])
+    project_report_meta_data(word_doc, c, m, b, "Falcon 9")
     word_doc.save("resources/summary_temp_altered.docx")
 
 
 def test_get_project_cost_profile(costs_masters, project_info):
     master = Master(costs_masters, project_info)
-    costs = CostData(master, group=[f9], baseline='standard')
+    costs = CostData(master, group=[mars], baseline=['standard'])
     assert len(costs.c_profiles['current']['prof']) == 24
 
 
 def test_project_cost_profile_chart(costs_masters, project_info):
     master = Master(costs_masters, project_info)
     costs = CostData(master, remove=[f9], baseline=['standard'])
-    cost_profile_graph(costs, chart='show')
+    cost_profile_graph(costs, chart=['show'])
 
 
 def test_project_cost_profile_into_wb(costs_masters, project_info):
     master = Master(costs_masters, project_info)
-    costs = CostData(master, baseline='standard')
+    costs = CostData(master, baseline=['standard'])
     wb = cost_profile_into_wb(costs)
     wb.save("resources/test_cost_profile_output.xlsx")
 
@@ -200,7 +203,7 @@ def test_project_cost_profile_chart_into_word_doc_one(
     word_doc, costs_masters, project_info
 ):
     master = Master(costs_masters, project_info)
-    costs = CostData(master, group=[f9])
+    costs = CostData(master, group=[f9], baseline=["standard"])
     graph = cost_profile_graph(costs, show="No")
     change_word_doc_landscape(word_doc)
     put_matplotlib_fig_into_word(word_doc, graph)
@@ -211,8 +214,8 @@ def test_total_cost_profile_chart_into_word_doc_one(
     word_doc, costs_masters, project_info
 ):
     master = Master(costs_masters, project_info)
-    costs = CostData(master, group=[f9])
-    benefits = BenefitsData(master, f9)
+    costs = CostData(master, baseline=["standard"])
+    benefits = BenefitsData(master, baseline=["standard"])
     graph = total_costs_benefits_bar_chart(costs, benefits, show="No")
     change_word_doc_landscape(word_doc)
     put_matplotlib_fig_into_word(word_doc, graph)
@@ -228,9 +231,9 @@ def test_project_cost_profile_chart_into_word_doc_many(
     word_doc, costs_masters, project_info
 ):
     master = Master(costs_masters, project_info)
+    graph = cost_profile_graph(costs, chart=True)
     for p in master.current_projects:
-        costs = CostData(master, group=[p])
-        graph = cost_profile_graph(costs, chart=True)
+        costs = CostData(master, quarter=["standard"])
         put_matplotlib_fig_into_word(word_doc, graph)
         word_doc.save("resources/summary_temp_altered.docx")
 
