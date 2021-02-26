@@ -1029,21 +1029,14 @@ class BenefitsData:
     def __init__(
             self,
             master: Master,
-            project_group: List[str] or str,
-            baseline_type: str = "ipdc_benefits",
+            **kwargs
     ):
         self.master = master
-        self.project_group = project_group
-        self.baseline_type = baseline_type
-        self.cat_delivered = []
-        self.cat_profiled = []
-        self.cat_unprofiled = []
-        self.delivered = []
-        self.profiled = []
-        self.unprofiled = []
-        self.y_scale_max = 0
-        self.y_scale_min = 0
-        self.economic_max = 0
+        self.baseline_type = "ipdc_benefits"
+        self.kwargs = kwargs
+        self.group = []
+        self.iter_list = []
+        self.b_totals = {}
         self.get_ben_totals()
 
     def get_ben_totals(self) -> None:
@@ -1053,48 +1046,42 @@ class BenefitsData:
         delivered = []
         profiled = []
         unprofiled = []
-        group_cash_dev = 0
-        group_uncash_dev = 0
-        group_economic_dev = 0
-        group_disben_dev = 0
-        group_cash_profiled = 0
-        group_uncash_profiled = 0
-        group_economic_profiled = 0
-        group_disben_profiled = 0
-        group_cash_unprofiled = 0
-        group_uncash_unprofiled = 0
-        group_economic_unprofiled = 0
-        group_disben_unprofiled = 0
+        cash_dev = 0
+        uncash_dev = 0
+        economic_dev = 0
+        disben_dev = 0
+        cash_profiled = 0
+        uncash_profiled = 0
+        economic_profiled = 0
+        disben_profiled = 0
+        cash_unprofiled = 0
+        uncash_unprofiled = 0
+        economic_unprofiled = 0
+        disben_unprofiled = 0
 
-        self.project_group = string_conversion(self.project_group)
-
-        for i in range(3):
+        self.iter_list = get_iter_list(self.kwargs, self.master)
+        lower_dict = {}
+        for tp in self.iter_list:
+            self.group = get_group(self.master, tp, self.kwargs)
             for x, key in enumerate(BEN_TYPE_KEY_LIST):
                 group_total = 0
-                for project in self.project_group:
-                    ben_bl_index = self.master.bl_index[self.baseline_type][project]
+                for p in self.group:
+                    p_data = get_correct_p_data(self.kwargs, self.master, self.baseline_type, p, tp)
+                    if p_data is None:
+                        continue
                     try:
-                        cash = round(
-                            self.master.master_data[ben_bl_index[i]].data[project][
-                                key[0]
-                            ]
-                        )
-                        uncash = round(
-                            self.master.master_data[ben_bl_index[i]].data[project][
-                                key[1]
-                            ]
-                        )
-                        economic = round(
-                            self.master.master_data[ben_bl_index[i]].data[project][
-                                key[2]
-                            ]
-                        )
-                        disben = round(
-                            self.master.master_data[ben_bl_index[i]].data[project][
-                                key[3]
-                            ]
-                        )
-
+                        cash = round(p_data[key[0]])
+                        if cash is None:
+                            cash = 0
+                        uncash = round(p_data[key[1]])
+                        if uncash is None:
+                            uncash = 0
+                        economic = round(p_data[key[2]])
+                        if economic is None:
+                            economic = 0
+                        disben = round(p_data[key[3]])
+                        if disben is None:
+                            disben = 0
                         total = round(cash + uncash + economic + disben)
                         group_total += total
                     except TypeError:  # handle None types, which are present if project not reporting last quarter.
@@ -1105,64 +1092,50 @@ class BenefitsData:
                         total = 0
                         group_total += total
 
-                    if i == 0:  # current quarter
+                    if self.iter_list.index(tp) == 0:  # current quarter
                         if x == 0:  # spent
-                            group_cash_dev += cash
-                            group_uncash_dev += uncash
-                            group_economic_dev += economic
-                            group_disben_dev += disben
+                            cash_dev += cash
+                            uncash_dev += uncash
+                            economic_dev += economic
+                            disben_dev += disben
                         if x == 1:  # profiled
-                            group_cash_profiled += cash
-                            group_uncash_profiled += uncash
-                            group_economic_profiled += economic
-                            group_disben_profiled += disben
+                            cash_profiled += cash
+                            uncash_profiled += uncash
+                            economic_profiled += economic
+                            disben_profiled += disben
                         if x == 2:  # unprofiled
-                            group_cash_unprofiled += cash
-                            group_uncash_unprofiled += uncash
-                            group_economic_unprofiled += economic
-                            group_disben_unprofiled += disben
+                            cash_unprofiled += cash
+                            uncash_unprofiled += uncash
+                            economic_unprofiled += economic
+                            disben_unprofiled += disben
 
-                if x == 0:  # spent
-                    delivered.append(group_total)
-                if x == 1:  # profiled
-                    profiled.append(group_total)
-                if x == 2:  # unprofiled
-                    unprofiled.append(group_total)
+                    if x == 0:  # spent
+                        delivered.append(group_total)
+                    if x == 1:  # profiled
+                        profiled.append(group_total)
+                    if x == 2:  # unprofiled
+                        unprofiled.append(group_total)
 
-        cat_spent = [
-            group_cash_dev,
-            group_uncash_dev,
-            group_economic_dev,
-            group_disben_dev,
-        ]
-        cat_profiled = [
-            group_cash_profiled,
-            group_uncash_profiled,
-            group_economic_profiled,
-            group_disben_profiled,
-        ]
-        cat_unprofiled = [
-            group_cash_unprofiled,
-            group_uncash_unprofiled,
-            group_economic_unprofiled,
-            group_disben_unprofiled,
-        ]
-        final_cat_profiled = calculate_profiled(cat_profiled, cat_spent, cat_unprofiled)
-        all_profiled = calculate_profiled(profiled, delivered, unprofiled)
+            cat_spent = [cash_dev, uncash_dev, economic_dev, disben_dev]
+            cat_profiled = [cash_profiled, uncash_profiled, economic_profiled,disben_profiled]
+            cat_unprofiled = [
+                cash_unprofiled,
+                uncash_unprofiled,
+                economic_unprofiled,
+                disben_unprofiled,
+            ]
+            cat_profiled = calculate_profiled(cat_profiled, cat_spent, cat_unprofiled)
+            adj_profiled = calculate_profiled(profiled, delivered, unprofiled)
 
-        self.cat_delivered = cat_spent
-        self.cat_profiled = final_cat_profiled
-        self.cat_unprofiled = cat_unprofiled
-        self.delivered = delivered
-        self.profiled = all_profiled
-        self.unprofiled = unprofiled
-        self.y_scale_max = max(profiled)
-        self.y_scale_min = min(
-            [group_disben_dev, group_disben_profiled, group_disben_unprofiled]
-        )
-        self.economic_max = max(
-            [group_economic_dev, group_economic_unprofiled, group_economic_profiled]
-        )
+            lower_dict[tp] = {"cat_spent": cat_spent,
+                              "cat_prof": cat_profiled,
+                              "cat_unprof": cat_unprofiled,
+                              "delivered": delivered,
+                              "prof": adj_profiled,
+                              "unprof": unprofiled,
+                              "total": profiled}
+
+        self.b_totals = lower_dict
 
 
 def milestone_info_handling(output_list: list, t_list: list) -> list:
@@ -2740,7 +2713,7 @@ def make_file_friendly(quarter_str: str) -> str:
 
 
 def total_costs_benefits_bar_chart(
-        costs: CostData, ben_master: BenefitsData, **kwargs
+        costs: CostData, ben: BenefitsData, **kwargs
 ) -> plt.figure:
     """compiles a matplotlib bar chart which shows total project costs"""
     fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2)  # four sub plots
@@ -2777,7 +2750,9 @@ def total_costs_benefits_bar_chart(
     # Y AXIS SCALE MAX
 
     highest_int = max(
-        [costs.c_totals[costs.iter_list[0]]["total"][0], ben_master.y_scale_max, ben_master.economic_max]
+        [costs.c_totals[costs.iter_list[0]]["total"][0],
+         ben.b_totals[ben.iter_list[0]]["total"][0]]
+         # ben.economic_max]
     )  # check in refactor
     y_max = highest_int + percentage(5, highest_int)
     ax1.set_ylim(0, y_max)
@@ -2854,22 +2829,24 @@ def total_costs_benefits_bar_chart(
     ax2.set_ylim(0, y_max)  # scale series_two axis max
 
     # BENEFITS SPENT, PROFILED AND UNPROFILED
-    labels = ["Latest", "Last Quarter", "Baseline"]
+    labels = ben.iter_list
     width = 0.5
-    ax3.bar(labels, np.array(ben_master.delivered), width, label="Delivered")
+    ax3.bar(labels, np.array(ben.b_totals[labels[0]]["delivered"]), width, label="delivered")
     ax3.bar(
         labels,
-        np.array(ben_master.profiled),
+        np.array(ben.b_totals[labels[0]]["prof"]),
         width,
-        bottom=np.array(ben_master.delivered),
-        label="Profiled",
+        bottom=np.array(ben.b_totals[labels[0]]["delivered"]),
+        label="profiled",
     )
     ax3.bar(
         labels,
-        np.array(ben_master.unprofiled),
+        np.array(ben.b_totals[labels[0]]["unprof"]),
         width,
-        bottom=np.array(ben_master.delivered) + np.array(ben_master.profiled),
-        label="Unprofiled",
+        bottom=np.array(
+            ben.b_totals[labels[0]]["delivered"]
+        ) + np.array(ben.b_totals[labels[0]]["prof"]),
+        label="unprofiled",
     )
     ax3.legend(prop={"size": 10})
     ax3.xaxis.set_tick_params(labelsize=12)
@@ -2892,19 +2869,21 @@ def total_costs_benefits_bar_chart(
     # BENEFITS CASHABLE, NON-CASHABLE, ECONOMIC, DISBENEFIT BAR CHART
     labels = ["Cashable", "Non-Cashable", "Economic", "Disbenefit"]
     width = 0.5
-    ax4.bar(labels, np.array(ben_master.cat_delivered), width, label="Delivered")
+    ax4.bar(labels, np.array(ben.b_totals[ben.iter_list[0]]["cat_spent"]), width, label="Delivered")
     ax4.bar(
         labels,
-        np.array(ben_master.cat_profiled),
+        np.array(ben.b_totals[ben.iter_list[0]]["cat_prof"]),
         width,
-        bottom=np.array(ben_master.cat_delivered),
+        bottom=np.array(ben.b_totals[ben.iter_list[0]]["cat_spent"]),
         label="Profiled",
     )
     ax4.bar(
         labels,
-        np.array(ben_master.cat_unprofiled),
+        np.array(ben.b_totals[ben.iter_list[0]]["cat_unprof"]),
         width,
-        bottom=np.array(ben_master.cat_delivered) + np.array(ben_master.cat_profiled),
+        bottom=np.array(
+            ben.b_totals[ben.iter_list[0]]["cat_spent"]
+        ) + np.array(ben.b_totals[ben.iter_list[0]]["cat_prof"]),
         label="Unprofiled",
     )
     ax4.legend(prop={"size": 10})
@@ -2923,11 +2902,13 @@ def total_costs_benefits_bar_chart(
         fontweight="bold",
     )
 
-    if ben_master.y_scale_min == 0:
+    check_min = ben.b_totals[ben.iter_list[0]]["cat_spent"][3] + ben.b_totals[ben.iter_list[0]]["cat_prof"][3] + ben.b_totals[ben.iter_list[0]]["cat_unprof"][3]
+
+    if check_min == 0:
         ax4.set_ylim(0, y_max)
     else:  # for negative benefits
-        y_min = ben_master.y_scale_min + percentage(
-            40, ben_master.y_scale_min
+        y_min = check_min + percentage(
+            40, check_min
         )  # arbitrary 40 percent
         ax4.set_ylim(y_min, y_max)
 

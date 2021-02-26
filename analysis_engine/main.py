@@ -421,6 +421,7 @@ def costs_sp(args):
         sys.exit(1)
 
 # HERE
+# note query option needs to work for one quarter only.
 def query(args):
     print("Getting data")
     m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))

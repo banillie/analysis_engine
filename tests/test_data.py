@@ -289,7 +289,7 @@ def test_get_project_total_cost_calculations_for_project(costs_masters, project_
 def test_get_project_total_costs_benefits_bar_chart(costs_masters, project_info):
     master = Master(costs_masters, project_info)
     costs = CostData(master, group=[f9], baseline=["standard"])
-    benefits = BenefitsData(master, f9)
+    benefits = BenefitsData(master, group=[f9], baseline=["standard"])
     total_costs_benefits_bar_chart(costs, benefits, chart=True)
 
 
@@ -581,9 +581,8 @@ def test_dandelion(basic_masters_dicts, project_info, word_doc):
 
 def test_dandelion_two(basic_masters_dicts, project_info, word_doc):
     m = Master(basic_masters_dicts, project_info)
-    d_data = DandelionData(m)
-    dlion = make_a_dandelion_auto(d_data)
-
+    d_data = DandelionData(m, quarter=["Q4 18/19"], group=["HSMRPG", "Rail", "RPE"])
+    make_a_dandelion_auto(d_data)
 
 
 def test_data_queries_non_milestone(basic_masters_dicts, project_info):
@@ -618,3 +617,4 @@ def test_build_dandelion_graph_manual(build_dandelion, word_doc_landscape):
     dlion = make_a_dandelion_manual(build_dandelion)
     put_matplotlib_fig_into_word(word_doc_landscape, dlion, size=7.5)
     word_doc_landscape.save("resources/dlion_mpl.docx")
+
