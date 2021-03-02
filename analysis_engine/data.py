@@ -469,17 +469,20 @@ FILE_FORMATS = [
 FIGURE_STYLE = {1: "half_horizontal", 2: "full_horizontal"}
 
 
-def calculate_profiled(p: List[int], s: List[int], unpro: List[int]) -> list:
+def calculate_profiled(p: int or List[int], s: int or List[int], unpro: int or List[int]) -> list:
     """small helper function to calculate the proper profiled amount. This is necessary as
     other wise 'profiled' would actually be the total figure.
     p = profiled list
     s = spent list
     unpro = unprofiled list"""
-    f_profiled = []
-    for y, amount in enumerate(p):
-        t = amount - (s[y] + unpro[y])
-        f_profiled.append(t)
-    return f_profiled
+    if isinstance(p, list):
+        f_profiled = []
+        for y, amount in enumerate(p):
+            t = amount - (s[y] + unpro[y])
+            f_profiled.append(t)
+        return f_profiled
+    else:
+        return p - (s + unpro)
 
 
 class Master:
@@ -775,26 +778,26 @@ class CostData:
         """Returns lists containing the sum total of group (of projects) costs,
         sliced in different ways. Cumbersome for loop used at the moment, but
         is the least cumbersome loop I could design!"""
-        spent = []
-        profiled = []
-        unprofiled = []
-        # overall_total = 0
-        spent_rdel = 0
-        spent_cdel = 0
-        spent_ngov = 0
-        prof_rdel = 0
-        prof_cdel = 0
-        prof_ngov = 0
-        unprof_rdel = 0
-        unprof_cdel = 0
-        unprof_ngov = 0
 
         self.iter_list = get_iter_list(self.kwargs, self.master)
         lower_dict = {}
         for tp in self.iter_list:
+            spent = 0
+            profiled = 0
+            unprofiled = 0
+            # overall_total = 0
+            spent_rdel = 0
+            spent_cdel = 0
+            spent_ngov = 0
+            prof_rdel = 0
+            prof_cdel = 0
+            prof_ngov = 0
+            unprof_rdel = 0
+            unprof_cdel = 0
+            unprof_ngov = 0
             self.group = get_group(self.master, tp, self.kwargs)
             for x, key in enumerate(COST_TYPE_KEY_LIST):
-                overall_total = 0
+                # group_total = 0
                 for project_name in self.group:
                     p_data = get_correct_p_data(self.kwargs, self.master, self.baseline_type, project_name, tp)
                     try:
@@ -808,13 +811,13 @@ class CostData:
                         if ngov is None:
                             ngov = 0
                         total = round(rdel + cdel + ngov)
-                        overall_total += total
+                        # group_total += total
                     except TypeError:  # handle None types, which are present if project not reporting last quarter.
-                        rdel = 0
-                        cdel = 0
-                        ngov = 0
+                        # rdel = 0
+                        # cdel = 0
+                        # ngov = 0
                         total = 0
-                        overall_total += total
+                        # group_total += total
 
                     if self.iter_list.index(tp) == 0:  # current quarter
                         if x == 0:  # spent
@@ -855,16 +858,16 @@ class CostData:
                                 ngov_std,
                             ]  # converts none types to zero
                             std_list = filter(None, std_list)
-                            spent.append(round(overall_total + sum(std_list)))
+                            spent += round(total + sum(std_list))
                         except (
                                 KeyError,
                                 TypeError,
                         ):  # Note. TypeError here as projects may have no baseline
-                            spent.append(overall_total)
+                            spent += total
                     if x == 1:  # profiled
-                        profiled.append(overall_total)
+                        profiled += total
                     if x == 2:  # unprofiled
-                        unprofiled.append(overall_total)
+                        unprofiled += total
 
             cat_spent = [spent_rdel, spent_cdel, spent_ngov]
             cat_profiled = [prof_rdel, prof_cdel, prof_ngov]
@@ -1043,28 +1046,28 @@ class BenefitsData:
         """Returns lists containing the sum total of group (of projects) benefits,
         sliced in different ways. Cumbersome for loop used at the moment, but
         is the least cumbersome loop I could design!"""
-        delivered = []
-        profiled = []
-        unprofiled = []
-        cash_dev = 0
-        uncash_dev = 0
-        economic_dev = 0
-        disben_dev = 0
-        cash_profiled = 0
-        uncash_profiled = 0
-        economic_profiled = 0
-        disben_profiled = 0
-        cash_unprofiled = 0
-        uncash_unprofiled = 0
-        economic_unprofiled = 0
-        disben_unprofiled = 0
 
         self.iter_list = get_iter_list(self.kwargs, self.master)
         lower_dict = {}
         for tp in self.iter_list:
+            delivered = 0
+            profiled = 0
+            unprofiled = 0
+            cash_dev = 0
+            uncash_dev = 0
+            economic_dev = 0
+            disben_dev = 0
+            cash_profiled = 0
+            uncash_profiled = 0
+            economic_profiled = 0
+            disben_profiled = 0
+            cash_unprofiled = 0
+            uncash_unprofiled = 0
+            economic_unprofiled = 0
+            disben_unprofiled = 0
             self.group = get_group(self.master, tp, self.kwargs)
             for x, key in enumerate(BEN_TYPE_KEY_LIST):
-                group_total = 0
+                # group_total = 0
                 for p in self.group:
                     p_data = get_correct_p_data(self.kwargs, self.master, self.baseline_type, p, tp)
                     if p_data is None:
@@ -1083,14 +1086,14 @@ class BenefitsData:
                         if disben is None:
                             disben = 0
                         total = round(cash + uncash + economic + disben)
-                        group_total += total
+                        # group_total += total
                     except TypeError:  # handle None types, which are present if project not reporting last quarter.
-                        cash = 0
-                        uncash = 0
-                        economic = 0
-                        disben = 0
+                        # cash = 0
+                        # uncash = 0
+                        # economic = 0
+                        # disben = 0
                         total = 0
-                        group_total += total
+                        # group_total += total
 
                     if self.iter_list.index(tp) == 0:  # current quarter
                         if x == 0:  # spent
@@ -1110,11 +1113,11 @@ class BenefitsData:
                             disben_unprofiled += disben
 
                     if x == 0:  # spent
-                        delivered.append(group_total)
+                        delivered += total
                     if x == 1:  # profiled
-                        profiled.append(group_total)
+                        profiled += total
                     if x == 2:  # unprofiled
-                        unprofiled.append(group_total)
+                        unprofiled += total
 
             cat_spent = [cash_dev, uncash_dev, economic_dev, disben_dev]
             cat_profiled = [cash_profiled, uncash_profiled, economic_profiled,disben_profiled]
@@ -1126,7 +1129,6 @@ class BenefitsData:
             ]
             cat_profiled = calculate_profiled(cat_profiled, cat_spent, cat_unprofiled)
             adj_profiled = calculate_profiled(profiled, delivered, unprofiled)
-
             lower_dict[tp] = {"cat_spent": cat_spent,
                               "cat_prof": cat_profiled,
                               "cat_unprof": cat_unprofiled,
@@ -2723,26 +2725,9 @@ def total_costs_benefits_bar_chart(
         fig.set_size_inches(set_figure_size(fig_size))
     except KeyError:
         fig.set_size_inches(set_figure_size(FIGURE_STYLE[2]))
-        pass
+        # pass
 
-    # cost profile charts.
-    title = (
-            costs.kwargs["group"][0]
-            # cost_master.master.abbreviations[cost_master.group[0]]
-            + " cost and benefit totals"
-    )
-    # if len(cost_master.project_group) == 1:
-    #     title = (
-    #             cost_master.master.abbreviations[cost_master.project_group[0]]
-    #             + " cost and benefit totals"
-    #     )
-    # else:
-    #     try:
-    #         title = kwargs["title"] + " cost and benefit totals"
-    #     except KeyError:
-    #         title = ""
-    #         print("You need to provide a title for this chart")
-
+    title = get_chart_title(costs, kwargs, " totals")
     plt.suptitle(title, fontweight="bold", fontsize=25)
     plt.xticks(size=12)
     plt.yticks(size=10)
@@ -2750,29 +2735,36 @@ def total_costs_benefits_bar_chart(
     # Y AXIS SCALE MAX
 
     highest_int = max(
-        [costs.c_totals[costs.iter_list[0]]["total"][0],
-         ben.b_totals[ben.iter_list[0]]["total"][0]]
-         # ben.economic_max]
-    )  # check in refactor
+        [costs.c_totals[costs.iter_list[0]]["total"],
+         ben.b_totals[ben.iter_list[0]]["total"]]
+    )
     y_max = highest_int + percentage(5, highest_int)
     ax1.set_ylim(0, y_max)
 
     # COST SPENT, PROFILED AND UNPROFILED
     labels = costs.iter_list
+    spent = []
+    prof = []
+    unprof = []
+    for x in labels:
+        spent.append(costs.c_totals[x]["spent"])
+        prof.append(costs.c_totals[x]["prof"])
+        unprof.append(costs.c_totals[x]["unprof"])
+
     width = 0.5
-    ax1.bar(labels, np.array(costs.c_totals[labels[0]]["spent"]), width, label="Spent")
+    ax1.bar(labels, np.array(spent), width, label="Spent")
     ax1.bar(
         labels,
-        np.array(costs.c_totals[labels[0]]["prof"]),
+        np.array(prof),
         width,
-        bottom=np.array(costs.c_totals[labels[0]]["spent"]),
+        bottom=np.array(spent),
         label="Profiled",
     )
     ax1.bar(
         labels,
-        np.array(costs.c_totals[labels[0]]["unprof"]),
+        np.array(unprof),
         width,
-        bottom=np.array(costs.c_totals[labels[0]]["spent"]) + np.array(costs.c_totals[labels[0]]["prof"]),
+        bottom=np.array(spent) + np.array(prof),
         label="Unprofiled",
     )
     ax1.legend(prop={"size": 10})
@@ -2830,22 +2822,28 @@ def total_costs_benefits_bar_chart(
 
     # BENEFITS SPENT, PROFILED AND UNPROFILED
     labels = ben.iter_list
+    delivered = []
+    prof = []
+    unprof = []
+    for x in labels:
+        delivered.append(ben.b_totals[x]["delivered"])
+        prof.append(ben.b_totals[x]["prof"])
+        unprof.append(ben.b_totals[x]["unprof"])
+
     width = 0.5
-    ax3.bar(labels, np.array(ben.b_totals[labels[0]]["delivered"]), width, label="delivered")
+    ax3.bar(labels, np.array(delivered), width, label="delivered")
     ax3.bar(
         labels,
-        np.array(ben.b_totals[labels[0]]["prof"]),
+        np.array(prof),
         width,
-        bottom=np.array(ben.b_totals[labels[0]]["delivered"]),
+        bottom=np.array(delivered),
         label="profiled",
     )
     ax3.bar(
         labels,
-        np.array(ben.b_totals[labels[0]]["unprof"]),
+        np.array(unprof),
         width,
-        bottom=np.array(
-            ben.b_totals[labels[0]]["delivered"]
-        ) + np.array(ben.b_totals[labels[0]]["prof"]),
+        bottom=np.array(delivered) + np.array(prof),
         label="unprofiled",
     )
     ax3.legend(prop={"size": 10})
@@ -2910,7 +2908,7 @@ def total_costs_benefits_bar_chart(
         y_min = check_min + percentage(
             40, check_min
         )  # arbitrary 40 percent
-        ax4.set_ylim(y_min, y_max)
+        ax4.set_ylim(y_min, y_max + abs(y_min))
 
     fig.tight_layout(rect=[0, 0.03, 1, 0.95])  # size/fit of chart
 
@@ -3620,7 +3618,7 @@ def remove_from_group(
             except KeyError:
                 try:
                     pg_list.remove(master.abbreviations[pg]["full name"])
-                except KeyError:
+                except (ValueError, KeyError):
                     try:
                         pg_list.remove(master.full_names[pg])
                     except (ValueError, KeyError):
@@ -3636,8 +3634,8 @@ def remove_from_group(
         if "quarter" in c_kwargs:
             for p in error_case:
                 logger.info(p + " not a recognised or not present in " + q_str + "."
-                                                                                 ' So not removed from the data for that quarter. Make sure the '
-                                                                                 '"remove" entry is correct.')
+                         '"So not removed from the data for that quarter. Make sure the '
+                         '"remove" entry is correct.')
 
     return pg_list
 
