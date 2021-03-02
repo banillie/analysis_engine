@@ -281,22 +281,24 @@ def test_get_stackplot_costs_chart(costs_masters, project_info):
 def test_get_project_total_cost_calculations_for_project(costs_masters, project_info):
     master = Master(costs_masters, project_info)
     costs = CostData(master, group=[f9], baseline=["standard"])
-    assert costs.c_totals[costs.iter_list[0]]["spent"] == [471, 188, 188]
-    assert costs.c_totals[costs.iter_list[0]]["prof"] == [6281, 6204, 6204]
-    assert costs.c_totals[costs.iter_list[0]]["unprof"] == [0, 0, 0]
+    assert costs.c_totals["current"]["spent"] == 471
+    assert costs.c_totals["current"]["prof"] == 6281
+    assert costs.c_totals["current"]["unprof"] == 0
 
 
 def test_get_group_total_cost_calculations(costs_masters, project_info):
     master = Master(costs_masters, project_info)
-    costs = CostData(master, group=master.current_projects)
-    assert costs.spent == [2929, 2210, 2210]
+    costs = CostData(master, group=master.current_projects, quarter=["standard"])
+    assert costs.c_totals["Q1 20/21"]["spent"] == 3102
+    assert costs.c_totals["Q4 19/20"]["spent"] == 2210
 
 
-def test_get_group_total_cost_and_bens_chart(costs_masters, project_info):
-    master = Master(costs_masters, project_info)
-    costs = CostData(master, group=[master.current_projects])
-    benefits = BenefitsData(master, master.current_projects)
-    total_costs_benefits_bar_chart(costs, benefits, title="Total Group", show="No")
+## no longer neccesary. covered by another test.
+# def test_get_group_total_cost_and_bens_chart(costs_masters, project_info):
+#     master = Master(costs_masters, project_info)
+#     costs = CostData(master, group=[master.current_projects])
+#     benefits = BenefitsData(master, master.current_projects)
+#     total_costs_benefits_bar_chart(costs, benefits, title="Total Group", show="No")
 
 
 def test_put_change_keys_into_a_dict(change_log):
@@ -309,28 +311,28 @@ def test_altering_master_wb_file_key_names(change_log, list_cost_masters_files):
     run_change_keys(list_cost_masters_files, keys_dict)
 
 
-def test_get_old_fy_cost_data(list_cost_masters_files, project_group_id_path):
-    run_get_old_fy_data(list_cost_masters_files, project_group_id_path)
-
-
-def test_placing_old_fy_cost_data_into_master_wbs(
-    list_cost_masters_files, project_old_fy_path
-):
-    run_place_old_fy_data_into_masters(list_cost_masters_files, project_old_fy_path)
+# def test_get_old_fy_cost_data(list_cost_masters_files, project_group_id_path):
+#     run_get_old_fy_data(list_cost_masters_files, project_group_id_path)
+#
+#
+# def test_placing_old_fy_cost_data_into_master_wbs(
+#     list_cost_masters_files, project_old_fy_path
+# ):
+#     run_place_old_fy_data_into_masters(list_cost_masters_files, project_old_fy_path)
 
 
 def test_getting_benefits_profile_for_a_group(costs_masters, project_info):
     master = Master(costs_masters, project_info)
-    ben = BenefitsData(master, master.current_projects)
-    assert ben.delivered == [0, 0, 0]
-    assert ben.profiled == [43659, 20608, 64227]
-    assert ben.unprofiled == [10164, 19228, 19228]
+    ben = BenefitsData(master, quarter=["standard"])
+    assert ben.b_totals["Q1 20/21"]["delivered"] == 0
+    assert ben.b_totals["Q1 20/21"]["prof"] == 43659
+    assert ben.b_totals["Q1 20/21"]["unprof"] == 10164
 
 
 def test_getting_benefits_profile_for_a_project(costs_masters, project_info):
     master = Master(costs_masters, project_info)
-    ben = BenefitsData(master, f9)
-    assert ben.profiled == [-200, 240, 240]
+    ben = BenefitsData(master, group=[f9], baseline=["all"])
+    assert ben.b_totals["current"]["cat_prof"] == [0, 0, 0, -200]
 
 
 def test_compare_changes_between_masters(basic_masters_file_paths, project_info):
@@ -338,10 +340,10 @@ def test_compare_changes_between_masters(basic_masters_file_paths, project_info)
     wb = compare_masters(basic_masters_file_paths, gmpp_list)
     wb.save(os.path.join(os.getcwd(), "resources/cut_down_master_compared.xlsx"))
 
-
-def test_get_gmpp_projects(project_info):
-    gmpp_list = get_gmpp_projects(project_info)
-    assert gmpp_list == ["Sea of Tranquility"]
+## nolonger using this meta data. gmpp taken from elsewhere
+# def test_get_gmpp_projects(project_info):
+#     gmpp_list = get_gmpp_projects(project_info)
+#     assert gmpp_list == ["Sea of Tranquility"]
 
 
 # this method has probably now been superceded by save_graph
@@ -366,7 +368,7 @@ def test_get_gmpp_projects(project_info):
 
 def test_get_milestone_data_bl(milestone_masters, project_info):
     master = Master(milestone_masters, project_info)
-    milestones = MilestoneData(master, group=[sot, a11, a13], baseline="all")
+    milestones = MilestoneData(master, group=[sot, a11, a13], baseline=["all"])
     assert isinstance(milestones.milestone_dict["current"], (dict,))
 
 
@@ -402,7 +404,7 @@ def test_compile_milestone_chart(milestone_masters, project_info, word_doc):
 
 def test_compile_milestone_chart_with_filter(milestone_masters, project_info):
     master = Master(milestone_masters, project_info)
-    milestones = MilestoneData(master, group=[sot, a11, a13], baseline=["current"])
+    milestones = MilestoneData(master, group=[sot, a11, a13], baseline=["standard"])
     milestones.filter_chart_info(dates=["1/1/2013", "1/1/2014"])
     milestone_chart(milestones, title="Group Test", fig_size=FIGURE_STYLE[1])
 
@@ -429,9 +431,8 @@ def test_putting_milestones_into_wb(milestone_masters, project_info):
 
 def test_saving_graph_to_word_doc_one(word_doc, milestone_masters, project_info):
     master = Master(milestone_masters, project_info)
-    milestones = MilestoneData(master, group=[sot, a11, a13], baseline="standard")
+    milestones = MilestoneData(master, group=[sot, a11, a13], baseline=["standard"])
     change_word_doc_landscape(word_doc)
-    # milestones.filter_chart_info(start_date="1/1/2013", end_date="1/1/2014")
     graph = milestone_chart(milestones, title="Group Test", blue_line="Today")
     put_matplotlib_fig_into_word(word_doc, graph, size=2)
     word_doc.save("resources/summary_temp_altered.docx")
@@ -455,7 +456,7 @@ def test_dca_analysis(project_info, dca_masters, word_doc):
 
 def test_speedial_print_out(project_info, dca_masters, word_doc):
     m = Master(dca_masters, project_info)
-    dca = DcaData(m)
+    dca = DcaData(m, baseline=["standard"])
     dca.get_changes()
     dca_changes_into_word(dca, word_doc)
     word_doc.save("resources/dca_checks.docx")
@@ -496,7 +497,8 @@ def test_sorting_project_by_dca(project_info, dca_masters):
 
 def test_calculating_wlc_changes(costs_masters, project_info):
     master = Master(costs_masters, project_info)
-    costs = CostData(master, group=master.current_projects)
+    costs = CostData(master, group=[master.current_projects], baseline=["all"])
+    costs.calculate_wlc_change()
     assert costs.wlc_change == {
         "Apollo 13": {"baseline one": 0, "last quarter": 0},
         "Columbia": {"baseline one": -43, "last quarter": -43},
@@ -556,26 +558,28 @@ def test_benefits_dashboard(benefits_masters, dashboard_template, project_info):
 
 def test_overall_dashboard(two_masters, dashboard_template, project_info):
     m = Master(two_masters, project_info)
-    milestones = MilestoneData(m, baseline="all")
+    milestones = MilestoneData(m, baseline=["all"])
     # milestones.get_milestones(baseline=[])
     wb = overall_dashboard(m, milestones, dashboard_template)
     wb.save("resources/test_dashboards_master_altered.xlsx")
 
-
-def test_dandelion(basic_masters_dicts, project_info, word_doc):
-    m = Master(basic_masters_dicts, project_info)
-    dand = DandelionData(m)
-    wb = dandelion_data_into_wb(dand)
-    wb.save("resources/test_dandelion_data.xlsx")
-    graph = run_dandelion_matplotlib_chart(dand)
-    put_matplotlib_fig_into_word(word_doc, graph, size=4, transparent=False)
-    word_doc.save("resources/test_dandelion_output.docx")
+## superceded by test below
+# def test_dandelion(basic_masters_dicts, project_info, word_doc):
+#     m = Master(basic_masters_dicts, project_info)
+#     dand = DandelionData(m, quarter=["standard"])
+#     wb = dandelion_data_into_wb(dand)
+#     wb.save("resources/test_dandelion_data.xlsx")
+#     graph = run_dandelion_matplotlib_chart(dand)
+#     put_matplotlib_fig_into_word(word_doc, graph, size=4, transparent=False)
+#     word_doc.save("resources/test_dandelion_output.docx")
 
 
 def test_dandelion_two(basic_masters_dicts, project_info, word_doc):
     m = Master(basic_masters_dicts, project_info)
     d_data = DandelionData(m, quarter=["Q4 18/19"], group=["HSMRPG", "Rail", "RPE"])
-    make_a_dandelion_auto(d_data)
+    graph = make_a_dandelion_auto(d_data)
+    put_matplotlib_fig_into_word(word_doc, graph, size=4, transparent=False)
+    word_doc.save("resources/test_dandelion_output.docx")
 
 
 def test_data_queries_non_milestone(basic_masters_dicts, project_info):

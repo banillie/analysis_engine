@@ -3393,7 +3393,7 @@ def milestone_chart(
                     fontsize=10,
                     fontweight="bold",
                 )
-        if blue_line == "ipdc_date":
+        elif blue_line == "ipdc_date":
             if min_date <= IPDC_DATE <= max_date:
                 plt.axvline(IPDC_DATE)
                 plt.figtext(
@@ -3404,7 +3404,7 @@ def milestone_chart(
                     fontsize=10,
                     fontweight="bold",
                 )
-        if isinstance(blue_line, str):
+        elif isinstance(blue_line, str):
             line_date = parser.parse(blue_line, dayfirst=True)
             if min_date <= line_date.date() <= max_date:
                 plt.axvline(line_date.date())
@@ -4860,7 +4860,7 @@ def project_report_meta_data(
     )
     hdr_cells[2].text = "Spent:"
     hdr_cells[3].text = (
-        "£" + str(round(costs.c_totals[costs.iter_list[0]]["spent"][0])) + "m"
+        "£" + str(round(costs.c_totals[costs.iter_list[0]]["spent"])) + "m"
     )
     row_cells = t.add_row().cells
     row_cells[0].text = "RDEL Total:"
@@ -4870,7 +4870,7 @@ def project_report_meta_data(
     row_cells[1].text = "£" + str(round(rdel_total)) + "m"
     row_cells[2].text = "Profiled:"
     row_cells[3].text = (
-        "£" + str(round(costs.c_totals[costs.iter_list[0]]["prof"][0])) + "m"
+        "£" + str(round(costs.c_totals[costs.iter_list[0]]["prof"])) + "m"
     )  # first in list is current
     row_cells = t.add_row().cells
     cdel_total = costs.master.master_data[0].data[project_name][
@@ -4881,7 +4881,7 @@ def project_report_meta_data(
     row_cells[1].text = "£" + str(round(cdel_total)) + "m"
     row_cells[2].text = "Unprofiled:"
     row_cells[3].text = (
-        "£" + str(round(costs.c_totals[costs.iter_list[0]]["unprof"][0])) + "m"
+        "£" + str(round(costs.c_totals[costs.iter_list[0]]["unprof"])) + "m"
     )
     row_cells = t.add_row().cells
     n_gov_total = costs.master.master_data[0].data[project_name][
@@ -5106,16 +5106,16 @@ def project_report_meta_data(
     )
     hdr_cells[2].text = "Benefits delivered:"
     hdr_cells[3].text = (
-        "£" + str(round(benefits.b_totals[benefits.iter_list[0]]["delivered"][0])) + "m"
+        "£" + str(round(benefits.b_totals[benefits.iter_list[0]]["delivered"])) + "m"
     )  # first in list is current
     row_cells = table.add_row().cells
     row_cells[0].text = "Benefits profiled:"
     row_cells[1].text = (
-        "£" + str(round(benefits.b_totals[benefits.iter_list[0]]["prof"][0])) + "m"
+        "£" + str(round(benefits.b_totals[benefits.iter_list[0]]["prof"])) + "m"
     )
     row_cells[2].text = "Benefits unprofiled:"
     row_cells[3].text = (
-        "£" + str(round(benefits.b_totals[benefits.iter_list[0]]["unprof"][0])) + "m"
+        "£" + str(round(benefits.b_totals[benefits.iter_list[0]]["unprof"])) + "m"
     )
 
     # set column width
