@@ -54,7 +54,6 @@ from analysis_engine.data import (
     make_file_friendly,
     DandelionData,
     dandelion_data_into_wb,
-    run_dandelion_matplotlib_chart,
     put_matplotlib_fig_into_word,
     cost_profile_into_wb,
     cost_profile_graph,
@@ -64,7 +63,7 @@ from analysis_engine.data import (
     milestone_chart,
     get_cost_stackplot_data,
     cost_stackplot_graph,
-    cal_group,
+    cal_group, make_a_dandelion_auto,
 )
 
 import logging
@@ -163,32 +162,20 @@ def run_general(args):
         if programme == "vfm":
             c = run_correct_args(m, VfMData, args)  # c is class
             wb = vfm_into_excel(c)
-        if programme == "risks":
+        elif programme == "risks":
             c = run_correct_args(m, RiskData, args)
             wb = risks_into_excel(c)
-        if programme == "dcas":
+        elif programme == "dcas":
             c = run_correct_args(m, DcaData, args)
             wb = dca_changes_into_excel(c)
-        if programme == "speedial":
+        elif programme == "speedial":
             doc = open_word_doc(root_path / "input/summary_temp.docx")
             c = run_correct_args(m, DcaData, args)
             c.get_changes()
             doc = dca_changes_into_word(c, doc)
             doc.save(root_path / "output/{}.docx".format(programme))
             print(programme + " analysis has been compiled. Enjoy!")
-        if programme == "dandelion":
-            doc = open_word_doc(root_path / "input/summary_temp.docx")
-            c = run_correct_args(m, DandelionData, args)
-            wb = dandelion_data_into_wb(c)
-            if args["chart"]:
-                for i in c.iter_list:
-                    graph = run_dandelion_matplotlib_chart(c.d_data[i], chart=True)
-                    if args["chart"] == "save":
-                        put_matplotlib_fig_into_word(
-                            doc, graph, size=6, transparent=True
-                        )
-                        doc.save(root_path / "output/dandelion_chart.docx")
-        if programme == "costs":
+        elif programme == "costs":
             doc = open_word_doc(root_path / "input/summary_temp.docx")
             c = run_correct_args(m, CostData, args)
             wb = cost_profile_into_wb(c)
@@ -201,7 +188,7 @@ def run_general(args):
                     put_matplotlib_fig_into_word(doc, graph, size=6, transparent=False)
                     doc.save(root_path / "output/costs_chart.docx")
 
-        if programme != "speedial":  # only excel outputs
+        elif programme != "speedial":  # only excel outputs
             wb.save(root_path / "output/{}.xlsx".format(programme))
             print(programme + " analysis has been compiled. Enjoy!")
     except ProjectNameError as e:
@@ -420,7 +407,7 @@ def costs_sp(args):
         logger.critical(e)
         sys.exit(1)
 
-# HERE
+
 # note query option needs to work for one quarter only.
 def query(args):
     print("Getting data")
@@ -442,6 +429,23 @@ def query(args):
         wb.save(root_path / "output/data_query.xlsx")
         print("Data compiled using key_names cvs file. Enjoy!")
 
+
+def dandelion(args):
+    try:
+        print("compiling dandelion")
+        m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
+        if args["group"]:
+            d_data = DandelionData(m, quarter=[str(m.current_quarter)], group=args["group"])
+        else:
+            d_data = DandelionData(m, quarter=[str(m.current_quarter)], group=["HSMRPG", "Rail", "AMIS", "RPE"])
+        graph = make_a_dandelion_auto(d_data, title="Standard dandelion")
+        doc = open_word_doc(root_path / "input/summary_temp_landscape.docx")
+        put_matplotlib_fig_into_word(doc, graph, size=7.5)
+        doc.save(root_path / "output/dandelion_graph.docx")
+        print("Dandelion chart has been compiled")
+    except ProjectNameError as e:
+        logger.critical(e)
+        sys.exit(1)
 
 def main():
     parser = argparse.ArgumentParser(
@@ -712,7 +716,7 @@ def main():
 
     parser_initiate.set_defaults(func=initiate)
     parser_dashboard.set_defaults(func=dashboard)
-    parser_dandelion.set_defaults(func=run_general)
+    parser_dandelion.set_defaults(func=dandelion)
     parser_costs.set_defaults(func=run_general)
     parser_vfm.set_defaults(func=run_general)
     parser_milestones.set_defaults(func=milestones)

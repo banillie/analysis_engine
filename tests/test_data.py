@@ -574,7 +574,7 @@ def test_overall_dashboard(two_masters, dashboard_template, project_info):
 #     word_doc.save("resources/test_dandelion_output.docx")
 
 
-def test_dandelion_two(basic_masters_dicts, project_info, word_doc):
+def test_build_dandelion_graph_auto(basic_masters_dicts, project_info, word_doc):
     m = Master(basic_masters_dicts, project_info)
     d_data = DandelionData(m, quarter=["Q4 18/19"], group=["HSMRPG", "Rail", "RPE"])
     graph = make_a_dandelion_auto(d_data)
