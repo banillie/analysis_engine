@@ -585,7 +585,7 @@ def test_dandelion_two(basic_masters_dicts, project_info, word_doc):
 def test_data_queries_non_milestone(basic_masters_dicts, project_info):
     m = Master(basic_masters_dicts, project_info)
     wb = data_query_into_wb(
-        m, keys=["Total Forecast"], quarters=["Q4 18/19", "Q4 17/18", "Q4 16/17"]
+        m, keys=["Total Forecast"], quarter=["Q4 18/19", "Q4 17/18", "Q4 16/17"]
     )
     wb.save("resources/test_data_query.xlsx")
 
@@ -593,7 +593,7 @@ def test_data_queries_non_milestone(basic_masters_dicts, project_info):
 def test_data_queries_milestones(milestone_masters, project_info):
     m = Master(milestone_masters, project_info)
     wb = data_query_into_wb(
-        m, keys=["Full Operations"], quarters=["Q4 19/20", "Q4 18/19"]
+        m, keys=["Full Operations"], quarter=["Q4 19/20", "Q4 18/19"]
     )
     wb.save("resources/test_data_query_milestones.xlsx")
 

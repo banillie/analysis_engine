@@ -3595,9 +3595,8 @@ def get_group(master: Master, tp: str, class_kwargs, group_indx=None) -> List[st
             group = cal_group(class_kwargs["group"], master, tp_indx, group_indx)
         else:
             group = cal_group(class_kwargs["group"], master, tp_indx)
-
     else:
-        group = master.current_projects
+        group = cal_group(master.current_projects, master, tp_indx)
 
     if "remove" in class_kwargs:
         group = remove_from_group(
@@ -5593,25 +5592,18 @@ def data_query_into_wb(master: Master, **kwargs) -> Workbook:
     """
 
     wb = Workbook()
-
-    if "quarters" in kwargs.keys():
-        quarters = kwargs["quarters"]
-    else:
-        quarters = [str(master.current_quarter)]
-
-    for z, q in enumerate(quarters):
-        i = master.quarter_list.index(q)  # handling here. for wrong quarter string
+    iter_list = get_iter_list(kwargs, master)
+    for z, tp in enumerate(iter_list):
+        i = master.quarter_list.index(tp)  # handling here. for wrong quarter string
         ws = wb.create_sheet(
-            make_file_friendly(q)
+            make_file_friendly(tp)
         )  # creating worksheets. names restricted to 30 characters.
-        ws.title = make_file_friendly(q)  # title of worksheet
-        group = get_group(master, q, kwargs)
+        ws.title = make_file_friendly(tp)  # title of worksheet
+        group = get_group(master, tp, kwargs)
 
-        milestones_one = MilestoneData(master, quarter=[q])
-        # milestones_one.get_milestones_all()
+        milestones_one = MilestoneData(master, quarter=[tp])
         try:
-            milestones_two = MilestoneData(master, quarter=[quarters[z + 1]])
-            # milestones_two.get_milestones_all()
+            milestones_two = MilestoneData(master, quarter=[iter_list[z + 1]])
         except IndexError:
             pass
 
@@ -5624,28 +5616,29 @@ def data_query_into_wb(master: Master, **kwargs) -> Workbook:
             ws.cell(row=2 + y, column=2).value = master.abbreviations[project_name][
                 "abb"
             ]
-
+            p_data = get_correct_p_data(kwargs, master, "ipdc_costs", project_name, tp)
+            try:
+                p_data_last = get_correct_p_data(kwargs, master, "ipdc_costs", project_name, iter_list[z + 1])
+            except IndexError:
+                pass
             for x, key in enumerate(kwargs["keys"]):
                 ws.cell(row=1, column=3 + x, value=key)
                 try:  # standard keys
-                    value = master.master_data[i].data[project_name][key]
+                    value = p_data[key]
                     if value is None:
                         ws.cell(row=2 + y, column=3 + x).value = "md"
                         ws.cell(row=2 + y, column=3 + x).fill = AMBER_FILL
                     else:
                         ws.cell(row=2 + y, column=3 + x, value=value)
                     try:  # checks for change against next master in loop
-                        lst_index = master.quarter_list.index(quarters[z + 1])
-                        lst_value = master.master_data[lst_index].data[project_name][
-                            key
-                        ]
+                        lst_value = p_data_last[key]
                         if value != lst_value:
                             ws.cell(row=2 + y, column=3 + x).fill = SALMON_FILL
-                    except (KeyError, IndexError):
+                    except KeyError:
                         pass
                 except KeyError:  # milestone keys
                     date = get_milestone_date(
-                        abb, milestones_one.milestone_dict, q, " " + key
+                        abb, milestones_one.milestone_dict, tp, " " + key
                     )
                     if date is None:
                         ws.cell(row=2 + y, column=3 + x).value = "md"
@@ -5657,42 +5650,16 @@ def data_query_into_wb(master: Master, **kwargs) -> Workbook:
                         lst_date = get_milestone_date(
                             abb,
                             milestones_two.milestone_dict,
-                            quarters[z + 1],
+                            iter_list[z + 1],
                             " " + key,
                         )
                         if date != lst_date:
                             ws.cell(row=2 + y, column=3 + x).fill = SALMON_FILL
-                    except (KeyError, IndexError):
+                    except (KeyError, IndexError, UnboundLocalError):
                         pass
-                    # except KeyError: # exception catches both standard and milestone keys
-                    #     ws.cell(row=2 + y, column=3 + x).value = 'knc'
-                    # except TypeError:
-                    #     ws.cell(row=2 + y, column=3 + x).value = 'pnr'
 
         ws.cell(row=1, column=1).value = "Group"
         ws.cell(row=1, column=2).value = "Project"
-
-        # for z, key in enumerate(kwargs["keys"]):
-        #     if key in list_of_rag_keys:
-        #         conditional_formatting(
-        #             ws,
-        #             [list_column_ltrs[z + 2]],
-        #             rag_txt_list_full,
-        #             rag_txt_colours,
-        #             rag_fill_colours,
-        #             "1",
-        #             "60",
-        #         )  # plus 2 in column ltrs as values start being placed in at col 2.
-
-        # conditional_formatting(
-        #     ws,
-        #     list_column_ltrs,
-        #     gen_txt_list,
-        #     gen_txt_colours,
-        #     gen_fill_colours,
-        #     "1",
-        #     "60",
-        # )
 
     wb.remove(wb["Sheet"])
     return wb
