@@ -125,6 +125,8 @@ def run_correct_args(
         data = ae_class(m, quarter=["standard"], group=args["stage"])
     elif args["group"]:
         data = ae_class(m, quarter=["standard"], group=args["group"])
+    elif args["remove"]:  # HERE. NOT WORKING
+        data = ae_class(m, quarter=["standard"], remove=args["remove"])
     else:
         data = ae_class(m, quarter=["standard"])
 
@@ -162,20 +164,20 @@ def run_general(args):
         if programme == "vfm":
             c = run_correct_args(m, VfMData, args)  # c is class
             wb = vfm_into_excel(c)
-        elif programme == "risks":
+        if programme == "risks":
             c = run_correct_args(m, RiskData, args)
             wb = risks_into_excel(c)
-        elif programme == "dcas":
+        if programme == "dcas":
             c = run_correct_args(m, DcaData, args)
             wb = dca_changes_into_excel(c)
-        elif programme == "speedial":
+        if programme == "speedial":
             doc = open_word_doc(root_path / "input/summary_temp.docx")
             c = run_correct_args(m, DcaData, args)
             c.get_changes()
             doc = dca_changes_into_word(c, doc)
             doc.save(root_path / "output/{}.docx".format(programme))
             print(programme + " analysis has been compiled. Enjoy!")
-        elif programme == "costs":
+        if programme == "costs":
             doc = open_word_doc(root_path / "input/summary_temp.docx")
             c = run_correct_args(m, CostData, args)
             wb = cost_profile_into_wb(c)
@@ -187,8 +189,7 @@ def run_general(args):
                 if args["chart"] == "save":
                     put_matplotlib_fig_into_word(doc, graph, size=6, transparent=False)
                     doc.save(root_path / "output/costs_chart.docx")
-
-        elif programme != "speedial":  # only excel outputs
+        if programme != "speedial":  # only excel outputs
             wb.save(root_path / "output/{}.xlsx".format(programme))
             print(programme + " analysis has been compiled. Enjoy!")
     except ProjectNameError as e:
@@ -306,6 +307,11 @@ def milestones(args):
             ms = MilestoneData(m, quarter=["standard"], group=args["stage"])
             ms.filter_chart_info(dates=args["dates"])
 
+        elif args["dates"] and args["type"]:
+            ms = MilestoneData(m, quarter=["standard"])
+            ms.filter_chart_info(dates=args["dates"], type=args["type"])
+
+        # type
         elif args["type"] and args["stage"]:
             ms = MilestoneData(m, quarter=["standard"], group=args["stage"])
             ms.filter_chart_info(type=args["type"])
@@ -397,12 +403,18 @@ def costs_sp(args):
         m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
         if args["group"]:
             g = cal_group(args["group"], m, 0)
-            sp = get_cost_stackplot_data(m, g, "Q3 20/21", type="comp")
+            sp_data = get_cost_stackplot_data(m, g, str(m.current_quarter), type="comp")
+        # elif args["stage"]:
+        #     s = cal_group(args["stage"], m, 0)
+        #     sp_data = get_cost_stackplot_data(m, s, str(m.current_quarter), type="comp")
         else:
-            sp = get_cost_stackplot_data(
-                m, ["HSMRPG", "Rail", "RPE", "AMIS"], "Q3 20/21", type="comp"
+            sp_data = get_cost_stackplot_data(
+                m, ["HSMRPG", "Rail", "RPE", "AMIS"], str(m.current_quarter), type="comp"
             )
-        cost_stackplot_graph(sp)
+        sp_graph = cost_stackplot_graph(sp_data)
+        doc = open_word_doc(root_path / "input/summary_temp_landscape.docx")
+        put_matplotlib_fig_into_word(doc, sp_graph, size=7.5)
+        doc.save(root_path / "output/stackplot_graph.docx")
     except ProjectNameError as e:
         logger.critical(e)
         sys.exit(1)
@@ -447,6 +459,7 @@ def dandelion(args):
         logger.critical(e)
         sys.exit(1)
 
+
 def main():
     parser = argparse.ArgumentParser(
         prog="engine", description="DfT Major Projects Portfolio Office analysis engine"
@@ -463,7 +476,7 @@ def main():
     )
     parser_costs = subparsers.add_parser(
         "costs",
-        help="cost trend profile graph and data (early version needs more testing).",
+        help="cost trend profile graph and data.",
     )
     parser_costs_sp = subparsers.add_parser(
         "costs_sp",
@@ -471,7 +484,7 @@ def main():
     )
     parser_milestones = subparsers.add_parser(
         "milestones",
-        help="milestone schedule graphs and data (early version needs more testing)",
+        help="milestone schedule graphs and data.",
     )
     parser_vfm = subparsers.add_parser("vfm", help="vfm analysis")
     parser_summaries = subparsers.add_parser("summaries", help="summary reports")
@@ -492,6 +505,7 @@ def main():
         parser_speedial,
         parser_dandelion,
         parser_costs,
+        parser_costs_sp,
         # parser_data_query,
         parser_milestones,
     ]:

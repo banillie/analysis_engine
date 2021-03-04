@@ -2189,6 +2189,8 @@ def get_chart_title(
         else:
             logger.info("Please provide a title for this chart using --title.")
             title = "user to provide"
+    else:
+        title = "user to provide"
 
     return title
 
@@ -5291,7 +5293,7 @@ def compile_p_report(
     dca_table(doc, master, project_name)
     dca_narratives(doc, master, project_name)
     costs = CostData(master, group=[project_name], baseline=["standard"])
-    benefits = BenefitsData(master, project_name)
+    benefits = BenefitsData(master, group=[project_name], baseline=["standard"])
     milestones = MilestoneData(master, group=[project_name], baseline=["standard"])
     project_report_meta_data(doc, costs, milestones, benefits, project_name)
     change_word_doc_landscape(doc)
@@ -7466,6 +7468,19 @@ def dandelion_project_text(number: int, project: str) -> str:
         )
 
 
+def cal_group_angle(dist_no: int, group: List[str], **kwargs):
+    """helper function for dandelion data class.
+    Calculates distribution of first circle around center."""
+    g_ang = dist_no / len(group)  # group_ang and distribution number
+    output_list = []
+    for i in range(len(group) + 2):
+        output_list.append(g_ang * i)
+    if "all" not in kwargs:
+        del output_list[4]
+    del output_list[0]
+    return output_list
+
+
 class DandelionData:
     def __init__(self, master: Master, **kwargs):
         self.master = master
@@ -7486,17 +7501,14 @@ class DandelionData:
 
         self.iter_list = get_iter_list(self.kwargs, self.master)
         for tp in self.iter_list:
-            # cal group angle
-            g_ang = 270 / len(self.group)  # group angle
-            g_ang_list = []
-            for i in range(6):
-                g_ang_list.append(g_ang * i)
-            del g_ang_list[4]
+            # cal group angle. do function.
+            if len(self.group) > 1:
+                g_ang_list = cal_group_angle(270, self.group)
             dft_g_list = []
-            dft_g_dict = {}
-            dft_l_group_dict = {}
+            dft_g_dict = {}  # first outer circle group
+            dft_l_group_dict = {}  # second group around first outer circle group
             p_total = 0  # portfolio total
-            for i, g in enumerate(self.group):
+            for i, g in enumerate(self.group):   # group
                 dft_l_group = get_group(self.master, tp, self.kwargs, i)
                 g_total = 0
                 dft_l_group_list = []
@@ -7530,21 +7542,26 @@ class DandelionData:
                     g_total += b_size
                     dft_l_group_list.append(
                         (
-                            math.sqrt(b_size) / 4,
+                            math.sqrt(b_size),
                             colour,
                             self.master.abbreviations[p]["abb"],
                         )
                     )
-                # group data
-                x_axis = 0 + 400 * math.cos(math.radians(g_ang_list[i + 1]))
-                y_axis = 0 + 300 * math.sin(math.radians(g_ang_list[i + 1]))
+                # hard code solution here for now. need to have p_total at this point
+                # for non-hard coded solution
+                if g_total > 65000:
+                    x_axis = 0 + 1200 * math.cos(math.radians(g_ang_list[i]))
+                    y_axis = 0 + 900 * math.sin(math.radians(g_ang_list[i]))
+                else:
+                    x_axis = 0 + 1000 * math.cos(math.radians(g_ang_list[i]))
+                    y_axis = 0 + 750 * math.sin(math.radians(g_ang_list[i]))
                 # list is tuple axis point, bubble size, colour, line style, line color, text position
                 dft_g_list.append(
                     (
                         (x_axis, y_axis),
-                        math.sqrt(g_total) / 4,
+                        math.sqrt(g_total),
                         "#FFFFFF",
-                        g,
+                        g + ", £" + str(round(g_total)),
                         "dashed",
                         "grey",
                         ("center", "center"),
@@ -7552,7 +7569,7 @@ class DandelionData:
                 )
                 dft_g_dict[g] = [
                     (x_axis, y_axis),
-                    math.sqrt(g_total) / 3,
+                    math.sqrt(g_total),
                 ]  # used for placement of circles
                 # project data
                 dft_l_group_dict[g] = list(reversed(sorted(dft_l_group_list)))
@@ -7561,9 +7578,9 @@ class DandelionData:
             dft_g_list.append(
                 (
                     (0, 0),
-                    math.sqrt(p_total) / 4,
+                    math.sqrt(p_total),
                     "#cb1f00",
-                    "Portfolio",
+                    "Portfolio, £" + str(round(p_total)),
                     "solid",
                     "#cb1f00",
                     ("center", "center"),
@@ -7572,26 +7589,27 @@ class DandelionData:
 
             for g in dft_l_group_dict.keys():
                 lg = dft_l_group_dict[g]  # local group
-                ang = 360 / len(lg)
-                ang_list = []
-                for i in range(len(lg) + 1):
-                    ang_list.append(ang * i)
+                ang_list = cal_group_angle(360, lg, all=True)
+                # ang = 360 / len(lg)
+                # ang_list = []
+                # for i in range(len(lg) + 1):
+                #     ang_list.append(ang * i)
                 for i, p in enumerate(lg):
                     a = dft_g_dict[g][0][0]
                     b = dft_g_dict[g][0][1]
                     if len(lg) <= 8:
                         x_axis = a + dft_g_dict[g][1] * math.cos(
-                            math.radians(ang_list[i + 1])
+                            math.radians(ang_list[i])
                         )
                         y_axis = b + dft_g_dict[g][1] * math.sin(
-                            math.radians(ang_list[i + 1])
+                            math.radians(ang_list[i])
                         )
                     else:
-                        x_axis = a + (dft_g_dict[g][1] + 50) * math.cos(
-                            math.radians(ang_list[i + 1])
+                        x_axis = a + (dft_g_dict[g][1] + 100) * math.cos(
+                            math.radians(ang_list[i])
                         )
-                        y_axis = b + (dft_g_dict[g][1] + 50) * math.sin(
-                            math.radians(ang_list[i + 1])
+                        y_axis = b + (dft_g_dict[g][1] + 100) * math.sin(
+                            math.radians(ang_list[i])
                         )
                     b_size = p[0]
                     colour = p[1]
@@ -7901,7 +7919,7 @@ def make_a_dandelion_auto(dlion_data: DandelionData, **kwargs):
 
     plt.axis("scaled")
     plt.axis("off")
-    # plt.show()
+    plt.show()
 
     return plt
 
