@@ -52,7 +52,7 @@ from analysis_engine.data import (
     overall_dashboard,
     DandelionData,
     dandelion_data_into_wb,
-    run_dandelion_matplotlib_chart,
+    # run_dandelion_matplotlib_chart,
     cost_v_schedule_chart_into_wb,
     cost_profile_into_wb,
     data_query_into_wb,
@@ -525,9 +525,10 @@ def test_printout_of_milestones(word_doc, milestone_masters, project_info):
     word_doc.save("resources/summary_temp_altered.docx")
 
 
+# very slow test as using whole master
 def test_cost_schedule_matrix(two_masters, project_info):
     m = Master(two_masters, project_info)
-    costs = CostData(m, group=m.current_projects)
+    costs = CostData(m, group=m.current_projects, quarters=["standard"])
     milestones = MilestoneData(m, group=m.current_projects)
     milestones.get_milestones()
     milestones.get_chart_info()

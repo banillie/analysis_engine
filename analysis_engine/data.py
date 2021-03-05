@@ -761,28 +761,28 @@ class CostData:
         # self.calculate_wlc_change()
         # self.get_stackplot_data()
 
-    def get_cost_totals_new(self):
-        p_dict = {}
-        for p in self.master.current_projects:
-            spent = 0
-            profiled = 0
-            unprofiled = 0
-            for i in SPENT_KEYS:
-                spent += self.master.master_data[0].data[p][i]
-            for i in PROFILE_KEYS:
-                profiled += self.master.master_data[0].data[p][i]
-            for i in UNPROFILE_KEYS:
-                unprofiled += self.master.master_data[0].data[p][i]
-            profiled = profiled - (spent + unprofiled)
-            total = self.master.master_data[0].data[p]["Total Forecast"]
-            p_dict[p] = {
-                "spent": spent,
-                "profiled": profiled,
-                "unprofiled": unprofiled,
-                "total": total,
-            }
-
-        self.c_totals = p_dict
+    # def get_cost_totals_new(self):
+    #     p_dict = {}
+    #     for p in self.master.current_projects:
+    #         spent = 0
+    #         profiled = 0
+    #         unprofiled = 0
+    #         for i in SPENT_KEYS:
+    #             spent += self.master.master_data[0].data[p][i]
+    #         for i in PROFILE_KEYS:
+    #             profiled += self.master.master_data[0].data[p][i]
+    #         for i in UNPROFILE_KEYS:
+    #             unprofiled += self.master.master_data[0].data[p][i]
+    #         profiled = profiled - (spent + unprofiled)
+    #         total = self.master.master_data[0].data[p]["Total Forecast"]
+    #         p_dict[p] = {
+    #             "spent": spent,
+    #             "profiled": profiled,
+    #             "unprofiled": unprofiled,
+    #             "total": total,
+    #         }
+    #
+    #     self.c_totals = p_dict
 
     def get_cost_totals(self) -> None:
         """Returns lists containing the sum total of group (of projects) costs,
@@ -966,33 +966,37 @@ class CostData:
 
     def calculate_wlc_change(self) -> None:
         """calculates changes in whole life cost of project. Current against baselines"""
+        self.iter_list = get_iter_list(self.kwargs, self.master)
+        wlc_dict = {}
+        for tp in self.iter_list:
+            self.group = get_group(self.master, tp, self.kwargs)
+            p_wlc_dict = {}
+            for project_name in self.group:
+                p_data = get_correct_p_data(
+                    self.kwargs, self.master, self.baseline_type, project_name, tp
+                )
+                wlc = p_data["Total Forecast"]
+                ## check wlc data here.
+                p_wlc_dict[project_name] = wlc
+            wlc_dict[tp] = p_wlc_dict
 
-        group = get_group(self.master, str(self.master.current_quarter), self.kwargs)
         wlc_change_dict = {}
-        for project_name in group:
-            wlc_list = []
-            current_wlc = self.master.master_data[0].data[project_name][
-                "Total Forecast"
-            ]
-            for i in range(1, 3):  # only taking last quarter and first baseline for now
+        for i, tp in enumerate(wlc_dict.keys()):
+            p_wlc_change_dict = {}
+            for p in wlc_dict[tp].keys():
+                wlc_one = wlc_dict[tp][p]
                 try:
-                    cost_bl_index = self.master.bl_index[self.baseline_type][
-                        project_name
-                    ]
-                    baseline_wlc = self.master.master_data[cost_bl_index[i]].data[
-                        project_name
-                    ]["Total Forecast"]
+                    wlc_two = wlc_dict[self.iter_list[i+1]][p]
                     percentage_change = int(
-                        ((current_wlc - baseline_wlc) / current_wlc) * 100
+                        ((wlc_one - wlc_two) / wlc_one) * 100
                     )
-                    if i == 1:
-                        wlc_list.append(("last quarter", percentage_change))
-                    if i == 2:
-                        wlc_list.append(("baseline one", percentage_change))
-                except TypeError:  # handles NoneTypes
+                    p_wlc_change_dict[p] = percentage_change
+                    # wlc_list.append(("last quarter", percentage_change))
+                    # wlc_list.append(("baseline one", percentage_change))
+                except IndexError:  # handles NoneTypes.
                     pass
 
-            wlc_change_dict[project_name] = dict(wlc_list)
+            wlc_change_dict[tp] = p_wlc_change_dict
 
         self.wlc_change = wlc_change_dict
 
@@ -7523,14 +7527,14 @@ class DandelionData:
                                     self.master, quarter=[tp], group=[p]
                                 )
                                 b_size = (
-                                    costs_data.c_totals[tp]["prof"][0]
-                                    + costs_data.c_totals[tp]["unprof"][0]
+                                    costs_data.c_totals[tp]["prof"]
+                                    + costs_data.c_totals[tp]["unprof"]
                                 )
                             elif self.kwargs["meta"] == "spent":
                                 costs_data = CostData(
                                     self.master, quarter=[tp], group=[p]
                                 )
-                                b_size = costs_data.c_totals[tp]["spent"][0]
+                                b_size = costs_data.c_totals[tp]["spent"]
                             else:
                                 b_size = p_data[self.kwargs["meta"]]
                         except KeyError:
