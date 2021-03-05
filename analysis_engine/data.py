@@ -754,11 +754,12 @@ class CostData:
         self.iter_list = []
         self.c_totals = {}
         self.c_profiles = {}
+        self.wlc_dict = {}
         self.wlc_change = {}
         # self.stack_p = {}
         self.get_cost_totals()
         self.get_cost_profile()
-        # self.calculate_wlc_change()
+        self.get_wlc_data()
         # self.get_stackplot_data()
 
     # def get_cost_totals_new(self):
@@ -964,35 +965,74 @@ class CostData:
             }
         self.c_profiles = lower_dict
 
-    def calculate_wlc_change(self) -> None:
+    def get_wlc_data(self) -> None:
         """calculates changes in whole life cost of project. Current against baselines"""
         self.iter_list = get_iter_list(self.kwargs, self.master)
         wlc_dict = {}
         for tp in self.iter_list:
             self.group = get_group(self.master, tp, self.kwargs)
             p_wlc_dict = {}
-            for project_name in self.group:
+            p_total = 0  # portfolio total
+            for p in self.group:
                 p_data = get_correct_p_data(
-                    self.kwargs, self.master, self.baseline_type, project_name, tp
+                    self.kwargs, self.master, self.baseline_type, p, tp
                 )
                 wlc = p_data["Total Forecast"]
-                ## check wlc data here.
-                p_wlc_dict[project_name] = wlc
+                if isinstance(wlc, (float, int)) and wlc is not None and wlc != 0:
+                    if wlc > 50000:
+                        logger.info(
+                            tp
+                            + ", "
+                            + str(p)
+                            + " is £"
+                            + str(round(wlc))
+                            + " please check this is correct. For now analysis_engine has recorded it as £0"
+                        )
+                    p_wlc_dict[p] = wlc
+                if wlc == 0:
+                    logger.info(
+                        tp
+                        + ", "
+                        + str(p)
+                        + " wlc is currently £"
+                        + str(wlc)
+                        + " note this is key information that should be provided by the project"
+                    )
+                    p_wlc_dict[p] = wlc
+                if wlc is None:
+                    logger.info(
+                        tp
+                        + ", "
+                        + str(p)
+                        + " wlc is currently None note this is key information that should be provided by the project"
+                    )
+                    p_wlc_dict[p] = 0
+                p_total += wlc
+
+            p_wlc_dict["total"] = p_total
             wlc_dict[tp] = p_wlc_dict
 
+        self.wlc_dict = wlc_dict
+
+    def calculate_wlc_change(self) -> None:
         wlc_change_dict = {}
-        for i, tp in enumerate(wlc_dict.keys()):
+        for i, tp in enumerate(self.wlc_dict.keys()):
             p_wlc_change_dict = {}
-            for p in wlc_dict[tp].keys():
-                wlc_one = wlc_dict[tp][p]
+            for p in self.wlc_dict[tp].keys():
+                wlc_one = self.wlc_dict[tp][p]
                 try:
-                    wlc_two = wlc_dict[self.iter_list[i+1]][p]
-                    percentage_change = int(
-                        ((wlc_one - wlc_two) / wlc_one) * 100
-                    )
-                    p_wlc_change_dict[p] = percentage_change
-                    # wlc_list.append(("last quarter", percentage_change))
-                    # wlc_list.append(("baseline one", percentage_change))
+                    wlc_two = self.wlc_dict[self.iter_list[i + 1]][p]
+                    try:
+                        percentage_change = int(((wlc_one - wlc_two) / wlc_one) * 100)
+                        p_wlc_change_dict[p] = percentage_change
+                    except ZeroDivisionError:
+                        logger.info(
+                            "As "
+                            + str(p)
+                            + " has no wlc total figure for "
+                            + tp
+                            + " change has been calculated as zero"
+                        )
                 except IndexError:  # handles NoneTypes.
                     pass
 
@@ -5624,7 +5664,9 @@ def data_query_into_wb(master: Master, **kwargs) -> Workbook:
             ]
             p_data = get_correct_p_data(kwargs, master, "ipdc_costs", project_name, tp)
             try:
-                p_data_last = get_correct_p_data(kwargs, master, "ipdc_costs", project_name, iter_list[z + 1])
+                p_data_last = get_correct_p_data(
+                    kwargs, master, "ipdc_costs", project_name, iter_list[z + 1]
+                )
             except IndexError:
                 pass
             for x, key in enumerate(kwargs["keys"]):
@@ -7486,8 +7528,9 @@ def cal_group_angle(dist_no: int, group: List[str], **kwargs):
 
 
 class DandelionData:
-    def __init__(self, master: Master, **kwargs):
+    def __init__(self, master: Master, c: CostData, **kwargs):
         self.master = master
+        self.c = c
         self.kwargs = kwargs
         self.baseline_type = "ipdc_costs"
         self.group = []
@@ -7512,7 +7555,7 @@ class DandelionData:
             dft_g_dict = {}  # first outer circle group
             dft_l_group_dict = {}  # second group around first outer circle group
             p_total = 0  # portfolio total
-            for i, g in enumerate(self.group):   # group
+            for i, g in enumerate(self.group):  # group
                 dft_l_group = get_group(self.master, tp, self.kwargs, i)
                 g_total = 0
                 dft_l_group_list = []
@@ -7551,6 +7594,8 @@ class DandelionData:
                             self.master.abbreviations[p]["abb"],
                         )
                     )
+                p_total = self.c.wlc_dict[tp]["total"]
+                print(p_total)
                 # hard code solution here for now. need to have p_total at this point
                 # for non-hard coded solution
                 if g_total > 65000:
@@ -7666,6 +7711,7 @@ def dandelion_data_into_wb(d_data: DandelionData) -> workbook:
 
     wb.remove(wb["Sheet"])
     return wb
+
 
 ## old and hashing out for now
 # class DandelionChart:
@@ -7805,6 +7851,7 @@ def dandelion_data_into_wb(d_data: DandelionData) -> workbook:
 #     return fig
 #
 
+
 def get_cost_stackplot_data(
     master: Master, g_list: List[str], quarter: str, **kwargs
 ) -> plt.figure:
@@ -7898,26 +7945,26 @@ def make_a_dandelion_manual(wb: Union[str, bytes, os.PathLike]):
     return plt
 
 
-def make_a_dandelion_auto(dlion_data: DandelionData, **kwargs):
+def make_a_dandelion_auto(dl_data: DandelionData, **kwargs):
     fig, ax = plt.subplots()
     # plt.figure(figsize=(20, 10))
-    title = get_chart_title(dlion_data, kwargs, "dandelion")
+    title = get_chart_title(dl_data, kwargs, "dandelion")
     plt.suptitle(title, fontweight="bold", fontsize=10)
-    for c in range(len(dlion_data.d_list)):
+    for c in range(len(dl_data.d_list)):
         circle = plt.Circle(
-            dlion_data.d_list[c][0],
-            radius=dlion_data.d_list[c][1],
-            fc=dlion_data.d_list[c][2],  # face colour
-            linestyle=dlion_data.d_list[c][4],
-            ec=dlion_data.d_list[c][5],
+            dl_data.d_list[c][0],
+            radius=dl_data.d_list[c][1],
+            fc=dl_data.d_list[c][2],  # face colour
+            linestyle=dl_data.d_list[c][4],
+            ec=dl_data.d_list[c][5],
         )  # edge colour
         ax.add_patch(circle)
         ax.annotate(
-            dlion_data.d_list[c][3],
-            xy=dlion_data.d_list[c][0],
+            dl_data.d_list[c][3],
+            xy=dl_data.d_list[c][0],
             fontsize=6,
-            horizontalalignment=dlion_data.d_list[c][6][0],
-            verticalalignment=dlion_data.d_list[c][6][1],
+            horizontalalignment=dl_data.d_list[c][6][0],
+            verticalalignment=dl_data.d_list[c][6][1],
         )
         # plt.gca().add_patch(circle)
 

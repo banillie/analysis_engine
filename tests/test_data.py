@@ -525,7 +525,6 @@ def test_printout_of_milestones(word_doc, milestone_masters, project_info):
     word_doc.save("resources/summary_temp_altered.docx")
 
 
-# very slow test as using whole master
 def test_cost_schedule_matrix(two_masters, project_info):
     m = Master(two_masters, project_info)
     costs = CostData(m, group=m.current_projects, quarters=["standard"])
