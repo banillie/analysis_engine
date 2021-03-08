@@ -14,7 +14,7 @@ stage = ["pre-SOBC", "SOBC", "OBC", "FBC"]
 group = ["Rail", "AMIS", "RPE", "HSMRPG"]
 group = ["HSMRPG", "AMIS", "Rail", "RPE"]
 c = CostData(m, quarter=["Q3 20/21"])
-d_data = DandelionData(m, c, quarter=["Q3 20/21"], group=group)
+d_data = DandelionData(m, c, quarter=["Q3 20/21"], group=stage)
 d_lion = make_a_dandelion_auto(d_data, title="Standard dandelion")
 doc = open_word_doc(root_path / "input/summary_temp_landscape.docx")
 put_matplotlib_fig_into_word(doc, d_lion, size=7.5)

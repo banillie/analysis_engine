@@ -7631,8 +7631,8 @@ class DandelionData:
                             b_size
                         )
                     )
-                yx = 0 + 1500 * math.sin(math.radians(g_ang_list[i]))   # y axis
-                xx = 0 + 1325 * math.cos(math.radians(g_ang_list[i]))   # x axis
+                yx = 0 + (math.sqrt(p_total)*3) * math.sin(math.radians(g_ang_list[i]))   # y axis
+                xx = 0 + (math.sqrt(p_total)*3) * math.cos(math.radians(g_ang_list[i]))   # x axis
                 # list is tuple axis point, bubble size, colour, line style, line color, text position
                 g_text = g + "\n" + dandelion_number_text(g_total)  # group text
                 dft_g_list.append(
