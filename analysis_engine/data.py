@@ -7514,16 +7514,44 @@ def dandelion_project_text(number: int, project: str) -> str:
         )
 
 
+def dandelion_number_text(number: int) -> str:
+    try:
+        total_len = len(str(int(number)))
+        if total_len <= 3:
+            round_total = int(round(number, -1))
+            return "£" + str(round_total) + "m"
+        if total_len == 4:
+            round_total = int(round(number, -2))
+            if str(round_total)[1] != "0":
+                return "£" + str(round_total)[0] + "," + str(round_total)[1] + "bn"
+            else:
+                return "£" + str(round_total)[0] + "bn"
+        if total_len == 5:
+            round_total = int(round(number, -2))
+            if str(round_total)[2] != "0":
+                return "£" + str(round_total)[:2] + "," + str(round_total)[2] + "bn"
+            else:
+                return "£" + str(round_total)[:2] + "bn"
+        if total_len == 6:
+            round_total = int(round(number, -3))
+            if str(round_total)[3] != "0":
+                return "£" + str(round_total)[:3] + "," + str(round_total)[3] + "bn"
+            else:
+                return "£" + str(round_total)[:3] + "bn"
+    except ValueError:
+        print("not number")
+
+
 def cal_group_angle(dist_no: int, group: List[str], **kwargs):
     """helper function for dandelion data class.
     Calculates distribution of first circle around center."""
     g_ang = dist_no / len(group)  # group_ang and distribution number
     output_list = []
-    for i in range(len(group) + 2):
+    for i in range(len(group)):
         output_list.append(g_ang * i)
     if "all" not in kwargs:
         del output_list[5]
-    del output_list[0]
+    # del output_list[0]
     return output_list
 
 
@@ -7600,40 +7628,39 @@ class DandelionData:
                             math.sqrt(b_size),
                             colour,
                             self.master.abbreviations[p]["abb"],
+                            b_size
                         )
                     )
-                if g_total/p_total > 0.5 or len(dft_l_group) > 12:
-                    x_axis = 0 + 1500 * math.sin(math.radians(g_ang_list[i]))
-                    y_axis = 0 + 1200 * math.cos(math.radians(g_ang_list[i]))
-                else:
-                    x_axis = 0 + 1500 * math.sin(math.radians(g_ang_list[i]))
-                    y_axis = 0 + 1200 * math.cos(math.radians(g_ang_list[i]))
+                yx = 0 + 1500 * math.sin(math.radians(g_ang_list[i]))   # y axis
+                xx = 0 + 1325 * math.cos(math.radians(g_ang_list[i]))   # x axis
                 # list is tuple axis point, bubble size, colour, line style, line color, text position
+                g_text = g + "\n" + dandelion_number_text(g_total)  # group text
                 dft_g_list.append(
                     (
-                        (x_axis, y_axis),
+                        (yx, xx),
                         math.sqrt(g_total),
                         "#FFFFFF",
-                        g + ", £" + str(round(g_total)),
+                        g_text,
                         "dashed",
                         "grey",
                         ("center", "center"),
                     )
                 )
                 dft_g_dict[g] = [
-                    (x_axis, y_axis),
+                    (yx, xx),
                     math.sqrt(g_total),
                     round(g_total)
                 ]  # used for placement of circles
                 # project data
                 dft_l_group_dict[g] = list(reversed(sorted(dft_l_group_list)))
                 # portfolio data
+            p_text = "Portfolio\n" + dandelion_number_text(p_total)
             dft_g_list.append(
                 (
                     (0, 0),
                     math.sqrt(p_total),
                     "#cb1f00",
-                    "Portfolio, £" + str(round(p_total)),
+                    p_text,
                     "solid",
                     "#cb1f00",
                     ("center", "center"),
@@ -7649,50 +7676,60 @@ class DandelionData:
                     b = dft_g_dict[g][0][1]  # y axis position
 
                     if len(lg) >= 12:
-                        x_axis = a + (dft_g_dict[g][1] + 200) * math.cos(
+                        yx = a + (dft_g_dict[g][1] + 200) * math.sin(
                             math.radians(ang_list[i])
                         )
-                        y_axis = b + (dft_g_dict[g][1] + 200) * math.sin(
+                        xx = b + (dft_g_dict[g][1] + 200) * math.cos(
                             math.radians(ang_list[i])
                         )
                     if 11 > len(lg) >= 8:
-                        x_axis = a + (dft_g_dict[g][1] + 150) * math.cos(
+                        yx = a + (dft_g_dict[g][1] + 150) * math.sin(
                             math.radians(ang_list[i])
                         )
-                        y_axis = b + (dft_g_dict[g][1] + 150) * math.sin(
+                        xx = b + (dft_g_dict[g][1] + 150) * math.cos(
                             math.radians(ang_list[i])
                         )
                     if len(lg) == 1:
-                        x_axis = a + (dft_g_dict[g][1] + 100) * math.sin(
+                        yx = a + (dft_g_dict[g][1] + 100) * math.sin(
                             math.radians(ang_list[i])
                         )
-                        y_axis = b + (dft_g_dict[g][1] + 100) * math.cos(
+                        xx = b + (dft_g_dict[g][1] + 100) * math.cos(
                             math.radians(ang_list[i])
                         )
                     if dft_g_dict[g][2]/p_total > 0.5:   # dft_g_dict[g][2] wlc total group
-                        x_axis = a + (dft_g_dict[g][1] + 100) * math.cos(
+                        yx = a + (dft_g_dict[g][1] + 100) * math.sin(
                             math.radians(ang_list[i])
                         )
-                        y_axis = b + (dft_g_dict[g][1] + 100) * math.sin(
+                        xx = b + (dft_g_dict[g][1] + 100) * math.cos(
                             math.radians(ang_list[i])
                         )
                     b_size = p[0]  # bubble size. This is sqrt wlc
                     colour = p[1]  # rag colour
                     name = p[2] # project name/abbreviation
-                    if 280 >= ang_list[i] >= 80:
-                        text_angle = ("right", "bottom")
-                    if 100 >= ang_list[i] or ang_list[i + 1] >= 260:
-                        text_angle = ("left", "bottom")
-                    if 279 >= ang_list[i] >= 261:
+                    wlc = p[3]
+                    # if 90 >= ang_list[i] >= 10:
+                    #     text_angle = ("left", "bottom")
+                    # if 170 >= ang_list[i] >= 91:
+                    #     text_angle = ("left", "top")
+                    # if 270 >= ang_list[i] >= 190:
+                    #     text_angle = ("right", "top")
+                    # if 350 >= ang_list[i] >= 271:
+                    #     text_angle = ("right", "bottom")
+                    if 189 >= ang_list[i] >= 171:
                         text_angle = ("center", "top")
-                    if 99 >= ang_list[i] >= 81:
+                    if 9 >= ang_list[i] or 351 <= ang_list[i]:
                         text_angle = ("center", "bottom")
+                    if 170 >= ang_list[i] >= 10:
+                        text_angle = ("left", "center")
+                    if 350 >= ang_list[i] >= 190:
+                        text_angle = ("right", "center")
+                    project_text = name + " " + dandelion_number_text(wlc)
                     dft_g_list.append(
                         (
-                            (x_axis, y_axis),
+                            (yx, xx),
                             b_size,
                             colour,
-                            name + ", £" + str(round(b_size*b_size)),
+                            project_text,
                             "solid",
                             colour,
                             text_angle,
@@ -7964,8 +8001,8 @@ def make_a_dandelion_manual(wb: Union[str, bytes, os.PathLike]):
 def make_a_dandelion_auto(dl_data: DandelionData, **kwargs):
     fig, ax = plt.subplots()
     # plt.figure(figsize=(20, 10))
-    title = get_chart_title(dl_data, kwargs, "dandelion")
-    plt.suptitle(title, fontweight="bold", fontsize=10)
+    # title = get_chart_title(dl_data, kwargs, "dandelion")
+    # plt.suptitle(title, fontweight="bold", fontsize=10)
     for c in range(len(dl_data.d_list)):
         circle = plt.Circle(
             dl_data.d_list[c][0],

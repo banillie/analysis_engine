@@ -9,7 +9,8 @@ from analysis_engine.data import open_pickle_file, root_path, DcaData, CostData,
     make_a_dandelion_auto, BenefitsData, total_costs_benefits_bar_chart
 
 m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
-# stage = ["OBC", "SOBC", "pre-SOBC", "FBC"]
+stage = ["OBC", "SOBC", "pre-SOBC", "FBC"]
+stage = ["pre-SOBC", "SOBC", "OBC", "FBC"]
 group = ["Rail", "AMIS", "RPE", "HSMRPG"]
 group = ["HSMRPG", "Rail", "AMIS", "RPE"]
 c = CostData(m, quarter=["Q3 20/21"])
