@@ -7715,6 +7715,10 @@ class DandelionData:
                     #     text_angle = ("right", "top")
                     # if 350 >= ang_list[i] >= 271:
                     #     text_angle = ("right", "bottom")
+
+                    yx_text_position = (xx/1000 + (yx/1000 + b_size/9) * math.sin(math.radians(ang_list[i])),
+                                        yx/1000 + (xx/1000 + b_size/9) * math.cos(math.radians(ang_list[i])))
+
                     if 189 >= ang_list[i] >= 171:
                         text_angle = ("center", "top")
                     if 9 >= ang_list[i] or 351 <= ang_list[i]:
@@ -7723,6 +7727,7 @@ class DandelionData:
                         text_angle = ("left", "center")
                     if 350 >= ang_list[i] >= 190:
                         text_angle = ("right", "center")
+
                     project_text = name + " " + dandelion_number_text(wlc)
                     if p[2] in self.master.dft_groups[tp]["GMPP"]:   # p[2] is full project name
                         edge_colour = "#000000"
@@ -7737,6 +7742,7 @@ class DandelionData:
                             "solid",
                             edge_colour,
                             text_angle,
+                            yx_text_position
                         )
                     )
 
@@ -8009,22 +8015,31 @@ def make_a_dandelion_auto(dl_data: DandelionData, **kwargs):
     # plt.suptitle(title, fontweight="bold", fontsize=10)
     for c in range(len(dl_data.d_list)):
         circle = plt.Circle(
-            dl_data.d_list[c][0],
-            radius=dl_data.d_list[c][1],
+            dl_data.d_list[c][0],  # x, y position
+            radius=dl_data.d_list[c][1],  # bubble size
             fc=dl_data.d_list[c][2],  # face colour
             linestyle=dl_data.d_list[c][4],
             ec=dl_data.d_list[c][5],  # edge colour
         )
         ax.add_patch(circle)
-        ax.annotate(
-            dl_data.d_list[c][3],
-            xy=dl_data.d_list[c][0],
-            xytext=(0, np.sqrt(dl_data.d_list[c][1])/2.+5),
-            fontsize=6,
-            textcoords="offset points",
-            horizontalalignment=dl_data.d_list[c][6][0],
-            verticalalignment=dl_data.d_list[c][6][1],
-        )
+        try:
+            ax.annotate(
+                dl_data.d_list[c][3],  # text
+                xy=dl_data.d_list[c][0],  # x, y position
+                xytext=dl_data.d_list[c][7],  # text position
+                fontsize=6,
+                textcoords="offset points",
+                horizontalalignment=dl_data.d_list[c][6][0],
+                verticalalignment=dl_data.d_list[c][6][1],
+            )
+        except IndexError:
+            ax.annotate(
+                dl_data.d_list[c][3],  # text
+                xy=dl_data.d_list[c][0],  # x, y position
+                fontsize=6,
+                horizontalalignment=dl_data.d_list[c][6][0],
+                verticalalignment=dl_data.d_list[c][6][1],
+            )
         # plt.gca().add_patch(circle)
 
     plt.axis("scaled")

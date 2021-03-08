@@ -12,7 +12,7 @@ m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
 stage = ["OBC", "SOBC", "pre-SOBC", "FBC"]
 stage = ["pre-SOBC", "SOBC", "OBC", "FBC"]
 group = ["Rail", "AMIS", "RPE", "HSMRPG"]
-group = ["HSMRPG", "Rail", "AMIS", "RPE"]
+group = ["HSMRPG", "AMIS", "Rail", "RPE"]
 c = CostData(m, quarter=["Q3 20/21"])
 d_data = DandelionData(m, c, quarter=["Q3 20/21"], group=group)
 d_lion = make_a_dandelion_auto(d_data, title="Standard dandelion")
