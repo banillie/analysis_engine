@@ -7627,7 +7627,7 @@ class DandelionData:
                         (
                             math.sqrt(b_size),
                             colour,
-                            self.master.abbreviations[p]["abb"],
+                            p,
                             b_size
                         )
                     )
@@ -7705,7 +7705,7 @@ class DandelionData:
                         )
                     b_size = p[0]  # bubble size. This is sqrt wlc
                     colour = p[1]  # rag colour
-                    name = p[2] # project name/abbreviation
+                    name = self.master.abbreviations[p[2]]["abb"]  # project name/abbreviation
                     wlc = p[3]
                     # if 90 >= ang_list[i] >= 10:
                     #     text_angle = ("left", "bottom")
@@ -7724,6 +7724,10 @@ class DandelionData:
                     if 350 >= ang_list[i] >= 190:
                         text_angle = ("right", "center")
                     project_text = name + " " + dandelion_number_text(wlc)
+                    if p[2] in self.master.dft_groups[tp]["GMPP"]:   # p[2] is full project name
+                        edge_colour = "#000000"
+                    else:
+                        edge_colour = colour
                     dft_g_list.append(
                         (
                             (yx, xx),
@@ -7731,7 +7735,7 @@ class DandelionData:
                             colour,
                             project_text,
                             "solid",
-                            colour,
+                            edge_colour,
                             text_angle,
                         )
                     )
@@ -8009,13 +8013,15 @@ def make_a_dandelion_auto(dl_data: DandelionData, **kwargs):
             radius=dl_data.d_list[c][1],
             fc=dl_data.d_list[c][2],  # face colour
             linestyle=dl_data.d_list[c][4],
-            ec=dl_data.d_list[c][5],
-        )  # edge colour
+            ec=dl_data.d_list[c][5],  # edge colour
+        )
         ax.add_patch(circle)
         ax.annotate(
             dl_data.d_list[c][3],
             xy=dl_data.d_list[c][0],
+            xytext=(0, np.sqrt(dl_data.d_list[c][1])/2.+5),
             fontsize=6,
+            textcoords="offset points",
             horizontalalignment=dl_data.d_list[c][6][0],
             verticalalignment=dl_data.d_list[c][6][1],
         )
