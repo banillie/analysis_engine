@@ -428,11 +428,18 @@ def query(args):
         wb = data_query_into_wb(m, keys=args["keys"])
         wb.save(root_path / "output/data_query.xlsx")
         print("Data compiled. Enjoy!")
+    elif args["file_name"]:
+        l = get_data_query_key_names(
+            root_path / "input/{}.csv".format(args["file_name"])
+        )
+        wb = data_query_into_wb(m, keys=l, quarter=["standard"])
+        wb.save(root_path / "output/data_query.xlsx")
+        print("Data compiled using " + args["file_name"] + ".cvs file. Enjoy!")
     elif args["file_name"] and args["quarters"]:
         l = get_data_query_key_names(
             root_path / "input/{}.csv".format(args["file_name"])
         )
-        wb = data_query_into_wb(m, keys=l, quarters=args["quarters"])
+        wb = data_query_into_wb(m, keys=l, quarter=args["quarters"])
         wb.save(root_path / "output/data_query.xlsx")
         print("Data compiled using " + args["file_name"] + ".cvs file. Enjoy!")
     else:
@@ -444,17 +451,26 @@ def query(args):
 
 def dandelion(args):
     try:
-        print("compiling dandelion")
+        print("compiling dandelion analysis")
         m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
+        costs_data = CostData(m, quarter=[str(m.current_quarter)])
         if args["group"]:
-            d_data = DandelionData(m, quarter=[str(m.current_quarter)], group=args["group"])
+            d_data = DandelionData(m, costs_data, quarter=[str(m.current_quarter)], group=args["group"])
+        elif args["stage"]:
+            d_data = DandelionData(m, costs_data, quarter=[str(m.current_quarter)], group=args["stage"])
         else:
-            d_data = DandelionData(m, quarter=[str(m.current_quarter)], group=["HSMRPG", "Rail", "AMIS", "RPE"])
-        graph = make_a_dandelion_auto(d_data, title="Standard dandelion")
-        doc = open_word_doc(root_path / "input/summary_temp_landscape.docx")
-        put_matplotlib_fig_into_word(doc, graph, size=7.5)
-        doc.save(root_path / "output/dandelion_graph.docx")
-        print("Dandelion chart has been compiled")
+            d_data = DandelionData(m, costs_data, quarter=[str(m.current_quarter)], group=["HSMRPG", "Rail", "AMIS", "RPE"])
+
+        if args["chart"]:
+            if args["title"]:
+                graph = make_a_dandelion_auto(d_data, title=args["title"], chart=True)
+            else:
+                graph = make_a_dandelion_auto(d_data, chart=True)
+            if args["chart"] == "save":
+                doc = open_word_doc(root_path / "input/summary_temp_landscape.docx")
+                put_matplotlib_fig_into_word(doc, graph, size=7.5)
+                doc.save(root_path / "output/dandelion_graph.docx")
+                print("Dandelion chart has been compiled")
     except ProjectNameError as e:
         logger.critical(e)
         sys.exit(1)
