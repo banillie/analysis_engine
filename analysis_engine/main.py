@@ -458,14 +458,23 @@ def dandelion(args):
             d_data = DandelionData(m, costs_data, quarter=[str(m.current_quarter)], group=args["group"])
         elif args["stage"]:
             d_data = DandelionData(m, costs_data, quarter=[str(m.current_quarter)], group=args["stage"])
+        elif args["meta"]:
+            d_data = DandelionData(
+                m,
+                costs_data,
+                quarter=[str(m.current_quarter)],
+                group=["HSMRPG", "Rail", "AMIS", "RPE"],
+                meta=args["meta"]
+            )
+
         else:
             d_data = DandelionData(m, costs_data, quarter=[str(m.current_quarter)], group=["HSMRPG", "Rail", "AMIS", "RPE"])
 
         if args["chart"]:
-            if args["title"]:
-                graph = make_a_dandelion_auto(d_data, title=args["title"], chart=True)
-            else:
-                graph = make_a_dandelion_auto(d_data, chart=True)
+            # if args["title"]:
+            #     graph = make_a_dandelion_auto(d_data, title=args["title"], chart=True)
+            # else:
+            graph = make_a_dandelion_auto(d_data, chart=True)
             if args["chart"] == "save":
                 doc = open_word_doc(root_path / "input/summary_temp_landscape.docx")
                 put_matplotlib_fig_into_word(doc, graph, size=7.5)
@@ -645,6 +654,15 @@ def main():
         action="store",
         nargs=2,
         help="dates for analysis. Must provide start date and then end date in format e.g. '1/1/2021' '1/1/2022'.",
+    )
+
+    parser_dandelion.add_argument(
+        "--meta",
+        type=str,
+        metavar="",
+        action="store",
+        choices=["spent", "remaining"],
+        help="Provide the type of value to include in dandelion e.g spent, remaining",
     )
 
     # chart
