@@ -7676,8 +7676,8 @@ class DandelionData:
                 lg = dft_l_group_dict[g]  # local group
                 ang_list = cal_group_angle(360, lg, all=True)
                 for i, p in enumerate(lg):
-                    a = dft_g_dict[g][0][0]  # x axis position
-                    b = dft_g_dict[g][0][1]  # y axis position
+                    a = dft_g_dict[g][0][0]  # y axis position
+                    b = dft_g_dict[g][0][1]  # x axis position
                     b_size = p[0]  # bubble size. This is sqrt wlc
                     colour = p[1]  # rag colour
                     name = self.master.abbreviations[p[2]]["abb"]  # project name/abbreviation
@@ -7744,6 +7744,121 @@ class DandelionData:
                     )
 
         self.d_list = dft_g_list
+
+
+    def get_data_2(self):
+        #  for dandelion need groups of groups.
+        if "group" in self.kwargs:
+            self.group = self.kwargs["group"]
+        elif "stage" in self.kwargs:
+            self.group = self.kwargs["stage"]
+
+        self.iter_list = get_iter_list(self.kwargs, self.master)
+        for tp in self.iter_list:
+            if len(self.group) == 4:
+                g_ang_l = [260, 320, 40, 100]   # group angle list
+            g_l = []  # group list
+            g_d = {}  # group dictionary. first outer circle.
+            l_g_d = {}  # lower group dictionary
+
+            pf_wlc = self.c.wlc_dict[tp]["total"]  # portfolio wlc
+            pf_colour = "#cb1f00"
+            pf_text = "Portfolio\n" + dandelion_number_text(pf_wlc)
+
+            ## center circle
+            g_d["portfolio"] = {
+                "axis": (0, 0),
+                "r": math.sqrt(p_wlc),
+                "colour": pf_colour,
+                "text": pf_text,
+                "fill": "solid",
+                "ec": pf_colour,
+                "alignment": ("center", "center")
+                }
+
+            ## first outer circle
+            for i, g in enumerate(self.group):
+                l_group = get_group(self.master, tp, self.kwargs, i)  # lower group
+                g_total = 0
+                l_g_l = []  # lower group list
+                for p in l_group:
+                    p_data = get_correct_p_data(
+                        self.kwargs, self.master, self.baseline_type, p, tp
+                    )
+                    ### insert meta here later
+
+                    ## project / second circle info here. why?
+                    p_wlc = p_data["Total Forecast"]
+                    # rag = p_data["Departmental DCA"]
+                    # colour = COLOUR_DICT[convert_rag_text(rag)]
+                    g_wlc += p_wlc
+                    # l_g_d[g] = {
+                    #     "project": p,
+                    #     "r": math.sqrt(p_wlc),  # radius
+                    #     "colour": colour,
+                    #     "wlc": p_wlc
+                    #     }
+                    l_g_l.append((p, p_wlc))
+
+                y_axis = 0 + ((math.sqrt(pf_wlc) * 3) + (math.sqrt(pf_wlc) * .2)) * math.sin(
+                    math.radians(g_ang_l[i]))
+                x_axis = 0 + (math.sqrt(pf_wlc) * 3) * math.cos(math.radians(g_ang_l[i]))
+                g_text = g + "\n" + dandelion_number_text(g_total)  # group text
+                g_d[g] = {
+                    "axis": (y_axis, x_axis),
+                    "r": math.sqrt(g_wlc),
+                    "wlc": g_wlc,
+                    "colour": "#FFFFFF",
+                    "text": g_text,
+                    "fill": "dashed",
+                    "ec": "grey",
+                    "alignment": ("center", "center")
+                }
+
+                l_g_d[g] = list(reversed(sorted(l_g_l)))
+
+            ## second outer circle
+            for g in self.group:
+                lg = l_g_d[g]  # local group
+                ang_l = cal_group_angle(360, lg, all=True)
+                g_wlc = g_d[g]["wlc"]
+                g_radius = g_d[g]["r"]
+                g_y_axis = g_d[g]["axis"][0]  # group y axis
+                g_x_axis = g_d[g]["axis"][1]  # group x axis
+                for i, p in enumerate(lg):
+                    if 0.02 <= g_wlc/pf_wlc <= 0.15:
+                        p_y_axis = g_y_axis + (g_radius * 2.5) * math.sin(  #
+                            math.radians(ang_l[i])
+                        )  # project y axis
+                        p_x_axis = g_x_axis + (g_radius * 2.5) * math.cos(
+                            math.radians(ang_l[i])
+                        )  # project x axis
+                    elif dft_g_dict[g][2]/p_total < 0.019:  # HERE
+                        yx = a + (dft_g_dict[g][1]*4) * math.sin(
+                            math.radians(ang_list[i])
+                        )
+                        xx = b + (dft_g_dict[g][1]*4) * math.cos(
+                            math.radians(ang_list[i])
+                        )
+                    elif dft_g_dict[g][2] / p_total > 0.5:  # dft_g_dict[g][2] wlc total group
+                        yx = a + (dft_g_dict[g][1] * 1.5) * math.sin(
+                            math.radians(ang_list[i])
+                        )
+                        xx = b + (dft_g_dict[g][1] * 1.5) * math.cos(
+                            math.radians(ang_list[i])
+                        )
+                    else:
+                        yx = a + (dft_g_dict[g][1] * 2) * math.sin(
+                            math.radians(ang_list[i])
+                        )
+                        xx = b + (dft_g_dict[g][1] * 2) * math.cos(
+                            math.radians(ang_list[i])
+                        )
+
+                    yx_text_position = (xx/1000 + (yx/1000 + b_size/9) * math.sin(math.radians(ang_list[i])),
+                                        yx/1000 + (xx/1000 + b_size/9) * math.cos(math.radians(ang_list[i])))
+
+
 
 
 def dandelion_data_into_wb(d_data: DandelionData) -> workbook:
