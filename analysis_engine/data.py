@@ -7631,8 +7631,9 @@ class DandelionData:
                             b_size
                         )
                     )
-                yx = 0 + (math.sqrt(p_total)*3) * math.sin(math.radians(g_ang_list[i]))   # y axis
-                xx = 0 + (math.sqrt(p_total)*3) * math.cos(math.radians(g_ang_list[i]))   # x axis
+                yx = 0 + ((math.sqrt(p_total) * 3) + (math.sqrt(p_total)*.2)) * math.sin(math.radians(g_ang_list[i]))   # y axis
+                xx = 0 + (math.sqrt(p_total) * 3) * math.cos(math.radians(g_ang_list[i]))   # x axis
+
                 # list is tuple axis point, bubble size, colour, line style, line color, text position
                 g_text = g + "\n" + dandelion_number_text(g_total)  # group text
                 dft_g_list.append(
@@ -7674,47 +7675,40 @@ class DandelionData:
                 for i, p in enumerate(lg):
                     a = dft_g_dict[g][0][0]  # x axis position
                     b = dft_g_dict[g][0][1]  # y axis position
-
-                    if len(lg) >= 12:
-                        yx = a + (dft_g_dict[g][1] + 200) * math.sin(
-                            math.radians(ang_list[i])
-                        )
-                        xx = b + (dft_g_dict[g][1] + 200) * math.cos(
-                            math.radians(ang_list[i])
-                        )
-                    if 11 > len(lg) >= 8:
-                        yx = a + (dft_g_dict[g][1] + 150) * math.sin(
-                            math.radians(ang_list[i])
-                        )
-                        xx = b + (dft_g_dict[g][1] + 150) * math.cos(
-                            math.radians(ang_list[i])
-                        )
-                    if len(lg) == 1:
-                        yx = a + (dft_g_dict[g][1] + 100) * math.sin(
-                            math.radians(ang_list[i])
-                        )
-                        xx = b + (dft_g_dict[g][1] + 100) * math.cos(
-                            math.radians(ang_list[i])
-                        )
-                    if dft_g_dict[g][2]/p_total > 0.5:   # dft_g_dict[g][2] wlc total group
-                        yx = a + (dft_g_dict[g][1] + 100) * math.sin(
-                            math.radians(ang_list[i])
-                        )
-                        xx = b + (dft_g_dict[g][1] + 100) * math.cos(
-                            math.radians(ang_list[i])
-                        )
                     b_size = p[0]  # bubble size. This is sqrt wlc
                     colour = p[1]  # rag colour
                     name = self.master.abbreviations[p[2]]["abb"]  # project name/abbreviation
                     wlc = p[3]
-                    # if 90 >= ang_list[i] >= 10:
-                    #     text_angle = ("left", "bottom")
-                    # if 170 >= ang_list[i] >= 91:
-                    #     text_angle = ("left", "top")
-                    # if 270 >= ang_list[i] >= 190:
-                    #     text_angle = ("right", "top")
-                    # if 350 >= ang_list[i] >= 271:
-                    #     text_angle = ("right", "bottom")
+
+                    if 20 >= len(lg) >= 1:
+                        if dft_g_dict[g][2]/p_total < 0.15:
+                            yx = a + (dft_g_dict[g][1]*2.5) * math.sin(
+                                math.radians(ang_list[i])
+                            )
+                            xx = b + (dft_g_dict[g][1]*2.5) * math.cos(
+                                math.radians(ang_list[i])
+                            )
+                        elif dft_g_dict[g][2]/p_total < 0.02:  # HERE
+                            yx = a + (dft_g_dict[g][1]*4) * math.sin(
+                                math.radians(ang_list[i])
+                            )
+                            xx = b + (dft_g_dict[g][1]*4) * math.cos(
+                                math.radians(ang_list[i])
+                            )
+                        elif dft_g_dict[g][2] / p_total > 0.5:  # dft_g_dict[g][2] wlc total group
+                            yx = a + (dft_g_dict[g][1] * 1.5) * math.sin(
+                                math.radians(ang_list[i])
+                            )
+                            xx = b + (dft_g_dict[g][1] * 1.5) * math.cos(
+                                math.radians(ang_list[i])
+                            )
+                        else:
+                            yx = a + (dft_g_dict[g][1] * 2) * math.sin(
+                                math.radians(ang_list[i])
+                            )
+                            xx = b + (dft_g_dict[g][1] * 2) * math.cos(
+                                math.radians(ang_list[i])
+                            )
 
                     yx_text_position = (xx/1000 + (yx/1000 + b_size/9) * math.sin(math.radians(ang_list[i])),
                                         yx/1000 + (xx/1000 + b_size/9) * math.cos(math.radians(ang_list[i])))
@@ -7728,7 +7722,7 @@ class DandelionData:
                     if 350 >= ang_list[i] >= 190:
                         text_angle = ("right", "center")
 
-                    project_text = name + " " + dandelion_number_text(wlc)
+                    project_text = name + "\n" + dandelion_number_text(wlc)
                     if p[2] in self.master.dft_groups[tp]["GMPP"]:   # p[2] is full project name
                         edge_colour = "#000000"
                     else:
