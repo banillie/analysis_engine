@@ -966,51 +966,67 @@ class CostData:
         self.c_profiles = lower_dict
 
     def get_wlc_data(self) -> None:
-        """calculates changes in whole life cost of project. Current against baselines"""
+        """central point in code which
+        calculates the quarters total
+        filters projects by group in order of size wlc"""
         self.iter_list = get_iter_list(self.kwargs, self.master)
         wlc_dict = {}
         for tp in self.iter_list:
-            self.group = get_group(self.master, tp, self.kwargs)
-            p_wlc_dict = {}
+            #  for need groups of groups.  Not consistent with steps for
+            #  other functions in this class. currently only in use for dandelion
+            if "group" in self.kwargs:
+                self.group = self.kwargs["group"]
+            elif "stage" in self.kwargs:
+                self.group = self.kwargs["stage"]
+            wlc_dict = {}
             p_total = 0  # portfolio total
-            for p in self.group:
-                p_data = get_correct_p_data(
-                    self.kwargs, self.master, self.baseline_type, p, tp
-                )
-                wlc = p_data["Total Forecast"]
-                if isinstance(wlc, (float, int)) and wlc is not None and wlc != 0:
-                    if wlc > 50000:
+
+            for i, g in enumerate(self.group):
+                l_group = get_group(self.master, tp, self.kwargs, i)  # lower group
+                g_total = 0
+                l_g_l = []  # lower group list
+                for p in l_group:
+                    p_data = get_correct_p_data(
+                        self.kwargs, self.master, self.baseline_type, p, tp
+                    )
+                    wlc = p_data["Total Forecast"]
+                    if isinstance(wlc, (float, int)) and wlc is not None and wlc != 0:
+                        if wlc > 50000:
+                            logger.info(
+                                tp
+                                + ", "
+                                + str(p)
+                                + " is £"
+                                + str(round(wlc))
+                                + " please check this is correct. For now analysis_engine has recorded it as £0"
+                            )
+                        # wlc_dict[p] = wlc
+                    if wlc == 0:
                         logger.info(
                             tp
                             + ", "
                             + str(p)
-                            + " is £"
-                            + str(round(wlc))
-                            + " please check this is correct. For now analysis_engine has recorded it as £0"
+                            + " wlc is currently £"
+                            + str(wlc)
+                            + " note this is key information that should be provided by the project"
                         )
-                    p_wlc_dict[p] = wlc
-                if wlc == 0:
-                    logger.info(
-                        tp
-                        + ", "
-                        + str(p)
-                        + " wlc is currently £"
-                        + str(wlc)
-                        + " note this is key information that should be provided by the project"
-                    )
-                    p_wlc_dict[p] = wlc
-                if wlc is None:
-                    logger.info(
-                        tp
-                        + ", "
-                        + str(p)
-                        + " wlc is currently None note this is key information that should be provided by the project"
-                    )
-                    p_wlc_dict[p] = 0
-                p_total += wlc
+                        # wlc_dict[p] = wlc
+                    if wlc is None:
+                        logger.info(
+                            tp
+                            + ", "
+                            + str(p)
+                            + " wlc is currently None note this is key information that should be provided by the project"
+                        )
+                        wlc = 0
 
-            p_wlc_dict["total"] = p_total
-            wlc_dict[tp] = p_wlc_dict
+                    l_g_l.append((wlc, p))
+                    g_total += wlc
+                wlc_dict[g] = list(reversed(sorted(l_g_l)))
+                p_total += g_total
+
+            wlc_dict["total"] = p_total
+            wlc_dict[tp] = wlc_dict
 
         self.wlc_dict = wlc_dict
 
@@ -7745,16 +7761,15 @@ class DandelionData:
 
         self.d_list = dft_g_list
 
-
     def get_data_2(self):
-        #  for dandelion need groups of groups.
-        if "group" in self.kwargs:
-            self.group = self.kwargs["group"]
-        elif "stage" in self.kwargs:
-            self.group = self.kwargs["stage"]
-
         self.iter_list = get_iter_list(self.kwargs, self.master)
         for tp in self.iter_list:
+            #  for dandelion need groups of groups.
+            if "group" in self.kwargs:
+                self.group = self.kwargs["group"]
+            elif "stage" in self.kwargs:
+                self.group = self.kwargs["stage"]
+
             if len(self.group) == 4:
                 g_ang_l = [260, 320, 40, 100]   # group angle list
             g_d = {}  # group dictionary. first outer circle.
