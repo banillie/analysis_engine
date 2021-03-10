@@ -7757,13 +7757,12 @@ class DandelionData:
         for tp in self.iter_list:
             if len(self.group) == 4:
                 g_ang_l = [260, 320, 40, 100]   # group angle list
-            g_l = []  # group list
             g_d = {}  # group dictionary. first outer circle.
             l_g_d = {}  # lower group dictionary
 
             pf_wlc = self.c.wlc_dict[tp]["total"]  # portfolio wlc
-            pf_colour = "#cb1f00"
-            pf_text = "Portfolio\n" + dandelion_number_text(pf_wlc)
+            pf_colour = "#cb1f00"   # option to specfic pf colour
+            pf_text = "Portfolio\n" + dandelion_number_text(pf_wlc)  # option to specify pf name
 
             ## center circle
             g_d["portfolio"] = {
@@ -7789,15 +7788,8 @@ class DandelionData:
 
                     ## project / second circle info here. why?
                     p_wlc = p_data["Total Forecast"]
-                    # rag = p_data["Departmental DCA"]
-                    # colour = COLOUR_DICT[convert_rag_text(rag)]
                     g_wlc += p_wlc
-                    # l_g_d[g] = {
-                    #     "project": p,
-                    #     "r": math.sqrt(p_wlc),  # radius
-                    #     "colour": colour,
-                    #     "wlc": p_wlc
-                    #     }
+
                     l_g_l.append((p, p_wlc))
 
                 y_axis = 0 + ((math.sqrt(pf_wlc) * 3) + (math.sqrt(pf_wlc) * .2)) * math.sin(
@@ -7826,38 +7818,74 @@ class DandelionData:
                 g_y_axis = g_d[g]["axis"][0]  # group y axis
                 g_x_axis = g_d[g]["axis"][1]  # group x axis
                 for i, p in enumerate(lg):
+                    p_data = get_correct_p_data(
+                        self.kwargs, self.master, self.baseline_type, p, tp
+                    )
+                    p_wlc = p_data["Total Forecast"]  # project wlc
+                    rag = p_data["Departmental DCA"]
+                    colour = COLOUR_DICT[convert_rag_text(rag)]   # bubble colour
+                    project_text = self.master.abbreviations[p[2]]["abb"] + "\n" + dandelion_number_text(p_wlc)
+                    if p in self.master.dft_groups[tp]["GMPP"]:
+                        edge_colour = "#000000"   # edge of bubble
+                    else:
+                        edge_colour = colour
+
                     if 0.02 <= g_wlc/pf_wlc <= 0.15:
-                        p_y_axis = g_y_axis + (g_radius * 2.5) * math.sin(  #
+                        p_y_axis = g_y_axis + (g_radius * 2.5) * math.sin(
                             math.radians(ang_l[i])
                         )  # project y axis
                         p_x_axis = g_x_axis + (g_radius * 2.5) * math.cos(
                             math.radians(ang_l[i])
                         )  # project x axis
-                    elif dft_g_dict[g][2]/p_total < 0.019:  # HERE
-                        yx = a + (dft_g_dict[g][1]*4) * math.sin(
-                            math.radians(ang_list[i])
+                    elif g_wlc / pf_wlc < 0.019:
+                        p_y_axis = g_y_axis + (g_radius * 4) * math.sin(
+                            math.radians(ang_l[i])
                         )
-                        xx = b + (dft_g_dict[g][1]*4) * math.cos(
-                            math.radians(ang_list[i])
+                        p_x_axis = g_x_axis + (g_radius * 4) * math.cos(
+                            math.radians(ang_l[i])
                         )
-                    elif dft_g_dict[g][2] / p_total > 0.5:  # dft_g_dict[g][2] wlc total group
-                        yx = a + (dft_g_dict[g][1] * 1.5) * math.sin(
-                            math.radians(ang_list[i])
+                    elif g_wlc / pf_wlc > 0.5:  # dft_g_dict[g][2] wlc total group
+                        p_y_axis = g_y_axis + (g_radius * 1.5) * math.sin(
+                            math.radians(ang_l[i])
                         )
-                        xx = b + (dft_g_dict[g][1] * 1.5) * math.cos(
-                            math.radians(ang_list[i])
+                        p_x_axis = g_x_axis + (g_radius * 1.5) * math.cos(
+                            math.radians(ang_l[i])
                         )
                     else:
-                        yx = a + (dft_g_dict[g][1] * 2) * math.sin(
-                            math.radians(ang_list[i])
+                        p_y_axis = g_y_axis + (g_radius * 2) * math.sin(
+                            math.radians(ang_l[i])
                         )
-                        xx = b + (dft_g_dict[g][1] * 2) * math.cos(
-                            math.radians(ang_list[i])
+                        p_x_axis = g_x_axis + (g_radius * 2) * math.cos(
+                            math.radians(ang_l[i])
                         )
 
-                    yx_text_position = (xx/1000 + (yx/1000 + b_size/9) * math.sin(math.radians(ang_list[i])),
-                                        yx/1000 + (xx/1000 + b_size/9) * math.cos(math.radians(ang_list[i])))
+                    if 189 >= ang_l[i] >= 171:
+                        text_angle = ("center", "top")
+                    if 9 >= ang_l[i] or 351 <= ang_l[i]:
+                        text_angle = ("center", "bottom")
+                    if 170 >= ang_l[i] >= 10:
+                        text_angle = ("left", "center")
+                    if 350 >= ang_l[i] >= 190:
+                        text_angle = ("right", "center")
 
+                    yx_text_position = (
+                        p_x_axis / 1000 + (p_y_axis / 1000 + math.sqrt(p_wlc) / 9) * math.sin(math.radians(ang_l[i])),
+                        p_y_axis / 1000 + (p_x_axis / 1000 + math.sqrt(p_wlc) / 9) * math.cos(math.radians(ang_l[i]))
+                    )
+
+                    g_d[g] = {
+                        "axis": (p_y_axis, p_x_axis),
+                        "r": math.sqrt(p_wlc),
+                        "wlc": p_wlc,
+                        "colour": colour,
+                        "text": project_text,
+                        "fill": "solid",
+                        "ec": edge_colour,
+                        "alignment": text_angle,
+                        "tp": yx_text_position
+                        }
+
+        self.d_data = g_d
 
 
 
