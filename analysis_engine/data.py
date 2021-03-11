@@ -1081,28 +1081,23 @@ class CostData:
     #             labels = cat_list
 
 
-def sort_group_by_key(key: str,
-                    group_idx: int,
-                      master: Master,
-                      baseline_type: str,
-                      tp: str,
-                      kwargs) -> List:  # no ** in front as passing in existing kwargs dict
-        """
-        Helper function. orders projects by key value e.g. total forecast
-        """
-        output_list = []
-        group = get_group(master, tp, kwargs, group_idx)  # lower group
-        for p in group:
-            p_data = get_correct_p_data(
-                kwargs, master, baseline_type, p, tp
-            )
-            value = p_data[key]
-            if value is None:
-                value = 0
+def sort_group_by_key(
+    key: str, group_idx: int, master: Master, baseline_type: str, tp: str, kwargs
+) -> List:  # no ** in front as passing in existing kwargs dict
+    """
+    Helper function. orders projects by key value e.g. total forecast
+    """
+    output_list = []
+    group = get_group(master, tp, kwargs, group_idx)  # lower group
+    for p in group:
+        p_data = get_correct_p_data(kwargs, master, baseline_type, p, tp)
+        value = p_data[key]
+        if value is None:
+            value = 0
 
-            output_list.append((value, p))
+        output_list.append((value, p))
 
-        return list(reversed(sorted(output_list)))
+    return list(reversed(sorted(output_list)))
 
 
 def put_cost_totals_into_wb(costs: CostData) -> workbook:
@@ -7596,11 +7591,11 @@ def cal_group_angle(dist_no: int, group: List[str], **kwargs):
     return output_list
 
 
-def get_dandelion_meta_total(master: Master, tp: str, g: str or List[str], kwargs) -> int or str:
+def get_dandelion_meta_total(
+    master: Master, tp: str, g: str or List[str], kwargs
+) -> int or str:
     ## Note no ** in front of kwargs as existing kwargs dict passed in
-    g_cost_d = CostData(
-        master, quarter=[tp], group=[g]
-    )  # group costs data
+    g_cost_d = CostData(master, quarter=[tp], group=[g])  # group costs data
     if "meta" in kwargs:
         if kwargs["meta"] == "remaining":
             return g_cost_d.c_totals[tp]["prof"] + g_cost_d.c_totals[tp]["unprof"]
@@ -7609,9 +7604,8 @@ def get_dandelion_meta_total(master: Master, tp: str, g: str or List[str], kwarg
 
 
 class DandelionData:
-    def __init__(self, master: Master, c: CostData, **kwargs):
+    def __init__(self, master: Master, **kwargs):
         self.master = master
-        self.c = c
         self.kwargs = kwargs
         self.baseline_type = "ipdc_costs"
         self.group = []
@@ -7807,13 +7801,17 @@ class DandelionData:
                 self.group = self.kwargs["stage"]
 
             if len(self.group) == 4:
-                g_ang_l = [260, 320, 40, 100]   # group angle list
+                g_ang_l = [260, 320, 40, 100]  # group angle list
             g_d = {}  # group dictionary. first outer circle.
             l_g_d = {}  # lower group dictionary
 
-            pf_wlc = get_dandelion_meta_total(self.master, tp, self.group, self.kwargs)  # portfolio wlc
-            pf_colour = "#cb1f00"   # option to specfic pf coloum
-            pf_text = "Portfolio\n" + dandelion_number_text(pf_wlc)  # option to specify pf name
+            pf_wlc = get_dandelion_meta_total(
+                self.master, tp, self.group, self.kwargs
+            )  # portfolio wlc
+            pf_colour = "#cb1f00"  # option to specfic pf coloum
+            pf_text = "Portfolio\n" + dandelion_number_text(
+                pf_wlc
+            )  # option to specify pf name
 
             ## center circle
             g_d["portfolio"] = {
@@ -7823,26 +7821,19 @@ class DandelionData:
                 "text": pf_text,
                 "fill": "solid",
                 "ec": pf_colour,
-                "alignment": ("center", "center")
-                }
+                "alignment": ("center", "center"),
+            }
 
             ## first outer circle
             for i, g in enumerate(self.group):
-                # l_group = get_group(self.master, tp, self.kwargs, i)  # lower group
-                # g_wlc = 0
-                # l_g_l = []  # lower group list
-
                 g_wlc = get_dandelion_meta_total(self.master, tp, g, self.kwargs)
 
-                # for x in self.c.wlc_dict[g]:
-                #     p = x[1]  # project. keeping from a tuple to make sure order of p is correct
-                #     # p_wlc = x[0]  # wlc
-                #     # g_wlc += p_wlc   # group wlc
-                #     l_g_l.append(p)
-
-                y_axis = 0 + ((math.sqrt(pf_wlc) * 3) + (math.sqrt(pf_wlc) * .2)) * math.sin(
-                    math.radians(g_ang_l[i]))
-                x_axis = 0 + (math.sqrt(pf_wlc) * 3) * math.cos(math.radians(g_ang_l[i]))
+                y_axis = 0 + (
+                    (math.sqrt(pf_wlc) * 3) + (math.sqrt(pf_wlc) * 0.2)
+                ) * math.sin(math.radians(g_ang_l[i]))
+                x_axis = 0 + (math.sqrt(pf_wlc) * 3) * math.cos(
+                    math.radians(g_ang_l[i])
+                )
                 g_text = g + "\n" + dandelion_number_text(g_wlc)  # group text
                 g_d[g] = {
                     "axis": (y_axis, x_axis),
@@ -7852,17 +7843,17 @@ class DandelionData:
                     "text": g_text,
                     "fill": "dashed",
                     "ec": "grey",
-                    "alignment": ("center", "center")
+                    "alignment": ("center", "center"),
                 }
-
-                # l_g_d[g] = sort_group_by_key("Total Forecast", i, self.master, self.baseline_type, tp, self.kwargs)
 
             ## second outer circle
             for i, g in enumerate(self.group):
                 group = get_group(self.master, tp, self.kwargs, i)  # lower group
                 p_list = []
                 for p in group:
-                    p_value = get_dandelion_meta_total(self.master, tp, p, self.kwargs)  # project wlc
+                    p_value = get_dandelion_meta_total(
+                        self.master, tp, p, self.kwargs
+                    )  # project wlc
                     p_list.append((p_value, p))
                 l_g_d[g] = list(reversed(sorted(p_list)))
 
@@ -7879,14 +7870,18 @@ class DandelionData:
                         self.kwargs, self.master, self.baseline_type, p, tp
                     )
                     rag = p_data["Departmental DCA"]
-                    colour = COLOUR_DICT[convert_rag_text(rag)]   # bubble colour
-                    project_text = self.master.abbreviations[p]["abb"] + "\n" + dandelion_number_text(p_value)
+                    colour = COLOUR_DICT[convert_rag_text(rag)]  # bubble colour
+                    project_text = (
+                        self.master.abbreviations[p]["abb"]
+                        + "\n"
+                        + dandelion_number_text(p_value)
+                    )
                     if p in self.master.dft_groups[tp]["GMPP"]:
-                        edge_colour = "#000000"   # edge of bubble
+                        edge_colour = "#000000"  # edge of bubble
                     else:
                         edge_colour = colour
 
-                    if 0.02 <= g_wlc/pf_wlc <= 0.15:
+                    if 0.02 <= g_wlc / pf_wlc <= 0.15:
                         p_y_axis = g_y_axis + (g_radius * 2.5) * math.sin(
                             math.radians(ang_l[i])
                         )  # project y axis
@@ -7925,8 +7920,12 @@ class DandelionData:
                         text_angle = ("right", "center")
 
                     yx_text_position = (
-                        p_x_axis / 1000 + (p_y_axis / 1000 + math.sqrt(p_value) / 9) * math.sin(math.radians(ang_l[i])),
-                        p_y_axis / 1000 + (p_x_axis / 1000 + math.sqrt(p_value) / 9) * math.cos(math.radians(ang_l[i]))
+                        p_x_axis / 1000
+                        + (p_y_axis / 1000 + math.sqrt(p_value) / 9)
+                        * math.sin(math.radians(ang_l[i])),
+                        p_y_axis / 1000
+                        + (p_x_axis / 1000 + math.sqrt(p_value) / 9)
+                        * math.cos(math.radians(ang_l[i])),
                     )
 
                     g_d[p] = {
@@ -7938,11 +7937,10 @@ class DandelionData:
                         "fill": "solid",
                         "ec": edge_colour,
                         "alignment": text_angle,
-                        "tp": yx_text_position
-                        }
+                        "tp": yx_text_position,
+                    }
 
         self.d_data = g_d
-
 
 
 def dandelion_data_into_wb(d_data: DandelionData) -> workbook:
@@ -8247,5 +8245,3 @@ def make_a_dandelion_auto(dl: DandelionData, **kwargs):
             plt.show()
 
     return fig
-
-

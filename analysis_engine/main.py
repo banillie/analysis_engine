@@ -63,7 +63,8 @@ from analysis_engine.data import (
     milestone_chart,
     get_cost_stackplot_data,
     cost_stackplot_graph,
-    cal_group, make_a_dandelion_auto,
+    cal_group,
+    make_a_dandelion_auto,
 )
 
 import logging
@@ -409,7 +410,10 @@ def costs_sp(args):
         #     sp_data = get_cost_stackplot_data(m, s, str(m.current_quarter), type="comp")
         else:
             sp_data = get_cost_stackplot_data(
-                m, ["HSMRPG", "Rail", "RPE", "AMIS"], str(m.current_quarter), type="comp"
+                m,
+                ["HSMRPG", "Rail", "RPE", "AMIS"],
+                str(m.current_quarter),
+                type="comp",
             )
         sp_graph = cost_stackplot_graph(sp_data)
         doc = open_word_doc(root_path / "input/summary_temp_landscape.docx")
@@ -454,24 +458,27 @@ def dandelion(args):
         print("compiling dandelion analysis")
         m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
         if args["group"]:
-            costs_data = CostData(m, quarter=[str(m.current_quarter)], group=args["group"])
-            d_data = DandelionData(m, costs_data, quarter=[str(m.current_quarter)], group=args["group"])
+            d_data = DandelionData(
+                m, quarter=[str(m.current_quarter)], group=args["group"]
+            )
         elif args["stage"]:
-            costs_data = CostData(m, quarter=[str(m.current_quarter)], group=args["stage"])
-            d_data = DandelionData(m, costs_data, quarter=[str(m.current_quarter)], group=args["stage"])
+            d_data = DandelionData(
+                m, quarter=[str(m.current_quarter)], group=args["stage"]
+            )
         elif args["meta"]:
-            costs_data = CostData(m, quarter=[str(m.current_quarter)], group=args["group"])
             d_data = DandelionData(
                 m,
-                costs_data,
                 quarter=[str(m.current_quarter)],
                 group=["HSMRPG", "AMIS", "Rail", "RPE"],
-                meta=args["meta"]
+                meta=args["meta"],
             )
 
         else:
-            costs_data = CostData(m, quarter=[str(m.current_quarter)], group=["HSMRPG", "AMIS", "Rail", "RPE"])
-            d_data = DandelionData(m, costs_data, quarter=[str(m.current_quarter)], group=["HSMRPG", "AMIS", "Rail", "RPE"])
+            d_data = DandelionData(
+                m,
+                quarter=[str(m.current_quarter)],
+                group=["HSMRPG", "AMIS", "Rail", "RPE"],
+            )
 
         if args["chart"]:
             # if args["title"]:
@@ -647,7 +654,7 @@ def main():
         action="store",
         nargs="+",
         choices=["Approval", "Assurance", "Delivery"],
-        help="Returns analysis for specified type of milestones."
+        help="Returns analysis for specified type of milestones.",
     )
 
     parser_milestones.add_argument(
