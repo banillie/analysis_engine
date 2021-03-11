@@ -7888,7 +7888,14 @@ class DandelionData:
                     else:
                         edge_colour = colour
 
-                    if 0.02 <= g_wlc / pf_wlc <= 0.15:
+                    if g_wlc / pf_wlc > 0.5:
+                        p_y_axis = g_y_axis + (g_radius * 1.25) * math.sin(
+                            math.radians(ang_l[i])
+                        )
+                        p_x_axis = g_x_axis + (g_radius * 1.25) * math.cos(
+                            math.radians(ang_l[i])
+                        )
+                    elif 0.02 <= g_wlc / pf_wlc <= 0.15:
                         p_y_axis = g_y_axis + (g_radius * 2.5) * math.sin(
                             math.radians(ang_l[i])
                         )  # project y axis
@@ -7900,13 +7907,6 @@ class DandelionData:
                             math.radians(ang_l[i])
                         )
                         p_x_axis = g_x_axis + (g_radius * 4) * math.cos(
-                            math.radians(ang_l[i])
-                        )
-                    elif g_wlc / pf_wlc > 0.5:  # dft_g_dict[g][2] wlc total group
-                        p_y_axis = g_y_axis + (g_radius * 1.5) * math.sin(
-                            math.radians(ang_l[i])
-                        )
-                        p_x_axis = g_x_axis + (g_radius * 1.5) * math.cos(
                             math.radians(ang_l[i])
                         )
                     else:
@@ -7926,14 +7926,22 @@ class DandelionData:
                     if 350 >= ang_l[i] >= 190:
                         text_angle = ("right", "center")
 
-                    yx_text_position = (
-                        p_x_axis / 1000
-                        + (p_y_axis / 1000 + math.sqrt(p_value) / 9)
-                        * math.sin(math.radians(ang_l[i])),
-                        p_y_axis / 1000
-                        + (p_x_axis / 1000 + math.sqrt(p_value) / 9)
-                        * math.cos(math.radians(ang_l[i])),
-                    )
+
+                    if p_value / g_wlc > 0.2:
+                        yx_text_position = (
+                            p_y_axis/1000 + (math.sqrt(p_value) / 6)
+                            * math.sin(math.radians(ang_l[i])),
+                            p_x_axis/1000 + (math.sqrt(p_value) / 6)
+                            * math.cos(math.radians(ang_l[i])),
+                        )
+                    else:
+                        yx_text_position = (
+                            p_y_axis / 1000 + (math.sqrt(p_value) / 4)
+                            * math.sin(math.radians(ang_l[i])),
+                            p_x_axis / 1000 + (math.sqrt(p_value) / 4)
+                            * math.cos(math.radians(ang_l[i])),
+                        )
+
 
                     g_d[p] = {
                         "axis": (p_y_axis, p_x_axis),
@@ -8231,10 +8239,20 @@ def make_a_dandelion_auto(dl: DandelionData, **kwargs):
                 xy=dl.d_data[c]["axis"],  # x, y position
                 xytext=dl.d_data[c]["tp"],  # text position
                 fontsize=6,
-                textcoords="offset points",
+                textcoords="offset pixels",
                 horizontalalignment=dl.d_data[c]["alignment"][0],
                 verticalalignment=dl.d_data[c]["alignment"][1],
             )
+        # try:
+        #     ax.annotate(
+        #         dl.d_data[c]["text"],  # text
+        #         xy=dl.d_data[c]["tp"],  # x, y position
+        #         # xytext=dl.d_data[c]["tp"],  # text position
+        #         fontsize=6,
+        #         # textcoords="offset points",
+        #         # horizontalalignment=dl.d_data[c]["alignment"][0],
+        #         # verticalalignment=dl.d_data[c]["alignment"][1],
+        #     )
         except KeyError:
             ax.annotate(
                 dl.d_data[c]["text"],  # text
@@ -8242,7 +8260,7 @@ def make_a_dandelion_auto(dl: DandelionData, **kwargs):
                 fontsize=6,
                 horizontalalignment=dl.d_data[c]["alignment"][0],
                 verticalalignment=dl.d_data[c]["alignment"][1],
-                weight="bold",
+                # weight="bold",  # bold here as will be group text
             )
 
     plt.axis("scaled")
