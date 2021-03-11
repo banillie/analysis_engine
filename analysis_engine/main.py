@@ -453,22 +453,25 @@ def dandelion(args):
     try:
         print("compiling dandelion analysis")
         m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
-        costs_data = CostData(m, quarter=[str(m.current_quarter)])
         if args["group"]:
+            costs_data = CostData(m, quarter=[str(m.current_quarter)], group=args["group"])
             d_data = DandelionData(m, costs_data, quarter=[str(m.current_quarter)], group=args["group"])
         elif args["stage"]:
+            costs_data = CostData(m, quarter=[str(m.current_quarter)], group=args["stage"])
             d_data = DandelionData(m, costs_data, quarter=[str(m.current_quarter)], group=args["stage"])
         elif args["meta"]:
+            costs_data = CostData(m, quarter=[str(m.current_quarter)], group=args["group"])
             d_data = DandelionData(
                 m,
                 costs_data,
                 quarter=[str(m.current_quarter)],
-                group=["HSMRPG", "Rail", "AMIS", "RPE"],
+                group=["HSMRPG", "AMIS", "Rail", "RPE"],
                 meta=args["meta"]
             )
 
         else:
-            d_data = DandelionData(m, costs_data, quarter=[str(m.current_quarter)], group=["HSMRPG", "Rail", "AMIS", "RPE"])
+            costs_data = CostData(m, quarter=[str(m.current_quarter)], group=["HSMRPG", "AMIS", "Rail", "RPE"])
+            d_data = DandelionData(m, costs_data, quarter=[str(m.current_quarter)], group=["HSMRPG", "AMIS", "Rail", "RPE"])
 
         if args["chart"]:
             # if args["title"]:

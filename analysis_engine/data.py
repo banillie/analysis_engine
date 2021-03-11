@@ -759,7 +759,7 @@ class CostData:
         # self.stack_p = {}
         self.get_cost_totals()
         self.get_cost_profile()
-        self.get_wlc_data()
+        # self.get_wlc_data()
         # self.get_stackplot_data()
 
     # def get_cost_totals_new(self):
@@ -1022,6 +1022,7 @@ class CostData:
 
                     l_g_l.append((wlc, p))
                     g_total += wlc
+
                 wlc_dict[g] = list(reversed(sorted(l_g_l)))
                 p_total += g_total
 
@@ -1078,6 +1079,30 @@ class CostData:
     #                 s_list.append([costs.c_profiles[quarter][cat_list[i]]])
     #             y = np.vstack(s_list)
     #             labels = cat_list
+
+
+def sort_group_by_key(key: str,
+                    group_idx: int,
+                      master: Master,
+                      baseline_type: str,
+                      tp: str,
+                      kwargs) -> List:  # no ** in front as passing in existing kwargs dict
+        """
+        Helper function. orders projects by key value e.g. total forecast
+        """
+        output_list = []
+        group = get_group(master, tp, kwargs, group_idx)  # lower group
+        for p in group:
+            p_data = get_correct_p_data(
+                kwargs, master, baseline_type, p, tp
+            )
+            value = p_data[key]
+            if value is None:
+                value = 0
+
+            output_list.append((value, p))
+
+        return list(reversed(sorted(output_list)))
 
 
 def put_cost_totals_into_wb(costs: CostData) -> workbook:
@@ -7571,6 +7596,18 @@ def cal_group_angle(dist_no: int, group: List[str], **kwargs):
     return output_list
 
 
+def get_dandelion_meta_total(master: Master, tp: str, g: str or List[str], kwargs) -> int or str:
+    ## Note no ** in front of kwargs as existing kwargs dict passed in
+    g_cost_d = CostData(
+        master, quarter=[tp], group=[g]
+    )  # group costs data
+    if "meta" in kwargs:
+        if kwargs["meta"] == "remaining":
+            return g_cost_d.c_totals[tp]["prof"] + g_cost_d.c_totals[tp]["unprof"]
+    else:
+        return g_cost_d.c_totals[tp]["total"]
+
+
 class DandelionData:
     def __init__(self, master: Master, c: CostData, **kwargs):
         self.master = master
@@ -7580,188 +7617,187 @@ class DandelionData:
         self.group = []
         self.iter_list = []
         self.d_data = {}
-        self.d_list = []
         self.get_data()
 
+    # def get_data(self):
+    #     #  for dandelion need groups of groups.
+    #     if "group" in self.kwargs:
+    #         self.group = self.kwargs["group"]
+    #     elif "stage" in self.kwargs:
+    #         self.group = self.kwargs["stage"]
+    #
+    #     self.iter_list = get_iter_list(self.kwargs, self.master)
+    #     for tp in self.iter_list:   # not currently collecting data x-qrts
+    #         # cal group angle. do function.
+    #         # if len(self.group) > 1:
+    #         #     g_ang_list = cal_group_angle(180, self.group)
+    #         if len(self.group) == 4:  # need to develop a function here.
+    #             g_ang_list = [40, 100, 260, 320]
+    #             g_ang_list = [260, 320, 40, 100]
+    #         dft_g_list = []
+    #         dft_g_dict = {}  # first outer circle group
+    #         dft_l_group_dict = {}  # second group around first outer circle group
+    #         p_total = 0  # portfolio total
+    #
+    #         ## circles around center circle
+    #         for i, g in enumerate(self.group):  # group
+    #             dft_l_group = get_group(self.master, tp, self.kwargs, i)
+    #             g_total = 0
+    #             dft_l_group_list = []
+    #             for p in dft_l_group:
+    #                 p_data = get_correct_p_data(
+    #                     self.kwargs, self.master, self.baseline_type, p, tp
+    #                 )
+    #                 if "meta" in self.kwargs:
+    #                     try:
+    #                         if self.kwargs["meta"] == "remaining":
+    #                             costs_data = CostData(
+    #                                 self.master, quarter=[tp], group=[p]
+    #                             )
+    #                             b_size = (
+    #                                 costs_data.c_totals[tp]["prof"]
+    #                                 + costs_data.c_totals[tp]["unprof"]
+    #                             )
+    #                             p_total = (
+    #                                 self.c.c_totals[tp]["prof"]
+    #                                 + self.c.c_totals[tp]["unprof"]
+    #                             )
+    #                         elif self.kwargs["meta"] == "spent":
+    #                             costs_data = CostData(
+    #                                 self.master, quarter=[tp], group=[p]
+    #                             )
+    #                             b_size = costs_data.c_totals[tp]["spent"]
+    #                             p_total = self.c.c_totals[tp]["spent"]
+    #                         else:
+    #                             b_size = p_data[self.kwargs["meta"]]
+    #                     except KeyError:
+    #                         logger.critical(self.kwargs["meta"] + " not recognised")
+    #                 else:
+    #                     b_size = p_data["Total Forecast"]
+    #                     p_total = self.c.wlc_dict[tp]["total"]
+    #                 rag = p_data["Departmental DCA"]
+    #                 colour = COLOUR_DICT[convert_rag_text(rag)]
+    #                 g_total += b_size
+    #                 dft_l_group_list.append(
+    #                     (
+    #                         math.sqrt(b_size),
+    #                         colour,
+    #                         p,
+    #                         b_size
+    #                     )
+    #                 )
+    #             yx = 0 + ((math.sqrt(p_total) * 3) + (math.sqrt(p_total)*.2)) * math.sin(math.radians(g_ang_list[i]))   # y axis
+    #             xx = 0 + (math.sqrt(p_total) * 3) * math.cos(math.radians(g_ang_list[i]))   # x axis
+    #
+    #             # list is tuple axis point, bubble size, colour, line style, line color, text position
+    #             g_text = g + "\n" + dandelion_number_text(g_total)  # group text
+    #             dft_g_list.append(
+    #                 (
+    #                     (yx, xx),
+    #                     math.sqrt(g_total),
+    #                     "#FFFFFF",
+    #                     g_text,
+    #                     "dashed",
+    #                     "grey",
+    #                     ("center", "center"),
+    #                 )
+    #             )
+    #             dft_g_dict[g] = [
+    #                 (yx, xx),
+    #                 math.sqrt(g_total),
+    #                 round(g_total)
+    #             ]  # used for placement of circles
+    #             # project data
+    #             dft_l_group_dict[g] = list(reversed(sorted(dft_l_group_list)))
+    #             # portfolio data
+    #         p_text = "Portfolio\n" + dandelion_number_text(p_total)
+    #         dft_g_list.append(
+    #             (
+    #                 (0, 0),
+    #                 math.sqrt(p_total),
+    #                 "#cb1f00",
+    #                 p_text,
+    #                 "solid",
+    #                 "#cb1f00",
+    #                 ("center", "center"),
+    #             )
+    #         )
+    #
+    #         ## circles around outer ring of circles
+    #         for g in dft_l_group_dict.keys():
+    #             lg = dft_l_group_dict[g]  # local group
+    #             ang_list = cal_group_angle(360, lg, all=True)
+    #             for i, p in enumerate(lg):
+    #                 a = dft_g_dict[g][0][0]  # y axis position
+    #                 b = dft_g_dict[g][0][1]  # x axis position
+    #                 b_size = p[0]  # bubble size. This is sqrt wlc
+    #                 colour = p[1]  # rag colour
+    #                 name = self.master.abbreviations[p[2]]["abb"]  # project name/abbreviation
+    #                 wlc = p[3]
+    #
+    #                 if 20 >= len(lg) >= 1:
+    #                     if 0.02 <= dft_g_dict[g][2]/p_total <= 0.15:
+    #                         yx = a + (dft_g_dict[g][1]*2.5) * math.sin(
+    #                             math.radians(ang_list[i])
+    #                         )
+    #                         xx = b + (dft_g_dict[g][1]*2.5) * math.cos(
+    #                             math.radians(ang_list[i])
+    #                         )
+    #                     elif dft_g_dict[g][2]/p_total < 0.019:  # HERE
+    #                         yx = a + (dft_g_dict[g][1]*4) * math.sin(
+    #                             math.radians(ang_list[i])
+    #                         )
+    #                         xx = b + (dft_g_dict[g][1]*4) * math.cos(
+    #                             math.radians(ang_list[i])
+    #                         )
+    #                     elif dft_g_dict[g][2] / p_total > 0.5:  # dft_g_dict[g][2] wlc total group
+    #                         yx = a + (dft_g_dict[g][1] * 1.5) * math.sin(
+    #                             math.radians(ang_list[i])
+    #                         )
+    #                         xx = b + (dft_g_dict[g][1] * 1.5) * math.cos(
+    #                             math.radians(ang_list[i])
+    #                         )
+    #                     else:
+    #                         yx = a + (dft_g_dict[g][1] * 2) * math.sin(
+    #                             math.radians(ang_list[i])
+    #                         )
+    #                         xx = b + (dft_g_dict[g][1] * 2) * math.cos(
+    #                             math.radians(ang_list[i])
+    #                         )
+    #
+    #                 yx_text_position = (xx/1000 + (yx/1000 + b_size/9) * math.sin(math.radians(ang_list[i])),
+    #                                     yx/1000 + (xx/1000 + b_size/9) * math.cos(math.radians(ang_list[i])))
+    #
+    #                 if 189 >= ang_list[i] >= 171:
+    #                     text_angle = ("center", "top")
+    #                 if 9 >= ang_list[i] or 351 <= ang_list[i]:
+    #                     text_angle = ("center", "bottom")
+    #                 if 170 >= ang_list[i] >= 10:
+    #                     text_angle = ("left", "center")
+    #                 if 350 >= ang_list[i] >= 190:
+    #                     text_angle = ("right", "center")
+    #
+    #                 project_text = name + "\n" + dandelion_number_text(wlc)
+    #                 if p[2] in self.master.dft_groups[tp]["GMPP"]:   # p[2] is full project name
+    #                     edge_colour = "#000000"
+    #                 else:
+    #                     edge_colour = colour
+    #                 dft_g_list.append(
+    #                     (
+    #                         (yx, xx),
+    #                         b_size,
+    #                         colour,
+    #                         project_text,
+    #                         "solid",
+    #                         edge_colour,
+    #                         text_angle,
+    #                         yx_text_position
+    #                     )
+    #                 )
+    #
+    #     self.d_data = dft_g_list
+
     def get_data(self):
-        #  for dandelion need groups of groups.
-        if "group" in self.kwargs:
-            self.group = self.kwargs["group"]
-        elif "stage" in self.kwargs:
-            self.group = self.kwargs["stage"]
-
-        self.iter_list = get_iter_list(self.kwargs, self.master)
-        for tp in self.iter_list:   # not currently collecting data x-qrts
-            # cal group angle. do function.
-            # if len(self.group) > 1:
-            #     g_ang_list = cal_group_angle(180, self.group)
-            if len(self.group) == 4:  # need to develop a function here.
-                g_ang_list = [40, 100, 260, 320]
-                g_ang_list = [260, 320, 40, 100]
-            dft_g_list = []
-            dft_g_dict = {}  # first outer circle group
-            dft_l_group_dict = {}  # second group around first outer circle group
-            p_total = 0  # portfolio total
-
-            ## circles around center circle
-            for i, g in enumerate(self.group):  # group
-                dft_l_group = get_group(self.master, tp, self.kwargs, i)
-                g_total = 0
-                dft_l_group_list = []
-                for p in dft_l_group:
-                    p_data = get_correct_p_data(
-                        self.kwargs, self.master, self.baseline_type, p, tp
-                    )
-                    if "meta" in self.kwargs:
-                        try:
-                            if self.kwargs["meta"] == "remaining":
-                                costs_data = CostData(
-                                    self.master, quarter=[tp], group=[p]
-                                )
-                                b_size = (
-                                    costs_data.c_totals[tp]["prof"]
-                                    + costs_data.c_totals[tp]["unprof"]
-                                )
-                                p_total = (
-                                    self.c.c_totals[tp]["prof"]
-                                    + self.c.c_totals[tp]["unprof"]
-                                )
-                            elif self.kwargs["meta"] == "spent":
-                                costs_data = CostData(
-                                    self.master, quarter=[tp], group=[p]
-                                )
-                                b_size = costs_data.c_totals[tp]["spent"]
-                                p_total = self.c.c_totals[tp]["spent"]
-                            else:
-                                b_size = p_data[self.kwargs["meta"]]
-                        except KeyError:
-                            logger.critical(self.kwargs["meta"] + " not recognised")
-                    else:
-                        b_size = p_data["Total Forecast"]
-                        p_total = self.c.wlc_dict[tp]["total"]
-                    rag = p_data["Departmental DCA"]
-                    colour = COLOUR_DICT[convert_rag_text(rag)]
-                    g_total += b_size
-                    dft_l_group_list.append(
-                        (
-                            math.sqrt(b_size),
-                            colour,
-                            p,
-                            b_size
-                        )
-                    )
-                yx = 0 + ((math.sqrt(p_total) * 3) + (math.sqrt(p_total)*.2)) * math.sin(math.radians(g_ang_list[i]))   # y axis
-                xx = 0 + (math.sqrt(p_total) * 3) * math.cos(math.radians(g_ang_list[i]))   # x axis
-
-                # list is tuple axis point, bubble size, colour, line style, line color, text position
-                g_text = g + "\n" + dandelion_number_text(g_total)  # group text
-                dft_g_list.append(
-                    (
-                        (yx, xx),
-                        math.sqrt(g_total),
-                        "#FFFFFF",
-                        g_text,
-                        "dashed",
-                        "grey",
-                        ("center", "center"),
-                    )
-                )
-                dft_g_dict[g] = [
-                    (yx, xx),
-                    math.sqrt(g_total),
-                    round(g_total)
-                ]  # used for placement of circles
-                # project data
-                dft_l_group_dict[g] = list(reversed(sorted(dft_l_group_list)))
-                # portfolio data
-            p_text = "Portfolio\n" + dandelion_number_text(p_total)
-            dft_g_list.append(
-                (
-                    (0, 0),
-                    math.sqrt(p_total),
-                    "#cb1f00",
-                    p_text,
-                    "solid",
-                    "#cb1f00",
-                    ("center", "center"),
-                )
-            )
-
-            ## circles around outer ring of circles
-            for g in dft_l_group_dict.keys():
-                lg = dft_l_group_dict[g]  # local group
-                ang_list = cal_group_angle(360, lg, all=True)
-                for i, p in enumerate(lg):
-                    a = dft_g_dict[g][0][0]  # y axis position
-                    b = dft_g_dict[g][0][1]  # x axis position
-                    b_size = p[0]  # bubble size. This is sqrt wlc
-                    colour = p[1]  # rag colour
-                    name = self.master.abbreviations[p[2]]["abb"]  # project name/abbreviation
-                    wlc = p[3]
-
-                    if 20 >= len(lg) >= 1:
-                        if 0.02 <= dft_g_dict[g][2]/p_total <= 0.15:
-                            yx = a + (dft_g_dict[g][1]*2.5) * math.sin(
-                                math.radians(ang_list[i])
-                            )
-                            xx = b + (dft_g_dict[g][1]*2.5) * math.cos(
-                                math.radians(ang_list[i])
-                            )
-                        elif dft_g_dict[g][2]/p_total < 0.019:  # HERE
-                            yx = a + (dft_g_dict[g][1]*4) * math.sin(
-                                math.radians(ang_list[i])
-                            )
-                            xx = b + (dft_g_dict[g][1]*4) * math.cos(
-                                math.radians(ang_list[i])
-                            )
-                        elif dft_g_dict[g][2] / p_total > 0.5:  # dft_g_dict[g][2] wlc total group
-                            yx = a + (dft_g_dict[g][1] * 1.5) * math.sin(
-                                math.radians(ang_list[i])
-                            )
-                            xx = b + (dft_g_dict[g][1] * 1.5) * math.cos(
-                                math.radians(ang_list[i])
-                            )
-                        else:
-                            yx = a + (dft_g_dict[g][1] * 2) * math.sin(
-                                math.radians(ang_list[i])
-                            )
-                            xx = b + (dft_g_dict[g][1] * 2) * math.cos(
-                                math.radians(ang_list[i])
-                            )
-
-                    yx_text_position = (xx/1000 + (yx/1000 + b_size/9) * math.sin(math.radians(ang_list[i])),
-                                        yx/1000 + (xx/1000 + b_size/9) * math.cos(math.radians(ang_list[i])))
-
-                    if 189 >= ang_list[i] >= 171:
-                        text_angle = ("center", "top")
-                    if 9 >= ang_list[i] or 351 <= ang_list[i]:
-                        text_angle = ("center", "bottom")
-                    if 170 >= ang_list[i] >= 10:
-                        text_angle = ("left", "center")
-                    if 350 >= ang_list[i] >= 190:
-                        text_angle = ("right", "center")
-
-                    project_text = name + "\n" + dandelion_number_text(wlc)
-                    if p[2] in self.master.dft_groups[tp]["GMPP"]:   # p[2] is full project name
-                        edge_colour = "#000000"
-                    else:
-                        edge_colour = colour
-                    dft_g_list.append(
-                        (
-                            (yx, xx),
-                            b_size,
-                            colour,
-                            project_text,
-                            "solid",
-                            edge_colour,
-                            text_angle,
-                            yx_text_position
-                        )
-                    )
-
-        self.d_list = dft_g_list
-
-    def get_data_2(self):
         self.iter_list = get_iter_list(self.kwargs, self.master)
         for tp in self.iter_list:
             #  for dandelion need groups of groups.
@@ -7775,14 +7811,14 @@ class DandelionData:
             g_d = {}  # group dictionary. first outer circle.
             l_g_d = {}  # lower group dictionary
 
-            pf_wlc = self.c.wlc_dict[tp]["total"]  # portfolio wlc
-            pf_colour = "#cb1f00"   # option to specfic pf colour
+            pf_wlc = get_dandelion_meta_total(self.master, tp, self.group, self.kwargs)  # portfolio wlc
+            pf_colour = "#cb1f00"   # option to specfic pf coloum
             pf_text = "Portfolio\n" + dandelion_number_text(pf_wlc)  # option to specify pf name
 
             ## center circle
             g_d["portfolio"] = {
                 "axis": (0, 0),
-                "r": math.sqrt(p_wlc),
+                "r": math.sqrt(pf_wlc),
                 "colour": pf_colour,
                 "text": pf_text,
                 "fill": "solid",
@@ -7792,25 +7828,22 @@ class DandelionData:
 
             ## first outer circle
             for i, g in enumerate(self.group):
-                l_group = get_group(self.master, tp, self.kwargs, i)  # lower group
-                g_total = 0
-                l_g_l = []  # lower group list
-                for p in l_group:
-                    p_data = get_correct_p_data(
-                        self.kwargs, self.master, self.baseline_type, p, tp
-                    )
-                    ### insert meta here later
+                # l_group = get_group(self.master, tp, self.kwargs, i)  # lower group
+                # g_wlc = 0
+                # l_g_l = []  # lower group list
 
-                    ## project / second circle info here. why?
-                    p_wlc = p_data["Total Forecast"]
-                    g_wlc += p_wlc
+                g_wlc = get_dandelion_meta_total(self.master, tp, g, self.kwargs)
 
-                    l_g_l.append((p, p_wlc))
+                # for x in self.c.wlc_dict[g]:
+                #     p = x[1]  # project. keeping from a tuple to make sure order of p is correct
+                #     # p_wlc = x[0]  # wlc
+                #     # g_wlc += p_wlc   # group wlc
+                #     l_g_l.append(p)
 
                 y_axis = 0 + ((math.sqrt(pf_wlc) * 3) + (math.sqrt(pf_wlc) * .2)) * math.sin(
                     math.radians(g_ang_l[i]))
                 x_axis = 0 + (math.sqrt(pf_wlc) * 3) * math.cos(math.radians(g_ang_l[i]))
-                g_text = g + "\n" + dandelion_number_text(g_total)  # group text
+                g_text = g + "\n" + dandelion_number_text(g_wlc)  # group text
                 g_d[g] = {
                     "axis": (y_axis, x_axis),
                     "r": math.sqrt(g_wlc),
@@ -7822,24 +7855,26 @@ class DandelionData:
                     "alignment": ("center", "center")
                 }
 
-                l_g_d[g] = list(reversed(sorted(l_g_l)))
+                l_g_d[g] = sort_group_by_key("Total Forecast", i, self.master, self.baseline_type, tp, self.kwargs)
 
             ## second outer circle
             for g in self.group:
-                lg = l_g_d[g]  # local group
-                ang_l = cal_group_angle(360, lg, all=True)
+                p_wlc, p_name = zip(*l_g_d[g])   # can simply, but sort_group_by_key only returning p list
+                ang_l = cal_group_angle(360, p_name, all=True)
                 g_wlc = g_d[g]["wlc"]
                 g_radius = g_d[g]["r"]
                 g_y_axis = g_d[g]["axis"][0]  # group y axis
                 g_x_axis = g_d[g]["axis"][1]  # group x axis
-                for i, p in enumerate(lg):
+                for i, p in enumerate(p_name):
                     p_data = get_correct_p_data(
                         self.kwargs, self.master, self.baseline_type, p, tp
                     )
-                    p_wlc = p_data["Total Forecast"]  # project wlc
+                    p_wlc = get_dandelion_meta_total(self.master, tp, p, self.kwargs)  # project wlc
+
+
                     rag = p_data["Departmental DCA"]
                     colour = COLOUR_DICT[convert_rag_text(rag)]   # bubble colour
-                    project_text = self.master.abbreviations[p[2]]["abb"] + "\n" + dandelion_number_text(p_wlc)
+                    project_text = self.master.abbreviations[p]["abb"] + "\n" + dandelion_number_text(p_wlc)
                     if p in self.master.dft_groups[tp]["GMPP"]:
                         edge_colour = "#000000"   # edge of bubble
                     else:
@@ -7888,7 +7923,7 @@ class DandelionData:
                         p_y_axis / 1000 + (p_x_axis / 1000 + math.sqrt(p_wlc) / 9) * math.cos(math.radians(ang_l[i]))
                     )
 
-                    g_d[g] = {
+                    g_d[p] = {
                         "axis": (p_y_axis, p_x_axis),
                         "r": math.sqrt(p_wlc),
                         "wlc": p_wlc,
@@ -8163,39 +8198,40 @@ def make_a_dandelion_manual(wb: Union[str, bytes, os.PathLike]):
     return plt
 
 
-def make_a_dandelion_auto(dl_data: DandelionData, **kwargs):
+def make_a_dandelion_auto(dl: DandelionData, **kwargs):
     fig, ax = plt.subplots()
+
     # plt.figure(figsize=(20, 10))
     # title = get_chart_title(dl_data, kwargs, "dandelion")
     # plt.suptitle(title, fontweight="bold", fontsize=10)
-    for c in range(len(dl_data.d_list)):
+
+    for c in dl.d_data.keys():
         circle = plt.Circle(
-            dl_data.d_list[c][0],  # x, y position
-            radius=dl_data.d_list[c][1],  # bubble size
-            fc=dl_data.d_list[c][2],  # face colour
-            linestyle=dl_data.d_list[c][4],
-            ec=dl_data.d_list[c][5],  # edge colour
+            dl.d_data[c]["axis"],  # x, y position
+            radius=dl.d_data[c]["r"],
+            fc=dl.d_data[c]["colour"],  # face colour
+            linestyle=dl.d_data[c]["fill"],
+            ec=dl.d_data[c]["ec"],  # edge colour
         )
         ax.add_patch(circle)
         try:
             ax.annotate(
-                dl_data.d_list[c][3],  # text
-                xy=dl_data.d_list[c][0],  # x, y position
-                xytext=dl_data.d_list[c][7],  # text position
+                dl.d_data[c]["text"],  # text
+                xy=dl.d_data[c]["axis"],  # x, y position
+                xytext=dl.d_data[c]["tp"],  # text position
                 fontsize=6,
                 textcoords="offset points",
-                horizontalalignment=dl_data.d_list[c][6][0],
-                verticalalignment=dl_data.d_list[c][6][1],
+                horizontalalignment=dl.d_data[c]["alignment"][0],
+                verticalalignment=dl.d_data[c]["alignment"][1],
             )
-        except IndexError:
+        except KeyError:
             ax.annotate(
-                dl_data.d_list[c][3],  # text
-                xy=dl_data.d_list[c][0],  # x, y position
+                dl.d_data[c]["text"],  # text
+                xy=dl.d_data[c]["axis"],  # x, y position
                 fontsize=6,
-                horizontalalignment=dl_data.d_list[c][6][0],
-                verticalalignment=dl_data.d_list[c][6][1],
+                horizontalalignment=dl.d_data[c]["alignment"][0],
+                verticalalignment=dl.d_data[c]["alignment"][1],
             )
-        # plt.gca().add_patch(circle)
 
     plt.axis("scaled")
     plt.axis("off")
