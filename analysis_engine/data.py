@@ -7855,26 +7855,32 @@ class DandelionData:
                     "alignment": ("center", "center")
                 }
 
-                l_g_d[g] = sort_group_by_key("Total Forecast", i, self.master, self.baseline_type, tp, self.kwargs)
+                # l_g_d[g] = sort_group_by_key("Total Forecast", i, self.master, self.baseline_type, tp, self.kwargs)
 
             ## second outer circle
+            for i, g in enumerate(self.group):
+                group = get_group(self.master, tp, self.kwargs, i)  # lower group
+                p_list = []
+                for p in group:
+                    p_value = get_dandelion_meta_total(self.master, tp, p, self.kwargs)  # project wlc
+                    p_list.append((p_value, p))
+                l_g_d[g] = list(reversed(sorted(p_list)))
+
             for g in self.group:
-                p_wlc, p_name = zip(*l_g_d[g])   # can simply, but sort_group_by_key only returning p list
-                ang_l = cal_group_angle(360, p_name, all=True)
                 g_wlc = g_d[g]["wlc"]
                 g_radius = g_d[g]["r"]
                 g_y_axis = g_d[g]["axis"][0]  # group y axis
                 g_x_axis = g_d[g]["axis"][1]  # group x axis
-                for i, p in enumerate(p_name):
+                p_values_list, p_list = zip(*l_g_d[g])
+                ang_l = cal_group_angle(360, p_list, all=True)
+                for i, p in enumerate(p_list):
+                    p_value = p_values_list[i]
                     p_data = get_correct_p_data(
                         self.kwargs, self.master, self.baseline_type, p, tp
                     )
-                    p_wlc = get_dandelion_meta_total(self.master, tp, p, self.kwargs)  # project wlc
-
-
                     rag = p_data["Departmental DCA"]
                     colour = COLOUR_DICT[convert_rag_text(rag)]   # bubble colour
-                    project_text = self.master.abbreviations[p]["abb"] + "\n" + dandelion_number_text(p_wlc)
+                    project_text = self.master.abbreviations[p]["abb"] + "\n" + dandelion_number_text(p_value)
                     if p in self.master.dft_groups[tp]["GMPP"]:
                         edge_colour = "#000000"   # edge of bubble
                     else:
@@ -7919,14 +7925,14 @@ class DandelionData:
                         text_angle = ("right", "center")
 
                     yx_text_position = (
-                        p_x_axis / 1000 + (p_y_axis / 1000 + math.sqrt(p_wlc) / 9) * math.sin(math.radians(ang_l[i])),
-                        p_y_axis / 1000 + (p_x_axis / 1000 + math.sqrt(p_wlc) / 9) * math.cos(math.radians(ang_l[i]))
+                        p_x_axis / 1000 + (p_y_axis / 1000 + math.sqrt(p_value) / 9) * math.sin(math.radians(ang_l[i])),
+                        p_y_axis / 1000 + (p_x_axis / 1000 + math.sqrt(p_value) / 9) * math.cos(math.radians(ang_l[i]))
                     )
 
                     g_d[p] = {
                         "axis": (p_y_axis, p_x_axis),
-                        "r": math.sqrt(p_wlc),
-                        "wlc": p_wlc,
+                        "r": math.sqrt(p_value),
+                        "wlc": p_value,
                         "colour": colour,
                         "text": project_text,
                         "fill": "solid",
