@@ -457,7 +457,15 @@ def dandelion(args):
     try:
         print("compiling dandelion analysis")
         m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
-        if args["group"]:
+        if args["group"] and args["meta"]:
+            d_data = DandelionData(
+                m, quarter=[str(m.current_quarter)], group=args["group"], meta=args["meta"]
+            )
+        elif args["stage"] and args["meta"]:
+            d_data = DandelionData(
+                m, quarter=[str(m.current_quarter)], group=args["stage"], meta=args["meta"]
+            )
+        elif args["group"]:
             d_data = DandelionData(
                 m, quarter=[str(m.current_quarter)], group=args["group"]
             )
