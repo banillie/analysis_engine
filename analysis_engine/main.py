@@ -472,7 +472,6 @@ def dandelion(args):
                 group=["HSMRPG", "AMIS", "Rail", "RPE"],
                 meta=args["meta"],
             )
-
         else:
             d_data = DandelionData(
                 m,
@@ -671,7 +670,7 @@ def main():
         type=str,
         metavar="",
         action="store",
-        choices=["spent", "remaining"],
+        choices=["spent", "remaining", "benefits"],
         help="Provide the type of value to include in dandelion e.g spent, remaining",
     )
 
