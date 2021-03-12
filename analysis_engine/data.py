@@ -7910,13 +7910,34 @@ class DandelionData:
                         p_x_axis = g_x_axis + (g_radius * 1.75) * math.cos(
                             math.radians(ang_l[i])
                         )
-                    elif 0.02 <= g_wlc / pf_wlc <= 0.1:
+                    elif 0.09 <= g_wlc / pf_wlc <= 0.24:
+                        p_y_axis = g_y_axis + (g_radius * 2) * math.sin(
+                            math.radians(ang_l[i])
+                        )
+                        p_x_axis = g_x_axis + (g_radius * 2) * math.cos(
+                            math.radians(ang_l[i])
+                        )
+                    elif 0.05 <= g_wlc / pf_wlc <= 0.1:
                         p_y_axis = g_y_axis + (g_radius * 2.5) * math.sin(
                             math.radians(ang_l[i])
-                        )  # project y axis
+                        )
                         p_x_axis = g_x_axis + (g_radius * 2.5) * math.cos(
                             math.radians(ang_l[i])
-                        )  # project x axis
+                        )
+                    elif 0.02 <= g_wlc / pf_wlc <= 0.49:
+                        p_y_axis = g_y_axis + (g_radius * 3.25) * math.sin(
+                            math.radians(ang_l[i])
+                        )
+                        p_x_axis = g_x_axis + (g_radius * 3.25) * math.cos(
+                            math.radians(ang_l[i])
+                        )
+                    elif g_wlc == 0:
+                        p_y_axis = g_y_axis + 75 * math.sin(
+                            math.radians(ang_l[i])
+                        )
+                        p_x_axis = g_x_axis + 75 * math.cos(
+                            math.radians(ang_l[i])
+                        )
                     elif g_wlc / pf_wlc < 0.019:
                         p_y_axis = g_y_axis + (g_radius * 4) * math.sin(
                             math.radians(ang_l[i])
@@ -7924,21 +7945,6 @@ class DandelionData:
                         p_x_axis = g_x_axis + (g_radius * 4) * math.cos(
                             math.radians(ang_l[i])
                         )
-                    else:
-                        if len(p_list) >= 14:
-                            p_y_axis = g_y_axis + (g_radius * 2.5) * math.sin(
-                                math.radians(ang_l[i])
-                            )
-                            p_x_axis = g_x_axis + (g_radius * 2.5) * math.cos(
-                                math.radians(ang_l[i])
-                            )
-                        else:
-                            p_y_axis = g_y_axis + (g_radius * 2) * math.sin(
-                                math.radians(ang_l[i])
-                            )
-                            p_x_axis = g_x_axis + (g_radius * 2) * math.cos(
-                                math.radians(ang_l[i])
-                            )
 
                     if 194 >= ang_l[i] >= 156:
                         text_angle = ("center", "top")
@@ -7949,32 +7955,26 @@ class DandelionData:
                     if 335 >= ang_l[i] >= 195:
                         text_angle = ("right", "center")
 
-                    if g_wlc == 0:
+
+                    if p_value / g_wlc > 0.15:
                         yx_text_position = (
-                            p_y_axis / 1000 + (math.sqrt(p_value) / 2)
+                            p_y_axis + (math.sqrt(p_value)*1.3)
                             * math.sin(math.radians(ang_l[i])),
-                            p_x_axis / 1000 + (math.sqrt(p_value) / 2)
+                            p_x_axis + (math.sqrt(p_value)*1.3)
                             * math.cos(math.radians(ang_l[i])),
                         )
-                    elif p_value / g_wlc > 0.45:
+                    elif 0.16 >= p_value / g_wlc > 0.09:
                         yx_text_position = (
-                            p_y_axis/1000 + (math.sqrt(p_value) / 10)
+                            p_y_axis + (math.sqrt(p_value)*1.5)
                             * math.sin(math.radians(ang_l[i])),
-                            p_x_axis/1000 + (math.sqrt(p_value) / 10)
+                            p_x_axis + (math.sqrt(p_value)*1.5)
                             * math.cos(math.radians(ang_l[i])),
                         )
-                    elif p_value / g_wlc > 0.2:
+                    else:
                         yx_text_position = (
-                            p_y_axis/1000 + (math.sqrt(p_value) / 8)
+                            p_y_axis + (math.sqrt(p_value)*2)
                             * math.sin(math.radians(ang_l[i])),
-                            p_x_axis/1000 + (math.sqrt(p_value) / 8)
-                            * math.cos(math.radians(ang_l[i])),
-                        )
-                    elif p_value / g_wlc < 0.2:
-                        yx_text_position = (
-                            p_y_axis / 1000 + (math.sqrt(p_value) / 6)
-                            * math.sin(math.radians(ang_l[i])),
-                            p_x_axis / 1000 + (math.sqrt(p_value) / 6)
+                            p_x_axis + (math.sqrt(p_value)*2)
                             * math.cos(math.radians(ang_l[i])),
                         )
 
@@ -8272,9 +8272,10 @@ def make_a_dandelion_auto(dl: DandelionData, **kwargs):
             ax.annotate(
                 dl.d_data[c]["text"],  # text
                 xy=dl.d_data[c]["axis"],  # x, y position
+                xycoords="data",
                 xytext=dl.d_data[c]["tp"],  # text position
                 fontsize=6,
-                textcoords="offset pixels",
+                # textcoords="offset pixels",
                 horizontalalignment=dl.d_data[c]["alignment"][0],
                 verticalalignment=dl.d_data[c]["alignment"][1],
             )
