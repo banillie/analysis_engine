@@ -7809,6 +7809,8 @@ class DandelionData:
 
             if len(self.group) == 4:
                 g_ang_l = [260, 320, 40, 100]  # group angle list
+            if len(self.group) == 1:
+                pass
             g_d = {}  # group dictionary. first outer circle.
             l_g_d = {}  # lower group dictionary
 
@@ -7834,24 +7836,39 @@ class DandelionData:
             ## first outer circle
             for i, g in enumerate(self.group):
                 g_wlc = get_dandelion_meta_total(self.master, tp, g, self.kwargs)
+                if len(self.group) > 1:
+                    y_axis = 0 + (
+                            (math.sqrt(pf_wlc) * 3) + (math.sqrt(pf_wlc) * 0.2)
+                    ) * math.sin(math.radians(g_ang_l[i]))
+                    x_axis = 0 + (math.sqrt(pf_wlc) * 3) * math.cos(
+                        math.radians(g_ang_l[i])
+                    )
+                    g_text = g + "\n" + dandelion_number_text(g_wlc)  # group text
+                    g_d[g] = {
+                        "axis": (y_axis, x_axis),
+                        "r": math.sqrt(g_wlc),
+                        "wlc": g_wlc,
+                        "colour": "#FFFFFF",
+                        "text": g_text,
+                        "fill": "dashed",
+                        "ec": "grey",
+                        "alignment": ("center", "center"),
+                    }
 
-                y_axis = 0 + (
-                        (math.sqrt(pf_wlc) * 3) + (math.sqrt(pf_wlc) * 0.2)
-                ) * math.sin(math.radians(g_ang_l[i]))
-                x_axis = 0 + (math.sqrt(pf_wlc) * 3) * math.cos(
-                    math.radians(g_ang_l[i])
-                )
-                g_text = g + "\n" + dandelion_number_text(g_wlc)  # group text
-                g_d[g] = {
-                    "axis": (y_axis, x_axis),
-                    "r": math.sqrt(g_wlc),
-                    "wlc": g_wlc,
-                    "colour": "#FFFFFF",
-                    "text": g_text,
-                    "fill": "dashed",
-                    "ec": "grey",
-                    "alignment": ("center", "center"),
-                }
+                else:
+                    g_d = {}
+                    pf_wlc = g_wlc * 3
+                    g_text = g + "\n" + dandelion_number_text(g_wlc)  # group text
+                    g_d[g] = {
+                        "axis": (0, 0),
+                        "r": math.sqrt(g_wlc),
+                        "wlc": g_wlc,
+                        "colour": "#FFFFFF",
+                        "text": g_text,
+                        "fill": "dashed",
+                        "ec": "grey",
+                        "alignment": ("center", "center"),
+                    }
 
             ## second outer circle
             for i, g in enumerate(self.group):
@@ -7890,17 +7907,24 @@ class DandelionData:
 
                     # multi = math.sqrt(pf_wlc/g_wlc)  # multiplier
                     # multi = (1 - (g_wlc / pf_wlc)) * 3
-                    if len(p_list) >= 14:
-                        multi = (pf_wlc / g_wlc) ** (1. / 2.)  # square root
-                    else:
-                        multi = (pf_wlc/g_wlc)**(1. / 3.)  # cube root
-
-                    p_y_axis = g_y_axis + (g_radius * multi) * math.sin(
-                        math.radians(ang_l[i])
-                    )
-                    p_x_axis = g_x_axis + (g_radius * multi) * math.cos(
-                        math.radians(ang_l[i])
-                    )
+                    try:
+                        if len(p_list) >= 14:
+                            multi = (pf_wlc / g_wlc) ** (1. / 2.)  # square root
+                        else:
+                            multi = (pf_wlc / g_wlc) ** (1. / 3.)  # cube root
+                        p_y_axis = g_y_axis + (g_radius * multi) * math.sin(
+                            math.radians(ang_l[i])
+                        )
+                        p_x_axis = g_x_axis + (g_radius * multi) * math.cos(
+                            math.radians(ang_l[i])
+                        )
+                    except ZeroDivisionError:
+                        p_y_axis = g_y_axis + 100 * math.sin(
+                            math.radians(ang_l[i])
+                        )
+                        p_x_axis = g_x_axis + 100 * math.cos(
+                            math.radians(ang_l[i])
+                        )
 
                     if 194 >= ang_l[i] >= 156:
                         text_angle = ("center", "top")
@@ -8228,7 +8252,7 @@ def make_a_dandelion_auto(dl: DandelionData, **kwargs):
             ax.annotate(
                 dl.d_data[c]["text"],  # text
                 xy=dl.d_data[c]["axis"],  # x, y position
-                fontsize=6,
+                fontsize=10,
                 horizontalalignment=dl.d_data[c]["alignment"][0],
                 verticalalignment=dl.d_data[c]["alignment"][1],
                 weight="bold",  # bold here as will be group text
