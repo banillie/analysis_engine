@@ -7888,7 +7888,13 @@ class DandelionData:
                     else:
                         edge_colour = colour
 
-                    multi = (1 - (g_wlc / pf_wlc)) * 2.75   # multiplier
+                    # multi = math.sqrt(pf_wlc/g_wlc)  # multiplier
+                    # multi = (1 - (g_wlc / pf_wlc)) * 3
+                    if len(p_list) >= 14:
+                        multi = (pf_wlc / g_wlc) ** (1. / 2.)  # square root
+                    else:
+                        multi = (pf_wlc/g_wlc)**(1. / 3.)  # cube root
+
                     p_y_axis = g_y_axis + (g_radius * multi) * math.sin(
                         math.radians(ang_l[i])
                     )
@@ -7905,8 +7911,10 @@ class DandelionData:
                     if 335 >= ang_l[i] >= 195:
                         text_angle = ("right", "center")
 
-                    t_multi = (1 - (p_value/g_wlc)) * 1.8  # text multipler
-                    if t_multi == 0:
+                    try:
+                        t_multi = (g_wlc/p_value) ** (1. / 4.)
+                        # t_multi = (1 - (p_value/g_wlc)) * 2  # text multiplier
+                    except ZeroDivisionError:
                         t_multi = 1
                     yx_text_position = (
                         p_y_axis + (math.sqrt(p_value) * t_multi)
@@ -8191,8 +8199,8 @@ def make_a_dandelion_manual(wb: Union[str, bytes, os.PathLike]):
 
 def make_a_dandelion_auto(dl: DandelionData, **kwargs):
     fig, ax = plt.subplots()
-
-    # plt.fig(figsize=(20, 10))
+    fig.set_size_inches(18.5, 10.5)
+    ax.set_facecolor('xkcd:salmon')  # TBC if face colour is required
     # title = get_chart_title(dl_data, kwargs, "dandelion")
     # plt.suptitle(title, fontweight="bold", fontsize=10)
 
