@@ -7888,63 +7888,13 @@ class DandelionData:
                     else:
                         edge_colour = colour
 
-                    if g_wlc / pf_wlc >= 0.5:
-                        if len(p_list) >= 14:
-                            p_y_axis = g_y_axis + (g_radius * 1.25) * math.sin(
-                                math.radians(ang_l[i])
-                            )
-                            p_x_axis = g_x_axis + (g_radius * 1.25) * math.cos(
-                                math.radians(ang_l[i])
-                            )
-                        else:
-                            p_y_axis = g_y_axis + (g_radius * 1.5) * math.sin(
-                                math.radians(ang_l[i])
-                            )
-                            p_x_axis = g_x_axis + (g_radius * 1.5) * math.cos(
-                                math.radians(ang_l[i])
-                            )
-                    elif 0.25 <= g_wlc / pf_wlc <= 0.5:
-                        p_y_axis = g_y_axis + (g_radius * 1.75) * math.sin(
-                            math.radians(ang_l[i])
-                        )
-                        p_x_axis = g_x_axis + (g_radius * 1.75) * math.cos(
-                            math.radians(ang_l[i])
-                        )
-                    elif 0.09 <= g_wlc / pf_wlc <= 0.24:
-                        p_y_axis = g_y_axis + (g_radius * 2) * math.sin(
-                            math.radians(ang_l[i])
-                        )
-                        p_x_axis = g_x_axis + (g_radius * 2) * math.cos(
-                            math.radians(ang_l[i])
-                        )
-                    elif 0.05 <= g_wlc / pf_wlc <= 0.1:
-                        p_y_axis = g_y_axis + (g_radius * 2.5) * math.sin(
-                            math.radians(ang_l[i])
-                        )
-                        p_x_axis = g_x_axis + (g_radius * 2.5) * math.cos(
-                            math.radians(ang_l[i])
-                        )
-                    elif 0.02 <= g_wlc / pf_wlc <= 0.49:
-                        p_y_axis = g_y_axis + (g_radius * 3.25) * math.sin(
-                            math.radians(ang_l[i])
-                        )
-                        p_x_axis = g_x_axis + (g_radius * 3.25) * math.cos(
-                            math.radians(ang_l[i])
-                        )
-                    elif g_wlc == 0:
-                        p_y_axis = g_y_axis + 75 * math.sin(
-                            math.radians(ang_l[i])
-                        )
-                        p_x_axis = g_x_axis + 75 * math.cos(
-                            math.radians(ang_l[i])
-                        )
-                    elif g_wlc / pf_wlc < 0.019:
-                        p_y_axis = g_y_axis + (g_radius * 4) * math.sin(
-                            math.radians(ang_l[i])
-                        )
-                        p_x_axis = g_x_axis + (g_radius * 4) * math.cos(
-                            math.radians(ang_l[i])
-                        )
+                    multi = (1 - (g_wlc / pf_wlc)) * 2.75   # multiplier
+                    p_y_axis = g_y_axis + (g_radius * multi) * math.sin(
+                        math.radians(ang_l[i])
+                    )
+                    p_x_axis = g_x_axis + (g_radius * multi) * math.cos(
+                        math.radians(ang_l[i])
+                    )
 
                     if 194 >= ang_l[i] >= 156:
                         text_angle = ("center", "top")
@@ -7955,28 +7905,15 @@ class DandelionData:
                     if 335 >= ang_l[i] >= 195:
                         text_angle = ("right", "center")
 
-
-                    if p_value / g_wlc > 0.15:
-                        yx_text_position = (
-                            p_y_axis + (math.sqrt(p_value)*1.3)
-                            * math.sin(math.radians(ang_l[i])),
-                            p_x_axis + (math.sqrt(p_value)*1.3)
-                            * math.cos(math.radians(ang_l[i])),
-                        )
-                    elif 0.16 >= p_value / g_wlc > 0.09:
-                        yx_text_position = (
-                            p_y_axis + (math.sqrt(p_value)*1.5)
-                            * math.sin(math.radians(ang_l[i])),
-                            p_x_axis + (math.sqrt(p_value)*1.5)
-                            * math.cos(math.radians(ang_l[i])),
-                        )
-                    else:
-                        yx_text_position = (
-                            p_y_axis + (math.sqrt(p_value)*2)
-                            * math.sin(math.radians(ang_l[i])),
-                            p_x_axis + (math.sqrt(p_value)*2)
-                            * math.cos(math.radians(ang_l[i])),
-                        )
+                    t_multi = (1 - (p_value/g_wlc)) * 1.8  # text multipler
+                    if t_multi == 0:
+                        t_multi = 1
+                    yx_text_position = (
+                        p_y_axis + (math.sqrt(p_value) * t_multi)
+                        * math.sin(math.radians(ang_l[i])),
+                        p_x_axis + (math.sqrt(p_value) * t_multi)
+                        * math.cos(math.radians(ang_l[i])),
+                    )
 
                     g_d[p] = {
                         "axis": (p_y_axis, p_x_axis),
@@ -8255,7 +8192,7 @@ def make_a_dandelion_manual(wb: Union[str, bytes, os.PathLike]):
 def make_a_dandelion_auto(dl: DandelionData, **kwargs):
     fig, ax = plt.subplots()
 
-    # plt.figure(figsize=(20, 10))
+    # plt.fig(figsize=(20, 10))
     # title = get_chart_title(dl_data, kwargs, "dandelion")
     # plt.suptitle(title, fontweight="bold", fontsize=10)
 
