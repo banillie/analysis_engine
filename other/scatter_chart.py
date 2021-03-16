@@ -1,5 +1,5 @@
 import math
-# import numpy as np
+import numpy as np
 from typing import List
 from matplotlib import pyplot as plt
 
@@ -22,3 +22,4 @@ doc.save(root_path / "output/dlion_graph.docx")
 #
 # b = BenefitsData(m, baseline=["all"])
 # total_costs_benefits_bar_chart(c, b, chart=True)
+
