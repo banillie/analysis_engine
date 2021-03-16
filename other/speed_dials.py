@@ -14,20 +14,32 @@ from analysis_engine.data import (
 )
 
 
-# m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
-# dca = DcaData(m, quarter=["standard"])
+m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
+dca = DcaData(m, quarter=["standard"])
 # word_doc = dca_changes_into_word(dca, get_word_doc())
 # word_doc.save(root_path / "output/dca_changes.docx")
 
-# labels = ["R \n1", "A/R\n2", "A\n3", "A/G\n7", "G\n89"]
-colours = ["#c00000", "#e77200", "#ffba00", "#92a700", "#007d00"]
-count = [1, 2, 3, 69, 24]
-gauge(
-    count,
-    colours,
-    # count,
-    2.33,
-    2.55,
-    title="DCA OVERALL",
-    fname=True,
-)
+for conf_type in dca.dca_count["Q3 20/21"]:
+    count = []
+    for colour in ["Green", "Amber/Green", "Amber", "Amber/Red", "Red"]:
+        no = dca.dca_count["Q3 20/21"][conf_type][colour][0]
+        count.append(no)
+    total = dca.dca_count["Q3 20/21"][conf_type]["Total"][0]
+    up = 0
+    down = 0
+    for p in dca.dca_changes[conf_type]:
+        change = dca.dca_changes[conf_type][p]["Change"]
+        if change == "Up":
+            up += 1
+        if change == "Down":
+            down += 1
+
+    gauge(
+        count,
+        str(total),
+        2.5,
+        3.5,
+        str(up),
+        str(down),
+        title=conf_type,
+    )
