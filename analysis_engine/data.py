@@ -4072,17 +4072,20 @@ def dca_changes_into_excel(dca_data: DcaData) -> workbook:
             ws.cell(row=start_row + i, column=3).value = "Count"
             ws.cell(row=start_row + i, column=4).value = "Costs"
             ws.cell(row=start_row + i, column=5).value = "Proportion costs"
-            for x, colour in enumerate(list(dca_data.dca_count[tp][dca_type].keys())):
+            for x, colour in enumerate(
+                    ["Green", "Amber/Green", "Amber", "Amber/Red", "Red", None
+                        , "Total"]
+            ):
                 ws.cell(row=start_row + i + x + 1, column=2).value = colour
                 ws.cell(row=start_row + i + x + 1, column=3).value = (
-                    dca_data.dca_count[tp][dca_type][colour]
-                )[0]
+                    dca_data.dca_count[tp][dca_type][colour]["count"]
+                )
                 ws.cell(row=start_row + i + x + 1, column=4).value = (
-                    dca_data.dca_count[tp][dca_type][colour]
-                )[1]
+                    dca_data.dca_count[tp][dca_type][colour]["cost"]
+                )
                 ws.cell(row=start_row + i + x + 1, column=5).value = (
-                    dca_data.dca_count[tp][dca_type][colour]
-                )[2]
+                    dca_data.dca_count[tp][dca_type][colour]["ct"]
+                )
                 if colour is None:
                     ws.cell(row=start_row + i + x + 1, column=2).value = "None"
 

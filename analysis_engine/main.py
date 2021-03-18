@@ -64,7 +64,7 @@ from analysis_engine.data import (
     get_cost_stackplot_data,
     cost_stackplot_graph,
     cal_group,
-    make_a_dandelion_auto,
+    make_a_dandelion_auto, build_speedials,
 )
 
 import logging
@@ -79,9 +79,9 @@ logger = logging.getLogger(__name__)
 
 def run_correct_args(
     m: Master,
-    ae_class: MilestoneData or CostData or VfMData or DcaData or RiskData,
+    ae_class: CostData or VfMData or DcaData or RiskData,
     args: argparse.ArgumentParser,
-) -> MilestoneData or CostData or VfMData or DcaData:
+) -> CostData or VfMData or DcaData or RiskData:
     if args["quarters"] and args["stage"] and args["remove"]:
         data = ae_class(
             m, quarter=args["quarters"], stage=args["stage"], remove=args["remove"]
@@ -171,13 +171,13 @@ def run_general(args):
         if programme == "dcas":
             c = run_correct_args(m, DcaData, args)
             wb = dca_changes_into_excel(c)
-        if programme == "speedial":
-            doc = open_word_doc(root_path / "input/summary_temp.docx")
-            c = run_correct_args(m, DcaData, args)
-            c.get_changes()
-            doc = dca_changes_into_word(c, doc)
-            doc.save(root_path / "output/{}.docx".format(programme))
-            print(programme + " analysis has been compiled. Enjoy!")
+        # if programme == "speedial":
+        #     doc = open_word_doc(root_path / "input/summary_temp.docx")
+        #     c = run_correct_args(m, DcaData, args)
+        #     c.get_changes()
+        #     doc = dca_changes_into_word(c, doc)
+        #     doc.save(root_path / "output/{}.docx".format(programme))
+        #     print(programme + " analysis has been compiled. Enjoy!")
         if programme == "costs":
             doc = open_word_doc(root_path / "input/summary_temp.docx")
             c = run_correct_args(m, CostData, args)
@@ -203,10 +203,73 @@ def run_general(args):
     # print(programme + " analysis has been compiled. Enjoy!")
 
 
+def speedials(args):
+    print("compiling speed dial analysis. This one takes a little time.")
+    m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
+    ## quarters
+    if args["quarters"] and args["stage"] and args["remove"]:
+        data = DcaData(
+            m, quarter=args["quarters"], stage=args["stage"], remove=args["remove"]
+        )
+    elif args["quarters"] and args["group"] and args["remove"]:
+        data = DcaData(
+            m, quarter=args["quarters"], group=args["group"], remove=args["remove"]
+        )
+    elif args["quarters"] and args["stage"]:
+        data = DcaData(m, quarter=args["quarters"], stage=args["stage"])
+    elif args["quarters"] and args["group"]:
+        data = DcaData(m, quarter=args["quarters"], group=args["group"])
+    elif args["quarters"] and args["remove"]:
+        data = DcaData(m, quarter=args["quarters"], remove=args["remove"])
+
+    elif args["baselines"] and args["stage"] and args["remove"]:
+        data = DcaData(
+            m, baseline=args["baselines"], stage=args["stage"], remove=args["remove"]
+        )
+    elif args["baselines"] and args["group"] and args["remove"]:
+        data = DcaData(
+            m, baseline=args["baselines"], group=args["group"], remove=args["remove"]
+        )
+    elif args["baselines"] and args["stage"]:
+        data = DcaData(m, baseline=args["baselines"], stage=args["stage"])
+    elif args["baselines"] and args["group"]:
+        data = DcaData(m, baseline=args["baselines"], group=args["group"])
+    elif args["baselines"] and args["remove"]:
+        data = DcaData(m, baseline=args["baselines"], remove=args["remove"])
+    elif args["stage"] and args["remove"]:
+        data = DcaData(
+            m, quarter=["standard"], group=args["stage"], remove=args["remove"]
+        )
+    elif args["group"] and args["remove"]:
+        data = DcaData(
+            m, quarter=["standard"], group=args["group"], remove=args["remove"]
+        )
+    elif args["baselines"]:
+        data = DcaData(m, baseline=args["baselines"])
+    elif args["quarters"]:
+        data = DcaData(m, quarter=args["quarters"])
+    elif args["stage"]:
+        data = DcaData(m, quarter=["standard"], group=args["stage"])
+    elif args["group"]:
+        data = DcaData(m, quarter=["standard"], group=args["group"])
+    elif args["remove"]:  # HERE. NOT WORKING
+        data = DcaData(m, quarter=["standard"], remove=args["remove"])
+    else:
+        data = DcaData(m, quarter=["standard"])
+
+    data.get_changes()
+    hz_doc = open_word_doc(root_path / "input/summary_temp.docx")
+    doc = dca_changes_into_word(data, hz_doc)
+    doc.save(root_path / "output/speed_dials.docx")
+    land_doc = open_word_doc(root_path / "input/summary_temp_landscape.docx")
+    build_speedials(data, land_doc)
+    land_doc.save(root_path / "output/speedial_graph.docx")
+    print("Speed dial analysis has been compiled. Enjoy!")
+
+
 def milestones(args):
     print("compiling milestone analysis_engine")
     m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
-    # print(args)
     try:
         if args["baselines"] and args["stage"] and args["dates"] and args["type"]:
             ms = MilestoneData(m, group=args["stage"], baseline=args["baselines"])
@@ -788,7 +851,7 @@ def main():
     parser_summaries.set_defaults(func=summaries)
     parser_risks.set_defaults(func=run_general)
     parser_dca.set_defaults(func=run_general)
-    parser_speedial.set_defaults(func=run_general)
+    parser_speedial.set_defaults(func=speedials)
     parser_matrix.set_defaults(func=matrix)
     parser_data_query.set_defaults(func=query)
     parser_costs_sp.set_defaults(func=costs_sp)
