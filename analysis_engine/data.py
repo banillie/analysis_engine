@@ -3604,10 +3604,10 @@ def milestone_chart(
 
 DCA_KEYS = {
     "SRO": "Departmental DCA",
-    "FINANCE": "SRO Finance confidence",
-    "BENEFITS": "SRO Benefits RAG",
-    "SCHEDULE": "SRO Schedule Confidence",
-    "RESOURCE": "Overall Resource DCA - Now",
+    "Finance": "SRO Finance confidence",
+    "Benefits": "SRO Benefits RAG",
+    "Schedule": "SRO Schedule Confidence",
+    "Resource": "Overall Resource DCA - Now",
 }
 
 DCA_RATING_SCORES = {
@@ -3816,6 +3816,7 @@ class DcaData:
     def __init__(self, master: Master, **kwargs):
         self.master = master
         self.kwargs = kwargs
+        self.conf_list = list(DCA_KEYS.keys())
         self.group = []
         self.baseline_type = "ipdc_costs"
         self.iter_list = []
@@ -3829,10 +3830,14 @@ class DcaData:
     def get_dictionary(self) -> None:
         self.iter_list = get_iter_list(self.kwargs, self.master)
         quarter_dict = {}
+
+        if "type" in self.kwargs:  # option here to change confidence types
+            self.conf_list = self.kwargs["type"]
+
         for tp in self.iter_list:
             self.group = get_group(self.master, tp, self.kwargs)
             type_dict = {}
-            for dca_type in list(DCA_KEYS.values()):
+            for conf_type in self.conf_list:  # confidence type
                 dca_dict = {}
                 try:
                     for project_name in self.group:
@@ -3845,6 +3850,7 @@ class DcaData:
                         )
                         if p_data is None:
                             continue
+                        dca_type = DCA_KEYS[conf_type]
                         colour = p_data[dca_type]
                         score = DCA_RATING_SCORES[p_data[dca_type]]
                         costs = p_data["Total Forecast"]
@@ -3856,7 +3862,7 @@ class DcaData:
                         dca_dict[self.master.abbreviations[project_name]["abb"]] = dict(
                             dca_colour + t + cost_amount + quarter + dca_score
                         )
-                    type_dict[dca_type] = dca_dict
+                    type_dict[conf_type] = dca_dict
                 except KeyError:  # handles dca_type e.g. schedule confidence key not present
                     pass
 
@@ -3868,23 +3874,23 @@ class DcaData:
         """compiles dictionary of changes in dca ratings when provided with two quarter arguments"""
 
         c_dict = {}
-        for dca_type in list(DCA_KEYS.values()):
+        for conf_type in self.conf_list:  # confidence type
             lower_dict = {}
             for project_name in list(
-                self.dca_dictionary[self.iter_list[0]][dca_type].keys()
+                self.dca_dictionary[self.iter_list[0]][conf_type].keys()
             ):
-                t = [("Type", dca_type)]
+                t = [("Type", conf_type)]
                 try:
-                    dca_one_colour = self.dca_dictionary[self.iter_list[0]][dca_type][
+                    dca_one_colour = self.dca_dictionary[self.iter_list[0]][conf_type][
                         project_name
                     ]["DCA"]
-                    dca_two_colour = self.dca_dictionary[self.iter_list[1]][dca_type][
+                    dca_two_colour = self.dca_dictionary[self.iter_list[1]][conf_type][
                         project_name
                     ]["DCA"]
-                    dca_one_score = self.dca_dictionary[self.iter_list[0]][dca_type][
+                    dca_one_score = self.dca_dictionary[self.iter_list[0]][conf_type][
                         project_name
                     ]["DCA score"]
-                    dca_two_score = self.dca_dictionary[self.iter_list[1]][dca_type][
+                    dca_two_score = self.dca_dictionary[self.iter_list[1]][conf_type][
                         project_name
                     ]["DCA score"]
                     if dca_one_score == dca_two_score:
@@ -3925,18 +3931,17 @@ class DcaData:
 
                 lower_dict[project_name] = dict(t + status + change)
 
-            c_dict[dca_type] = lower_dict
+            c_dict[conf_type] = lower_dict
         self.dca_changes = c_dict
 
     def get_count(self) -> None:
         """Returns dictionary containing a count of dcas"""
         output_dict = {}
         error_list = []
-        for quarter in self.dca_dictionary.keys():
+        for quarter in self.dca_dictionary.keys():  #HERE
             dca_dict = {}
             for i, dca_type in enumerate(list(self.dca_dictionary[quarter].keys())):
-                colour_count = []
-                total_count = []
+                clr = {}
                 for x, colour in enumerate(list(DCA_RATING_SCORES.keys())):
                     count = 0
                     cost = 0
@@ -3969,12 +3974,10 @@ class DcaData:
                                 ]
                             except TypeError:  # error message above doesn't need repeating
                                 pass
-                    colour_count.append((colour, (count, cost, cost / cost_total)))
-                    total_count.append(
-                        ("Total", (total, cost_total, cost_total / cost_total))
-                    )
 
-                dca_dict[dca_type] = dict(colour_count + total_count)
+                    clr[colour] = {"count": count, "cost": cost, "ct": cost / cost_total}
+                    clr["Total"] = {"count": total, "cost": cost_total, "ct": cost_total / cost_total}
+                dca_dict[dca_type] = clr
             output_dict[quarter] = dca_dict
 
         error_list = get_error_list(error_list)
@@ -4596,7 +4599,7 @@ def gauge(
         )
 
     ## title
-    plt.suptitle(title, fontweight="bold", fontsize=20)
+    plt.suptitle(title + " Confidence", fontweight="bold", fontsize=40)
 
     # r = Rectangle((-0.4, -0.1), 0.8, 0.1, facecolor="w", lw=2)
     # ax.add_patch(r)
@@ -4604,16 +4607,16 @@ def gauge(
     ax.text(
         0,
         -0.1,
-        total + " SRO ratings",
+        total + "\nSRO ratings",
         horizontalalignment="center",
         verticalalignment="center",
-        fontsize=22,
+        fontsize=35,
         fontweight="bold",
         zorder=1,
     )
 
     def get_arrow_point(score: float):
-        return 180 * (score / 5)
+        return (240 * score) - 120
 
     ## different way of making arrows
     # ax.arrow(
@@ -4632,8 +4635,8 @@ def gauge(
     ax.annotate(
         "",
         xy=(
-            (0.275 * np.cos(np.radians(get_arrow_point(arrow_two)))),
             (0.275 * np.sin(np.radians(get_arrow_point(arrow_two)))),
+            (0.275 * np.cos(np.radians(get_arrow_point(arrow_two)))),
         ),
         xytext=(0, 0),
         arrowprops=dict(
@@ -4644,8 +4647,8 @@ def gauge(
     ax.annotate(
         "",
         xy=(
-            (0.275 * np.cos(np.radians(get_arrow_point(arrow_one)))),
             (0.275 * np.sin(np.radians(get_arrow_point(arrow_one)))),
+            (0.275 * np.cos(np.radians(get_arrow_point(arrow_one)))),
         ),
         xytext=(0, 0),
         arrowprops=dict(arrowstyle="wedge", linewidth=20),
@@ -4664,9 +4667,9 @@ def gauge(
         textcoords="data",
         arrowprops=dict(arrowstyle="->", connectionstyle="arc3, rad=-0.3", linewidth=2),
     )
-    ax.text(-0.35, 0.35, up, fontsize=10)
+    ax.text(-0.35, 0.35, down, fontsize=20)
 
-    ax.text(0.35, 0.35, down, fontsize=10)
+    ax.text(0.35, 0.35, up, fontsize=20)
 
     plt.annotate(
         "",
@@ -4679,6 +4682,46 @@ def gauge(
 
     plt.axis("scaled")
     plt.axis("off")
+
+    return fig
+
+
+def build_speedials(dca_data: DcaData, doc):
+    for conf_type in dca_data.dca_count[dca_data.iter_list[0]]:
+        c_count = []
+        l_count = []
+        for colour in ["Green", "Amber/Green", "Amber", "Amber/Red", "Red"]:
+            c_no = dca_data.dca_count[dca_data.iter_list[0]][conf_type][colour]['count']
+            c_count.append(c_no)
+            l_no = dca_data.dca_count[dca_data.iter_list[1]][conf_type][colour]['count']
+            l_count.append(l_no)
+        c_total = dca_data.dca_count[dca_data.iter_list[0]][conf_type]["Total"]['count']
+
+        up = 0
+        down = 0
+        for p in dca_data.dca_changes[conf_type]:
+            change = dca_data.dca_changes[conf_type][p]["Change"]
+            if change == "Up":
+                up += 1
+            if change == "Down":
+                down += 1
+
+        rate = [1, .75, .5, .25, 0]
+        dial_one = np.average(rate, weights=c_count)
+        dial_two = np.average(rate, weights=l_count)
+
+        graph = gauge(
+            c_count,
+            str(c_total),
+            dial_one,
+            dial_two,
+            str(up),
+            str(down),
+            title=conf_type,
+        )
+
+        put_matplotlib_fig_into_word(doc, graph, size=7.5)
+
 
 
 def sort_projects_by_dca(
