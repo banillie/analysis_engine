@@ -54,12 +54,20 @@ logging.basicConfig(
     datefmt="%d-%b-%y %H:%M:%S",
 )
 logger = logging.getLogger(__name__)
+# debug, info, warning, critical
+
+CURRENT_LOG = []
 
 
-# debug
-# info
-# warning
-# critical
+class DuplicateFilter(logging.Filter):
+    def filter(self, record):
+        if record.msg not in CURRENT_LOG:
+            CURRENT_LOG.append(record.msg)
+            return True
+        return False
+
+
+logger.addFilter(DuplicateFilter())  # application of filter
 
 
 class ProjectNameError(Exception):
@@ -3741,39 +3749,47 @@ def remove_from_group(
         remove_list = [item for sublist in remove_list for item in sublist]
     else:
         remove_list = remove_list
-    error_case = []
+    removed_case = []
     q_str = master.quarter_list[tp_index]
     for pg in remove_list:
         try:
             local_g = master.project_stage[q_str][pg]
             pg_list = [x for x in pg_list if x not in local_g]
+            removed_case.append(pg)
         except KeyError:
             try:
                 local_g = master.dft_groups[q_str][pg]
                 pg_list = [x for x in pg_list if x not in local_g]
+                removed_case.append(pg)
             except KeyError:
                 try:
                     pg_list.remove(master.abbreviations[pg]["full name"])
+                    removed_case.append(pg)
                 except (ValueError, KeyError):
                     try:
                         pg_list.remove(master.full_names[pg])
+                        removed_case.append(pg)
                     except (ValueError, KeyError):
-                        error_case.append(pg)
+                        pass
 
-    if error_case:
-        if "baseline" in c_kwargs:
-            for p in error_case:
-                logger.critical(p + " not a recognised.")
-            raise ProjectNameError(
-                'Program stopping. Please check the "remove" entry and re-enter.'
-            )
-        if "quarter" in c_kwargs:
-            for p in error_case:
-                logger.info(
-                    p + " not a recognised or not present in " + q_str + "."
-                    '"So not removed from the data for that quarter. Make sure the '
-                    '"remove" entry is correct.'
-                )
+    if removed_case:
+        for p in removed_case:
+            logger.info(p + " successfully removed from analysis.")
+
+        ## not sure why quarter / baseline is important hashing for now.
+        # if "baseline" in c_kwargs:
+        #     for p in removed_case:
+        #         logger.critical(p + " not a recognised.")
+        #     raise ProjectNameError(
+        #         'Program stopping. Please check the "remove" entry and re-enter.'
+        #     )
+        # if "quarter" in c_kwargs:
+        #     for p in removed_case:
+        #         logger.info(
+        #             p + " not a recognised or not present in " + q_str + "."
+        #             '"So not removed from the data for that quarter. Make sure the '
+        #             '"remove" entry is correct.'
+        #         )
 
     return pg_list
 
@@ -7868,6 +7884,7 @@ class DandelionData:
 
             ## first outer circle
             for i, g in enumerate(self.group):
+                self.kwargs["group"] = [g]
                 g_wlc = get_dandelion_meta_total(self.master, tp, g, self.kwargs)
                 if len(self.group) > 1:
                     y_axis = 0 + (
@@ -7905,9 +7922,11 @@ class DandelionData:
 
             ## second outer circle
             for i, g in enumerate(self.group):
-                group = get_group(self.master, tp, self.kwargs, i)  # lower group
+                self.kwargs["group"] = [g]
+                group = get_group(self.master, tp, self.kwargs)  # lower group
                 p_list = []
                 for p in group:
+                    self.kwargs["group"] = [p]
                     p_value = get_dandelion_meta_total(
                         self.master, tp, p, self.kwargs
                     )  # project wlc
@@ -8296,6 +8315,7 @@ def make_a_dandelion_auto(dl: DandelionData, **kwargs):
     line_clr = "#ececec"
     line_style = "dashed"
     for i, g in enumerate(dl.group):
+        dl.kwargs["group"] = [g]
         ax.arrow(
             0,
             0,
@@ -8306,7 +8326,8 @@ def make_a_dandelion_auto(dl: DandelionData, **kwargs):
             # linestyle=line_style,
             zorder=1,
         )
-        lower_g = get_group(dl.master, dl.iter_list[0], dl.kwargs, i)
+
+        lower_g = get_group(dl.master, dl.iter_list[0], dl.kwargs)
         for p in lower_g:
             ax.arrow(
                 dl.d_data[g]["axis"][0],

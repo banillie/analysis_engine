@@ -28,7 +28,8 @@ from analysis_engine.data import (
 m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
 stage = ["pre-SOBC", "SOBC", "OBC", "FBC"]
 group = ["HSMRPG", "AMIS", "Rail", "RPE"]
-d_data = DandelionData(m, quarter=["Q3 20/21"], group=group, remove=["Rail Franchising"])
+d_data = DandelionData(m, quarter=["Q3 20/21"], group=group, remove=["Rail Franchising", "Crossrail"])
+print(CURRENT_LOG)
 d_lion = make_a_dandelion_auto(d_data, title="Standard dandelion", chart=True)
 # doc = open_word_doc(root_path / "input/summary_temp_landscape.docx")
 # put_matplotlib_fig_into_word(doc, d_lion, size=7.5)

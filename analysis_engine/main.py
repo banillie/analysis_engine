@@ -51,6 +51,19 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+class DuplicateFilter(logging.Filter):
+
+    def filter(self, record):
+        # add other fields if you need more granular comparison, depends on your app
+        current_log = (record.module, record.levelno, record.msg)
+        if current_log != getattr(self, "last_log", None):
+            self.last_log = current_log
+            return True
+        return False
+
+logger.addFilter(DuplicateFilter())  # application of filter
+
+
 DFT_GROUPS = ["HSMRPG", "AMIS", "Rail", "RPE"]
 
 
@@ -491,9 +504,33 @@ def dandelion(args):
     print("compiling dandelion analysis")
     try:
         m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
-        if args["group"] and args["type"] and args["quarters"]:
+        if args["group"] and args["type"] and args["quarters"] and args["remove"]:
+            d_data = DandelionData(
+                m, quarter=args["quarters"], group=args["group"], meta=args["type"], remove=args["remove"]
+            )
+        elif args["group"] and args["type"] and args["quarters"]:
             d_data = DandelionData(
                 m, quarter=args["quarters"], group=args["group"], meta=args["type"]
+            )
+        elif args["stage"] and args["type"] and args["quarters"]:
+            d_data = DandelionData(
+                m, quarter=args["quarters"], group=args["stage"], meta=args["type"]
+            )
+        elif args["group"] and args["type"] and args["remove"]:
+            d_data = DandelionData(
+                m, group=args["group"], meta=args["type"], remove=args["remove"]
+            )
+        elif args["quarters"] and args["type"] and args["remove"]:
+            d_data = DandelionData(
+                m, quarter=args["quarters"], meta=args["type"], remove=args["remove"]
+            )
+        elif args["quarters"] and args["group"] and args["remove"]:
+            d_data = DandelionData(
+                m, quarter=args["quarters"], group=args["group"], remove=args["remove"]
+            )
+        elif args["quarters"] and args["stage"] and args["remove"]:
+            d_data = DandelionData(
+                m, quarter=args["quarters"], group=args["stage"], remove=args["remove"]
             )
         elif args["quarters"] and args["group"]:
             d_data = DandelionData(m, quarter=args["quarters"], group=args["group"])
@@ -501,6 +538,8 @@ def dandelion(args):
             d_data = DandelionData(m, quarter=args["quarters"], group=args["stage"])
         elif args["quarters"] and args["type"]:
             d_data = DandelionData(m, quarter=args["quarters"], meta=args["type"])
+        elif args["quarters"] and args["remove"]:
+            d_data = DandelionData(m, quarter=args["quarters"], group=DFT_GROUPS, remove=args["remove"])
         elif args["group"] and args["type"]:
             d_data = DandelionData(
                 m, quarter=[str(m.current_quarter)], group=args["group"], meta=args["type"]
