@@ -7639,7 +7639,7 @@ def get_dandelion_meta_total(
             return benefits.b_totals[tp]["total"]
 
     else:
-        cost = CostData(master, quarter=[tp], group=[g])  # group costs data
+        cost = CostData(master, **kwargs)  # group costs data
         return cost.c_totals[tp]["total"]
 
 

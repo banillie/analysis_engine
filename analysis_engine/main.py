@@ -1,30 +1,5 @@
-"""
-cli for analysis_engine engine.
-currently working on number of different subcommands
-sub commands.. so far.
-vfm: is the name of the command to runs analysis_engine
-summaries: in place but hard coded without options
-milestones: in place but hard coded without options
-
-Options... so far.
--group: an option for a particular dft group of projects. str. specific options.
--stage: an option for a group of projects at a particular business case stage. str. specific options.
--quarter: specifies the quarter(s) for analysis_engine. at least one str.
-
--stage and -group cannot be entered at same time current. Can sort.
-
-Next steps:
-- explore possibility of there being a way to 'initiate' analysis_engine engine so
-master data is stored in memory and subcommands run directly from it. rather
-than having to convert excel ws into python dict each time. This would also be
-a useful first step as lots of data checking is done as part of Master Class
-creation.
-- have cli so that it is analysis_engine, rather than main.py
-- packaged onto PyPI.
-
-"""
-
 import argparse
+from argparse import RawTextHelpFormatter
 import itertools
 import sys
 
@@ -75,6 +50,8 @@ logging.basicConfig(
     datefmt="%d-%b-%y %H:%M:%S",
 )
 logger = logging.getLogger(__name__)
+
+DFT_GROUPS = ["HSMRPG", "AMIS", "Rail", "RPE"]
 
 
 def run_correct_args(
@@ -171,13 +148,6 @@ def run_general(args):
         if programme == "dcas":
             c = run_correct_args(m, DcaData, args)
             wb = dca_changes_into_excel(c)
-        # if programme == "speedial":
-        #     doc = open_word_doc(root_path / "input/summary_temp.docx")
-        #     c = run_correct_args(m, DcaData, args)
-        #     c.get_changes()
-        #     doc = dca_changes_into_word(c, doc)
-        #     doc.save(root_path / "output/{}.docx".format(programme))
-        #     print(programme + " analysis has been compiled. Enjoy!")
         if programme == "costs":
             doc = open_word_doc(root_path / "input/summary_temp.docx")
             c = run_correct_args(m, CostData, args)
@@ -222,6 +192,7 @@ def speedials(args):
     elif args["quarters"] and args["remove"]:
         data = DcaData(m, quarter=args["quarters"], remove=args["remove"])
 
+    ## baselines
     elif args["baselines"] and args["stage"] and args["remove"]:
         data = DcaData(
             m, baseline=args["baselines"], stage=args["stage"], remove=args["remove"]
@@ -517,17 +488,30 @@ def query(args):
 
 
 def dandelion(args):
+    print("compiling dandelion analysis")
     try:
-        print("compiling dandelion analysis")
         m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
-        if args["group"] and args["meta"]:
+        if args["group"] and args["type"] and args["quarters"]:
             d_data = DandelionData(
-                m, quarter=[str(m.current_quarter)], group=args["group"], meta=args["meta"]
+                m, quarter=args["quarters"], group=args["group"], meta=args["type"]
             )
-        elif args["stage"] and args["meta"]:
+        elif args["quarters"] and args["group"]:
+            d_data = DandelionData(m, quarter=args["quarters"], group=args["group"])
+        elif args["quarters"] and args["stage"]:
+            d_data = DandelionData(m, quarter=args["quarters"], group=args["stage"])
+        elif args["quarters"] and args["type"]:
+            d_data = DandelionData(m, quarter=args["quarters"], meta=args["type"])
+        elif args["group"] and args["type"]:
             d_data = DandelionData(
-                m, quarter=[str(m.current_quarter)], group=args["stage"], meta=args["meta"]
+                m, quarter=[str(m.current_quarter)], group=args["group"], meta=args["type"]
             )
+        elif args["stage"] and args["type"]:
+            d_data = DandelionData(
+                m, quarter=[str(m.current_quarter)], group=args["stage"], meta=args["type"]
+            )
+        elif args["quarters"]:
+            d_data = DandelionData(
+                m, quarter=args["quarters"], group=DFT_GROUPS)
         elif args["group"]:
             d_data = DandelionData(
                 m, quarter=[str(m.current_quarter)], group=args["group"]
@@ -536,12 +520,20 @@ def dandelion(args):
             d_data = DandelionData(
                 m, quarter=[str(m.current_quarter)], group=args["stage"]
             )
-        elif args["meta"]:
+
+        elif args["type"]:
             d_data = DandelionData(
                 m,
                 quarter=[str(m.current_quarter)],
                 group=["HSMRPG", "AMIS", "Rail", "RPE"],
-                meta=args["meta"],
+                meta=args["type"],
+            )
+        elif args["remove"]:
+            d_data = DandelionData(
+                m,
+                quarter=[str(m.current_quarter)],
+                group=["HSMRPG", "AMIS", "Rail", "RPE"],
+                remove=args["remove"],
             )
         else:
             d_data = DandelionData(
@@ -566,15 +558,25 @@ def dandelion(args):
 
 
 def main():
+    ae_description = "Welcome to the DfT Major Projects Portfolio Office analysis engine.\n\n" \
+                     "To operate use subcommands outlined below. To navigate each subcommand\n" \
+                     "option use the --help flag which will provide instructions on which optional\n" \
+                     "arguments can be used with each subcommand. e.g. analysis dandelion --help."
     parser = argparse.ArgumentParser(
-        prog="engine", description="DfT Major Projects Portfolio Office analysis engine"
+        prog="engine", description=ae_description, formatter_class=RawTextHelpFormatter
     )
     subparsers = parser.add_subparsers(dest="subparser_name")
     subparsers.metavar = "subcommand                "
     parser_initiate = subparsers.add_parser(
         "initiate", help="creates a master data file"
     )
-    parser_dashboard = subparsers.add_parser("dashboards", help="ipdc dashboard")
+    dashboard_description = "Creates IPDC dashboards. There are no optional arguments for this command.\n\n" \
+                            "A blank master dashboard titled dashboards_master.xlsx must be in input file.\n\n" \
+                            "A completed dashboard title completed_ipdc_dashboard.xlsx will be placed into\n" \
+                            "the output file."
+    parser_dashboard = subparsers.add_parser(
+        "dashboards", description=dashboard_description, formatter_class=RawTextHelpFormatter
+    )
     parser_dandelion = subparsers.add_parser(
         "dandelion",
         help="dandelion graph and data (early version of graph output).",
@@ -692,7 +694,7 @@ def main():
         parser_vfm,
         parser_risks,
         parser_speedial,
-        parser_dandelion,
+        # parser_dandelion,
         parser_costs,
         # parser_data_query,
         parser_milestones,
@@ -737,7 +739,7 @@ def main():
     )
 
     parser_dandelion.add_argument(
-        "--meta",
+        "--type",
         type=str,
         metavar="",
         action="store",
