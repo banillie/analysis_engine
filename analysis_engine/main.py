@@ -248,12 +248,168 @@ def speedials(args):
 
 
 def milestones(args):
+    # args available for milestones quarters, baseline, stage, group, remove, type, dates, koi
     print("compiling milestone analysis_engine")
     m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
     try:
-        if args["baselines"] and args["stage"] and args["dates"] and args["type"]:
+        if args["baselines"] and args["stage"] and args["type"] and args["remove"] and args["dates"] and args["koi"]:
+            ms = MilestoneData(m, group=args["stage"], baseline=args["baselines"], remove=args["remove"])
+            ms.filter_chart_info(dates=args["dates"], type=args["type"], key=args["koi"])
+        elif args["baselines"] and args["group"] and args["type"] and args["remove"] and args["dates"] and args["koi"]:
+            ms = MilestoneData(m, group=args["group"], baseline=args["baselines"], remove=args["remove"])
+            ms.filter_chart_info(dates=args["dates"], type=args["type"], key=args["koi"])
+        elif args["quarters"] and args["group"] and args["type"] and args["remove"] and args["dates"] and args["koi"]:
+            ms = MilestoneData(m, group=args["group"], quarter=args["quarters"], remove=args["remove"])
+            ms.filter_chart_info(dates=args["dates"], type=args["type"], key=args["koi"])
+        elif args["quarters"] and args["stage"] and args["type"] and args["remove"] and args["dates"] and args["koi"]:
+            ms = MilestoneData(m, group=args["stage"], quarter=args["quarters"], remove=args["remove"])
+            ms.filter_chart_info(dates=args["dates"], type=args["type"], key=args["koi"])
+
+        elif args["stage"] and args["type"] and args["remove"] and args["dates"] and args["koi"]:
+            ms = MilestoneData(m, group=args["stage"], quarter=["standard"], remove=args["remove"])
+            ms.filter_chart_info(dates=args["dates"], type=args["type"], key=args["koi"])
+        elif args["group"] and args["type"] and args["remove"] and args["dates"] and args["koi"]:
+            ms = MilestoneData(m, group=args["group"], quarter=["standard"], remove=args["remove"])
+            ms.filter_chart_info(dates=args["dates"], type=args["type"], key=args["koi"])
+        elif args['baseline'] and args["type"] and args["remove"] and args["dates"] and args["koi"]:
+            ms = MilestoneData(m, baseline=args["baseline"], remove=args["remove"])
+            ms.filter_chart_info(dates=args["dates"], type=args["type"], key=args["koi"])
+        elif args['baseline'] and args["stage"] and args["remove"] and args["dates"] and args["koi"]:
+            ms = MilestoneData(m, group=args["stage"], baseline=args["baseline"], remove=args["remove"])
+            ms.filter_chart_info(dates=args["dates"], key=args["koi"])
+        elif args['baseline'] and args["type"] and args["stage"] and args["dates"] and args["koi"]:
+            ms = MilestoneData(m, group=args["stage"], baseline=args["baseline"])
+            ms.filter_chart_info(dates=args["dates"], type=args["type"], key=args["koi"])
+        elif args['baseline'] and args["type"] and args["remove"] and args["stage"] and args["koi"]:
+            ms = MilestoneData(m, group=args["stage"], baseline=args["baseline"], remove=args["remove"])
+            ms.filter_chart_info(type=args["type"], key=args["koi"])
+        elif args['baseline'] and args["type"] and args["remove"] and args["stage"] and args["dates"]:
+            ms = MilestoneData(m, group=args["stage"], baseline=args["baseline"], remove=args["remove"])
+            ms.filter_chart_info(type=args["type"], dates=args["dates"])
+        elif args['baseline'] and args["group"] and args["remove"] and args["dates"] and args["koi"]:
+            ms = MilestoneData(m, group=args["group"], baseline=args["baseline"], remove=args["remove"])
+            ms.filter_chart_info(dates=args["dates"], key=args["koi"])
+        elif args['baseline'] and args["type"] and args["group"] and args["dates"] and args["koi"]:
+            ms = MilestoneData(m, group=args["group"], baseline=args["baseline"])
+            ms.filter_chart_info(dates=args["dates"], type=args["type"], key=args["koi"])
+        elif args['baseline'] and args["type"] and args["remove"] and args["group"] and args["koi"]:
+            ms = MilestoneData(m, group=args["group"], baseline=args["baseline"], remove=args["remove"])
+            ms.filter_chart_info(type=args["type"], key=args["koi"])
+        elif args['baseline'] and args["type"] and args["remove"] and args["group"] and args["dates"]:
+            ms = MilestoneData(m, group=args["group"], baseline=args["baseline"], remove=args["remove"])
+            ms.filter_chart_info(type=args["type"], dates=args["dates"])
+        elif args['quarters'] and args["type"] and args["remove"] and args["dates"] and args["koi"]:
+            ms = MilestoneData(m, quarter=args["quarters"], remove=args["remove"])
+            ms.filter_chart_info(dates=args["dates"], type=args["type"], key=args["koi"])
+        elif args['quarters'] and args["stage"] and args["remove"] and args["dates"] and args["koi"]:
+            ms = MilestoneData(m, group=args["stage"], quarter=args["quarters"], remove=args["remove"])
+            ms.filter_chart_info(dates=args["dates"], key=args["koi"])
+        elif args['quarters'] and args["type"] and args["stage"] and args["dates"] and args["koi"]:
+            ms = MilestoneData(m, group=args["stage"], quarter=args["quarters"])
+            ms.filter_chart_info(dates=args["dates"], type=args["type"], key=args["koi"])
+        elif args['quarters'] and args["type"] and args["remove"] and args["stage"] and args["koi"]:
+            ms = MilestoneData(m, group=args["stage"], quarter=args["quarters"], remove=args["remove"])
+            ms.filter_chart_info(type=args["type"], key=args["koi"])
+        elif args['quarters'] and args["type"] and args["remove"] and args["stage"] and args["dates"]:
+            ms = MilestoneData(m, group=args["stage"], quarter=args["quarters"], remove=args["remove"])
+            ms.filter_chart_info(type=args["type"], dates=args["dates"])
+        elif args['quarters'] and args["group"] and args["remove"] and args["dates"] and args["koi"]:
+            ms = MilestoneData(m, group=args["group"], quarter=args["quarters"], remove=args["remove"])
+            ms.filter_chart_info(dates=args["dates"], key=args["koi"])
+        elif args['quarters'] and args["type"] and args["group"] and args["dates"] and args["koi"]:
+            ms = MilestoneData(m, group=args["group"], quarter=args["quarters"])
+            ms.filter_chart_info(dates=args["dates"], type=args["type"], key=args["koi"])
+        elif args['quarters'] and args["type"] and args["remove"] and args["group"] and args["koi"]:
+            ms = MilestoneData(m, group=args["group"], quarter=args["quarters"], remove=args["remove"])
+            ms.filter_chart_info(type=args["type"], key=args["koi"])
+        elif args['quarters'] and args["type"] and args["remove"] and args["group"] and args["dates"]:
+            ms = MilestoneData(m, group=args["group"], quarter=args["quarters"], remove=args["remove"])
+            ms.filter_chart_info(type=args["type"], dates=args["dates"])
+
+        elif args["type"] and args["remove"] and args["dates"] and args["koi"]:
+            ms = MilestoneData(m, quarter=["standard"], remove=args["remove"])
+            ms.filter_chart_info(dates=args["dates"], type=args["type"], key=args["koi"])
+        elif args["stage"] and args["remove"] and args["dates"] and args["koi"]:
+            ms = MilestoneData(m, group=args["stage"], quarter=["standard"], remove=args["remove"])
+            ms.filter_chart_info(dates=args["dates"], key=args["koi"])
+        elif args["type"] and args["stage"] and args["dates"] and args["koi"]:
+            ms = MilestoneData(m, group=args["stage"], quarter=["standard"])
+            ms.filter_chart_info(dates=args["dates"], type=args["type"], key=args["koi"])
+        elif args["type"] and args["remove"] and args["stage"] and args["koi"]:
+            ms = MilestoneData(m, group=args["stage"], quarter=["standard"], remove=args["remove"])
+            ms.filter_chart_info(type=args["type"], key=args["koi"])
+        elif args["type"] and args["remove"] and args["stage"] and args["dates"]:
+            ms = MilestoneData(m, group=args["stage"], quarter=["standard"], remove=args["remove"])
+            ms.filter_chart_info(type=args["type"], dates=args["dates"])
+        elif args["group"] and args["remove"] and args["dates"] and args["koi"]:
+            ms = MilestoneData(m, group=args["group"], quarter=["standard"], remove=args["remove"])
+            ms.filter_chart_info(dates=args["dates"], key=args["koi"])
+        elif args["type"] and args["group"] and args["dates"] and args["koi"]:
+            ms = MilestoneData(m, group=args["group"], quarter=["standard"])
+            ms.filter_chart_info(dates=args["dates"], type=args["type"], key=args["koi"])
+        elif args["type"] and args["remove"] and args["group"] and args["koi"]:
+            ms = MilestoneData(m, group=args["group"], quarter=["standard"], remove=args["remove"])
+            ms.filter_chart_info(type=args["type"], key=args["koi"])
+        elif args["type"] and args["remove"] and args["group"] and args["dates"]:
+            ms = MilestoneData(m, group=args["group"], quarter=["standard"], remove=args["remove"])
+            ms.filter_chart_info(type=args["type"], dates=args["dates"])
+
+        elif args['baseline'] and args["remove"] and args["dates"] and args["koi"]:
+            ms = MilestoneData(m, baseline=args["baseline"], remove=args["remove"])
+            ms.filter_chart_info(dates=args["dates"], key=args["koi"])
+
+        # elif args['baseline'] and args["stage"] and args["remove"] and args["dates"] and args["koi"]:
+        #     ms = MilestoneData(m, group=args["stage"], baseline=args["baseline"], remove=args["remove"])
+        #     ms.filter_chart_info(dates=args["dates"], key=args["koi"])
+
+        elif args['baseline'] and args["type"] and args["dates"] and args["koi"]:
+            ms = MilestoneData(m, group=DFT_GROUP, baseline=args["baseline"])
+            ms.filter_chart_info(dates=args["dates"], type=args["type"], key=args["koi"])
+        elif args['baseline'] and args["type"] and args["remove"] and args["koi"]:
+            ms = MilestoneData(m, group=DFT_GROUP, baseline=args["baseline"], remove=args["remove"])
+            ms.filter_chart_info(type=args["type"], key=args["koi"])
+        elif args['baseline'] and args["type"] and args["remove"] and args["dates"]:
+            ms = MilestoneData(m, group=DFT_GROUP, baseline=args["baseline"], remove=args["remove"])
+            ms.filter_chart_info(type=args["type"], dates=args["dates"])
+        elif args['baseline'] and args["stage"] and args["dates"] and args["koi"]:
+            ms = MilestoneData(m, group=args["stage"], baseline=args["baseline"])
+            ms.filter_chart_info(dates=args["dates"], key=args["koi"])
+        elif args['baseline'] and args["stage"] and args["dates"] and args["koi"]:
+            ms = MilestoneData(m, group=args["group"], baseline=args["baseline"])
+            ms.filter_chart_info(dates=args["dates"], key=args["koi"])
+        elif args['baseline'] and args["type"] and args["remove"] and args["stage"]:
+            ms = MilestoneData(m, group=args["stage"], baseline=args["baseline"], remove=args["remove"])
+            ms.filter_chart_info(type=args["type"])
+
+        elif args['baseline'] and args["type"] and args["stage"] and args["koi"]:
+            ms = MilestoneData(m, baseline=args["baseline"], group=DFT_GROUP)
+            ms.filter_chart_info(type=args["type"], key=args["koi"])
+        elif args["baselines"] and args["stage"] and args["dates"] and args["type"]:
             ms = MilestoneData(m, group=args["stage"], baseline=args["baselines"])
             ms.filter_chart_info(dates=args["dates"], type=args["type"])
+        elif args['baseline'] and args["stage"] and args["remove"] and args["type"]:
+            ms = MilestoneData(m, group=args["stage"], baseline=args["baseline"], remove=args["remove"])
+            ms.filter_chart_info(type=args["type"])
+        elif args['baseline'] and args["group"] and args["dates"] and args["koi"]:
+            ms = MilestoneData(m, group=args["group"], baseline=args["baseline"])
+            ms.filter_chart_info(dates=args["dates"], key=args["koi"])
+        elif args['baseline'] and args["remove"] and args["group"] and args["koi"]:
+            ms = MilestoneData(m, group=args["group"], baseline=args["baseline"], remove=args["remove"])
+            ms.filter_chart_info(key=args["koi"])
+        elif args['baseline'] and args["remove"] and args["group"] and args["dates"]:
+            ms = MilestoneData(m, group=args["group"], baseline=args["baseline"], remove=args["remove"])
+            ms.filter_chart_info(dates=args["dates"])
+        elif args['baseline'] and args["type"] and args["group"] and args["koi"]:
+            ms = MilestoneData(m, group=args["group"], baseline=args["baseline"])
+            ms.filter_chart_info(type=args["type"], key=args["koi"])
+        elif args['baseline'] and args["type"] and args["remove"] and args["group"]:
+            ms = MilestoneData(m, group=args["group"], baseline=args["baseline"], remove=args["remove"])
+            ms.filter_chart_info(type=args["type"])
+
+
+        # here
+
+
 
         elif args["baselines"] and args["group"] and args["dates"] and args["type"]:
             ms = MilestoneData(m, group=args["group"], baseline=args["baselines"])
@@ -278,6 +434,20 @@ def milestones(args):
         elif args["baselines"] and args["stage"] and args["type"]:
             ms = MilestoneData(m, group=args["stage"], baseline=args["baselines"])
             ms.filter_chart_info(type=args["type"])
+
+
+        ## AND HERE
+        elif args["remove"] and args["dates"] and args["koi"]:
+            ms = MilestoneData(m, quarter=[str(m.current_quarter)], remove=args["remove"])
+            ms.filter_chart_info(dates=args["dates"], key=args["koi"])
+        elif args["remove"] and args["dates"]:
+            ms = MilestoneData(m, quarter=[str(m.current_quarter)], remove=args["remove"])
+            ms.filter_chart_info(dates=args["dates"])
+        elif args["koi"]:
+            ms = MilestoneData(m, quarter=[str(m.current_quarter)])
+            ms.filter_chart_info(key=args["koi"])
+
+
 
         elif args["baselines"] and args["dates"]:
             ms = MilestoneData(m, baseline=args["baselines"])
@@ -397,6 +567,8 @@ def milestones(args):
                     )
             elif args["title"]:
                 graph = milestone_chart(ms, title=args["title"], chart=True)
+            elif args["blue_line"]:
+                graph = milestone_chart(ms, blue_line="Today", chart=True)
             else:
                 graph = milestone_chart(ms, chart=True)
             if args["chart"] == "save":
@@ -472,7 +644,7 @@ def query(args):
     print("Getting data")
     m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
     if args["keys"]:
-        wb = data_query_into_wb(m, keys=args["keys"])
+        wb = data_query_into_wb(m, keys=args["keys"], quarter=["standard"])
         wb.save(root_path / "output/data_query.xlsx")
         print("Data compiled. Enjoy!")
     elif args["file_name"]:
@@ -858,6 +1030,15 @@ def main():
     )
 
     parser_milestones.add_argument(
+        "--koi",
+        type=str,
+        # metavar="Key Name",
+        action="store",
+        nargs="+",
+        help="Returns the specified keys of interest (KOI).",
+    )
+
+    parser_milestones.add_argument(
         "--dates",
         type=str,
         metavar="",
@@ -994,3 +1175,114 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+('quarter',)
+('baseline',)
+('group',)
+('stage',)
+('type',)
+('remove',)
+('dates',)
+('koi',)
+('quarter', 'group')
+('quarter', 'stage')
+('quarter', 'type')
+('quarter', 'remove')
+('quarter', 'dates')
+('quarter', 'koi')
+('baseline', 'group')
+('baseline', 'stage')
+('baseline', 'type')
+('baseline', 'remove')
+('baseline', 'dates')
+('baseline', 'koi')
+('group', 'type')
+('group', 'remove')
+('group', 'dates')
+('group', 'koi')
+('stage', 'type')
+('stage', 'remove')
+('stage', 'dates')
+('stage', 'koi')
+('type', 'remove')
+('type', 'dates')
+('type', 'koi')
+('remove', 'dates')
+('remove', 'koi')
+('dates', 'koi')
+('quarter', 'group', 'stage')
+('quarter', 'group', 'type')
+('quarter', 'group', 'remove')
+('quarter', 'group', 'dates')
+('quarter', 'group', 'koi')
+('quarter', 'stage', 'type')
+('quarter', 'stage', 'remove')
+('quarter', 'stage', 'dates')
+('quarter', 'stage', 'koi')
+('quarter', 'type', 'remove')
+('quarter', 'type', 'dates')
+('quarter', 'type', 'koi')
+('quarter', 'remove', 'dates')
+('quarter', 'remove', 'koi')
+('quarter', 'dates', 'koi')
+('baseline', 'group', 'stage')
+('baseline', 'group', 'type')
+('baseline', 'group', 'remove')
+('baseline', 'group', 'dates')
+('baseline', 'group', 'koi')
+('baseline', 'stage', 'type')
+('baseline', 'stage', 'remove')
+('baseline', 'stage', 'dates')
+('baseline', 'stage', 'koi')
+('baseline', 'type', 'remove')
+('baseline', 'type', 'dates')
+('baseline', 'type', 'koi')
+('baseline', 'remove', 'dates')
+('baseline', 'remove', 'koi')
+('baseline', 'dates', 'koi')
+('group', 'type', 'remove')
+('group', 'type', 'dates')
+('group', 'type', 'koi')
+('group', 'remove', 'dates')
+('group', 'remove', 'koi')
+('group', 'dates', 'koi')
+('stage', 'type', 'remove')
+('stage', 'type', 'dates')
+('stage', 'type', 'koi')
+('stage', 'remove', 'dates')
+('stage', 'remove', 'koi')
+('stage', 'dates', 'koi')
+('type', 'remove', 'dates')
+('type', 'remove', 'koi')
+('type', 'dates', 'koi')
+('remove', 'dates', 'koi')
+('quarter', 'group', 'type', 'remove')
+('quarter', 'group', 'type', 'dates')
+('quarter', 'group', 'type', 'koi')
+('quarter', 'group', 'remove', 'dates')
+('quarter', 'group', 'remove', 'koi')
+('quarter', 'group', 'dates', 'koi')
+('quarter', 'stage', 'type', 'remove')
+('quarter', 'stage', 'type', 'dates')
+('quarter', 'stage', 'type', 'koi')
+('quarter', 'stage', 'remove', 'dates')
+('quarter', 'stage', 'remove', 'koi')
+('quarter', 'stage', 'dates', 'koi')
+('quarter', 'type', 'remove', 'dates')
+('quarter', 'type', 'remove', 'koi')
+('quarter', 'type', 'dates', 'koi')
+('quarter', 'remove', 'dates', 'koi')
+
+
+
+
+
+
+
+
+
+
+
+
+
+

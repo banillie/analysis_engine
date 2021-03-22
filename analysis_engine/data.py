@@ -1,6 +1,7 @@
 import csv
 import datetime
 import difflib
+import itertools
 import math
 import os
 import pickle
@@ -1664,10 +1665,10 @@ class MilestoneData:
 
         elif "key" in filter_kwargs and "dates" in filter_kwargs:
             start_date, end_date = zip(filter_kwargs["dates"])
-            start = parser.parse(start_date, dayfirst=True)
-            end = parser.parse(end_date, dayfirst=True)
+            start = parser.parse(start_date[0], dayfirst=True)
+            end = parser.parse(end_date[0], dayfirst=True)
             for i, v in enumerate(self.milestone_dict[self.iter_list[0]].values()):
-                if v["Milestone"] in filter_kwargs["keys"]:
+                if v["Milestone"] in filter_kwargs["key"]:
                     if start.date() <= v["Date"] <= end.date():
                         filtered_dict["Milestone " + str(i)] = v
                         continue
@@ -1680,7 +1681,7 @@ class MilestoneData:
 
         elif "key" in filter_kwargs:
             for i, v in enumerate(self.milestone_dict[self.iter_list[0]].values()):
-                if v["Milestone"] in filter_kwargs["type"]:
+                if v["Milestone"] in filter_kwargs["key"]:
                     filtered_dict["Milestone " + str(i)] = v
                     continue
 
