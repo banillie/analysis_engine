@@ -87,6 +87,14 @@ def _platform_docs_dir() -> Path:
 root_path = _platform_docs_dir()
 
 
+def calculate_arg_combinations(args_list: List):
+    # code to help calculate the different combinations required for each
+    # cli subcommands. not used in analysis engine.
+    for x in range(0, len(args_list) + 1):
+        for subset in itertools.combinations(args_list, x):
+            print(subset)
+
+
 def get_master_data() -> List[
     Dict[str, Union[str, int, datetime.date, float]]
 ]:  # how specify a list of dictionaries?
