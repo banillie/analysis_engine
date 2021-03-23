@@ -291,18 +291,38 @@ def milestones(args):
 
         if args["type"] and args["dates"] and args["koi"]:
             ms.filter_chart_info(dates=args["dates"], type=args["type"], key=args["koi"])
+        if args["type"] and args["dates"] and args["koi_fn"]:
+            keys = get_data_query_key_names(
+                root_path / "input/{}.csv".format(args["koi_fn"])
+            )
+            ms.filter_chart_info(dates=args["dates"], type=args["type"], key=keys)
         elif args["dates"] and args["koi"]:
             ms.filter_chart_info(dates=args["dates"], key=args["koi"])
+        elif args["dates"] and args["koi_fn"]:
+            keys = get_data_query_key_names(
+                root_path / "input/{}.csv".format(args["koi_fn"])
+            )
+            ms.filter_chart_info(dates=args["dates"], key=keys)
         elif args["type"] and args["koi"]:
-            ms.filter_chart_info(dates=args["type"], key=args["koi"])
+            ms.filter_chart_info(type=args["type"], key=args["koi"])
+        elif args["type"] and args["koi_fn"]:
+            keys = get_data_query_key_names(
+                root_path / "input/{}.csv".format(args["koi_fn"])
+            )
+            ms.filter_chart_info(type=args["type"], key=keys)
         elif args["dates"] and args["type"]:
             ms.filter_chart_info(dates=args["dates"], key=args["type"])
+        elif args["koi_fn"]:
+            keys = get_data_query_key_names(
+                root_path / "input/{}.csv".format(args["koi_fn"])
+            )
+            ms.filter_chart_info(key=keys)
         elif args["koi"]:
             ms.filter_chart_info(key=args["koi"])
         elif args["dates"]:
-            ms.filter_chart_info(key=args["dates"])
+            ms.filter_chart_info(dates=args["dates"])
         elif args["type"]:
-            ms.filter_chart_info(key=args["type"])
+            ms.filter_chart_info(type=args["type"])
 
         wb = put_milestones_into_wb(ms)
         wb.save(root_path / "output/milestone_data_output.xlsx")
@@ -808,6 +828,13 @@ def main():
         action="store",
         nargs="+",
         help="Returns the specified keys of interest (KOI).",
+    )
+
+    parser_milestones.add_argument(
+        "--koi_fn",
+        type=str,
+        action="store",
+        help="provide name of csc file contain key names",
     )
 
     parser_milestones.add_argument(
