@@ -395,33 +395,49 @@ def costs_sp(args):
         sys.exit(1)
 
 
-# note query option needs to work for one quarter only.
 def query(args):
+    # args options for query quarters, baselines, keys, file_name
     print("Getting data")
     m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
-    if args["keys"]:
-        wb = data_query_into_wb(m, keys=args["keys"], quarter=["standard"])
+    if args["baselines"] and args["keys"]:
+        wb = data_query_into_wb(m, keys=args["keys"], baseline=args["baselines"], group=DFT_GROUP)
+        print("Data compiled. Enjoy!")
+    elif args["baselines"] and args["file_name"]:
+        keys = get_data_query_key_names(
+            root_path / "input/{}.csv".format(args["file_name"])
+        )
+        wb = data_query_into_wb(m, keys=keys, baseline=args["baselines"], group=DFT_GROUP)
+        print("Data compiled using " + args["file_name"] + ".cvs file. Enjoy!")
+    elif args["file_name"] and args["quarters"]:
+        keys = get_data_query_key_names(
+            root_path / "input/{}.csv".format(args["file_name"])
+        )
+        wb = data_query_into_wb(m, keys=keys, quarter=args["quarters"], group=DFT_GROUP)
+        wb.save(root_path / "output/data_query.xlsx")
+        print("Data compiled using " + args["file_name"] + ".cvs file. Enjoy!")
+    elif args["keys"] and args["quarters"]:
+        wb = data_query_into_wb(m, keys=args["keys"], quarter=args["quarters"], group=DFT_GROUP)
         wb.save(root_path / "output/data_query.xlsx")
         print("Data compiled. Enjoy!")
     elif args["file_name"]:
-        l = get_data_query_key_names(
+        keys = get_data_query_key_names(
             root_path / "input/{}.csv".format(args["file_name"])
         )
-        wb = data_query_into_wb(m, keys=l, quarter=["standard"])
+        wb = data_query_into_wb(m, keys=keys, quarter=["standard"], group=DFT_GROUP)
         wb.save(root_path / "output/data_query.xlsx")
         print("Data compiled using " + args["file_name"] + ".cvs file. Enjoy!")
-    elif args["file_name"] and args["quarters"]:
-        l = get_data_query_key_names(
-            root_path / "input/{}.csv".format(args["file_name"])
-        )
-        wb = data_query_into_wb(m, keys=l, quarter=args["quarters"])
+    elif args["keys"]:
+        wb = data_query_into_wb(m, keys=args["keys"], quarter=["standard"], group=DFT_GROUP)
         wb.save(root_path / "output/data_query.xlsx")
-        print("Data compiled using " + args["file_name"] + ".cvs file. Enjoy!")
-    else:
-        l = get_data_query_key_names(root_path / "input/key_names.csv")
-        wb = data_query_into_wb(m, keys=l)
-        wb.save(root_path / "output/data_query.xlsx")
-        print("Data compiled using key_names cvs file. Enjoy!")
+        print("Data compiled. Enjoy!")
+    elif args["quarters"]:
+        logger.critical("Please enter a key name(s) using either --keys or --file_name")
+        sys.exit(1)
+    elif args["baselines"]:
+        logger.critical("Please enter a key name(s) using either --keys or --file_name")
+        sys.exit(1)
+
+    wb.save(root_path / "output/data_query.xlsx")
 
 
 def dandelion(args):
@@ -752,7 +768,7 @@ def main():
         parser_speedial,
         # parser_dandelion,
         parser_costs,
-        # parser_data_query,
+        parser_data_query,
         parser_milestones,
     ]:
         sub.add_argument(
@@ -931,6 +947,13 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+
+
+
+
+
 
 
 

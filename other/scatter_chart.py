@@ -27,12 +27,9 @@ from analysis_engine.data import (
     calculate_arg_combinations
 )
 
-# m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
-arg_list = ["quarter", "baseline", "group", "stage", "type", "remove", "dates", "koi"]
-arg_list_2 = ["quarter", "baseline", "group", "stage", "remove"]
-option_list = ["type", "dates", "koi"]
-
-calculate_arg_combinations(option_list)
+m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
+# arg_list = ["quarters", "baselines", "keys", "file_name"]
+# calculate_arg_combinations(arg_list)
 # stage = ["pre-SOBC", "SOBC", "OBC", "FBC"]
 # group = ["HSMRPG", "AMIS", "Rail", "RPE"]
 # d_data = DandelionData(m, quarter=["Q3 20/21"], group=group, remove=["Rail Franchising", "Crossrail"])
@@ -60,7 +57,8 @@ calculate_arg_combinations(option_list)
 # b = BenefitsData(m, baseline=["all"])
 # total_costs_benefits_bar_chart(c, b, chart=True)
 
-## QUERY
-# wb = data_query_into_wb(m, keys=["FBC - IPDC Approval"], quarter=["all"])
-# wb.save(root_path / "output/query_test.xlsx")
+# QUERY
+DFT_GROUP = ["HSMRPG", "AMIS", "Rail", "RPE"]
+wb = data_query_into_wb(m, keys=["Senior Responsible Owner (SRO)"], quarter=["Q3 19/20"], group=DFT_GROUP)
+wb.save(root_path / "output/query_test.xlsx")
 

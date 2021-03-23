@@ -5734,35 +5734,25 @@ def data_query_into_wb(master: Master, **kwargs) -> Workbook:
     wb = Workbook()
     iter_list = get_iter_list(kwargs, master)
     for z, tp in enumerate(iter_list):
-        i = master.quarter_list.index(tp)  # handling here. for wrong quarter string
+        # i = master.quarter_list.index(tp)  # handling here. for wrong quarter string
         ws = wb.create_sheet(
             make_file_friendly(tp)
         )  # creating worksheets. names restricted to 30 characters.
         ws.title = make_file_friendly(tp)  # title of worksheet
         group = get_group(master, tp, kwargs)
 
-        milestones_one = MilestoneData(master, quarter=[tp])
-        try:
-            milestones_two = MilestoneData(master, quarter=[iter_list[z + 1]])
-        except IndexError:
-            pass
-
         """list project names, groups and stage in ws"""
         for y, project_name in enumerate(group):
-            abb = master.abbreviations[project_name]["abb"]
-            ws.cell(row=2 + y, column=1).value = DFT_GROUP_DICT[
-                master.master_data[i].data[project_name]["DfT Group"]
-            ]
-            ws.cell(row=2 + y, column=2).value = master.abbreviations[project_name][
-                "abb"
-            ]
             p_data = get_correct_p_data(kwargs, master, "ipdc_costs", project_name, tp)
+            abb = master.abbreviations[project_name]["abb"]
+            ws.cell(row=2 + y, column=1).value = str(p_data["DfT Group"])
+            ws.cell(row=2 + y, column=2).value = abb
             try:
                 p_data_last = get_correct_p_data(
                     kwargs, master, "ipdc_costs", project_name, iter_list[z + 1]
                 )
             except IndexError:
-                pass
+                p_data_last = None
             for x, key in enumerate(kwargs["keys"]):
                 ws.cell(row=1, column=3 + x, value=key)
                 try:  # standard keys
@@ -5772,13 +5762,29 @@ def data_query_into_wb(master: Master, **kwargs) -> Workbook:
                         ws.cell(row=2 + y, column=3 + x).fill = AMBER_FILL
                     else:
                         ws.cell(row=2 + y, column=3 + x, value=value)
+
                     try:  # checks for change against next master in loop
                         lst_value = p_data_last[key]
                         if value != lst_value:
                             ws.cell(row=2 + y, column=3 + x).fill = SALMON_FILL
-                    except KeyError:
+                    except (KeyError, UnboundLocalError, TypeError):
+                        # KeyError is key not present in master.
+                        # UnboundLocalError if there is no last_value.
+                        # TypeError if project not in master. p_data_last becomes None.
                         pass
                 except KeyError:  # milestone keys
+                    if "quarter" in kwargs:
+                        milestones_one = MilestoneData(master, quarter=[tp], group=[project_name])
+                        try:
+                            milestones_two = MilestoneData(master, quarter=[iter_list[z + 1]], group=[project_name])
+                        except IndexError:
+                            pass
+                    if "baseline" in kwargs:
+                        milestones_one = MilestoneData(master, baseline=[tp], group=[project_name])
+                        try:
+                            milestones_two = MilestoneData(master, baseline=[iter_list[z + 1]], group=[project_name])
+                        except IndexError:
+                            pass
                     date = get_milestone_date(
                         abb, milestones_one.milestone_dict, tp, " " + key
                     )
@@ -5797,7 +5803,7 @@ def data_query_into_wb(master: Master, **kwargs) -> Workbook:
                         )
                         if date != lst_date:
                             ws.cell(row=2 + y, column=3 + x).fill = SALMON_FILL
-                    except (KeyError, IndexError, UnboundLocalError):
+                    except (KeyError, UnboundLocalError, TypeError, IndexError):
                         pass
 
         ws.cell(row=1, column=1).value = "Group"
