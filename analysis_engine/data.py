@@ -75,6 +75,14 @@ class ProjectNameError(Exception):
     pass
 
 
+class ProjectGroupError(Exception):
+    pass
+
+
+class ProjectStageError(Exception):
+    pass
+
+
 def _platform_docs_dir() -> Path:
     #  Cross plaform file path handling
     if platform.system() == "Linux":
@@ -347,7 +355,11 @@ BASELINE_TYPES = {
     "Re-baseline HMT cost": "hmt_costs",
     "Re-baseline HMT benefits": "hmt_benefits",
 }
-# using dicts to clean up text
+IPDC_BASELINE_TYPES = {
+    "Re-baseline IPDC milestones": "ipdc_milestones",
+    "Re-baseline IPDC cost": "ipdc_costs",
+    "Re-baseline IPDC benefits": "ipdc_benefits",
+}
 BC_STAGE_DICT = {
     "Strategic Outline Case": "SOBC",
     "SOBC": "SOBC",
@@ -366,23 +378,31 @@ BC_STAGE_DICT = {
     "To be confirmed": None,
     "To be confirmed ": None,
 }
+# DFT_GROUP_DICT_OLD = {
+#     "High Speed Rail Group": "HSMRPG",
+#     "International Security and Environment": "AMIS",
+#     "Transport for London": "Rail",
+#     "DVSA": "RPE",
+#     "Roads Places and Environment Group": "RPE",
+#     "ISG": "AMIS",
+#     "HSMRPG": "HSMRPG",
+#     "DfT": "DfT",
+#     "RPE": "RPE",
+#     "Rail Group": "Rail",
+#     "Highways England": "RPE",
+#     "Rail": "Rail",
+#     "Roads Devolution & Motoring": "RPE",
+#     "AMIS": "AMIS",
+#     None: None,
+#     "RDM": "RPE",
+# }
 DFT_GROUP_DICT = {
-    "High Speed Rail Group": "HSMRPG",
-    "International Security and Environment": "AMIS",
-    "Transport for London": "Rail",
-    "DVSA": "RPE",
-    "Roads Places and Environment Group": "RPE",
-    "ISG": "AMIS",
-    "HSMRPG": "HSMRPG",
-    "DfT": "DfT",
-    "RPE": "RPE",
-    "Rail Group": "Rail",
-    "Highways England": "RPE",
-    "Rail": "Rail",
-    "Roads Devolution & Motoring": "RPE",
-    "AMIS": "AMIS",
-    None: None,
-    "RDM": "RPE",
+    "AMIS": "Aviation",
+    "HSRG": "High Speed Rail Group",
+    "RIG": "Rail Infrastructure Group",
+    "RSS": "Rail Services",
+    "CDG": "Corporate Delivery Group",
+    "RPE": "Roads People and Environment"
 }
 YEAR_LIST = [
     "16-17",
@@ -590,6 +610,7 @@ class Master:
                             approved_bc = master.data[name][b_type]
                             quarter = str(master.quarter)
                         # exception handling in here in case data keys across masters are not consistent.
+                        # not sure this is necessary any more
                         except KeyError:
                             print(
                                 str(b_type)
@@ -645,12 +666,11 @@ class Master:
     def check_baselines(self) -> None:
         """checks that projects have the correct baseline information. stops the
         programme if baselines are missing"""
-        # work through best way to stop the programme.
-        for v in BASELINE_TYPES.values():
+        for v in IPDC_BASELINE_TYPES.values():
             for p in self.current_projects:
                 baselines = self.bl_index[v][p]
                 if len(baselines) <= 2:
-                    print(
+                    logger.critical(
                         p
                         + " does not have a baseline point for "
                         + v
@@ -659,9 +679,6 @@ class Master:
                         "Please amend the data for " + p + " so that "
                         " it has at least one baseline point for " + v
                     )
-            else:
-                continue
-            break
 
     def get_project_groups(self) -> None:
         """gets the groups that projects are part of e.g. business case
@@ -674,23 +691,28 @@ class Master:
         for i, master in enumerate(self.master_data):
             lower_dict = {}
             for p in master.projects:
-                try:
-                    dft_group = DFT_GROUP_DICT[
-                        master[p]["DfT Group"]
-                    ]  # different groups cleaned here
-                    stage = BC_STAGE_DICT[master[p]["IPDC approval point"]]
-                    raw_list.append(("group", dft_group))
-                    raw_list.append(("stage", stage))
-                    lower_dict[p] = dict(raw_list)
-                    group_list.append(dft_group)
-                    stage_list.append(stage)
-                except KeyError:
-                    print(
-                        str(master.quarter)
-                        + ": "
-                        + str(p)
-                        + " has reported an incorrect DfT Group value. Amend"
+                dft_group = self.project_information[p]["Group"]  # different groups cleaned here
+                if dft_group is None:
+                    logger.critical(
+                        str(p) + " does not have a Group value in the project information document."
                     )
+                    raise ProjectGroupError(
+                        "Program stopping as this could cause a crash. Please check project Group info."
+                    )
+                if dft_group not in list(DFT_GROUP_DICT.keys()):
+                    logger.critical(
+                        str(p) + " Group value is " + str(dft_group) + " . This is not a recognised group"
+                    )
+                    raise ProjectGroupError(
+                        "Program stopping as this could cause a crash. Please check project Group info."
+                    )
+                stage = BC_STAGE_DICT[master[p]["IPDC approval point"]]
+                raw_list.append(("group", dft_group))
+                raw_list.append(("stage", stage))
+                lower_dict[p] = dict(raw_list)
+                group_list.append(dft_group)
+                stage_list.append(stage)
+
             raw_dict[str(master.quarter)] = lower_dict
 
         group_list = list(set(group_list))
@@ -705,18 +727,18 @@ class Master:
                     p_group = raw_dict[quarter][p]["group"]
                     if p_group == group_type:
                         g_list.append(p)
-                # messaging to clean up group data.
-                # TODO wrap into system messaging
-                if group_type is None or group_type == "DfT":
-                    if g_list:
-                        for x in g_list:
-                            print(
-                                str(quarter)
-                                + " "
-                                + str(x)
-                                + " DfT Group data needs cleaning. Currently "
-                                + str(group_type)
-                            )
+                ## no longer need this loop
+                # if group_type is None or group_type == "DfT":
+                #     if g_list:
+                #         for x in g_list:
+                #             logger.critical(
+                #                 str(quarter)
+                #                 + " "
+                #                 + str(x)
+                #                 + " DfT Group data needs cleaning. Currently "
+                #                 + str(group_type)
+                #             )
+                #             raise.ProjectGroupError
                 lower_g_dict[group_type] = g_list
 
             gmpp_list = []
@@ -737,18 +759,18 @@ class Master:
                     p_stage = raw_dict[quarter][p]["stage"]
                     if p_stage == stage_type:
                         s_list.append(p)
-                # messaging to clean up group data.
-                # TODO wrap into system messaging
                 if stage_type is None:
                     if s_list:
-                        for x in s_list:
-                            print(
-                                str(quarter)
-                                + " "
-                                + str(x)
-                                + " IPDC stage data needs cleaning. Currently "
-                                + str(stage_type)
-                            )
+                        if quarter == self.current_quarter:
+                            for x in s_list:
+                                logger.critical(str(x) + " has no IPDC stage date")
+                                raise ProjectStageError("Programme stopping as this could cause incomplete analysis")
+                        else:
+                            for x in s_list:
+                                logger.warning(
+                                    "In " + str(quarter) + " master " + str(x)
+                                    + " IPDC stage data is currently None. Please amend."
+                                )
                 lower_s_dict[stage_type] = s_list
             stage_dict[quarter] = lower_s_dict
 
@@ -7871,8 +7893,8 @@ class DandelionData:
             elif "stage" in self.kwargs:
                 self.group = self.kwargs["stage"]
 
-            if len(self.group) == 4:
-                g_ang_l = [260, 320, 40, 100]  # group angle list
+            if len(self.group) == 5:
+                g_ang_l = [260, 310, 360, 50, 100]  # group angle list
             if len(self.group) == 1:
                 pass
             g_d = {}  # group dictionary. first outer circle.
@@ -7903,9 +7925,10 @@ class DandelionData:
                 g_wlc = get_dandelion_meta_total(self.master, tp, g, self.kwargs)
                 if len(self.group) > 1:
                     y_axis = 0 + (
-                        (math.sqrt(pf_wlc) * 3) + (math.sqrt(pf_wlc) * 0.2)
-                    ) * math.sin(math.radians(g_ang_l[i]))
-                    x_axis = 0 + (math.sqrt(pf_wlc) * 3) * math.cos(
+                        (math.sqrt(pf_wlc) * 3) * math.sin(math.radians(g_ang_l[i]))
+                    )
+                        # + (math.sqrt(pf_wlc)*0))\
+                    x_axis = 0 + (math.sqrt(pf_wlc) * 2.5) * math.cos(
                         math.radians(g_ang_l[i])
                     )
                     g_text = g + "\n" + dandelion_number_text(g_wlc)  # group text
@@ -7918,6 +7941,7 @@ class DandelionData:
                         "fill": "dashed",
                         "ec": "grey",
                         "alignment": ("center", "center"),
+                        "angle": g_ang_l[i],
                     }
 
                 else:
@@ -7954,7 +7978,16 @@ class DandelionData:
                 g_y_axis = g_d[g]["axis"][0]  # group y axis
                 g_x_axis = g_d[g]["axis"][1]  # group x axis
                 p_values_list, p_list = zip(*l_g_d[g])
-                ang_l = cal_group_angle(360, p_list, all=True)
+                if len(p_list) > 3:
+                    ang_l = cal_group_angle(360, p_list, all=True)
+                else:
+                    if len(p_list) == 1:
+                        ang_l = [g_d[g]["angle"]]
+                    if len(p_list) == 2:
+                        ang_l = [g_d[g]["angle"], g_d[g]["angle"] + 60]
+                    if len(p_list) == 3:
+                        ang_l = [g_d[g]["angle"], g_d[g]["angle"] + 60, g_d[g]["angle"] + 120]
+
                 for i, p in enumerate(p_list):
                     p_value = p_values_list[i]
                     p_data = get_correct_p_data(
@@ -7976,7 +8009,7 @@ class DandelionData:
                     # multi = (1 - (g_wlc / pf_wlc)) * 3
                     try:
                         if len(p_list) >= 14:
-                            multi = (pf_wlc / g_wlc) ** (1.0 / 2.0)  # square root
+                            multi = ((pf_wlc / g_wlc) ** (1.0 / 2.0)) # square root
                         else:
                             multi = (pf_wlc / g_wlc) ** (1.0 / 3.0)  # cube root
                         p_y_axis = g_y_axis + (g_radius * multi) * math.sin(
@@ -7989,13 +8022,13 @@ class DandelionData:
                         p_y_axis = g_y_axis + 100 * math.sin(math.radians(ang_l[i]))
                         p_x_axis = g_x_axis + 100 * math.cos(math.radians(ang_l[i]))
 
-                    if 194 >= ang_l[i] >= 156:
+                    if 185 >= ang_l[i] >= 175:
                         text_angle = ("center", "top")
-                    if 24 >= ang_l[i] or 336 <= ang_l[i]:
+                    if 5 >= ang_l[i] or 355 <= ang_l[i]:
                         text_angle = ("center", "bottom")
-                    if 155 >= ang_l[i] >= 25:
+                    if 174 >= ang_l[i] >= 6:
                         text_angle = ("left", "center")
-                    if 335 >= ang_l[i] >= 195:
+                    if 354 >= ang_l[i] >= 186:
                         text_angle = ("right", "center")
 
                     try:
@@ -8309,7 +8342,7 @@ def make_a_dandelion_auto(dl: DandelionData, **kwargs):
                 xy=dl.d_data[c]["axis"],  # x, y position
                 xycoords="data",
                 xytext=dl.d_data[c]["tp"],  # text position
-                fontsize=8,
+                fontsize=6,
                 # textcoords="offset pixels",
                 horizontalalignment=dl.d_data[c]["alignment"][0],
                 verticalalignment=dl.d_data[c]["alignment"][1],
@@ -8319,7 +8352,7 @@ def make_a_dandelion_auto(dl: DandelionData, **kwargs):
             ax.annotate(
                 dl.d_data[c]["text"],  # text
                 xy=dl.d_data[c]["axis"],  # x, y position
-                fontsize=10,
+                fontsize=8,
                 horizontalalignment=dl.d_data[c]["alignment"][0],
                 verticalalignment=dl.d_data[c]["alignment"][1],
                 weight="bold",  # bold here as will be group text

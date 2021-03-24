@@ -615,3 +615,31 @@ def test_build_dandelion_graph_manual(build_dandelion, word_doc_landscape):
     put_matplotlib_fig_into_word(word_doc_landscape, dlion, size=7.5)
     word_doc_landscape.save("resources/dlion_mpl.docx")
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
