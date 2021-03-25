@@ -30,15 +30,21 @@ from analysis_engine.data import (
     # Master
 )
 
+## GENERATE CLI OPTIONS
+arg_list = ["quarters", "group", "stage", "remove", "type", "pc"]
+calculate_arg_combinations(arg_list)
+
+## INITIATE
 # master = Master(get_master_data(), get_project_information())
 
-m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
-# arg_list = ["quarters", "baselines", "stage", "group", "remove", "type"]
-# calculate_arg_combinations(arg_list)
+## MASTER
+# m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
+
+## DANDELION
 # stage = ["pre-SOBC", "SOBC", "OBC", "FBC"]
-group = ["HSRG", "AMIS", "RIG", "RSS", "RPE"]
-d_data = DandelionData(m, quarter=[str(m.current_quarter)], group=group)
-d_lion = make_a_dandelion_auto(d_data, title="Standard dandelion", chart=True)
+# group = ["HSRG", "AMIS", "RIG", "RSS", "RPE"]
+# d_data = DandelionData(m, quarter=[str(m.current_quarter)], group=group, pc="A/G")
+# d_lion = make_a_dandelion_auto(d_data, chart=True)
 # doc = open_word_doc(root_path / "input/summary_temp_landscape.docx")
 # put_matplotlib_fig_into_word(doc, d_lion, size=7.5)
 # doc.save(root_path / "output/dlion_graph.docx")

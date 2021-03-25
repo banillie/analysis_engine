@@ -4599,6 +4599,7 @@ DCA_WA = {"Green": 5,
           "Amber/Red": 2,
           "Red": 1}
 
+
 def gauge(
     labels: List[str],
     total: str,
@@ -7903,7 +7904,12 @@ class DandelionData:
             pf_wlc = get_dandelion_meta_total(
                 self.master, tp, self.group, self.kwargs
             )  # portfolio wlc
-            pf_colour = "#cb1f00"  # option to specify pf colour
+            if "pc" in self.kwargs:  # pc portfolio colour
+                pf_colour = COLOUR_DICT[self.kwargs["pc"]]
+                pf_colour_edge = COLOUR_DICT[self.kwargs["pc"]]
+            else:
+                pf_colour = "#FFFFFF"
+                pf_colour_edge = "grey"
             pf_text = "Portfolio\n" + dandelion_number_text(
                 pf_wlc
             )  # option to specify pf name
@@ -7915,7 +7921,7 @@ class DandelionData:
                 "colour": pf_colour,
                 "text": pf_text,
                 "fill": "solid",
-                "ec": pf_colour,
+                "ec": pf_colour_edge,
                 "alignment": ("center", "center"),
             }
 
@@ -7925,10 +7931,9 @@ class DandelionData:
                 g_wlc = get_dandelion_meta_total(self.master, tp, g, self.kwargs)
                 if len(self.group) > 1:
                     y_axis = 0 + (
-                        (math.sqrt(pf_wlc) * 3) * math.sin(math.radians(g_ang_l[i]))
+                        (math.sqrt(pf_wlc) * 3.25) * math.sin(math.radians(g_ang_l[i]))
                     )
-                        # + (math.sqrt(pf_wlc)*0))\
-                    x_axis = 0 + (math.sqrt(pf_wlc) * 2.5) * math.cos(
+                    x_axis = 0 + (math.sqrt(pf_wlc) * 2.75) * math.cos(
                         math.radians(g_ang_l[i])
                     )
                     g_text = g + "\n" + dandelion_number_text(g_wlc)  # group text

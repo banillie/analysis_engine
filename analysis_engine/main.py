@@ -54,16 +54,19 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-DFT_GROUP = ["HSRG", "AMIS", "RIG", "RSS", "RPE"]
+DFT_GROUP = ["HSRG", "RSS", "RIG", "AMIS", "RPE"]
 
 
 def check_remove(sc_args):  # subcommand arg
     if sc_args["remove"]:
         from analysis_engine.data import CURRENT_LOG
+
         for p in sc_args["remove"]:
             if p + " successfully removed from analysis." not in CURRENT_LOG:
-                logger.warning(p + ' not recognised and therefore not removed from analysis.'
-                                   ' Please make sure "remove" entry is correct.')
+                logger.warning(
+                    p + " not recognised and therefore not removed from analysis."
+                    ' Please make sure "remove" entry is correct.'
+                )
 
 
 def run_correct_args(
@@ -256,25 +259,47 @@ def milestones(args):
     m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
     try:
         if args["baselines"] and args["stage"] and args["remove"]:
-            ms = MilestoneData(m, group=args["stage"], baseline=args["baselines"], remove=args["remove"])
+            ms = MilestoneData(
+                m,
+                group=args["stage"],
+                baseline=args["baselines"],
+                remove=args["remove"],
+            )
         elif args["baselines"] and args["group"] and args["remove"]:
-            ms = MilestoneData(m, group=args["group"], baseline=args["baselines"], remove=args["remove"])
+            ms = MilestoneData(
+                m,
+                group=args["group"],
+                baseline=args["baselines"],
+                remove=args["remove"],
+            )
         elif args["quarters"] and args["group"] and args["remove"]:
-            ms = MilestoneData(m, group=args["group"], quarter=args["quarters"], remove=args["remove"])
+            ms = MilestoneData(
+                m, group=args["group"], quarter=args["quarters"], remove=args["remove"]
+            )
         elif args["quarters"] and args["stage"] and args["remove"]:
-            ms = MilestoneData(m, group=args["stage"], quarter=args["quarters"], remove=args["remove"])
+            ms = MilestoneData(
+                m, group=args["stage"], quarter=args["quarters"], remove=args["remove"]
+            )
         elif args["group"] and args["remove"]:
-            ms = MilestoneData(m, group=args["group"], quarter=["standard"], remove=args["remove"])
+            ms = MilestoneData(
+                m, group=args["group"], quarter=["standard"], remove=args["remove"]
+            )
         elif args["stage"] and args["remove"]:
-            ms = MilestoneData(m, group=args["stage"], quarter=["standard"], remove=args["remove"])
+            ms = MilestoneData(
+                m, group=args["stage"], quarter=["standard"], remove=args["remove"]
+            )
         elif args["baselines"] and args["remove"]:
-            ms = MilestoneData(m, group=DFT_GROUP, baseline=args["baselines"], remove=args["remove"])
+            ms = MilestoneData(
+                m, group=DFT_GROUP, baseline=args["baselines"], remove=args["remove"]
+            )
         elif args["baselines"] and args["stage"]:
             ms = MilestoneData(m, group=args["stage"], baseline=args["baselines"])
         elif args["baselines"] and args["group"]:
             ms = MilestoneData(m, group=args["group"], baseline=args["baselines"])
         elif args["quarters"] and args["remove"]:
-            ms = MilestoneData(m, group=DFT_GROUP, quarter=args["quarters"], remove=args["remove"])
+            ms = MilestoneData(
+                m, group=DFT_GROUP, quarter=args["quarters"], remove=args["remove"]
+            )
         elif args["quarters"] and args["stage"]:
             ms = MilestoneData(m, group=args["stage"], quarter=args["quarters"])
         elif args["quarters"] and args["group"]:
@@ -286,14 +311,18 @@ def milestones(args):
         elif args["group"]:
             ms = MilestoneData(m, group=args["group"], quarter=["standard"])
         elif args["remove"]:
-            ms = MilestoneData(m, group=DFT_GROUP, quarter=["standard"], remove=args["remove"])
+            ms = MilestoneData(
+                m, group=DFT_GROUP, quarter=["standard"], remove=args["remove"]
+            )
         elif args["baselines"]:
             ms = MilestoneData(m, group=DFT_GROUP, baseline=args["baselines"])
         else:
             ms = MilestoneData(m, quarter=["standard"])
 
         if args["type"] and args["dates"] and args["koi"]:
-            ms.filter_chart_info(dates=args["dates"], type=args["type"], key=args["koi"])
+            ms.filter_chart_info(
+                dates=args["dates"], type=args["type"], key=args["koi"]
+            )
         if args["type"] and args["dates"] and args["koi_fn"]:
             keys = get_data_query_key_names(
                 root_path / "input/{}.csv".format(args["koi_fn"])
@@ -423,13 +452,17 @@ def query(args):
     print("Getting data")
     m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
     if args["baselines"] and args["keys"]:
-        wb = data_query_into_wb(m, keys=args["keys"], baseline=args["baselines"], group=DFT_GROUP)
+        wb = data_query_into_wb(
+            m, keys=args["keys"], baseline=args["baselines"], group=DFT_GROUP
+        )
         print("Data compiled. Enjoy!")
     elif args["baselines"] and args["file_name"]:
         keys = get_data_query_key_names(
             root_path / "input/{}.csv".format(args["file_name"])
         )
-        wb = data_query_into_wb(m, keys=keys, baseline=args["baselines"], group=DFT_GROUP)
+        wb = data_query_into_wb(
+            m, keys=keys, baseline=args["baselines"], group=DFT_GROUP
+        )
         print("Data compiled using " + args["file_name"] + ".cvs file. Enjoy!")
     elif args["file_name"] and args["quarters"]:
         keys = get_data_query_key_names(
@@ -439,7 +472,9 @@ def query(args):
         wb.save(root_path / "output/data_query.xlsx")
         print("Data compiled using " + args["file_name"] + ".cvs file. Enjoy!")
     elif args["keys"] and args["quarters"]:
-        wb = data_query_into_wb(m, keys=args["keys"], quarter=args["quarters"], group=DFT_GROUP)
+        wb = data_query_into_wb(
+            m, keys=args["keys"], quarter=args["quarters"], group=DFT_GROUP
+        )
         wb.save(root_path / "output/data_query.xlsx")
         print("Data compiled. Enjoy!")
     elif args["file_name"]:
@@ -450,7 +485,9 @@ def query(args):
         wb.save(root_path / "output/data_query.xlsx")
         print("Data compiled using " + args["file_name"] + ".cvs file. Enjoy!")
     elif args["keys"]:
-        wb = data_query_into_wb(m, keys=args["keys"], quarter=["standard"], group=DFT_GROUP)
+        wb = data_query_into_wb(
+            m, keys=args["keys"], quarter=["standard"], group=DFT_GROUP
+        )
         wb.save(root_path / "output/data_query.xlsx")
         print("Data compiled. Enjoy!")
     elif args["quarters"]:
@@ -464,25 +501,128 @@ def query(args):
 
 
 def dandelion(args):
-    # args available for dandelion "quarters", "group", "stage", "remove", "type"
+    # args available for dandelion "quarters", "group", "stage", "remove", "type", "pc"
     print("compiling dandelion analysis")
     m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
     try:
-        if args['quarters'] and args['stage'] and args['type'] and args["remove"]:
+        if args["quarters"] and args["stage"] and args["type"] and args["remove"] and args["pc"]:
             d_data = DandelionData(
-                m, quarter=args["quarters"], group=args["stage"], meta=args["type"], remove=args["remove"]
+                m,
+                quarter=args["quarters"],
+                group=args["stage"],
+                meta=args["type"],
+                remove=args["remove"],
+                pc=args["pc"]
             )
-        elif args['quarters'] and args['group'] and args['type'] and args["remove"]:
+        elif args["quarters"] and args["group"] and args["type"] and args["remove"] and args["pc"]:
             d_data = DandelionData(
-                m, quarter=args["quarters"], group=args["group"], meta=args["type"], remove=args["remove"]
+                m,
+                quarter=args["quarters"],
+                group=args["group"],
+                meta=args["type"],
+                remove=args["remove"],
+                pc=args["pc"]
             )
-        elif args['stage'] and args["type"] and args['remove']:
+        elif args["quarters"] and args["stage"] and args["type"] and args["remove"]:
+            d_data = DandelionData(
+                m,
+                quarter=args["quarters"],
+                group=args["stage"],
+                meta=args["type"],
+                remove=args["remove"],
+            )
+        elif args["quarters"] and args["group"] and args["type"] and args["remove"]:
+            d_data = DandelionData(
+                m,
+                quarter=args["quarters"],
+                group=args["group"],
+                meta=args["type"],
+                remove=args["remove"],
+            )
+        elif args["pc"] and args["group"] and args["type"] and args["remove"]:
+            d_data = DandelionData(
+                m,
+                pc=args["pc"],
+                group=args["group"],
+                meta=args["type"],
+                remove=args["remove"],
+            )
+        elif args["pc"] and args["stage"] and args["type"] and args["remove"]:
+            d_data = DandelionData(
+                m,
+                pc=args["pc"],
+                group=args["stage"],
+                meta=args["type"],
+                remove=args["remove"],
+            )
+
+        elif args["quarters"] and args["pc"] and args["type"] and args["remove"]:
+            d_data = DandelionData(
+                m,
+                quarter=args["quarters"],
+                pc=args["pc"],
+                meta=args["type"],
+                remove=args["remove"],
+            )
+        elif args["quarters"] and args["stage"] and args["type"] and args["pc"]:
+            d_data = DandelionData(
+                m,
+                quarter=args["quarters"],
+                group=args["stage"],
+                meta=args["type"],
+                pc=args["pc"],
+            )
+        elif args["quarters"] and args["stage"] and args["remove"] and args["pc"]:
+            d_data = DandelionData(
+                m,
+                quarter=args["quarters"],
+                group=args["stage"],
+                remove=args["remove"],
+                pc=args["pc"],
+            )
+        elif args["quarters"] and args["group"] and args["type"] and args["pc"]:
+            d_data = DandelionData(
+                m,
+                quarter=args["quarters"],
+                group=args["group"],
+                meta=args["type"],
+                pc=args["pc"],
+            )
+        elif args["quarters"] and args["group"] and args["pc"] and args["remove"]:
+            d_data = DandelionData(
+                m,
+                quarter=args["quarters"],
+                group=args["group"],
+                pc=args["pc"],
+                remove=args["remove"],
+            )
+        elif args["stage"] and args["type"] and args["remove"]:
             d_data = DandelionData(
                 m, meta=args["type"], group=args["stage"], remove=args["remove"]
             )
-        elif args['group'] and args["type"] and args['remove']:
+        elif args["stage"] and args["type"] and args["pc"]:
+            d_data = DandelionData(
+                m, remove=args["remove"], group=args["stage"], pc=args["pc"]
+            )
+        elif args["stage"] and args["pc"] and args["remove"]:
+            d_data = DandelionData(
+                m, remove=args["remove"], group=args["stage"], pc=args["pc"]
+            )
+        elif args["group"] and args["type"] and args["remove"]:
             d_data = DandelionData(
                 m, remove=args["remove"], group=args["group"], meta=args["type"]
+            )
+        elif args["group"] and args["type"] and args["pc"]:
+            d_data = DandelionData(
+                m, remove=args["remove"], group=args["group"], pc=args["pc"]
+            )
+        elif args["group"] and args["pc"] and args["remove"]:
+            d_data = DandelionData(
+                m, remove=args["remove"], group=args["group"], pc=args["pc"]
+            )
+        elif args["type"] and args["pc"] and args["remove"]:
+            d_data = DandelionData(
+                m, remove=args["remove"], meta=args["type"], pc=args["pc"]
             )
         elif args["quarters"] and args["stage"] and args["remove"]:
             d_data = DandelionData(
@@ -504,6 +644,25 @@ def dandelion(args):
             d_data = DandelionData(
                 m, quarter=args["quarters"], group=args["group"], meta=args["type"]
             )
+        elif args["quarters"] and args["group"] and args["pc"]:
+            d_data = DandelionData(
+                m, quarter=args["quarters"], group=args["group"], pc=args["pc"]
+            )
+        elif args["quarters"] and args["stage"] and args["pc"]:
+            d_data = DandelionData(
+                m, quarter=args["quarters"], group=args["stage"], pc=args["pc"]
+            )
+        elif args["quarters"] and args["remove"] and args["pc"]:
+            d_data = DandelionData(
+                m, quarter=args["quarters"], remove=args["remove"], pc=args["pc"]
+            )
+        elif args["quarters"] and args["type"] and args["pc"]:
+            d_data = DandelionData(
+                m, quarter=args["quarters"], type=args["type"], pc=args["pc"]
+            )
+
+
+
         elif args["quarters"] and args["group"]:
             d_data = DandelionData(m, quarter=args["quarters"], group=args["group"])
         elif args["quarters"] and args["stage"]:
@@ -511,38 +670,85 @@ def dandelion(args):
         elif args["quarters"] and args["type"]:
             d_data = DandelionData(m, quarter=args["quarters"], meta=args["type"])
         elif args["quarters"] and args["remove"]:
-            d_data = DandelionData(m, quarter=args["quarters"], group=DFT_GROUP, remove=args["remove"])
+            d_data = DandelionData(
+                m, quarter=args["quarters"], group=DFT_GROUP, remove=args["remove"]
+            )
         elif args["group"] and args["type"]:
             d_data = DandelionData(
-                m, quarter=[str(m.current_quarter)], group=args["group"], meta=args["type"]
+                m,
+                quarter=[str(m.current_quarter)],
+                group=args["group"],
+                meta=args["type"],
             )
         elif args["stage"] and args["type"]:
             d_data = DandelionData(
-                m, quarter=[str(m.current_quarter)], group=args["stage"], meta=args["type"]
+                m,
+                quarter=[str(m.current_quarter)],
+                group=args["stage"],
+                meta=args["type"],
             )
         elif args["group"] and args["type"]:
             d_data = DandelionData(
-                m, quarter=[str(m.current_quarter)], group=args["group"], meta=args["type"]
+                m,
+                quarter=[str(m.current_quarter)],
+                group=args["group"],
+                meta=args["type"],
             )
         elif args["stage"] and args["remove"]:
             d_data = DandelionData(
-                m, quarter=[str(m.current_quarter)], group=args["stage"], remove=args["remove"]
+                m,
+                quarter=[str(m.current_quarter)],
+                group=args["stage"],
+                remove=args["remove"],
             )
         elif args["group"] and args["remove"]:
             d_data = DandelionData(
-                m, quarter=[str(m.current_quarter)], group=args["group"], remove=args["remove"]
+                m,
+                quarter=[str(m.current_quarter)],
+                group=args["group"],
+                remove=args["remove"],
             )
         elif args["type"] and args["remove"]:
             d_data = DandelionData(
-                m, quarter=[str(m.current_quarter)], meta=args["type"], remove=args["remove"]
+                m,
+                quarter=[str(m.current_quarter)],
+                meta=args["type"],
+                remove=args["remove"],
             )
+        elif args["type"] and args["pc"]:
+            d_data = DandelionData(
+                m,
+                quarter=[str(m.current_quarter)],
+                meta=args["type"],
+                pc=args["pc"],
+            )
+        elif args["remove"] and args["pc"]:
+            d_data = DandelionData(
+                m,
+                quarter=[str(m.current_quarter)],
+                remove=args["remove"],
+                pc=args["pc"],
+            )
+        elif args["stage"] and args["pc"]:
+            d_data = DandelionData(
+                m,
+                quarter=[str(m.current_quarter)],
+                group=args["stage"],
+                pc=args["pc"],
+            )
+        elif args["group"] and args["pc"]:
+            d_data = DandelionData(
+                m,
+                quarter=[str(m.current_quarter)],
+                group=args["group"],
+                pc=args["pc"],
+            )
+        elif args["quarters"] and args["pc"]:
+            d_data = DandelionData(m, quarter=args["quarters"], pc=args["pc"])
         elif args["quarters"] and args["remove"]:
-            d_data = DandelionData(
-                m, quarter=args["quarters"], remove=args["remove"]
-            )
+            d_data = DandelionData(m, quarter=args["quarters"], remove=args["remove"])
         elif args["quarters"]:
-            d_data = DandelionData(
-                m, quarter=args["quarters"], group=DFT_GROUP)
+            d_data = DandelionData(m, quarter=args["quarters"], group=DFT_GROUP)
         elif args["group"]:
             d_data = DandelionData(
                 m, quarter=[str(m.current_quarter)], group=args["group"]
@@ -555,17 +761,22 @@ def dandelion(args):
             d_data = DandelionData(
                 m,
                 quarter=[str(m.current_quarter)],
-                group=DFT_GROUP
-                ,
+                group=DFT_GROUP,
                 meta=args["type"],
             )
         elif args["remove"]:
             d_data = DandelionData(
                 m,
                 quarter=[str(m.current_quarter)],
-                group=DFT_GROUP
-                ,
+                group=DFT_GROUP,
                 remove=args["remove"],
+            )
+        elif args["pc"]:
+            d_data = DandelionData(
+                m,
+                quarter=[str(m.current_quarter)],
+                group=DFT_GROUP,
+                pc=args["pc"],
             )
         else:
             d_data = DandelionData(
@@ -578,12 +789,16 @@ def dandelion(args):
             # if args["title"]:
             #     graph = make_a_dandelion_auto(d_data, title=args["title"], chart=True)
             # else:
-            graph = make_a_dandelion_auto(d_data, chart=True)
             if args["chart"] == "save":
                 doc = open_word_doc(root_path / "input/summary_temp_landscape.docx")
+                graph = make_a_dandelion_auto(d_data, chart=False)
                 put_matplotlib_fig_into_word(doc, graph, size=7.5)
                 doc.save(root_path / "output/dandelion_graph.docx")
                 print("Dandelion chart has been compiled")
+            if args["chart"] == "show":
+                make_a_dandelion_auto(d_data, chart=True)
+        else:
+            make_a_dandelion_auto(d_data, chart=True)
 
         check_remove(args)
 
@@ -593,10 +808,12 @@ def dandelion(args):
 
 
 def main():
-    ae_description = "Welcome to the DfT Major Projects Portfolio Office analysis engine.\n\n" \
-                     "To operate use subcommands outlined below. To navigate each subcommand\n" \
-                     "option use the --help flag which will provide instructions on which optional\n" \
-                     "arguments can be used with each subcommand. e.g. analysis dandelion --help."
+    ae_description = (
+        "Welcome to the DfT Major Projects Portfolio Office analysis engine.\n\n"
+        "To operate use subcommands outlined below. To navigate each subcommand\n"
+        "option use the --help flag which will provide instructions on which optional\n"
+        "arguments can be used with each subcommand. e.g. analysis dandelion --help."
+    )
     parser = argparse.ArgumentParser(
         prog="engine", description=ae_description, formatter_class=RawTextHelpFormatter
     )
@@ -605,12 +822,16 @@ def main():
     parser_initiate = subparsers.add_parser(
         "initiate", help="creates a master data file"
     )
-    dashboard_description = "Creates IPDC dashboards. There are no optional arguments for this command.\n\n" \
-                            "A blank master dashboard titled dashboards_master.xlsx must be in input file.\n\n" \
-                            "A completed dashboard title completed_ipdc_dashboard.xlsx will be placed into\n" \
-                            "the output file."
+    dashboard_description = (
+        "Creates IPDC dashboards. There are no optional arguments for this command.\n\n"
+        "A blank master dashboard titled dashboards_master.xlsx must be in input file.\n\n"
+        "A completed dashboard title completed_ipdc_dashboard.xlsx will be placed into\n"
+        "the output file."
+    )
     parser_dashboard = subparsers.add_parser(
-        "dashboards", description=dashboard_description, formatter_class=RawTextHelpFormatter
+        "dashboards",
+        description=dashboard_description,
+        formatter_class=RawTextHelpFormatter,
     )
     parser_dandelion = subparsers.add_parser(
         "dandelion",
@@ -798,6 +1019,15 @@ def main():
         help="Provide the type of value to include in dandelion e.g spent, remaining",
     )
 
+    parser_dandelion.add_argument(
+        "--pc",
+        type=str,
+        metavar="",
+        action="store",
+        choices=["G", "A/G", "A", "A/R", "R"],
+        help="specify the colour for the overall portfolio circle",
+    )
+
     # chart
     for sub in [parser_dandelion, parser_costs, parser_milestones]:
         sub.add_argument(
@@ -917,28 +1147,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
