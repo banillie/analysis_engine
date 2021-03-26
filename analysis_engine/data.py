@@ -8248,9 +8248,11 @@ def get_cost_stackplot_data(
     # tp_index = master.quarter_list.index(quarter[0])
     if kwargs["type"] == "comp":  # composition
         for g in g_list:  # group list
-            # HERE
+            # HERE. figure out how to remove g from sp_dict keys if it needs to be removed.
             if "remove" in kwargs:
                 costs = CostData(master, group=[g], quarter=quarter, remove=kwargs["remove"])
+                if costs is None:
+                    pass
             else:
                 costs = CostData(master, group=[g], quarter=quarter)
             try:

@@ -75,6 +75,6 @@ m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
 
 ## STACKPLOT
 DFT_GROUP = ["HSRG", "RSS", "RIG", "AMIS", "RPE"]
-# g = cal_group(["FBC"], m, 0)
-sp_data = get_cost_stackplot_data(m, DFT_GROUP, [str(m.current_quarter)], type="comp", remove=["A14"])
+g = cal_group(["FBC"], m, 0)
+sp_data = get_cost_stackplot_data(m, g, [str(m.current_quarter)], type="comp", remove=["HS2 1"])
 cost_stackplot_graph(sp_data)
