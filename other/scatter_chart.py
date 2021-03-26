@@ -24,26 +24,26 @@ from analysis_engine.data import (
     # BenefitsData,
     # total_costs_benefits_bar_chart,
     # gauge,
-    calculate_arg_combinations,
+    calculate_arg_combinations, get_cost_stackplot_data, cal_group, cost_stackplot_graph,
     # get_master_data,
     # get_project_information,
     # Master
 )
 
 ## GENERATE CLI OPTIONS
-arg_list = ["quarters", "group", "stage", "remove", "type", "pc"]
-calculate_arg_combinations(arg_list)
+# arg_list = ["quarters", "group", "stage", "remove", "type"]
+# calculate_arg_combinations(arg_list)
 
 ## INITIATE
 # master = Master(get_master_data(), get_project_information())
 
 ## MASTER
-# m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
+m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
 
 ## DANDELION
 # stage = ["pre-SOBC", "SOBC", "OBC", "FBC"]
 # group = ["HSRG", "AMIS", "RIG", "RSS", "RPE"]
-# d_data = DandelionData(m, quarter=[str(m.current_quarter)], group=group, pc="A/G")
+# d_data = DandelionData(m, quarter=[str(m.current_quarter)], group=group, meta="benefits")
 # d_lion = make_a_dandelion_auto(d_data, chart=True)
 # doc = open_word_doc(root_path / "input/summary_temp_landscape.docx")
 # put_matplotlib_fig_into_word(doc, d_lion, size=7.5)
@@ -73,3 +73,8 @@ calculate_arg_combinations(arg_list)
 # wb = data_query_into_wb(m, keys=["Senior Responsible Owner (SRO)"], quarter=["Q3 19/20"], group=DFT_GROUP)
 # wb.save(root_path / "output/query_test.xlsx")
 
+## STACKPLOT
+DFT_GROUP = ["HSRG", "RSS", "RIG", "AMIS", "RPE"]
+# g = cal_group(["FBC"], m, 0)
+sp_data = get_cost_stackplot_data(m, DFT_GROUP, [str(m.current_quarter)], type="comp", remove=["A14"])
+cost_stackplot_graph(sp_data)

@@ -323,7 +323,7 @@ def milestones(args):
             ms.filter_chart_info(
                 dates=args["dates"], type=args["type"], key=args["koi"]
             )
-        if args["type"] and args["dates"] and args["koi_fn"]:
+        elif args["type"] and args["dates"] and args["koi_fn"]:
             keys = get_data_query_key_names(
                 root_path / "input/{}.csv".format(args["koi_fn"])
             )
@@ -422,23 +422,74 @@ def matrix(args):
 
 
 def costs_sp(args):
+    ## optional arguments "quarters", "group", "stage", "remove", "type"
+    print("compiling cost stackplot analysis")
+    m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
     try:
-        print("compiling cost stackplot")
-        m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
-        if args["group"]:
+        if args["quarters"] and args["stage"] and args["type"] and args["remove"]:
+            g = cal_group(args["stage"], m, 0)
+            sp_data = get_cost_stackplot_data(m, g, args["quarters"], type=args["type"], remove=args["remove"])
+        elif args["quarters"] and args["group"] and args["type"] and args["remove"]:
             g = cal_group(args["group"], m, 0)
-            sp_data = get_cost_stackplot_data(m, g, str(m.current_quarter), type="comp")
+            sp_data = get_cost_stackplot_data(m, g, args["quarters"], type=args["type"], remove=args["remove"])
+
+        elif args["quarters"] and args["stage"] and args["type"]:
+            g = cal_group(args["stage"], m, 0)
+            sp_data = get_cost_stackplot_data(m, g, args["quarters"], type=args["type"])
+        elif args["quarters"] and args["group"] and args["type"]:
+            g = cal_group(args["group"], m, 0)
+            sp_data = get_cost_stackplot_data(m, g, args["quarters"], type=args["type"])
+        elif args["quarters"] and args["stage"] and args["remove"]:
+            g = cal_group(args["stage"], m, 0)
+            sp_data = get_cost_stackplot_data(m, g, args["quarters"], remove=args["remove"])
+        elif args["quarters"] and args["group"] and args["remove"]:
+            g = cal_group(args["group"], m, 0)
+            sp_data = get_cost_stackplot_data(m, g, args["quarters"], remove=args["remove"])
+        elif args["quarters"] and args["remove"] and args["type"]:
+            g = cal_group(DFT_GROUP, m, 0)
+            sp_data = get_cost_stackplot_data(m, g, args["quarters"], type=args["type"], remove=args["remove"])
+        elif args["stage"] and args["type"] and args["remove"]:
+            g = cal_group(args["stage"], m, 0)
+            sp_data = get_cost_stackplot_data(m, g, [m.current_quarter], type=args["type"], remove=args["remove"])
+        elif args["group"] and args["type"] and args["remove"]:
+            g = cal_group(args["group"], m, 0)
+            sp_data = get_cost_stackplot_data(m, g, [m.current_quarter], type=args["type"], remove=args["remove"])
+
+        elif args["remove"] and args["type"]:
+            sp_data = get_cost_stackplot_data(m, DFT_GROUP, [str(m.current_quarter)], type=args["type"], remove=args["remove"])
+        elif args["stage"] and args["type"]:
+            g = cal_group(args["stage"], m, 0)
+            sp_data = get_cost_stackplot_data(m, g, [str(m.current_quarter)], type=args["type"])
+        elif args["stage"] and args["remove"]:
+            g = cal_group(args["stage"], m, 0)
+            sp_data = get_cost_stackplot_data(m, g, [str(m.current_quarter)], remove=args["remove"], type="comp")
+        elif args["group"] and args["type"]:
+            g = cal_group(args["group"], m, 0)
+            sp_data = get_cost_stackplot_data(m, g, [str(m.current_quarter)], type=args["type"])
+        elif args["group"] and args["remove"]:
+            g = cal_group(args["group"], m, 0)
+            sp_data = get_cost_stackplot_data(m, g, [str(m.current_quarter)], remove=args["remove"])
+        elif args["quarters"] and args["type"]:
+            sp_data = get_cost_stackplot_data(m, DFT_GROUP, args["quarters"], type=args["type"])
+        elif args["quarters"] and args["remove"]:
+            sp_data = get_cost_stackplot_data(m, DFT_GROUP, args["quarters"], remove=args["remove"])
+
+
+        elif args["group"]:
+            g = cal_group(args["group"], m, 0)
+            sp_data = get_cost_stackplot_data(m, g, [str(m.current_quarter)], type="comp")
         # elif args["stage"]:
         #     s = cal_group(args["stage"], m, 0)
         #     sp_data = get_cost_stackplot_data(m, s, str(m.current_quarter), type="comp")
         else:
             sp_data = get_cost_stackplot_data(
                 m,
-                ["HSMRPG", "Rail", "RPE", "AMIS"],
-                str(m.current_quarter),
+                DFT_GROUP,
+                [str(m.current_quarter)],
                 type="comp",
             )
-        sp_graph = cost_stackplot_graph(sp_data)
+
+        sp_graph = cost_stackplot_graph(sp_data, chart=True)
         doc = open_word_doc(root_path / "input/summary_temp_landscape.docx")
         put_matplotlib_fig_into_word(doc, sp_graph, size=7.5)
         doc.save(root_path / "output/stackplot_graph.docx")
@@ -830,21 +881,40 @@ def main():
     )
     parser_dashboard = subparsers.add_parser(
         "dashboards",
+        help="IPDC dashboards",
         description=dashboard_description,
         formatter_class=RawTextHelpFormatter,
     )
+    dandelion_description = (
+        "Creates the IPDC 'dandelion' graph. See below optional arguments for changing the "
+        "dandelion that is compiled. The command analysis dandelion returns the default "
+        'dandelion graph. The user must specify --chart "save" to save the chart, otherwise '
+        'only a temporary matplotlib chart will be generated.'
+    )
     parser_dandelion = subparsers.add_parser(
         "dandelion",
-        help="dandelion graph and data (early version of graph output).",
+        help="Dandelion graph.",
+        description=dandelion_description,
+        # formatter_class=RawTextHelpFormatter,  # can't use as effects how optional arguments are shown.
     )
+
+    costs_description = (
+        "Creates a cost profile graph. See below optional arguments. The user "
+        'must specify --chart "save" to save the chart, otherwise '
+        'only a temporary matplotlib chart will be generated.'
+    )
+
     parser_costs = subparsers.add_parser(
         "costs",
         help="cost trend profile graph and data.",
+        description=costs_description
     )
+
     parser_costs_sp = subparsers.add_parser(
         "costs_sp",
         help="cost stackplot graph and data (early version needs more testing).",
     )
+
     parser_milestones = subparsers.add_parser(
         "milestones",
         help="milestone schedule graphs and data.",
@@ -902,7 +972,7 @@ def main():
             action="store",
             nargs="+",
             help="Returns analysis for specified project(s), only. User must enter one or a combination of "
-            'DfT Group names; "HSMRPG", "AMIS", "Rail", "RPE", or the project(s) acronym or full name.',
+            'DfT Group names; "HSRG", "RSS", "RIG", "AMIS","RPE", or the project(s) acronym or full name.',
         )
     # remove
     for sub in [
@@ -912,6 +982,7 @@ def main():
         parser_speedial,
         parser_dandelion,
         parser_costs,
+        parser_costs_sp,
         # parser_data_query,
         parser_milestones,
     ]:
@@ -933,6 +1004,7 @@ def main():
         parser_speedial,
         parser_dandelion,
         parser_costs,
+        parser_costs_sp,
         parser_data_query,
         parser_milestones,
     ]:
@@ -942,7 +1014,8 @@ def main():
             metavar="",
             action="store",
             nargs="+",
-            help='Returns analysis for specified quarters. User must use correct format e.g "Q3 19/20"',
+            help='Returns analysis for one or combination of specified quarters. '
+                 'User must use correct format e.g "Q3 19/20"',
         )
     # baseline
     for sub in [
@@ -1016,7 +1089,18 @@ def main():
         metavar="",
         action="store",
         choices=["spent", "remaining", "benefits"],
-        help="Provide the type of value to include in dandelion e.g spent, remaining",
+        help='Provide the type of value to include in dandelion. Options are'
+             ' "spent", "remaining", "benefits".',
+    )
+
+    parser_costs_sp.add_argument(
+        "--type",
+        type=str,
+        metavar="",
+        action="store",
+        choices=["cat", "comp"],
+        help='Provide the type of value to include in dandelion. Options are'
+             ' "spent", "remaining", "benefits".',
     )
 
     parser_dandelion.add_argument(
@@ -1029,7 +1113,12 @@ def main():
     )
 
     # chart
-    for sub in [parser_dandelion, parser_costs, parser_milestones]:
+    for sub in [
+        parser_dandelion,
+        parser_costs,
+        parser_costs_sp,
+        parser_milestones
+    ]:
         sub.add_argument(
             "--chart",
             type=str,
@@ -1147,3 +1236,25 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+('quarters',)
+('group',)
+('stage',)
+('remove',)
+('type',)
+('quarters', 'group')
+('quarters', 'stage')
+('quarters', 'remove')
+('quarters', 'type')
+
+
+
+
+
+
+
+
+
+
+

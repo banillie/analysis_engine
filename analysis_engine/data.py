@@ -7896,6 +7896,12 @@ class DandelionData:
 
             if len(self.group) == 5:
                 g_ang_l = [260, 310, 360, 50, 100]  # group angle list
+            if len(self.group) == 4:
+                g_ang_l = [260, 326, 32, 100]
+            if len(self.group) == 3:
+                g_ang_l = [280, 360, 80]
+            if len(self.group) == 2:
+                g_ang_l = [290, 70]
             if len(self.group) == 1:
                 pass
             g_d = {}  # group dictionary. first outer circle.
@@ -7998,7 +8004,11 @@ class DandelionData:
                     p_data = get_correct_p_data(
                         self.kwargs, self.master, self.baseline_type, p, tp
                     )
-                    rag = p_data["Departmental DCA"]
+                    # change confidence type here
+                    # SRO Schedule Confidence
+                    # Departmental DCA
+                    # SRO Benefits RAG
+                    rag = p_data["SRO Schedule Confidence"]
                     colour = COLOUR_DICT[convert_rag_text(rag)]  # bubble colour
                     project_text = (
                         self.master.abbreviations[p]["abb"]
@@ -8232,18 +8242,26 @@ def dandelion_data_into_wb(d_data: DandelionData) -> workbook:
 
 
 def get_cost_stackplot_data(
-    master: Master, g_list: List[str], quarter: str, **kwargs
+    master: Master, g_list: List[str], quarter: List[str], **kwargs
 ) -> plt.figure:
     sp_dict = {}  # stacked plot dict
+    # tp_index = master.quarter_list.index(quarter[0])
     if kwargs["type"] == "comp":  # composition
         for g in g_list:  # group list
-            costs = CostData(master, group=[g], quarter=[quarter])
-            sp_dict[g] = costs.c_profiles[quarter]["prof"]
+            # HERE
+            if "remove" in kwargs:
+                costs = CostData(master, group=[g], quarter=quarter, remove=kwargs["remove"])
+            else:
+                costs = CostData(master, group=[g], quarter=quarter)
+            try:
+                sp_dict[master.abbreviations[g]['abb']] = costs.c_profiles[quarter[0]]["prof"]
+            except KeyError:
+                sp_dict[g] = costs.c_profiles[quarter[0]]["prof"]
     elif kwargs["type"] == "cat":  # category
-        costs = CostData(master, group=[g_list], quarter=[quarter])
+        costs = CostData(master, group=[g_list], quarter=quarter)
         cat_list = ["cdel", "rdel", "ngov"]
         for c in cat_list:
-            sp_dict[c] = costs.c_profiles[quarter][c]
+            sp_dict[c] = costs.c_profiles[quarter[0]][c]
 
     return sp_dict
 
@@ -8263,7 +8281,7 @@ def put_stackplot_data_into_wb(sp_data: Dict) -> workbook:
     wb.save(root_path / "output/sp_data_all.xlsx")
 
 
-def cost_stackplot_graph(sp_dict: Dict[str, float], **chart_kwargs) -> plt.figure:
+def cost_stackplot_graph(sp_dict: Dict[str, float], **kwargs) -> plt.figure:
     sp_list = []  # stackplot list
     labels = list(sp_dict.keys())
     for g in labels:
@@ -8272,11 +8290,11 @@ def cost_stackplot_graph(sp_dict: Dict[str, float], **chart_kwargs) -> plt.figur
 
     x = YEAR_LIST
     fig, ax = plt.subplots()
+    fig.set_size_inches(18.5, 10.5)
     ax.stackplot(x, y, labels=labels)
-    ax.legend(loc="upper left")
 
-    if "size" in chart_kwargs:
-        fig = set_fig_size(chart_kwargs["size"], fig)
+    # if "size" in chart_kwargs:
+    #     fig = set_fig_size(chart_kwargs["size"], fig)
 
     # Chart styling
     fig.suptitle("stackplot example", fontweight="bold", fontsize=15)
@@ -8287,9 +8305,13 @@ def cost_stackplot_graph(sp_dict: Dict[str, float], **chart_kwargs) -> plt.figur
     ylab1.set_style("italic")
     ylab1.set_size(12)
     ax.grid(color="grey", linestyle="-", linewidth=0.2)
+    ax.legend(loc="upper right")
     # ax.legend(prop={"size": 12})
 
-    plt.show()
+    if "chart" in kwargs:
+        if kwargs["chart"]:
+            plt.show()
+
     return fig
     # fig.savefig(root_path /"output/portfolio_cost_composition_cat.png")
 
