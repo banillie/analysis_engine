@@ -24,7 +24,7 @@ from analysis_engine.data import (
     # BenefitsData,
     # total_costs_benefits_bar_chart,
     # gauge,
-    calculate_arg_combinations, get_cost_stackplot_data, cal_group, cost_stackplot_graph,
+    calculate_arg_combinations, get_sp_data, cal_group, cost_stackplot_graph, get_sp_data,
     # get_master_data,
     # get_project_information,
     # Master
@@ -75,6 +75,8 @@ m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
 
 ## STACKPLOT
 DFT_GROUP = ["HSRG", "RSS", "RIG", "AMIS", "RPE"]
-g = cal_group(["FBC"], m, 0)
-sp_data = get_cost_stackplot_data(m, g, [str(m.current_quarter)], type="comp", remove=["HS2 1"])
+# DFT_GROUP = ["RPE", "AMIS"]
+# g = cal_group(["FBC"], m, 0)
+# sp_data = get_sp_data(m, g, [str(m.current_quarter)], type="comp", remove=["HS2 1"])
+sp_data = get_sp_data(m, stage=["SOBC"], quarter=["standard"], type="cat")
 cost_stackplot_graph(sp_data)

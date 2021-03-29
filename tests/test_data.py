@@ -57,7 +57,7 @@ from analysis_engine.data import (
     cost_profile_into_wb,
     data_query_into_wb,
     get_data_query_key_names,
-    remove_project_name_from_milestone_key, get_cost_stackplot_data, cost_stackplot_graph, get_group,
+    remove_project_name_from_milestone_key, get_sp_data, cost_stackplot_graph, get_group,
     make_a_dandelion_manual, make_a_dandelion_auto,
 )
 
@@ -274,7 +274,7 @@ def test_get_group_cost_profile_chart(costs_masters, project_info):
 
 def test_get_stackplot_costs_chart(costs_masters, project_info):
     m = Master(costs_masters, project_info)
-    sp = get_cost_stackplot_data(m, group, "Q1 20/21", type="cat")
+    sp = get_sp_data(m, group, "Q1 20/21", type="cat")
     cost_stackplot_graph(sp)
 
 

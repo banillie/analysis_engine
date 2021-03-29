@@ -1096,28 +1096,41 @@ class CostData:
 
         self.wlc_change = wlc_change_dict
 
-    # def get_stackplot_data(self, sp_kwargs) -> None:
-    #     if "type" in sp_kwargs:
-    #         sp_dict = {}  # stacked plot dict
-    #         if sp_kwargs["type"] == "comp":  # composition
-    #             for g in sp_kwargs:  # group list
-    #                 costs = CostData(master, group=[g], quarter=[quarter])
-    #                 sp_dict[g] = costs.c_profiles[quarter]["prof"]
-    #
-    #             s_list = []  # stack list
-    #             for i in range(len(g_list)):
-    #                 s_list.append([sp_dict[g_list[i]]])
-    #             y = np.vstack(s_list)
-    #             labels = g_list
-    #
-    #         elif kwargs["type"] == "cat":  # category
-    #             costs = CostData(master, group=[g_list], quarter=[quarter])
-    #             cat_list = ["cdel", "rdel", "ngov"]
-    #             s_list = []
-    #             for i in range(len(cat_list)):
-    #                 s_list.append([costs.c_profiles[quarter][cat_list[i]]])
-    #             y = np.vstack(s_list)
-    #             labels = cat_list
+
+def get_sp_data(master: Master, **kwargs) -> Dict[str, float]:
+    sp_dict = {}
+    if "group" in kwargs:
+        group = kwargs["group"]
+    elif "stage" in kwargs:
+        group = kwargs["stage"]
+
+    iter_list = get_iter_list(kwargs, master)
+
+    if "type" in kwargs:
+        cat_list = ["cdel", "rdel", "ngov"]
+        for tp in iter_list:
+            kwargs["group"] = [group]
+            c = CostData(master, **kwargs)
+            for cat in cat_list:
+                sp_dict[cat] = c.c_profiles[tp][cat]
+    else:
+        for tp in iter_list:
+            if len(group) > 1:
+                for i, g in enumerate(group):
+                    kwargs["group"] = [g]
+                    c = CostData(master, **kwargs)
+                    sp_dict[g] = c.c_profiles[tp]["prof"]
+            else:
+                for i, g in enumerate(group):
+                    kwargs["group"] = [g]
+                    group = get_group(master, tp, kwargs)  # lower group
+                    for p in group:
+                        kwargs["group"] = [p]
+                        c = CostData(master, **kwargs)
+                        sp_dict[master.abbreviations[p]['abb']] = c.c_profiles[tp]["prof"]
+
+    return sp_dict
+
 
 
 def sort_group_by_key(
@@ -8241,31 +8254,31 @@ def dandelion_data_into_wb(d_data: DandelionData) -> workbook:
 #
 
 
-def get_cost_stackplot_data(
-    master: Master, g_list: List[str], quarter: List[str], **kwargs
-) -> plt.figure:
-    sp_dict = {}  # stacked plot dict
-    # tp_index = master.quarter_list.index(quarter[0])
-    if kwargs["type"] == "comp":  # composition
-        for g in g_list:  # group list
-            # HERE. figure out how to remove g from sp_dict keys if it needs to be removed.
-            if "remove" in kwargs:
-                costs = CostData(master, group=[g], quarter=quarter, remove=kwargs["remove"])
-                if costs is None:
-                    pass
-            else:
-                costs = CostData(master, group=[g], quarter=quarter)
-            try:
-                sp_dict[master.abbreviations[g]['abb']] = costs.c_profiles[quarter[0]]["prof"]
-            except KeyError:
-                sp_dict[g] = costs.c_profiles[quarter[0]]["prof"]
-    elif kwargs["type"] == "cat":  # category
-        costs = CostData(master, group=[g_list], quarter=quarter)
-        cat_list = ["cdel", "rdel", "ngov"]
-        for c in cat_list:
-            sp_dict[c] = costs.c_profiles[quarter[0]][c]
-
-    return sp_dict
+# def get_sp_data(
+#     master: Master, g_list: List[str], quarter: List[str], **kwargs
+# ) -> plt.figure:
+#     sp_dict = {}  # stacked plot dict
+#     # tp_index = master.quarter_list.index(quarter[0])
+#     if kwargs["type"] == "comp":  # composition
+#         for g in g_list:  # group list
+#             # HERE. figure out how to remove g from sp_dict keys if it needs to be removed.
+#             if "remove" in kwargs:
+#                 costs = CostData(master, group=[g], quarter=quarter, remove=kwargs["remove"])
+#                 if costs is None:
+#                     pass
+#             else:
+#                 costs = CostData(master, group=[g], quarter=quarter)
+#             try:
+#                 sp_dict[master.abbreviations[g]['abb']] = costs.c_profiles[quarter[0]]["prof"]
+#             except KeyError:
+#                 sp_dict[g] = costs.c_profiles[quarter[0]]["prof"]
+#     elif kwargs["type"] == "cat":  # category
+#         costs = CostData(master, group=[g_list], quarter=quarter)
+#         cat_list = ["cdel", "rdel", "ngov"]
+#         for c in cat_list:
+#             sp_dict[c] = costs.c_profiles[quarter[0]][c]
+#
+#     return sp_dict
 
 
 def put_stackplot_data_into_wb(sp_data: Dict) -> workbook:
@@ -8289,17 +8302,17 @@ def cost_stackplot_graph(sp_dict: Dict[str, float], **kwargs) -> plt.figure:
     for g in labels:
         sp_list.append(sp_dict[g])
     y = np.vstack(sp_list)
-
     x = YEAR_LIST
     fig, ax = plt.subplots()
     fig.set_size_inches(18.5, 10.5)
+
+    ## HERE
+    # title = get_chart_title(costs, kwargs, "cost profile trend")
+    # plt.suptitle(title, fontweight="bold", fontsize=15)
+    fig.suptitle("Stackplot Graph", fontweight="bold", fontsize=15)
     ax.stackplot(x, y, labels=labels)
 
-    # if "size" in chart_kwargs:
-    #     fig = set_fig_size(chart_kwargs["size"], fig)
-
     # Chart styling
-    fig.suptitle("stackplot example", fontweight="bold", fontsize=15)
     plt.xticks(rotation=45, size=10)
     plt.yticks(size=10)
     ax.set_ylabel("Cost (£m)")
