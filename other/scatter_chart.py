@@ -7,9 +7,11 @@ from analysis_engine.data import (
     open_pickle_file,
     root_path,
     # DcaData,
-    # CostData,
+    CostData,
     # MilestoneData,
-    # put_milestones_into_wb, data_query_into_wb, milestone_chart,
+    # put_milestones_into_wb,
+    # data_query_into_wb,
+    # milestone_chart,
     # cost_v_schedule_chart_into_wb,
     # RiskData,
     DandelionData,
@@ -24,7 +26,7 @@ from analysis_engine.data import (
     # BenefitsData,
     # total_costs_benefits_bar_chart,
     # gauge,
-    calculate_arg_combinations, get_sp_data, cal_group, cost_stackplot_graph, get_sp_data,
+    calculate_arg_combinations, get_sp_data, cal_group, cost_stackplot_graph, get_sp_data, cost_profile_graph,
     # get_master_data,
     # get_project_information,
     # Master
@@ -39,6 +41,10 @@ from analysis_engine.data import (
 
 ## MASTER
 m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
+
+# GROUPS
+DFT_GROUP = ["HSRG", "RSS", "RIG", "AMIS", "RPE"]
+# DFT_GROUP = ["RPE", "AMIS"]
 
 ## DANDELION
 # stage = ["pre-SOBC", "SOBC", "OBC", "FBC"]
@@ -74,9 +80,11 @@ m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
 # wb.save(root_path / "output/query_test.xlsx")
 
 ## STACKPLOT
-DFT_GROUP = ["HSRG", "RSS", "RIG", "AMIS", "RPE"]
-# DFT_GROUP = ["RPE", "AMIS"]
 # g = cal_group(["FBC"], m, 0)
 # sp_data = get_sp_data(m, g, [str(m.current_quarter)], type="comp", remove=["HS2 1"])
-sp_data = get_sp_data(m, stage=["SOBC"], quarter=["standard"], type="cat")
-cost_stackplot_graph(sp_data)
+# sp_data = get_sp_data(m, stage=["SOBC"], quarter=["standard"], type="cat")
+# cost_stackplot_graph(sp_data)
+
+# COSTS
+c = CostData(m, quarter=["standard"], group=DFT_GROUP)
+cost_profile_graph(c, m, chart=True, group=c.group)

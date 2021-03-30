@@ -396,6 +396,8 @@ BC_STAGE_DICT = {
 #     None: None,
 #     "RDM": "RPE",
 # }
+DFT_GROUP = ["HSRG", "RSS", "RIG", "AMIS", "RPE"]
+DFT_STAGE = ["pre-SOBC", "SOBC", "OBC", "FBC"]
 DFT_GROUP_DICT = {
     "AMIS": "Aviation",
     "HSRG": "High Speed Rail Group",
@@ -2299,35 +2301,52 @@ def set_fig_size(kwargs, fig: plt.figure) -> plt.figure:
 
 
 def get_chart_title(
-    data_class: CostData or MilestoneData, chart_kwargs, title_end
+    master: Master,
+    title_end: str,
+    **c_kwargs,  # chart kwargs
 ) -> str:
-    if "title" in chart_kwargs:
-        title = chart_kwargs["title"]
-    elif set(data_class.group) == set(data_class.master.current_projects):
-        title = "Portfolio " + title_end
-    elif "group" in data_class.kwargs:
-        if data_class.group == data_class.master.current_projects:
+    if "title" in c_kwargs:
+        title = c_kwargs["title"]
+    elif "group" in c_kwargs:
+        if set(c_kwargs["group"]) == set(DFT_GROUP):
             title = "Portfolio " + title_end
-        elif len(data_class.kwargs["group"]) == 1:
-            title = data_class.kwargs["group"][0] + " " + title_end
+        elif list(set(c_kwargs["group"])) == list(set(master.current_projects)):
+            title = "Portfolio " + title_end
+        # elif c.group["group"] == data_class.master.current_projects:
+        #     title = "Portfolio " + title_end
+        elif len(c_kwargs["group"]) == 1:
+            try:
+                title = master.abbreviations[c_kwargs["group"][0]]["abb"] + " " + title_end
+            except KeyError:
+                title = c_kwargs["group"][0] + " " + title_end
         else:
             logger.info("Please provide a title for this chart using --title.")
-            title = "user to provide"
-    elif "stage" in data_class.kwargs:
-        if data_class.group == data_class.master.current_projects:
+            title = None
+
+    elif "stage" in c_kwargs:   # not clear when this loop would be used. leaving in for now.,
+        if set(c_kwargs["stage"]) == set(DFT_STAGE):
             title = "Portfolio " + title_end
-        elif len(data_class.kwargs["stage"]) == 1:
-            title = data_class.kwargs["stage"][0] + " " + title_end
+        elif set(c_kwargs["stage"]) == set(master.current_projects):
+            title = "Portfolio " + title_end
+        elif len(c_kwargs["stage"]) == 1:
+            try:
+                title = master.abbreviations[c_kwargs["stage"][0]]["abb"] + " " + title_end
+            except KeyError:
+                title = c_kwargs["stage"][0] + " " + title_end
         else:
             logger.info("Please provide a title for this chart using --title.")
-            title = "user to provide"
+            title = None
     else:
-        title = "user to provide"
+        title = None
 
     return title
 
 
-def cost_profile_graph(costs: CostData, **kwargs) -> plt.figure:
+def cost_profile_graph(
+        costs: CostData,
+        master: Master,
+        **kwargs
+    ) -> plt.figure:
     """Compiles a matplotlib line chart for costs of GROUP of projects contained within cost_master class"""
 
     fig, (ax1) = plt.subplots(1)  # two subplots for this chart
@@ -2335,7 +2354,7 @@ def cost_profile_graph(costs: CostData, **kwargs) -> plt.figure:
     fig = set_fig_size(kwargs, fig)
 
     # title
-    title = get_chart_title(costs, kwargs, "cost profile trend")
+    title = get_chart_title(master, "cost profile trend", **kwargs)
 
     plt.suptitle(title, fontweight="bold", fontsize=25)
 

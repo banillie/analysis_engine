@@ -44,6 +44,7 @@ from analysis_engine.data import (
     make_a_dandelion_auto,
     build_speedials,
     get_sp_data,
+    DFT_GROUP,
 )
 
 import logging
@@ -55,7 +56,6 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-DFT_GROUP = ["HSRG", "RSS", "RIG", "AMIS", "RPE"]
 
 
 def check_remove(sc_args):  # subcommand arg
