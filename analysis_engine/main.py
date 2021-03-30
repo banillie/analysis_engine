@@ -344,7 +344,7 @@ def milestones(args):
             )
             ms.filter_chart_info(type=args["type"], key=keys)
         elif args["dates"] and args["type"]:
-            ms.filter_chart_info(dates=args["dates"], key=args["type"])
+            ms.filter_chart_info(dates=args["dates"], type=args["type"])
         elif args["koi_fn"]:
             keys = get_data_query_key_names(
                 root_path / "input/{}.csv".format(args["koi_fn"])
