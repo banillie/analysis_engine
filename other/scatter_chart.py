@@ -8,23 +8,30 @@ from analysis_engine.data import (
     root_path,
     # DcaData,
     # CostData,
-    # MilestoneData,
-    # put_milestones_into_wb, data_query_into_wb, milestone_chart,
+    MilestoneData,
+    # put_milestones_into_wb,
+    # data_query_into_wb,
+    milestone_chart,
     # cost_v_schedule_chart_into_wb,
     # RiskData,
-    DandelionData,
+    # DandelionData,
     # VfMData,
     # put_cost_totals_into_wb,
-    put_matplotlib_fig_into_word,
-    open_word_doc,
+    # put_matplotlib_fig_into_word,
+    # open_word_doc,
     # FIGURE_STYLE,
     # get_cost_stackplot_data,
     # put_stackplot_data_into_wb,
-    make_a_dandelion_auto,
+    # make_a_dandelion_auto,
     # BenefitsData,
     # total_costs_benefits_bar_chart,
     # gauge,
-    calculate_arg_combinations, get_sp_data, cal_group, cost_stackplot_graph, get_sp_data,
+    # calculate_arg_combinations,
+    # get_sp_data,
+    # cal_group,
+    # cost_stackplot_graph,
+    # get_sp_data,
+    # cost_profile_graph,
     # get_master_data,
     # get_project_information,
     # Master
@@ -40,6 +47,10 @@ from analysis_engine.data import (
 ## MASTER
 m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
 
+# GROUPS
+DFT_GROUP = ["HSRG", "RSS", "RIG", "AMIS", "RPE"]
+# DFT_GROUP = ["RPE", "AMIS"]
+
 ## DANDELION
 # stage = ["pre-SOBC", "SOBC", "OBC", "FBC"]
 # group = ["HSRG", "AMIS", "RIG", "RSS", "RPE"]
@@ -50,9 +61,10 @@ m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
 # doc.save(root_path / "output/dlion_graph.docx")
 
 ## MILESTONES
-# ms = MilestoneData(m, quarter=[str(m.current_quarter)], group=["GMPP"])
-# ms.filter_chart_info(dates=["1/1/2021", "1/1/2030"])
-# wb = put_milestones_into_wb(ms)
+ms = MilestoneData(m, quarter=["standard"], stage=["SOBC"])
+ms.filter_chart_info(dates=["1/1/2021", "1/2/2021"])
+chart_kwargs = {**{"blue_line": "Today", "Chart": True}, **ms.kwargs}
+milestone_chart(ms, m, **chart_kwargs)
 # wb.save(root_path / "output/gmpp_milestones_data.xlsx")
 # doc = open_word_doc(root_path / "input/summary_temp_landscape.docx")
 # for p in m.dft_groups["Q3 20/21"]["GMPP"]:
@@ -69,14 +81,15 @@ m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
 # total_costs_benefits_bar_chart(c, b, chart=True)
 
 # QUERY
-# DFT_GROUP = ["HSMRPG", "AMIS", "Rail", "RPE"]
 # wb = data_query_into_wb(m, keys=["Senior Responsible Owner (SRO)"], quarter=["Q3 19/20"], group=DFT_GROUP)
 # wb.save(root_path / "output/query_test.xlsx")
 
 ## STACKPLOT
-DFT_GROUP = ["HSRG", "RSS", "RIG", "AMIS", "RPE"]
-# DFT_GROUP = ["RPE", "AMIS"]
 # g = cal_group(["FBC"], m, 0)
 # sp_data = get_sp_data(m, g, [str(m.current_quarter)], type="comp", remove=["HS2 1"])
-sp_data = get_sp_data(m, stage=["SOBC"], quarter=["standard"], type="cat")
-cost_stackplot_graph(sp_data)
+# sp_data = get_sp_data(m, stage=["FBC"], quarter=["standard"], remove=["HS2 1"], type="cat")
+# cost_stackplot_graph(sp_data, m, group=["SOBC"])
+
+# COSTS
+# c = CostData(m, quarter=["standard"], group=["NPR"])
+# cost_profile_graph(c, m, chart=True, group=c.start_group)

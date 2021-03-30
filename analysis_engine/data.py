@@ -396,6 +396,8 @@ BC_STAGE_DICT = {
 #     None: None,
 #     "RDM": "RPE",
 # }
+DFT_GROUP = ["HSRG", "RSS", "RIG", "AMIS", "RPE"]
+DFT_STAGE = ["pre-SOBC", "SOBC", "OBC", "FBC"]
 DFT_GROUP_DICT = {
     "AMIS": "Aviation",
     "HSRG": "High Speed Rail Group",
@@ -789,6 +791,7 @@ class CostData:
         self.master = master
         self.baseline_type = "ipdc_costs"
         self.kwargs = kwargs
+        self.start_group = []
         self.group = []
         self.iter_list = []
         self.c_totals = {}
@@ -830,7 +833,11 @@ class CostData:
         is the least cumbersome loop I could design!"""
 
         self.iter_list = get_iter_list(self.kwargs, self.master)
+        self.start_group = get_group(self.master, self.iter_list[0], self.kwargs)
+        ## start_group is a temporary measure until refactor. needed to keep a
+        ## record of the group of projects first passed into class.
         lower_dict = {}
+
         for tp in self.iter_list:
             spent = 0
             profiled = 0
@@ -1121,11 +1128,17 @@ def get_sp_data(master: Master, **kwargs) -> Dict[str, float]:
                     c = CostData(master, **kwargs)
                     sp_dict[g] = c.c_profiles[tp]["prof"]
             else:
+                if "stage" in kwargs:
+                    del kwargs["stage"]
                 for i, g in enumerate(group):
                     kwargs["group"] = [g]
-                    group = get_group(master, tp, kwargs)  # lower group
-                    for p in group:
+                    low_group = get_group(master, tp, kwargs)  # lower group
+                    for p in low_group:
                         kwargs["group"] = [p]
+                        try:
+                            del kwargs["stage"]
+                        except KeyError:
+                            pass
                         c = CostData(master, **kwargs)
                         sp_dict[master.abbreviations[p]['abb']] = c.c_profiles[tp]["prof"]
 
@@ -2299,35 +2312,53 @@ def set_fig_size(kwargs, fig: plt.figure) -> plt.figure:
 
 
 def get_chart_title(
-    data_class: CostData or MilestoneData, chart_kwargs, title_end
+    master: Master,
+    title_end: str,
+    **c_kwargs,  # chart kwargs
 ) -> str:
-    if "title" in chart_kwargs:
-        title = chart_kwargs["title"]
-    elif set(data_class.group) == set(data_class.master.current_projects):
-        title = "Portfolio " + title_end
-    elif "group" in data_class.kwargs:
-        if data_class.group == data_class.master.current_projects:
+    if "title" in c_kwargs:
+        title = c_kwargs["title"]
+    elif "group" in c_kwargs:
+        if set(c_kwargs["group"]) == set(DFT_GROUP):
             title = "Portfolio " + title_end
-        elif len(data_class.kwargs["group"]) == 1:
-            title = data_class.kwargs["group"][0] + " " + title_end
+        elif set(c_kwargs["group"]) == set(master.current_projects):
+            title = "Portfolio " + title_end
+        # elif c.group["group"] == data_class.master.current_projects:
+        #     title = "Portfolio " + title_end
+        elif len(c_kwargs["group"]) == 1:
+            try:
+                title = master.abbreviations[c_kwargs["group"][0]]["abb"] + " " + title_end
+            except KeyError:
+                title = c_kwargs["group"][0] + " " + title_end
         else:
             logger.info("Please provide a title for this chart using --title.")
-            title = "user to provide"
-    elif "stage" in data_class.kwargs:
-        if data_class.group == data_class.master.current_projects:
+            title = None
+
+    elif "stage" in c_kwargs:   # not clear when this loop would be used. leaving in for now.,
+        if set(c_kwargs["stage"]) == set(DFT_STAGE):
             title = "Portfolio " + title_end
-        elif len(data_class.kwargs["stage"]) == 1:
-            title = data_class.kwargs["stage"][0] + " " + title_end
+        elif set(c_kwargs["stage"]) == set(master.current_projects):
+            title = "Portfolio " + title_end
+        elif len(c_kwargs["stage"]) == 1:
+            try:
+                title = master.abbreviations[c_kwargs["stage"][0]]["abb"] + " " + title_end
+            except KeyError:
+                title = c_kwargs["stage"][0] + " " + title_end
         else:
             logger.info("Please provide a title for this chart using --title.")
-            title = "user to provide"
+            title = None
     else:
-        title = "user to provide"
+        logger.info("Please provide a title for this chart using --title.")
+        title = None
 
     return title
 
 
-def cost_profile_graph(costs: CostData, **kwargs) -> plt.figure:
+def cost_profile_graph(
+        costs: CostData,
+        master: Master,
+        **kwargs
+    ) -> plt.figure:
     """Compiles a matplotlib line chart for costs of GROUP of projects contained within cost_master class"""
 
     fig, (ax1) = plt.subplots(1)  # two subplots for this chart
@@ -2335,9 +2366,9 @@ def cost_profile_graph(costs: CostData, **kwargs) -> plt.figure:
     fig = set_fig_size(kwargs, fig)
 
     # title
-    title = get_chart_title(costs, kwargs, "cost profile trend")
+    title = get_chart_title(master, "cost profile trend", **kwargs)
 
-    plt.suptitle(title, fontweight="bold", fontsize=25)
+    plt.suptitle(title, fontweight="bold", fontsize=20)
 
     # Overall cost profile chart
     for i in reversed(costs.iter_list):
@@ -3435,12 +3466,13 @@ def handle_long_keys(key_names: List[str]) -> List[str]:
 
 def milestone_chart(
     milestones: MilestoneData,
+    master: Master,
     **kwargs,
 ) -> plt.figure:
     fig, ax1 = plt.subplots()
     fig = set_fig_size(kwargs, fig)
 
-    title = get_chart_title(milestones, kwargs, "schedule")
+    title = get_chart_title(master, "schedule", **kwargs)
     plt.suptitle(title, fontweight="bold", fontsize=20)
 
     ms_names = milestones.sorted_milestone_dict[milestones.iter_list[0]]["names"]
@@ -8296,7 +8328,7 @@ def put_stackplot_data_into_wb(sp_data: Dict) -> workbook:
     wb.save(root_path / "output/sp_data_all.xlsx")
 
 
-def cost_stackplot_graph(sp_dict: Dict[str, float], **kwargs) -> plt.figure:
+def cost_stackplot_graph(sp_dict: Dict[str, float], master: Master, **kwargs) -> plt.figure:
     sp_list = []  # stackplot list
     labels = list(sp_dict.keys())
     for g in labels:
@@ -8307,9 +8339,8 @@ def cost_stackplot_graph(sp_dict: Dict[str, float], **kwargs) -> plt.figure:
     fig.set_size_inches(18.5, 10.5)
 
     ## HERE
-    # title = get_chart_title(costs, kwargs, "cost profile trend")
-    # plt.suptitle(title, fontweight="bold", fontsize=15)
-    fig.suptitle("Stackplot Graph", fontweight="bold", fontsize=15)
+    title = get_chart_title(master, "costs stack plot", **kwargs)
+    plt.suptitle(title, fontweight="bold", fontsize=20)
     ax.stackplot(x, y, labels=labels)
 
     # Chart styling
