@@ -426,177 +426,182 @@ def costs_sp(args):
     ## optional arguments "quarters", "group", "stage", "remove", "type"
     print("compiling cost stackplot analysis")
     m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
-    try:
-        if args["quarters"] and args["stage"] and args["type"] and args["remove"]:
-            sp_data = get_sp_data(
-                m,
-                quarter=args["quarters"],
-                stage=args["stage"],
-                type=args["type"],
-                remove=args["remove"],
-            )
-        elif args["quarters"] and args["group"] and args["type"] and args["remove"]:
-            sp_data = get_sp_data(
-                m,
-                quarter=args["quarters"],
-                group=args["group"],
-                type=args["type"],
-                remove=args["remove"],
-            )
-        elif args["quarters"] and args["stage"] and args["type"]:
-            sp_data = get_sp_data(
-                m, args["quarters"], stage=args["stage"], type=args["type"]
-            )
-        elif args["quarters"] and args["group"] and args["type"]:
-            sp_data = get_sp_data(
-                m, quarter=args["quarters"], group=args["group"], type=args["type"]
-            )
-        elif args["quarters"] and args["stage"] and args["remove"]:
-            sp_data = get_sp_data(
-                m, quarter=args["quarters"], stage=args["stage"], remove=args["remove"]
-            )
-        elif args["quarters"] and args["group"] and args["remove"]:
-            sp_data = get_sp_data(
-                m, quarter=args["quarters"], group=args["group"], remove=args["remove"]
-            )
-        elif args["quarters"] and args["remove"] and args["type"]:
-            sp_data = get_sp_data(
-                m, quarters=args["quarters"], type=args["type"], remove=args["remove"]
-            )
-        elif args["stage"] and args["type"] and args["remove"]:
-            sp_data = get_sp_data(
-                m,
-                quarter=["standard"],
-                stage=args["stage"],
-                type=args["type"],
-                remove=args["remove"],
-            )
-        elif args["group"] and args["type"] and args["remove"]:
-            sp_data = get_sp_data(
-                m,
-                quarter=["standard"],
-                group=["group"],
-                type=args["type"],
-                remove=args["remove"],
-            )
-
-        elif args["remove"] and args["type"]:
-            sp_data = get_sp_data(
-                m,
-                quarter=["standard"],
-                group=DFT_GROUP,
-                type=args["type"],
-                remove=args["remove"],
-            )
-        elif args["stage"] and args["type"]:
-            sp_data = get_sp_data(
-                m,
-                quarter=["standard"],
-                stage=args["stage"],
-                type=args["type"],
-            )
-        elif args["stage"] and args["remove"]:
-            sp_data = get_sp_data(
-                m,
-                quarter=["standard"],
-                stage=args["stage"],
-                remove=args["remove"],
-            )
-        elif args["group"] and args["type"]:
-            sp_data = get_sp_data(
-                m,
-                quarter=["standard"],
-                group=args["group"],
-                type=args["type"],
-            )
-        elif args["group"] and args["remove"]:
-            sp_data = get_sp_data(
-                m,
-                quarter=["standard"],
-                group=args["group"],
-                remove=args["remove"],
-            )
-        elif args["quarters"] and args["type"]:
-            sp_data = get_sp_data(
-                m,
-                quarter=args["quarters"],
-                group=DFT_GROUP,
-                type=args["type"],
-            )
-        elif args["quarters"] and args["remove"]:
-            get_sp_data(
-                m, quarter=args["quarters"], group=DFT_GROUP, remove=args["remove"]
-            )
-        elif args["quarters"] and args["stage"]:
-            get_sp_data(
-                m,
-                quarter=args["quarters"],
-                stage=args["stage"],
-            )
-        elif args["quarters"] and args["group"]:
-            get_sp_data(
-                m,
-                quarter=args["quarters"],
-                group=args["group"],
-            )
-        elif args["type"]:
-            sp_data = get_sp_data(
-                m,
-                quarter=["standard"],
-                group=DFT_GROUP,
-                type=args["type"],
-            )
-        elif args["remove"]:
-            sp_data = get_sp_data(
-                m,
-                quarter=["standard"],
-                group=DFT_GROUP,
-                remove=args["remove"],
-            )
-        elif args["group"]:
-            get_sp_data(
-                m,
-                quarter=["standard"],
-                group=args["group"],
-            )
-        elif args["stage"]:
-            get_sp_data(
-                m,
-                quarter=["standard"],
-                stage=args["stage"],
-            )
-        elif args["quarters"]:
-            get_sp_data(
-                m,
-                quarter=args["quarters"],
-                group=DFT_GROUP,
-            )
-        else:
-            sp_data = get_sp_data(
-                m,
-                group=DFT_GROUP,
-                quarter=["standard"],
-            )
-
-        if args["title"]:
-            title = args["title"]
-        else:
-            title = "something"
-
-        if args["chart"]:
-            if args["chart"] == "save":
-                sp_graph = cost_stackplot_graph(sp_data, title=title)
-                doc = open_word_doc(root_path / "input/summary_temp_landscape.docx")
-                put_matplotlib_fig_into_word(doc, sp_graph, size=7.5)
-                doc.save(root_path / "output/stackplot_graph.docx")
-            if args["chart"] == "show":
-                cost_stackplot_graph(sp_data, chart=True, title=title)
-        else:
-            cost_stackplot_graph(sp_data, chart=True, title=title)
-
-    except ProjectNameError as e:
-        logger.critical(e)
-        sys.exit(1)
+    op_args = {k: v for k, v in args.items() if v}
+    op_args["group"] = DFT_GROUP
+    op_args["quarter"] = ["standard"]
+    op_args["chart"] = True
+    sp_data = get_sp_data(m, **op_args)
+    cost_stackplot_graph(sp_data, m, **op_args)
+    # try:
+    #     # if args["quarters"] and args["stage"] and args["type"] and args["remove"]:
+    #     #     sp_data = get_sp_data(
+    #     #         m,
+    #     #         quarter=args["quarters"],
+    #     #         stage=args["stage"],
+    #     #         type=args["type"],
+    #     #         remove=args["remove"],
+    #     #     )
+    #     # elif args["quarters"] and args["group"] and args["type"] and args["remove"]:
+    #     #     sp_data = get_sp_data(
+    #     #         m,
+    #     #         quarter=args["quarters"],
+    #     #         group=args["group"],
+    #     #         type=args["type"],
+    #     #         remove=args["remove"],
+    #     #     )
+    #     # elif args["quarters"] and args["stage"] and args["type"]:
+    #     #     sp_data = get_sp_data(
+    #     #         m, args["quarters"], stage=args["stage"], type=args["type"]
+    #     #     )
+    #     # elif args["quarters"] and args["group"] and args["type"]:
+    #     #     sp_data = get_sp_data(
+    #     #         m, quarter=args["quarters"], group=args["group"], type=args["type"]
+    #     #     )
+    #     # elif args["quarters"] and args["stage"] and args["remove"]:
+    #     #     sp_data = get_sp_data(
+    #     #         m, quarter=args["quarters"], stage=args["stage"], remove=args["remove"]
+    #     #     )
+    #     # elif args["quarters"] and args["group"] and args["remove"]:
+    #     #     sp_data = get_sp_data(
+    #     #         m, quarter=args["quarters"], group=args["group"], remove=args["remove"]
+    #     #     )
+    #     # elif args["quarters"] and args["remove"] and args["type"]:
+    #     #     sp_data = get_sp_data(
+    #     #         m, quarters=args["quarters"], type=args["type"], remove=args["remove"]
+    #     #     )
+    #     # elif args["stage"] and args["type"] and args["remove"]:
+    #     #     sp_data = get_sp_data(
+    #     #         m,
+    #     #         quarter=["standard"],
+    #     #         stage=args["stage"],
+    #     #         type=args["type"],
+    #     #         remove=args["remove"],
+    #     #     )
+    #     # elif args["group"] and args["type"] and args["remove"]:
+    #     #     sp_data = get_sp_data(
+    #     #         m,
+    #     #         quarter=["standard"],
+    #     #         group=["group"],
+    #     #         type=args["type"],
+    #     #         remove=args["remove"],
+    #     #     )
+    #     #
+    #     # elif args["remove"] and args["type"]:
+    #     #     sp_data = get_sp_data(
+    #     #         m,
+    #     #         quarter=["standard"],
+    #     #         group=DFT_GROUP,
+    #     #         type=args["type"],
+    #     #         remove=args["remove"],
+    #     #     )
+    #     # elif args["stage"] and args["type"]:
+    #     #     sp_data = get_sp_data(
+    #     #         m,
+    #     #         quarter=["standard"],
+    #     #         stage=args["stage"],
+    #     #         type=args["type"],
+    #     #     )
+    #     # elif args["stage"] and args["remove"]:
+    #     #     sp_data = get_sp_data(
+    #     #         m,
+    #     #         quarter=["standard"],
+    #     #         stage=args["stage"],
+    #     #         remove=args["remove"],
+    #     #     )
+    #     # elif args["group"] and args["type"]:
+    #     #     sp_data = get_sp_data(
+    #     #         m,
+    #     #         quarter=["standard"],
+    #     #         group=args["group"],
+    #     #         type=args["type"],
+    #     #     )
+    #     # elif args["group"] and args["remove"]:
+    #     #     sp_data = get_sp_data(
+    #     #         m,
+    #     #         quarter=["standard"],
+    #     #         group=args["group"],
+    #     #         remove=args["remove"],
+    #     #     )
+    #     # elif args["quarters"] and args["type"]:
+    #     #     sp_data = get_sp_data(
+    #     #         m,
+    #     #         quarter=args["quarters"],
+    #     #         group=DFT_GROUP,
+    #     #         type=args["type"],
+    #     #     )
+    #     # elif args["quarters"] and args["remove"]:
+    #     #     get_sp_data(
+    #     #         m, quarter=args["quarters"], group=DFT_GROUP, remove=args["remove"]
+    #     #     )
+    #     # elif args["quarters"] and args["stage"]:
+    #     #     get_sp_data(
+    #     #         m,
+    #     #         quarter=args["quarters"],
+    #     #         stage=args["stage"],
+    #     #     )
+    #     # elif args["quarters"] and args["group"]:
+    #     #     get_sp_data(
+    #     #         m,
+    #     #         quarter=args["quarters"],
+    #     #         group=args["group"],
+    #     #     )
+    #     # elif args["type"]:
+    #     #     sp_data = get_sp_data(
+    #     #         m,
+    #     #         quarter=["standard"],
+    #     #         group=DFT_GROUP,
+    #     #         type=args["type"],
+    #     #     )
+    #     # elif args["remove"]:
+    #     #     sp_data = get_sp_data(
+    #     #         m,
+    #     #         quarter=["standard"],
+    #     #         group=DFT_GROUP,
+    #     #         remove=args["remove"],
+    #     #     )
+    #     # elif args["group"]:
+    #     #     get_sp_data(
+    #     #         m,
+    #     #         quarter=["standard"],
+    #     #         group=args["group"],
+    #     #     )
+    #     # elif args["stage"]:
+    #     #     get_sp_data(
+    #     #         m,
+    #     #         quarter=["standard"],
+    #     #         stage=args["stage"],
+    #     #     )
+    #     # elif args["quarters"]:
+    #     #     get_sp_data(
+    #     #         m,
+    #     #         quarter=args["quarters"],
+    #     #         group=DFT_GROUP,
+    #     #     )
+    #     # else:
+    #     #     sp_data = get_sp_data(
+    #     #         m,
+    #     #         group=DFT_GROUP,
+    #     #         quarter=["standard"],
+    #     #     )
+    #
+    #
+    #     if args["title"]:
+    #         title = args["title"]
+    #
+    #     if args["chart"]:
+    #         if args["chart"] == "save":
+    #             sp_graph = cost_stackplot_graph(sp_data, m, title=title)
+    #             doc = open_word_doc(root_path / "input/summary_temp_landscape.docx")
+    #             put_matplotlib_fig_into_word(doc, sp_graph, size=7.5)
+    #             doc.save(root_path / "output/stackplot_graph.docx")
+    #         if args["chart"] == "show":
+    #             cost_stackplot_graph(sp_data, chart=True, title=title)
+    #     else:
+    #         cost_stackplot_graph(sp_data, m, chart=True, group=sp_data.keys())
+    #
+    # except ProjectNameError as e:
+    #     logger.critical(e)
+    #     sys.exit(1)
 
 
 def query(args):
@@ -1341,3 +1346,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
