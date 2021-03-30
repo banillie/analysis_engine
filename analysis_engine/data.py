@@ -791,6 +791,7 @@ class CostData:
         self.master = master
         self.baseline_type = "ipdc_costs"
         self.kwargs = kwargs
+        self.start_group = []
         self.group = []
         self.iter_list = []
         self.c_totals = {}
@@ -832,7 +833,11 @@ class CostData:
         is the least cumbersome loop I could design!"""
 
         self.iter_list = get_iter_list(self.kwargs, self.master)
+        self.start_group = get_group(self.master, self.iter_list[0], self.kwargs)
+        ## start_group is a temporary measure until refactor. needed to keep a
+        ## record of the group of projects first passed into class.
         lower_dict = {}
+
         for tp in self.iter_list:
             spent = 0
             profiled = 0
@@ -1123,11 +1128,17 @@ def get_sp_data(master: Master, **kwargs) -> Dict[str, float]:
                     c = CostData(master, **kwargs)
                     sp_dict[g] = c.c_profiles[tp]["prof"]
             else:
+                if "stage" in kwargs:
+                    del kwargs["stage"]
                 for i, g in enumerate(group):
                     kwargs["group"] = [g]
-                    group = get_group(master, tp, kwargs)  # lower group
-                    for p in group:
+                    low_group = get_group(master, tp, kwargs)  # lower group
+                    for p in low_group:
                         kwargs["group"] = [p]
+                        try:
+                            del kwargs["stage"]
+                        except KeyError:
+                            pass
                         c = CostData(master, **kwargs)
                         sp_dict[master.abbreviations[p]['abb']] = c.c_profiles[tp]["prof"]
 
@@ -2310,7 +2321,7 @@ def get_chart_title(
     elif "group" in c_kwargs:
         if set(c_kwargs["group"]) == set(DFT_GROUP):
             title = "Portfolio " + title_end
-        elif list(set(c_kwargs["group"])) == list(set(master.current_projects)):
+        elif set(c_kwargs["group"]) == set(master.current_projects):
             title = "Portfolio " + title_end
         # elif c.group["group"] == data_class.master.current_projects:
         #     title = "Portfolio " + title_end
@@ -2337,6 +2348,7 @@ def get_chart_title(
             logger.info("Please provide a title for this chart using --title.")
             title = None
     else:
+        logger.info("Please provide a title for this chart using --title.")
         title = None
 
     return title
@@ -2356,7 +2368,7 @@ def cost_profile_graph(
     # title
     title = get_chart_title(master, "cost profile trend", **kwargs)
 
-    plt.suptitle(title, fontweight="bold", fontsize=25)
+    plt.suptitle(title, fontweight="bold", fontsize=20)
 
     # Overall cost profile chart
     for i in reversed(costs.iter_list):
@@ -3454,12 +3466,13 @@ def handle_long_keys(key_names: List[str]) -> List[str]:
 
 def milestone_chart(
     milestones: MilestoneData,
+    master: Master,
     **kwargs,
 ) -> plt.figure:
     fig, ax1 = plt.subplots()
     fig = set_fig_size(kwargs, fig)
 
-    title = get_chart_title(milestones, kwargs, "schedule")
+    title = get_chart_title(master, "schedule", **kwargs)
     plt.suptitle(title, fontweight="bold", fontsize=20)
 
     ms_names = milestones.sorted_milestone_dict[milestones.iter_list[0]]["names"]
@@ -8315,7 +8328,7 @@ def put_stackplot_data_into_wb(sp_data: Dict) -> workbook:
     wb.save(root_path / "output/sp_data_all.xlsx")
 
 
-def cost_stackplot_graph(sp_dict: Dict[str, float], **kwargs) -> plt.figure:
+def cost_stackplot_graph(sp_dict: Dict[str, float], master: Master, **kwargs) -> plt.figure:
     sp_list = []  # stackplot list
     labels = list(sp_dict.keys())
     for g in labels:
@@ -8326,9 +8339,8 @@ def cost_stackplot_graph(sp_dict: Dict[str, float], **kwargs) -> plt.figure:
     fig.set_size_inches(18.5, 10.5)
 
     ## HERE
-    # title = get_chart_title(costs, kwargs, "cost profile trend")
-    # plt.suptitle(title, fontweight="bold", fontsize=15)
-    fig.suptitle("Stackplot Graph", fontweight="bold", fontsize=15)
+    title = get_chart_title(master, "costs stack plot", **kwargs)
+    plt.suptitle(title, fontweight="bold", fontsize=20)
     ax.stackplot(x, y, labels=labels)
 
     # Chart styling
