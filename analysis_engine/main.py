@@ -2,6 +2,7 @@ import argparse
 from argparse import RawTextHelpFormatter
 import itertools
 import sys
+from typing import Dict
 
 from openpyxl import load_workbook
 
@@ -57,7 +58,6 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-
 def check_remove(sc_args):  # subcommand arg
     if sc_args["remove"]:
         from analysis_engine.data import CURRENT_LOG
@@ -66,14 +66,14 @@ def check_remove(sc_args):  # subcommand arg
             if p + " successfully removed from analysis." not in CURRENT_LOG:
                 logger.warning(
                     p + " not recognised and therefore not removed from analysis."
-                    ' Please make sure "remove" entry is correct.'
+                        ' Please make sure "remove" entry is correct.'
                 )
 
 
 def run_correct_args(
-    m: Master,
-    ae_class: CostData or VfMData or DcaData or RiskData,
-    args: argparse.ArgumentParser,
+        m: Master,
+        ae_class: CostData or VfMData or DcaData or RiskData,
+        args: argparse.ArgumentParser,
 ) -> CostData or VfMData or DcaData or RiskData:
     if args["quarters"] and args["stage"] and args["remove"]:
         data = ae_class(
@@ -254,136 +254,54 @@ def speedials(args):
     print("Speed dial analysis has been compiled. Enjoy!")
 
 
-def milestones(args):
-    # args available for milestones quarters, baseline, stage, group, remove, type, dates, koi
-    print("compiling milestone analysis_engine")
-    m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
-    try:
-        if args["baselines"] and args["stage"] and args["remove"]:
-            ms = MilestoneData(
-                m,
-                group=args["stage"],
-                baseline=args["baselines"],
-                remove=args["remove"],
-            )
-        elif args["baselines"] and args["group"] and args["remove"]:
-            ms = MilestoneData(
-                m,
-                group=args["group"],
-                baseline=args["baselines"],
-                remove=args["remove"],
-            )
-        elif args["quarters"] and args["group"] and args["remove"]:
-            ms = MilestoneData(
-                m, group=args["group"], quarter=args["quarters"], remove=args["remove"]
-            )
-        elif args["quarters"] and args["stage"] and args["remove"]:
-            ms = MilestoneData(
-                m, group=args["stage"], quarter=args["quarters"], remove=args["remove"]
-            )
-        elif args["group"] and args["remove"]:
-            ms = MilestoneData(
-                m, group=args["group"], quarter=["standard"], remove=args["remove"]
-            )
-        elif args["stage"] and args["remove"]:
-            ms = MilestoneData(
-                m, group=args["stage"], quarter=["standard"], remove=args["remove"]
-            )
-        elif args["baselines"] and args["remove"]:
-            ms = MilestoneData(
-                m, group=DFT_GROUP, baseline=args["baselines"], remove=args["remove"]
-            )
-        elif args["baselines"] and args["stage"]:
-            ms = MilestoneData(m, group=args["stage"], baseline=args["baselines"])
-        elif args["baselines"] and args["group"]:
-            ms = MilestoneData(m, group=args["group"], baseline=args["baselines"])
-        elif args["quarters"] and args["remove"]:
-            ms = MilestoneData(
-                m, group=DFT_GROUP, quarter=args["quarters"], remove=args["remove"]
-            )
-        elif args["quarters"] and args["stage"]:
-            ms = MilestoneData(m, group=args["stage"], quarter=args["quarters"])
-        elif args["quarters"] and args["group"]:
-            ms = MilestoneData(m, group=args["group"], quarter=args["quarters"])
-        elif args["quarters"]:
-            ms = MilestoneData(m, group=DFT_GROUP, quarter=args["quarters"])
-        elif args["stage"]:
-            ms = MilestoneData(m, group=args["stage"], quarter=["standard"])
-        elif args["group"]:
-            ms = MilestoneData(m, group=args["group"], quarter=["standard"])
-        elif args["remove"]:
-            ms = MilestoneData(
-                m, group=DFT_GROUP, quarter=["standard"], remove=args["remove"]
-            )
-        elif args["baselines"]:
-            ms = MilestoneData(m, group=DFT_GROUP, baseline=args["baselines"])
-        else:
-            ms = MilestoneData(m, quarter=["standard"])
+def return_koi_fn_keys(oa: Dict):  # op_args
+    """small helper function to convert key names in file into list of strings
+    and place in op_args dictionary"""
+    if "koi_fn" in oa:
+        keys = get_data_query_key_names(
+            root_path / "input/{}.csv".format(oa["koi_fn"])
+        )
+        oa["key"] = keys
+        return oa
+    else:
+        return oa
 
-        if args["type"] and args["dates"] and args["koi"]:
-            ms.filter_chart_info(
-                dates=args["dates"], type=args["type"], key=args["koi"]
-            )
-        elif args["type"] and args["dates"] and args["koi_fn"]:
-            keys = get_data_query_key_names(
-                root_path / "input/{}.csv".format(args["koi_fn"])
-            )
-            ms.filter_chart_info(dates=args["dates"], type=args["type"], key=keys)
-        elif args["dates"] and args["koi"]:
-            ms.filter_chart_info(dates=args["dates"], key=args["koi"])
-        elif args["dates"] and args["koi_fn"]:
-            keys = get_data_query_key_names(
-                root_path / "input/{}.csv".format(args["koi_fn"])
-            )
-            ms.filter_chart_info(dates=args["dates"], key=keys)
-        elif args["type"] and args["koi"]:
-            ms.filter_chart_info(type=args["type"], key=args["koi"])
-        elif args["type"] and args["koi_fn"]:
-            keys = get_data_query_key_names(
-                root_path / "input/{}.csv".format(args["koi_fn"])
-            )
-            ms.filter_chart_info(type=args["type"], key=keys)
-        elif args["dates"] and args["type"]:
-            ms.filter_chart_info(dates=args["dates"], type=args["type"])
-        elif args["koi_fn"]:
-            keys = get_data_query_key_names(
-                root_path / "input/{}.csv".format(args["koi_fn"])
-            )
-            ms.filter_chart_info(key=keys)
-        elif args["koi"]:
-            ms.filter_chart_info(key=args["koi"])
-        elif args["dates"]:
-            ms.filter_chart_info(dates=args["dates"])
-        elif args["type"]:
-            ms.filter_chart_info(type=args["type"])
+
+def milestones(args):
+    """args available for milestones quarters, baseline, stage, group, remove, type, dates, koi, koi_fn"""
+    print("compiling milestone analysis_engine")
+
+    m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
+
+    try:
+        op_args = {k: v for k, v in args.items() if v}  # removes None values
+        if "group" not in op_args:
+            if "stage" not in op_args:
+                op_args["group"] = DFT_GROUP
+        if "quarter" not in op_args:
+            if "baseline" not in op_args:
+                op_args["quarter"] = ["standard"]
+
+        ms = MilestoneData(m, **op_args)
+
+        if "type" in op_args or "dates" in op_args or "koi" in op_args or "koi_fn" in op_args:
+            op_args = return_koi_fn_keys(op_args)
+            ms.filter_chart_info(**op_args)
+
+        if "chart" not in op_args:
+            pass
+        else:
+            if op_args["chart"] == "save":
+                op_args["chart"] = False
+                ms_graph = milestone_chart(ms, m, **op_args)
+                doc = open_word_doc(root_path / "input/summary_temp_landscape.docx")
+                put_matplotlib_fig_into_word(doc, ms_graph, size=8, transparent=False)
+                doc.save(root_path / "output/milestones_chart.docx")
+            if op_args["chart"] == "show":
+                milestone_chart(ms, m, **op_args)
 
         wb = put_milestones_into_wb(ms)
         wb.save(root_path / "output/milestone_data_output.xlsx")
-
-        if args["chart"]:
-            if args["title"] and args["blue_line"]:
-                if args["blue_line"] == "today":
-                    graph = milestone_chart(
-                        ms, title=args["title"], blue_line="Today", chart=True
-                    )
-                elif args["blue_line"] == "ipdc":
-                    graph = milestone_chart(
-                        ms, title=args["title"], blue_line="ipdc_date", chart=True
-                    )
-                else:
-                    graph = milestone_chart(
-                        ms, title=args["title"], blue_line=args["blue_line"], chart=True
-                    )
-            elif args["title"]:
-                graph = milestone_chart(ms, title=args["title"], chart=True)
-            elif args["blue_line"]:
-                graph = milestone_chart(ms, blue_line="Today", chart=True)
-            else:
-                graph = milestone_chart(ms, chart=True)
-            if args["chart"] == "save":
-                doc = open_word_doc(root_path / "input/summary_temp_landscape.docx")
-                put_matplotlib_fig_into_word(doc, graph, size=8, transparent=False)
-                doc.save(root_path / "output/milestones_chart.docx")
 
     except ProjectNameError as e:
         logger.critical(e)
@@ -515,11 +433,11 @@ def dandelion(args):
     m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
     try:
         if (
-            args["quarters"]
-            and args["stage"]
-            and args["type"]
-            and args["remove"]
-            and args["pc"]
+                args["quarters"]
+                and args["stage"]
+                and args["type"]
+                and args["remove"]
+                and args["pc"]
         ):
             d_data = DandelionData(
                 m,
@@ -530,11 +448,11 @@ def dandelion(args):
                 pc=args["pc"],
             )
         elif (
-            args["quarters"]
-            and args["group"]
-            and args["type"]
-            and args["remove"]
-            and args["pc"]
+                args["quarters"]
+                and args["group"]
+                and args["type"]
+                and args["remove"]
+                and args["pc"]
         ):
             d_data = DandelionData(
                 m,
@@ -925,7 +843,7 @@ def main():
             nargs="+",
             choices=["FBC", "OBC", "SOBC", "pre-SOBC"],
             help="Returns analysis for only those projects at the specified planning stage(s). User must enter one "
-            'or combination of "FBC", "OBC", "SOBC", "pre-SOBC".',
+                 'or combination of "FBC", "OBC", "SOBC", "pre-SOBC".',
         )
     # group
     for sub in [
@@ -947,7 +865,7 @@ def main():
             action="store",
             nargs="+",
             help="Returns analysis for specified project(s), only. User must enter one or a combination of "
-            'DfT Group names; "HSRG", "RSS", "RIG", "AMIS","RPE", or the project(s) acronym or full name.',
+                 'DfT Group names; "HSRG", "RSS", "RIG", "AMIS","RPE", or the project(s) acronym or full name.',
         )
     # remove
     for sub in [
@@ -968,8 +886,8 @@ def main():
             action="store",
             nargs="+",
             help="Removes specified projects from analysis. User must enter one or a combination of either"
-            " a recognised DfT Group name, a recognised planning stage or the project(s) acronym or full"
-            " name.",
+                 " a recognised DfT Group name, a recognised planning stage or the project(s) acronym or full"
+                 " name.",
         )
     # quarter
     for sub in [
@@ -990,7 +908,7 @@ def main():
             action="store",
             nargs="+",
             help="Returns analysis for one or combination of specified quarters. "
-            'User must use correct format e.g "Q3 19/20"',
+                 'User must use correct format e.g "Q3 19/20"',
         )
     # baseline
     for sub in [
@@ -1019,8 +937,8 @@ def main():
                 "all",
             ],
             help="Returns analysis for specified baselines. User must use correct format"
-            ' which are "current", "last", "bl_one", "bl_two", "bl_three", "standard", "all".'
-            ' The "all" option returns all, "standard" returns first three',
+                 ' which are "current", "last", "bl_one", "bl_two", "bl_three", "standard", "all".'
+                 ' The "all" option returns all, "standard" returns first three',
         )
 
     parser_milestones.add_argument(
@@ -1065,7 +983,7 @@ def main():
         action="store",
         choices=["spent", "remaining", "benefits"],
         help="Provide the type of value to include in dandelion. Options are"
-        ' "spent", "remaining", "benefits".',
+             ' "spent", "remaining", "benefits".',
     )
 
     parser_costs_sp.add_argument(
@@ -1112,7 +1030,8 @@ def main():
         type=str,
         metavar="",
         action="store",
-        help='Insert blue line into chart to represent a date. Options are "today" "ipdc" or a date in correct format e.g. "1/1/2021".',
+        help='Insert blue line into chart to represent a date. '
+             'Options are "Today" "IPDC" or a date in correct format e.g. "1/1/2021".',
     )
 
     parser_data_query.add_argument(
@@ -1205,4 +1124,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

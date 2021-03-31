@@ -11,7 +11,7 @@ from analysis_engine.data import (
     MilestoneData,
     # put_milestones_into_wb,
     # data_query_into_wb,
-    milestone_chart, run_p_reports,
+    milestone_chart, run_p_reports, put_milestones_into_wb,
     # cost_v_schedule_chart_into_wb,
     # RiskData,
     # DandelionData,
@@ -61,9 +61,11 @@ DFT_GROUP = ["HSRG", "RSS", "RIG", "AMIS", "RPE"]
 # doc.save(root_path / "output/dlion_graph.docx")
 
 ## MILESTONES
-ms = MilestoneData(m, quarter=["standard"], stage=["SOBC"])
-ms.filter_chart_info(dates=["1/1/2021", "1/2/2021"])
-chart_kwargs = {**{"blue_line": "Today", "Chart": True}, **ms.kwargs}
+ms = MilestoneData(m, quarter=["standard"], group=DFT_GROUP)
+ms.filter_chart_info(dates=["1/4/2021", "1/5/2021"])
+# wb = put_milestones_into_wb(ms)
+# wb.save(root_path / "output/test_milestone_data_output.xlsx")
+chart_kwargs = {**{"blue_line": "today", "Chart": True}, **ms.kwargs}
 milestone_chart(ms, m, **chart_kwargs)
 # wb.save(root_path / "output/gmpp_milestones_data.xlsx")
 # doc = open_word_doc(root_path / "input/summary_temp_landscape.docx")

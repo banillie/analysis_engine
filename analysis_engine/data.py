@@ -3560,7 +3560,7 @@ def milestone_chart(
                     fontsize=10,
                     fontweight="bold",
                 )
-        elif blue_line == "ipdc_date":
+        elif blue_line == "IPDC":
             if min_date <= IPDC_DATE <= max_date:
                 plt.axvline(IPDC_DATE)
                 plt.figtext(
