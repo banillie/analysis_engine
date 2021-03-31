@@ -109,7 +109,7 @@ def get_master_data() -> List[
 ]:  # how specify a list of dictionaries?
     """Returns a list of dictionaries each containing quarter data"""
     master_data_list = [
-        # project_data_from_master(root_path / "core_data/master_4_2020.xlsx", 4, 2020),
+        project_data_from_master(root_path / "core_data/master_4_2020.xlsx", 4, 2020),
         project_data_from_master(root_path / "core_data/master_3_2020.xlsx", 3, 2020),
         project_data_from_master(root_path / "core_data/master_2_2020.xlsx", 2, 2020),
         project_data_from_master(root_path / "core_data/master_1_2020.xlsx", 1, 2020),
@@ -4504,7 +4504,7 @@ class VfMData:
                 if p_data is None:
                     continue
                 vfm_list = []
-                vfm = ("Group", DFT_GROUP_DICT[p_data["DfT Group"]])
+                vfm = ("Group", self.master.project_information.data[p]["Group"])
                 vfm_list.append(vfm)
                 for vfm_type in VFM_LIST:
                     try:
@@ -5523,7 +5523,7 @@ def compile_p_report(
         milestones_chart = milestone_chart(
             milestones,
             master,
-            blue_line="ipdc_date",
+            blue_line="IPDC",
             title=ab + " schedule (2021 - 22)",
             show="No",
         )
@@ -5536,7 +5536,8 @@ def compile_p_report(
         milestones.filter_chart_info(dates=["1/9/2020", "30/12/2024"])
         milestones_chart = milestone_chart(
             milestones,
-            blue_line="ipdc_date",
+            master,
+            blue_line="IPDC",
             title=ab + " schedule (2021 - 24)",
             show="No",
         )
