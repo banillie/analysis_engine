@@ -3491,12 +3491,18 @@ def milestone_chart(
     #         s=200,
     #     )
 
-    for i in reversed(milestones.iter_list):
+    # alpha_list = [1, 0.8, 0.6, 0.4, 0.2]
+    # c_list = ["#436f70", "#4c7e80", "#5f9ea0"]
+
+    for i, tp in enumerate(milestones.iter_list):
         ax1.scatter(
-            milestones.sorted_milestone_dict[i]["g_dates"],
+            milestones.sorted_milestone_dict[tp]["g_dates"],
             ms_names,
-            label=i,
+            label=tp,
             s=200,
+            # color=c_list[i],
+            # alpha=alpha_list[i],
+            zorder=20-i,
         )
 
     ax1.legend(prop={"size": 14})  # insert legend
