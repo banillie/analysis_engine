@@ -451,8 +451,6 @@ def costs_sp(args):
             if op_args["chart"] == "show":
                 cost_stackplot_graph(sp_data, m, **op_args)
 
-        print(op_args)
-
     except ProjectNameError as e:
         logger.critical(e)
         sys.exit(1)
@@ -880,9 +878,16 @@ def main():
         description=costs_description,
     )
 
+    costs_sp_description = (
+        "Creates a cost stack plot profile graph. See below optional arguments. The user "
+        'must specify --chart "save" to save the chart, otherwise '
+        "only a temporary matplotlib chart will be generated."
+    )
+
     parser_costs_sp = subparsers.add_parser(
         "costs_sp",
-        help="cost stackplot graph and data (early version needs more testing).",
+        help="cost stack plot graph and data.",
+        description=costs_sp_description,
     )
 
     parser_milestones = subparsers.add_parser(

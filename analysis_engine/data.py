@@ -109,6 +109,7 @@ def get_master_data() -> List[
 ]:  # how specify a list of dictionaries?
     """Returns a list of dictionaries each containing quarter data"""
     master_data_list = [
+        # project_data_from_master(root_path / "core_data/master_4_2020.xlsx", 4, 2020),
         project_data_from_master(root_path / "core_data/master_3_2020.xlsx", 3, 2020),
         project_data_from_master(root_path / "core_data/master_2_2020.xlsx", 2, 2020),
         project_data_from_master(root_path / "core_data/master_1_2020.xlsx", 1, 2020),
@@ -325,7 +326,7 @@ SRO_CONF_KEY_LIST = [
 ]
 
 IPDC_DATE = datetime.date(
-    2021, 2, 22
+    2021, 4, 24
 )  # ipdc date. Python date format is Year, Month, day
 
 LIST_OF_TITLES = [
@@ -2919,7 +2920,7 @@ def make_file_friendly(quarter_str: str) -> str:
 
 
 def total_costs_benefits_bar_chart(
-    costs: CostData, ben: BenefitsData, **kwargs
+    costs: CostData, ben: BenefitsData, master: Master, **kwargs
 ) -> plt.figure:
     """compiles a matplotlib bar chart which shows total project costs"""
     fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2)  # four sub plots
@@ -2931,7 +2932,7 @@ def total_costs_benefits_bar_chart(
         fig.set_size_inches(set_figure_size(FIGURE_STYLE[2]))
         # pass
 
-    title = get_chart_title(costs, kwargs, " totals")
+    title = get_chart_title(master, " totals", **kwargs)
     plt.suptitle(title, fontweight="bold", fontsize=25)
     plt.xticks(size=12)
     plt.yticks(size=10)
@@ -5503,18 +5504,19 @@ def compile_p_report(
     milestones = MilestoneData(master, group=[project_name], baseline=["standard"])
     project_report_meta_data(doc, costs, milestones, benefits, project_name)
     change_word_doc_landscape(doc)
-    cost_profile = cost_profile_graph(costs, show="No")
+    cost_profile = cost_profile_graph(costs, master, show="No", group=milestones.group)
     put_matplotlib_fig_into_word(doc, cost_profile, transparent=False, size=8)
-    total_profile = total_costs_benefits_bar_chart(costs, benefits, show="No")
+    total_profile = total_costs_benefits_bar_chart(costs, benefits, master, group=costs.group, show="No")
     put_matplotlib_fig_into_word(doc, total_profile, transparent=False, size=8)
     #  handling of no milestones within filtered period.
     ab = master.abbreviations[project_name]["abb"]
     try:
         # milestones.get_milestones()
         # milestones.get_chart_info()
-        milestones.filter_chart_info(dates=["1/9/2020", "30/12/2022"])
+        milestones.filter_chart_info(dates=["1/1/2021", "31/12/2022"])
         milestones_chart = milestone_chart(
             milestones,
+            master,
             blue_line="ipdc_date",
             title=ab + " schedule (2021 - 22)",
             show="No",

@@ -11,7 +11,7 @@ from analysis_engine.data import (
     MilestoneData,
     # put_milestones_into_wb,
     # data_query_into_wb,
-    milestone_chart,
+    milestone_chart, run_p_reports,
     # cost_v_schedule_chart_into_wb,
     # RiskData,
     # DandelionData,
@@ -93,3 +93,7 @@ milestone_chart(ms, m, **chart_kwargs)
 # COSTS
 # c = CostData(m, quarter=["standard"], group=["NPR"])
 # cost_profile_graph(c, m, chart=True, group=c.start_group)
+
+
+## SUMMARYS
+# run_p_reports(m, baseline=["standard"])
