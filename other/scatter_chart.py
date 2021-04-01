@@ -8,28 +8,28 @@ from analysis_engine.data import (
     root_path,
     # DcaData,
     # CostData,
-    MilestoneData,
+    # MilestoneData,
     # put_milestones_into_wb,
     # data_query_into_wb,
     # milestone_chart, run_p_reports, put_milestones_into_wb,
     # cost_v_schedule_chart_into_wb,
     # RiskData,
-    DandelionData,
-    VfMData, vfm_into_excel,
+    # DandelionData,
+    # VfMData, vfm_into_excel,
     # put_cost_totals_into_wb,
     # put_matplotlib_fig_into_word,
     # open_word_doc,
     # FIGURE_STYLE,
     # get_cost_stackplot_data,
     # put_stackplot_data_into_wb,
-    make_a_dandelion_auto,
+    # make_a_dandelion_auto,
     # BenefitsData,
     # total_costs_benefits_bar_chart,
     # gauge,
     # calculate_arg_combinations,
-    # get_sp_data,
+    get_sp_data,
     # cal_group,
-    # cost_stackplot_graph,
+    cost_stackplot_graph,
     # get_sp_data,
     # cost_profile_graph,
     # get_master_data,
@@ -54,8 +54,8 @@ DFT_GROUP = ["HSRG", "RSS", "RIG", "AMIS", "RPE"]
 ## DANDELION
 # stage = ["pre-SOBC", "SOBC", "OBC", "FBC"]
 # group = ["HSRG", "AMIS", "RIG", "RSS", "RPE"]
-d_data = DandelionData(m, quarter=[str(m.current_quarter)], group=DFT_GROUP, meta="remaining")
-d_lion = make_a_dandelion_auto(d_data, chart=True)
+# d_data = DandelionData(m, quarter=[str(m.current_quarter)], group=DFT_GROUP, type="remaining")
+# d_lion = make_a_dandelion_auto(d_data, chart=True)
 # doc = open_word_doc(root_path / "input/summary_temp_landscape.docx")
 # put_matplotlib_fig_into_word(doc, d_lion, size=7.5)
 # doc.save(root_path / "output/dlion_graph.docx")
@@ -87,10 +87,8 @@ d_lion = make_a_dandelion_auto(d_data, chart=True)
 # wb.save(root_path / "output/query_test.xlsx")
 
 ## STACKPLOT
-# g = cal_group(["FBC"], m, 0)
-# sp_data = get_sp_data(m, g, [str(m.current_quarter)], type="comp", remove=["HS2 1"])
-# sp_data = get_sp_data(m, stage=["FBC"], quarter=["standard"], remove=["HS2 1"], type="cat")
-# cost_stackplot_graph(sp_data, m, group=["SOBC"])
+sp_data = get_sp_data(m, quarter=["standard"], group=["RIG"])
+cost_stackplot_graph(sp_data, m, group=DFT_GROUP)
 
 # COSTS
 # c = CostData(m, quarter=["standard"], group=["NPR"])

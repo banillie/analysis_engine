@@ -145,13 +145,13 @@ def run_general(args):
             else:
                 if op_args["chart"] == "save":
                     op_args["chart"] = False
-                    cost_graph = cost_stackplot_graph(c, m, **op_args)
+                    cost_graph = cost_profile_graph(c, m, **op_args)
                     doc = open_word_doc(root_path / "input/summary_temp_landscape.docx")
                     put_matplotlib_fig_into_word(doc, cost_graph, size=7.5)
-                    doc.save(root_path / "output/stack_plot_graph.docx")
+                    doc.save(root_path / "output/costs_graph.docx")
                 if op_args["chart"] == "show":
                     op_args["chart"] = True
-                    cost_stackplot_graph(c, m, **op_args)
+                    cost_profile_graph(c, m, **op_args)
 
         if programme == "costs_sp":
             sp_data = get_sp_data(m, **op_args)
