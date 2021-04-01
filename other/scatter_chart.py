@@ -13,7 +13,7 @@ from analysis_engine.data import (
     # data_query_into_wb,
     # milestone_chart, run_p_reports, put_milestones_into_wb,
     # cost_v_schedule_chart_into_wb,
-    # RiskData,
+    RiskData,
     # DandelionData,
     # VfMData, vfm_into_excel,
     # put_cost_totals_into_wb,
@@ -27,14 +27,15 @@ from analysis_engine.data import (
     # total_costs_benefits_bar_chart,
     # gauge,
     # calculate_arg_combinations,
-    get_sp_data,
+    # get_sp_data,
     # cal_group,
-    cost_stackplot_graph,
+    # cost_stackplot_graph,
     # get_sp_data,
     # cost_profile_graph,
     # get_master_data,
     # get_project_information,
-    # Master
+    # Master,
+    risks_into_excel,
 )
 
 ## GENERATE CLI OPTIONS
@@ -49,46 +50,50 @@ m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
 
 ## GROUPS
 DFT_GROUP = ["HSRG", "RSS", "RIG", "AMIS", "RPE"]
-# DFT_GROUP = ["RPE", "AMIS"]
 
-## DANDELION
-# stage = ["pre-SOBC", "SOBC", "OBC", "FBC"]
-# group = ["HSRG", "AMIS", "RIG", "RSS", "RPE"]
-# d_data = DandelionData(m, quarter=[str(m.current_quarter)], group=DFT_GROUP, type="remaining")
-# d_lion = make_a_dandelion_auto(d_data, chart=True)
-# doc = open_word_doc(root_path / "input/summary_temp_landscape.docx")
-# put_matplotlib_fig_into_word(doc, d_lion, size=7.5)
-# doc.save(root_path / "output/dlion_graph.docx")
-
-## MILESTONES
-# ms = MilestoneData(m, quarter=["standard"], group=DFT_GROUP)
-# ms.filter_chart_info(dates=["1/4/2021", "1/5/2021"])
-# wb = put_milestones_into_wb(ms)
-# wb.save(root_path / "output/test_milestone_data_output.xlsx")
-# chart_kwargs = {**{"blue_line": "today", "Chart": True}, **ms.kwargs}
-# milestone_chart(ms, m, **chart_kwargs)
-# wb.save(root_path / "output/gmpp_milestones_data.xlsx")
-# doc = open_word_doc(root_path / "input/summary_temp_landscape.docx")
-# for p in m.dft_groups["Q3 20/21"]["GMPP"]:
-#     try:
-#         ms = MilestoneData(m, quarter=[str(m.current_quarter)], group=[p])
-#         ms.filter_chart_info(dates=["1/1/2021", "1/1/2030"])
-#         graph = milestone_chart(ms, blue_line="Today", chart=True)
-#         put_matplotlib_fig_into_word(doc, graph, size=8, transparent=False)
-#     except ValueError:
-#         pass
-# doc.save(root_path / "output/gmpp_milestones_charts.docx".format(p))
-
-# b = BenefitsData(m, baseline=["all"])
-# total_costs_benefits_bar_chart(c, b, chart=True)
-
-# QUERY
-# wb = data_query_into_wb(m, keys=["Senior Responsible Owner (SRO)"], quarter=["Q3 19/20"], group=DFT_GROUP)
-# wb.save(root_path / "output/query_test.xlsx")
-
-## STACKPLOT
-sp_data = get_sp_data(m, quarter=["standard"], group=["RIG"])
-cost_stackplot_graph(sp_data, m, group=DFT_GROUP)
+## OP_ARGS
+op_args = {"quarter": ["standard"],
+           "Group": DFT_GROUP}
+# # DFT_GROUP = ["RPE", "AMIS"]
+#
+# ## DANDELION
+# # stage = ["pre-SOBC", "SOBC", "OBC", "FBC"]
+# # group = ["HSRG", "AMIS", "RIG", "RSS", "RPE"]
+# # d_data = DandelionData(m, quarter=[str(m.current_quarter)], group=DFT_GROUP, type="remaining")
+# # d_lion = make_a_dandelion_auto(d_data, chart=True)
+# # doc = open_word_doc(root_path / "input/summary_temp_landscape.docx")
+# # put_matplotlib_fig_into_word(doc, d_lion, size=7.5)
+# # doc.save(root_path / "output/dlion_graph.docx")
+#
+# ## MILESTONES
+# # ms = MilestoneData(m, quarter=["standard"], group=DFT_GROUP)
+# # ms.filter_chart_info(dates=["1/4/2021", "1/5/2021"])
+# # wb = put_milestones_into_wb(ms)
+# # wb.save(root_path / "output/test_milestone_data_output.xlsx")
+# # chart_kwargs = {**{"blue_line": "today", "Chart": True}, **ms.kwargs}
+# # milestone_chart(ms, m, **chart_kwargs)
+# # wb.save(root_path / "output/gmpp_milestones_data.xlsx")
+# # doc = open_word_doc(root_path / "input/summary_temp_landscape.docx")
+# # for p in m.dft_groups["Q3 20/21"]["GMPP"]:
+# #     try:
+# #         ms = MilestoneData(m, quarter=[str(m.current_quarter)], group=[p])
+# #         ms.filter_chart_info(dates=["1/1/2021", "1/1/2030"])
+# #         graph = milestone_chart(ms, blue_line="Today", chart=True)
+# #         put_matplotlib_fig_into_word(doc, graph, size=8, transparent=False)
+# #     except ValueError:
+# #         pass
+# # doc.save(root_path / "output/gmpp_milestones_charts.docx".format(p))
+#
+# # b = BenefitsData(m, baseline=["all"])
+# # total_costs_benefits_bar_chart(c, b, chart=True)
+#
+# # QUERY
+# # wb = data_query_into_wb(m, keys=["Senior Responsible Owner (SRO)"], quarter=["Q3 19/20"], group=DFT_GROUP)
+# # wb.save(root_path / "output/query_test.xlsx")
+#
+# ## STACKPLOT
+# sp_data = get_sp_data(m, quarter=["standard"], group=["RIG"])
+# cost_stackplot_graph(sp_data, m, group=DFT_GROUP)
 
 # COSTS
 # c = CostData(m, quarter=["standard"], group=["NPR"])
@@ -101,3 +106,7 @@ cost_stackplot_graph(sp_data, m, group=DFT_GROUP)
 ## VFM
 # c = VfMData(m, group=DFT_GROUP, quarter=["standard"])  # c is class
 # wb = vfm_into_excel(c)
+
+## RISKS
+c = RiskData(m, **op_args)
+wb = risks_into_excel(c)

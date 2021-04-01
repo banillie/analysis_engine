@@ -4257,7 +4257,7 @@ class RiskData:
                     number_dict = {}
                     for x in range(1, 11):  # currently 10 risks
                         risk_list = []
-                        risk = ("Group", DFT_GROUP_DICT[p_data["DfT Group"]])
+                        risk = ("Group", self.master.project_information.data[p]["Group"])
                         risk_list.append(risk)
                         for risk_type in RISK_LIST:
 
@@ -4363,7 +4363,7 @@ def risks_into_excel(risk_data: RiskData) -> workbook:
     wb = Workbook()
 
     for q in risk_data.risk_dictionary.keys():
-        start_row = 3
+        start_row = 1
         ws = wb.create_sheet(
             make_file_friendly(str(q) + " all data")
         )  # creating worksheets. names restricted to 30 characters.
@@ -4403,10 +4403,10 @@ def risks_into_excel(risk_data: RiskData) -> workbook:
             start_row += x
 
         for i in range(len(RISK_LIST)):
-            ws.cell(row=3, column=4 + i).value = RISK_LIST[i]
-        ws.cell(row=3, column=1).value = "DfT Group"
-        ws.cell(row=3, column=2).value = "Project Name"
-        ws.cell(row=3, column=3).value = "Risk Number"
+            ws.cell(row=1, column=4 + i).value = RISK_LIST[i]
+        ws.cell(row=1, column=1).value = "DfT Group"
+        ws.cell(row=1, column=2).value = "Project Name"
+        ws.cell(row=1, column=3).value = "Risk Number"
 
         ws = wb.create_sheet(
             make_file_friendly(q + " Count")
