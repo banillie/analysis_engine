@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="analysis_engine",
-    version="0.0.9",
+    version="0.0.10",
     author="Will Grant",
     author_email="will.granty@yahoo.co.uk",
     description="Analysis for the UK Department for Transport's major projects portfolio",
@@ -22,6 +22,7 @@ setuptools.setup(
         'python-docx==0.8.10',
         'openpyxl==3.0.0',
         'matplotlib==3.3.0',
+        'pdf2image',
     ],
     classifiers=[
         "Programming Language :: Python :: 3",
