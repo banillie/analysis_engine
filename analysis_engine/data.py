@@ -5830,7 +5830,7 @@ def data_query_into_wb(master: Master, **kwargs) -> Workbook:
                 )
             except IndexError:
                 p_data_last = None
-            for x, key in enumerate(kwargs["keys"]):
+            for x, key in enumerate(kwargs["key"]):
                 ws.cell(row=1, column=3 + x, value=key)
                 try:  # standard keys
                     value = p_data[key]
@@ -7732,17 +7732,17 @@ def cal_group_angle(dist_no: int, group: List[str], **kwargs):
     return output_list
 
 
-def get_dandelion_meta_total(
+def get_dandelion_type_total(
     master: Master, tp: str, g: str or List[str], kwargs
 ) -> int or str:  # Note no **kwargs as existing kwargs dict passed in
-    if "meta" in kwargs:
-        if kwargs["meta"] == "remaining":
+    if "type" in kwargs:
+        if kwargs["type"] == "remaining":
             cost = CostData(master, quarter=[tp], group=[g])  # group costs data
             return cost.c_totals[tp]["prof"] + cost.c_totals[tp]["unprof"]
-        if kwargs["meta"] == "spent":
+        if kwargs["type"] == "spent":
             cost = CostData(master, quarter=[tp], group=[g])  # group costs data
             return cost.c_totals[tp]["spent"]
-        if kwargs["meta"] == "benefits":
+        if kwargs["type"] == "benefits":
             benefits = BenefitsData(master, quarter=[tp], group=[g])
             return benefits.b_totals[tp]["total"]
 
@@ -7961,7 +7961,7 @@ class DandelionData:
             g_d = {}  # group dictionary. first outer circle.
             l_g_d = {}  # lower group dictionary
 
-            pf_wlc = get_dandelion_meta_total(
+            pf_wlc = get_dandelion_type_total(
                 self.master, tp, self.group, self.kwargs
             )  # portfolio wlc
             if "pc" in self.kwargs:  # pc portfolio colour
@@ -7988,7 +7988,7 @@ class DandelionData:
             ## first outer circle
             for i, g in enumerate(self.group):
                 self.kwargs["group"] = [g]
-                g_wlc = get_dandelion_meta_total(self.master, tp, g, self.kwargs)
+                g_wlc = get_dandelion_type_total(self.master, tp, g, self.kwargs)
                 if len(self.group) > 1:
                     y_axis = 0 + (
                         (math.sqrt(pf_wlc) * 3.25) * math.sin(math.radians(g_ang_l[i]))
@@ -8031,7 +8031,7 @@ class DandelionData:
                 p_list = []
                 for p in group:
                     self.kwargs["group"] = [p]
-                    p_value = get_dandelion_meta_total(
+                    p_value = get_dandelion_type_total(
                         self.master, tp, p, self.kwargs
                     )  # project wlc
                     p_list.append((p_value, p))
@@ -8042,8 +8042,11 @@ class DandelionData:
                 g_radius = g_d[g]["r"]
                 g_y_axis = g_d[g]["axis"][0]  # group y axis
                 g_x_axis = g_d[g]["axis"][1]  # group x axis
-                p_values_list, p_list = zip(*l_g_d[g])
-                if len(p_list) > 3:
+                try:
+                    p_values_list, p_list = zip(*l_g_d[g])
+                except ValueError:  # handles no projects in l_g_d list
+                    continue
+                if len(p_list) > 3 or len(self.group) == 1:
                     ang_l = cal_group_angle(360, p_list, all=True)
                 else:
                     if len(p_list) == 1:

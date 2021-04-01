@@ -14,7 +14,7 @@ from analysis_engine.data import (
     # milestone_chart, run_p_reports, put_milestones_into_wb,
     # cost_v_schedule_chart_into_wb,
     # RiskData,
-    # DandelionData,
+    DandelionData,
     VfMData, vfm_into_excel,
     # put_cost_totals_into_wb,
     # put_matplotlib_fig_into_word,
@@ -22,7 +22,7 @@ from analysis_engine.data import (
     # FIGURE_STYLE,
     # get_cost_stackplot_data,
     # put_stackplot_data_into_wb,
-    # make_a_dandelion_auto,
+    make_a_dandelion_auto,
     # BenefitsData,
     # total_costs_benefits_bar_chart,
     # gauge,
@@ -54,8 +54,8 @@ DFT_GROUP = ["HSRG", "RSS", "RIG", "AMIS", "RPE"]
 ## DANDELION
 # stage = ["pre-SOBC", "SOBC", "OBC", "FBC"]
 # group = ["HSRG", "AMIS", "RIG", "RSS", "RPE"]
-# d_data = DandelionData(m, quarter=[str(m.current_quarter)], group=group, meta="benefits")
-# d_lion = make_a_dandelion_auto(d_data, chart=True)
+d_data = DandelionData(m, quarter=[str(m.current_quarter)], group=DFT_GROUP, meta="remaining")
+d_lion = make_a_dandelion_auto(d_data, chart=True)
 # doc = open_word_doc(root_path / "input/summary_temp_landscape.docx")
 # put_matplotlib_fig_into_word(doc, d_lion, size=7.5)
 # doc.save(root_path / "output/dlion_graph.docx")
@@ -101,5 +101,5 @@ DFT_GROUP = ["HSRG", "RSS", "RIG", "AMIS", "RPE"]
 # run_p_reports(m, baseline=["standard"])
 
 ## VFM
-c = VfMData(m, group=DFT_GROUP, quarter=["standard"])  # c is class
-wb = vfm_into_excel(c)
+# c = VfMData(m, group=DFT_GROUP, quarter=["standard"])  # c is class
+# wb = vfm_into_excel(c)

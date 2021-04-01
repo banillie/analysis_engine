@@ -58,11 +58,11 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def check_remove(sc_args):  # subcommand arg
-    if sc_args["remove"]:
+def check_remove(op_args):  # subcommand arg
+    if "remove" in op_args:
         from analysis_engine.data import CURRENT_LOG
 
-        for p in sc_args["remove"]:
+        for p in op_args["remove"]:
             if p + " successfully removed from analysis." not in CURRENT_LOG:
                 logger.warning(
                     p + " not recognised and therefore not removed from analysis."
@@ -114,6 +114,7 @@ def run_general(args):
     programme = args["subparser_name"]
     print("compiling " + programme + " analysis")
     m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
+
     try:
         op_args = {k: v for k, v in args.items() if v}  # removes None values
         if "group" not in op_args:
@@ -149,7 +150,25 @@ def run_general(args):
                     put_matplotlib_fig_into_word(doc, cost_graph, size=7.5)
                     doc.save(root_path / "output/stack_plot_graph.docx")
                 if op_args["chart"] == "show":
+                    op_args["chart"] = True
                     cost_stackplot_graph(c, m, **op_args)
+
+        if programme == "costs_sp":
+            sp_data = get_sp_data(m, **op_args)
+
+            if "chart" not in op_args:
+                op_args["chart"] = True
+                cost_stackplot_graph(sp_data, m, **op_args)
+            else:
+                if op_args["chart"] == "save":
+                    op_args["chart"] = False
+                    sp_graph = cost_stackplot_graph(sp_data, m, **op_args)
+                    doc = open_word_doc(root_path / "input/summary_temp_landscape.docx")
+                    put_matplotlib_fig_into_word(doc, sp_graph, size=7.5)
+                    doc.save(root_path / "output/stack_plot_graph.docx")
+                if op_args["chart"] == "show":
+                    op_args["chart"] = True
+                    cost_stackplot_graph(sp_data, m, **op_args)
 
         if programme == "speedial":
             data = DcaData(m, **op_args)
@@ -199,7 +218,33 @@ def run_general(args):
                 if op_args["chart"] == "show":
                     make_a_dandelion_auto(d_data, **op_args)
 
-        check_remove(args)
+        if programme == "dashboards":
+            dashboard_master = load_workbook(root_path / "input/dashboards_master.xlsx")
+            wb = ipdc_dashboard(m, dashboard_master)
+            wb.save(root_path / "output/completed_ipdc_dashboard.xlsx")
+
+        if programme == "summaries":
+            op_args["baseline"] = "standard"
+            if "group" in op_args:
+                run_p_reports(m, **op_args)
+            else:
+                run_p_reports(m, **op_args)
+
+        if programme == "matrix":
+            costs = CostData(m, **op_args)
+            miles = MilestoneData(m, *op_args)
+            miles.calculate_schedule_changes()
+            wb = cost_v_schedule_chart_into_wb(miles, costs)
+            wb.save(root_path / "output/costs_schedule_matrix.xlsx")
+
+        if programme == "query":
+            if "koi" not in op_args and "koi_fn" not in op_args:
+                logger.critical("Please enter a key name(s) using either --keys or --file_name")
+                sys.exit(1)
+            op_args = return_koi_fn_keys(op_args)
+            wb = data_query_into_wb(m, **op_args)
+
+        check_remove(op_args)
 
         try:
             wb.save(root_path / "output/{}.xlsx".format(programme))
@@ -217,71 +262,6 @@ def run_general(args):
     # wb.save(root_path / "output/{}_{}.xlsx".format(programme, optional_args))
     # print(programme + " analysis has been compiled. Enjoy!")
 
-#
-# def speedial(args):
-#     """args available for speedial are quarter, baseline, remove  """
-#     print("compiling speed dial analysis. This one takes a little time.")
-#     m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
-#     if args["quarters"] and args["stage"] and args["remove"]:
-#         data = DcaData(
-#             m, quarter=args["quarters"], stage=args["stage"], remove=args["remove"]
-#         )
-#     elif args["quarters"] and args["group"] and args["remove"]:
-#         data = DcaData(
-#             m, quarter=args["quarters"], group=args["group"], remove=args["remove"]
-#         )
-#     elif args["quarters"] and args["stage"]:
-#         data = DcaData(m, quarter=args["quarters"], stage=args["stage"])
-#     elif args["quarters"] and args["group"]:
-#         data = DcaData(m, quarter=args["quarters"], group=args["group"])
-#     elif args["quarters"] and args["remove"]:
-#         data = DcaData(m, quarter=args["quarters"], remove=args["remove"])
-#
-#     ## baselines
-#     elif args["baselines"] and args["stage"] and args["remove"]:
-#         data = DcaData(
-#             m, baseline=args["baselines"], stage=args["stage"], remove=args["remove"]
-#         )
-#     elif args["baselines"] and args["group"] and args["remove"]:
-#         data = DcaData(
-#             m, baseline=args["baselines"], group=args["group"], remove=args["remove"]
-#         )
-#     elif args["baselines"] and args["stage"]:
-#         data = DcaData(m, baseline=args["baselines"], stage=args["stage"])
-#     elif args["baselines"] and args["group"]:
-#         data = DcaData(m, baseline=args["baselines"], group=args["group"])
-#     elif args["baselines"] and args["remove"]:
-#         data = DcaData(m, baseline=args["baselines"], remove=args["remove"])
-#     elif args["stage"] and args["remove"]:
-#         data = DcaData(
-#             m, quarter=["standard"], group=args["stage"], remove=args["remove"]
-#         )
-#     elif args["group"] and args["remove"]:
-#         data = DcaData(
-#             m, quarter=["standard"], group=args["group"], remove=args["remove"]
-#         )
-#     elif args["baselines"]:
-#         data = DcaData(m, baseline=args["baselines"])
-#     elif args["quarters"]:
-#         data = DcaData(m, quarter=args["quarters"])
-#     elif args["stage"]:
-#         data = DcaData(m, quarter=["standard"], group=args["stage"])
-#     elif args["group"]:
-#         data = DcaData(m, quarter=["standard"], group=args["group"])
-#     elif args["remove"]:  # HERE. NOT WORKING
-#         data = DcaData(m, quarter=["standard"], remove=args["remove"])
-#     else:
-#         data = DcaData(m, quarter=["standard"])
-#
-#     data.get_changes()
-#     hz_doc = open_word_doc(root_path / "input/summary_temp.docx")
-#     doc = dca_changes_into_word(data, hz_doc)
-#     doc.save(root_path / "output/speed_dials.docx")
-#     land_doc = open_word_doc(root_path / "input/summary_temp_landscape.docx")
-#     build_speedials(data, land_doc)
-#     land_doc.save(root_path / "output/speedial_graph.docx")
-#     print("Speed dial analysis has been compiled. Enjoy!")
-
 
 def return_koi_fn_keys(oa: Dict):  # op_args
     """small helper function to convert key names in file into list of strings
@@ -292,485 +272,11 @@ def return_koi_fn_keys(oa: Dict):  # op_args
         )
         oa["key"] = keys
         return oa
+    if "koi" in oa:
+        oa["key"] = oa["koi"]
+        return oa
     else:
         return oa
-
-
-# def milestones(args):
-#     """args available for milestones quarters, baseline, stage, group, remove, type, dates, koi, koi_fn"""
-#     print("compiling milestone analysis_engine")
-#
-#     m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
-#
-#     try:
-#         op_args = {k: v for k, v in args.items() if v}  # removes None values
-#         if "group" not in op_args:
-#             if "stage" not in op_args:
-#                 op_args["group"] = DFT_GROUP
-#         if "quarter" not in op_args:
-#             if "baseline" not in op_args:
-#                 op_args["quarter"] = ["standard"]
-#
-#         ms = MilestoneData(m, **op_args)
-#
-#         if "type" in op_args or "dates" in op_args or "koi" in op_args or "koi_fn" in op_args:
-#             op_args = return_koi_fn_keys(op_args)
-#             ms.filter_chart_info(**op_args)
-#
-#         if "chart" not in op_args:
-#             pass
-#         else:
-#             if op_args["chart"] == "save":
-#                 op_args["chart"] = False
-#                 ms_graph = milestone_chart(ms, m, **op_args)
-#                 doc = open_word_doc(root_path / "input/summary_temp_landscape.docx")
-#                 put_matplotlib_fig_into_word(doc, ms_graph, size=8, transparent=False)
-#                 doc.save(root_path / "output/milestones_chart.docx")
-#             if op_args["chart"] == "show":
-#                 milestone_chart(ms, m, **op_args)
-#
-#         wb = put_milestones_into_wb(ms)
-#         wb.save(root_path / "output/milestone_data_output.xlsx")
-#
-#     except ProjectNameError as e:
-#         logger.critical(e)
-#         sys.exit(1)
-#     except Warning:
-#         logger.critical("To many milestone for chart. Stopping")
-#         sys.exit(1)
-
-
-def summaries(args):
-    print("compiling summaries")
-    m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
-    if args["group"]:
-        run_p_reports(m, group=args["group"], baseline=["standard"])
-    else:
-        run_p_reports(m, baseline=["standard"])
-
-
-def dashboard(args):
-    print("compiling ipdc dashboards")
-    dashboard_master = load_workbook(root_path / "input/dashboards_master.xlsx")
-    m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
-    wb = ipdc_dashboard(m, dashboard_master)
-    wb.save(root_path / "output/completed_ipdc_dashboard.xlsx")
-    print("dashboard compiled. enjoy!")
-
-
-def matrix(args):
-    print("compiling cost and schedule matrix analysis")
-    m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
-    costs = CostData(m, m.current_projects)
-    miles = MilestoneData(m, m.current_projects)
-    miles.calculate_schedule_changes()
-    wb = cost_v_schedule_chart_into_wb(miles, costs)
-    wb.save(root_path / "output/costs_schedule_matrix.xlsx")
-    print("Cost and schedule matrix compiled. Enjoy!")
-
-
-def costs_sp(args):
-    """optional arguments quarter, group, stage, remove, type"""
-    print("compiling cost stack plot analysis")
-
-    m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
-
-    try:
-        op_args = {k: v for k, v in args.items() if v}  # removes None values
-        if "group" not in op_args:
-            if "stage" not in op_args:
-                op_args["group"] = DFT_GROUP
-        if "quarter" not in op_args:  # no baseline option for cost sp.
-            op_args["quarter"] = ["standard"]
-
-        sp_data = get_sp_data(m, **op_args)
-
-        if "chart" not in op_args:
-            op_args["chart"] = True
-            cost_stackplot_graph(sp_data, m, **op_args)
-        else:
-            if op_args["chart"] == "save":
-                op_args["chart"] = False
-                sp_graph = cost_stackplot_graph(sp_data, m, **op_args)
-                doc = open_word_doc(root_path / "input/summary_temp_landscape.docx")
-                put_matplotlib_fig_into_word(doc, sp_graph, size=7.5)
-                doc.save(root_path / "output/stack_plot_graph.docx")
-            if op_args["chart"] == "show":
-                cost_stackplot_graph(sp_data, m, **op_args)
-
-    except ProjectNameError as e:
-        logger.critical(e)
-        sys.exit(1)
-
-
-def query(args):
-    # args options for query quarters, baselines, keys, file_name
-    print("Getting data")
-    m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
-    if args["baselines"] and args["keys"]:
-        wb = data_query_into_wb(
-            m, keys=args["keys"], baseline=args["baselines"], group=DFT_GROUP
-        )
-        print("Data compiled. Enjoy!")
-    elif args["baselines"] and args["file_name"]:
-        keys = get_data_query_key_names(
-            root_path / "input/{}.csv".format(args["file_name"])
-        )
-        wb = data_query_into_wb(
-            m, keys=keys, baseline=args["baselines"], group=DFT_GROUP
-        )
-        print("Data compiled using " + args["file_name"] + ".cvs file. Enjoy!")
-    elif args["file_name"] and args["quarters"]:
-        keys = get_data_query_key_names(
-            root_path / "input/{}.csv".format(args["file_name"])
-        )
-        wb = data_query_into_wb(m, keys=keys, quarter=args["quarters"], group=DFT_GROUP)
-        wb.save(root_path / "output/data_query.xlsx")
-        print("Data compiled using " + args["file_name"] + ".cvs file. Enjoy!")
-    elif args["keys"] and args["quarters"]:
-        wb = data_query_into_wb(
-            m, keys=args["keys"], quarter=args["quarters"], group=DFT_GROUP
-        )
-        wb.save(root_path / "output/data_query.xlsx")
-        print("Data compiled. Enjoy!")
-    elif args["file_name"]:
-        keys = get_data_query_key_names(
-            root_path / "input/{}.csv".format(args["file_name"])
-        )
-        wb = data_query_into_wb(m, keys=keys, quarter=["standard"], group=DFT_GROUP)
-        wb.save(root_path / "output/data_query.xlsx")
-        print("Data compiled using " + args["file_name"] + ".cvs file. Enjoy!")
-    elif args["keys"]:
-        wb = data_query_into_wb(
-            m, keys=args["keys"], quarter=["standard"], group=DFT_GROUP
-        )
-        wb.save(root_path / "output/data_query.xlsx")
-        print("Data compiled. Enjoy!")
-    elif args["quarters"]:
-        logger.critical("Please enter a key name(s) using either --keys or --file_name")
-        sys.exit(1)
-    elif args["baselines"]:
-        logger.critical("Please enter a key name(s) using either --keys or --file_name")
-        sys.exit(1)
-
-    wb.save(root_path / "output/data_query.xlsx")
-
-
-# def dandelion(args):
-#     # args available for dandelion "quarters", "group", "stage", "remove", "type", "pc"
-#     print("compiling dandelion analysis")
-#     m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
-#     try:
-#         if (
-#                 args["quarters"]
-#                 and args["stage"]
-#                 and args["type"]
-#                 and args["remove"]
-#                 and args["pc"]
-#         ):
-#             d_data = DandelionData(
-#                 m,
-#                 quarter=args["quarters"],
-#                 group=args["stage"],
-#                 meta=args["type"],
-#                 remove=args["remove"],
-#                 pc=args["pc"],
-#             )
-#         elif (
-#                 args["quarters"]
-#                 and args["group"]
-#                 and args["type"]
-#                 and args["remove"]
-#                 and args["pc"]
-#         ):
-#             d_data = DandelionData(
-#                 m,
-#                 quarter=args["quarters"],
-#                 group=args["group"],
-#                 meta=args["type"],
-#                 remove=args["remove"],
-#                 pc=args["pc"],
-#             )
-#         elif args["quarters"] and args["stage"] and args["type"] and args["remove"]:
-#             d_data = DandelionData(
-#                 m,
-#                 quarter=args["quarters"],
-#                 group=args["stage"],
-#                 meta=args["type"],
-#                 remove=args["remove"],
-#             )
-#         elif args["quarters"] and args["group"] and args["type"] and args["remove"]:
-#             d_data = DandelionData(
-#                 m,
-#                 quarter=args["quarters"],
-#                 group=args["group"],
-#                 meta=args["type"],
-#                 remove=args["remove"],
-#             )
-#         elif args["pc"] and args["group"] and args["type"] and args["remove"]:
-#             d_data = DandelionData(
-#                 m,
-#                 pc=args["pc"],
-#                 group=args["group"],
-#                 meta=args["type"],
-#                 remove=args["remove"],
-#             )
-#         elif args["pc"] and args["stage"] and args["type"] and args["remove"]:
-#             d_data = DandelionData(
-#                 m,
-#                 pc=args["pc"],
-#                 group=args["stage"],
-#                 meta=args["type"],
-#                 remove=args["remove"],
-#             )
-#
-#         elif args["quarters"] and args["pc"] and args["type"] and args["remove"]:
-#             d_data = DandelionData(
-#                 m,
-#                 quarter=args["quarters"],
-#                 pc=args["pc"],
-#                 meta=args["type"],
-#                 remove=args["remove"],
-#             )
-#         elif args["quarters"] and args["stage"] and args["type"] and args["pc"]:
-#             d_data = DandelionData(
-#                 m,
-#                 quarter=args["quarters"],
-#                 group=args["stage"],
-#                 meta=args["type"],
-#                 pc=args["pc"],
-#             )
-#         elif args["quarters"] and args["stage"] and args["remove"] and args["pc"]:
-#             d_data = DandelionData(
-#                 m,
-#                 quarter=args["quarters"],
-#                 group=args["stage"],
-#                 remove=args["remove"],
-#                 pc=args["pc"],
-#             )
-#         elif args["quarters"] and args["group"] and args["type"] and args["pc"]:
-#             d_data = DandelionData(
-#                 m,
-#                 quarter=args["quarters"],
-#                 group=args["group"],
-#                 meta=args["type"],
-#                 pc=args["pc"],
-#             )
-#         elif args["quarters"] and args["group"] and args["pc"] and args["remove"]:
-#             d_data = DandelionData(
-#                 m,
-#                 quarter=args["quarters"],
-#                 group=args["group"],
-#                 pc=args["pc"],
-#                 remove=args["remove"],
-#             )
-#         elif args["stage"] and args["type"] and args["remove"]:
-#             d_data = DandelionData(
-#                 m, meta=args["type"], group=args["stage"], remove=args["remove"]
-#             )
-#         elif args["stage"] and args["type"] and args["pc"]:
-#             d_data = DandelionData(
-#                 m, remove=args["remove"], group=args["stage"], pc=args["pc"]
-#             )
-#         elif args["stage"] and args["pc"] and args["remove"]:
-#             d_data = DandelionData(
-#                 m, remove=args["remove"], group=args["stage"], pc=args["pc"]
-#             )
-#         elif args["group"] and args["type"] and args["remove"]:
-#             d_data = DandelionData(
-#                 m, remove=args["remove"], group=args["group"], meta=args["type"]
-#             )
-#         elif args["group"] and args["type"] and args["pc"]:
-#             d_data = DandelionData(
-#                 m, remove=args["remove"], group=args["group"], pc=args["pc"]
-#             )
-#         elif args["group"] and args["pc"] and args["remove"]:
-#             d_data = DandelionData(
-#                 m, remove=args["remove"], group=args["group"], pc=args["pc"]
-#             )
-#         elif args["type"] and args["pc"] and args["remove"]:
-#             d_data = DandelionData(
-#                 m, remove=args["remove"], meta=args["type"], pc=args["pc"]
-#             )
-#         elif args["quarters"] and args["stage"] and args["remove"]:
-#             d_data = DandelionData(
-#                 m, quarter=args["quarters"], group=args["stage"], remove=args["remove"]
-#             )
-#         elif args["quarters"] and args["type"] and args["remove"]:
-#             d_data = DandelionData(
-#                 m, quarter=args["quarters"], meta=args["type"], remove=args["remove"]
-#             )
-#         elif args["quarters"] and args["group"] and args["remove"]:
-#             d_data = DandelionData(
-#                 m, quarter=args["quarters"], group=args["group"], remove=args["remove"]
-#             )
-#         elif args["quarters"] and args["stage"] and args["type"]:
-#             d_data = DandelionData(
-#                 m, quarter=args["quarters"], group=args["stage"], meta=args["type"]
-#             )
-#         elif args["quarters"] and args["group"] and args["type"]:
-#             d_data = DandelionData(
-#                 m, quarter=args["quarters"], group=args["group"], meta=args["type"]
-#             )
-#         elif args["quarters"] and args["group"] and args["pc"]:
-#             d_data = DandelionData(
-#                 m, quarter=args["quarters"], group=args["group"], pc=args["pc"]
-#             )
-#         elif args["quarters"] and args["stage"] and args["pc"]:
-#             d_data = DandelionData(
-#                 m, quarter=args["quarters"], group=args["stage"], pc=args["pc"]
-#             )
-#         elif args["quarters"] and args["remove"] and args["pc"]:
-#             d_data = DandelionData(
-#                 m, quarter=args["quarters"], remove=args["remove"], pc=args["pc"]
-#             )
-#         elif args["quarters"] and args["type"] and args["pc"]:
-#             d_data = DandelionData(
-#                 m, quarter=args["quarters"], type=args["type"], pc=args["pc"]
-#             )
-#
-#         elif args["quarters"] and args["group"]:
-#             d_data = DandelionData(m, quarter=args["quarters"], group=args["group"])
-#         elif args["quarters"] and args["stage"]:
-#             d_data = DandelionData(m, quarter=args["quarters"], group=args["stage"])
-#         elif args["quarters"] and args["type"]:
-#             d_data = DandelionData(m, quarter=args["quarters"], meta=args["type"])
-#         elif args["quarters"] and args["remove"]:
-#             d_data = DandelionData(
-#                 m, quarter=args["quarters"], group=DFT_GROUP, remove=args["remove"]
-#             )
-#         elif args["group"] and args["type"]:
-#             d_data = DandelionData(
-#                 m,
-#                 quarter=[str(m.current_quarter)],
-#                 group=args["group"],
-#                 meta=args["type"],
-#             )
-#         elif args["stage"] and args["type"]:
-#             d_data = DandelionData(
-#                 m,
-#                 quarter=[str(m.current_quarter)],
-#                 group=args["stage"],
-#                 meta=args["type"],
-#             )
-#         elif args["group"] and args["type"]:
-#             d_data = DandelionData(
-#                 m,
-#                 quarter=[str(m.current_quarter)],
-#                 group=args["group"],
-#                 meta=args["type"],
-#             )
-#         elif args["stage"] and args["remove"]:
-#             d_data = DandelionData(
-#                 m,
-#                 quarter=[str(m.current_quarter)],
-#                 group=args["stage"],
-#                 remove=args["remove"],
-#             )
-#         elif args["group"] and args["remove"]:
-#             d_data = DandelionData(
-#                 m,
-#                 quarter=[str(m.current_quarter)],
-#                 group=args["group"],
-#                 remove=args["remove"],
-#             )
-#         elif args["type"] and args["remove"]:
-#             d_data = DandelionData(
-#                 m,
-#                 quarter=[str(m.current_quarter)],
-#                 meta=args["type"],
-#                 remove=args["remove"],
-#             )
-#         elif args["type"] and args["pc"]:
-#             d_data = DandelionData(
-#                 m,
-#                 quarter=[str(m.current_quarter)],
-#                 meta=args["type"],
-#                 pc=args["pc"],
-#             )
-#         elif args["remove"] and args["pc"]:
-#             d_data = DandelionData(
-#                 m,
-#                 quarter=[str(m.current_quarter)],
-#                 remove=args["remove"],
-#                 pc=args["pc"],
-#             )
-#         elif args["stage"] and args["pc"]:
-#             d_data = DandelionData(
-#                 m,
-#                 quarter=[str(m.current_quarter)],
-#                 group=args["stage"],
-#                 pc=args["pc"],
-#             )
-#         elif args["group"] and args["pc"]:
-#             d_data = DandelionData(
-#                 m,
-#                 quarter=[str(m.current_quarter)],
-#                 group=args["group"],
-#                 pc=args["pc"],
-#             )
-#         elif args["quarters"] and args["pc"]:
-#             d_data = DandelionData(m, quarter=args["quarters"], pc=args["pc"])
-#         elif args["quarters"] and args["remove"]:
-#             d_data = DandelionData(m, quarter=args["quarters"], remove=args["remove"])
-#         elif args["quarters"]:
-#             d_data = DandelionData(m, quarter=args["quarters"], group=DFT_GROUP)
-#         elif args["group"]:
-#             d_data = DandelionData(
-#                 m, quarter=[str(m.current_quarter)], group=args["group"]
-#             )
-#         elif args["stage"]:
-#             d_data = DandelionData(
-#                 m, quarter=[str(m.current_quarter)], group=args["stage"]
-#             )
-#         elif args["type"]:
-#             d_data = DandelionData(
-#                 m,
-#                 quarter=[str(m.current_quarter)],
-#                 group=DFT_GROUP,
-#                 meta=args["type"],
-#             )
-#         elif args["remove"]:
-#             d_data = DandelionData(
-#                 m,
-#                 quarter=[str(m.current_quarter)],
-#                 group=DFT_GROUP,
-#                 remove=args["remove"],
-#             )
-#         elif args["pc"]:
-#             d_data = DandelionData(
-#                 m,
-#                 quarter=[str(m.current_quarter)],
-#                 group=DFT_GROUP,
-#                 pc=args["pc"],
-#             )
-#         else:
-#             d_data = DandelionData(
-#                 m,
-#                 quarter=[str(m.current_quarter)],
-#                 group=DFT_GROUP,
-#             )
-#
-#         if args["chart"]:
-#             # if args["title"]:
-#             #     graph = make_a_dandelion_auto(d_data, title=args["title"], chart=True)
-#             # else:
-#             if args["chart"] == "save":
-#                 doc = open_word_doc(root_path / "input/summary_temp_landscape.docx")
-#                 graph = make_a_dandelion_auto(d_data, chart=False)
-#                 put_matplotlib_fig_into_word(doc, graph, size=7.5)
-#                 doc.save(root_path / "output/dandelion_graph.docx")
-#                 print("Dandelion chart has been compiled")
-#             if args["chart"] == "show":
-#                 make_a_dandelion_auto(d_data, chart=True)
-#         else:
-#             make_a_dandelion_auto(d_data, chart=True)
-#
-#         check_remove(args)
-#
-#     except ProjectNameError as e:
-#         logger.critical(e)
-#         sys.exit(1)
 
 
 def main():
@@ -846,7 +352,7 @@ def main():
     parser_risks = subparsers.add_parser("risks", help="risk analysis")
     parser_dca = subparsers.add_parser("dcas", help="dca analysis")
     parser_speedial = subparsers.add_parser("speedial", help="speed dial analysis")
-    parser_matrix = subparsers.add_parser("matrix", help="cost v schedule chart")
+    parser_matrix = subparsers.add_parser("matrix", help="cost v schedule chart. In development not working.")
     parser_data_query = subparsers.add_parser(
         "query", help="return data from core data"
     )
@@ -980,21 +486,22 @@ def main():
         help="Returns analysis for specified type of milestones.",
     )
 
-    parser_milestones.add_argument(
-        "--koi",
-        type=str,
-        # metavar="Key Name",
-        action="store",
-        nargs="+",
-        help="Returns the specified keys of interest (KOI).",
-    )
+    for sub in [parser_milestones, parser_data_query]:
+        sub.add_argument(
+            "--koi",
+            type=str,
+            action="store",
+            nargs="+",
+            help="Returns the specified keys of interest (KOI).",
+        )
 
-    parser_milestones.add_argument(
-        "--koi_fn",
-        type=str,
-        action="store",
-        help="provide name of csc file contain key names",
-    )
+    for sub in [parser_milestones, parser_data_query]:
+        sub.add_argument(
+            "--koi_fn",
+            type=str,
+            action="store",
+            help="provide name of csc file contain key names",
+        )
 
     parser_milestones.add_argument(
         "--dates",
@@ -1063,21 +570,16 @@ def main():
              'Options are "Today" "IPDC" or a date in correct format e.g. "1/1/2021".',
     )
 
-    parser_data_query.add_argument(
-        "--keys",
-        type=str,
-        metavar="Key Name",
-        action="store",
-        nargs="+",
-        help="Returns the specified data keys.",
-    )
 
-    parser_data_query.add_argument(
-        "--file_name",
-        type=str,
-        action="store",
-        help="provide name of csc file contain key names",
-    )
+
+    # parser_data_query.add_argument(
+    #     "--file_name",
+    #     type=str,
+    #     action="store",
+    #     help="provide name of csc file contain key names",
+    # )
+
+
 
     # for sub in [
     #     parser_dca,
@@ -1134,18 +636,18 @@ def main():
     #     )
 
     parser_initiate.set_defaults(func=initiate)
-    parser_dashboard.set_defaults(func=dashboard)
+    parser_dashboard.set_defaults(func=run_general)
     parser_dandelion.set_defaults(func=run_general)
     parser_costs.set_defaults(func=run_general)
     parser_vfm.set_defaults(func=run_general)
     parser_milestones.set_defaults(func=run_general)
-    parser_summaries.set_defaults(func=summaries)
+    parser_summaries.set_defaults(func=run_general)
     parser_risks.set_defaults(func=run_general)
     parser_dca.set_defaults(func=run_general)
     parser_speedial.set_defaults(func=run_general)
-    parser_matrix.set_defaults(func=matrix)
-    parser_data_query.set_defaults(func=query)
-    parser_costs_sp.set_defaults(func=costs_sp)
+    parser_matrix.set_defaults(func=run_general)
+    parser_data_query.set_defaults(func=run_general)
+    parser_costs_sp.set_defaults(func=run_general)
     args = parser.parse_args()
     # print(vars(args))
     args.func(vars(args))
