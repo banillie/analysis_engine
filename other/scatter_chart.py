@@ -6,36 +6,38 @@ from matplotlib import pyplot as plt
 from analysis_engine.data import (
     open_pickle_file,
     root_path,
-    # DcaData,
-    # CostData,
-    # MilestoneData,
-    # put_milestones_into_wb,
-    # data_query_into_wb,
-    # milestone_chart, run_p_reports, put_milestones_into_wb,
-    # cost_v_schedule_chart_into_wb,
-    # RiskData,
+    DcaData,
+    CostData,
+    MilestoneData,
+    put_milestones_into_wb,
+    data_query_into_wb,
+    milestone_chart, run_p_reports, put_milestones_into_wb,
+    cost_v_schedule_chart_into_wb,
+    RiskData,
     DandelionData,
-    # VfMData, vfm_into_excel,
-    # put_cost_totals_into_wb,
+    VfMData, vfm_into_excel,
+    put_cost_totals_into_wb,
     put_matplotlib_fig_into_word,
     open_word_doc,
-    # FIGURE_STYLE,
-    # get_cost_stackplot_data,
-    # put_stackplot_data_into_wb,
+    FIGURE_STYLE,
+    put_stackplot_data_into_wb,
     make_a_dandelion_auto,
-    # BenefitsData,
-    # total_costs_benefits_bar_chart,
-    # gauge,
-    # calculate_arg_combinations,
-    # get_sp_data,
-    # cal_group,
-    # cost_stackplot_graph,
-    # get_sp_data,
-    # cost_profile_graph,
-    # get_master_data,
-    # get_project_information,
-    # Master,
-    # risks_into_excel,
+    BenefitsData,
+    total_costs_benefits_bar_chart,
+    gauge,
+    calculate_arg_combinations,
+    get_sp_data,
+    cal_group,
+    cost_stackplot_graph,
+    get_sp_data,
+    cost_profile_graph,
+    get_master_data,
+    get_master_data_json_test,
+    get_project_information,
+    Master,
+    Json,
+    project_data_from_master,
+    risks_into_excel,
 )
 
 ## GENERATE CLI OPTIONS
@@ -45,8 +47,9 @@ from analysis_engine.data import (
 ## INITIATE
 # master = Master(get_master_data(), get_project_information())
 
-## MASTER
+## PICKLE
 m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
+
 
 ## GROUPS
 DFT_GROUP = ["HSRG", "RSS", "RIG", "AMIS", "RPE"]
@@ -59,13 +62,14 @@ op_args = {
     }
 
 # ## DANDELION
-stage = ["pre-SOBC", "SOBC", "OBC", "FBC"]
+# stage = ["pre-SOBC", "SOBC", "OBC", "FBC"]
 d_data = DandelionData(m, **op_args)
 d_lion = make_a_dandelion_auto(d_data, **op_args)
 doc = open_word_doc(root_path / "input/summary_temp_landscape.docx")
 put_matplotlib_fig_into_word(doc, d_lion, size=7.5)
 doc.save(root_path / "output/dlion_graph.docx")
-#
+
+
 # ## MILESTONES
 # # ms = MilestoneData(m, quarter=["standard"], group=DFT_GROUP)
 # # ms.filter_chart_info(dates=["1/4/2021", "1/5/2021"])
