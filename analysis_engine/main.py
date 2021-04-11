@@ -203,7 +203,8 @@ def run_general(args):
             wb = put_milestones_into_wb(ms)
 
         if programme == "dandelion":
-            op_args["quarter"] = [str(m.current_quarter)]
+            if op_args["quarter"] == ["standard"]:  # converts "standard" default to current quarter
+                op_args["quarter"] = [str(m.current_quarter)]
             d_data = DandelionData(m, **op_args)
             if "chart" not in op_args:
                 op_args["chart"] = True

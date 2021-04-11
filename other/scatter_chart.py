@@ -13,16 +13,16 @@ from analysis_engine.data import (
     # data_query_into_wb,
     # milestone_chart, run_p_reports, put_milestones_into_wb,
     # cost_v_schedule_chart_into_wb,
-    RiskData,
-    # DandelionData,
+    # RiskData,
+    DandelionData,
     # VfMData, vfm_into_excel,
     # put_cost_totals_into_wb,
-    # put_matplotlib_fig_into_word,
-    # open_word_doc,
+    put_matplotlib_fig_into_word,
+    open_word_doc,
     # FIGURE_STYLE,
     # get_cost_stackplot_data,
     # put_stackplot_data_into_wb,
-    # make_a_dandelion_auto,
+    make_a_dandelion_auto,
     # BenefitsData,
     # total_costs_benefits_bar_chart,
     # gauge,
@@ -35,7 +35,7 @@ from analysis_engine.data import (
     # get_master_data,
     # get_project_information,
     # Master,
-    risks_into_excel,
+    # risks_into_excel,
 )
 
 ## GENERATE CLI OPTIONS
@@ -52,18 +52,19 @@ m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
 DFT_GROUP = ["HSRG", "RSS", "RIG", "AMIS", "RPE"]
 
 ## OP_ARGS
-op_args = {"quarter": ["standard"],
-           "Group": DFT_GROUP}
-# # DFT_GROUP = ["RPE", "AMIS"]
-#
+op_args = {
+    "quarter": ["Q3 20/21"],
+    "group": DFT_GROUP,
+    "chart": True,
+    }
+
 # ## DANDELION
-# # stage = ["pre-SOBC", "SOBC", "OBC", "FBC"]
-# # group = ["HSRG", "AMIS", "RIG", "RSS", "RPE"]
-# # d_data = DandelionData(m, quarter=[str(m.current_quarter)], group=DFT_GROUP, type="remaining")
-# # d_lion = make_a_dandelion_auto(d_data, chart=True)
-# # doc = open_word_doc(root_path / "input/summary_temp_landscape.docx")
-# # put_matplotlib_fig_into_word(doc, d_lion, size=7.5)
-# # doc.save(root_path / "output/dlion_graph.docx")
+stage = ["pre-SOBC", "SOBC", "OBC", "FBC"]
+d_data = DandelionData(m, **op_args)
+d_lion = make_a_dandelion_auto(d_data, **op_args)
+doc = open_word_doc(root_path / "input/summary_temp_landscape.docx")
+put_matplotlib_fig_into_word(doc, d_lion, size=7.5)
+doc.save(root_path / "output/dlion_graph.docx")
 #
 # ## MILESTONES
 # # ms = MilestoneData(m, quarter=["standard"], group=DFT_GROUP)
@@ -108,5 +109,5 @@ op_args = {"quarter": ["standard"],
 # wb = vfm_into_excel(c)
 
 ## RISKS
-c = RiskData(m, **op_args)
-wb = risks_into_excel(c)
+# c = RiskData(m, **op_args)
+# wb = risks_into_excel(c)
