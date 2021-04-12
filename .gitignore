@@ -26,3 +26,4 @@ build/
 **/*.egg-info/*:wq
 analysis_engine.egg-info
 .nox
+.eggs
