@@ -207,6 +207,7 @@ def get_datamap_file_paths():
     pass
 
 
+
 def get_project_information() -> Dict[str, Union[str, int]]:
     """Returns dictionary containing all project meta data"""
     return project_data_from_master(
@@ -730,18 +731,6 @@ class Master:
                     p_group = raw_dict[quarter][p]["group"]
                     if p_group == group_type:
                         g_list.append(p)
-                ## no longer need this loop
-                # if group_type is None or group_type == "DfT":
-                #     if g_list:
-                #         for x in g_list:
-                #             logger.critical(
-                #                 str(quarter)
-                #                 + " "
-                #                 + str(x)
-                #                 + " DfT Group data needs cleaning. Currently "
-                #                 + str(group_type)
-                #             )
-                #             raise.ProjectGroupError
                 lower_g_dict[group_type] = g_list
 
             gmpp_list = []
@@ -3278,6 +3267,10 @@ def run_change_keys(master_files_list: list, key_dict: Dict[str, str]) -> None:
         alter_wb_master_file_key_names(f, key_dict)
 
 
+# keys_dict = put_key_change_master_into_dict(root_path / "core_data/analysis_engine/keys_to_change.xlsx")
+# run_change_keys(get_master_data_file_paths_fy_16_17(), keys_dict)
+
+
 def string_conversion(name):
     if isinstance(name, str):
         return [name]
@@ -4843,7 +4836,7 @@ COLOUR_DICT = {
     "A/R": "#f97b31",
     "R": "#cb1f00",
     "G": "#17960c",
-    "": "#808080",  # Gray if missing
+    "": "#FFFFFF",  # white if missing
     "W": "#ffffff",
 }
 
@@ -7689,6 +7682,9 @@ def dandelion_project_text(number: int, project: str) -> str:
 def dandelion_number_text(number: int) -> str:
     try:
         total_len = len(str(int(number)))
+        if total_len <= 2:
+            round_total = int(round(number))
+            return "£" + str(round_total) + "m"
         if total_len <= 3:
             round_total = int(round(number, -1))
             return "£" + str(round_total) + "m"
@@ -7758,7 +7754,7 @@ class DandelionData:
 
     def get_data(self):
         self.iter_list = get_iter_list(self.kwargs, self.master)
-        for tp in self.iter_list:
+        for tp in self.iter_list:  # although tp is iterated only one can be handled for now.
             #  for dandelion need groups of groups.
             if "group" in self.kwargs:
                 self.group = self.kwargs["group"]
@@ -7882,7 +7878,7 @@ class DandelionData:
                     # SRO Schedule Confidence
                     # Departmental DCA
                     # SRO Benefits RAG
-                    rag = p_data["SRO Schedule Confidence"]
+                    rag = p_data["Departmental DCA"]
                     colour = COLOUR_DICT[convert_rag_text(rag)]  # bubble colour
                     project_text = (
                             self.master.abbreviations[p]["abb"]
