@@ -735,7 +735,7 @@ class Master:
 
             gmpp_list = []
             for p in self.master_data[i].projects:
-                gmpp = self.master_data[i].data[p]["GMPP - IPA ID Number"]
+                gmpp = self.project_information[p]["GMPP"]
                 if gmpp is not None:
                     gmpp_list.append(p)
                 lower_g_dict["GMPP"] = gmpp_list
