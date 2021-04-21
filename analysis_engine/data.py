@@ -1245,10 +1245,10 @@ class BenefitsData:
                         total = round(cash + uncash + economic + disben)
                         # group_total += total
                     except TypeError:  # handle None types, which are present if project not reporting last quarter.
-                        # cash = 0
-                        # uncash = 0
-                        # economic = 0
-                        # disben = 0
+                        cash = 0
+                        uncash = 0
+                        economic = 0
+                        disben = 0
                         total = 0
                         # group_total += total
 
@@ -7753,6 +7753,7 @@ class DandelionData:
                 self.group = self.kwargs["group"]
             elif "stage" in self.kwargs:
                 self.group = self.kwargs["stage"]
+                del self.kwargs["stage"]  # nolonger need as not captured in group
 
             if len(self.group) == 5:
                 g_ang_l = [260, 310, 360, 50, 100]  # group angle list

@@ -49,13 +49,14 @@ m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
 
 ## GROUPS
 DFT_GROUP = ["HSRG", "RSS", "RIG", "AMIS", "RPE"]
-STAGE_GROUPS = ["pre_SOBC", "SOBC", "OBC", "FBC"]
+STAGE_GROUPS = ["SOBC", "OBC"]
 
 ## OP_ARGS
 op_args = {
     "quarter": ["Q4 20/21"],
-    "group": STAGE_GROUPS,
-    "chart": True,
+    # "stage": "Ely Area Capacity Enhancement Programme",
+    "type": "benefits",
+    # "chart": True,
     # "baseline": ["standard"],
     }
 
