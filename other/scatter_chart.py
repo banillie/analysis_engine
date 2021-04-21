@@ -49,19 +49,20 @@ m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
 
 ## GROUPS
 DFT_GROUP = ["HSRG", "RSS", "RIG", "AMIS", "RPE"]
+STAGE_GROUPS = ["pre_SOBC", "SOBC", "OBC", "FBC"]
 
 ## OP_ARGS
 op_args = {
-    # "quarter": ["Q4 20/21"],
-    "group": ["EWR CS1"],
+    "quarter": ["Q4 20/21"],
+    "group": STAGE_GROUPS,
     "chart": True,
-    "baseline": ["standard"],
+    # "baseline": ["standard"],
     }
 
 # ## DANDELION
 # stage = ["pre-SOBC", "SOBC", "OBC", "FBC"]
-# d_data = DandelionData(m, **op_args)
-# d_lion = make_a_dandelion_auto(d_data, **op_args)
+d_data = DandelionData(m, **op_args)
+d_lion = make_a_dandelion_auto(d_data, **op_args)
 # doc = open_word_doc(root_path / "input/summary_temp_landscape.docx")
 # put_matplotlib_fig_into_word(doc, d_lion, size=7.5)
 # doc.save(root_path / "output/dlion_graph.docx")
@@ -97,8 +98,8 @@ op_args = {
 # cost_stackplot_graph(sp_data, m, group=DFT_GROUP)
 
 # COSTS
-c = CostData(m, **op_args)
-cost_profile_graph(c, m, chart=True, group=c.start_group)
+# c = CostData(m, **op_args)
+# cost_profile_graph(c, m, chart=True, group=c.start_group)
 
 
 ## SUMMARYS

@@ -7878,7 +7878,9 @@ class DandelionData:
                             + "\n"
                             + dandelion_number_text(p_value)
                     )
-                    if p in self.master.dft_groups[tp]["GMPP"]:
+                    if colour == "#FFFFFF":
+                        edge_colour = "grey"
+                    elif p in self.master.dft_groups[tp]["GMPP"]:
                         edge_colour = "#000000"  # edge of bubble
                     else:
                         edge_colour = colour
