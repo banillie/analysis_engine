@@ -52,7 +52,7 @@ DFT_GROUP = ["HSRG", "RSS", "RIG", "AMIS", "RPE"]
 
 ## OP_ARGS
 op_args = {
-    "quarter": ["Q4 20/21"],
+    # "quarter": ["Q4 20/21"],
     "group": ["EWR CS1"],
     "chart": True,
     "baseline": ["standard"],
@@ -97,12 +97,12 @@ op_args = {
 # cost_stackplot_graph(sp_data, m, group=DFT_GROUP)
 
 # COSTS
-# c = CostData(m, quarter=["standard"], group=["NPR"])
-# cost_profile_graph(c, m, chart=True, group=c.start_group)
+c = CostData(m, **op_args)
+cost_profile_graph(c, m, chart=True, group=c.start_group)
 
 
 ## SUMMARYS
-run_p_reports(m, **op_args)
+# run_p_reports(m, **op_args)
 
 ## VFM
 # c = VfMData(m, group=DFT_GROUP, quarter=["standard"])  # c is class

@@ -2350,22 +2350,19 @@ def cost_profile_graph(
     """Compiles a matplotlib line chart for costs of GROUP of projects contained within cost_master class"""
 
     fig, (ax1) = plt.subplots(1)  # two subplots for this chart
-
     fig = set_fig_size(kwargs, fig)
-
-    # title
-    title = get_chart_title(master, "cost profile trend", **kwargs)
-
+    title = get_chart_title(master, "cost profile trend", **kwargs)   # title
     plt.suptitle(title, fontweight="bold", fontsize=20)
 
     # Overall cost profile chart
-    for i in reversed(costs.iter_list):
+    for i, iter in enumerate(costs.iter_list):
         ax1.plot(
             YEAR_LIST[:-1],
-            np.array(costs.c_profiles[i]["prof_ra"]),
-            label=i,
+            np.array(costs.c_profiles[iter]["prof_ra"]),
+            label=iter,
             linewidth=5.0,
             marker="o",
+            zorder=10 - i,
         )
 
     # Chart styling
