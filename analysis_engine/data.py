@@ -5505,8 +5505,6 @@ def compile_p_report(
     #  handling of no milestones within filtered period.
     ab = master.abbreviations[project_name]["abb"]
     try:
-        # milestones.get_milestones()
-        # milestones.get_chart_info()
         milestones.filter_chart_info(dates=["1/1/2021", "31/12/2022"])
         milestones_chart = milestone_chart(
             milestones,
@@ -5518,9 +5516,7 @@ def compile_p_report(
         put_matplotlib_fig_into_word(doc, milestones_chart, transparent=False, size=8)
         # print_out_project_milestones(doc, milestones, project_name)
     except ValueError:  # extends the time period.
-        milestones = MilestoneData(master, project_name)
-        # milestones.get_milestones()
-        # milestones.get_chart_info()
+        milestones = MilestoneData(master, group=[project_name], baseline=["standard"])
         milestones.filter_chart_info(dates=["1/9/2020", "30/12/2024"])
         milestones_chart = milestone_chart(
             milestones,
