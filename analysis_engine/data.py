@@ -8216,6 +8216,7 @@ def make_a_dandelion_manual(wb: Union[str, bytes, os.PathLike]):
 def make_a_dandelion_auto(dl: DandelionData, **kwargs):
     fig, ax = plt.subplots()
     fig.set_size_inches(18.5, 10.5)
+    font_type = ['monospace', 'Andale Mono']
     # ax.set_facecolor('xkcd:salmon')  # TBC if face colour is required
     # title = get_chart_title(dl_data, kwargs, "dandelion")
     # plt.suptitle(title, fontweight="bold", fontsize=10)
@@ -8236,7 +8237,8 @@ def make_a_dandelion_auto(dl: DandelionData, **kwargs):
                 xy=dl.d_data[c]["axis"],  # x, y position
                 xycoords="data",
                 xytext=dl.d_data[c]["tp"],  # text position
-                fontsize=6,
+                fontsize=7,
+                fontname=font_type,
                 # textcoords="offset pixels",
                 horizontalalignment=dl.d_data[c]["alignment"][0],
                 verticalalignment=dl.d_data[c]["alignment"][1],
@@ -8246,7 +8248,8 @@ def make_a_dandelion_auto(dl: DandelionData, **kwargs):
             ax.annotate(
                 dl.d_data[c]["text"],  # text
                 xy=dl.d_data[c]["axis"],  # x, y position
-                fontsize=8,
+                fontsize=9,
+                fontname=font_type,
                 horizontalalignment=dl.d_data[c]["alignment"][0],
                 verticalalignment=dl.d_data[c]["alignment"][1],
                 weight="bold",  # bold here as will be group text
