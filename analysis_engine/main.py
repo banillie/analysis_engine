@@ -173,8 +173,8 @@ def run_general(args):
         if programme == "speedial":
             data = DcaData(m, **op_args)
             data.get_changes()
-            hz_doc = open_word_doc(root_path / "input/summary_temp.docx")
-            doc = dca_changes_into_word(data, hz_doc)
+            doc = open_word_doc(root_path / "input/summary_temp.docx")
+            doc = dca_changes_into_word(data, doc)
             doc.save(root_path / "output/speed_dials.docx")
             land_doc = open_word_doc(root_path / "input/summary_temp_landscape.docx")
             build_speedials(data, land_doc)

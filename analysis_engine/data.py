@@ -207,7 +207,6 @@ def get_datamap_file_paths():
     pass
 
 
-
 def get_project_information() -> Dict[str, Union[str, int]]:
     """Returns dictionary containing all project meta data"""
     return project_data_from_master(
@@ -309,6 +308,8 @@ rag_txt_list_full = ["Amber/Green", "Amber/Red", "Red", "Green", "Amber"]
 gen_txt_colours = [darkish_grey_text, light_grey_text, greyblue_text]
 gen_fill_colours = [darkish_grey_fill, light_grey_fill, greyblue_fill]
 gen_txt_list = ["md", "pnr", "knc"]
+
+FONT_TYPE = ['monospace', 'Andale Mono']
 
 # for project summary pages
 SRO_CONF_TABLE_LIST = [
@@ -4007,13 +4008,13 @@ class DcaData:
                         change = [("Change", "Down")]
                 except TypeError:  # This picks up None types
                     if dca_one_colour:  # if project not reporting dca previous quarter
-                        status = [("Status", "New entry")]
+                        status = [("Status", "entered at " + str(dca_one_colour))]
                         change = [("Change", "New entry")]
                     else:
                         status = [("Status", "Missing")]
                         change = [("Change", "Unknown")]
                 except KeyError:  # This picks up projects not being present in the quarters being analysed.
-                    status = [("Status", "New entry")]
+                    status = [("Status", "entered at " + str(dca_one_colour))]
                     change = [("Change", "New entry")]
 
                 lower_dict[project_name] = dict(t + status + change)
@@ -4140,6 +4141,22 @@ def dca_changes_into_word(dca_data: DcaData, doc: Document) -> Document:
                 )
                 count += 1
         total_line = str(count) + " project(s) in total are missing a rating"
+        doc.add_paragraph(total_line)
+
+        doc.add_paragraph()
+        sub_head = "New Projects"
+        sub = doc.add_paragraph()
+        sub.add_run(sub_head).bold = True
+        count = 0
+        for project_name in list(dca_data.dca_changes[dca_type].keys()):
+            if dca_data.dca_changes[dca_type][project_name]["Change"] == "New entry":
+                doc.add_paragraph(
+                    project_name
+                    + " "
+                    + dca_data.dca_changes[dca_type][project_name]["Status"]
+                )
+                count += 1
+        total_line = str(count) + " new project(s)"
         doc.add_paragraph(total_line)
 
     return doc
@@ -4653,7 +4670,8 @@ def gauge(
     fig, ax = plt.subplots()
     fig.set_size_inches(18.5, 10.5)
     ang_range, mid_points = degree_range(no)
-    colours = ["#c00000", "#e77200", "#ffba00", "#92a700", "#007d00"]
+    colours = [COLOUR_DICT["R"], COLOUR_DICT["A/R"], COLOUR_DICT["A"], COLOUR_DICT["A/G"], COLOUR_DICT["G"]]
+    # ["#c00000", "#e77200", "#ffba00", "#92a700", "#007d00"]
 
     patches = []
     for ang, c in zip(ang_range, colours):
@@ -4675,33 +4693,59 @@ def gauge(
 
     [ax.add_patch(p) for p in patches]
 
-    for mid, lab in zip(mid_points, labels):
+    for mid, lab in zip(mid_points, reversed(labels)):
         ax.text(
-            0.35 * np.cos(np.radians(mid)),
-            0.35 * np.sin(np.radians(mid)),
+            0.325 * np.cos(np.radians(mid)),
+            0.325 * np.sin(np.radians(mid)),
             lab,
             horizontalalignment="center",
             verticalalignment="center",
-            fontsize=20,
+            fontsize=35,
             fontweight="bold",
+            fontname=FONT_TYPE,
             rotation=rot_text(mid),
             zorder=4,
         )
 
     ## title
-    plt.suptitle(title + " Confidence", fontweight="bold", fontsize=40)
+    plt.suptitle(title + " Confidence", fontweight="bold", fontsize=50, fontname=FONT_TYPE)
 
     # r = Rectangle((-0.4, -0.1), 0.8, 0.1, facecolor="w", lw=2)
     # ax.add_patch(r)
 
+    # ax.text(
+    #     0,
+    #     -0.1,
+    #     total + "\nSRO ratings",
+    #     horizontalalignment="center",
+    #     verticalalignment="center",
+    #     fontsize=35,
+    #     fontweight="bold",
+    #     fontname=FONT_TYPE,
+    #     zorder=1,
+    # )
+
     ax.text(
         0,
         -0.1,
-        total + "\nSRO ratings",
+        total,
         horizontalalignment="center",
         verticalalignment="center",
-        fontsize=35,
+        fontsize=60,
         fontweight="bold",
+        fontname=FONT_TYPE,
+        zorder=1,
+    )
+
+    ax.text(
+        0,
+        -0.17,
+        "SRO ratings",
+        horizontalalignment="center",
+        verticalalignment="center",
+        fontsize=45,
+        fontweight="bold",
+        fontname=FONT_TYPE,
         zorder=1,
     )
 
@@ -4754,11 +4798,11 @@ def gauge(
         xycoords="data",
         xytext=(-0.4, 0.2),
         textcoords="data",
-        arrowprops=dict(arrowstyle="->", connectionstyle="arc3, rad=-0.3", linewidth=2),
+        arrowprops=dict(arrowstyle="->", connectionstyle="arc3, rad=-0.3", linewidth=4),
     )
-    ax.text(-0.35, 0.35, down, fontsize=20)
+    ax.text(-0.35, 0.35, down, fontsize=30, fontname=FONT_TYPE)
 
-    ax.text(0.35, 0.35, up, fontsize=20)
+    ax.text(0.35, 0.35, up, fontsize=30, fontname=FONT_TYPE)
 
     plt.annotate(
         "",
@@ -4766,20 +4810,22 @@ def gauge(
         xycoords="data",
         xytext=(0.2, 0.4),
         textcoords="data",
-        arrowprops=dict(arrowstyle="<-", connectionstyle="arc3, rad=-0.3", linewidth=2),
+        arrowprops=dict(arrowstyle="<-", connectionstyle="arc3, rad=-0.3", linewidth=4),
     )
 
     plt.axis("scaled")
     plt.axis("off")
+    # plt.show()
 
     return fig
 
 
-def build_speedials(dca_data: DcaData, doc):
+def build_speedials(dca_data: DcaData, doc) -> None:
+    """function for build speed dial graphical output"""
     for conf_type in dca_data.dca_count[dca_data.iter_list[0]]:
         c_count = []
         l_count = []
-        for colour in ["Green", "Amber/Green", "Amber", "Amber/Red", "Red"]:
+        for colour in DCA_WA.keys():
             c_no = dca_data.dca_count[dca_data.iter_list[0]][conf_type][colour]['count']
             c_count.append(c_no)
             l_no = dca_data.dca_count[dca_data.iter_list[1]][conf_type][colour]['count']
@@ -4796,8 +4842,8 @@ def build_speedials(dca_data: DcaData, doc):
                 down += 1
 
         rate = [1, .75, .5, .25, 0]
-        dial_one = np.average(rate, weights=c_count)
-        dial_two = np.average(rate, weights=l_count)
+        dial_one = 1 - (np.average(rate, weights=c_count))
+        dial_two = 1 - (np.average(rate, weights=l_count))
 
         graph = gauge(
             c_count,
@@ -4836,7 +4882,6 @@ COLOUR_DICT = {
     "": "#FFFFFF",  # white if missing
     "W": "#ffffff",
 }
-
 
 def cost_schedule_scatter_chart_matplotlib(milestones: MilestoneData, costs: CostData):
     sc_list = []
@@ -8216,7 +8261,6 @@ def make_a_dandelion_manual(wb: Union[str, bytes, os.PathLike]):
 def make_a_dandelion_auto(dl: DandelionData, **kwargs):
     fig, ax = plt.subplots()
     fig.set_size_inches(18.5, 10.5)
-    font_type = ['monospace', 'Andale Mono']
     # ax.set_facecolor('xkcd:salmon')  # TBC if face colour is required
     # title = get_chart_title(dl_data, kwargs, "dandelion")
     # plt.suptitle(title, fontweight="bold", fontsize=10)
@@ -8238,7 +8282,7 @@ def make_a_dandelion_auto(dl: DandelionData, **kwargs):
                 xycoords="data",
                 xytext=dl.d_data[c]["tp"],  # text position
                 fontsize=7,
-                fontname=font_type,
+                fontname=FONT_TYPE,
                 # textcoords="offset pixels",
                 horizontalalignment=dl.d_data[c]["alignment"][0],
                 verticalalignment=dl.d_data[c]["alignment"][1],
@@ -8249,7 +8293,7 @@ def make_a_dandelion_auto(dl: DandelionData, **kwargs):
                 dl.d_data[c]["text"],  # text
                 xy=dl.d_data[c]["axis"],  # x, y position
                 fontsize=9,
-                fontname=font_type,
+                fontname=FONT_TYPE,
                 horizontalalignment=dl.d_data[c]["alignment"][0],
                 verticalalignment=dl.d_data[c]["alignment"][1],
                 weight="bold",  # bold here as will be group text

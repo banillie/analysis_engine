@@ -34,7 +34,7 @@ from analysis_engine.data import (
     get_master_data,
     get_project_information,
     Master,
-    risks_into_excel,
+    risks_into_excel, build_speedials, dca_changes_into_word,
 )
 
 ## GENERATE CLI OPTIONS
@@ -53,17 +53,18 @@ STAGE_GROUPS = ["SOBC", "OBC"]
 
 ## OP_ARGS
 op_args = {
-    "quarter": ["Q4 20/21"],
+    "quarter": ["standard"],
+    "group": DFT_GROUP,
     # "stage": "Ely Area Capacity Enhancement Programme",
-    "type": "benefits",
+    "type": ["SRO"],
     # "chart": True,
     # "baseline": ["standard"],
     }
 
 # ## DANDELION
 # stage = ["pre-SOBC", "SOBC", "OBC", "FBC"]
-d_data = DandelionData(m, **op_args)
-d_lion = make_a_dandelion_auto(d_data, **op_args)
+# d_data = DandelionData(m, **op_args)
+# d_lion = make_a_dandelion_auto(d_data, **op_args)
 # doc = open_word_doc(root_path / "input/summary_temp_landscape.docx")
 # put_matplotlib_fig_into_word(doc, d_lion, size=7.5)
 # doc.save(root_path / "output/dlion_graph.docx")
@@ -89,11 +90,11 @@ d_lion = make_a_dandelion_auto(d_data, **op_args)
 #
 # # b = BenefitsData(m, baseline=["all"])
 # # total_costs_benefits_bar_chart(c, b, chart=True)
-#
+
 # # QUERY
 # # wb = data_query_into_wb(m, keys=["Senior Responsible Owner (SRO)"], quarter=["Q3 19/20"], group=DFT_GROUP)
 # # wb.save(root_path / "output/query_test.xlsx")
-#
+
 # ## STACKPLOT
 # sp_data = get_sp_data(m, quarter=["standard"], group=["RIG"])
 # cost_stackplot_graph(sp_data, m, group=DFT_GROUP)
@@ -113,3 +114,13 @@ d_lion = make_a_dandelion_auto(d_data, **op_args)
 ## RISKS
 # c = RiskData(m, **op_args)
 # wb = risks_into_excel(c)
+
+## SPEED DIALS
+data = DcaData(m, **op_args)
+data.get_changes()
+land_doc = open_word_doc(root_path / "input/summary_temp_landscape.docx")
+build_speedials(data, land_doc)
+land_doc.save(root_path / "output/speed_dial_graph.docx")
+doc = open_word_doc(root_path / "input/summary_temp.docx")
+doc = dca_changes_into_word(data, doc)
+doc.save(root_path / "output/speed_dials.docx")
