@@ -35,7 +35,7 @@ from analysis_engine.data import (
     get_master_data_json_test,
     get_project_information,
     Master,
-    Json,
+    JsonData,
     project_data_from_master,
     risks_into_excel,
 )

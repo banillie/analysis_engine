@@ -6584,9 +6584,9 @@ def open_pickle_file(path: str):
         return pickle.load(handle)
 
 
-class Json:
+class JsonData:
     def __init__(self, master: Dict, save_path: str):
-        self.master = master
+        self.master = master.data
         self.path = save_path
         self.put_into_jason()
 
