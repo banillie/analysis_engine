@@ -44,7 +44,7 @@ from analysis_engine.data import (
 ## INITIATE
 # master = Master(get_master_data(), get_project_information())
 
-## MASTER
+## PICKLE
 m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
 
 ## GROUPS
@@ -69,6 +69,7 @@ op_args = {
 # put_matplotlib_fig_into_word(doc, d_lion, size=7.5)
 # doc.save(root_path / "output/dlion_graph.docx")
 #
+
 # ## MILESTONES
 # ms = MilestoneData(m, **op_args)
 # # ms.filter_chart_info(dates=["1/4/2021", "1/5/2021"])
@@ -102,7 +103,6 @@ op_args = {
 # COSTS
 # c = CostData(m, **op_args)
 # cost_profile_graph(c, m, chart=True, group=c.start_group)
-
 
 ## SUMMARYS
 # run_p_reports(m, **op_args)

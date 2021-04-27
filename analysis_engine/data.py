@@ -2,6 +2,7 @@ import csv
 import datetime
 import difflib
 import itertools
+import json
 import math
 import os
 import pickle
@@ -130,6 +131,12 @@ def get_master_data() -> List[
     ]
 
     return master_data_list
+
+
+def get_master_data_json_test() -> Dict:
+    # temp function for testing use of json data structure.
+    return {"Q4 20/21":
+                project_data_from_master(root_path / "core_data/master_4_2020.xlsx", 4, 2020)}
 
 
 def get_master_data_file_paths() -> List[typing.TextIO]:
@@ -559,17 +566,6 @@ class Master:
         self.get_project_abbreviations()
         self.check_baselines()
         self.get_project_groups()
-
-    """This is the entry point for all data. It converts a list of excel wbs (note at the moment)
-    this is actually done prior to being passed into the Master class. The Master class does a number
-    of things. 
-    compiles and checks all baseline data for projects. These index reference points. 
-    compiles lists of different project groups. e.g stage and DfT Group
-    gets a list of projects currently in the portfolio. 
-    checks data returned by projects is consistent with whats in project_information
-    gets project abbreviations
-    
-    """
 
     def get_project_abbreviations(self) -> None:
         """gets the abbreviations for all current projects.
@@ -6602,6 +6598,7 @@ def data_query_into_wb(master: Master, **kwargs) -> Workbook:
 #     ws.add_chart(chart, "I12")
 #
 #     return output_wb
+
 class Pickle:
     def __init__(self, master: Master, save_path: str):
         self.master = master
@@ -6616,6 +6613,18 @@ class Pickle:
 def open_pickle_file(path: str):
     with open(path, "rb") as handle:
         return pickle.load(handle)
+
+
+class JsonData:
+    def __init__(self, master: Dict, save_path: str):
+        self.master = master.data
+        self.path = save_path
+        self.put_into_jason()
+
+    def put_into_jason(self) -> None:
+        with open(self.path + ".json", "w") as write_file:
+            json.dump(self.master, write_file)
+
 
 
 """NOTE. these three lists need to have rag ratings in the same order"""
