@@ -5216,7 +5216,7 @@ def project_report_meta_data(
     font.underline = True
     table = doc.add_table(rows=1, cols=4)
     hdr_cells = table.rows[0].cells
-    hdr_cells[0].text = "Business case stage :"
+    hdr_cells[0].text = "Business case stage:"
     hdr_cells[1].text = convert_bc_stage_text(
         costs.master.master_data[0].data[project_name]["IPDC approval point"]
     )

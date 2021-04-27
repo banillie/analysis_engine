@@ -248,7 +248,8 @@ def run_general(args):
         check_remove(op_args)
 
         try:
-            wb.save(root_path / "output/{}.xlsx".format(programme))
+            if programme != "dashboards":
+                wb.save(root_path / "output/{}.xlsx".format(programme))
         except UnboundLocalError:
             pass
 

@@ -4,8 +4,28 @@ import pytest
 from datamaps.api import project_data_from_master
 from openpyxl import load_workbook
 
-from analysis_engine.data import open_word_doc
+from analysis_engine.data import open_word_doc, open_pickle_file
 from other.database.database import create_db
+
+
+def pytest_addoption(parser):
+    parser.addoption(
+        "--runslow", action="store_true", default=False, help="run slow tests"
+    )
+
+
+def pytest_configure(config):
+    config.addinivalue_line("markers", "slow: mark test as slow to run")
+
+
+def pytest_collection_modifyitems(config, items):
+    if config.getoption("--runslow"):
+        # --runslow given in cli: do not skip slow tests
+        return
+    skip_slow = pytest.mark.skip(reason="need --runslow option to run")
+    for item in items:
+        if "slow" in item.keywords:
+            item.add_marker(skip_slow)
 
 
 @pytest.fixture
@@ -31,7 +51,7 @@ def word_doc_landscape():
 
 
 @pytest.fixture
-def contact_master():
+def master_pickle():
     return [project_data_from_master(os.path.join(os.getcwd(), "resources/"
                                                                "contact_info_master_3_2019.xlsx"), 3, 2019),
             project_data_from_master(os.path.join(os.getcwd(), "resources/"
@@ -88,8 +108,26 @@ def basic_masters_dicts():
 
 
 @pytest.fixture()
-def basic_pickle():
-    return os.path.join(os.getcwd(), "resources/test_master.pickle")
+def full_test_masters_dict():
+    test_master_data = [
+        project_data_from_master(os.path.join(os.getcwd(), "resources/"
+                                                           "test_master_1_2020.xlsx"), 1, 2020),
+        project_data_from_master(os.path.join(os.getcwd(), "resources/"
+                                                           "test_master_4_2019.xlsx"), 4, 2019),
+        project_data_from_master(os.path.join(os.getcwd(), "resources/"
+                                                           "test_master_4_2018.xlsx"), 4, 2018),
+        project_data_from_master(os.path.join(os.getcwd(), "resources/"
+                                                           "test_master_4_2017.xlsx"), 4, 2017),
+        project_data_from_master(os.path.join(os.getcwd(), "resources/"
+                                                           "test_master_4_2016.xlsx"), 4, 2016)
+
+    ]
+    return test_master_data
+
+
+@pytest.fixture()
+def master_pickle():
+    return open_pickle_file(os.path.join(os.getcwd(), "resources/test_master.pickle"))
 
 
 @pytest.fixture()
