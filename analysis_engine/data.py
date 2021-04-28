@@ -4376,12 +4376,13 @@ def risks_into_excel(risk_data: RiskData) -> workbook:
             for x, number in enumerate(
                     list(risk_data.risk_dictionary[q][project_name].keys())
             ):
-                if (
-                        risk_data.risk_dictionary[q][project_name][number][
-                            "Brief Risk Description "
-                        ]
-                        is None
-                ):
+                try:
+                    r_description = risk_data.risk_dictionary[q][project_name][number][
+                        "Brief Risk Description "]
+                except KeyError:
+                    logger.info("Latest risk data set not available for " + str(q) + ".")
+                    break
+                if r_description is None:
                     break
                 else:
                     ws.cell(
@@ -4410,6 +4411,8 @@ def risks_into_excel(risk_data: RiskData) -> workbook:
         ws.cell(row=1, column=1).value = "DfT Group"
         ws.cell(row=1, column=2).value = "Project Name"
         ws.cell(row=1, column=3).value = "Risk Number"
+
+
 
         ws = wb.create_sheet(
             make_file_friendly(q + " Count")

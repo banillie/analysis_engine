@@ -112,6 +112,12 @@ def test_get_current_project_names(basic_masters_dicts, project_info):
 #     # assert error message
 
 
+def test_getting_project_groups(project_info, basic_masters_dicts):
+    m = Master(basic_masters_dicts, project_info)
+    assert isinstance(m.project_stage, (dict,))
+    assert isinstance(m.dft_groups, (dict,))
+
+
 def test_get_project_abbreviations(basic_masters_dicts, project_info):
     master = Master(basic_masters_dicts, project_info)
     assert master.abbreviations == {
@@ -193,7 +199,7 @@ def test_project_cost_profile_into_wb(master_pickle):
     wb.save("resources/test_cost_profile_output.xlsx")
 
 
-def test_project_cost_profile_chart_into_word_doc_one(word_doc, master_pickle):
+def test_matplotlib_chart_into_word(word_doc, master_pickle):
     costs = CostData(master_pickle, group=[F9], baseline=['standard'])
     graph = cost_profile_graph(costs, master_pickle, chart=False)
     change_word_doc_landscape(word_doc)
@@ -205,15 +211,6 @@ def test_get_project_total_costs_benefits_bar_chart(master_pickle):
     costs = CostData(master_pickle, baseline=["standard"], group=TEST_GROUP)
     benefits = BenefitsData(master_pickle, baseline=["standard"], group=TEST_GROUP)
     total_costs_benefits_bar_chart(costs, benefits, master_pickle, chart=False)
-
-
-def test_total_cost_profile_chart_into_word_doc_one(word_doc, master_pickle):
-    costs = CostData(master_pickle, baseline=["standard"], group=TEST_GROUP)
-    benefits = BenefitsData(master_pickle, baseline=["standard"], group=TEST_GROUP)
-    graph = total_costs_benefits_bar_chart(costs, benefits, master_pickle, chart=False)
-    change_word_doc_landscape(word_doc)
-    put_matplotlib_fig_into_word(word_doc, graph)
-    word_doc.save("resources/summary_temp_altered.docx")
 
 
 def test_changing_word_doc_to_landscape(word_doc):
@@ -333,19 +330,6 @@ def test_get_milestone_chart_data(master_pickle):
     )
 
 
-def test_compile_milestone_chart(master_pickle, word_doc):
-    milestones = MilestoneData(master_pickle, group=[SOT], quarter=["Q4 19/20", "Q4 18/19"])
-    graph = milestone_chart(
-        milestones,
-        master_pickle,
-        title="Group Test",
-        blue_line="Today",
-        chart=False,
-    )
-    put_matplotlib_fig_into_word(word_doc, graph)
-    word_doc.save("resources/summary_temp_altered.docx")
-
-
 def test_compile_milestone_chart_with_filter(master_pickle):
     milestones = MilestoneData(master_pickle, group=[SOT], quarter=["Q4 19/20", "Q4 18/19"])
     milestones.filter_chart_info(dates=["1/1/2013", "1/1/2014"])
@@ -386,72 +370,43 @@ def test_putting_milestones_into_wb(master_pickle):
     wb.save("resources/milestone_data_output_test.xlsx")
 
 
-def test_saving_graph_to_word_doc_one(word_doc, milestone_masters, project_info):
-    master = Master(milestone_masters, project_info)
-    milestones = MilestoneData(master, group=[SOT, A11, A13], baseline=["standard"])
-    change_word_doc_landscape(word_doc)
-    graph = milestone_chart(milestones, title="Group Test", blue_line="Today")
-    put_matplotlib_fig_into_word(word_doc, graph, size=2)
-    word_doc.save("resources/summary_temp_altered.docx")
-
-
-#  hashed out. not saving to test/resources
-# def test_saving_graph_to_word_doc_other(milestone_masters, project_info):
-#     master = Master(milestone_masters, project_info)
-#     milestones = MilestoneData(master, [sot, a11, a13])
-#     milestones.filter_chart_info(start_date="1/1/2013", end_date="1/1/2014")
-#     f = milestone_chart(milestones, title="Group Test", fig_size=FIGURE_STYLE[1], blue_line="Today")
-#     save_graph(f, "testing", orientation="landscape")
-
-
-def test_dca_analysis(project_info, dca_masters, word_doc):
-    m = Master(dca_masters, project_info)
-    dca = DcaData(m, quarter=["standard"])
+def test_dca_analysis(master_pickle):
+    dca = DcaData(master_pickle, quarter=["standard"])
     wb = dca_changes_into_excel(dca)
     wb.save("resources/dca_print.xlsx")
 
 
-def test_speedial_print_out(project_info, dca_masters, word_doc):
-    m = Master(dca_masters, project_info)
-    dca = DcaData(m, baseline=["standard"])
+def test_speedial_print_out(master_pickle, word_doc):
+    dca = DcaData(master_pickle, baseline=["standard"])
     dca.get_changes()
     dca_changes_into_word(dca, word_doc)
     word_doc.save("resources/dca_checks.docx")
 
 
-def test_risk_analysis(project_info, risk_masters):
-    m = Master(risk_masters, project_info)
-    risk = RiskData(m, group=["Rail"], quarter=["standard"])
+def test_risk_analysis(master_pickle):
+    risk = RiskData(master_pickle, quarter=["standard"])
     wb = risks_into_excel(risk)
     wb.save("resources/risks.xlsx")
 
 
-def test_vfm_analysis(project_info, vfm_masters):
-    m = Master(vfm_masters, project_info)
-    vfm = VfMData(m, quarter=['standard'])
+def test_vfm_analysis(master_pickle):
+    vfm = VfMData(master_pickle, quarter=['standard'])
     wb = vfm_into_excel(vfm)
     wb.save("resources/vfm.xlsx")
 
 
-def test_getting_project_groups(project_info, basic_masters_dicts):
-    m = Master(basic_masters_dicts, project_info)
-    # assert m.dft_groups == {}
-    # assert m.project_stage == {}
-    assert isinstance(m.project_stage, (dict,))
-    assert isinstance(m.dft_groups, (dict,))
-
-
-def test_sorting_project_by_dca(project_info, dca_masters):
-    rag_list = sort_projects_by_dca(dca_masters[0], Falcon)
+def test_sorting_project_by_dca(master_pickle):
+    rag_list = sort_projects_by_dca(master_pickle.master_data[0], TEST_GROUP)
     assert rag_list == [
-        ("Falcon 9", "Amber"),
-        ("Mars", "Amber"),
-        ("Apollo 13", "Amber/Green"),
-        ("Sea of Tranquility", "Green"),
-        ("Columbia", "Green"),
+        ('Falcon 9', 'Amber'),
+         ('Sea of Tranquility', 'Amber/Green'),
+         ('Apollo 13', 'Amber/Green'),
+         ('Mars', 'Amber/Green'),
+         ('Columbia', 'Green')
     ]
 
 
+# HERE
 def test_calculating_wlc_changes(costs_masters, project_info):
     master = Master(costs_masters, project_info)
     costs = CostData(master, group=[master.current_projects], baseline=["all"])
@@ -519,16 +474,6 @@ def test_overall_dashboard(two_masters, dashboard_template, project_info):
     # milestones.get_milestones(baseline=[])
     wb = overall_dashboard(m, milestones, dashboard_template)
     wb.save("resources/test_dashboards_master_altered.xlsx")
-
-## superceded by test below
-# def test_dandelion(basic_masters_dicts, project_info, word_doc):
-#     m = Master(basic_masters_dicts, project_info)
-#     dand = DandelionData(m, quarter=["standard"])
-#     wb = dandelion_data_into_wb(dand)
-#     wb.save("resources/test_dandelion_data.xlsx")
-#     graph = run_dandelion_matplotlib_chart(dand)
-#     put_matplotlib_fig_into_word(word_doc, graph, size=4, transparent=False)
-#     word_doc.save("resources/test_dandelion_output.docx")
 
 
 def test_build_dandelion_graph_auto(basic_masters_dicts, project_info, word_doc):
