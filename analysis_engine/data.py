@@ -999,18 +999,13 @@ class CostData:
         self.c_profiles = lower_dict
 
     def get_wlc_data(self) -> None:
-        """central point in code which
-        calculates the quarters total
-        filters projects by group in order of size wlc"""
+        """
+        calculates the quarters total wlc change
+        """
         self.iter_list = get_iter_list(self.kwargs, self.master)
         wlc_dict = {}
         for tp in self.iter_list:
-            #  for need groups of groups.  Not consistent with steps for
-            #  other functions in this class. currently only in use for dandelion
-            if "group" in self.kwargs:
-                self.group = self.kwargs["group"]
-            elif "stage" in self.kwargs:
-                self.group = self.kwargs["stage"]
+            self.group = get_group(self.master, tp, self.kwargs)
             wlc_dict = {}
             p_total = 0  # portfolio total
 

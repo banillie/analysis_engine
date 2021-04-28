@@ -131,6 +131,11 @@ def master_pickle():
 
 
 @pytest.fixture()
+def master_pickle_file_path():
+    return os.path.join(os.getcwd(), "resources/test_master.pickle")
+
+
+@pytest.fixture()
 def basic_masters_file_paths():
     file_paths = [
         os.path.join(os.getcwd(), "resources/"
