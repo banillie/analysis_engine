@@ -153,22 +153,22 @@ def test_word_doc_heading(word_doc, project_info):
     word_doc.save("resources/summary_temp_altered.docx")
 
 
-def test_word_doc_contacts(word_doc, project_info, master_pickle):
+def test_word_doc_contacts(word_doc, master_pickle):
     key_contacts(word_doc, master_pickle, "Apollo 13")
     word_doc.save("resources/summary_temp_altered.docx")
 
 
-def test_word_doc_dca_table(word_doc, project_info, master_pickle):
+def test_word_doc_dca_table(word_doc, master_pickle):
     dca_table(word_doc, master_pickle, "Falcon 9")
     word_doc.save("resources/summary_temp_altered.docx")
 
 
-def test_word_doc_dca_narratives(word_doc, project_info, master_pickle):
+def test_word_doc_dca_narratives(word_doc, master_pickle):
     dca_narratives(word_doc, master_pickle, "Falcon 9")
     word_doc.save("resources/summary_temp_altered.docx")
 
 
-def test_project_report_meta_data(word_doc, project_info, master_pickle):
+def test_project_report_meta_data(word_doc, master_pickle):
     project = [F9]
     cost = CostData(master_pickle, quarter=["standard"], group=project)
     milestones = MilestoneData(master_pickle, quarter=["standard"], group=project)
@@ -177,25 +177,23 @@ def test_project_report_meta_data(word_doc, project_info, master_pickle):
     word_doc.save("resources/summary_temp_altered.docx")
 
 
-def test_get_project_cost_profile(master_pickle, project_info):
+def test_get_project_cost_profile(master_pickle):
     costs = CostData(master_pickle, group=[MARS], baseline=['standard'])
     assert len(costs.c_profiles['current']['prof']) == 24
 
 
-def test_project_cost_profile_chart(master_pickle, project_info):
+def test_project_cost_profile_chart(master_pickle):
     costs = CostData(master_pickle, group=TEST_GROUP, baseline=['standard'])
     cost_profile_graph(costs, master_pickle, chart=False)
 
 
-def test_project_cost_profile_into_wb(master_pickle, project_info):
+def test_project_cost_profile_into_wb(master_pickle):
     costs = CostData(master_pickle, baseline=['standard'], group=TEST_GROUP)
     wb = cost_profile_into_wb(costs)
     wb.save("resources/test_cost_profile_output.xlsx")
 
 
-def test_project_cost_profile_chart_into_word_doc_one(
-    word_doc, master_pickle, project_info
-):
+def test_project_cost_profile_chart_into_word_doc_one(word_doc, master_pickle):
     costs = CostData(master_pickle, group=[F9], baseline=['standard'])
     graph = cost_profile_graph(costs, master_pickle, chart=False)
     change_word_doc_landscape(word_doc)
@@ -203,15 +201,13 @@ def test_project_cost_profile_chart_into_word_doc_one(
     word_doc.save("resources/summary_temp_altered.docx")
 
 
-def test_get_project_total_costs_benefits_bar_chart(master_pickle, project_info):
+def test_get_project_total_costs_benefits_bar_chart(master_pickle):
     costs = CostData(master_pickle, baseline=["standard"], group=TEST_GROUP)
     benefits = BenefitsData(master_pickle, baseline=["standard"], group=TEST_GROUP)
     total_costs_benefits_bar_chart(costs, benefits, master_pickle, chart=False)
 
 
-def test_total_cost_profile_chart_into_word_doc_one(
-    word_doc, master_pickle, project_info
-):
+def test_total_cost_profile_chart_into_word_doc_one(word_doc, master_pickle):
     costs = CostData(master_pickle, baseline=["standard"], group=TEST_GROUP)
     benefits = BenefitsData(master_pickle, baseline=["standard"], group=TEST_GROUP)
     graph = total_costs_benefits_bar_chart(costs, benefits, master_pickle, chart=False)
@@ -225,24 +221,22 @@ def test_changing_word_doc_to_landscape(word_doc):
     word_doc.save("resources/summary_changed_to_landscape.docx")
 
 
-def test_get_stackplot_costs_chart(master_pickle, project_info):
+def test_get_stackplot_costs_chart(master_pickle):
     sp = get_sp_data(master_pickle, group=TEST_GROUP, quarter=["standard"])
     cost_stackplot_graph(sp, master_pickle, chart=False)
 
 
-def test_get_project_total_cost_calculations_for_project(costs_masters, project_info):
-    master = Master(costs_masters, project_info)
-    costs = CostData(master, group=[F9], baseline=["standard"])
+def test_get_project_total_cost_calculations_for_project(master_pickle):
+    costs = CostData(master_pickle, group=[F9], baseline=["standard"])
     assert costs.c_totals["current"]["spent"] == 471
     assert costs.c_totals["current"]["prof"] == 6281
     assert costs.c_totals["current"]["unprof"] == 0
 
 
-def test_get_group_total_cost_calculations(costs_masters, project_info):
-    master = Master(costs_masters, project_info)
-    costs = CostData(master, group=master.current_projects, quarter=["standard"])
-    assert costs.c_totals["Q1 20/21"]["spent"] == 3102
-    assert costs.c_totals["Q4 19/20"]["spent"] == 2210
+def test_get_group_total_cost_calculations(master_pickle):
+    costs = CostData(master_pickle, group=master_pickle.current_projects, quarter=["standard"])
+    assert costs.c_totals["Q1 20/21"]["spent"] == 3926
+    assert costs.c_totals["Q4 19/20"]["spent"] == 2610
 
 
 ## no longer neccesary. covered by another test.
@@ -273,17 +267,15 @@ def test_altering_master_wb_file_key_names(change_log, list_cost_masters_files):
 #     run_place_old_fy_data_into_masters(list_cost_masters_files, project_old_fy_path)
 
 
-def test_getting_benefits_profile_for_a_group(costs_masters, project_info):
-    master = Master(costs_masters, project_info)
-    ben = BenefitsData(master, quarter=["standard"])
+def test_getting_benefits_profile_for_a_group(master_pickle):
+    ben = BenefitsData(master_pickle, group=master_pickle.current_projects, quarter=["standard"])
     assert ben.b_totals["Q1 20/21"]["delivered"] == 0
     assert ben.b_totals["Q1 20/21"]["prof"] == 43659
     assert ben.b_totals["Q1 20/21"]["unprof"] == 10164
 
 
-def test_getting_benefits_profile_for_a_project(costs_masters, project_info):
-    master = Master(costs_masters, project_info)
-    ben = BenefitsData(master, group=[F9], baseline=["all"])
+def test_getting_benefits_profile_for_a_project(master_pickle):
+    ben = BenefitsData(master_pickle, group=[F9], baseline=["all"])
     assert ben.b_totals["current"]["cat_prof"] == [0, 0, 0, -200]
 
 
@@ -318,65 +310,78 @@ def test_compare_changes_between_masters(basic_masters_file_paths, project_info)
 #     totals_chart(costs, benefits, title="Test Group")
 
 
-def test_get_milestone_data_bl(milestone_masters, project_info):
-    master = Master(milestone_masters, project_info)
-    milestones = MilestoneData(master, group=[SOT, A11, A13], baseline=["all"])
+def test_get_milestone_data_bl(master_pickle):
+    milestones = MilestoneData(master_pickle, group=master_pickle.current_projects, baseline=["all"])
     assert isinstance(milestones.milestone_dict["current"], (dict,))
 
 
-def test_get_milestone_data_all(milestone_masters, project_info):
-    m = Master(milestone_masters, project_info)
-    milestones = MilestoneData(m, quarter=["Q4 19/20", "Q4 18/19"])
+def test_get_milestone_data_all(master_pickle):
+    milestones = MilestoneData(master_pickle, group=master_pickle.current_projects, quarter=["Q4 19/20", "Q4 18/19"])
     assert isinstance(milestones.milestone_dict["Q4 19/20"], (dict,))
 
 
-def test_get_milestone_chart_data(milestone_masters, project_info):
-    master = Master(milestone_masters, project_info)
-    milestones = MilestoneData(master, group=[SOT, A11, A13], baseline=["standard"])
+def test_get_milestone_chart_data(master_pickle):
+    milestones = MilestoneData(master_pickle, group=[SOT, A13], baseline=["standard"])
     assert (
-        len(milestones.sorted_milestone_dict[milestones.iter_list[0]]["g_dates"]) == 11
+        len(milestones.sorted_milestone_dict[milestones.iter_list[0]]["g_dates"]) == 76
     )
     assert (
-        len(milestones.sorted_milestone_dict[milestones.iter_list[1]]["g_dates"]) == 11
+        len(milestones.sorted_milestone_dict[milestones.iter_list[1]]["g_dates"]) == 76
     )
     assert (
-        len(milestones.sorted_milestone_dict[milestones.iter_list[2]]["g_dates"]) == 11
+        len(milestones.sorted_milestone_dict[milestones.iter_list[2]]["g_dates"]) == 76
     )
 
 
-def test_compile_milestone_chart(milestone_masters, project_info, word_doc):
-    master = Master(milestone_masters, project_info)
-    milestones = MilestoneData(master, group=[SOT], quarter=["Q4 19/20", "Q4 18/19"])
+def test_compile_milestone_chart(master_pickle, word_doc):
+    milestones = MilestoneData(master_pickle, group=[SOT], quarter=["Q4 19/20", "Q4 18/19"])
     graph = milestone_chart(
-        milestones, title="Group Test", fig_size=FIGURE_STYLE[1], blue_line="Today"
+        milestones,
+        master_pickle,
+        title="Group Test",
+        blue_line="Today",
+        chart=False,
     )
     put_matplotlib_fig_into_word(word_doc, graph)
     word_doc.save("resources/summary_temp_altered.docx")
 
 
-def test_compile_milestone_chart_with_filter(milestone_masters, project_info):
-    master = Master(milestone_masters, project_info)
-    milestones = MilestoneData(master, group=[SOT, A11, A13], baseline=["standard"])
+def test_compile_milestone_chart_with_filter(master_pickle):
+    milestones = MilestoneData(master_pickle, group=[SOT], quarter=["Q4 19/20", "Q4 18/19"])
     milestones.filter_chart_info(dates=["1/1/2013", "1/1/2014"])
-    milestone_chart(milestones, title="Group Test", fig_size=FIGURE_STYLE[1])
+    milestone_chart(
+        milestones,
+        master_pickle,
+        title="Group Test",
+        blue_line="Today",
+        chart=True,
+    )
 
 
-def test_removing_project_name_from_milestone_keys(milestone_masters, project_info):
-    master = Master(milestone_masters, project_info)
-    milestones = MilestoneData(master, group=[SOT], baseline=["all"])
+def test_removing_project_name_from_milestone_keys(master_pickle):
+    """
+    The standard list contained with in the sorted_milestone_dict is {"names": ["Project Name,
+    Milestone Name, ...]. When there is only one project in the dictionary the need for a Project
+    Name is obsolete. The function remove_project_name_from_milestone_key, removes the project name
+    and returns milestone name only.
+    """
+    milestones = MilestoneData(master_pickle, group=[SOT], baseline=["all"])
+    milestones.filter_chart_info(dates=["1/1/2013", "1/1/2014"])
     key_names = milestones.sorted_milestone_dict["current"]["names"]
     key_names = remove_project_name_from_milestone_key("SoT", key_names)
     assert key_names == [
-        "Start of Project",
-        "Standard A",
-        "Inverted Cosmonauts",
-        "Start of Construction/build",
+        'Sputnik Radiation',
+         'Lunar Magma',
+         'Standard B',
+         'Standard C',
+         'Mercury Eleven',
+         'Tranquility Radiation'
     ]
 
 
-def test_putting_milestones_into_wb(milestone_masters, project_info):
-    mst = Master(milestone_masters, project_info)
-    milestones = MilestoneData(mst, group=[SOT], baseline=["standard"])
+def test_putting_milestones_into_wb(master_pickle):
+    milestones = MilestoneData(master_pickle, group=[SOT], baseline=["all"])
+    milestones.filter_chart_info(dates=["1/1/2013", "1/1/2014"])
     wb = put_milestones_into_wb(milestones)
     wb.save("resources/milestone_data_output_test.xlsx")
 

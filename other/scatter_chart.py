@@ -56,9 +56,10 @@ op_args = {
     "quarter": ["standard"],
     "group": DFT_GROUP,
     # "stage": "Ely Area Capacity Enhancement Programme",
-    "type": ["SRO"],
+    # "type": ["SRO"],
     # "chart": True,
     # "baseline": ["standard"],
+    "remove": "HS2 1"
     }
 
 # ## DANDELION
@@ -70,27 +71,27 @@ op_args = {
 # doc.save(root_path / "output/dlion_graph.docx")
 #
 
-# ## MILESTONES
-# ms = MilestoneData(m, **op_args)
-# # ms.filter_chart_info(dates=["1/4/2021", "1/5/2021"])
-# # wb = put_milestones_into_wb(ms)
-# # wb.save(root_path / "output/test_milestone_data_output.xlsx")
-# # chart_kwargs = {**{"blue_line": "today", "Chart": True}, **ms.kwargs}
-# # milestone_chart(ms, m, **chart_kwargs)
-# # wb.save(root_path / "output/gmpp_milestones_data.xlsx")
-# # doc = open_word_doc(root_path / "input/summary_temp_landscape.docx")
-# # for p in m.dft_groups["Q3 20/21"]["GMPP"]:
-# #     try:
-# #         ms = MilestoneData(m, quarter=[str(m.current_quarter)], group=[p])
-# #         ms.filter_chart_info(dates=["1/1/2021", "1/1/2030"])
-# #         graph = milestone_chart(ms, blue_line="Today", chart=True)
-# #         put_matplotlib_fig_into_word(doc, graph, size=8, transparent=False)
-# #     except ValueError:
-# #         pass
-# # doc.save(root_path / "output/gmpp_milestones_charts.docx".format(p))
-#
-# # b = BenefitsData(m, baseline=["all"])
-# # total_costs_benefits_bar_chart(c, b, chart=True)
+## MILESTONES
+ms = MilestoneData(m, **op_args)
+# ms.filter_chart_info(dates=["1/4/2021", "1/5/2021"])
+# wb = put_milestones_into_wb(ms)
+# wb.save(root_path / "output/test_milestone_data_output.xlsx")
+# chart_kwargs = {**{"blue_line": "today", "Chart": True}, **ms.kwargs}
+# milestone_chart(ms, m, **chart_kwargs)
+# wb.save(root_path / "output/gmpp_milestones_data.xlsx")
+# doc = open_word_doc(root_path / "input/summary_temp_landscape.docx")
+# for p in m.dft_groups["Q3 20/21"]["GMPP"]:
+#     try:
+#         ms = MilestoneData(m, quarter=[str(m.current_quarter)], group=[p])
+#         ms.filter_chart_info(dates=["1/1/2021", "1/1/2030"])
+#         graph = milestone_chart(ms, blue_line="Today", chart=True)
+#         put_matplotlib_fig_into_word(doc, graph, size=8, transparent=False)
+#     except ValueError:
+#         pass
+# doc.save(root_path / "output/gmpp_milestones_charts.docx".format(p))
+
+# b = BenefitsData(m, baseline=["all"])
+# total_costs_benefits_bar_chart(c, b, chart=True)
 
 # # QUERY
 # # wb = data_query_into_wb(m, keys=["Senior Responsible Owner (SRO)"], quarter=["Q3 19/20"], group=DFT_GROUP)

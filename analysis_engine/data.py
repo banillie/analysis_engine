@@ -13,7 +13,7 @@ import random
 from collections import Counter
 from typing import List, Dict, Union, Optional, Tuple
 
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from datetime import timedelta, date
 
@@ -6624,7 +6624,6 @@ class JsonData:
     def put_into_jason(self) -> None:
         with open(self.path + ".json", "w") as write_file:
             json.dump(self.master, write_file)
-
 
 
 """NOTE. these three lists need to have rag ratings in the same order"""
