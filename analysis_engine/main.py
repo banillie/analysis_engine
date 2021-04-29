@@ -367,7 +367,7 @@ def main():
         parser_vfm,
         parser_risks,
         parser_speedial,
-        parser_dandelion,
+        # parser_dandelion,
         parser_costs,
         parser_costs_sp,
         # parser_data_query,
@@ -383,6 +383,18 @@ def main():
             help="Returns analysis for only those projects at the specified planning stage(s). User must enter one "
                  'or combination of "FBC", "OBC", "SOBC", "pre-SOBC".',
         )
+    # stage dandelion only
+    parser_dandelion.add_argument(
+        "--stage",
+        type=str,
+        metavar="",
+        action="store",
+        nargs="+",
+        choices=["FBC", "OBC", "SOBC", "pre-SOBC", "pipeline"],
+        help="Returns analysis for only those projects at the specified planning stage(s). User must enter one "
+             'or combination of "FBC", "OBC", "SOBC", "pre-SOBC". For dandelion "pipeline" is also available',
+    )
+
     # group
     for sub in [
         parser_dca,

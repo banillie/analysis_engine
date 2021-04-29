@@ -467,7 +467,12 @@ def test_overall_dashboard(master_pickle, dashboard_template):
 
 
 def test_build_dandelion_graph_auto(master_pickle, word_doc):
-    d_data = DandelionData(master_pickle, quarter=["Q4 18/19"], group=["RIG", "HSRG"])
+    d_data = DandelionData(
+        master_pickle,
+        quarter=["Q4 18/19"],
+        # group=["RIG", "HSRG"],
+        stage=["pipeline", "OBC", "FBC"],
+    )
     make_a_dandelion_auto(d_data, chart=True)
 
 
@@ -508,10 +513,6 @@ def test_build_dandelion_graph_manual(build_dandelion, word_doc_landscape):
     dlion = make_a_dandelion_manual(build_dandelion)
     put_matplotlib_fig_into_word(word_doc_landscape, dlion, size=7.5)
     word_doc_landscape.save("resources/dlion_mpl.docx")
-
-
-
-
 
 
 

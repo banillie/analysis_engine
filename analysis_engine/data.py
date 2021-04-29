@@ -559,6 +559,8 @@ class Master:
         self.dft_groups = {}
         self.project_group = {}
         self.project_stage = {}
+        self.pipeline_dict = {}
+        self.pipeline_list = []
         self.quarter_list = []
         self.get_quarter_list()
         self.get_baseline_data()
@@ -566,6 +568,7 @@ class Master:
         self.get_project_abbreviations()
         self.check_baselines()
         self.get_project_groups()
+        self.pipeline_projects_information()
 
     def get_project_abbreviations(self) -> None:
         """gets the abbreviations for all current projects.
@@ -678,7 +681,7 @@ class Master:
                         + " this could cause the programme to "
                           "crash. Therefore the programme is stopping. "
                           "Please amend the data for " + p + " so that "
-                                                             " it has at least one baseline point for " + v
+                            " it has at least one baseline point for " + v
                     )
 
     def get_project_groups(self) -> None:
@@ -772,6 +775,22 @@ class Master:
             output_list.append(str(master.quarter))
         self.quarter_list = output_list
 
+    def pipeline_projects_information(self) -> None:
+        pipeline_dict = {}
+        pipeline_list = []
+        total_wlc = 0
+        for p in self.project_information.projects:
+            if self.project_information[p]["Pipeline"] is not None:
+                pipeline_dict[p] = {"wlc": self.project_information[p]["WLC"]}
+                pipeline_list.append(p)
+                total_wlc += self.project_information[p]["WLC"]
+        pipeline_dict["pipeline"] = {"wlc": total_wlc}
+
+        self.pipeline_dict = pipeline_dict
+        self.pipeline_list = pipeline_list
+
+
+
 
 class CostData:
     def __init__(self, master: Master, **kwargs):
@@ -846,6 +865,8 @@ class CostData:
                     p_data = get_correct_p_data(
                         self.kwargs, self.master, self.baseline_type, project_name, tp
                     )
+                    if p_data is None:
+                        continue
                     try:
                         rdel = p_data[key[0]]
                         if rdel is None:
@@ -7864,7 +7885,10 @@ class DandelionData:
             ## first outer circle
             for i, g in enumerate(self.group):
                 self.kwargs["group"] = [g]
-                g_wlc = get_dandelion_type_total(self.master, tp, g, self.kwargs)
+                if g == "pipeline":
+                    g_wlc = self.master.pipeline_dict["pipeline"]["wlc"]
+                else:
+                    g_wlc = get_dandelion_type_total(self.master, tp, g, self.kwargs)
                 if len(self.group) > 1:
                     y_axis = 0 + (
                             (math.sqrt(pf_wlc) * 3.25) * math.sin(math.radians(g_ang_l[i]))
@@ -7907,13 +7931,19 @@ class DandelionData:
             ## second outer circle
             for i, g in enumerate(self.group):
                 self.kwargs["group"] = [g]
-                group = get_group(self.master, tp, self.kwargs)  # lower group
+                if g == "pipeline":
+                    group = self.master.pipeline_list
+                else:
+                    group = get_group(self.master, tp, self.kwargs)  # lower group
                 p_list = []
                 for p in group:
                     self.kwargs["group"] = [p]
-                    p_value = get_dandelion_type_total(
-                        self.master, tp, p, self.kwargs
-                    )  # project wlc
+                    if g == "pipeline":
+                        p_value = self.master.pipeline_dict[p]["wlc"]
+                    else:
+                        p_value = get_dandelion_type_total(
+                            self.master, tp, p, self.kwargs
+                        )  # project wlc
                     p_list.append((p_value, p))
                 l_g_d[g] = list(reversed(sorted(p_list)))
 
@@ -7926,15 +7956,15 @@ class DandelionData:
                     p_values_list, p_list = zip(*l_g_d[g])
                 except ValueError:  # handles no projects in l_g_d list
                     continue
-                if len(p_list) > 3 or len(self.group) == 1:
+                if len(p_list) > 2 or len(self.group) == 1:
                     ang_l = cal_group_angle(360, p_list, all=True)
                 else:
                     if len(p_list) == 1:
                         ang_l = [g_d[g]["angle"]]
                     if len(p_list) == 2:
                         ang_l = [g_d[g]["angle"], g_d[g]["angle"] + 60]
-                    if len(p_list) == 3:
-                        ang_l = [g_d[g]["angle"], g_d[g]["angle"] + 60, g_d[g]["angle"] + 120]
+                    # if len(p_list) == 3:
+                    #     ang_l = [g_d[g]["angle"], g_d[g]["angle"] + 60, g_d[g]["angle"] + 120]
 
                 for i, p in enumerate(p_list):
                     p_value = p_values_list[i]
@@ -7945,8 +7975,11 @@ class DandelionData:
                     # SRO Schedule Confidence
                     # Departmental DCA
                     # SRO Benefits RAG
-                    rag = p_data["Departmental DCA"]
-                    colour = COLOUR_DICT[convert_rag_text(rag)]  # bubble colour
+                    try: # this is for pipeline projects
+                        rag = p_data["Departmental DCA"]
+                        colour = COLOUR_DICT[convert_rag_text(rag)]  # bubble colour
+                    except TypeError: # p_data is None for pipeline projects
+                        colour = "#FFFFFF"
                     project_text = (
                             self.master.abbreviations[p]["abb"]
                             + "\n"
@@ -8353,7 +8386,10 @@ def make_a_dandelion_auto(dl: DandelionData, **kwargs):
             zorder=1,
         )
 
-        lower_g = get_group(dl.master, dl.iter_list[0], dl.kwargs)
+        if g == "pipeline":
+            lower_g = dl.master.pipeline_list
+        else:
+            lower_g = get_group(dl.master, dl.iter_list[0], dl.kwargs)
         for p in lower_g:
             ax.arrow(
                 dl.d_data[g]["axis"][0],
