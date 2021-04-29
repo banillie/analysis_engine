@@ -7984,8 +7984,8 @@ class DandelionData:
                             + "\n"
                             + dandelion_number_text(p_value)
                     )
-                    # if len(project_text) > 20:  # hard coded temporary fix!
-                    #     project_text = "PS COVID\nResponse\n" + dandelion_number_text(p_value)
+                    if p_value == 0:
+                        p_value = g_wlc/100
                     if colour == "#FFFFFF":
                         edge_colour = "grey"
                     elif p in self.master.dft_groups[tp]["GMPP"]:
