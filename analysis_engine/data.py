@@ -681,7 +681,7 @@ class Master:
                         + " this could cause the programme to "
                           "crash. Therefore the programme is stopping. "
                           "Please amend the data for " + p + " so that "
-                            " it has at least one baseline point for " + v
+                                                             " it has at least one baseline point for " + v
                     )
 
     def get_project_groups(self) -> None:
@@ -788,8 +788,6 @@ class Master:
 
         self.pipeline_dict = pipeline_dict
         self.pipeline_list = pipeline_list
-
-
 
 
 class CostData:
@@ -1108,7 +1106,6 @@ class CostData:
 
 
 def get_sp_data(master: Master, **kwargs) -> Dict[str, float]:
-
     if "group" in kwargs:
         group = kwargs["group"]
     elif "stage" in kwargs:
@@ -2364,7 +2361,7 @@ def cost_profile_graph(
 
     fig, (ax1) = plt.subplots(1)  # two subplots for this chart
     fig = set_fig_size(kwargs, fig)
-    title = get_chart_title(master, "cost profile trend", **kwargs)   # title
+    title = get_chart_title(master, "cost profile trend", **kwargs)  # title
     plt.suptitle(title, fontweight="bold", fontsize=20)
 
     # Overall cost profile chart
@@ -3695,11 +3692,11 @@ def milestone_chart(
 #     pass
 
 DCA_KEYS = {
-    "SRO": "Departmental DCA",
-    "Finance": "SRO Finance confidence",
-    "Benefits": "SRO Benefits RAG",
-    "Schedule": "SRO Schedule Confidence",
-    "Resource": "Overall Resource DCA - Now",
+    "sro": "Departmental DCA",
+    "finance": "SRO Finance confidence",
+    "benefits": "SRO Benefits RAG",
+    "schedule": "SRO Schedule Confidence",
+    "resource": "Overall Resource DCA - Now",
 }
 
 DCA_RATING_SCORES = {
@@ -4428,8 +4425,6 @@ def risks_into_excel(risk_data: RiskData) -> workbook:
         ws.cell(row=1, column=2).value = "Project Name"
         ws.cell(row=1, column=3).value = "Risk Number"
 
-
-
         ws = wb.create_sheet(
             make_file_friendly(q + " Count")
         )  # creating worksheets. names restricted to 30 characters.
@@ -4897,6 +4892,7 @@ COLOUR_DICT = {
     "": "#FFFFFF",  # white if missing
     "W": "#ffffff",
 }
+
 
 def cost_schedule_scatter_chart_matplotlib(milestones: MilestoneData, costs: CostData):
     sc_list = []
@@ -5874,7 +5870,7 @@ def data_query_into_wb(master: Master, **kwargs) -> Workbook:
         group = get_group(master, tp, kwargs)
 
         """list project names, groups and stage in ws"""
-        for y, p in enumerate(group):   # p is project name
+        for y, p in enumerate(group):  # p is project name
             p_data = get_correct_p_data(kwargs, master, "ipdc_costs", p, tp)
             abb = master.abbreviations[p]["abb"]
             ws.cell(row=2 + y, column=1).value = p_data["DfT Group"]
@@ -7898,7 +7894,7 @@ class DandelionData:
                     )
                     g_text = g + "\n" + dandelion_number_text(g_wlc)  # group text
                     if g_wlc == 0:
-                        g_wlc = pf_wlc/20
+                        g_wlc = pf_wlc / 20
                     g_d[g] = {
                         "axis": (y_axis, x_axis),
                         "r": math.sqrt(g_wlc),
@@ -7975,10 +7971,13 @@ class DandelionData:
                     # SRO Schedule Confidence
                     # Departmental DCA
                     # SRO Benefits RAG
-                    try: # this is for pipeline projects
-                        rag = p_data["Departmental DCA"]
+                    try:  # this is for pipeline projects
+                        if "confidence" in self.kwargs:
+                            rag = p_data[DCA_KEYS[self.kwargs["confidence"]]]
+                        else:
+                            rag = p_data["Departmental DCA"]
                         colour = COLOUR_DICT[convert_rag_text(rag)]  # bubble colour
-                    except TypeError: # p_data is None for pipeline projects
+                    except TypeError:  # p_data is None for pipeline projects
                         colour = "#FFFFFF"
                     project_text = (
                             self.master.abbreviations[p]["abb"]
@@ -7994,8 +7993,6 @@ class DandelionData:
                     else:
                         edge_colour = colour
 
-                    # multi = math.sqrt(pf_wlc/g_wlc)  # multiplier
-                    # multi = (1 - (g_wlc / pf_wlc)) * 3
                     try:
                         if len(p_list) >= 14:
                             multi = ((pf_wlc / g_wlc) ** (1.0 / 1.75))  # square root
@@ -8039,7 +8036,6 @@ class DandelionData:
                         + (math.sqrt(p_value) * t_multi)
                         * math.cos(math.radians(ang_l[i])),
                     )
-
 
                     g_d[p] = {
                         "axis": (p_y_axis, p_x_axis),

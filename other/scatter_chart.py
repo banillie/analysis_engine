@@ -55,13 +55,14 @@ STAGE_GROUPS = ["SOBC", "OBC"]
 op_args = {
     # "quarter": ["standard"],
     "quarter": [str(m.current_quarter)],
-    # "group": DFT_GROUP,
-    "stage": ["pipeline", "pre-SOBC", "SOBC", "OBC", "FBC"]
+    "group": DFT_GROUP,
+    # "stage": ["pipeline", "pre-SOBC", "SOBC", "OBC", "FBC"]
     # "stage": "Ely Area Capacity Enhancement Programme",
     # "type": ["SRO"],
     # "chart": True,
     # "baseline": ["standard"],
-    # "remove": "HS2 1"
+    # "remove": "HS2 1",
+    "confidence": "benefits"
     }
 
 # ## DANDELION

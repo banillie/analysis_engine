@@ -547,6 +547,15 @@ def main():
     )
 
     parser_dandelion.add_argument(
+        "--confidence",
+        type=str,
+        metavar="",
+        action="store",
+        choices=['sro', 'finance', 'benefits', 'schedule', 'resource'],
+        help="specify the confidence type to displayed for each project.",
+    )
+
+    parser_dandelion.add_argument(
         "--pc",
         type=str,
         metavar="",
