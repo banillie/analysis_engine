@@ -5839,31 +5839,33 @@ def data_query_into_wb(master: Master, **kwargs) -> Workbook:
         group = get_group(master, tp, kwargs)
 
         """list project names, groups and stage in ws"""
-        for y, project_name in enumerate(group):
-            p_data = get_correct_p_data(kwargs, master, "ipdc_costs", project_name, tp)
-            abb = master.abbreviations[project_name]["abb"]
-            ws.cell(row=2 + y, column=1).value = str(p_data["DfT Group"])
-            ws.cell(row=2 + y, column=2).value = abb
+        for y, p in enumerate(group):   # p is project name
+            p_data = get_correct_p_data(kwargs, master, "ipdc_costs", p, tp)
+            abb = master.abbreviations[p]["abb"]
+            ws.cell(row=2 + y, column=1).value = p_data["DfT Group"]
+            ws.cell(row=2 + y, column=2).value = p
+            ws.cell(row=2 + y, column=3).value = abb
+            ws.cell(row=2 + y, column=4).value = master.project_information.data[p]["GMPP"]
             try:
                 p_data_last = get_correct_p_data(
-                    kwargs, master, "ipdc_costs", project_name, iter_list[z + 1]
+                    kwargs, master, "ipdc_costs", p, iter_list[z + 1]
                 )
             except IndexError:
                 p_data_last = None
             for x, key in enumerate(kwargs["key"]):
-                ws.cell(row=1, column=3 + x, value=key)
+                ws.cell(row=1, column=5 + x, value=key)
                 try:  # standard keys
                     value = p_data[key]
                     if value is None:
-                        ws.cell(row=2 + y, column=3 + x).value = "md"
-                        ws.cell(row=2 + y, column=3 + x).fill = AMBER_FILL
+                        ws.cell(row=2 + y, column=5 + x).value = "md"
+                        ws.cell(row=2 + y, column=5 + x).fill = AMBER_FILL
                     else:
-                        ws.cell(row=2 + y, column=3 + x, value=value)
+                        ws.cell(row=2 + y, column=5 + x, value=value)
 
                     try:  # checks for change against next master in loop
                         lst_value = p_data_last[key]
                         if value != lst_value:
-                            ws.cell(row=2 + y, column=3 + x).fill = SALMON_FILL
+                            ws.cell(row=2 + y, column=5 + x).fill = SALMON_FILL
                     except (KeyError, UnboundLocalError, TypeError):
                         # KeyError is key not present in master.
                         # UnboundLocalError if there is no last_value.
@@ -5871,26 +5873,26 @@ def data_query_into_wb(master: Master, **kwargs) -> Workbook:
                         pass
                 except KeyError:  # milestone keys
                     if "quarter" in kwargs:
-                        milestones_one = MilestoneData(master, quarter=[tp], group=[project_name])
+                        milestones_one = MilestoneData(master, quarter=[tp], group=[p])
                         try:
-                            milestones_two = MilestoneData(master, quarter=[iter_list[z + 1]], group=[project_name])
+                            milestones_two = MilestoneData(master, quarter=[iter_list[z + 1]], group=[p])
                         except IndexError:
                             pass
                     if "baseline" in kwargs:
-                        milestones_one = MilestoneData(master, baseline=[tp], group=[project_name])
+                        milestones_one = MilestoneData(master, baseline=[tp], group=[p])
                         try:
-                            milestones_two = MilestoneData(master, baseline=[iter_list[z + 1]], group=[project_name])
+                            milestones_two = MilestoneData(master, baseline=[iter_list[z + 1]], group=[p])
                         except IndexError:
                             pass
                     date = get_milestone_date(
                         abb, milestones_one.milestone_dict, tp, " " + key
                     )
                     if date is None:
-                        ws.cell(row=2 + y, column=3 + x).value = "md"
-                        ws.cell(row=2 + y, column=3 + x).fill = AMBER_FILL
+                        ws.cell(row=2 + y, column=5 + x).value = "md"
+                        ws.cell(row=2 + y, column=5 + x).fill = AMBER_FILL
                     else:
-                        ws.cell(row=2 + y, column=3 + x).value = date
-                        ws.cell(row=2 + y, column=3 + x).number_format = "dd/mm/yy"
+                        ws.cell(row=2 + y, column=5 + x).value = date
+                        ws.cell(row=2 + y, column=5 + x).number_format = "dd/mm/yy"
                     try:  # checks for changes against next master in loop
                         lst_date = get_milestone_date(
                             abb,
@@ -5899,12 +5901,14 @@ def data_query_into_wb(master: Master, **kwargs) -> Workbook:
                             " " + key,
                         )
                         if date != lst_date:
-                            ws.cell(row=2 + y, column=3 + x).fill = SALMON_FILL
+                            ws.cell(row=2 + y, column=5 + x).fill = SALMON_FILL
                     except (KeyError, UnboundLocalError, TypeError, IndexError):
                         pass
 
         ws.cell(row=1, column=1).value = "Group"
-        ws.cell(row=1, column=2).value = "Project"
+        ws.cell(row=1, column=2).value = "Project Name"
+        ws.cell(row=1, column=3).value = "Project Acronym"
+        ws.cell(row=1, column=4).value = "GMPP"
 
     wb.remove(wb["Sheet"])
     return wb
