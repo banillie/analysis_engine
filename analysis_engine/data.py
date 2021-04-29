@@ -11,7 +11,7 @@ import sys
 import typing
 import random
 from collections import Counter
-from typing import List, Dict, Union, Optional, Tuple
+from typing import List, Dict, Union, Optional, Tuple, TextIO
 
 # import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
@@ -5568,12 +5568,26 @@ def compile_p_report(
     return doc
 
 
+def get_input_doc(file_path: TextIO) -> Union[Workbook, Document, Exception]:
+    """
+    Returns blank documents in analysis_engine/input file used for saving outputs.
+    Raises error and user message if files are not present
+    """
+    try:
+        if str(file_path).endswith(".docx"):
+            return open_word_doc(file_path)
+        if str(file_path).endswith(".xlsx"):
+            return load_workbook(file_path)
+    except FileNotFoundError:
+        base = os.path.basename(file_path)
+        raise FileNotFoundError(str(base) + " document not present in input file. Stopping.")
+
+
 def run_p_reports(master: Master, **kwargs) -> None:
     group = get_group(master, str(master.current_quarter), kwargs)
-
     for p in group:
         print("Compiling summary for " + p)
-        report_doc = open_word_doc(root_path / "input/summary_temp.docx")
+        report_doc = get_input_doc(root_path / "input/summary_temp.docx")
         qrt = make_file_friendly(str(master.master_data[0].quarter))
         output = compile_p_report(report_doc, get_project_information(), master, p)
         output.save(

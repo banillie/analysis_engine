@@ -1,6 +1,7 @@
 import argparse
 from argparse import RawTextHelpFormatter
 import itertools
+import os
 import sys
 from typing import Dict
 
@@ -45,7 +46,7 @@ from analysis_engine.data import (
     make_a_dandelion_auto,
     build_speedials,
     get_sp_data,
-    DFT_GROUP,
+    DFT_GROUP, get_input_doc,
 )
 
 import logging
@@ -146,7 +147,7 @@ def run_general(args):
                 if op_args["chart"] == "save":
                     op_args["chart"] = False
                     cost_graph = cost_profile_graph(c, m, **op_args)
-                    doc = open_word_doc(root_path / "input/summary_temp_landscape.docx")
+                    doc = get_input_doc(root_path / "input/summary_temp_landscape.docx")
                     put_matplotlib_fig_into_word(doc, cost_graph, size=7.5)
                     doc.save(root_path / "output/costs_graph.docx")
                 if op_args["chart"] == "show":
@@ -163,7 +164,7 @@ def run_general(args):
                 if op_args["chart"] == "save":
                     op_args["chart"] = False
                     sp_graph = cost_stackplot_graph(sp_data, m, **op_args)
-                    doc = open_word_doc(root_path / "input/summary_temp_landscape.docx")
+                    doc = get_input_doc(root_path / "input/summary_temp_landscape.docx")
                     put_matplotlib_fig_into_word(doc, sp_graph, size=7.5)
                     doc.save(root_path / "output/stack_plot_graph.docx")
                 if op_args["chart"] == "show":
@@ -173,10 +174,10 @@ def run_general(args):
         if programme == "speedial":
             data = DcaData(m, **op_args)
             data.get_changes()
-            doc = open_word_doc(root_path / "input/summary_temp.docx")
+            doc = get_input_doc(root_path / "input/summary_temp.docx")
             doc = dca_changes_into_word(data, doc)
-            doc.save(root_path / "output/speed_dials.docx")
-            land_doc = open_word_doc(root_path / "input/summary_temp_landscape.docx")
+            doc.save(root_path / "output/speed_dials_text.docx")
+            land_doc = get_input_doc(root_path / "input/summary_temp_landscape.docx")
             build_speedials(data, land_doc)
             land_doc.save(root_path / "output/speed_dial_graph.docx")
             # print("Speed dial analysis has been compiled. Enjoy!")
@@ -194,7 +195,7 @@ def run_general(args):
                 if op_args["chart"] == "save":
                     op_args["chart"] = False
                     ms_graph = milestone_chart(ms, m, **op_args)
-                    doc = open_word_doc(root_path / "input/summary_temp_landscape.docx")
+                    doc = get_input_doc(root_path / "input/summary_temp_landscape.docx")
                     put_matplotlib_fig_into_word(doc, ms_graph, size=8, transparent=False)
                     doc.save(root_path / "output/milestones_chart.docx")
                 if op_args["chart"] == "show":
@@ -213,14 +214,14 @@ def run_general(args):
                 if op_args["chart"] == "save":
                     op_args["chart"] = False
                     d_graph = make_a_dandelion_auto(d_data, **op_args)
-                    doc = open_word_doc(root_path / "input/summary_temp_landscape.docx")
+                    doc = get_input_doc(root_path / "input/summary_temp_landscape.docx")
                     put_matplotlib_fig_into_word(doc, d_graph, size=7.5)
                     doc.save(root_path / "output/dandelion_graph.docx")
                 if op_args["chart"] == "show":
                     make_a_dandelion_auto(d_data, **op_args)
 
         if programme == "dashboards":
-            dashboard_master = load_workbook(root_path / "input/dashboards_master.xlsx")
+            dashboard_master = get_input_doc(root_path / "input/dashboards_master.xlsx")
             wb = ipdc_dashboard(m, dashboard_master)
             wb.save(root_path / "output/completed_ipdc_dashboard.xlsx")
 
@@ -255,7 +256,7 @@ def run_general(args):
 
         print(programme + " analysis has been compiled. Enjoy!")
 
-    except ProjectNameError as e:
+    except (ProjectNameError, FileNotFoundError) as e:
         logger.critical(e)
         sys.exit(1)
 
