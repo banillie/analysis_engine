@@ -5568,7 +5568,7 @@ def compile_p_report(
     return doc
 
 
-def get_input_doc(file_path: TextIO) -> Union[Workbook, Document, Exception]:
+def get_input_doc(file_path: TextIO) -> Union[Workbook, Document, None]:
     """
     Returns blank documents in analysis_engine/input file used for saving outputs.
     Raises error and user message if files are not present
@@ -7873,6 +7873,8 @@ class DandelionData:
                         math.radians(g_ang_l[i])
                     )
                     g_text = g + "\n" + dandelion_number_text(g_wlc)  # group text
+                    if g_wlc == 0:
+                        g_wlc = pf_wlc/20
                     g_d[g] = {
                         "axis": (y_axis, x_axis),
                         "r": math.sqrt(g_wlc),
@@ -7889,6 +7891,8 @@ class DandelionData:
                     g_d = {}
                     pf_wlc = g_wlc * 3
                     g_text = g + "\n" + dandelion_number_text(g_wlc)  # group text
+                    if g_wlc == 0:
+                        g_wlc = 20
                     g_d[g] = {
                         "axis": (0, 0),
                         "r": math.sqrt(g_wlc),
@@ -7948,6 +7952,8 @@ class DandelionData:
                             + "\n"
                             + dandelion_number_text(p_value)
                     )
+                    # if len(project_text) > 20:  # hard coded temporary fix!
+                    #     project_text = "PS COVID\nResponse\n" + dandelion_number_text(p_value)
                     if colour == "#FFFFFF":
                         edge_colour = "grey"
                     elif p in self.master.dft_groups[tp]["GMPP"]:
@@ -7959,7 +7965,7 @@ class DandelionData:
                     # multi = (1 - (g_wlc / pf_wlc)) * 3
                     try:
                         if len(p_list) >= 14:
-                            multi = ((pf_wlc / g_wlc) ** (1.0 / 2.0))  # square root
+                            multi = ((pf_wlc / g_wlc) ** (1.0 / 1.75))  # square root
                         else:
                             multi = (pf_wlc / g_wlc) ** (1.0 / 3.0)  # cube root
                         p_y_axis = g_y_axis + (g_radius * multi) * math.sin(
@@ -7972,18 +7978,24 @@ class DandelionData:
                         p_y_axis = g_y_axis + 100 * math.sin(math.radians(ang_l[i]))
                         p_x_axis = g_x_axis + 100 * math.cos(math.radians(ang_l[i]))
 
-                    if 185 >= ang_l[i] >= 175:
+                    if 179 >= ang_l[i] >= 165:
+                        text_angle = ("left", "top")
+                    if 195 >= ang_l[i] >= 181:
+                        text_angle = ("right", "top")
+                    if ang_l[i] == 180:
                         text_angle = ("center", "top")
                     if 5 >= ang_l[i] or 355 <= ang_l[i]:
                         text_angle = ("center", "bottom")
-                    if 174 >= ang_l[i] >= 6:
+                    if 164 >= ang_l[i] >= 6:
                         text_angle = ("left", "center")
-                    if 354 >= ang_l[i] >= 186:
+                    if 354 >= ang_l[i] >= 196:
                         text_angle = ("right", "center")
 
                     try:
                         t_multi = (g_wlc / p_value) ** (1.0 / 4.0)
-                        # t_multi = (1 - (p_value/g_wlc)) * 2  # text multiplier
+                        # print(p, t_multi)
+                        if t_multi <= 1.3:
+                            t_multi = 1.3
                     except ZeroDivisionError:
                         t_multi = 1
                     yx_text_position = (
@@ -7994,6 +8006,7 @@ class DandelionData:
                         + (math.sqrt(p_value) * t_multi)
                         * math.cos(math.radians(ang_l[i])),
                     )
+
 
                     g_d[p] = {
                         "axis": (p_y_axis, p_x_axis),

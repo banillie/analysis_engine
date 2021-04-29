@@ -495,6 +495,7 @@ def test_open_csv_file(key_file):
     key_list = get_data_query_key_names(key_file)
     assert isinstance(key_list, (list,))
 
+
 @pytest.mark.skip(reason="Failing. get_group function messy and could use refactor.")
 def test_cal_group_including_removing(master_pickle):
     op_args = {"baseline": "standard", "remove": ["Mars"]}

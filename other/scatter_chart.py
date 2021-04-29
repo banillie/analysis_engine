@@ -53,26 +53,27 @@ STAGE_GROUPS = ["SOBC", "OBC"]
 
 ## OP_ARGS
 op_args = {
-    "quarter": ["standard"],
+    # "quarter": ["standard"],
+    "quarter": [str(m.current_quarter)],
     "group": DFT_GROUP,
     # "stage": "Ely Area Capacity Enhancement Programme",
     # "type": ["SRO"],
     # "chart": True,
     # "baseline": ["standard"],
-    "remove": "HS2 1"
+    # "remove": "HS2 1"
     }
 
 # ## DANDELION
 # stage = ["pre-SOBC", "SOBC", "OBC", "FBC"]
-# d_data = DandelionData(m, **op_args)
-# d_lion = make_a_dandelion_auto(d_data, **op_args)
+d_data = DandelionData(m, **op_args)
+d_lion = make_a_dandelion_auto(d_data, **op_args)
 # doc = open_word_doc(root_path / "input/summary_temp_landscape.docx")
 # put_matplotlib_fig_into_word(doc, d_lion, size=7.5)
 # doc.save(root_path / "output/dlion_graph.docx")
 #
 
 ## MILESTONES
-ms = MilestoneData(m, **op_args)
+# ms = MilestoneData(m, **op_args)
 # ms.filter_chart_info(dates=["1/4/2021", "1/5/2021"])
 # wb = put_milestones_into_wb(ms)
 # wb.save(root_path / "output/test_milestone_data_output.xlsx")
