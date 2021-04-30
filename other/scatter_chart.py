@@ -3,6 +3,8 @@ import numpy as np
 # from typing import List
 from matplotlib import pyplot as plt
 
+# matplotlib==3.3.0
+
 from analysis_engine.data import (
     open_pickle_file,
     root_path,

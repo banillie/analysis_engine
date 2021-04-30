@@ -4679,6 +4679,7 @@ def gauge(
     no = len(labels)
     fig, ax = plt.subplots()
     fig.set_size_inches(18.5, 10.5)
+    ax.set_facecolor('#a0c1d5')  # TBC if face colour is required
     ang_range, mid_points = degree_range(no)
     colours = [COLOUR_DICT["R"], COLOUR_DICT["A/R"], COLOUR_DICT["A"], COLOUR_DICT["A/G"], COLOUR_DICT["G"]]
     # ["#c00000", "#e77200", "#ffba00", "#92a700", "#007d00"]
@@ -4718,7 +4719,7 @@ def gauge(
         )
 
     ## title
-    plt.suptitle(title + " Confidence", fontweight="bold", fontsize=50, fontname=FONT_TYPE)
+    plt.suptitle(title.upper() + " Confidence", fontweight="bold", fontsize=50, fontname=FONT_TYPE)
 
     # r = Rectangle((-0.4, -0.1), 0.8, 0.1, facecolor="w", lw=2)
     # ax.add_patch(r)
@@ -4824,7 +4825,7 @@ def gauge(
     )
 
     plt.axis("scaled")
-    plt.axis("off")
+    # plt.axis("off")
     # plt.show()
 
     return fig
@@ -8327,7 +8328,7 @@ def make_a_dandelion_manual(wb: Union[str, bytes, os.PathLike]):
 def make_a_dandelion_auto(dl: DandelionData, **kwargs):
     fig, ax = plt.subplots()
     fig.set_size_inches(18.5, 10.5)
-    # ax.set_facecolor('xkcd:salmon')  # TBC if face colour is required
+    ax.set_facecolor('#a0c1d5')  # TBC if face colour is required
     # title = get_chart_title(dl_data, kwargs, "dandelion")
     # plt.suptitle(title, fontweight="bold", fontsize=10)
 
@@ -8401,7 +8402,8 @@ def make_a_dandelion_auto(dl: DandelionData, **kwargs):
     # ax.axes.set_xticks([])
     # ax.axes.set_yticks([])
     plt.axis("scaled")
-    plt.axis("off")
+    # plt.axis("off")
+    # ax.set(xlim=(-2200, 2000), ylim=(-1000, 2100))
 
     if "chart" in kwargs:
         if kwargs["chart"]:
