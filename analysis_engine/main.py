@@ -547,6 +547,16 @@ def main():
     )
 
     parser_dandelion.add_argument(
+        "--angles",
+        type=int,
+        metavar="",
+        action="store",
+        nargs="+",
+        # choices=['sro', 'finance', 'benefits', 'schedule', 'resource'],
+        help="Use can manually enter angles for group bubbles",
+    )
+
+    parser_dandelion.add_argument(
         "--confidence",
         type=str,
         metavar="",

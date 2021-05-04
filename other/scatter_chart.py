@@ -51,20 +51,21 @@ m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
 
 ## GROUPS
 DFT_GROUP = ["HSRG", "RSS", "RIG", "AMIS", "RPE"]
-STAGE_GROUPS = ["SOBC", "OBC"]
+STAGE_GROUPS = ["pipeline", "pre-SOBC", "SOBC", "OBC", "FBC"]
 
 ## OP_ARGS
 op_args = {
     # "quarter": ["standard"],
     "quarter": [str(m.current_quarter)],
-    "group": DFT_GROUP,
-    # "stage": ["pipeline", "pre-SOBC", "SOBC", "OBC", "FBC"]
+    # "group": DFT_GROUP,
+    "stage": ["pipeline", "pre-SOBC", "SOBC", "OBC", "FBC"],
     # "stage": "Ely Area Capacity Enhancement Programme",
-    # "type": ["SRO"],
+    "type": "remaining",
     # "chart": True,
     # "baseline": ["standard"],
     # "remove": "HS2 1",
-    "confidence": "benefits"
+    # "confidence": "benefits"
+    "angles": [260, 300, 345, 40]
     }
 
 # ## DANDELION

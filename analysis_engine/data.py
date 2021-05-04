@@ -3795,6 +3795,8 @@ def cal_group(
         inner_list = input_list
     q_str = master.quarter_list[tp_indx]  # quarter string
     for pg in inner_list:  # pg is project/group
+        if pg == "pipeline":
+            continue
         try:
             local_g = master.project_stage[q_str][pg]
             output += local_g
@@ -7851,16 +7853,21 @@ class DandelionData:
                 self.group = self.kwargs["stage"]
                 del self.kwargs["stage"]  # nolonger need as not captured in group
 
-            if len(self.group) == 5:
-                g_ang_l = [260, 310, 360, 50, 100]  # group angle list
-            if len(self.group) == 4:
-                g_ang_l = [260, 326, 32, 100]
-            if len(self.group) == 3:
-                g_ang_l = [280, 360, 80]
-            if len(self.group) == 2:
-                g_ang_l = [290, 70]
-            if len(self.group) == 1:
-                pass
+            if "angles" in self.kwargs:
+                g_ang_l = self.kwargs["angles"]
+                if len(g_ang_l) != len(self.group):
+                    logger.critical("Angles are wrong. Here")
+            else:
+                if len(self.group) == 5:
+                    g_ang_l = [260, 310, 360, 50, 100]  # group angle list
+                if len(self.group) == 4:
+                    g_ang_l = [260, 326, 32, 100]
+                if len(self.group) == 3:
+                    g_ang_l = [280, 360, 80]
+                if len(self.group) == 2:
+                    g_ang_l = [290, 70]
+                if len(self.group) == 1:
+                    pass
             g_d = {}  # group dictionary. first outer circle.
             l_g_d = {}  # lower group dictionary
 
@@ -7933,6 +7940,12 @@ class DandelionData:
                         "ec": "grey",
                         "alignment": ("center", "center"),
                     }
+
+            if len(self.group) > 1:
+                group_angles = []
+                for g in self.group:
+                    group_angles.append((g, g_d[g]["angle"]))
+                logger.info("The group circle angles are " + str(group_angles))
 
             ## second outer circle
             for i, g in enumerate(self.group):
