@@ -316,7 +316,9 @@ gen_txt_colours = [darkish_grey_text, light_grey_text, greyblue_text]
 gen_fill_colours = [darkish_grey_fill, light_grey_fill, greyblue_fill]
 gen_txt_list = ["md", "pnr", "knc"]
 
-FONT_TYPE = ['monospace', 'Andale Mono']
+FONT_TYPE = ['sans serif', 'Ariel']
+FACE_COLOUR = '#a0c1d5'
+
 
 # for project summary pages
 SRO_CONF_TABLE_LIST = [
@@ -4677,9 +4679,9 @@ def gauge(
         title: str,
 ):
     no = len(labels)
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(facecolor=FACE_COLOUR)
     fig.set_size_inches(18.5, 10.5)
-    ax.set_facecolor('#a0c1d5')  # TBC if face colour is required
+    ax.set_facecolor(FACE_COLOUR)  # TBC if face colour is required
     ang_range, mid_points = degree_range(no)
     colours = [COLOUR_DICT["R"], COLOUR_DICT["A/R"], COLOUR_DICT["A"], COLOUR_DICT["A/G"], COLOUR_DICT["G"]]
     # ["#c00000", "#e77200", "#ffba00", "#92a700", "#007d00"]
@@ -4825,7 +4827,7 @@ def gauge(
     )
 
     plt.axis("scaled")
-    # plt.axis("off")
+    plt.axis("off")
     # plt.show()
 
     return fig
@@ -4892,6 +4894,13 @@ COLOUR_DICT = {
     "G": "#17960c",
     "": "#FFFFFF",  # white if missing
     "W": "#ffffff",
+    "Amber": "#fce553",
+    "Amber/Green": "#a5b700",
+    "Amber/Red": "#f97b31",
+    "Red": "#cb1f00",
+    "Green": "#17960c",
+    "None": "#FFFFFF",  # white if missing
+    "White": "#ffffff",
 }
 
 
@@ -8295,40 +8304,40 @@ def cost_stackplot_graph(sp_dict: Dict[str, float], master: Master, **kwargs) ->
     # fig.savefig(root_path /"output/portfolio_cost_composition_cat.png")
 
 
-def make_a_dandelion_manual(wb: Union[str, bytes, os.PathLike]):
-    wb = load_workbook(wb, data_only=True)
-    ws = wb.active
-
-    d_list = []  # data list
-    for row_num in range(3, ws.max_row + 1):
-        x_axis = ws.cell(row=row_num, column=5).value
-        y_axis = ws.cell(row=row_num, column=6).value
-        b_size = ws.cell(row=row_num, column=13).value
-        colour = random.choice(list(COLOUR_DICT.values()))
-        d_list.append(((x_axis, y_axis), b_size / 10, colour, "-"))
-
-    # fig = plt.figure()
-    # d_list.insert(0, ((515, 450), 455, 'r'))
-    # , ((590, 422), 52, 'g')]
-    plt.figure(figsize=(20, 10))
-    for c in range(len(d_list)):
-        # circle = plt.Circle(d_list[c][0], radius=d_list[c][1], fc=d_list[c][2], linestyle='-')
-        circle = plt.Circle(
-            d_list[c][0], radius=d_list[c][1], linestyle="--", fill=False
-        )
-        plt.gca().add_patch(circle)
-    plt.axis("scaled")
-    plt.axis("off")
-
-    plt.show()
-
-    return plt
+# def make_a_dandelion_manual(wb: Union[str, bytes, os.PathLike]):
+#     wb = load_workbook(wb, data_only=True)
+#     ws = wb.active
+#
+#     d_list = []  # data list
+#     for row_num in range(3, ws.max_row + 1):
+#         x_axis = ws.cell(row=row_num, column=5).value
+#         y_axis = ws.cell(row=row_num, column=6).value
+#         b_size = ws.cell(row=row_num, column=13).value
+#         colour = random.choice(list(COLOUR_DICT.values()))
+#         d_list.append(((x_axis, y_axis), b_size / 10, colour, "-"))
+#
+#     # fig = plt.figure()
+#     # d_list.insert(0, ((515, 450), 455, 'r'))
+#     # , ((590, 422), 52, 'g')]
+#     plt.figure(figsize=(20, 10))
+#     for c in range(len(d_list)):
+#         # circle = plt.Circle(d_list[c][0], radius=d_list[c][1], fc=d_list[c][2], linestyle='-')
+#         circle = plt.Circle(
+#             d_list[c][0], radius=d_list[c][1], linestyle="--", fill=False
+#         )
+#         plt.gca().add_patch(circle)
+#     plt.axis("scaled")
+#     plt.axis("off")
+#
+#     plt.show()
+#
+#     return plt
 
 
 def make_a_dandelion_auto(dl: DandelionData, **kwargs):
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(facecolor=FACE_COLOUR)
     fig.set_size_inches(18.5, 10.5)
-    ax.set_facecolor('#a0c1d5')  # TBC if face colour is required
+    ax.set_facecolor(FACE_COLOUR)  # TBC if face colour is required
     # title = get_chart_title(dl_data, kwargs, "dandelion")
     # plt.suptitle(title, fontweight="bold", fontsize=10)
 
@@ -8402,7 +8411,7 @@ def make_a_dandelion_auto(dl: DandelionData, **kwargs):
     # ax.axes.set_xticks([])
     # ax.axes.set_yticks([])
     plt.axis("scaled")
-    # plt.axis("off")
+    plt.axis("off")
     # ax.set(xlim=(-2200, 2000), ylim=(-1000, 2100))
 
     if "chart" in kwargs:
@@ -8410,3 +8419,77 @@ def make_a_dandelion_auto(dl: DandelionData, **kwargs):
             plt.show()
 
     return fig
+
+
+def get_horizontal_bar_chart_data(wb_path: TextIO) -> Dict:
+    wb = load_workbook(wb_path)
+    ws = wb.active
+
+    category_names = []
+    for x in range(2, ws.max_row + 1):
+        cat = ws.cell(row=x, column=1).value
+        if cat is not None:
+            category_names.append(cat)
+
+    results = {}
+    for y in range(2, ws.max_column + 1):
+        type = ws.cell(row=1, column=y).value
+        results_list = []
+        for x in range(2, ws.max_row + 1):
+            r = ws.cell(row=x, column=y).value
+            if r is not None:
+                if isinstance(r, float) or r < 1:
+                    results_list.append(int(r*100))
+                else:
+                    results_list.append(r)
+        if type is not None:
+            results[type] = results_list
+
+    def survey(results, category_names):
+        """
+        Parameters
+        ----------
+        results : dict
+            A mapping from question labels to a list of answers per category.
+            It is assumed all lists contain the same number of entries and that
+            it matches the length of *category_names*.
+        category_names : list of str
+            The category labels.
+        """
+        labels = list(results.keys())
+        data = np.array(list(results.values()))
+        data_cum = data.cumsum(axis=1)
+        category_colors = plt.get_cmap('RdYlGn')(np.linspace(0.15, 0.85, data.shape[1]))
+
+        fig, ax = plt.subplots(facecolor=FACE_COLOUR)  # figsize=(9.2, 5)
+        fig.set_size_inches(18.5, 10.5)
+        ax.set_facecolor(FACE_COLOUR)
+        ax.invert_yaxis()
+        ax.xaxis.set_visible(False)
+        ax.set_xlim(0, np.sum(data, axis=1).max())
+
+        for i, (colname, color) in enumerate(zip(category_names, category_colors)):
+            widths = data[:, i]
+            starts = data_cum[:, i] - widths
+            widths = np.ma.masked_equal(widths, 0)  # removes zeros
+            rects = ax.barh(labels, widths, left=starts, height=0.5,
+                            label=colname, color=COLOUR_DICT[colname])
+
+            # r, g, b, _ = color
+            # text_color = 'white'  # if r * g * b < 0.5 else 'darkgrey'
+            ax.bar_label(rects, label_type='center')  # color=text_color
+
+        ax.legend(ncol=len(category_names), bbox_to_anchor=(0.5, -0.1),
+                  loc='center', fontsize='medium', facecolor=FACE_COLOUR)
+
+        plt.axis("off")
+        # plt.show()
+
+        return fig
+
+    fig = survey(results, category_names)
+
+
+    return fig
+
+

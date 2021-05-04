@@ -270,3 +270,8 @@ def key_file():
 @pytest.fixture()
 def build_dandelion():
     return os.path.join(os.getcwd(), "resources/dandelion_build.xlsm")
+
+
+@pytest.fixture()
+def horizontal_bar_chart_data():
+    return os.path.join(os.getcwd(), "resources/horizontal_bar_chart_manual_data.xlsx")

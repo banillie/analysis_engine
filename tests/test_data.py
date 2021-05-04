@@ -60,8 +60,12 @@ from analysis_engine.data import (
     cost_profile_into_wb,
     data_query_into_wb,
     get_data_query_key_names,
-    remove_project_name_from_milestone_key, get_sp_data, cost_stackplot_graph, get_group,
-    make_a_dandelion_manual, make_a_dandelion_auto,
+    remove_project_name_from_milestone_key,
+    get_sp_data,
+    cost_stackplot_graph,
+    get_group,
+    make_a_dandelion_auto,
+    get_horizontal_bar_chart_data,
 )
 
 SOT = "Sea of Tranquility"
@@ -108,6 +112,7 @@ def test_get_current_project_names(basic_masters_dicts, project_info):
         "Falcon 9",
         "Columbia",
     ]
+
 
 # def test_check_projects_in_project_info(basic_masters_dicts, project_info_incorrect):
 #     Master(basic_masters_dicts, project_info_incorrect)
@@ -186,23 +191,23 @@ def test_project_report_meta_data(word_doc, master_pickle):
 
 
 def test_get_project_cost_profile(master_pickle):
-    costs = CostData(master_pickle, group=[MARS], baseline=['standard'])
-    assert len(costs.c_profiles['current']['prof']) == 24
+    costs = CostData(master_pickle, group=[MARS], baseline=["standard"])
+    assert len(costs.c_profiles["current"]["prof"]) == 24
 
 
 def test_project_cost_profile_chart(master_pickle):
-    costs = CostData(master_pickle, group=TEST_GROUP, baseline=['standard'])
+    costs = CostData(master_pickle, group=TEST_GROUP, baseline=["standard"])
     cost_profile_graph(costs, master_pickle, chart=False)
 
 
 def test_project_cost_profile_into_wb(master_pickle):
-    costs = CostData(master_pickle, baseline=['standard'], group=TEST_GROUP)
+    costs = CostData(master_pickle, baseline=["standard"], group=TEST_GROUP)
     wb = cost_profile_into_wb(costs)
     wb.save("resources/test_cost_profile_output.xlsx")
 
 
 def test_matplotlib_chart_into_word(word_doc, master_pickle):
-    costs = CostData(master_pickle, group=[F9], baseline=['standard'])
+    costs = CostData(master_pickle, group=[F9], baseline=["standard"])
     graph = cost_profile_graph(costs, master_pickle, chart=False)
     change_word_doc_landscape(word_doc)
     put_matplotlib_fig_into_word(word_doc, graph)
@@ -233,7 +238,9 @@ def test_get_project_total_cost_calculations_for_project(master_pickle):
 
 
 def test_get_group_total_cost_calculations(master_pickle):
-    costs = CostData(master_pickle, group=master_pickle.current_projects, quarter=["standard"])
+    costs = CostData(
+        master_pickle, group=master_pickle.current_projects, quarter=["standard"]
+    )
     assert costs.c_totals["Q1 20/21"]["spent"] == 3926
     assert costs.c_totals["Q4 19/20"]["spent"] == 2610
 
@@ -267,7 +274,9 @@ def test_altering_master_wb_file_key_names(change_log, list_cost_masters_files):
 
 
 def test_getting_benefits_profile_for_a_group(master_pickle):
-    ben = BenefitsData(master_pickle, group=master_pickle.current_projects, quarter=["standard"])
+    ben = BenefitsData(
+        master_pickle, group=master_pickle.current_projects, quarter=["standard"]
+    )
     assert ben.b_totals["Q1 20/21"]["delivered"] == 0
     assert ben.b_totals["Q1 20/21"]["prof"] == 43659
     assert ben.b_totals["Q1 20/21"]["unprof"] == 10164
@@ -282,6 +291,7 @@ def test_compare_changes_between_masters(basic_masters_file_paths, project_info)
     gmpp_list = get_gmpp_projects(project_info)
     wb = compare_masters(basic_masters_file_paths, gmpp_list)
     wb.save(os.path.join(os.getcwd(), "resources/cut_down_master_compared.xlsx"))
+
 
 ## nolonger using this meta data. gmpp taken from elsewhere
 # def test_get_gmpp_projects(project_info):
@@ -310,12 +320,18 @@ def test_compare_changes_between_masters(basic_masters_file_paths, project_info)
 
 
 def test_get_milestone_data_bl(master_pickle):
-    milestones = MilestoneData(master_pickle, group=master_pickle.current_projects, baseline=["all"])
+    milestones = MilestoneData(
+        master_pickle, group=master_pickle.current_projects, baseline=["all"]
+    )
     assert isinstance(milestones.milestone_dict["current"], (dict,))
 
 
 def test_get_milestone_data_all(master_pickle):
-    milestones = MilestoneData(master_pickle, group=master_pickle.current_projects, quarter=["Q4 19/20", "Q4 18/19"])
+    milestones = MilestoneData(
+        master_pickle,
+        group=master_pickle.current_projects,
+        quarter=["Q4 19/20", "Q4 18/19"],
+    )
     assert isinstance(milestones.milestone_dict["Q4 19/20"], (dict,))
 
 
@@ -333,7 +349,9 @@ def test_get_milestone_chart_data(master_pickle):
 
 
 def test_compile_milestone_chart_with_filter(master_pickle):
-    milestones = MilestoneData(master_pickle, group=[SOT], quarter=["Q4 19/20", "Q4 18/19"])
+    milestones = MilestoneData(
+        master_pickle, group=[SOT], quarter=["Q4 19/20", "Q4 18/19"]
+    )
     milestones.filter_chart_info(dates=["1/1/2013", "1/1/2014"])
     milestone_chart(
         milestones,
@@ -356,12 +374,12 @@ def test_removing_project_name_from_milestone_keys(master_pickle):
     key_names = milestones.sorted_milestone_dict["current"]["names"]
     key_names = remove_project_name_from_milestone_key("SoT", key_names)
     assert key_names == [
-        'Sputnik Radiation',
-         'Lunar Magma',
-         'Standard B',
-         'Standard C',
-         'Mercury Eleven',
-         'Tranquility Radiation'
+        "Sputnik Radiation",
+        "Lunar Magma",
+        "Standard B",
+        "Standard C",
+        "Mercury Eleven",
+        "Tranquility Radiation",
     ]
 
 
@@ -392,7 +410,7 @@ def test_risk_analysis(master_pickle):
 
 
 def test_vfm_analysis(master_pickle):
-    vfm = VfMData(master_pickle, quarter=['standard'])
+    vfm = VfMData(master_pickle, quarter=["standard"])
     wb = vfm_into_excel(vfm)
     wb.save("resources/vfm.xlsx")
 
@@ -400,17 +418,19 @@ def test_vfm_analysis(master_pickle):
 def test_sorting_project_by_dca(master_pickle):
     rag_list = sort_projects_by_dca(master_pickle.master_data[0], TEST_GROUP)
     assert rag_list == [
-        ('Falcon 9', 'Amber'),
-         ('Sea of Tranquility', 'Amber/Green'),
-         ('Apollo 13', 'Amber/Green'),
-         ('Mars', 'Amber/Green'),
-         ('Columbia', 'Green')
+        ("Falcon 9", "Amber"),
+        ("Sea of Tranquility", "Amber/Green"),
+        ("Apollo 13", "Amber/Green"),
+        ("Mars", "Amber/Green"),
+        ("Columbia", "Green"),
     ]
 
 
 @pytest.mark.skip(reason="failing need to look at.")
 def test_calculating_wlc_changes(master_pickle):
-    costs = CostData(master_pickle, group=[master_pickle.current_projects], baseline=["all"])
+    costs = CostData(
+        master_pickle, group=[master_pickle.current_projects], baseline=["all"]
+    )
     costs.calculate_wlc_change()
     assert costs.wlc_change == {
         "Apollo 13": {"baseline one": 0, "last quarter": 0},
@@ -437,7 +457,9 @@ def test_printout_of_milestones(word_doc, master_pickle):
 
 @pytest.mark.skip(reason="failing need to look at.")
 def test_cost_schedule_matrix(master_pickle, project_info):
-    costs = CostData(master_pickle, group=master_pickle.current_projects, quarters=["standard"])
+    costs = CostData(
+        master_pickle, group=master_pickle.current_projects, quarters=["standard"]
+    )
     milestones = MilestoneData(master_pickle, group=master_pickle.current_projects)
     milestones.calculate_schedule_changes()
     wb = cost_v_schedule_chart_into_wb(milestones, costs)
@@ -483,7 +505,7 @@ def test_data_queries_non_milestone(master_pickle):
         master_pickle,
         key=["Total Forecast"],
         quarter=["Q4 18/19", "Q4 17/18", "Q4 16/17"],
-        group=[A11]
+        group=[A11],
     )
     wb.save("resources/test_data_query.xlsx")
 
@@ -507,7 +529,13 @@ def test_open_csv_file(key_file):
 def test_cal_group_including_removing(master_pickle):
     op_args = {"baseline": "standard", "remove": ["Mars"]}
     group = get_group(master_pickle, "Q1 20/21", **op_args)
-    assert group == ['Sea of Tranquility', 'Apollo 11', 'Apollo 13', 'Falcon 9', 'Columbia']
+    assert group == [
+        "Sea of Tranquility",
+        "Apollo 11",
+        "Apollo 13",
+        "Falcon 9",
+        "Columbia",
+    ]
 
 
 @pytest.mark.skip(reason="not currently in use.")
@@ -517,77 +545,7 @@ def test_build_dandelion_graph_manual(build_dandelion, word_doc_landscape):
     word_doc_landscape.save("resources/dlion_mpl.docx")
 
 
-def test_build_chart_from_data_source():
-    category_names = ['Strongly disagree', 'Disagree',
-                      'Neither agree nor disagree', 'Agree', 'Strongly agree']
-    results = {
-        'Question 1': [10, 15, 17, 32, 26],
-        'Question 2': [26, 22, 29, 10, 13],
-        'Question 3': [35, 37, 7, 2, 19],
-        'Question 4': [32, 11, 9, 15, 33],
-        'Question 5': [21, 29, 5, 5, 40],
-        'Question 6': [8, 19, 5, 30, 38]
-    }
-
-    def survey(results, category_names):
-        """
-        Parameters
-        ----------
-        results : dict
-            A mapping from question labels to a list of answers per category.
-            It is assumed all lists contain the same number of entries and that
-            it matches the length of *category_names*.
-        category_names : list of str
-            The category labels.
-        """
-        labels = list(results.keys())
-        data = np.array(list(results.values()))
-        data_cum = data.cumsum(axis=1)
-        category_colors = plt.get_cmap('RdYlGn')(
-            np.linspace(0.15, 0.85, data.shape[1]))
-
-        fig, ax = plt.subplots(figsize=(9.2, 5))
-        ax.invert_yaxis()
-        ax.xaxis.set_visible(False)
-        ax.set_xlim(0, np.sum(data, axis=1).max())
-
-        for i, (colname, color) in enumerate(zip(category_names, category_colors)):
-            widths = data[:, i]
-            starts = data_cum[:, i] - widths
-            rects = ax.barh(labels, widths, left=starts, height=0.5,
-                            label=colname, color=color)
-
-            r, g, b, _ = color
-            text_color = 'white' if r * g * b < 0.5 else 'darkgrey'
-            ax.bar_label(rects, label_type='center', color=text_color)
-        ax.legend(ncol=len(category_names), bbox_to_anchor=(0, 1),
-                  loc='lower left', fontsize='small')
-
-        return fig, ax
-
-    survey(results, category_names)
-    plt.show()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+def test_build_horizontal_bar_chart_manually(horizontal_bar_chart_data, word_doc_landscape):
+   graph = get_horizontal_bar_chart_data(horizontal_bar_chart_data)
+   put_matplotlib_fig_into_word(word_doc_landscape, graph)
+   word_doc_landscape.save("resources/distributed_horz_bar_chart.docx")
