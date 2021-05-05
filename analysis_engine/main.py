@@ -46,7 +46,7 @@ from analysis_engine.data import (
     make_a_dandelion_auto,
     build_speedials,
     get_sp_data,
-    DFT_GROUP, get_input_doc,
+    DFT_GROUP, get_input_doc, InputError,
 )
 
 import logging
@@ -256,7 +256,7 @@ def run_general(args):
 
         print(programme + " analysis has been compiled. Enjoy!")
 
-    except (ProjectNameError, FileNotFoundError) as e:
+    except (ProjectNameError, FileNotFoundError, InputError) as e:
         logger.critical(e)
         sys.exit(1)
 

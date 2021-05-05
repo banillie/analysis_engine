@@ -84,6 +84,10 @@ class ProjectStageError(Exception):
     pass
 
 
+class InputError(Exception):
+    pass
+
+
 def _platform_docs_dir() -> Path:
     #  Cross plaform file path handling
     if platform.system() == "Linux":
@@ -318,7 +322,6 @@ gen_txt_list = ["md", "pnr", "knc"]
 
 FONT_TYPE = ['sans serif', 'Ariel']
 FACE_COLOUR = '#a0c1d5'
-
 
 # for project summary pages
 SRO_CONF_TABLE_LIST = [
@@ -7854,9 +7857,10 @@ class DandelionData:
                 del self.kwargs["stage"]  # nolonger need as not captured in group
 
             if "angles" in self.kwargs:
-                g_ang_l = self.kwargs["angles"]
-                if len(g_ang_l) != len(self.group):
-                    logger.critical("Angles are wrong. Here")
+                if len(self.kwargs["angles"]) == len(self.group):
+                    g_ang_l = self.kwargs["angles"]
+                else:
+                    raise InputError("The number of groups and angles don't match. Stopping.")
             else:
                 if len(self.group) == 5:
                     g_ang_l = [260, 310, 360, 50, 100]  # group angle list
@@ -8008,7 +8012,7 @@ class DandelionData:
                             + dandelion_number_text(p_value)
                     )
                     if p_value == 0:
-                        p_value = g_wlc/100
+                        p_value = g_wlc / 100
                     if colour == "#FFFFFF":
                         edge_colour = "grey"
                     elif p in self.master.dft_groups[tp]["GMPP"]:
@@ -8452,7 +8456,7 @@ def get_horizontal_bar_chart_data(wb_path: TextIO) -> Dict:
             r = ws.cell(row=x, column=y).value
             if r is not None:
                 if isinstance(r, float) or r < 1:
-                    results_list.append(int(r*100))
+                    results_list.append(int(r * 100))
                 else:
                     results_list.append(r)
         if type is not None:
@@ -8502,7 +8506,4 @@ def get_horizontal_bar_chart_data(wb_path: TextIO) -> Dict:
 
     fig = survey(results, category_names)
 
-
     return fig
-
-
