@@ -8715,13 +8715,18 @@ def radar_chart():
         register_projection(RadarAxes)
         return theta
 
-    data = [['Sulfate', 'Nitrate', 'EC', 'OC1', 'OC2', 'OC3', 'OP', 'CO', 'O3'],
+    data = [['Improving Transport for Users',
+             'Better Dept',
+             'VfM',
+             'Grow and Level up the Economy',
+             'Increase Global Impact',
+             'Reduce Environmenal Impacts'],
             ('Basecase', [
-                [0.88, 0.01, 0.03, 0.03, 0.00, 0.06, 0.01, 0.00, 0.00],
-                [0.07, 0.95, 0.04, 0.05, 0.10, 0.02, 0.01, 0.20, 0.20],
-                [0.01, 0.02, 0.85, 0.19, 0.05, 0.10, 0.00, 0.00, 0.00],
-                [0.02, 0.01, 0.07, 0.01, 0.21, 0.12, 0.98, 0.00, 0.00],
-                [0.8, 0.8, 0.8, 0.71, 0.74, 0.70, 0.8, 0.8, 0.8]])]
+                [1, 2, 3, 4, 5, 6],
+                [0.07, 0.95, 1, 0.05, 0.10, 0.02],
+                [0.01, 0.02, 0.85, 3, 0.05, 0.10],
+                [0.02, 0.01, 0.07, 0.01, 0.21, 0.12],
+                [0.8, 0.8, 0.8, 0.71, 0.74, 0.70]])]
 
     N = len(data[0])
     theta = radar_factory(N, frame='polygon')
@@ -8732,12 +8737,12 @@ def radar_chart():
     fig, ax = plt.subplots(figsize=(6, 6), subplot_kw=dict(projection='radar'))
     fig.subplots_adjust(top=0.85, bottom=0.05)
 
-    ax.set_rgrids([0.2, 0.4, 0.6, 0.8])
+    ax.set_rgrids([0, 1, 2, 3, 4, 5, 6])
     ax.set_title(title, position=(0.5, 1.1), ha='center')
 
     for d in case_data:
         line = ax.plot(theta, d)
-        ax.fill(theta, d, alpha=0.25)
+        ax.fill(theta, d, alpha=0.25, color='g')
     ax.set_varlabels(spoke_labels)
 
     plt.show()
