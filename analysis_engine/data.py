@@ -5888,7 +5888,7 @@ def data_query_into_wb(master: Master, **kwargs) -> Workbook:
         for y, p in enumerate(group):  # p is project name
             p_data = get_correct_p_data(kwargs, master, "ipdc_costs", p, tp)
             abb = master.abbreviations[p]["abb"]
-            ws.cell(row=2 + y, column=1).value = p_data["DfT Group"]
+            ws.cell(row=2 + y, column=1).value = master.project_information.data[p]["Group"]
             ws.cell(row=2 + y, column=2).value = p
             ws.cell(row=2 + y, column=3).value = abb
             ws.cell(row=2 + y, column=4).value = master.project_information.data[p]["GMPP"]
