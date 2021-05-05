@@ -8507,3 +8507,89 @@ def get_horizontal_bar_chart_data(wb_path: TextIO) -> Dict:
     fig = survey(results, category_names)
 
     return fig
+
+
+def simple_horz_bar_chart(wb_path: TextIO) -> Dict:
+    wb = load_workbook(wb_path)
+    ws = wb.active
+
+    type_names = []
+    for y in range(2, ws.max_column + 1):
+        cat = ws.cell(row=1, column=y).value
+        if cat is not None:
+            type_names.append(cat)
+
+    # results = {}
+    # for y in range(2, ws.max_column + 1):
+    #     type = ws.cell(row=1, column=y).value
+    #     results_list = []
+    #     for x in range(2, ws.max_row + 1):
+    #         r = ws.cell(row=x, column=y).value
+    #         if r is not None:
+    #             if isinstance(r, float) or r < 1:
+    #                 results_list.append(int(r * 100))
+    #             else:
+    #                 results_list.append(r)
+    #     if type is not None:
+    #         results[type] = results_list
+    #
+    results = {}
+    for x in range(2, ws.max_row + 1):
+        cat = ws.cell(row=x, column=1).value
+        results_list = []
+        for y in range(2, ws.max_column + 1):
+            r = ws.cell(row=x, column=y).value
+            if r is not None:
+                if isinstance(r, float) or r < 1:
+                    results_list.append(int(r * 100))
+                else:
+                    results_list.append(r)
+        if cat is not None:
+            results[cat] = results_list
+
+    fig, ax = plt.subplots()
+    left_list = [0, 0]
+    for r in results:
+        result = np.ma.masked_equal(results[r], 0)  # removes zeros
+        p = ax.barh(type_names,
+                result,
+                align='center',
+                left=left_list,
+                height=.25,
+                color=COLOUR_DICT[r],
+                label=r)
+        left_list = [results[r][i] + left_list[i] for i in range(len(left_list))]
+        ax.bar_label(p, label_type="center")
+        # left_list = ll
+
+    ax.set_yticks(type_names)
+    # ax.set_xlabel('Percentage')
+    # ax.set_title('Run Time by Job')
+    # ax.grid(True)
+    # ax.legend()
+    # plt.tight_layout()
+    # # plt.savefig('C:\\Data\\stackedbar.png')
+    plt.show()
+
+    return fig
+
+
+def so_matplotlib():
+    from datetime import datetime
+
+    jobs = ['Q4', 'Q3', 'Q2']
+    waittimes = [3.3472222222222223, 4.752777777777778, 6.177777777777778]
+    runtimes = [0.3472222222222222, 1.0027777777777778, 0.5111111111111111]
+
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    ax.barh(jobs, waittimes, align='center', height=.25, color='#00ff00', label='wait time')
+    ax.barh(jobs, runtimes, align='center', height=.25, left=waittimes, color='g', label='run time')
+    ax.set_yticks(jobs)
+    ax.set_xlabel('Hour')
+    ax.set_title('Run Time by Job')
+    ax.grid(True)
+    ax.legend()
+    plt.tight_layout()
+    # plt.savefig('C:\\Data\\stackedbar.png')
+    plt.show()
