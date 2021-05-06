@@ -65,7 +65,11 @@ from analysis_engine.data import (
     cost_stackplot_graph,
     get_group,
     make_a_dandelion_auto,
-    get_horizontal_bar_chart_data, simple_horz_bar_chart, so_matplotlib, radar_chart, get_strategic_priorities_data,
+    get_horizontal_bar_chart_data,
+    simple_horz_bar_chart,
+    so_matplotlib,
+    radar_chart,
+    get_strategic_priorities_data,
 )
 
 SOT = "Sea of Tranquility"
@@ -77,7 +81,7 @@ MARS = "Mars"
 TEST_GROUP = [SOT, A13, F9, COLUMBIA, MARS]
 
 
-@pytest.mark.slow
+@pytest.mark.slow(reason="only needs to be run once to load pickle into memory")
 def test_master_in_a_pickle(full_test_masters_dict, project_info):
     master = Master(full_test_masters_dict, project_info)
     path_str = str("{0}/resources/test_master".format(os.path.join(os.getcwd())))
@@ -545,12 +549,14 @@ def test_build_dandelion_graph_manual(build_dandelion, word_doc_landscape):
     word_doc_landscape.save("resources/dlion_mpl.docx")
 
 
-def test_build_horizontal_bar_chart_manually(horizontal_bar_chart_data, word_doc_landscape):
-   # graph = get_horizontal_bar_chart_data(horizontal_bar_chart_data)
-   simple_horz_bar_chart(horizontal_bar_chart_data)
-   # put_matplotlib_fig_into_word(word_doc_landscape, graph)
-   # word_doc_landscape.save("resources/distributed_horz_bar_chart.docx")
-   # so_matplotlib()
+def test_build_horizontal_bar_chart_manually(
+    horizontal_bar_chart_data, word_doc_landscape
+):
+    # graph = get_horizontal_bar_chart_data(horizontal_bar_chart_data)
+    simple_horz_bar_chart(horizontal_bar_chart_data)
+    # put_matplotlib_fig_into_word(word_doc_landscape, graph)
+    # word_doc_landscape.save("resources/distributed_horz_bar_chart.docx")
+    # so_matplotlib()
 
 
 def test_radar_chart(sp_data, master_pickle, word_doc):
