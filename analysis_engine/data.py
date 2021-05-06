@@ -8618,8 +8618,10 @@ def so_matplotlib():
 #     plt.xticks(label_loc, categories, color="grey", size=8)
 #     ax.set
 
-def radar_chart():
-    import numpy as np
+
+def radar_chart(sp_data_path: TextIO, master: Master, **kwargs):
+
+    data = get_strategic_priorities_data(sp_data_path, master, **kwargs)
 
     import matplotlib.pyplot as plt
     from matplotlib.patches import Circle, RegularPolygon
@@ -8646,6 +8648,14 @@ def radar_chart():
         theta = np.linspace(0, 2 * np.pi, num_vars, endpoint=False)
 
         class RadarAxes(PolarAxes):
+            import numpy as np
+            import matplotlib.pyplot as plt
+            from matplotlib.patches import Circle, RegularPolygon
+            from matplotlib.path import Path
+            from matplotlib.projections.polar import PolarAxes
+            from matplotlib.projections import register_projection
+            from matplotlib.spines import Spine
+            from matplotlib.transforms import Affine2D
 
             name = 'radar'
 
@@ -8715,34 +8725,83 @@ def radar_chart():
         register_projection(RadarAxes)
         return theta
 
-    data = [['Improving Transport for Users',
-             'Better Dept',
-             'VfM',
-             'Grow and Level up the Economy',
-             'Increase Global Impact',
-             'Reduce Environmenal Impacts'],
-            ('Basecase', [
-                [1, 2, 3, 4, 5, 6],
-                [0.07, 0.95, 1, 0.05, 0.10, 0.02],
-                [0.01, 0.02, 0.85, 3, 0.05, 0.10],
-                [0.02, 0.01, 0.07, 0.01, 0.21, 0.12],
-                [0.8, 0.8, 0.8, 0.71, 0.74, 0.70]])]
-
     N = len(data[0])
     theta = radar_factory(N, frame='polygon')
 
     spoke_labels = data.pop(0)
     title, case_data = data[0]
 
-    fig, ax = plt.subplots(figsize=(6, 6), subplot_kw=dict(projection='radar'))
+    fig, ax = plt.subplots(figsize=(7, 6), subplot_kw=dict(projection='radar'))
+    # fig.set_size_inches(18.5, 10.5)
     fig.subplots_adjust(top=0.85, bottom=0.05)
 
-    ax.set_rgrids([0, 1, 2, 3, 4, 5, 6])
-    ax.set_title(title, position=(0.5, 1.1), ha='center')
+    ax.set_rgrids([0, 1, 2, 3, 4, 5, 6, 7])
+    # ax.set_title(title, fontweight="bold", position=(0.5, 1), fontsize=15)
 
     for d in case_data:
-        line = ax.plot(theta, d)
-        ax.fill(theta, d, alpha=0.25, color='g')
+        line = ax.plot(theta, d[:-1], alpha=0.25, color=COLOUR_DICT[d[-1]])
+        ax.fill(theta, d[:-1], alpha=0.25, facecolor=COLOUR_DICT[d[-1]])
     ax.set_varlabels(spoke_labels)
 
-    plt.show()
+    if "chart" in kwargs:
+        if kwargs["chart"]:
+            plt.show()
+
+    return fig
+
+
+def get_strategic_priorities_data(
+        wb_path: TextIO,
+        master: Master,
+        **kwargs,
+    ):
+
+    sp_data = project_data_from_master(wb_path, 1, 2021)
+
+    categories = [
+        'Improving transport for the user',
+        'Reduce environmental impacts',
+        'Increase our global impact',
+        'Grow an level up the economy',
+        'Be an excellent department',
+        "VfM"
+    ]
+
+    sp_scoring = {
+        None: 0,
+        "adverse impact": 1,
+        "zero impact": 2,
+        "minor postive impact": 3,
+        "moderate positive impact": 4,
+        "major positive impact": 5,
+    }
+
+    vfm_scoring = {
+        None: 0,
+        "Very Poor": 1,
+        "Poor": 2,
+        "Low": 3,
+        "Medium": 4,
+        "High": 5,
+        "Very High": 6,
+        "Very High and Financially Positive": 6,
+        "Economically Efficient Cost Saving": 6,
+    }
+
+    if "group" in kwargs:
+        p_list = kwargs["group"]
+    else:
+        p_list = sp_data.data.keys()
+
+    top_list = []
+    for p in p_list:
+        p_list = []
+        for c in categories[:-1]:
+            p_list.append(sp_scoring[sp_data.data[p][c]])
+        p_list.append(vfm_scoring[master.master_data[0].data[p]["VfM Category single entry"]])
+        p_list.append(master.master_data[0].data[p]["Departmental DCA"])
+        top_list.append(p_list)
+
+    radar_data = [categories, ('Strategic Priorities', top_list)]
+
+    return radar_data

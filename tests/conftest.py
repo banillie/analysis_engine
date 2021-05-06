@@ -275,3 +275,8 @@ def build_dandelion():
 @pytest.fixture()
 def horizontal_bar_chart_data():
     return os.path.join(os.getcwd(), "resources/horizontal_bar_chart_manual_data.xlsx")
+
+
+@pytest.fixture()
+def sp_data():
+    return os.path.join(os.getcwd(), "resources/test_sp_master.xlsx")

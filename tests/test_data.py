@@ -65,7 +65,7 @@ from analysis_engine.data import (
     cost_stackplot_graph,
     get_group,
     make_a_dandelion_auto,
-    get_horizontal_bar_chart_data, simple_horz_bar_chart, so_matplotlib, radar_chart,
+    get_horizontal_bar_chart_data, simple_horz_bar_chart, so_matplotlib, radar_chart, get_strategic_priorities_data,
 )
 
 SOT = "Sea of Tranquility"
@@ -553,5 +553,11 @@ def test_build_horizontal_bar_chart_manually(horizontal_bar_chart_data, word_doc
    # so_matplotlib()
 
 
-def test_radar_chart():
-    radar_chart()
+def test_radar_chart(sp_data, master_pickle, word_doc):
+    chart = radar_chart(sp_data, master_pickle, chart=True)
+    put_matplotlib_fig_into_word(word_doc, chart, size=5)
+    word_doc.save("resources/test_radar.docx")
+
+
+def test_strategic_priority_data(sp_data, master_pickle):
+    get_strategic_priorities_data(sp_data, master_pickle)

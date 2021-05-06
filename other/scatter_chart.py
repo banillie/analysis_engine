@@ -36,7 +36,7 @@ from analysis_engine.data import (
     get_master_data,
     get_project_information,
     Master,
-    risks_into_excel, build_speedials, dca_changes_into_word,
+    risks_into_excel, build_speedials, dca_changes_into_word, radar_chart,
 )
 
 ## GENERATE CLI OPTIONS
@@ -52,6 +52,9 @@ m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
 ## GROUPS
 DFT_GROUP = ["HSRG", "RSS", "RIG", "AMIS", "RPE"]
 STAGE_GROUPS = ["pipeline", "pre-SOBC", "SOBC", "OBC", "FBC"]
+
+doc = open_word_doc(root_path / "input/summary_temp_landscape.docx")
+
 
 ## OP_ARGS
 op_args = {
@@ -70,9 +73,8 @@ op_args = {
 
 # ## DANDELION
 # stage = ["pre-SOBC", "SOBC", "OBC", "FBC"]
-d_data = DandelionData(m, **op_args)
-d_lion = make_a_dandelion_auto(d_data, **op_args)
-# doc = open_word_doc(root_path / "input/summary_temp_landscape.docx")
+# d_data = DandelionData(m, **op_args)
+# d_lion = make_a_dandelion_auto(d_data, **op_args)
 # put_matplotlib_fig_into_word(doc, d_lion, size=7.5)
 # doc.save(root_path / "output/dlion_graph.docx")
 #
@@ -131,3 +133,10 @@ d_lion = make_a_dandelion_auto(d_data, **op_args)
 # doc = open_word_doc(root_path / "input/summary_temp.docx")
 # doc = dca_changes_into_word(data, doc)
 # doc.save(root_path / "output/speed_dials.docx")
+
+
+## RADAR CHART
+sp_data = root_path / "core_data/sp_master.xlsx"
+chart = radar_chart(sp_data, m)
+put_matplotlib_fig_into_word(doc, chart, size=5)
+doc.save(root_path / "output/radar.docx")
