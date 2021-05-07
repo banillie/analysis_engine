@@ -137,6 +137,17 @@ op_args = {
 
 ## RADAR CHART
 sp_data = root_path / "core_data/sp_master.xlsx"
-chart = radar_chart(sp_data, m)
-put_matplotlib_fig_into_word(doc, chart, size=5)
-doc.save(root_path / "output/radar.docx")
+
+# t = m.dft_groups
+# for s in t["Q4 20/21"].keys():
+#     g = t["Q4 20/21"][s]
+#     if not g:
+#         continue
+for g in m.current_projects:
+    chart = radar_chart(sp_data, m, group=[g], title=m.abbreviations[g]["abb"])
+    put_matplotlib_fig_into_word(doc, chart, size=5)
+    doc.save(root_path / "output/radar_individual.docx")
+
+# chart = radar_chart(sp_data, m, title="All")
+# put_matplotlib_fig_into_word(doc, chart, size=5)
+# doc.save(root_path / "output/radar_all.docx")

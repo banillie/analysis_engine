@@ -16,6 +16,13 @@ from typing import List, Dict, Union, Optional, Tuple, TextIO
 # import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from datetime import timedelta, date
+# import matplotlib.pyplot as plt
+from matplotlib.patches import Circle, RegularPolygon
+from matplotlib.path import Path
+from matplotlib.projections.polar import PolarAxes
+from matplotlib.projections import register_projection
+from matplotlib.spines import Spine
+from matplotlib.transforms import Affine2D
 
 from dateutil import parser
 import numpy as np
@@ -4943,6 +4950,7 @@ COLOUR_DICT = {
     "Red": "#cb1f00",
     "Green": "#17960c",
     "None": "#FFFFFF",  # white if missing
+    None: "#FFFFFF",  # white if missing
     "White": "#ffffff",
 }
 
@@ -8409,8 +8417,8 @@ def cost_stackplot_graph(
 
 
 def make_a_dandelion_auto(dl: DandelionData, **kwargs):
-    fig, ax = plt.subplots(facecolor=FACE_COLOUR)
-    fig.set_size_inches(18.5, 10.5)
+    fig, ax = plt.subplots(figsize=(10, 10), facecolor=FACE_COLOUR)
+    # fig.set_size_inches(1, 10)
     ax.set_facecolor(FACE_COLOUR)  # TBC if face colour is required
     # title = get_chart_title(dl_data, kwargs, "dandelion")
     # plt.suptitle(title, fontweight="bold", fontsize=10)
@@ -8615,7 +8623,7 @@ def simple_horz_bar_chart(wb_path: TextIO) -> Dict:
         if cat is not None:
             results[cat] = results_list
 
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(5, 3))
     left_list = [0, 0]
     for r in results:
         result = np.ma.masked_equal(results[r], 0)  # removes zeros
@@ -8630,7 +8638,12 @@ def simple_horz_bar_chart(wb_path: TextIO) -> Dict:
         )
         left_list = [results[r][i] + left_list[i] for i in range(len(left_list))]
         ax.bar_label(p, label_type="center")
-        # left_list = ll
+    # for (p, r) in zip(ax.patches, results):
+    #     percentage = '{:.1f}%'.format(100 * p.get_width() / results[r])
+    #     x = p.get_x() + p.get_width() + 0.02
+    #     y = p.get_y() + p.get_height() / 2
+    #     ax.annotate(percentage, (x, y))
+
 
     ax.set_yticks(type_names)
     # ax.set_xlabel('Percentage')
@@ -8703,13 +8716,13 @@ def radar_chart(sp_data_path: TextIO, master: Master, **kwargs):
 
     data = get_strategic_priorities_data(sp_data_path, master, **kwargs)
 
-    import matplotlib.pyplot as plt
-    from matplotlib.patches import Circle, RegularPolygon
-    from matplotlib.path import Path
-    from matplotlib.projections.polar import PolarAxes
-    from matplotlib.projections import register_projection
-    from matplotlib.spines import Spine
-    from matplotlib.transforms import Affine2D
+    # import matplotlib.pyplot as plt
+    # from matplotlib.patches import Circle, RegularPolygon
+    # from matplotlib.path import Path
+    # from matplotlib.projections.polar import PolarAxes
+    # from matplotlib.projections import register_projection
+    # from matplotlib.spines import Spine
+    # from matplotlib.transforms import Affine2D
 
     def radar_factory(num_vars, frame="circle"):
         """Create a radar chart with `num_vars` axes.
@@ -8810,8 +8823,9 @@ def radar_chart(sp_data_path: TextIO, master: Master, **kwargs):
     # fig.set_size_inches(18.5, 10.5)
     fig.subplots_adjust(top=0.85, bottom=0.05)
 
-    ax.set_rgrids([0, 1, 2, 3, 4, 5, 6, 7])
-    # ax.set_title(title, fontweight="bold", position=(0.5, 1), fontsize=15)
+    # ax.set_rgrids([0, 1, 2, 3, 4, 5, 6, 7])
+    ax.set_yticklabels([1, 2, 3, 4, 5])
+    ax.set_title(title, fontweight="bold", position=(0.5, 1), fontsize=15)
 
     for d in case_data:
         line = ax.plot(theta, d[:-1], alpha=0.25, color=COLOUR_DICT[d[-1]])
@@ -8853,32 +8867,45 @@ def get_strategic_priorities_data(
 
     vfm_scoring = {
         None: 0,
-        "Very Poor": 1,
-        "Poor": 2,
-        "Low": 3,
-        "Medium": 4,
-        "High": 5,
-        "Very High": 6,
-        "Very High and Financially Positive": 6,
-        "Economically Efficient Cost Saving": 6,
+        "Very Poor": 0,
+        "Poor": 1,
+        "Low": 2,
+        "Medium": 3,
+        "High": 4,
+        "Very High": 5,
+        "Very High and Financially Positive": 5,
+        "Economically Efficient Cost Saving": 5,
     }
 
     if "group" in kwargs:
-        p_list = kwargs["group"]
+        group_list = kwargs["group"]
     else:
-        p_list = sp_data.data.keys()
+        group_list = sp_data.data.keys()
 
     top_list = []
-    for p in p_list:
+    for p in group_list:
+        if p not in sp_data.data.keys():
+            print(p)
+            continue
         p_list = []
-        for c in categories[:-1]:
+        # for c in categories:  # no vfm
+        for c in categories[:-1]:  # if vfm included
             p_list.append(sp_scoring[sp_data.data[p][c]])
-        p_list.append(
-            vfm_scoring[master.master_data[0].data[p]["VfM Category single entry"]]
-        )
-        p_list.append(master.master_data[0].data[p]["Departmental DCA"])
+        try:
+            p_list.append(
+                vfm_scoring[master.master_data[0].data[p]["VfM Category single entry"]]
+            )
+            p_list.append(master.master_data[0].data[p]["Departmental DCA"])
+        except KeyError:
+            print(p)
+            p_list.append(0)  # if vfm included
+            p_list.append("Amber")
         top_list.append(p_list)
 
-    radar_data = [categories, ("Strategic Priorities", top_list)]
+    if "title" in kwargs:
+        title = kwargs["title"]
+    else:
+        title = ""
+    radar_data = [categories, (title, top_list)]
 
     return radar_data
