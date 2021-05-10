@@ -50,7 +50,6 @@ def project_info():
     )
 
 
-
 @pytest.fixture()
 def basic_masters_dicts():
     test_master_data = [
@@ -96,6 +95,18 @@ def full_test_masters_dict():
 
 
 @pytest.fixture()
+def one_master_dict():
+    return project_data_from_master(
+            os.path.join(os.getcwd(), "resources/" "test_master_1_2020.xlsx"), 1, 2020
+        )
+
+
+@pytest.fixture()
+def json_path():
+    return os.path.join(os.getcwd(), "resources/" "json_master")
+
+
+@pytest.fixture()
 def master_pickle():
     return open_pickle_file(os.path.join(os.getcwd(), "resources/test_master.pickle"))
 
@@ -123,7 +134,6 @@ def change_log():
 @pytest.fixture()
 def list_cost_masters_files():
     return [os.path.join(os.getcwd(), "resources/cost_test_master_4_2018.xlsx")]
-
 
 
 @pytest.fixture()

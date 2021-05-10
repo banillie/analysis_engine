@@ -69,7 +69,7 @@ from analysis_engine.data import (
     simple_horz_bar_chart,
     so_matplotlib,
     radar_chart,
-    get_strategic_priorities_data,
+    get_strategic_priorities_data, JsonData,
 )
 
 SOT = "Sea of Tranquility"
@@ -573,7 +573,5 @@ def test_strategic_priority_data(sp_data, master_pickle):
     assert isinstance(sp_dict, (list,))
 
 
-def test_json_file():
-    pass
-    # current = project_data_from_master(root_path / "core_data/master_3_2020.xlsx", 3, 2020)
-    # JsonData(current, path_str)
+def test_json_file(one_master_dict, json_path):
+    JsonData(one_master_dict, json_path)
