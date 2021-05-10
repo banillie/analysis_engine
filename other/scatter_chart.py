@@ -1,3 +1,4 @@
+import json
 import math
 import numpy as np
 # from typing import List
@@ -36,7 +37,7 @@ from analysis_engine.data import (
     get_master_data,
     get_project_information,
     Master,
-    risks_into_excel, build_speedials, dca_changes_into_word, radar_chart,
+    risks_into_excel, build_speedials, dca_changes_into_word, radar_chart, JsonData, open_json_file,
 )
 
 ## GENERATE CLI OPTIONS
@@ -46,8 +47,15 @@ from analysis_engine.data import (
 ## INITIATE
 # master = Master(get_master_data(), get_project_information())
 
+
+## JSON
+# master = Master(get_master_data(), get_project_information())
+# json_m = JsonData(master, "{}/core_data/json/master".format(root_path))
+m = open_json_file(str(root_path / "core_data/json/master.json"))
+
+
 ## PICKLE
-m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
+# m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
 
 ## GROUPS
 DFT_GROUP = ["HSRG", "RSS", "RIG", "AMIS", "RPE"]
@@ -57,19 +65,19 @@ doc = open_word_doc(root_path / "input/summary_temp_landscape.docx")
 
 
 ## OP_ARGS
-op_args = {
-    # "quarter": ["standard"],
-    "quarter": [str(m.current_quarter)],
-    # "group": DFT_GROUP,
-    "stage": ["pipeline", "pre-SOBC", "SOBC", "OBC", "FBC"],
-    # "stage": "Ely Area Capacity Enhancement Programme",
-    "type": "remaining",
-    # "chart": True,
-    # "baseline": ["standard"],
-    # "remove": "HS2 1",
-    # "confidence": "benefits"
-    "angles": [260, 300, 345, 40]
-    }
+# op_args = {
+#     # "quarter": ["standard"],
+#     "quarter": [str(m.current_quarter)],
+#     # "group": DFT_GROUP,
+#     "stage": ["pipeline", "pre-SOBC", "SOBC", "OBC", "FBC"],
+#     # "stage": "Ely Area Capacity Enhancement Programme",
+#     "type": "remaining",
+#     # "chart": True,
+#     # "baseline": ["standard"],
+#     # "remove": "HS2 1",
+#     # "confidence": "benefits"
+#     "angles": [260, 300, 345, 40]
+#     }
 
 # ## DANDELION
 # stage = ["pre-SOBC", "SOBC", "OBC", "FBC"]
@@ -136,18 +144,16 @@ op_args = {
 
 
 ## RADAR CHART
-sp_data = root_path / "core_data/sp_master.xlsx"
-
+# sp_data = root_path / "core_data/sp_master.xlsx"
 # t = m.dft_groups
 # for s in t["Q4 20/21"].keys():
 #     g = t["Q4 20/21"][s]
 #     if not g:
 #         continue
-for g in m.current_projects:
-    chart = radar_chart(sp_data, m, group=[g], title=m.abbreviations[g]["abb"])
-    put_matplotlib_fig_into_word(doc, chart, size=5)
-    doc.save(root_path / "output/radar_individual.docx")
-
+# for g in m.current_projects:
+#     chart = radar_chart(sp_data, m, group=[g], title=m.abbreviations[g]["abb"])
+#     put_matplotlib_fig_into_word(doc, chart, size=5)
+#     doc.save(root_path / "output/radar_individual.docx")
 # chart = radar_chart(sp_data, m, title="All")
 # put_matplotlib_fig_into_word(doc, chart, size=5)
 # doc.save(root_path / "output/radar_all.docx")

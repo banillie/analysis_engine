@@ -6722,15 +6722,26 @@ def open_pickle_file(path: str):
         return pickle.load(handle)
 
 
+def json_date_converter(o):
+    if isinstance(o, datetime.date):
+        return o.__str__()
+
+
 class JsonData:
     def __init__(self, master: Dict, save_path: str):
-        self.master = master.data
+        self.master = master
         self.path = save_path
-        self.put_into_jason()
+        self.put_into_json()
 
-    def put_into_jason(self) -> None:
+    def put_into_json(self) -> None:
         with open(self.path + ".json", "w") as write_file:
-            json.dump(self.master, write_file)
+            json.dump(self.master, write_file, default=json_date_converter)
+            # json.dump(self.master, write_file)
+
+
+def open_json_file(path: str):
+    with open(path, "r") as handle:
+        return json.load(handle)
 
 
 """NOTE. these three lists need to have rag ratings in the same order"""
