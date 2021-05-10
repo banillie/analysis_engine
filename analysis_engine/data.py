@@ -8684,7 +8684,6 @@ def so_matplotlib():
     ax.grid(True)
     ax.legend()
     plt.tight_layout()
-    # plt.savefig('C:\\Data\\stackedbar.png')
     plt.show()
 
 

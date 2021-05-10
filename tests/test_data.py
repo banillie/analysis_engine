@@ -132,12 +132,15 @@ def test_getting_project_groups(project_info, basic_masters_dicts):
 def test_get_project_abbreviations(basic_masters_dicts, project_info):
     master = Master(basic_masters_dicts, project_info)
     assert master.abbreviations == {
-        "Apollo 11": {"abb": "A11", "full name": "Apollo 11"},
-        "Apollo 13": {"abb": "A13", "full name": "Apollo 13"},
-        "Columbia": {"abb": "Columbia", "full name": "Columbia"},
-        "Falcon 9": {"abb": "F9", "full name": "Falcon 9"},
-        "Mars": {"abb": "Mars", "full name": "Mars"},
-        "Sea of Tranquility": {"abb": "SoT", "full name": "Sea of Tranquility"},
+        'Apollo 11': {'abb': 'A11', 'full name': 'Apollo 11'},
+        'Apollo 13': {'abb': 'A13', 'full name': 'Apollo 13'},
+        'Columbia': {'abb': 'Columbia', 'full name': 'Columbia'},
+        'Falcon 9': {'abb': 'F9', 'full name': 'Falcon 9'},
+        'Mars': {'abb': 'Mars', 'full name': 'Mars'},
+        'Pipe Dreaming': {'abb': 'Pdream', 'full name': 'Pipe Dreaming'},
+        'Piping Hot': {'abb': 'PH', 'full name': 'Piping Hot'},
+        'Put That in Your Pipe': {'abb': 'PtiYP', 'full name': 'Put That in Your Pipe'},
+        'Sea of Tranquility': {'abb': 'SoT', 'full name': 'Sea of Tranquility'}
     }
 
 
@@ -566,4 +569,11 @@ def test_radar_chart(sp_data, master_pickle, word_doc):
 
 
 def test_strategic_priority_data(sp_data, master_pickle):
-    get_strategic_priorities_data(sp_data, master_pickle)
+    sp_dict = get_strategic_priorities_data(sp_data, master_pickle)
+    assert isinstance(sp_dict, (list,))
+
+
+def test_json_file():
+    pass
+    # current = project_data_from_master(root_path / "core_data/master_3_2020.xlsx", 3, 2020)
+    # JsonData(current, path_str)
