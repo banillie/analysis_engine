@@ -372,6 +372,7 @@ def main():
         parser_costs_sp,
         # parser_data_query,
         parser_milestones,
+        parser_data_query,
     ]:
         sub.add_argument(
             "--stage",
@@ -407,6 +408,7 @@ def main():
         parser_milestones,
         parser_summaries,
         parser_costs_sp,
+        parser_data_query,
     ]:
         sub.add_argument(
             "--group",
@@ -426,7 +428,7 @@ def main():
         parser_dandelion,
         parser_costs,
         parser_costs_sp,
-        # parser_data_query,
+        parser_data_query,
         parser_milestones,
     ]:
         sub.add_argument(

@@ -578,7 +578,7 @@ class Master:
         self.pipeline_list = []
         self.quarter_list = []
         self.get_quarter_list()
-        self.get_baseline_data()
+        self.get_baseline_data()   # doing refactor here
         self.check_project_information()
         self.get_project_abbreviations()
         self.check_baselines()
@@ -651,6 +651,50 @@ class Master:
                         lower_list.append((None, quarter, None))
 
                 index_list = []
+                for x in lower_list:
+                    index_list.append(x[2])
+
+                project_baseline_info[name] = list(reversed(lower_list))
+                project_baseline_index[name] = list(reversed(index_list))
+
+            baseline_info[BASELINE_TYPES[b_type]] = project_baseline_info
+            baseline_index[BASELINE_TYPES[b_type]] = project_baseline_index
+
+        self.bl_info = baseline_info
+        self.bl_index = baseline_index
+
+    def get_baseline_data_refactor(self) -> None:
+        """
+        Returns two dictionaries used to calculate baselines.
+        The current method is that each projects baseline list
+        is prefixed with current and last quarter index (including None
+        if necessary), as these need to be present at later stage
+        calculations. structure of output dict is
+        {bl_index: {bl_type: {proj_name: [baseline index list]}}}
+        """
+
+        baseline_info = {}
+        baseline_index = {}
+
+        for b_type in list(BASELINE_TYPES.keys()):
+            project_baseline_info = {}
+            project_baseline_index = {}
+            for name in self.current_projects:
+                lower_list = []
+                for i, master in reversed(list(enumerate(self.master_data))):
+                    quarter = str(master.quarter)
+                    if name in master.projects:
+                        approved_bc = master.data[name][b_type]
+                        # lower_list.append((approved_bc, quarter, i))
+                        if approved_bc == "Yes":
+                            lower_list.append((approved_bc, quarter, i))
+                    else:
+                        pass
+
+                if name in self.master_data[1].projects:  # prefix for other bl data
+                    index_list = [0, 1]
+                else:  # project not present last quarter so none
+                    index_list = [0, None]
                 for x in lower_list:
                     index_list.append(x[2])
 

@@ -10,6 +10,8 @@ import numpy as np
 from matplotlib import pyplot as plt
 import pytest
 
+from analysis_engine.cdg_data import cdg_get_master_data, cdg_get_project_information, CDGMaster, cdg_root_path, \
+    CDGDandelionData, cdg_make_a_dandelion_auto
 from analysis_engine.data import (
     Master,
     CostData,
@@ -507,6 +509,21 @@ def test_build_dandelion_graph_auto(master_pickle, word_doc):
     make_a_dandelion_auto(d_data, chart=True)
 
 
+# @pytest.mark.skip(reason="test resources not currently available")
+def test_cdg_build_dandelion_graph_auto(word_doc):
+    m = Master(cdg_get_master_data(), cdg_get_project_information())
+    CDG_DIR = ["GF", "CFPD", "SCS"]
+    op_args = {
+        "quarter": ["Q4 20/21"],
+        "group": CDG_DIR,
+        "chart": True,
+    }
+    dl_data = CDGDandelionData(m, **op_args)
+    d_lion = cdg_make_a_dandelion_auto(dl_data)
+    put_matplotlib_fig_into_word(word_doc, d_lion, size=7.5)
+    word_doc.save(cdg_root_path / "output/cdg_dandelion_graph.docx")
+
+
 def test_data_queries_non_milestone(master_pickle):
     wb = data_query_into_wb(
         master_pickle,
@@ -581,4 +598,3 @@ def test_json_master_save(basic_masters_dicts, project_info, json_path):
 def test_json_master_open(json_path):
     m = open_json_file(json_path + ".json")
     assert isinstance(m, (dict,))
-

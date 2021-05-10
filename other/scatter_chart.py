@@ -48,14 +48,8 @@ from analysis_engine.data import (
 # master = Master(get_master_data(), get_project_information())
 
 
-## JSON
-# master = Master(get_master_data(), get_project_information())
-# json_m = JsonData(master, "{}/core_data/json/master".format(root_path))
-m = open_json_file(str(root_path / "core_data/json/master.json"))
-
-
 ## PICKLE
-# m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
+m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
 
 ## GROUPS
 DFT_GROUP = ["HSRG", "RSS", "RIG", "AMIS", "RPE"]
@@ -157,3 +151,6 @@ doc = open_word_doc(root_path / "input/summary_temp_landscape.docx")
 # chart = radar_chart(sp_data, m, title="All")
 # put_matplotlib_fig_into_word(doc, chart, size=5)
 # doc.save(root_path / "output/radar_all.docx")
+
+
+
