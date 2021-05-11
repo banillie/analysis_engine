@@ -380,6 +380,13 @@ BASELINE_TYPES = {
     "Re-baseline HMT cost": "hmt_costs",
     "Re-baseline HMT benefits": "hmt_benefits",
 }
+CDG_BASELINE_TYPES = {
+    "BC approved by CDG Board in quarter": "quarter",
+    "Costs re-baselined by CDG in quarter": "costs",
+    "Schedule re-baselined by CDG in quarter": "schedule",
+    "Benefits re-baselined by CDG in quarter": "benefits"
+
+}
 IPDC_BASELINE_TYPES = {
     "Re-baseline IPDC milestones": "ipdc_milestones",
     "Re-baseline IPDC cost": "ipdc_costs",
@@ -430,6 +437,12 @@ DFT_GROUP_DICT = {
     "RSS": "Rail Services",
     "CDG": "Corporate Delivery Group",
     "RPE": "Roads People and Environment",
+}
+CDG_DIR_DICT = {
+    "CFPD": "cfpd",
+    "GF": "gf",
+    "Digital": "D",
+    "SCS": "scs",
 }
 YEAR_LIST = [
     "16-17",
@@ -562,9 +575,11 @@ class Master:
         self,
         master_data: List[Dict[str, Union[str, int, datetime.date, float]]],
         project_information: Dict[str, Union[str, int]],
+        **kwargs,
     ) -> None:
         self.master_data = master_data
         self.project_information = project_information
+        self.kwargs = kwargs
         self.current_quarter = self.master_data[0].quarter
         self.current_projects = self.master_data[0].projects
         self.abbreviations = {}
@@ -618,10 +633,16 @@ class Master:
         {bl_index: {bl_type: {proj_name: [baseline index list]}}}
         """
 
+        # handles baselines across different datasets.
+        if "type" in self.kwargs:
+            if self.kwargs["type"] == "cdg":
+                baseline_dict = CDG_BASELINE_TYPES
+        else:
+            baseline_dict = BASELINE_TYPES
+
         baseline_info = {}
         baseline_index = {}
-
-        for b_type in list(BASELINE_TYPES.keys()):
+        for b_type in list(baseline_dict.keys()):
             project_baseline_info = {}
             project_baseline_index = {}
             for name in self.current_projects:
@@ -646,8 +667,8 @@ class Master:
                 project_baseline_info[name] = list(lower_list)
                 project_baseline_index[name] = list(index_list)
 
-            baseline_info[BASELINE_TYPES[b_type]] = project_baseline_info
-            baseline_index[BASELINE_TYPES[b_type]] = project_baseline_index
+            baseline_info[baseline_dict[b_type]] = project_baseline_info
+            baseline_index[baseline_dict[b_type]] = project_baseline_index
 
         self.bl_info = baseline_info
         self.bl_index = baseline_index
@@ -674,7 +695,14 @@ class Master:
     def check_baselines(self) -> None:
         """checks that projects have the correct baseline information. stops the
         programme if baselines are missing"""
-        for v in IPDC_BASELINE_TYPES.values():
+
+        if "type" in self.kwargs:
+            if self.kwargs["type"] == "cdg":
+                baseline_dict = CDG_BASELINE_TYPES
+        else:
+            baseline_dict = IPDC_BASELINE_TYPES
+
+        for v in baseline_dict.values():
             for p in self.current_projects:
                 baselines = self.bl_index[v][p]
                 if len(baselines) <= 2:
@@ -692,6 +720,16 @@ class Master:
         """gets the groups that projects are part of e.g. business case
         stage or dft group"""
 
+        if "type" in self.kwargs:
+            if self.kwargs["type"] == "cdg":
+                group_key = "Directorate"
+                group_dict = CDG_DIR_DICT
+                approval = "Last Business Case (BC) achieved"
+        else:
+            group_key = "Group"
+            group_dict = DFT_GROUP_DICT
+            approval = "IPDC approval point"
+
         raw_dict = {}
         raw_list = []
         group_list = []
@@ -700,7 +738,7 @@ class Master:
             lower_dict = {}
             for p in master.projects:
                 dft_group = self.project_information[p][
-                    "Group"
+                    group_key
                 ]  # different groups cleaned here
                 if dft_group is None:
                     logger.critical(
@@ -710,7 +748,7 @@ class Master:
                     raise ProjectGroupError(
                         "Program stopping as this could cause a crash. Please check project Group info."
                     )
-                if dft_group not in list(DFT_GROUP_DICT.keys()):
+                if dft_group not in list(group_dict.keys()):
                     logger.critical(
                         str(p)
                         + " Group value is "
@@ -720,7 +758,7 @@ class Master:
                     raise ProjectGroupError(
                         "Program stopping as this could cause a crash. Please check project Group info."
                     )
-                stage = BC_STAGE_DICT[master[p]["IPDC approval point"]]
+                stage = BC_STAGE_DICT[master[p][approval]]
                 raw_list.append(("group", dft_group))
                 raw_list.append(("stage", stage))
                 lower_dict[p] = dict(raw_list)

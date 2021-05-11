@@ -165,8 +165,8 @@ def test_open_word_doc(word_doc):
     word_doc.save("resources/summary_temp_altered.docx")
     var = word_doc.paragraphs[1].text
     assert (
-        "Because i'm still in love with you I want to see you dance again, "
-        "because i'm still in love with you on this harvest moon" == var
+            "Because i'm still in love with you I want to see you dance again, "
+            "because i'm still in love with you on this harvest moon" == var
     )
 
 
@@ -347,13 +347,13 @@ def test_get_milestone_data_all(master_pickle):
 def test_get_milestone_chart_data(master_pickle):
     milestones = MilestoneData(master_pickle, group=[SOT, A13], baseline=["standard"])
     assert (
-        len(milestones.sorted_milestone_dict[milestones.iter_list[0]]["g_dates"]) == 76
+            len(milestones.sorted_milestone_dict[milestones.iter_list[0]]["g_dates"]) == 76
     )
     assert (
-        len(milestones.sorted_milestone_dict[milestones.iter_list[1]]["g_dates"]) == 76
+            len(milestones.sorted_milestone_dict[milestones.iter_list[1]]["g_dates"]) == 76
     )
     assert (
-        len(milestones.sorted_milestone_dict[milestones.iter_list[2]]["g_dates"]) == 76
+            len(milestones.sorted_milestone_dict[milestones.iter_list[2]]["g_dates"]) == 76
     )
 
 
@@ -510,8 +510,10 @@ def test_build_dandelion_graph_auto(master_pickle, word_doc):
 
 
 # @pytest.mark.skip(reason="test resources not currently available")
-def test_cdg_build_dandelion_graph_auto(word_doc):
-    m = Master(cdg_get_master_data(), cdg_get_project_information())
+def test_cdg_build_dandelion_graph_auto(word_doc, cdg_masters, cdg_project_info):
+    m = Master(cdg_masters,
+               cdg_project_info,
+               type="cdg")
     CDG_DIR = ["GF", "CFPD", "SCS"]
     op_args = {
         "quarter": ["Q4 20/21"],
@@ -570,7 +572,7 @@ def test_build_dandelion_graph_manual(build_dandelion, word_doc_landscape):
 
 
 def test_build_horizontal_bar_chart_manually(
-    horizontal_bar_chart_data, word_doc_landscape
+        horizontal_bar_chart_data, word_doc_landscape
 ):
     # graph = get_horizontal_bar_chart_data(horizontal_bar_chart_data)
     simple_horz_bar_chart(horizontal_bar_chart_data)

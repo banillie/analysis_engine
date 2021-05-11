@@ -42,9 +42,16 @@ def word_doc_landscape():
 @pytest.fixture
 def project_info():
     return project_data_from_master(
-        os.path.join(
-            os.getcwd(), "resources/" "test_project_info.xlsx"
-        ),
+        os.path.join(os.getcwd(), "resources/" "test_project_info.xlsx"),
+        1,
+        2020,
+    )
+
+
+@pytest.fixture
+def cdg_project_info():
+    return project_data_from_master(
+        os.path.join(os.getcwd(), "resources/" "test_cdg_proj_info.xlsx"),
         1,
         2020,
     )
@@ -97,8 +104,21 @@ def full_test_masters_dict():
 @pytest.fixture()
 def one_master_dict():
     return project_data_from_master(
-            os.path.join(os.getcwd(), "resources/" "test_master_1_2020.xlsx"), 1, 2020
-        )
+        os.path.join(os.getcwd(), "resources/" "test_master_1_2020.xlsx"), 1, 2020
+    )
+
+
+@pytest.fixture()
+def cdg_masters():
+    data = [
+        project_data_from_master(
+            os.path.join(os.getcwd(), "resources/" "test_cdg_master_Q4.xlsx"), 4, 2020
+        ),
+        project_data_from_master(
+            os.path.join(os.getcwd(), "resources/" "test_cdg_master_Q3.xlsx"), 3, 2020
+        ),
+    ]
+    return data
 
 
 @pytest.fixture()
