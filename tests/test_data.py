@@ -511,19 +511,36 @@ def test_build_dandelion_graph_auto(master_pickle, word_doc):
 
 # @pytest.mark.skip(reason="test resources not currently available")
 def test_cdg_build_dandelion_graph_auto(word_doc, cdg_masters, cdg_project_info):
-    m = Master(cdg_masters,
-               cdg_project_info,
-               type="cdg")
-    CDG_DIR = ["GF", "CFPD", "SCS"]
-    op_args = {
-        "quarter": ["Q4 20/21"],
-        "group": CDG_DIR,
-        "chart": True,
+    data_type_dict = {
+        "test": {
+            "save_path": "resources/cdg_portfolio_graph.xlsx",
+            "data": (cdg_masters, cdg_project_info),
+            "op_args": {
+                "quarter": ["Q4 20/21"],
+                "group": ["CFPD"],
+                "chart": True,
+                "data_type": "cdg",
+            }
+
+        },
+        "real": {
+            "save_path": cdg_root_path / "output/cdg_dandelion_graph.docx",
+            "data": (cdg_get_master_data(), cdg_get_project_information()),
+            "op_args": {
+                "quarter": ["Q4 20/21"],
+                "group": ["GF", "CFPD", "SCS"],
+                "chart": True,
+                "data_type": "cdg",
+            }
+        }
     }
-    dl_data = CDGDandelionData(m, **op_args)
-    d_lion = cdg_make_a_dandelion_auto(dl_data)
+
+    m = Master(*data_type_dict["real"]["data"],
+               **data_type_dict["real"]["op_args"])
+    dl_data = DandelionData(m, **data_type_dict["real"]["op_args"])
+    d_lion = make_a_dandelion_auto(dl_data)
     put_matplotlib_fig_into_word(word_doc, d_lion, size=7.5)
-    word_doc.save(cdg_root_path / "output/cdg_dandelion_graph.docx")
+    word_doc.save(data_type_dict["real"]["save_path"])
 
 
 def test_data_queries_non_milestone(master_pickle):

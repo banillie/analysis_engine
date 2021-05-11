@@ -71,34 +71,6 @@ def check_remove(op_args):  # subcommand arg
                 )
 
 
-# def run_correct_args(
-#         m: Master,
-#         ae_class: CostData or VfMData or DcaData or RiskData,
-#         args: argparse.ArgumentParser,
-# ) -> CostData or VfMData or DcaData or RiskData:
-#     """Runs subcommands for costs, vfm, dcas, risks.
-#     Options for these subcommands are quarter, baseline, group, stage, remove"""
-#     try:
-#         data = ae_class(m, **op_args)
-#
-#     except ProjectNameError as e:
-#         logger.critical(e)
-#         sys.exit(1)
-#
-#     return data
-
-# def get_args_for_file(args: argparse) -> list:
-#     l = []  # l is list
-#     for x in args.values():
-#         if x is not None:
-#             ffx = make_file_friendly(x)  # ffx
-#             l.append(ffx)
-#     l = l[1:-1]  # get rid of builtin_function_or_method
-#     unpack = itertools.chain.from_iterable(l)
-#     return list(unpack)
-#
-
-
 def initiate(args):
     print("creating a master data file for analysis_engine")
     try:

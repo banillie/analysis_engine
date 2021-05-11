@@ -634,8 +634,8 @@ class Master:
         """
 
         # handles baselines across different datasets.
-        if "type" in self.kwargs:
-            if self.kwargs["type"] == "cdg":
+        if "data_type" in self.kwargs:
+            if self.kwargs["data_type"] == "cdg":
                 baseline_dict = CDG_BASELINE_TYPES
         else:
             baseline_dict = BASELINE_TYPES
@@ -696,8 +696,8 @@ class Master:
         """checks that projects have the correct baseline information. stops the
         programme if baselines are missing"""
 
-        if "type" in self.kwargs:
-            if self.kwargs["type"] == "cdg":
+        if "data_type" in self.kwargs:
+            if self.kwargs["data_type"] == "cdg":
                 baseline_dict = CDG_BASELINE_TYPES
         else:
             baseline_dict = IPDC_BASELINE_TYPES
@@ -720,8 +720,8 @@ class Master:
         """gets the groups that projects are part of e.g. business case
         stage or dft group"""
 
-        if "type" in self.kwargs:
-            if self.kwargs["type"] == "cdg":
+        if "data_type" in self.kwargs:
+            if self.kwargs["data_type"] == "cdg":
                 group_key = "Directorate"
                 group_dict = CDG_DIR_DICT
                 approval = "Last Business Case (BC) achieved"
@@ -843,6 +843,13 @@ class Master:
         self.pipeline_list = pipeline_list
 
 
+def convert_none_types(x):
+    if x is None:
+        return 0
+    else:
+        return x
+
+
 class CostData:
     def __init__(self, master: Master, **kwargs):
         self.master = master
@@ -857,7 +864,7 @@ class CostData:
         self.wlc_change = {}
         # self.stack_p = {}
         self.get_cost_totals()
-        self.get_cost_profile()
+        # self.get_cost_profile()
         # self.get_wlc_data()
         # self.get_stackplot_data()
 
@@ -890,124 +897,152 @@ class CostData:
         is the least cumbersome loop I could design!"""
 
         self.iter_list = get_iter_list(self.kwargs, self.master)
-        self.start_group = get_group(self.master, self.iter_list[0], self.kwargs)
-        ## start_group is a temporary measure until refactor. needed to keep a
-        ## record of the group of projects first passed into class.
         lower_dict = {}
+        # self.start_group = get_group(self.master, self.iter_list[0], self.kwargs)
 
-        for tp in self.iter_list:
-            spent = 0
-            profiled = 0
-            unprofiled = 0
-            # overall_total = 0
-            spent_rdel = 0
-            spent_cdel = 0
-            spent_ngov = 0
-            prof_rdel = 0
-            prof_cdel = 0
-            prof_ngov = 0
-            unprof_rdel = 0
-            unprof_cdel = 0
-            unprof_ngov = 0
-            self.group = get_group(self.master, tp, self.kwargs)
-            for x, key in enumerate(COST_TYPE_KEY_LIST):
-                # group_total = 0
+        if "data_type" in self.kwargs:
+            for tp in self.iter_list:
+                c_spent = 0
+                c_remaining = 0
+                c_total = 0
+                in_achieved = 0
+                in_remaining = 0
+                in_total = 0
+                self.group = get_group(self.master, tp, self.kwargs)
                 for project_name in self.group:
                     p_data = get_correct_p_data(
                         self.kwargs, self.master, self.baseline_type, project_name, tp
                     )
-                    if p_data is None:
-                        continue
-                    try:
-                        rdel = p_data[key[0]]
-                        if rdel is None:
-                            rdel = 0
-                        cdel = p_data[key[1]]
-                        if cdel is None:
-                            cdel = 0
-                        ngov = p_data[key[2]]
-                        if ngov is None:
-                            ngov = 0
-                        total = round(rdel + cdel + ngov)
-                        # group_total += total
-                    except TypeError:  # handle None types, which are present if project not reporting last quarter.
-                        # rdel = 0
-                        # cdel = 0
-                        # ngov = 0
-                        total = 0
-                        # group_total += total
+                    c_spent += convert_none_types(p_data["Total Costs Spent"])
+                    c_remaining += convert_none_types(p_data["Total Costs Remaining"])
+                    c_total += convert_none_types(p_data["Total Costs"])
+                    in_achieved += convert_none_types(p_data["Total Income Achieved"])
+                    in_remaining += convert_none_types(p_data["Total Income Remaining"])
+                    in_total += convert_none_types(p_data["Total Income"])
 
-                    if self.iter_list.index(tp) == 0:  # current quarter
+                lower_dict[tp] = {
+                    "costs_spent": c_spent,
+                    "costs_remaining": c_remaining,
+                    "total": c_total,
+                    "income_achieved": in_achieved,
+                    "income_remaining": in_remaining,
+                    "income_total": in_total,
+                }
+
+        else:
+            for tp in self.iter_list:
+                spent = 0
+                profiled = 0
+                unprofiled = 0
+                # overall_total = 0
+                spent_rdel = 0
+                spent_cdel = 0
+                spent_ngov = 0
+                prof_rdel = 0
+                prof_cdel = 0
+                prof_ngov = 0
+                unprof_rdel = 0
+                unprof_cdel = 0
+                unprof_ngov = 0
+                self.group = get_group(self.master, tp, self.kwargs)
+                for x, key in enumerate(COST_TYPE_KEY_LIST):
+                    # group_total = 0
+                    for project_name in self.group:
+                        p_data = get_correct_p_data(
+                            self.kwargs, self.master, self.baseline_type, project_name, tp
+                        )
+                        if p_data is None:
+                            continue
+                        try:
+                            rdel = p_data[key[0]]
+                            if rdel is None:
+                                rdel = 0
+                            cdel = p_data[key[1]]
+                            if cdel is None:
+                                cdel = 0
+                            ngov = p_data[key[2]]
+                            if ngov is None:
+                                ngov = 0
+                            total = round(rdel + cdel + ngov)
+                            # group_total += total
+                        except TypeError:  # handle None types, which are present if project not reporting last quarter.
+                            # rdel = 0
+                            # cdel = 0
+                            # ngov = 0
+                            total = 0
+                            # group_total += total
+
+                        if self.iter_list.index(tp) == 0:  # current quarter
+                            if x == 0:  # spent
+                                try:  # handling for spend to date figures which are not present in all masters
+                                    rdel_std = p_data["20-21 RDEL STD one off new costs"]
+                                    if rdel_std is None:
+                                        rdel_std = 0
+                                    cdel_std = p_data["20-21 CDEL STD one off new costs"]
+                                    if cdel_std is None:
+                                        cdel_std = 0
+                                    ngov_std = p_data["20-21 CDEL STD Non Gov costs"]
+                                    if ngov_std is None:
+                                        ngov_std = 0
+                                    spent_rdel += round(rdel + rdel_std)
+                                    spent_cdel += round(cdel + cdel_std)
+                                    spent_ngov += round(ngov + ngov_std)
+                                except KeyError:
+                                    spent_rdel += rdel
+                                    spent_cdel += cdel
+                                    spent_ngov += ngov
+                            if x == 1:  # profiled
+                                prof_rdel += rdel
+                                prof_cdel += cdel
+                                prof_ngov += ngov
+                            if x == 2:  # unprofiled
+                                unprof_rdel += rdel
+                                unprof_cdel += cdel
+                                unprof_ngov += ngov
+
                         if x == 0:  # spent
                             try:  # handling for spend to date figures which are not present in all masters
                                 rdel_std = p_data["20-21 RDEL STD one off new costs"]
-                                if rdel_std is None:
-                                    rdel_std = 0
                                 cdel_std = p_data["20-21 CDEL STD one off new costs"]
-                                if cdel_std is None:
-                                    cdel_std = 0
                                 ngov_std = p_data["20-21 CDEL STD Non Gov costs"]
-                                if ngov_std is None:
-                                    ngov_std = 0
-                                spent_rdel += round(rdel + rdel_std)
-                                spent_cdel += round(cdel + cdel_std)
-                                spent_ngov += round(ngov + ngov_std)
-                            except KeyError:
-                                spent_rdel += rdel
-                                spent_cdel += cdel
-                                spent_ngov += ngov
+                                std_list = [
+                                    rdel_std,
+                                    cdel_std,
+                                    ngov_std,
+                                ]  # converts none types to zero
+                                std_list = filter(None, std_list)
+                                spent += round(total + sum(std_list))
+                            except (
+                                KeyError,
+                                TypeError,
+                            ):  # Note. TypeError here as projects may have no baseline
+                                spent += total
                         if x == 1:  # profiled
-                            prof_rdel += rdel
-                            prof_cdel += cdel
-                            prof_ngov += ngov
+                            profiled += total
                         if x == 2:  # unprofiled
-                            unprof_rdel += rdel
-                            unprof_cdel += cdel
-                            unprof_ngov += ngov
+                            unprofiled += total
 
-                    if x == 0:  # spent
-                        try:  # handling for spend to date figures which are not present in all masters
-                            rdel_std = p_data["20-21 RDEL STD one off new costs"]
-                            cdel_std = p_data["20-21 CDEL STD one off new costs"]
-                            ngov_std = p_data["20-21 CDEL STD Non Gov costs"]
-                            std_list = [
-                                rdel_std,
-                                cdel_std,
-                                ngov_std,
-                            ]  # converts none types to zero
-                            std_list = filter(None, std_list)
-                            spent += round(total + sum(std_list))
-                        except (
-                            KeyError,
-                            TypeError,
-                        ):  # Note. TypeError here as projects may have no baseline
-                            spent += total
-                    if x == 1:  # profiled
-                        profiled += total
-                    if x == 2:  # unprofiled
-                        unprofiled += total
+                cat_spent = [spent_rdel, spent_cdel, spent_ngov]
+                cat_profiled = [prof_rdel, prof_cdel, prof_ngov]
+                cat_unprofiled = [
+                    unprof_rdel,
+                    unprof_cdel,
+                    unprof_ngov,
+                ]
+                cat_profiled = calculate_profiled(cat_profiled, cat_spent, cat_unprofiled)
 
-            cat_spent = [spent_rdel, spent_cdel, spent_ngov]
-            cat_profiled = [prof_rdel, prof_cdel, prof_ngov]
-            cat_unprofiled = [
-                unprof_rdel,
-                unprof_cdel,
-                unprof_ngov,
-            ]
-            cat_profiled = calculate_profiled(cat_profiled, cat_spent, cat_unprofiled)
-
-            adj_profiled = calculate_profiled(
-                profiled, spent, unprofiled
-            )  # adjusted profiled
-            lower_dict[tp] = {
-                "cat_spent": cat_spent,
-                "cat_prof": cat_profiled,
-                "cat_unprof": cat_unprofiled,
-                "spent": spent,
-                "prof": adj_profiled,
-                "unprof": unprofiled,
-                "total": profiled,
-            }
+                adj_profiled = calculate_profiled(
+                    profiled, spent, unprofiled
+                )  # adjusted profiled
+                lower_dict[tp] = {
+                    "cat_spent": cat_spent,
+                    "cat_prof": cat_profiled,
+                    "cat_unprof": cat_unprofiled,
+                    "spent": spent,
+                    "prof": adj_profiled,
+                    "unprof": unprofiled,
+                    "total": profiled,
+                }
 
         self.c_totals = lower_dict
 
@@ -7945,9 +7980,7 @@ class DandelionData:
 
     def get_data(self):
         self.iter_list = get_iter_list(self.kwargs, self.master)
-        for (
-            tp
-        ) in self.iter_list:  # although tp is iterated only one can be handled for now.
+        for tp in self.iter_list:  # although tp is iterated only one can be handled for now.
             #  for dandelion need groups of groups.
             if "group" in self.kwargs:
                 self.group = self.kwargs["group"]
