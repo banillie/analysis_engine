@@ -578,7 +578,7 @@ class Master:
         self.pipeline_list = []
         self.quarter_list = []
         self.get_quarter_list()
-        self.get_baseline_data()   # doing refactor here
+        self.get_baseline_data()
         self.check_project_information()
         self.get_project_abbreviations()
         self.check_baselines()
@@ -609,61 +609,6 @@ class Master:
         self.full_names = fn_dict
 
     def get_baseline_data(self) -> None:
-        """
-        Returns the two dictionaries baseline_info and baseline_index for all projects for all
-        baseline types
-        """
-
-        baseline_info = {}
-        baseline_index = {}
-
-        for b_type in list(BASELINE_TYPES.keys()):
-            project_baseline_info = {}
-            project_baseline_index = {}
-            for name in self.current_projects:
-                bc_list = []
-                lower_list = []
-                for i, master in reversed(list(enumerate(self.master_data))):
-                    if name in master.projects:
-                        try:
-                            approved_bc = master.data[name][b_type]
-                            quarter = str(master.quarter)
-                        # exception handling in here in case data keys across masters are not consistent.
-                        # not sure this is necessary any more
-                        except KeyError:
-                            print(
-                                str(b_type)
-                                + " keys not present in "
-                                + str(master.quarter)
-                            )
-                        if approved_bc == "Yes":
-                            bc_list.append(approved_bc)
-                            lower_list.append((approved_bc, quarter, i))
-                    else:
-                        pass
-                for i in reversed(range(2)):
-                    if name in self.master_data[i].projects:
-                        approved_bc = self.master_data[i][name][b_type]
-                        quarter = str(self.master_data[i].quarter)
-                        lower_list.append((approved_bc, quarter, i))
-                    else:
-                        quarter = str(self.master_data[i].quarter)
-                        lower_list.append((None, quarter, None))
-
-                index_list = []
-                for x in lower_list:
-                    index_list.append(x[2])
-
-                project_baseline_info[name] = list(reversed(lower_list))
-                project_baseline_index[name] = list(reversed(index_list))
-
-            baseline_info[BASELINE_TYPES[b_type]] = project_baseline_info
-            baseline_index[BASELINE_TYPES[b_type]] = project_baseline_index
-
-        self.bl_info = baseline_info
-        self.bl_index = baseline_index
-
-    def get_baseline_data_refactor(self) -> None:
         """
         Returns two dictionaries used to calculate baselines.
         The current method is that each projects baseline list
@@ -698,8 +643,8 @@ class Master:
                 for x in lower_list:
                     index_list.append(x[2])
 
-                project_baseline_info[name] = list(reversed(lower_list))
-                project_baseline_index[name] = list(reversed(index_list))
+                project_baseline_info[name] = list(lower_list)
+                project_baseline_index[name] = list(index_list)
 
             baseline_info[BASELINE_TYPES[b_type]] = project_baseline_info
             baseline_index[BASELINE_TYPES[b_type]] = project_baseline_index

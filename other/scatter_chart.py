@@ -45,8 +45,7 @@ from analysis_engine.data import (
 # calculate_arg_combinations(arg_list)
 
 ## INITIATE
-# master = Master(get_master_data(), get_project_information())
-
+master = Master(get_master_data(), get_project_information())
 
 ## PICKLE
 m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
