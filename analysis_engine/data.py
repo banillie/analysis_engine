@@ -834,9 +834,10 @@ class Master:
         total_wlc = 0
         for p in self.project_information.projects:
             if self.project_information[p]["Pipeline"] is not None:
-                pipeline_dict[p] = {"wlc": self.project_information[p]["WLC"]}
+                wlc = convert_none_types(self.project_information[p]["WLC"])
+                pipeline_dict[p] = {"wlc": convert_none_types(self.project_information[p]["WLC"])}
                 pipeline_list.append(p)
-                total_wlc += self.project_information[p]["WLC"]
+                total_wlc += wlc
         pipeline_dict["pipeline"] = {"wlc": total_wlc}
 
         self.pipeline_dict = pipeline_dict
@@ -7891,6 +7892,8 @@ def dandelion_project_text(number: int, project: str) -> str:
 
 def dandelion_number_text(number: int) -> str:
     try:
+        if number == 0:
+            return "£TBC"
         total_len = len(str(int(number)))
         if total_len <= 2:
             round_total = int(round(number))
@@ -8128,7 +8131,7 @@ class DandelionData:
                         + dandelion_number_text(p_value)
                     )
                     if p_value == 0:
-                        p_value = g_wlc / 100
+                        p_value = g_wlc / 10
                     if colour == "#FFFFFF":
                         edge_colour = "grey"
                     elif p in self.master.dft_groups[tp]["GMPP"]:

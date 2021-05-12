@@ -2,6 +2,12 @@ import os
 import pytest
 from datamaps.api import project_data_from_master
 from openpyxl import load_workbook
+
+from analysis_engine.cdg_data import (
+    cdg_root_path,
+    cdg_get_master_data,
+    cdg_get_project_information,
+)
 from analysis_engine.data import open_word_doc, open_pickle_file
 
 
@@ -48,7 +54,7 @@ def project_info():
     )
 
 
-@pytest.fixture
+# @pytest.fixture
 def cdg_project_info():
     return project_data_from_master(
         os.path.join(os.getcwd(), "resources/" "test_cdg_proj_info.xlsx"),
@@ -108,7 +114,7 @@ def one_master_dict():
     )
 
 
-@pytest.fixture()
+# @pytest.fixture()
 def cdg_masters():
     data = [
         project_data_from_master(
@@ -176,3 +182,29 @@ def horizontal_bar_chart_data():
 @pytest.fixture()
 def sp_data():
     return os.path.join(os.getcwd(), "resources/test_sp_master.xlsx")
+
+
+@pytest.fixture()
+def cdg_data():
+    return {
+        "test": {
+            "save_path": "resources/cdg_portfolio_graph.xlsx",
+            "data": (cdg_masters(), cdg_project_info()),
+            "op_args": {
+                "quarter": ["Q4 20/21"],
+                "group": ["CFPD"],
+                "chart": True,
+                "data_type": "cdg",
+            },
+        },
+        "real": {
+            "save_path": cdg_root_path / "output/cdg_dandelion_graph.docx",
+            "data": (cdg_get_master_data(), cdg_get_project_information()),
+            "op_args": {
+                "quarter": ["Q4 20/21"],
+                "group": ["GF", "CFPD", "SCS"],
+                "chart": True,
+                "data_type": "cdg",
+            },
+        },
+    }
