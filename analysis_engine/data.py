@@ -868,29 +868,6 @@ class CostData:
         # self.get_wlc_data()
         # self.get_stackplot_data()
 
-    # def get_cost_totals_new(self):
-    #     p_dict = {}
-    #     for p in self.master.current_projects:
-    #         spent = 0
-    #         profiled = 0
-    #         unprofiled = 0
-    #         for i in SPENT_KEYS:
-    #             spent += self.master.master_data[0].data[p][i]
-    #         for i in PROFILE_KEYS:
-    #             profiled += self.master.master_data[0].data[p][i]
-    #         for i in UNPROFILE_KEYS:
-    #             unprofiled += self.master.master_data[0].data[p][i]
-    #         profiled = profiled - (spent + unprofiled)
-    #         total = self.master.master_data[0].data[p]["Total Forecast"]
-    #         p_dict[p] = {
-    #             "spent": spent,
-    #             "profiled": profiled,
-    #             "unprofiled": unprofiled,
-    #             "total": total,
-    #         }
-    #
-    #     self.c_totals = p_dict
-
     def get_cost_totals(self) -> None:
         """Returns lists containing the sum total of group (of projects) costs,
         sliced in different ways. Cumbersome for loop used at the moment, but
@@ -2688,16 +2665,23 @@ def get_word_doc() -> Document():
 
 
 def wd_heading(
-    doc: Document, project_info: Dict[str, Union[str, int]], project_name: str
+        doc: Document,
+        project_info: Dict[str, Union[str, int]],
+        project_name: str,
+        **kwargs,
 ) -> None:
     """Function adds header to word doc"""
     font = doc.styles["Normal"].font
     font.name = "Arial"
     font.size = Pt(12)
 
-    heading = str(
-        project_info.data[project_name]["Abbreviations"]
-    )  # integrate into master
+    if "data_type" in kwargs:
+        if kwargs["data_type"] == "ar":
+            heading = project_name
+    else:
+        heading = str(
+            project_info.data[project_name]["Abbreviations"]
+        )
     intro = doc.add_heading(str(heading), 0)
     intro.alignment = 1
     intro.bold = True
@@ -7969,6 +7953,9 @@ def get_dandelion_type_total(
 
 
 class DandelionData:
+    """
+    Data class for dandelion info graphic. Output dictionary to d_data()
+    """
     def __init__(self, master: Master, **kwargs):
         self.master = master
         self.kwargs = kwargs
@@ -7981,6 +7968,7 @@ class DandelionData:
     def get_data(self):
         self.iter_list = get_iter_list(self.kwargs, self.master)
         for tp in self.iter_list:  # although tp is iterated only one can be handled for now.
+
             #  for dandelion need groups of groups.
             if "group" in self.kwargs:
                 self.group = self.kwargs["group"]
@@ -8020,7 +8008,7 @@ class DandelionData:
                 pf_colour_edge = "grey"
             pf_text = "Portfolio\n" + dandelion_number_text(
                 pf_wlc
-            )  # option to specify pf name
+            )
 
             ## center circle
             g_d["portfolio"] = {
@@ -8119,21 +8107,15 @@ class DandelionData:
                     if len(p_list) == 1:
                         ang_l = [g_d[g]["angle"]]
                     if len(p_list) == 2:
-                        ang_l = [g_d[g]["angle"], g_d[g]["angle"] + 60]
-                    # if len(p_list) == 3:
-                    #     ang_l = [g_d[g]["angle"], g_d[g]["angle"] + 60, g_d[g]["angle"] + 120]
+                        ang_l = [g_d[g]["angle"], g_d[g]["angle"] + 70]
 
                 for i, p in enumerate(p_list):
                     p_value = p_values_list[i]
                     p_data = get_correct_p_data(
                         self.kwargs, self.master, self.baseline_type, p, tp
                     )
-                    # change confidence type here
-                    # SRO Schedule Confidence
-                    # Departmental DCA
-                    # SRO Benefits RAG
                     try:  # this is for pipeline projects
-                        if "confidence" in self.kwargs:
+                        if "confidence" in self.kwargs:   # change confidence type here
                             rag = p_data[DCA_KEYS[self.kwargs["confidence"]]]
                         else:
                             rag = p_data["Departmental DCA"]
@@ -8155,10 +8137,20 @@ class DandelionData:
                         edge_colour = colour
 
                     try:
-                        if len(p_list) >= 14:
-                            multi = (pf_wlc / g_wlc) ** (1.0 / 1.75)  # square root
+                        if len(p_list) >= 16:
+                            multi = (pf_wlc / g_wlc) ** 1.1
+                        elif 15 >= len(p_list) >= 11:
+                            multi = (pf_wlc / g_wlc) ** (1.0 / 2.0)  # square root
                         else:
-                            multi = (pf_wlc / g_wlc) ** (1.0 / 3.0)  # cube root
+                            if g_wlc / pf_wlc >= 0.33:
+                                multi = (pf_wlc / g_wlc) ** (1.0 / 2.0)  # cube root
+                            else:
+                                multi = (pf_wlc / g_wlc) ** (1.0 / 3.0)  # cube root
+                        #
+                        # if len(p_list) >= 14:
+                        #     multi = (pf_wlc / g_wlc) ** (1.0 / 1.75)  # square root
+                        # else:
+                        #     multi = (pf_wlc / g_wlc) ** (1.0 / 3.0)  # cube root
                         p_y_axis = g_y_axis + (g_radius * multi) * math.sin(
                             math.radians(ang_l[i])
                         )
@@ -8488,9 +8480,12 @@ def cost_stackplot_graph(
 
 
 def make_a_dandelion_auto(dl: DandelionData, **kwargs):
-    fig, ax = plt.subplots(figsize=(10, 10), facecolor=FACE_COLOUR)
-    # fig.set_size_inches(1, 10)
-    ax.set_facecolor(FACE_COLOUR)  # TBC if face colour is required
+    """function used to compile dandelion graph. Data is taken from
+    DandelionData class."""
+
+    fig, ax = plt.subplots(figsize=(10, 8), facecolor=FACE_COLOUR)
+    ax.set_facecolor(FACE_COLOUR)
+    ## title not currently in use
     # title = get_chart_title(dl_data, kwargs, "dandelion")
     # plt.suptitle(title, fontweight="bold", fontsize=10)
 
@@ -8499,7 +8494,6 @@ def make_a_dandelion_auto(dl: DandelionData, **kwargs):
             dl.d_data[c]["axis"],  # x, y position
             radius=dl.d_data[c]["r"],
             fc=dl.d_data[c]["colour"],  # face colour
-            # linestyle=dl.d_data[c]["fill"],
             ec=dl.d_data[c]["ec"],  # edge colour
             zorder=2,
         )
@@ -8510,14 +8504,14 @@ def make_a_dandelion_auto(dl: DandelionData, **kwargs):
                 xy=dl.d_data[c]["axis"],  # x, y position
                 xycoords="data",
                 xytext=dl.d_data[c]["tp"],  # text position
-                fontsize=7,
+                fontsize=6,
                 fontname=FONT_TYPE,
-                # textcoords="offset pixels",
                 horizontalalignment=dl.d_data[c]["alignment"][0],
                 verticalalignment=dl.d_data[c]["alignment"][1],
                 zorder=3,
             )
         except KeyError:
+            # key error will occur for first and second outer circles as different text
             ax.annotate(
                 dl.d_data[c]["text"],  # text
                 xy=dl.d_data[c]["axis"],  # x, y position
@@ -8561,11 +8555,8 @@ def make_a_dandelion_auto(dl: DandelionData, **kwargs):
                 zorder=1,
             )
 
-    # ax.axes.set_xticks([])
-    # ax.axes.set_yticks([])
     plt.axis("scaled")
     plt.axis("off")
-    # ax.set(xlim=(-2200, 2000), ylim=(-1000, 2100))
 
     if "chart" in kwargs:
         if kwargs["chart"]:
@@ -8979,3 +8970,5 @@ def get_strategic_priorities_data(
     radar_data = [categories, (title, top_list)]
 
     return radar_data
+
+

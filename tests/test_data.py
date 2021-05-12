@@ -10,8 +10,12 @@ import numpy as np
 from matplotlib import pyplot as plt
 import pytest
 
-from analysis_engine.cdg_data import cdg_get_master_data, cdg_get_project_information, CDGMaster, cdg_root_path, \
-    CDGDandelionData, cdg_make_a_dandelion_auto
+from analysis_engine.cdg_data import (
+    cdg_get_master_data,
+    cdg_get_project_information,
+    cdg_root_path,
+)
+from analysis_engine.ar_data import get_ar_data, ar_run_p_reports
 from analysis_engine.data import (
     Master,
     CostData,
@@ -71,7 +75,10 @@ from analysis_engine.data import (
     simple_horz_bar_chart,
     so_matplotlib,
     radar_chart,
-    get_strategic_priorities_data, JsonData, open_json_file,
+    get_strategic_priorities_data,
+    JsonData,
+    open_json_file,
+    get_project_information,
 )
 
 SOT = "Sea of Tranquility"
@@ -134,15 +141,15 @@ def test_getting_project_groups(project_info, basic_masters_dicts):
 def test_get_project_abbreviations(basic_masters_dicts, project_info):
     master = Master(basic_masters_dicts, project_info)
     assert master.abbreviations == {
-        'Apollo 11': {'abb': 'A11', 'full name': 'Apollo 11'},
-        'Apollo 13': {'abb': 'A13', 'full name': 'Apollo 13'},
-        'Columbia': {'abb': 'Columbia', 'full name': 'Columbia'},
-        'Falcon 9': {'abb': 'F9', 'full name': 'Falcon 9'},
-        'Mars': {'abb': 'Mars', 'full name': 'Mars'},
-        'Pipe Dreaming': {'abb': 'Pdream', 'full name': 'Pipe Dreaming'},
-        'Piping Hot': {'abb': 'PH', 'full name': 'Piping Hot'},
-        'Put That in Your Pipe': {'abb': 'PtiYP', 'full name': 'Put That in Your Pipe'},
-        'Sea of Tranquility': {'abb': 'SoT', 'full name': 'Sea of Tranquility'}
+        "Apollo 11": {"abb": "A11", "full name": "Apollo 11"},
+        "Apollo 13": {"abb": "A13", "full name": "Apollo 13"},
+        "Columbia": {"abb": "Columbia", "full name": "Columbia"},
+        "Falcon 9": {"abb": "F9", "full name": "Falcon 9"},
+        "Mars": {"abb": "Mars", "full name": "Mars"},
+        "Pipe Dreaming": {"abb": "Pdream", "full name": "Pipe Dreaming"},
+        "Piping Hot": {"abb": "PH", "full name": "Piping Hot"},
+        "Put That in Your Pipe": {"abb": "PtiYP", "full name": "Put That in Your Pipe"},
+        "Sea of Tranquility": {"abb": "SoT", "full name": "Sea of Tranquility"},
     }
 
 
@@ -165,8 +172,8 @@ def test_open_word_doc(word_doc):
     word_doc.save("resources/summary_temp_altered.docx")
     var = word_doc.paragraphs[1].text
     assert (
-            "Because i'm still in love with you I want to see you dance again, "
-            "because i'm still in love with you on this harvest moon" == var
+        "Because i'm still in love with you I want to see you dance again, "
+        "because i'm still in love with you on this harvest moon" == var
     )
 
 
@@ -254,14 +261,6 @@ def test_get_group_total_cost_calculations(master_pickle):
     assert costs.c_totals["Q4 19/20"]["spent"] == 2610
 
 
-## no longer neccesary. covered by another test.
-# def test_get_group_total_cost_and_bens_chart(costs_masters, project_info):
-#     master = Master(costs_masters, project_info)
-#     costs = CostData(master, group=[master.current_projects])
-#     benefits = BenefitsData(master, master.current_projects)
-#     total_costs_benefits_bar_chart(costs, benefits, title="Total Group", show="No")
-
-
 def test_put_change_keys_into_a_dict(change_log):
     keys_dict = put_key_change_master_into_dict(change_log)
     assert isinstance(keys_dict, (dict,))
@@ -347,13 +346,13 @@ def test_get_milestone_data_all(master_pickle):
 def test_get_milestone_chart_data(master_pickle):
     milestones = MilestoneData(master_pickle, group=[SOT, A13], baseline=["standard"])
     assert (
-            len(milestones.sorted_milestone_dict[milestones.iter_list[0]]["g_dates"]) == 76
+        len(milestones.sorted_milestone_dict[milestones.iter_list[0]]["g_dates"]) == 76
     )
     assert (
-            len(milestones.sorted_milestone_dict[milestones.iter_list[1]]["g_dates"]) == 76
+        len(milestones.sorted_milestone_dict[milestones.iter_list[1]]["g_dates"]) == 76
     )
     assert (
-            len(milestones.sorted_milestone_dict[milestones.iter_list[2]]["g_dates"]) == 76
+        len(milestones.sorted_milestone_dict[milestones.iter_list[2]]["g_dates"]) == 76
     )
 
 
@@ -510,7 +509,7 @@ def test_build_dandelion_graph_auto(master_pickle, word_doc):
 
 
 # @pytest.mark.skip(reason="test resources not currently available")
-def test_cdg_build_dandelion_graph_auto(word_doc, cdg_masters, cdg_project_info):
+def test_cdg_build_dandelion_graph_auto(word_doc_landscape, cdg_masters, cdg_project_info):
     data_type_dict = {
         "test": {
             "save_path": "resources/cdg_portfolio_graph.xlsx",
@@ -520,8 +519,7 @@ def test_cdg_build_dandelion_graph_auto(word_doc, cdg_masters, cdg_project_info)
                 "group": ["CFPD"],
                 "chart": True,
                 "data_type": "cdg",
-            }
-
+            },
         },
         "real": {
             "save_path": cdg_root_path / "output/cdg_dandelion_graph.docx",
@@ -531,16 +529,15 @@ def test_cdg_build_dandelion_graph_auto(word_doc, cdg_masters, cdg_project_info)
                 "group": ["GF", "CFPD", "SCS"],
                 "chart": True,
                 "data_type": "cdg",
-            }
-        }
+            },
+        },
     }
 
-    m = Master(*data_type_dict["real"]["data"],
-               **data_type_dict["real"]["op_args"])
+    m = Master(*data_type_dict["real"]["data"], **data_type_dict["real"]["op_args"])
     dl_data = DandelionData(m, **data_type_dict["real"]["op_args"])
     d_lion = make_a_dandelion_auto(dl_data)
-    put_matplotlib_fig_into_word(word_doc, d_lion, size=7.5)
-    word_doc.save(data_type_dict["real"]["save_path"])
+    put_matplotlib_fig_into_word(word_doc_landscape, d_lion, size=7)
+    word_doc_landscape.save(data_type_dict["real"]["save_path"])
 
 
 def test_data_queries_non_milestone(master_pickle):
@@ -588,8 +585,9 @@ def test_build_dandelion_graph_manual(build_dandelion, word_doc_landscape):
     word_doc_landscape.save("resources/dlion_mpl.docx")
 
 
+@pytest.mark.skip(reason="wp")
 def test_build_horizontal_bar_chart_manually(
-        horizontal_bar_chart_data, word_doc_landscape
+    horizontal_bar_chart_data, word_doc_landscape
 ):
     # graph = get_horizontal_bar_chart_data(horizontal_bar_chart_data)
     simple_horz_bar_chart(horizontal_bar_chart_data)
@@ -617,3 +615,10 @@ def test_json_master_save(basic_masters_dicts, project_info, json_path):
 def test_json_master_open(json_path):
     m = open_json_file(json_path + ".json")
     assert isinstance(m, (dict,))
+
+
+# @pytest.mark.skip(reason="temp code for now. No plans for long term ae intergration")
+def test_annual_report_summaries():
+    data = get_ar_data()
+    pi = get_project_information()
+    ar_run_p_reports(data, pi)

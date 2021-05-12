@@ -187,7 +187,7 @@ def run_general(args):
                     op_args["chart"] = False
                     d_graph = make_a_dandelion_auto(d_data, **op_args)
                     doc = get_input_doc(root_path / "input/summary_temp_landscape.docx")
-                    put_matplotlib_fig_into_word(doc, d_graph, size=7.5)
+                    put_matplotlib_fig_into_word(doc, d_graph, size=7)
                     doc.save(root_path / "output/dandelion_graph.docx")
                 if op_args["chart"] == "show":
                     make_a_dandelion_auto(d_data, **op_args)

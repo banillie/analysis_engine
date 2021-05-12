@@ -1,6 +1,6 @@
 datamaps
 python-docx==0.8.10
-openpyxl==3.0.0
+openpyxl
 matplotlib==3.4.1
 pdbpp==0.10.2
 pytest==5.4.1

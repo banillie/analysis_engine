@@ -21,7 +21,7 @@ setuptools.setup(
     install_requires=[
         'datamaps',
         'python-docx==0.8.10',
-        'openpyxl==3.0.0',
+        'openpyxl',
         'matplotlib==3.4.1',
         'pdf2image',
     ],
