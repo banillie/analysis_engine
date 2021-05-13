@@ -9,6 +9,7 @@ from analysis_engine.cdg_data import (
     cdg_get_project_information,
 )
 from analysis_engine.data import open_word_doc, open_pickle_file, root_path
+from analysis_engine.top35_data import top35_root_path, top35_get_master_data, top35_get_project_information
 
 
 def pytest_addoption(parser):
@@ -230,6 +231,34 @@ def ipdc_data():
                 # "group": ["HSRG", "RSS", "RIG", "AMIS", "RPE"],
                 "group": ["HSRG"],
                 "chart": True,
+                "circle_colour": 'No',
+            },
+        },
+    }
+
+
+@pytest.fixture()
+def top35_data():
+    return {
+        # need to create test data
+        # "test": {
+        #     "docx_save_path": "resources/{}.docx",
+        #     "data": (cdg_masters(), cdg_project_info()),
+        #     "op_args": {
+        #         "quarter": ["Q4 20/21"],
+        #         "group": ["CFPD"],
+        #         "chart": True,
+        #         "data_type": "cdg",
+        #     },
+        # },
+        "real": {
+            "docx_save_path": str(top35_root_path / "output/{}.docx"),
+            "data": (top35_get_master_data(), top35_get_project_information()),
+            "op_args": {
+                "quarter": ["Q4 20/21"],
+                "group": ["HSRG", "RSS", "RIG", "RPE"],
+                "chart": True,
+                "data_type": "top35",
                 "circle_colour": 'No',
             },
         },

@@ -75,6 +75,8 @@ def initiate(args):
     print("creating a master data file for analysis_engine")
     try:
         master = Master(get_master_data(), get_project_information())
+        master.get_baseline_data()
+        master.check_baselines()
     except (ProjectNameError, ProjectGroupError, ProjectStageError) as e:
         logger.critical(e)
         sys.exit(1)

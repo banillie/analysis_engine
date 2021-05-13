@@ -78,8 +78,9 @@ from analysis_engine.data import (
     get_strategic_priorities_data,
     JsonData,
     open_json_file,
-    get_project_information,
+    get_project_information, run_p_reports,
 )
+from analysis_engine.top35_data import top35_run_p_reports
 
 SOT = "Sea of Tranquility"
 A11 = "Apollo 11"
@@ -495,7 +496,8 @@ def test_overall_dashboard(master_pickle, dashboard_template):
 
 def test_build_dandelion_graph(word_doc_landscape, ipdc_data):
     d = ipdc_data["test"]
-    # m = Master(*d["data"], **d["op_args"])  # currently necessary for cdg data
+    # m = Master(*d["data"], **d["op_args"])  # currently necessary for cdg and top35 data
+    # dl_data = DandelionData(m, **d["op_args"])
     dl_data = DandelionData(d["master"], **d["op_args"])
     d_lion = make_a_dandelion_auto(dl_data, **d["op_args"])
     put_matplotlib_fig_into_word(word_doc_landscape, d_lion, size=7)
@@ -584,3 +586,9 @@ def test_annual_report_summaries():
     data = get_ar_data()
     pi = get_project_information()
     ar_run_p_reports(data, pi)
+
+
+def test_top35_summaries(top35_data):
+    d = top35_data["real"]
+    m = Master(*d["data"], **d["op_args"] )
+    top35_run_p_reports(m, **d["op_args"])

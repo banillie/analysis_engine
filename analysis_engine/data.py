@@ -593,10 +593,10 @@ class Master:
         self.pipeline_list = []
         self.quarter_list = []
         self.get_quarter_list()
-        self.get_baseline_data()
+        # self.get_baseline_data()
         self.check_project_information()
         self.get_project_abbreviations()
-        self.check_baselines()
+        # self.check_baselines()
         self.get_project_groups()
         self.pipeline_projects_information()
 
@@ -725,6 +725,9 @@ class Master:
                 group_key = "Directorate"
                 group_dict = CDG_DIR_DICT
                 approval = "Last Business Case (BC) achieved"
+            if self.kwargs["data_type"] == "top35":
+                group_key = "Group"
+                group_dict = DFT_GROUP_DICT
         else:
             group_key = "Group"
             group_dict = DFT_GROUP_DICT
@@ -758,7 +761,10 @@ class Master:
                     raise ProjectGroupError(
                         "Program stopping as this could cause a crash. Please check project Group info."
                     )
-                stage = BC_STAGE_DICT[master[p][approval]]
+                try:
+                    stage = BC_STAGE_DICT[master[p][approval]]
+                except UnboundLocalError:  # top35 does not collect stage
+                    stage = "None"
                 raw_list.append(("group", dft_group))
                 raw_list.append(("stage", stage))
                 lower_dict[p] = dict(raw_list)
@@ -879,33 +885,57 @@ class CostData:
         # self.start_group = get_group(self.master, self.iter_list[0], self.kwargs)
 
         if "data_type" in self.kwargs:
-            for tp in self.iter_list:
-                c_spent = 0
-                c_remaining = 0
-                c_total = 0
-                in_achieved = 0
-                in_remaining = 0
-                in_total = 0
-                self.group = get_group(self.master, tp, self.kwargs)
-                for project_name in self.group:
-                    p_data = get_correct_p_data(
-                        self.kwargs, self.master, self.baseline_type, project_name, tp
-                    )
-                    c_spent += convert_none_types(p_data["Total Costs Spent"])
-                    c_remaining += convert_none_types(p_data["Total Costs Remaining"])
-                    c_total += convert_none_types(p_data["Total Costs"])
-                    in_achieved += convert_none_types(p_data["Total Income Achieved"])
-                    in_remaining += convert_none_types(p_data["Total Income Remaining"])
-                    in_total += convert_none_types(p_data["Total Income"])
+            if self.kwargs["data_type"] == "cdg":
+                for tp in self.iter_list:
+                    c_spent = 0
+                    c_remaining = 0
+                    c_total = 0
+                    in_achieved = 0
+                    in_remaining = 0
+                    in_total = 0
+                    self.group = get_group(self.master, tp, self.kwargs)
+                    for project_name in self.group:
+                        p_data = get_correct_p_data(
+                            self.kwargs, self.master, self.baseline_type, project_name, tp
+                        )
+                        c_spent += convert_none_types(p_data["Total Costs Spent"])
+                        c_remaining += convert_none_types(p_data["Total Costs Remaining"])
+                        c_total += convert_none_types(p_data["Total Costs"])
+                        in_achieved += convert_none_types(p_data["Total Income Achieved"])
+                        in_remaining += convert_none_types(p_data["Total Income Remaining"])
+                        in_total += convert_none_types(p_data["Total Income"])
 
-                lower_dict[tp] = {
-                    "costs_spent": c_spent,
-                    "costs_remaining": c_remaining,
-                    "total": c_total,
-                    "income_achieved": in_achieved,
-                    "income_remaining": in_remaining,
-                    "income_total": in_total,
-                }
+                    lower_dict[tp] = {
+                        "costs_spent": c_spent,
+                        "costs_remaining": c_remaining,
+                        "total": c_total,
+                        "income_achieved": in_achieved,
+                        "income_remaining": in_remaining,
+                        "income_total": in_total,
+                    }
+
+            if self.kwargs["data_type"] == "top35":
+                for tp in self.iter_list:
+                    rdel = 0
+                    cdel = 0
+                    c_total = 0
+                    non_gov = 0
+                    self.group = get_group(self.master, tp, self.kwargs)
+                    for project_name in self.group:
+                        p_data = get_correct_p_data(
+                            self.kwargs, self.master, self.baseline_type, project_name, tp
+                        )
+                        rdel += convert_none_types(p_data["WLC GOV RDEL"])
+                        cdel += convert_none_types(p_data["WLC GOV CDEL"])
+                        c_total += convert_none_types(p_data["WLC TOTAL"])
+                        non_gov += convert_none_types(p_data["WLC TOTAL"])
+
+                    lower_dict[tp] = {
+                        "costs_rdel": rdel,
+                        "costs_cdel": cdel,
+                        "total": c_total,
+                        "non_gov": non_gov,
+                    }
 
         else:
             for tp in self.iter_list:
@@ -1388,6 +1418,7 @@ def milestone_info_handling(output_list: list, t_list: list) -> list:
     """helper function for handling and cleaning up milestone date generated
     via MilestoneDate class. Removes none type milestone names and non date
     string values"""
+    # here use name tuple?
     if t_list[1][1] is None or t_list[1][1] == "Project - Business Case End Date":
         pass
     else:
@@ -1487,31 +1518,20 @@ class MilestoneData:
                     continue
                 # i loops below removes None Milestone names and rejects non-datetime date values.
                 p = self.master.abbreviations[project_name]["abb"]
-                for i in range(1, 50):
-                    try:
+                if self.kwargs["data_type"] == "top35":
+                    for i in range(1, 20):
                         t = [
                             ("Project", p),
-                            ("Milestone", p_data["Approval MM" + str(i)]),
-                            ("Type", "Approval"),
-                            (
-                                "Date",
-                                p_data["Approval MM" + str(i) + " Forecast / Actual"],
-                            ),
-                            ("Notes", p_data["Approval MM" + str(i) + " Notes"]),
+                            ("Milestone", p_data["MM" + str(i) + " name"]),
+                            # ("Type", "Approval"),
+                            ("Date", p_data["MM" + str(i) + " date"]),
+                            ("Notes", p_data["MM" + str(i) + " Comment"]),
+                            ("Status", p_data["MM" + str(i) + " status"])
                         ]
                         milestone_info_handling(project_list, t)
-                        t = [
-                            ("Project", p),
-                            ("Milestone", p_data["Assurance MM" + str(i)]),
-                            ("Type", "Assurance"),
-                            (
-                                "Date",
-                                p_data["Assurance MM" + str(i) + " Forecast - Actual"],
-                            ),
-                            ("Notes", p_data["Assurance MM" + str(i) + " Notes"]),
-                        ]
-                        milestone_info_handling(project_list, t)
-                    except KeyError:  # handles inconsistent keys naming for approval milestones.
+
+                else:
+                    for i in range(1, 50):
                         try:
                             t = [
                                 ("Project", p),
@@ -1519,51 +1539,74 @@ class MilestoneData:
                                 ("Type", "Approval"),
                                 (
                                     "Date",
-                                    p_data[
-                                        "Approval MM" + str(i) + " Forecast - Actual"
-                                    ],
+                                    p_data["Approval MM" + str(i) + " Forecast / Actual"],
                                 ),
                                 ("Notes", p_data["Approval MM" + str(i) + " Notes"]),
+                            ]
+                            milestone_info_handling(project_list, t)
+                            t = [
+                                ("Project", p),
+                                ("Milestone", p_data["Assurance MM" + str(i)]),
+                                ("Type", "Assurance"),
+                                (
+                                    "Date",
+                                    p_data["Assurance MM" + str(i) + " Forecast - Actual"],
+                                ),
+                                ("Notes", p_data["Assurance MM" + str(i) + " Notes"]),
+                            ]
+                            milestone_info_handling(project_list, t)
+                        except KeyError:  # handles inconsistent keys naming for approval milestones.
+                            try:
+                                t = [
+                                    ("Project", p),
+                                    ("Milestone", p_data["Approval MM" + str(i)]),
+                                    ("Type", "Approval"),
+                                    (
+                                        "Date",
+                                        p_data[
+                                            "Approval MM" + str(i) + " Forecast - Actual"
+                                        ],
+                                    ),
+                                    ("Notes", p_data["Approval MM" + str(i) + " Notes"]),
+                                ]
+                                milestone_info_handling(project_list, t)
+                            except KeyError:
+                                pass
+
+                    # handles inconsistent number of Milestone. could be incorporated above.
+                    for i in range(18, 67):
+                        try:
+                            t = [
+                                ("Project", p),
+                                ("Milestone", p_data["Project MM" + str(i)]),
+                                ("Type", "Delivery"),
+                                (
+                                    "Date",
+                                    p_data["Project MM" + str(i) + " Forecast - Actual"],
+                                ),
+                                ("Notes", p_data["Project MM" + str(i) + " Notes"]),
                             ]
                             milestone_info_handling(project_list, t)
                         except KeyError:
                             pass
 
-                # handles inconsistent number of Milestone. could be incorporated above.
-                for i in range(18, 67):
-                    try:
-                        t = [
-                            ("Project", p),
-                            ("Milestone", p_data["Project MM" + str(i)]),
-                            ("Type", "Delivery"),
-                            (
-                                "Date",
-                                p_data["Project MM" + str(i) + " Forecast - Actual"],
-                            ),
-                            ("Notes", p_data["Project MM" + str(i) + " Notes"]),
-                        ]
-                        milestone_info_handling(project_list, t)
-                    except KeyError:
-                        pass
-
-                # change in Q3. Some milestones collected via HMT approval section.
-                # this loop picks them up
-                # TODO check these are coming through in q3 data
-                for i in range(1, 4):
-                    try:
-                        t = [
-                            ("Project", p),
-                            ("Milestone", p_data["HMT Approval " + str(i)]),
-                            ("Type", "Approval"),
-                            (
-                                "Date",
-                                p_data["HMT Approval " + str(i) + " Forecast / Actual"],
-                            ),
-                            ("Notes", p_data["HMT Approval " + str(i) + " Notes"]),
-                        ]
-                        milestone_info_handling(project_list, t)
-                    except KeyError:
-                        pass
+                    # change in Q3. Some milestones collected via HMT approval section.
+                    # this loop picks them up
+                    for i in range(1, 4):
+                        try:
+                            t = [
+                                ("Project", p),
+                                ("Milestone", p_data["HMT Approval " + str(i)]),
+                                ("Type", "Approval"),
+                                (
+                                    "Date",
+                                    p_data["HMT Approval " + str(i) + " Forecast / Actual"],
+                                ),
+                                ("Notes", p_data["HMT Approval " + str(i) + " Notes"]),
+                            ]
+                            milestone_info_handling(project_list, t)
+                        except KeyError:
+                            pass
 
                 # loop to stop keys names being the same. Done at project level.
                 # not particularly concise code.
@@ -8124,7 +8167,10 @@ class DandelionData:
                         if "confidence" in self.kwargs:   # change confidence type here
                             rag = p_data[DCA_KEYS[self.kwargs["confidence"]]]
                         else:
-                            rag = p_data["Departmental DCA"]
+                            try:
+                                rag = p_data["Departmental DCA"]
+                            except KeyError:  # top35 has no rag data
+                                rag = None
                         colour = COLOUR_DICT[convert_rag_text(rag)]  # bubble colour
                     except TypeError:  # p_data is None for pipeline projects
                         colour = "#FFFFFF"
