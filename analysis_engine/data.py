@@ -923,14 +923,13 @@ class CostData:
                 unprof_cdel = 0
                 unprof_ngov = 0
                 self.group = get_group(self.master, tp, self.kwargs)
-                for x, key in enumerate(COST_TYPE_KEY_LIST):
-                    # group_total = 0
-                    for project_name in self.group:
-                        p_data = get_correct_p_data(
-                            self.kwargs, self.master, self.baseline_type, project_name, tp
-                        )
-                        if p_data is None:
-                            continue
+                for project_name in self.group:
+                    p_data = get_correct_p_data(
+                        self.kwargs, self.master, self.baseline_type, project_name, tp
+                    )
+                    if p_data is None:
+                        continue
+                    for x, key in enumerate(COST_TYPE_KEY_LIST):
                         try:
                             rdel = p_data[key[0]]
                             if rdel is None:
@@ -942,13 +941,8 @@ class CostData:
                             if ngov is None:
                                 ngov = 0
                             total = round(rdel + cdel + ngov)
-                            # group_total += total
                         except TypeError:  # handle None types, which are present if project not reporting last quarter.
-                            # rdel = 0
-                            # cdel = 0
-                            # ngov = 0
                             total = 0
-                            # group_total += total
 
                         if self.iter_list.index(tp) == 0:  # current quarter
                             if x == 0:  # spent
@@ -999,6 +993,11 @@ class CostData:
                             profiled += total
                         if x == 2:  # unprofiled
                             unprofiled += total
+
+                    # hard coded due to current use need.
+                    if project_name == "HS2 Phase 2b" or project_name == "HS2 Phase2a":
+                        profiled = profiled - p_data["Total Forecast - Income both Revenue and Capital"]
+                        total = total - p_data["Total Forecast - Income both Revenue and Capital"]
 
                 cat_spent = [spent_rdel, spent_cdel, spent_ngov]
                 cat_profiled = [prof_rdel, prof_cdel, prof_ngov]
@@ -1188,6 +1187,7 @@ def get_sp_data(master: Master, **kwargs) -> Dict[str, float]:
             cat_list = ["cdel", "rdel", "ngov"]
             kwargs["group"] = [group]
             c = CostData(master, **kwargs)
+            c.get_cost_profile()
             for cat in cat_list:
                 sp_dict[cat] = c.c_profiles[tp][cat]
         else:
@@ -1195,6 +1195,7 @@ def get_sp_data(master: Master, **kwargs) -> Dict[str, float]:
                 for i, g in enumerate(group):
                     kwargs["group"] = [g]
                     c = CostData(master, **kwargs)
+                    c.get_cost_profile()
                     sp_dict[g] = c.c_profiles[tp]["prof"]
             else:
                 for i, g in enumerate(group):
@@ -1203,6 +1204,7 @@ def get_sp_data(master: Master, **kwargs) -> Dict[str, float]:
                     for p in low_group:
                         kwargs["group"] = [p]
                         c = CostData(master, **kwargs)
+                        c.get_cost_profile()
                         sp_dict[master.abbreviations[p]["abb"]] = c.c_profiles[tp][
                             "prof"
                         ]
@@ -5655,6 +5657,7 @@ def compile_p_report(
     dca_table(doc, master, project_name)
     dca_narratives(doc, master, project_name)
     costs = CostData(master, group=[project_name], baseline=["standard"])
+    costs.get_cost_profile()
     benefits = BenefitsData(master, group=[project_name], baseline=["standard"])
     milestones = MilestoneData(master, group=[project_name], baseline=["standard"])
     project_report_meta_data(doc, costs, milestones, benefits, project_name)
@@ -8125,6 +8128,9 @@ class DandelionData:
                         colour = COLOUR_DICT[convert_rag_text(rag)]  # bubble colour
                     except TypeError:  # p_data is None for pipeline projects
                         colour = "#FFFFFF"
+                    if "circle_colour" in self.kwargs:
+                        if self.kwargs["circle_colour"] == 'No':
+                            colour = FACE_COLOUR
                     project_text = (
                         self.master.abbreviations[p]["abb"]
                         + "\n"
@@ -8132,10 +8138,11 @@ class DandelionData:
                     )
                     if p_value == 0:
                         p_value = g_wlc / 10
-                    if colour == "#FFFFFF":
-                        edge_colour = "grey"
-                    elif p in self.master.dft_groups[tp]["GMPP"]:
-                        edge_colour = "#000000"  # edge of bubble
+                    if colour == "#FFFFFF" or colour == FACE_COLOUR:
+                        if p in self.master.dft_groups[tp]["GMPP"]:
+                            edge_colour = "#000000"
+                        else:
+                            edge_colour = "grey"
                     else:
                         edge_colour = colour
 

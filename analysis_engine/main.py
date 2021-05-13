@@ -111,6 +111,7 @@ def run_general(args):
 
         if programme == "costs":
             c = CostData(m, **op_args)
+            c.get_cost_profile()
             wb = cost_profile_into_wb(c)
             if "chart" not in op_args:
                 op_args["chart"] = True
@@ -546,6 +547,15 @@ def main():
         action="store",
         choices=["G", "A/G", "A", "A/R", "R"],
         help="specify the colour for the overall portfolio circle",
+    )
+
+    parser_dandelion.add_argument(
+        "--circle_colour",
+        type=str,
+        metavar="",
+        action="store",
+        choices=["No", "Yes"],
+        help="specify whether to colour circles with DCA rating colours",
     )
 
     # chart
