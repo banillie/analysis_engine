@@ -158,8 +158,8 @@ def test_get_project_abbreviations(basic_masters_dicts, project_info):
 #     master.check_baselines()
 
 
-def test_calculating_spent(master_pickle):
-    test_dict = master_pickle.master_data[0]
+def test_calculating_spent(ipdc_data):
+    test_dict = ipdc_data["test"]["master"].master_data[0]
     spent = spent_calculation(test_dict, "Sea of Tranquility")
     assert spent == 1409.33
 
@@ -182,13 +182,13 @@ def test_word_doc_heading(word_doc, project_info):
     word_doc.save("resources/summary_temp_altered.docx")
 
 
-def test_word_doc_contacts(word_doc, master_pickle):
-    key_contacts(word_doc, master_pickle, "Apollo 13")
+def test_word_doc_contacts(word_doc, ipdc_data):
+    key_contacts(word_doc, ipdc_data["test"]["master"], "Apollo 13")
     word_doc.save("resources/summary_temp_altered.docx")
 
 
-def test_word_doc_dca_table(word_doc, master_pickle):
-    dca_table(word_doc, master_pickle, "Falcon 9")
+def test_word_doc_dca_table(word_doc, ipdc_data):
+    dca_table(word_doc, ipdc_data["test"]["master"], "Falcon 9")
     word_doc.save("resources/summary_temp_altered.docx")
 
 
@@ -204,11 +204,6 @@ def test_project_report_meta_data(word_doc, master_pickle):
     benefits = BenefitsData(master_pickle, quarter=["standard"], group=project)
     project_report_meta_data(word_doc, cost, milestones, benefits, *project)
     word_doc.save("resources/summary_temp_altered.docx")
-
-
-def test_get_project_cost_profile(master_pickle):
-    costs = CostData(master_pickle, group=[MARS], baseline=["standard"])
-    assert len(costs.c_profiles["current"]["prof"]) == 24
 
 
 def test_project_cost_profile_chart(master_pickle):
@@ -479,10 +474,10 @@ def test_financial_dashboard(master_pickle, dashboard_template):
     wb.save("resources/test_dashboards_master_altered.xlsx")
 
 
-def test_schedule_dashboard(master_pickle, dashboard_template):
-    milestones = MilestoneData(master_pickle, baseline=["all"])
+def test_schedule_dashboard(ipdc_data, dashboard_template):
+    milestones = MilestoneData(ipdc_data, baseline=["all"])
     milestones.filter_chart_info(milestone_type=["Approval", "Delivery"])
-    wb = schedule_dashboard(master_pickle, milestones, dashboard_template)
+    wb = schedule_dashboard(ipdc_data, milestones, dashboard_template)
     wb.save("resources/test_dashboards_master_altered.xlsx")
 
 
@@ -498,26 +493,13 @@ def test_overall_dashboard(master_pickle, dashboard_template):
     wb.save("resources/test_dashboards_master_altered.xlsx")
 
 
-def test_build_dandelion_graph_auto(master_pickle, word_doc):
-    d_data = DandelionData(
-        master_pickle,
-        quarter=["Q4 18/19"],
-        # group=["RIG", "HSRG"],
-        stage=["pipeline", "OBC", "FBC"],
-    )
-    make_a_dandelion_auto(d_data, chart=True)
-
-
-# @pytest.mark.skip(reason="test resources not currently available")
-def test_cdg_build_dandelion_graph_auto(word_doc_landscape, cdg_data):
-    cdg_data_type = cdg_data
-    d = cdg_data_type["test"]
-
-    m = Master(*d["data"], **d["op_args"])
-    dl_data = DandelionData(m, **d["op_args"])
-    d_lion = make_a_dandelion_auto(dl_data)
+def test_build_dandelion_graph(word_doc_landscape, ipdc_data):
+    d = ipdc_data["test"]
+    # m = Master(*d["data"], **d["op_args"])  # currently necessary for cdg data
+    dl_data = DandelionData(d["master"], **d["op_args"])
+    d_lion = make_a_dandelion_auto(dl_data, **d["op_args"])
     put_matplotlib_fig_into_word(word_doc_landscape, d_lion, size=7)
-    word_doc_landscape.save(d["save_path"])
+    word_doc_landscape.save(d["docx_save_path"].format("ipdc_d_graph"))
 
 
 def test_data_queries_non_milestone(master_pickle):

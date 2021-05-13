@@ -8,7 +8,7 @@ from analysis_engine.cdg_data import (
     cdg_get_master_data,
     cdg_get_project_information,
 )
-from analysis_engine.data import open_word_doc, open_pickle_file
+from analysis_engine.data import open_word_doc, open_pickle_file, root_path
 
 
 def pytest_addoption(parser):
@@ -132,7 +132,7 @@ def json_path():
     return os.path.join(os.getcwd(), "resources/" "json_master")
 
 
-@pytest.fixture()
+# @pytest.fixture()
 def master_pickle():
     return open_pickle_file(os.path.join(os.getcwd(), "resources/test_master.pickle"))
 
@@ -188,7 +188,7 @@ def sp_data():
 def cdg_data():
     return {
         "test": {
-            "save_path": "resources/cdg_portfolio_graph.xlsx",
+            "docx_save_path": "resources/{}.docx",
             "data": (cdg_masters(), cdg_project_info()),
             "op_args": {
                 "quarter": ["Q4 20/21"],
@@ -198,13 +198,39 @@ def cdg_data():
             },
         },
         "real": {
-            "save_path": cdg_root_path / "output/cdg_dandelion_graph.docx",
+            "docx_save_path": cdg_root_path / "output/{}.docx",
             "data": (cdg_get_master_data(), cdg_get_project_information()),
             "op_args": {
                 "quarter": ["Q4 20/21"],
                 "group": ["GF", "CFPD", "SCS"],
                 "chart": True,
                 "data_type": "cdg",
+            },
+        },
+    }
+
+
+@pytest.fixture()
+def ipdc_data():
+    return {
+        "test": {
+            "docx_save_path": "resources/{}.docx",
+            "master": master_pickle(),
+            "op_args": {
+                "quarter": ["Q1 20/21"],
+                "group": ["HSRG", "RSS", "RIG", "AMIS", "RPE"],
+                "chart": True,
+            },
+        },
+        "real": {
+            "docx_save_path": str(root_path / "output/{}.docx"),
+            "master": open_pickle_file(str(root_path / "core_data/pickle/master.pickle")),
+            "op_args": {
+                "quarter": ["Q4 20/21"],
+                # "group": ["HSRG", "RSS", "RIG", "AMIS", "RPE"],
+                "group": ["HSRG"],
+                "chart": True,
+                "circle_colour": 'No',
             },
         },
     }
