@@ -319,7 +319,7 @@ def top35_run_p_reports(master: Master, **kwargs) -> None:
         print("Compiling summary for " + p)
         report_doc = open_word_doc(top35_root_path / "input/summary_temp.docx")
         # qrt = make_file_friendly(str(master.master_data[0].quarter))
-        output = compile_p_report(report_doc, top35_get_project_information(), master, p)
+        output = compile_p_report(report_doc, master, p, **kwargs)
         p_name = master.project_information.data[p]["Abbreviations"]
         output.save(
             top35_root_path / "output/{}_report.docx".format(p_name)
@@ -362,20 +362,21 @@ def run_pm_one_lines_single(master: Master, prog_info: Dict, **kwargs) -> None:
 
 def compile_p_report(
     doc: Document,
-    project_info: Dict[str, Union[str, int, date, float]],
     master: Master,
     project_name: str,
+    **kwargs,
 ) -> Document:
     p_master = master.master_data[0].data[project_name]
     r_args = [doc, p_master]
-    wd_heading(doc, project_info, project_name)
+    wd_heading(doc, master.project_information, project_name)
     key_contacts(*r_args)
     project_scope_text(*r_args)
     deliverables(*r_args)
     project_report_meta_data(*r_args)
     # doc.add_section(WD_SECTION_START.NEW_PAGE)
     dca_narratives(*r_args)
-    ms = MilestoneData(master, "ipdc_milestones", **master.kwargs)  # milestones
+    kwargs["group"] = [project_name]
+    ms = MilestoneData(master, "ipdc_milestones", **kwargs)  # milestones
     print_out_project_milestones(doc, ms)
     cs = CentralSupportData(master, group=[project_name], quarter=["Q4 20/21"]) # central support
     print_out_central_support(doc, cs)
@@ -1641,3 +1642,4 @@ def get_dandelion_type_total(
     else:
         cost = CostData(master, **kwargs)  # group costs data
         return cost.c_totals[tp]["total"]
+

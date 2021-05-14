@@ -16,6 +16,7 @@ from typing import List, Dict, Union, Optional, Tuple, TextIO
 # import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from datetime import timedelta, date
+
 # import matplotlib.pyplot as plt
 from matplotlib.patches import Circle, RegularPolygon
 from matplotlib.path import Path
@@ -384,8 +385,7 @@ CDG_BASELINE_TYPES = {
     "BC approved by CDG Board in quarter": "quarter",
     "Costs re-baselined by CDG in quarter": "costs",
     "Schedule re-baselined by CDG in quarter": "schedule",
-    "Benefits re-baselined by CDG in quarter": "benefits"
-
+    "Benefits re-baselined by CDG in quarter": "benefits",
 }
 IPDC_BASELINE_TYPES = {
     "Re-baseline IPDC milestones": "ipdc_milestones",
@@ -841,7 +841,9 @@ class Master:
         for p in self.project_information.projects:
             if self.project_information[p]["Pipeline"] is not None:
                 wlc = convert_none_types(self.project_information[p]["WLC"])
-                pipeline_dict[p] = {"wlc": convert_none_types(self.project_information[p]["WLC"])}
+                pipeline_dict[p] = {
+                    "wlc": convert_none_types(self.project_information[p]["WLC"])
+                }
                 pipeline_list.append(p)
                 total_wlc += wlc
         pipeline_dict["pipeline"] = {"wlc": total_wlc}
@@ -896,13 +898,23 @@ class CostData:
                     self.group = get_group(self.master, tp, self.kwargs)
                     for project_name in self.group:
                         p_data = get_correct_p_data(
-                            self.kwargs, self.master, self.baseline_type, project_name, tp
+                            self.kwargs,
+                            self.master,
+                            self.baseline_type,
+                            project_name,
+                            tp,
                         )
                         c_spent += convert_none_types(p_data["Total Costs Spent"])
-                        c_remaining += convert_none_types(p_data["Total Costs Remaining"])
+                        c_remaining += convert_none_types(
+                            p_data["Total Costs Remaining"]
+                        )
                         c_total += convert_none_types(p_data["Total Costs"])
-                        in_achieved += convert_none_types(p_data["Total Income Achieved"])
-                        in_remaining += convert_none_types(p_data["Total Income Remaining"])
+                        in_achieved += convert_none_types(
+                            p_data["Total Income Achieved"]
+                        )
+                        in_remaining += convert_none_types(
+                            p_data["Total Income Remaining"]
+                        )
                         in_total += convert_none_types(p_data["Total Income"])
 
                     lower_dict[tp] = {
@@ -923,7 +935,11 @@ class CostData:
                     self.group = get_group(self.master, tp, self.kwargs)
                     for project_name in self.group:
                         p_data = get_correct_p_data(
-                            self.kwargs, self.master, self.baseline_type, project_name, tp
+                            self.kwargs,
+                            self.master,
+                            self.baseline_type,
+                            project_name,
+                            tp,
                         )
                         rdel += convert_none_types(p_data["WLC GOV RDEL"])
                         cdel += convert_none_types(p_data["WLC GOV CDEL"])
@@ -977,10 +993,14 @@ class CostData:
                         if self.iter_list.index(tp) == 0:  # current quarter
                             if x == 0:  # spent
                                 try:  # handling for spend to date figures which are not present in all masters
-                                    rdel_std = p_data["20-21 RDEL STD one off new costs"]
+                                    rdel_std = p_data[
+                                        "20-21 RDEL STD one off new costs"
+                                    ]
                                     if rdel_std is None:
                                         rdel_std = 0
-                                    cdel_std = p_data["20-21 CDEL STD one off new costs"]
+                                    cdel_std = p_data[
+                                        "20-21 CDEL STD one off new costs"
+                                    ]
                                     if cdel_std is None:
                                         cdel_std = 0
                                     ngov_std = p_data["20-21 CDEL STD Non Gov costs"]
@@ -1026,8 +1046,14 @@ class CostData:
 
                     # hard coded due to current use need.
                     if project_name == "HS2 Phase 2b" or project_name == "HS2 Phase2a":
-                        profiled = profiled - p_data["Total Forecast - Income both Revenue and Capital"]
-                        total = total - p_data["Total Forecast - Income both Revenue and Capital"]
+                        profiled = (
+                            profiled
+                            - p_data["Total Forecast - Income both Revenue and Capital"]
+                        )
+                        total = (
+                            total
+                            - p_data["Total Forecast - Income both Revenue and Capital"]
+                        )
 
                 cat_spent = [spent_rdel, spent_cdel, spent_ngov]
                 cat_profiled = [prof_rdel, prof_cdel, prof_ngov]
@@ -1036,7 +1062,9 @@ class CostData:
                     unprof_cdel,
                     unprof_ngov,
                 ]
-                cat_profiled = calculate_profiled(cat_profiled, cat_spent, cat_unprofiled)
+                cat_profiled = calculate_profiled(
+                    cat_profiled, cat_spent, cat_unprofiled
+                )
 
                 adj_profiled = calculate_profiled(
                     profiled, spent, unprofiled
@@ -1523,10 +1551,9 @@ class MilestoneData:
                         t = [
                             ("Project", p),
                             ("Milestone", p_data["MM" + str(i) + " name"]),
-                            # ("Type", "Approval"),
-                            ("Date", p_data["MM" + str(i) + " date"]),
                             ("Notes", p_data["MM" + str(i) + " Comment"]),
-                            ("Status", p_data["MM" + str(i) + " status"])
+                            ("Date", p_data["MM" + str(i) + " date"]),
+                            ("Status", p_data["MM" + str(i) + " status"]),
                         ]
                         milestone_info_handling(project_list, t)
 
@@ -1539,7 +1566,9 @@ class MilestoneData:
                                 ("Type", "Approval"),
                                 (
                                     "Date",
-                                    p_data["Approval MM" + str(i) + " Forecast / Actual"],
+                                    p_data[
+                                        "Approval MM" + str(i) + " Forecast / Actual"
+                                    ],
                                 ),
                                 ("Notes", p_data["Approval MM" + str(i) + " Notes"]),
                             ]
@@ -1550,7 +1579,9 @@ class MilestoneData:
                                 ("Type", "Assurance"),
                                 (
                                     "Date",
-                                    p_data["Assurance MM" + str(i) + " Forecast - Actual"],
+                                    p_data[
+                                        "Assurance MM" + str(i) + " Forecast - Actual"
+                                    ],
                                 ),
                                 ("Notes", p_data["Assurance MM" + str(i) + " Notes"]),
                             ]
@@ -1564,10 +1595,15 @@ class MilestoneData:
                                     (
                                         "Date",
                                         p_data[
-                                            "Approval MM" + str(i) + " Forecast - Actual"
+                                            "Approval MM"
+                                            + str(i)
+                                            + " Forecast - Actual"
                                         ],
                                     ),
-                                    ("Notes", p_data["Approval MM" + str(i) + " Notes"]),
+                                    (
+                                        "Notes",
+                                        p_data["Approval MM" + str(i) + " Notes"],
+                                    ),
                                 ]
                                 milestone_info_handling(project_list, t)
                             except KeyError:
@@ -1582,7 +1618,9 @@ class MilestoneData:
                                 ("Type", "Delivery"),
                                 (
                                     "Date",
-                                    p_data["Project MM" + str(i) + " Forecast - Actual"],
+                                    p_data[
+                                        "Project MM" + str(i) + " Forecast - Actual"
+                                    ],
                                 ),
                                 ("Notes", p_data["Project MM" + str(i) + " Notes"]),
                             ]
@@ -1600,7 +1638,9 @@ class MilestoneData:
                                 ("Type", "Approval"),
                                 (
                                     "Date",
-                                    p_data["HMT Approval " + str(i) + " Forecast / Actual"],
+                                    p_data[
+                                        "HMT Approval " + str(i) + " Forecast / Actual"
+                                    ],
                                 ),
                                 ("Notes", p_data["HMT Approval " + str(i) + " Notes"]),
                             ]
@@ -1648,6 +1688,7 @@ class MilestoneData:
             g_dates = []  # graph dates
             r_dates = []  # raw dates
             notes = []
+            status = []
             for v in self.milestone_dict[self.iter_list[0]].values():
                 p = None  # project
                 mn = None  # milestone name
@@ -1666,6 +1707,10 @@ class MilestoneData:
                         g_dates.append(d)
                         r_dates.append(d)
                         notes.append(x["Notes"])
+                        try:
+                            status.append(x["Status"])
+                        except KeyError:
+                            pass
                         break
                 if p is None and mn is None and d is None:
                     p = v["Project"]
@@ -1676,12 +1721,14 @@ class MilestoneData:
                     g_dates.append(v["Date"])
                     r_dates.append(None)
                     notes.append(None)
+                    status.append(None)
 
             output_dict[i] = {
                 "names": key_names,
                 "g_dates": g_dates,
                 "r_dates": r_dates,
                 "notes": notes,
+                "status": status,  # only present for top35
             }
 
         self.sorted_milestone_dict = output_dict
@@ -2711,10 +2758,10 @@ def get_word_doc() -> Document():
 
 
 def wd_heading(
-        doc: Document,
-        project_info: Dict[str, Union[str, int]],
-        project_name: str,
-        **kwargs,
+    doc: Document,
+    project_info: Dict[str, Union[str, int]],
+    project_name: str,
+    **kwargs,
 ) -> None:
     """Function adds header to word doc"""
     font = doc.styles["Normal"].font
@@ -2725,9 +2772,7 @@ def wd_heading(
         if kwargs["data_type"] == "ar":
             heading = project_name
     else:
-        heading = str(
-            project_info.data[project_name]["Abbreviations"]
-        )
+        heading = str(project_info.data[project_name]["Abbreviations"])
     intro = doc.add_heading(str(heading), 0)
     intro.alignment = 1
     intro.bold = True
@@ -6827,8 +6872,16 @@ class JsonData:
         self.put_into_json()
 
     def put_into_json(self) -> None:
+        data = self.master.data
+        projects = self.master.projects
+        qrt = str(str(self.master.quarter))
+        b = {
+            "data": data,
+            "projects": projects,
+            "quarter": qrt,
+        }
         with open(self.path + ".json", "w") as write_file:
-            json.dump(self.master, write_file, default=json_date_converter)
+            json.dump(b, write_file, default=json_date_converter)
             # json.dump(self.master, write_file)
 
 
@@ -8005,6 +8058,7 @@ class DandelionData:
     """
     Data class for dandelion info graphic. Output dictionary to d_data()
     """
+
     def __init__(self, master: Master, **kwargs):
         self.master = master
         self.kwargs = kwargs
@@ -8016,7 +8070,9 @@ class DandelionData:
 
     def get_data(self):
         self.iter_list = get_iter_list(self.kwargs, self.master)
-        for tp in self.iter_list:  # although tp is iterated only one can be handled for now.
+        for (
+            tp
+        ) in self.iter_list:  # although tp is iterated only one can be handled for now.
 
             #  for dandelion need groups of groups.
             if "group" in self.kwargs:
@@ -8055,9 +8111,7 @@ class DandelionData:
             else:
                 pf_colour = "#FFFFFF"
                 pf_colour_edge = "grey"
-            pf_text = "Portfolio\n" + dandelion_number_text(
-                pf_wlc
-            )
+            pf_text = "Portfolio\n" + dandelion_number_text(pf_wlc)
 
             ## center circle
             g_d["portfolio"] = {
@@ -8164,7 +8218,7 @@ class DandelionData:
                         self.kwargs, self.master, self.baseline_type, p, tp
                     )
                     try:  # this is for pipeline projects
-                        if "confidence" in self.kwargs:   # change confidence type here
+                        if "confidence" in self.kwargs:  # change confidence type here
                             rag = p_data[DCA_KEYS[self.kwargs["confidence"]]]
                         else:
                             try:
@@ -8175,7 +8229,7 @@ class DandelionData:
                     except TypeError:  # p_data is None for pipeline projects
                         colour = "#FFFFFF"
                     if "circle_colour" in self.kwargs:
-                        if self.kwargs["circle_colour"] == 'No':
+                        if self.kwargs["circle_colour"] == "No":
                             colour = FACE_COLOUR
                     project_text = (
                         self.master.abbreviations[p]["abb"]
@@ -8762,7 +8816,6 @@ def simple_horz_bar_chart(wb_path: TextIO) -> Dict:
     #     y = p.get_y() + p.get_height() / 2
     #     ax.annotate(percentage, (x, y))
 
-
     ax.set_yticks(type_names)
     # ax.set_xlabel('Percentage')
     # ax.set_title('Run Time by Job')
@@ -9026,5 +9079,3 @@ def get_strategic_priorities_data(
     radar_data = [categories, (title, top_list)]
 
     return radar_data
-
-

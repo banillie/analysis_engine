@@ -572,8 +572,7 @@ def test_strategic_priority_data(sp_data, master_pickle):
 
 
 def test_json_master_save(basic_masters_dicts, project_info, json_path):
-    # master = Master(basic_masters_dicts[0].data, project_info)
-    JsonData(basic_masters_dicts[0].data, json_path)
+    JsonData(basic_masters_dicts[0], json_path)
 
 
 def test_json_master_open(json_path):
