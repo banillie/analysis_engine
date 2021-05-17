@@ -233,7 +233,8 @@ def top35_data():
             "data": (top35_master(), top35_project_information()),
             "op_args": {
                 "quarter": ["Q4 20/21"],
-                "group": ["HSRG", "RSS", "RIG", "RPE"],
+                # "group": ["HSRG", "RSS", "RIG", "RPE"],
+                "group": ["RIG"],
                 "chart": True,
                 "data_type": "top35",
                 "circle_colour": 'No',

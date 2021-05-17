@@ -591,7 +591,5 @@ def test_annual_report_summaries():
 
 
 def test_top35_summaries(top35_data):
-    #Here
-    d = top35_data["test"]
-    m = Master(*d["data"], **d["op_args"] )
-    top35_run_p_reports(m, **d["op_args"])
+    m = Master(*top35_data["data"], **top35_data["op_args"] )
+    top35_run_p_reports(m, **top35_data["op_args"])

@@ -551,6 +551,24 @@ FILE_FORMATS = [
 ]
 FIGURE_STYLE = {1: "half_horizontal", 2: "full_horizontal"}
 
+COLOUR_DICT = {
+    "A": "#ffba00",
+    "A/G": "#92a700",
+    "A/R": "#e77200",
+    "R": "#c00000",
+    "G": "#007d00",
+    "": "#FFFFFF",  # white if missing
+    "W": "#ffffff",
+    "Amber": "#ffba00",
+    "Amber/Green": "#92a700",
+    "Amber/Red": "#e77200",
+    "Red": "#c00000",
+    "Green": "#007d00",
+    "None": "#FFFFFF",  # white if missing
+    None: "#FFFFFF",  # white if missing
+    "White": "#ffffff",
+}
+
 
 def calculate_profiled(
     p: int or List[int], s: int or List[int], unpro: int or List[int]
@@ -5071,25 +5089,6 @@ def sort_projects_by_dca(
     rag_list_sorted = sorted(rag_list, key=lambda x: x[1])
 
     return rag_list_sorted
-
-
-COLOUR_DICT = {
-    "A": "#fce553",
-    "A/G": "#a5b700",
-    "A/R": "#f97b31",
-    "R": "#cb1f00",
-    "G": "#17960c",
-    "": "#FFFFFF",  # white if missing
-    "W": "#ffffff",
-    "Amber": "#fce553",
-    "Amber/Green": "#a5b700",
-    "Amber/Red": "#f97b31",
-    "Red": "#cb1f00",
-    "Green": "#17960c",
-    "None": "#FFFFFF",  # white if missing
-    None: "#FFFFFF",  # white if missing
-    "White": "#ffffff",
-}
 
 
 def cost_schedule_scatter_chart_matplotlib(milestones: MilestoneData, costs: CostData):
