@@ -124,11 +124,11 @@ ipdc_data_dict = {
 #     }
 
 ## DANDELION
-data = top35_data_dict
-dl_data = DandelionData(data["master"], **data["op_args"])
-d_lion = make_a_dandelion_auto(dl_data, **data["op_args"])
-put_matplotlib_fig_into_word(word_doc_landscape, d_lion, size=7)
-word_doc_landscape.save(data["docx_save_path"].format("dandelion_graph"))
+# data = top35_data_dict
+# dl_data = DandelionData(data["master"], **data["op_args"])
+# d_lion = make_a_dandelion_auto(dl_data, **data["op_args"])
+# put_matplotlib_fig_into_word(word_doc_landscape, d_lion, size=7)
+# word_doc_landscape.save(data["docx_save_path"].format("dandelion_graph"))
 
 
 ## MILESTONES
@@ -165,12 +165,12 @@ word_doc_landscape.save(data["docx_save_path"].format("dandelion_graph"))
 # c = CostData(m, **op_args)
 # cost_profile_graph(c, m, chart=True, group=c.start_group)
 
-# SUMMARYS
-# m = Master(*top35_data_dict["data"], **top35_data_dict["op_args"] )
-# top35_run_p_reports(m, **top35_data_dict["op_args"])
+# SUMMARIES
+data = top35_data_dict
+top35_run_p_reports(data["master"], **data["op_args"])
 
 ## VFM
-# c = VfMData(m, group=DFT_GROUP, quarter=["standard"])  # c is class
+# c = VfMData(m, group=DFm = Master(*data["data"], **data["op_args"] )T_GROUP, quarter=["standard"])  # c is class
 # wb = vfm_into_excel(c)
 
 ## RISKS

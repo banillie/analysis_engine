@@ -1,7 +1,5 @@
 import argparse
 from argparse import RawTextHelpFormatter
-import itertools
-import os
 import sys
 from typing import Dict
 
@@ -22,15 +20,12 @@ from analysis_engine.data import (
     DcaData,
     dca_changes_into_excel,
     dca_changes_into_word,
-    open_word_doc,
     Pickle,
     open_pickle_file,
     ipdc_dashboard,
     CostData,
     cost_v_schedule_chart_into_wb,
-    make_file_friendly,
     DandelionData,
-    # dandelion_data_into_wb,
     put_matplotlib_fig_into_word,
     cost_profile_into_wb,
     cost_profile_graph,
@@ -40,9 +35,7 @@ from analysis_engine.data import (
     ProjectGroupError,
     ProjectStageError,
     milestone_chart,
-    get_sp_data,
     cost_stackplot_graph,
-    cal_group,
     make_a_dandelion_auto,
     build_speedials,
     get_sp_data,
@@ -69,7 +62,7 @@ def check_remove(op_args):  # subcommand arg
             if p + " successfully removed from analysis." not in CURRENT_LOG:
                 logger.warning(
                     p + " not recognised and therefore not removed from analysis."
-                        ' Please make sure "remove" entry is correct.'
+                    ' Please make sure "remove" entry is correct.'
                 )
 
 
@@ -162,7 +155,12 @@ def run_general(args):
         if programme == "milestones":
             ms = MilestoneData(m, **op_args)
 
-            if "type" in op_args or "dates" in op_args or "koi" in op_args or "koi_fn" in op_args:
+            if (
+                "type" in op_args
+                or "dates" in op_args
+                or "koi" in op_args
+                or "koi_fn" in op_args
+            ):
                 op_args = return_koi_fn_keys(op_args)
                 ms.filter_chart_info(**op_args)
 
@@ -173,7 +171,9 @@ def run_general(args):
                     op_args["chart"] = False
                     ms_graph = milestone_chart(ms, m, **op_args)
                     doc = get_input_doc(root_path / "input/summary_temp_landscape.docx")
-                    put_matplotlib_fig_into_word(doc, ms_graph, size=8, transparent=False)
+                    put_matplotlib_fig_into_word(
+                        doc, ms_graph, size=8, transparent=False
+                    )
                     doc.save(root_path / "output/milestones_chart.docx")
                 if op_args["chart"] == "show":
                     milestone_chart(ms, m, **op_args)
@@ -181,7 +181,9 @@ def run_general(args):
             wb = put_milestones_into_wb(ms)
 
         if programme == "dandelion":
-            if op_args["quarter"] == ["standard"]:  # converts "standard" default to current quarter
+            if op_args["quarter"] == [
+                "standard"
+            ]:  # converts "standard" default to current quarter
                 op_args["quarter"] = [str(m.current_quarter)]
             d_data = DandelionData(m, **op_args)
             if "chart" not in op_args:
@@ -218,7 +220,9 @@ def run_general(args):
 
         if programme == "query":
             if "koi" not in op_args and "koi_fn" not in op_args:
-                logger.critical("Please enter a key name(s) using either --keys or --file_name")
+                logger.critical(
+                    "Please enter a key name(s) using either --keys or --file_name"
+                )
                 sys.exit(1)
             op_args = return_koi_fn_keys(op_args)
             wb = data_query_into_wb(m, **op_args)
@@ -247,9 +251,7 @@ def return_koi_fn_keys(oa: Dict):  # op_args
     """small helper function to convert key names in file into list of strings
     and place in op_args dictionary"""
     if "koi_fn" in oa:
-        keys = get_data_query_key_names(
-            root_path / "input/{}.csv".format(oa["koi_fn"])
-        )
+        keys = get_data_query_key_names(root_path / "input/{}.csv".format(oa["koi_fn"]))
         oa["key"] = keys
         return oa
     if "koi" in oa:
@@ -270,7 +272,7 @@ def main():
         prog="engine", description=ae_description, formatter_class=RawTextHelpFormatter
     )
     subparsers = parser.add_subparsers(dest="subparser_name")
-    subparsers.metavar = "subcommand                "
+    subparsers.metavar = "               "
     parser_initiate = subparsers.add_parser(
         "initiate", help="creates a master data file"
     )
@@ -332,7 +334,9 @@ def main():
     parser_risks = subparsers.add_parser("risks", help="risk analysis")
     parser_dca = subparsers.add_parser("dcas", help="dca analysis")
     parser_speedial = subparsers.add_parser("speedial", help="speed dial analysis")
-    parser_matrix = subparsers.add_parser("matrix", help="cost v schedule chart. In development not working.")
+    parser_matrix = subparsers.add_parser(
+        "matrix", help="cost v schedule chart. In development not working."
+    )
     parser_data_query = subparsers.add_parser(
         "query", help="return data from core data"
     )
@@ -359,7 +363,7 @@ def main():
             nargs="+",
             choices=["FBC", "OBC", "SOBC", "pre-SOBC"],
             help="Returns analysis for only those projects at the specified planning stage(s). User must enter one "
-                 'or combination of "FBC", "OBC", "SOBC", "pre-SOBC".',
+            'or combination of "FBC", "OBC", "SOBC", "pre-SOBC".',
         )
     # stage dandelion only
     parser_dandelion.add_argument(
@@ -370,7 +374,7 @@ def main():
         nargs="+",
         choices=["FBC", "OBC", "SOBC", "pre-SOBC", "pipeline"],
         help="Returns analysis for only those projects at the specified planning stage(s). User must enter one "
-             'or combination of "FBC", "OBC", "SOBC", "pre-SOBC". For dandelion "pipeline" is also available',
+        'or combination of "FBC", "OBC", "SOBC", "pre-SOBC". For dandelion "pipeline" is also available',
     )
 
     # group
@@ -394,7 +398,7 @@ def main():
             action="store",
             nargs="+",
             help="Returns analysis for specified project(s), only. User must enter one or a combination of "
-                 'DfT Group names; "HSRG", "RSS", "RIG", "AMIS","RPE", or the project(s) acronym or full name.',
+            'DfT Group names; "HSRG", "RSS", "RIG", "AMIS","RPE", or the project(s) acronym or full name.',
         )
     # remove
     for sub in [
@@ -415,8 +419,8 @@ def main():
             action="store",
             nargs="+",
             help="Removes specified projects from analysis. User must enter one or a combination of either"
-                 " a recognised DfT Group name, a recognised planning stage or the project(s) acronym or full"
-                 " name.",
+            " a recognised DfT Group name, a recognised planning stage or the project(s) acronym or full"
+            " name.",
         )
     # quarter
     for sub in [
@@ -437,7 +441,7 @@ def main():
             action="store",
             nargs="+",
             help="Returns analysis for one or combination of specified quarters. "
-                 'User must use correct format e.g "Q3 19/20"',
+            'User must use correct format e.g "Q3 19/20"',
         )
     # baseline
     for sub in [
@@ -466,8 +470,8 @@ def main():
                 "all",
             ],
             help="Returns analysis for specified baselines. User must use correct format"
-                 ' which are "current", "last", "bl_one", "bl_two", "bl_three", "standard", "all".'
-                 ' The "all" option returns all, "standard" returns first three',
+            ' which are "current", "last", "bl_one", "bl_two", "bl_three", "standard", "all".'
+            ' The "all" option returns all, "standard" returns first three',
         )
 
     parser_milestones.add_argument(
@@ -513,7 +517,7 @@ def main():
         action="store",
         choices=["spent", "remaining", "benefits"],
         help="Provide the type of value to include in dandelion. Options are"
-             ' "spent", "remaining", "benefits".',
+        ' "spent", "remaining", "benefits".',
     )
 
     parser_costs_sp.add_argument(
@@ -540,7 +544,7 @@ def main():
         type=str,
         metavar="",
         action="store",
-        choices=['sro', 'finance', 'benefits', 'schedule', 'resource'],
+        choices=["sro", "finance", "benefits", "schedule", "resource"],
         help="specify the confidence type to displayed for each project.",
     )
 
@@ -588,11 +592,9 @@ def main():
         type=str,
         metavar="",
         action="store",
-        help='Insert blue line into chart to represent a date. '
-             'Options are "Today" "IPDC" or a date in correct format e.g. "1/1/2021".',
+        help="Insert blue line into chart to represent a date. "
+        'Options are "Today" "IPDC" or a date in correct format e.g. "1/1/2021".',
     )
-
-
 
     # parser_data_query.add_argument(
     #     "--file_name",
@@ -600,8 +602,6 @@ def main():
     #     action="store",
     #     help="provide name of csc file contain key names",
     # )
-
-
 
     # for sub in [
     #     parser_dca,
