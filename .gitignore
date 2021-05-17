@@ -27,4 +27,4 @@ build/
 analysis_engine.egg-info
 .nox
 .eggs
-other/create_test_files.py
+other/
