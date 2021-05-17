@@ -55,7 +55,6 @@ def project_info():
     )
 
 
-# @pytest.fixture
 def cdg_project_info():
     return project_data_from_master(
         os.path.join(os.getcwd(), "resources/" "test_cdg_proj_info.xlsx"),
@@ -115,7 +114,6 @@ def one_master_dict():
     )
 
 
-# @pytest.fixture()
 def cdg_masters():
     data = [
         project_data_from_master(
@@ -133,7 +131,7 @@ def json_path():
     return os.path.join(os.getcwd(), "resources/" "json_master")
 
 
-# @pytest.fixture()
+@pytest.fixture()
 def master_pickle():
     return open_pickle_file(os.path.join(os.getcwd(), "resources/test_master.pickle"))
 
@@ -198,62 +196,41 @@ def cdg_data():
                 "data_type": "cdg",
             },
         },
-        "real": {
-            "docx_save_path": cdg_root_path / "output/{}.docx",
-            "data": (cdg_get_master_data(), cdg_get_project_information()),
-            "op_args": {
-                "quarter": ["Q4 20/21"],
-                "group": ["GF", "CFPD", "SCS"],
-                "chart": True,
-                "data_type": "cdg",
-            },
-        },
     }
 
 
 @pytest.fixture()
 def ipdc_data():
     return {
-        "test": {
-            "docx_save_path": "resources/{}.docx",
-            "master": master_pickle(),
-            "op_args": {
-                "quarter": ["Q1 20/21"],
-                "group": ["HSRG", "RSS", "RIG", "AMIS", "RPE"],
-                "chart": True,
-            },
-        },
-        "real": {
-            "docx_save_path": str(root_path / "output/{}.docx"),
-            "master": open_pickle_file(str(root_path / "core_data/pickle/master.pickle")),
-            "op_args": {
-                "quarter": ["Q4 20/21"],
-                # "group": ["HSRG", "RSS", "RIG", "AMIS", "RPE"],
-                "group": ["HSRG"],
-                "chart": True,
-                "circle_colour": 'No',
-            },
+        "docx_save_path": "resources/{}.docx",
+        "master": open_pickle_file(os.path.join(os.getcwd(), "resources/test_master.pickle")),
+        "op_args": {
+            "quarter": ["Q1 20/21"],
+            "group": ["HSRG", "RSS", "RIG", "AMIS", "RPE"],
+            "chart": True,
         },
     }
+
+
+def top35_master():
+    master_data_list = [
+        project_data_from_master("resources/250_master_test_2.xlsx", 4, 2020
+        ),
+        project_data_from_master("resources/250_master_test_1.xlsx", 3, 2020
+        ),
+    ]
+    return master_data_list
+
+
+def top35_project_information():
+    return project_data_from_master("resources/250_project_info_test.xlsx", 2, 2020)
 
 
 @pytest.fixture()
 def top35_data():
     return {
-        # need to create test data
-        # "test": {
-        #     "docx_save_path": "resources/{}.docx",
-        #     "data": (cdg_masters(), cdg_project_info()),
-        #     "op_args": {
-        #         "quarter": ["Q4 20/21"],
-        #         "group": ["CFPD"],
-        #         "chart": True,
-        #         "data_type": "cdg",
-        #     },
-        # },
-        "real": {
-            "docx_save_path": str(top35_root_path / "output/{}.docx"),
-            "data": (top35_get_master_data(), top35_get_project_information()),
+        "docx_save_path": "resources/{}.docx",
+            "data": (top35_master(), top35_project_information()),
             "op_args": {
                 "quarter": ["Q4 20/21"],
                 "group": ["HSRG", "RSS", "RIG", "RPE"],
@@ -261,5 +238,4 @@ def top35_data():
                 "data_type": "top35",
                 "circle_colour": 'No',
             },
-        },
-    }
+        }

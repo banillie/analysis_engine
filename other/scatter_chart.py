@@ -1,6 +1,7 @@
 import json
 import math
 import numpy as np
+
 # from typing import List
 from matplotlib import pyplot as plt
 
@@ -14,11 +15,14 @@ from analysis_engine.data import (
     MilestoneData,
     put_milestones_into_wb,
     data_query_into_wb,
-    milestone_chart, run_p_reports, put_milestones_into_wb,
+    milestone_chart,
+    run_p_reports,
+    put_milestones_into_wb,
     cost_v_schedule_chart_into_wb,
     RiskData,
     DandelionData,
-    VfMData, vfm_into_excel,
+    VfMData,
+    vfm_into_excel,
     put_cost_totals_into_wb,
     put_matplotlib_fig_into_word,
     open_word_doc,
@@ -37,7 +41,12 @@ from analysis_engine.data import (
     get_master_data,
     get_project_information,
     Master,
-    risks_into_excel, build_speedials, dca_changes_into_word, radar_chart, JsonData, open_json_file,
+    risks_into_excel,
+    build_speedials,
+    dca_changes_into_word,
+    radar_chart,
+    JsonData,
+    open_json_file,
 )
 
 ## GENERATE CLI OPTIONS
@@ -45,7 +54,13 @@ from analysis_engine.data import (
 # calculate_arg_combinations(arg_list)
 
 ## INITIATE
-master = Master(get_master_data(), get_project_information())
+from analysis_engine.top35_data import (
+    top35_get_master_data,
+    top35_get_project_information,
+    top35_root_path,
+)
+
+# master = Master(get_master_data(), get_project_information())
 
 ## PICKLE
 m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
@@ -137,19 +152,56 @@ doc = open_word_doc(root_path / "input/summary_temp_landscape.docx")
 
 
 ## RADAR CHART
-# sp_data = root_path / "core_data/sp_master.xlsx"
-# t = m.dft_groups
+sp_data = root_path / "core_data/sp_master.xlsx"
+# t = m.project_stage
 # for s in t["Q4 20/21"].keys():
 #     g = t["Q4 20/21"][s]
 #     if not g:
 #         continue
-# for g in m.current_projects:
-#     chart = radar_chart(sp_data, m, group=[g], title=m.abbreviations[g]["abb"])
-#     put_matplotlib_fig_into_word(doc, chart, size=5)
-#     doc.save(root_path / "output/radar_individual.docx")
-# chart = radar_chart(sp_data, m, title="All")
-# put_matplotlib_fig_into_word(doc, chart, size=5)
-# doc.save(root_path / "output/radar_all.docx")
+# # for g in m.current_projects:
+#     else:
+#         chart = radar_chart(sp_data, m, group=g)
+#         doc = open_word_doc(root_path / "input/summary_temp_landscape.docx")
+#         put_matplotlib_fig_into_word(doc, chart, size=5)
+#         doc.save(root_path / "output/{}_radar_5_poly_individual.docx".format(s))
+
+chart = radar_chart(sp_data, m, title="All")
+put_matplotlib_fig_into_word(doc, chart, size=5)
+doc.save(root_path / "output/radar_5_poly_all.docx")
 
 
+top35_data_dict = {
+    "docx_save_path": str(top35_root_path / "output/{}.docx"),
+    "data": (top35_get_master_data(), top35_get_project_information()),
+    "op_args": {
+        "quarter": ["Q4 20/21"],
+        "group": ["HSRG", "RSS", "RIG", "RPE"],
+        "chart": True,
+        "data_type": "top35",
+        "circle_colour": "No",
+    },
+}
 
+ipdc_data_dict = {
+    "docx_save_path": str(root_path / "output/{}.docx"),
+    "master": open_pickle_file(str(root_path / "core_data/pickle/master.pickle")),
+    "op_args": {
+        "quarter": ["Q4 20/21"],
+        # "group": ["HSRG", "RSS", "RIG", "AMIS", "RPE"],
+        "group": ["HSRG"],
+        "chart": True,
+        "circle_colour": "No",
+    },
+}
+
+
+cdg_data_dict = {
+    "docx_save_path": cdg_root_path / "output/{}.docx",
+    "data": (cdg_get_master_data(), cdg_get_project_information()),
+    "op_args": {
+        "quarter": ["Q4 20/21"],
+        "group": ["GF", "CFPD", "SCS"],
+        "chart": True,
+        "data_type": "cdg",
+    },
+}

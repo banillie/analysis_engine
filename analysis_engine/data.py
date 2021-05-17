@@ -647,11 +647,10 @@ class Master:
             project_baseline_index = {}
             for name in self.current_projects:
                 lower_list = []
-                for i, master in reversed(list(enumerate(self.master_data))):
+                for i, master in list(enumerate(self.master_data)):
                     quarter = str(master.quarter)
                     if name in master.projects:
                         approved_bc = master.data[name][b_type]
-                        # lower_list.append((approved_bc, quarter, i))
                         if approved_bc == "Yes":
                             lower_list.append((approved_bc, quarter, i))
                     else:
@@ -1546,16 +1545,17 @@ class MilestoneData:
                     continue
                 # i loops below removes None Milestone names and rejects non-datetime date values.
                 p = self.master.abbreviations[project_name]["abb"]
-                if self.kwargs["data_type"] == "top35":
-                    for i in range(1, 20):
-                        t = [
-                            ("Project", p),
-                            ("Milestone", p_data["MM" + str(i) + " name"]),
-                            ("Notes", p_data["MM" + str(i) + " Comment"]),
-                            ("Date", p_data["MM" + str(i) + " date"]),
-                            ("Status", p_data["MM" + str(i) + " status"]),
-                        ]
-                        milestone_info_handling(project_list, t)
+                if "data_type" in self.kwargs:
+                    if self.kwargs["data_type"] == "top35":
+                        for i in range(1, 20):
+                            t = [
+                                ("Project", p),
+                                ("Milestone", p_data["MM" + str(i) + " name"]),
+                                ("Notes", p_data["MM" + str(i) + " Comment"]),
+                                ("Date", p_data["MM" + str(i) + " date"]),
+                                ("Status", p_data["MM" + str(i) + " status"]),
+                            ]
+                            milestone_info_handling(project_list, t)
 
                 else:
                     for i in range(1, 50):
@@ -8244,7 +8244,10 @@ class DandelionData:
                         else:
                             edge_colour = "grey"
                     else:
-                        edge_colour = colour
+                        if p in self.master.dft_groups[tp]["GMPP"]:
+                            edge_colour = "#000000"
+                        else:
+                            edge_colour = colour
 
                     try:
                         if len(p_list) >= 16:
@@ -8888,7 +8891,7 @@ def radar_chart(sp_data_path: TextIO, master: Master, **kwargs):
 
     # import matplotlib.pyplot as plt
     # from matplotlib.patches import Circle, RegularPolygon
-    # from matplotlib.path import Path
+    from matplotlib.path import Path
     # from matplotlib.projections.polar import PolarAxes
     # from matplotlib.projections import register_projection
     # from matplotlib.spines import Spine
@@ -8984,7 +8987,7 @@ def radar_chart(sp_data_path: TextIO, master: Master, **kwargs):
         return theta
 
     N = len(data[0])
-    theta = radar_factory(N, frame="circle")
+    theta = radar_factory(N, frame="polygon")
 
     spoke_labels = data.pop(0)
     title, case_data = data[0]
@@ -9023,7 +9026,7 @@ def get_strategic_priorities_data(
         "Increase our global impact",
         "Grow an level up the economy",
         "Be an excellent department",
-        "VfM",
+        # "VfM",
     ]
 
     sp_scoring = {
@@ -9058,17 +9061,17 @@ def get_strategic_priorities_data(
             print(p)
             continue
         p_list = []
-        # for c in categories:  # no vfm
-        for c in categories[:-1]:  # if vfm included
+        for c in categories:  # no vfm
+        # for c in categories[:-1]:  # if vfm included
             p_list.append(sp_scoring[sp_data.data[p][c]])
         try:
-            p_list.append(
-                vfm_scoring[master.master_data[0].data[p]["VfM Category single entry"]]
-            )
+            # p_list.append(
+            #     vfm_scoring[master.master_data[0].data[p]["VfM Category single entry"]]
+            # )
             p_list.append(master.master_data[0].data[p]["Departmental DCA"])
         except KeyError:
             print(p)
-            p_list.append(0)  # if vfm included
+            # p_list.append(0)  # if vfm included
             p_list.append("Amber")
         top_list.append(p_list)
 

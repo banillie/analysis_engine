@@ -111,6 +111,7 @@ def test_creation_of_masters_class(basic_masters_dicts, project_info):
 
 def test_getting_baseline_data_from_masters(basic_masters_dicts, project_info):
     master = Master(basic_masters_dicts, project_info)
+    master.get_baseline_data()
     assert isinstance(master.bl_index, (dict,))
     assert master.bl_index["ipdc_milestones"]["Sea of Tranquility"] == [0, 1]
     assert master.bl_index["ipdc_costs"]["Apollo 11"] == [0, 1, 0, 2]
@@ -159,8 +160,8 @@ def test_get_project_abbreviations(basic_masters_dicts, project_info):
 #     master.check_baselines()
 
 
-def test_calculating_spent(ipdc_data):
-    test_dict = ipdc_data["test"]["master"].master_data[0]
+def test_calculating_spent(master_pickle):
+    test_dict = master_pickle.master_data[0]
     spent = spent_calculation(test_dict, "Sea of Tranquility")
     assert spent == 1409.33
 
@@ -183,13 +184,13 @@ def test_word_doc_heading(word_doc, project_info):
     word_doc.save("resources/summary_temp_altered.docx")
 
 
-def test_word_doc_contacts(word_doc, ipdc_data):
-    key_contacts(word_doc, ipdc_data["test"]["master"], "Apollo 13")
+def test_word_doc_contacts(word_doc, master_pickle):
+    key_contacts(word_doc, master_pickle, "Apollo 13")
     word_doc.save("resources/summary_temp_altered.docx")
 
 
-def test_word_doc_dca_table(word_doc, ipdc_data):
-    dca_table(word_doc, ipdc_data["test"]["master"], "Falcon 9")
+def test_word_doc_dca_table(word_doc, master_pickle):
+    dca_table(word_doc, master_pickle, "Falcon 9")
     word_doc.save("resources/summary_temp_altered.docx")
 
 
@@ -209,17 +210,20 @@ def test_project_report_meta_data(word_doc, master_pickle):
 
 def test_project_cost_profile_chart(master_pickle):
     costs = CostData(master_pickle, group=TEST_GROUP, baseline=["standard"])
+    costs.get_cost_profile()
     cost_profile_graph(costs, master_pickle, chart=False)
 
 
 def test_project_cost_profile_into_wb(master_pickle):
     costs = CostData(master_pickle, baseline=["standard"], group=TEST_GROUP)
+    costs.get_cost_profile()
     wb = cost_profile_into_wb(costs)
     wb.save("resources/test_cost_profile_output.xlsx")
 
 
 def test_matplotlib_chart_into_word(word_doc, master_pickle):
     costs = CostData(master_pickle, group=[F9], baseline=["standard"])
+    costs.get_cost_profile()
     graph = cost_profile_graph(costs, master_pickle, chart=False)
     change_word_doc_landscape(word_doc)
     put_matplotlib_fig_into_word(word_doc, graph)
@@ -475,10 +479,10 @@ def test_financial_dashboard(master_pickle, dashboard_template):
     wb.save("resources/test_dashboards_master_altered.xlsx")
 
 
-def test_schedule_dashboard(ipdc_data, dashboard_template):
-    milestones = MilestoneData(ipdc_data, baseline=["all"])
+def test_schedule_dashboard(master_pickle, dashboard_template):
+    milestones = MilestoneData(master_pickle, baseline=["all"])
     milestones.filter_chart_info(milestone_type=["Approval", "Delivery"])
-    wb = schedule_dashboard(ipdc_data, milestones, dashboard_template)
+    wb = schedule_dashboard(master_pickle, milestones, dashboard_template)
     wb.save("resources/test_dashboards_master_altered.xlsx")
 
 
@@ -495,13 +499,12 @@ def test_overall_dashboard(master_pickle, dashboard_template):
 
 
 def test_build_dandelion_graph(word_doc_landscape, ipdc_data):
-    d = ipdc_data["test"]
     # m = Master(*d["data"], **d["op_args"])  # currently necessary for cdg and top35 data
     # dl_data = DandelionData(m, **d["op_args"])
-    dl_data = DandelionData(d["master"], **d["op_args"])
-    d_lion = make_a_dandelion_auto(dl_data, **d["op_args"])
+    dl_data = DandelionData(ipdc_data["master"], **ipdc_data["op_args"])
+    d_lion = make_a_dandelion_auto(dl_data, **ipdc_data["op_args"])
     put_matplotlib_fig_into_word(word_doc_landscape, d_lion, size=7)
-    word_doc_landscape.save(d["docx_save_path"].format("ipdc_d_graph"))
+    word_doc_landscape.save(ipdc_data["docx_save_path"].format("ipdc_d_graph"))
 
 
 def test_data_queries_non_milestone(master_pickle):
@@ -588,6 +591,7 @@ def test_annual_report_summaries():
 
 
 def test_top35_summaries(top35_data):
-    d = top35_data["real"]
+    #Here
+    d = top35_data["test"]
     m = Master(*d["data"], **d["op_args"] )
     top35_run_p_reports(m, **d["op_args"])
