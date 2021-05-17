@@ -57,7 +57,7 @@ from analysis_engine.data import (
 from analysis_engine.top35_data import (
     top35_get_master_data,
     top35_get_project_information,
-    top35_root_path,
+    top35_root_path, top35_run_p_reports,
 )
 
 # master = Master(get_master_data(), get_project_information())
@@ -69,7 +69,43 @@ m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
 DFT_GROUP = ["HSRG", "RSS", "RIG", "AMIS", "RPE"]
 STAGE_GROUPS = ["pipeline", "pre-SOBC", "SOBC", "OBC", "FBC"]
 
-doc = open_word_doc(root_path / "input/summary_temp_landscape.docx")
+word_doc_landscape = open_word_doc(root_path / "input/summary_temp_landscape.docx")
+
+
+top35_data_dict = {
+    "docx_save_path": str(top35_root_path / "output/{}.docx"),
+    "master": Master(top35_get_master_data(), top35_get_project_information(), data_type="top35"),
+    "op_args": {
+        "quarter": ["Q4 20/21"],
+        "group": ["HSRG", "RSS", "RIG", "RPE"],
+        "chart": False,
+        "data_type": "top35",
+        "circle_colour": "No",
+    },
+}
+
+ipdc_data_dict = {
+    "docx_save_path": str(root_path / "output/{}.docx"),
+    "master": open_pickle_file(str(root_path / "core_data/pickle/master.pickle")),
+    "op_args": {
+        "quarter": ["Q4 20/21"],
+        # "group": ["HSRG", "RSS", "RIG", "AMIS", "RPE"],
+        "group": ["HSRG"],
+        "chart": True,
+        "circle_colour": "No",
+    },
+}
+
+# cdg_data_dict = {
+#     "docx_save_path": cdg_root_path / "output/{}.docx",
+#     "data": (cdg_get_master_data(), cdg_get_project_information()),
+#     "op_args": {
+#         "quarter": ["Q4 20/21"],
+#         "group": ["GF", "CFPD", "SCS"],
+#         "chart": True,
+#         "data_type": "cdg",
+#     },
+# }
 
 
 ## OP_ARGS
@@ -87,13 +123,13 @@ doc = open_word_doc(root_path / "input/summary_temp_landscape.docx")
 #     "angles": [260, 300, 345, 40]
 #     }
 
-# ## DANDELION
-# stage = ["pre-SOBC", "SOBC", "OBC", "FBC"]
-# d_data = DandelionData(m, **op_args)
-# d_lion = make_a_dandelion_auto(d_data, **op_args)
-# put_matplotlib_fig_into_word(doc, d_lion, size=7.5)
-# doc.save(root_path / "output/dlion_graph.docx")
-#
+## DANDELION
+data = top35_data_dict
+dl_data = DandelionData(data["master"], **data["op_args"])
+d_lion = make_a_dandelion_auto(dl_data, **data["op_args"])
+put_matplotlib_fig_into_word(word_doc_landscape, d_lion, size=7)
+word_doc_landscape.save(data["docx_save_path"].format("dandelion_graph"))
+
 
 ## MILESTONES
 # ms = MilestoneData(m, **op_args)
@@ -129,8 +165,9 @@ doc = open_word_doc(root_path / "input/summary_temp_landscape.docx")
 # c = CostData(m, **op_args)
 # cost_profile_graph(c, m, chart=True, group=c.start_group)
 
-## SUMMARYS
-# run_p_reports(m, **op_args)
+# SUMMARYS
+# m = Master(*top35_data_dict["data"], **top35_data_dict["op_args"] )
+# top35_run_p_reports(m, **top35_data_dict["op_args"])
 
 ## VFM
 # c = VfMData(m, group=DFT_GROUP, quarter=["standard"])  # c is class
@@ -152,7 +189,7 @@ doc = open_word_doc(root_path / "input/summary_temp_landscape.docx")
 
 
 ## RADAR CHART
-sp_data = root_path / "core_data/sp_master.xlsx"
+# sp_data = root_path / "core_data/sp_master.xlsx"
 # t = m.project_stage
 # for s in t["Q4 20/21"].keys():
 #     g = t["Q4 20/21"][s]
@@ -164,44 +201,7 @@ sp_data = root_path / "core_data/sp_master.xlsx"
 #         doc = open_word_doc(root_path / "input/summary_temp_landscape.docx")
 #         put_matplotlib_fig_into_word(doc, chart, size=5)
 #         doc.save(root_path / "output/{}_radar_5_poly_individual.docx".format(s))
+# chart = radar_chart(sp_data, m, title="All")
+# put_matplotlib_fig_into_word(doc, chart, size=5)
+# doc.save(root_path / "output/radar_5_poly_all.docx")
 
-chart = radar_chart(sp_data, m, title="All")
-put_matplotlib_fig_into_word(doc, chart, size=5)
-doc.save(root_path / "output/radar_5_poly_all.docx")
-
-
-top35_data_dict = {
-    "docx_save_path": str(top35_root_path / "output/{}.docx"),
-    "data": (top35_get_master_data(), top35_get_project_information()),
-    "op_args": {
-        "quarter": ["Q4 20/21"],
-        "group": ["HSRG", "RSS", "RIG", "RPE"],
-        "chart": True,
-        "data_type": "top35",
-        "circle_colour": "No",
-    },
-}
-
-ipdc_data_dict = {
-    "docx_save_path": str(root_path / "output/{}.docx"),
-    "master": open_pickle_file(str(root_path / "core_data/pickle/master.pickle")),
-    "op_args": {
-        "quarter": ["Q4 20/21"],
-        # "group": ["HSRG", "RSS", "RIG", "AMIS", "RPE"],
-        "group": ["HSRG"],
-        "chart": True,
-        "circle_colour": "No",
-    },
-}
-
-
-cdg_data_dict = {
-    "docx_save_path": cdg_root_path / "output/{}.docx",
-    "data": (cdg_get_master_data(), cdg_get_project_information()),
-    "op_args": {
-        "quarter": ["Q4 20/21"],
-        "group": ["GF", "CFPD", "SCS"],
-        "chart": True,
-        "data_type": "cdg",
-    },
-}
