@@ -331,7 +331,6 @@ gen_txt_colours = [darkish_grey_text, light_grey_text, greyblue_text]
 gen_fill_colours = [darkish_grey_fill, light_grey_fill, greyblue_fill]
 gen_txt_list = ["md", "pnr", "knc"]
 
-VERSION = "0.0.20"
 FONT_TYPE = ["sans serif", "Ariel"]
 FACE_COLOUR = "#a0c1d5"
 
@@ -1064,14 +1063,17 @@ class CostData:
 
                     # hard coded due to current use need.
                     if project_name == "HS2 Phase 2b" or project_name == "HS2 Phase2a":
-                        profiled = (
-                            profiled
-                            - p_data["Total Forecast - Income both Revenue and Capital"]
-                        )
-                        total = (
-                            total
-                            - p_data["Total Forecast - Income both Revenue and Capital"]
-                        )
+                        try:
+                            profiled = (
+                                profiled
+                                - p_data["Total Forecast - Income both Revenue and Capital"]
+                            )
+                            total = (
+                                total
+                                - p_data["Total Forecast - Income both Revenue and Capital"]
+                            )
+                        except KeyError:  # some older masters do have key.
+                            pass
 
                 cat_spent = [spent_rdel, spent_cdel, spent_ngov]
                 cat_profiled = [prof_rdel, prof_cdel, prof_ngov]
@@ -7405,7 +7407,7 @@ def benefits_dashboard(master: Master, wb: Workbook) -> Workbook:
                     ws.cell(row=row_num, column=4).font = Font(
                         name="Arial", size=10, color="00fc2525"
                     )
-            except TypeError:
+            except KeyError:
                 pass
             """Next stage"""
             proj_stage = master.master_data[0].data[project_name]["Project stage"]
@@ -7418,7 +7420,7 @@ def benefits_dashboard(master: Master, wb: Workbook) -> Workbook:
                     ws.cell(row=row_num, column=5).font = Font(
                         name="Arial", size=10, color="00fc2525"
                     )
-            except TypeError:
+            except KeyError:
                 pass
 
             """initial bcr"""
@@ -8900,7 +8902,7 @@ def radar_chart(sp_data_path: TextIO, master: Master, **kwargs):
 
     # import matplotlib.pyplot as plt
     # from matplotlib.patches import Circle, RegularPolygon
-    from matplotlib.path import Path
+    # from matplotlib.path import Path
     # from matplotlib.projections.polar import PolarAxes
     # from matplotlib.projections import register_projection
     # from matplotlib.spines import Spine

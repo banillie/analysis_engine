@@ -25,7 +25,7 @@ from docx.enum.section import WD_SECTION_START
 from docx.shared import Cm, RGBColor, Pt
 
 
-def _platform_docs_dir() -> Path:
+def _top_35_platform_docs_dir() -> Path:
     #  Cross plaform file path handling
     if platform.system() == "Linux":
         return Path.home() / "Documents" / "top_250"
@@ -35,7 +35,7 @@ def _platform_docs_dir() -> Path:
         return Path.home() / "Documents" / "top_250"
 
 
-top35_root_path = _platform_docs_dir()
+top35_root_path = _top_35_platform_docs_dir()
 
 
 def top35_get_master_data() -> List[

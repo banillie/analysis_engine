@@ -46,7 +46,7 @@ from analysis_engine.data import (
     dca_changes_into_word,
     radar_chart,
     JsonData,
-    open_json_file,
+    open_json_file, get_input_doc, ipdc_dashboard,
 )
 
 ## GENERATE CLI OPTIONS
@@ -89,8 +89,9 @@ ipdc_data_dict = {
     "master": open_pickle_file(str(root_path / "core_data/pickle/master.pickle")),
     "op_args": {
         "quarter": ["Q4 20/21"],
+        "baseline": ["standard"],
         # "group": ["HSRG", "RSS", "RIG", "AMIS", "RPE"],
-        "group": ["HSRG"],
+        "group": ["HS2 2a"],
         "chart": True,
         "circle_colour": "No",
     },
@@ -107,21 +108,7 @@ ipdc_data_dict = {
 #     },
 # }
 
-
-## OP_ARGS
-# op_args = {
-#     # "quarter": ["standard"],
-#     "quarter": [str(m.current_quarter)],
-#     # "group": DFT_GROUP,
-#     "stage": ["pipeline", "pre-SOBC", "SOBC", "OBC", "FBC"],
-#     # "stage": "Ely Area Capacity Enhancement Programme",
-#     "type": "remaining",
-#     # "chart": True,
-#     # "baseline": ["standard"],
-#     # "remove": "HS2 1",
-#     # "confidence": "benefits"
-#     "angles": [260, 300, 345, 40]
-#     }
+data = ipdc_data_dict
 
 ## DANDELION
 # data = top35_data_dict
@@ -165,9 +152,8 @@ ipdc_data_dict = {
 # c = CostData(m, **op_args)
 # cost_profile_graph(c, m, chart=True, group=c.start_group)
 
-# SUMMARIES
-data = top35_data_dict
-top35_run_p_reports(data["master"], **data["op_args"])
+## SUMMARIES
+# run_p_reports(data["master"], **data["op_args"])
 
 ## VFM
 # c = VfMData(m, group=DFm = Master(*data["data"], **data["op_args"] )T_GROUP, quarter=["standard"])  # c is class
@@ -205,3 +191,8 @@ top35_run_p_reports(data["master"], **data["op_args"])
 # put_matplotlib_fig_into_word(doc, chart, size=5)
 # doc.save(root_path / "output/radar_5_poly_all.docx")
 
+
+## DASHBOARD
+dashboard_master = get_input_doc(root_path / "input/dashboards_master.xlsx")
+wb = ipdc_dashboard(m, dashboard_master)
+wb.save(root_path / "output/completed_ipdc_dashboard.xlsx")

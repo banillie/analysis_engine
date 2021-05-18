@@ -1,5 +1,4 @@
 import setuptools
-from analysis_engine.data import VERSION
 # with open("README.md", "r", encoding="utf-8") as fh:
 
 with open("README.md", "r") as fh:
@@ -7,7 +6,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="analysis_engine",
-    version=VERSION,
+    version="0.0.21",
     author="Will Grant",
     author_email="will.granty@yahoo.co.uk",
     description="Analysis for the UK Department for Transport's major projects portfolio",

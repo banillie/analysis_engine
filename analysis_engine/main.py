@@ -41,7 +41,7 @@ from analysis_engine.data import (
     get_sp_data,
     DFT_GROUP,
     get_input_doc,
-    InputError, VERSION,
+    InputError,
 )
 
 import logging
@@ -281,7 +281,7 @@ def main():
         description=ae_description,
         formatter_class=RawTextHelpFormatter
     )
-    parser.add_argument('--version', action='version', version=VERSION)  # link to setup.py
+    parser.add_argument('--version', action='version', version="0.0.21")  # link to setup.py
     subparsers = parser.add_subparsers(dest="subparser_name")
     subparsers.metavar = "                      "
     # parser.add_argument('initiate', metavar="initiate", type=str, nargs=1, help="creates a master data file")
