@@ -331,6 +331,7 @@ gen_txt_colours = [darkish_grey_text, light_grey_text, greyblue_text]
 gen_fill_colours = [darkish_grey_fill, light_grey_fill, greyblue_fill]
 gen_txt_list = ["md", "pnr", "knc"]
 
+VERSION = "0.0.20"
 FONT_TYPE = ["sans serif", "Ariel"]
 FACE_COLOUR = "#a0c1d5"
 
@@ -2556,15 +2557,19 @@ def cost_profile_graph(costs: CostData, master: Master, **kwargs) -> plt.figure:
         )
 
     # Chart styling
-    plt.xticks(rotation=45, size=14)
-    plt.yticks(size=14)
+    plt.xticks(rotation=45, size=16)
+    plt.yticks(size=16)
     # ax1.tick_params(axis="series_one", which="major")  # matplotlib version issue
     ax1.set_ylabel("Cost (£m)")
+    ax1.set_xlabel("Financial Year")
+    xlab1 = ax1.xaxis.get_label()
+    xlab1.set_style("italic")
+    xlab1.set_size(20)
     ylab1 = ax1.yaxis.get_label()
     ylab1.set_style("italic")
-    ylab1.set_size(16)
+    ylab1.set_size(20)
     ax1.grid(color="grey", linestyle="-", linewidth=0.2)
-    ax1.legend(prop={"size": 16})
+    ax1.legend(prop={"size": 20})
     # ax1.set_title(
     #     "Change in project cost profile",
     #     loc="left",
@@ -8543,14 +8548,19 @@ def cost_stackplot_graph(
     ax.stackplot(x, y, labels=labels)
 
     # Chart styling
-    plt.xticks(rotation=45, size=10)
-    plt.yticks(size=10)
+    plt.xticks(rotation=45, size=16)
+    plt.yticks(size=16)
     ax.set_ylabel("Cost (£m)")
+    ax.set_xlabel("Financial Year")
+    xlab1 = ax.xaxis.get_label()
+    xlab1.set_style("italic")
+    xlab1.set_size(20)
     ylab1 = ax.yaxis.get_label()
     ylab1.set_style("italic")
-    ylab1.set_size(12)
+    ylab1.set_size(20)
     ax.grid(color="grey", linestyle="-", linewidth=0.2)
-    ax.legend(loc="upper right")
+    # ax.legend()
+    ax.legend(loc="upper right", prop={"size": 16})
     # ax.legend(prop={"size": 12})
 
     if "chart" in kwargs:
@@ -8616,7 +8626,7 @@ def make_a_dandelion_auto(dl: DandelionData, **kwargs):
                 xy=dl.d_data[c]["axis"],  # x, y position
                 xycoords="data",
                 xytext=dl.d_data[c]["tp"],  # text position
-                fontsize=6,
+                fontsize=7,
                 fontname=FONT_TYPE,
                 horizontalalignment=dl.d_data[c]["alignment"][0],
                 verticalalignment=dl.d_data[c]["alignment"][1],

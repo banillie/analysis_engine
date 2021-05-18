@@ -316,11 +316,10 @@ def top35_get_project_information() -> Dict[str, Union[str, int]]:
 def top35_run_p_reports(master: Master, **kwargs) -> None:
     group = get_group(master, str(master.current_quarter), kwargs)
     for p in group:
-        print("Compiling summary for " + p)
-        report_doc = open_word_doc(top35_root_path / "input/summary_temp.docx")
-        # qrt = make_file_friendly(str(master.master_data[0].quarter))
-        output = compile_p_report(report_doc, master, p, **kwargs)
         p_name = master.project_information.data[p]["Abbreviations"]
+        print("Compiling summary for " + p_name)
+        report_doc = open_word_doc(top35_root_path / "input/summary_temp.docx")
+        output = compile_p_report(report_doc, master, p, **kwargs)
         output.save(
             top35_root_path / "output/{}_report.docx".format(p_name)
         )  # add quarter here

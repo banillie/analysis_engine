@@ -41,10 +41,12 @@ from analysis_engine.data import (
     get_sp_data,
     DFT_GROUP,
     get_input_doc,
-    InputError,
+    InputError, VERSION,
 )
 
 import logging
+
+from analysis_engine.top35_data import top35_get_master_data, top35_get_project_information, top35_run_p_reports
 
 logging.basicConfig(
     level=logging.INFO,
@@ -211,6 +213,12 @@ def run_general(args):
             else:
                 run_p_reports(m, **op_args)
 
+        if programme == "top_250_summaries":
+            m = Master(top35_get_master_data(), top35_get_project_information(), data_type="top35")
+            if op_args["group"] == DFT_GROUP:
+                op_args["group"] = ["HSRG", "RSS", "RIG", "RPE"]
+            top35_run_p_reports(m, **op_args)
+
         if programme == "matrix":
             costs = CostData(m, **op_args)
             miles = MilestoneData(m, *op_args)
@@ -269,10 +277,14 @@ def main():
         "arguments can be used with each subcommand. e.g. analysis dandelion --help."
     )
     parser = argparse.ArgumentParser(
-        prog="engine", description=ae_description, formatter_class=RawTextHelpFormatter
+        # prog="engine",
+        description=ae_description,
+        formatter_class=RawTextHelpFormatter
     )
+    parser.add_argument('--version', action='version', version=VERSION)  # link to setup.py
     subparsers = parser.add_subparsers(dest="subparser_name")
-    subparsers.metavar = "               "
+    subparsers.metavar = "                      "
+    # parser.add_argument('initiate', metavar="initiate", type=str, nargs=1, help="creates a master data file")
     parser_initiate = subparsers.add_parser(
         "initiate", help="creates a master data file"
     )
@@ -340,6 +352,9 @@ def main():
     parser_data_query = subparsers.add_parser(
         "query", help="return data from core data"
     )
+    parser_top_250_summaries = subparsers.add_parser(
+        "top_250_summaries", help="top 250 summaries"
+    )
 
     # Arguments
     # stage
@@ -390,6 +405,7 @@ def main():
         parser_summaries,
         parser_costs_sp,
         parser_data_query,
+        parser_top_250_summaries,
     ]:
         sub.add_argument(
             "--group",
@@ -670,6 +686,7 @@ def main():
     parser_matrix.set_defaults(func=run_general)
     parser_data_query.set_defaults(func=run_general)
     parser_costs_sp.set_defaults(func=run_general)
+    parser_top_250_summaries.set_defaults(func=run_general)
     args = parser.parse_args()
     # print(vars(args))
     args.func(vars(args))
