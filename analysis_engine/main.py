@@ -678,7 +678,7 @@ def main():
     parser_dandelion.set_defaults(func=run_general)
     parser_costs.set_defaults(func=run_general)
     parser_vfm.set_defaults(func=run_general)
-    parser_milestones.set_defaults(func=run_general)
+    # parser_milestones.set_defaults(func=run_general)
     parser_summaries.set_defaults(func=run_general)
     parser_risks.set_defaults(func=run_general)
     parser_dca.set_defaults(func=run_general)
