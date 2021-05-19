@@ -1075,6 +1075,9 @@ class CostData:
                         except KeyError:  # some older masters do have key.
                             pass
 
+                    if project_name == "Northern Powerhouse Rail":  # hacked fix for now.
+                        profiled = profiled + p_data["Total CDEL Forecast recurring new costs"]
+
                 cat_spent = [spent_rdel, spent_cdel, spent_ngov]
                 cat_profiled = [prof_rdel, prof_cdel, prof_ngov]
                 cat_unprofiled = [

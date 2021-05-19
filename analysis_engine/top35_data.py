@@ -44,10 +44,10 @@ def top35_get_master_data() -> List[
     """Returns a list of dictionaries each containing quarter data"""
     master_data_list = [
         project_data_from_master(
-            top35_root_path / "core_data/250_master_april_21.xlsx", 4, 2020
+            top35_root_path / "core_data/250_Master_May_21.xlsx", 4, 2020
         ),
         project_data_from_master(
-            top35_root_path / "core_data/250_master_april_21.xlsx", 3, 2020
+            top35_root_path / "core_data/250_Master_April_21.xlsx", 3, 2020
         ),
     ]
     return master_data_list
@@ -365,8 +365,8 @@ def compile_p_report(
     project_name: str,
     **kwargs,
 ) -> Document:
-    p_master = master.master_data[0].data[project_name]
-    r_args = [doc, p_master]
+    # p_master = master.master_data[0].data[project_name]
+    r_args = [doc, master, project_name]
     wd_heading(doc, master.project_information, project_name)
     key_contacts(*r_args)
     project_scope_text(*r_args)
@@ -398,8 +398,9 @@ def wd_heading(
     intro.bold = True
 
 
-def key_contacts(doc: Document, p_master: Dict) -> None:
+def key_contacts(doc: Document, master: Dict, project_name: str) -> None:
     """Function adds keys contact details"""
+    p_master = master.master_data[0].data[project_name]
     sro_name = p_master["SRO NAME"]
     if sro_name is None:
         sro_name = "tbc"
@@ -418,35 +419,31 @@ def key_contacts(doc: Document, p_master: Dict) -> None:
     doc.add_paragraph("SRO: " + str(sro_name) + ", " + str(sro_email))
 
 
-def project_scope_text(doc: Document, p_master: Master) -> Document:
+def project_scope_text(doc: Document, master: Master, project_name: str) -> Document:
     doc.add_paragraph().add_run("Short project description").bold = True
-    text_one = str(p_master["SHORT PROJECT DESCRIPTION"])
-    try:
-        text_two = str(p_master["SHORT PROJECT DESCRIPTION"])
-    except IndexError:
-        text_two = text_one
+    text_one = str(master.master_data[0].data[project_name]["SHORT PROJECT DESCRIPTION"])
+    # try:
+    text_two = str(master.master_data[1].data[project_name]["SHORT PROJECT DESCRIPTION"])
+    # except IndexError:
+    #     text_two = text_one
     compare_text_new_and_old(text_one, text_two, doc)
     return doc
 
 
-def deliverables(doc: Document, p_master: Dict, **kwargs) -> Document:
-    dels = [
-        p_master["TOP 3 PROJECT DELIVERABLES 1"],  # deliverables
-        p_master["TOP 3 PROJECT DELIVERABLES 2"],
-        p_master["TOP 3 PROJECT DELIVERABLES 3"],
+def deliverables(doc: Document, master: Dict, project_name: str) -> Document:
+    dels = ["TOP 3 PROJECT DELIVERABLES 1",  # deliverables
+            "TOP 3 PROJECT DELIVERABLES 2",
+            "TOP 3 PROJECT DELIVERABLES 3",
     ]
 
-    if "p_name" in kwargs:
-        doc.add_paragraph().add_run(kwargs["p_name"]).bold = True
-    else:
-        doc.add_paragraph().add_run("Top 3 Deliverables").bold = True
+    doc.add_paragraph().add_run("Top 3 Deliverables").bold = True
 
     for i, d in enumerate(dels):
         try:  # this is necessary as string data contains NBSP and this removes them
-            text_one = d
-            text_two = d
+            text_one = master.master_data[0].data[project_name][d]
+            text_two = master.master_data[1].data[project_name][d]
             compare_text_new_and_old(text_one, text_two, doc)
-        except (TypeError, AttributeError):
+        except AttributeError:
             pass
 
     return doc
@@ -454,8 +451,10 @@ def deliverables(doc: Document, p_master: Dict, **kwargs) -> Document:
 
 def project_report_meta_data(
         doc: Document,
-        p_master: Dict,
+        master: Dict,
+        project_name: str,
 ):
+    p_master = master.master_data[0].data[project_name]
     """Meta data table"""
     # doc.add_section(WD_SECTION_START.NEW_PAGE)
     # paragraph = doc.add_paragraph()
@@ -500,7 +499,7 @@ def project_report_meta_data(
     return doc
 
 
-def dca_narratives(doc: Document, p_master: Dict) -> None:
+def dca_narratives(doc: Document, master: Dict, project_name: str) -> None:
     doc.add_paragraph()
     # p = doc.add_paragraph()
     # text = "*Red text highlights changes in narratives from last quarter"
@@ -519,19 +518,12 @@ def dca_narratives(doc: Document, p_master: Dict) -> None:
     ]
 
     for x in range(len(headings_list)):
-        try:  # overall try statement relates to data_bridge
-            text_one = str(
-                p_master[narrative_keys_list[x]]
-            )
-            try:
-                text_two = str(
-                    p_master[narrative_keys_list[x]]
-                )
-            except (KeyError, IndexError):  # index error relates to data_bridge
-                text_two = text_one
-        except KeyError:
-            break
-
+        text_one = str(
+            master.master_data[0].data[project_name][narrative_keys_list[x]]
+        )
+        text_two = str(
+            master.master_data[1].data[project_name][narrative_keys_list[x]]
+        )
         doc.add_paragraph().add_run(str(headings_list[x])).bold = True
         compare_text_new_and_old(text_one, text_two, doc)
 

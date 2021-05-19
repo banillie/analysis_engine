@@ -108,7 +108,7 @@ ipdc_data_dict = {
 #     },
 # }
 
-data = ipdc_data_dict
+data = top35_data_dict
 
 ## DANDELION
 # data = top35_data_dict
@@ -152,8 +152,8 @@ data = ipdc_data_dict
 # c = CostData(m, **op_args)
 # cost_profile_graph(c, m, chart=True, group=c.start_group)
 
-## SUMMARIES
-# run_p_reports(data["master"], **data["op_args"])
+# SUMMARIES
+top35_run_p_reports(data["master"], **data["op_args"])
 
 ## VFM
 # c = VfMData(m, group=DFm = Master(*data["data"], **data["op_args"] )T_GROUP, quarter=["standard"])  # c is class
@@ -193,6 +193,6 @@ data = ipdc_data_dict
 
 
 ## DASHBOARD
-dashboard_master = get_input_doc(root_path / "input/dashboards_master.xlsx")
-wb = ipdc_dashboard(m, dashboard_master)
-wb.save(root_path / "output/completed_ipdc_dashboard.xlsx")
+# dashboard_master = get_input_doc(root_path / "input/dashboards_master.xlsx")
+# wb = ipdc_dashboard(m, dashboard_master)
+# wb.save(root_path / "output/completed_ipdc_dashboard.xlsx")
