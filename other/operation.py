@@ -6,7 +6,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 
 # matplotlib==3.3.0
-from analysis_engine.cdg_data import cdg_root_path, cdg_get_master_data, cdg_get_project_information
+from analysis_engine.cdg_data import cdg_root_path, cdg_get_master_data, cdg_get_project_information, cdg_dashboard
 from analysis_engine.data import (
     open_pickle_file,
     root_path,
@@ -109,13 +109,15 @@ cdg_data_dict = {
         "data_type": "cdg",
         "type": "income",
     },
+    "dashboard": str(cdg_root_path / "input/dashboard_master.xlsx"),
+    "excel_save_path": str(cdg_root_path / "output/{}.xlsx")
 }
 
 data = cdg_data_dict
 
 ## DANDELION
-dl_data = DandelionData(data["master"], **data["op_args"])
-d_lion = make_a_dandelion_auto(dl_data, **data["op_args"])
+# dl_data = DandelionData(data["master"], **data["op_args"])
+# d_lion = make_a_dandelion_auto(dl_data, **data["op_args"])
 # put_matplotlib_fig_into_word(word_doc_landscape, d_lion, size=7)
 # word_doc_landscape.save(data["docx_save_path"].format("dandelion_graph"))
 
@@ -195,6 +197,5 @@ d_lion = make_a_dandelion_auto(dl_data, **data["op_args"])
 
 
 ## DASHBOARD
-# dashboard_master = get_input_doc(root_path / "input/dashboards_master.xlsx")
-# wb = ipdc_dashboard(m, dashboard_master)
-# wb.save(root_path / "output/completed_ipdc_dashboard.xlsx")
+wb = cdg_dashboard(data["master"], data["dashboard"])
+wb.save(data["excel_save_path"].format("q4_2021_cdg_dashboard"))
