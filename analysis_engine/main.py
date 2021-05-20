@@ -272,7 +272,9 @@ def top250_run_general(args):
                 op_args["group"] = ["HSRG", "RSS", "RIG", "RPE"]
         if "quarter" not in op_args:
             if "baseline" not in op_args:
-                op_args["quarter"] = ["standard"]
+                op_args["quarter"] = ["Q4 20/21"]
+
+        op_args["data_type"] = "top35"
 
         if programme == "summaries":
             top35_run_p_reports(m, **op_args)
@@ -319,7 +321,7 @@ class main():
             formatter_class=RawTextHelpFormatter
         )
 
-        parser.add_argument('--version', action='version', version="0.0.24")
+        parser.add_argument('--version', action='version', version="0.0.27")
 
         parser.add_argument(
             'command',

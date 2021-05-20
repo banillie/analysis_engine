@@ -3894,6 +3894,13 @@ DCA_KEYS = {
     "resource": "Overall Resource DCA - Now",
 }
 
+CPG_DCA_KEYS = {
+    "sro": "Overall Delivery Confidence",
+    "finance": "Costs Confidence",
+    "benefits": "Benefits Confidence",
+    "schedule": "Schedule Confidence",
+}
+
 DCA_RATING_SCORES = {
     "Green": 5,
     "Amber/Green": 4,
@@ -4110,7 +4117,7 @@ class DcaData:
     def __init__(self, master: Master, **kwargs):
         self.master = master
         self.kwargs = kwargs
-        self.conf_list = list(DCA_KEYS.keys())
+        # self.conf_list = list(DCA_KEYS.keys())
         self.group = []
         self.baseline_type = "ipdc_costs"
         self.iter_list = []
@@ -4125,13 +4132,19 @@ class DcaData:
         self.iter_list = get_iter_list(self.kwargs, self.master)
         quarter_dict = {}
 
-        if "type" in self.kwargs:  # option here to change confidence types
-            self.conf_list = self.kwargs["type"]
+        if "data_type" in self.kwargs:
+            if self.kwargs["data_type"] == "cdg":
+                dca_keys = CPG_DCA_KEYS
+        else:
+            dca_keys = DCA_KEYS
+
+        # if "type" in self.kwargs:  # option here to change confidence types
+        #     self.conf_list = self.kwargs["type"]
 
         for tp in self.iter_list:
             self.group = get_group(self.master, tp, self.kwargs)
             type_dict = {}
-            for conf_type in self.conf_list:  # confidence type
+            for conf_type in list(dca_keys.keys()):  # confidence type
                 dca_dict = {}
                 try:
                     for project_name in self.group:
@@ -4144,10 +4157,10 @@ class DcaData:
                         )
                         if p_data is None:
                             continue
-                        dca_type = DCA_KEYS[conf_type]
+                        dca_type = dca_keys[conf_type]
                         colour = p_data[dca_type]
                         score = DCA_RATING_SCORES[p_data[dca_type]]
-                        costs = p_data["Total Forecast"]
+                        costs = p_data["Total Forecast"]  # Here
                         dca_colour = [("DCA", colour)]
                         dca_score = [("DCA score", score)]
                         t = [("Type", dca_type)]

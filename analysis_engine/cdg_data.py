@@ -42,11 +42,11 @@ from analysis_engine.data import (
 def _cdg_platform_docs_dir() -> Path:
     #  Cross plaform file path handling
     if platform.system() == "Linux":
-        return Path.home() / "Documents" / "data_bridge"
+        return Path.home() / "Documents" / "cdg"
     if platform.system() == "Darwin":
-        return Path.home() / "Documents" / "data_bridge"
+        return Path.home() / "Documents" / "cdg"
     else:
-        return Path.home() / "Documents" / "data_bridge"
+        return Path.home() / "Documents" / "cdg"
 
 
 cdg_root_path = _cdg_platform_docs_dir()
@@ -63,6 +63,9 @@ def cdg_get_master_data() -> List[
         project_data_from_master(
             cdg_root_path / "core_data/cdg_master_3_2020.xlsx", 3, 2020
         ),
+        # project_data_from_master(
+        #     cdg_root_path / "core_data/cdg_master_2_2020.xlsx", 2, 2020
+        # ),
     ]
     return master_data_list
 

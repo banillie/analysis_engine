@@ -6,7 +6,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 
 # matplotlib==3.3.0
-
+from analysis_engine.cdg_data import cdg_root_path, cdg_get_master_data, cdg_get_project_information
 from analysis_engine.data import (
     open_pickle_file,
     root_path,
@@ -78,30 +78,32 @@ top35_data_dict = {
     "op_args": {
         "quarter": ["Q4 20/21"],
         "group": ["HSRG", "RSS", "RIG", "RPE"],
+        # "group": ["MML Prog"],
         "chart": False,
         "data_type": "top35",
         "circle_colour": "No",
     },
 }
 
-ipdc_data_dict = {
-    "docx_save_path": str(root_path / "output/{}.docx"),
-    "master": open_pickle_file(str(root_path / "core_data/pickle/master.pickle")),
-    "op_args": {
-        "quarter": ["Q4 20/21"],
-        "baseline": ["standard"],
-        # "group": ["HSRG", "RSS", "RIG", "AMIS", "RPE"],
-        "group": ["HS2 2a"],
-        "chart": True,
-        "circle_colour": "No",
-    },
-}
-
-# cdg_data_dict = {
-#     "docx_save_path": cdg_root_path / "output/{}.docx",
-#     "data": (cdg_get_master_data(), cdg_get_project_information()),
+# ipdc_data_dict = {
+#     "docx_save_path": str(root_path / "output/{}.docx"),
+#     "master": open_pickle_file(str(root_path / "core_data/pickle/master.pickle")),
 #     "op_args": {
 #         "quarter": ["Q4 20/21"],
+#         "baseline": ["standard"],
+#         # "group": ["HSRG", "RSS", "RIG", "AMIS", "RPE"],
+#         "group": ["HS2 2a"],
+#         "chart": True,
+#         "circle_colour": "No",
+#     },
+# }
+
+# cdg_data_dict = {
+#     "docx_save_path": str(cdg_root_path / "output/{}.docx"),
+#     "master": Master(cdg_get_master_data(), cdg_get_project_information(), data_type="cdg"),
+#     "op_args": {
+#         "quarter": ["Q4 20/21"],
+#         "quarter": ["standard"],
 #         "group": ["GF", "CFPD", "SCS"],
 #         "chart": True,
 #         "data_type": "cdg",
@@ -111,7 +113,6 @@ ipdc_data_dict = {
 data = top35_data_dict
 
 ## DANDELION
-# data = top35_data_dict
 # dl_data = DandelionData(data["master"], **data["op_args"])
 # d_lion = make_a_dandelion_auto(dl_data, **data["op_args"])
 # put_matplotlib_fig_into_word(word_doc_landscape, d_lion, size=7)
@@ -163,14 +164,14 @@ top35_run_p_reports(data["master"], **data["op_args"])
 # c = RiskData(m, **op_args)
 # wb = risks_into_excel(c)
 
-## SPEED DIALS
-# data = DcaData(m, **op_args)
-# data.get_changes()
+# SPEED DIALS
+# dca_data = DcaData(data["master"], **data["op_args"])
+# dca_data.get_changes()
 # land_doc = open_word_doc(root_path / "input/summary_temp_landscape.docx")
-# build_speedials(data, land_doc)
+# build_speedials(dca_data, land_doc)
 # land_doc.save(root_path / "output/speed_dial_graph.docx")
 # doc = open_word_doc(root_path / "input/summary_temp.docx")
-# doc = dca_changes_into_word(data, doc)
+# doc = dca_changes_into_word(dca_data, doc)
 # doc.save(root_path / "output/speed_dials.docx")
 
 

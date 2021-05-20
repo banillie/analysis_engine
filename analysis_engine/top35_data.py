@@ -3,6 +3,10 @@ import math
 from collections import Counter
 from typing import List, Dict, Union
 from datetime import date
+
+from docx.oxml import parse_xml
+from docx.oxml.ns import nsdecls
+
 from analysis_engine.data import (
     get_group,
     open_word_doc,
@@ -17,7 +21,7 @@ from analysis_engine.data import (
 from datamaps.api import project_data_from_master
 import platform
 from pathlib import Path
-from docx import Document
+from docx import Document, table
 from dateutil import parser
 from dateutil.parser import ParserError
 
@@ -340,23 +344,23 @@ def top35_run_p_reports(master: Master, **kwargs) -> None:
 #     )  # add quarter here
 
 
-def run_pm_one_lines_single(master: Master, prog_info: Dict, **kwargs) -> None:
-    group = get_group(master, str(master.current_quarter), kwargs)
-
-    name_list = []
-    for p in group:
-        name_list.append((p, prog_info.data[p]["ID Number"]))
-
-    name_list.sort(key=lambda x: x[1])
-
-    report_doc = open_word_doc(top35_root_path / "input/summary_temp.docx")
-    for p in name_list:
-        p_master = master.master_data[0].data[p[0]]
-        p_name = prog_info.data[p[0]]["ID Number"]
-        output = deliverables(report_doc, p_master, p_name=p_name)
-        # output = pm_one_line(report_doc, p_master, prog_info.data[p[0]]["ID Number"])
-
-    output.save(top35_root_path / "output/deliverables.docx")  # add quarter here
+# def run_pm_one_lines_single(master: Master, prog_info: Dict, **kwargs) -> None:
+#     group = get_group(master, str(master.current_quarter), kwargs)
+#
+#     name_list = []
+#     for p in group:
+#         name_list.append((p, prog_info.data[p]["ID Number"]))
+#
+#     name_list.sort(key=lambda x: x[1])
+#
+#     report_doc = open_word_doc(top35_root_path / "input/summary_temp.docx")
+#     for p in name_list:
+#         p_master = master.master_data[0].data[p[0]]
+#         p_name = prog_info.data[p[0]]["ID Number"]
+#         output = deliverables(report_doc, p_master, p_name=p_name)
+#         # output = pm_one_line(report_doc, p_master, prog_info.data[p[0]]["ID Number"])
+#
+#     output.save(top35_root_path / "output/deliverables.docx")  # add quarter here
 
 
 def compile_p_report(
@@ -377,7 +381,7 @@ def compile_p_report(
     kwargs["group"] = [project_name]
     ms = MilestoneData(master, "ipdc_milestones", **kwargs)  # milestones
     print_out_project_milestones(doc, ms)
-    cs = CentralSupportData(master, group=[project_name], quarter=["Q4 20/21"]) # central support
+    cs = CentralSupportData(master, **kwargs) # central support
     print_out_central_support(doc, cs)
     return doc
 
@@ -449,12 +453,32 @@ def deliverables(doc: Document, master: Dict, project_name: str) -> Document:
     return doc
 
 
+def make_text_red(cell: int, current, old) -> None:
+    for paragraph in cell.paragraphs:
+        for run in paragraph.runs:
+            if current != old:
+                run.font.color.rgb = RGBColor(255, 0, 0)
+
+
+def cell_colouring(word_table_cell: table.Table.cell, one, two) -> None:
+    """Function that handles cell colouring for word documents"""
+
+    try:
+        if one != two:
+            colour = parse_xml(r'<w:shd {} w:fill="cb1f00"/>'.format(nsdecls("w")))
+            word_table_cell._tc.get_or_add_tcPr().append(colour)
+
+    except TypeError:
+        pass
+
+
 def project_report_meta_data(
         doc: Document,
         master: Dict,
         project_name: str,
 ):
     p_master = master.master_data[0].data[project_name]
+    p_master_last = master.master_data[1].data[project_name]
     """Meta data table"""
     # doc.add_section(WD_SECTION_START.NEW_PAGE)
     # paragraph = doc.add_paragraph()
@@ -471,12 +495,22 @@ def project_report_meta_data(
     t = doc.add_table(rows=1, cols=4)
     hdr_cells = t.rows[0].cells
     hdr_cells[0].text = "ON SCHEDULE:"
-    hdr_cells[1].text = str(p_master["PROJECT DEL TO CURRENT TIMINGS ?"])
+    on_time = str(p_master["PROJECT DEL TO CURRENT TIMINGS ?"])
+    on_time_old = str(p_master_last["PROJECT DEL TO CURRENT TIMINGS ?"])
+    hdr_cells[1].text = on_time
+    # cell_colouring(hdr_cells[1], on_time, on_time_old)
+    # make_text_red(hdr_cells[1], on_time, on_time_old)
     hdr_cells[2].text = "ON GMPP:"
-    hdr_cells[3].text = str(p_master["GMPP ID: IS THIS PROJECT ON GMPP"])
+    on_gmpp = str(p_master["GMPP ID: IS THIS PROJECT ON GMPP"])
+    on_gmpp_last = str(p_master_last["GMPP ID: IS THIS PROJECT ON GMPP"])
+    hdr_cells[3].text = on_gmpp
+    # cell_colouring(hdr_cells[3], on_gmpp, on_gmpp_last)
     row_cells = t.add_row().cells
     row_cells[0].text = "ON BUDGET:"
-    row_cells[1].text = str(p_master["PROJECT ON BUDGET?"])
+    on_budget = str(p_master["PROJECT ON BUDGET?"])
+    on_budget_last = str(p_master_last["PROJECT ON BUDGET?"])
+    row_cells[1].text = on_budget
+    # cell_colouring(row_cells[1], on_budget, on_budget_last)
     row_cells[2].text = "TOTAL COST:"
     if p_master["WLC NON GOV"] is None or p_master["WLC NON GOV"] == 0:
         total = p_master["WLC TOTAL"]
@@ -495,6 +529,7 @@ def project_report_meta_data(
     # make column keys bold
     make_columns_bold([t.columns[0], t.columns[2]])
     # change_text_size([t.columns[0], t.columns[1], t.columns[2], t.columns[3]], 10)
+    # make_text_red([t.columns[1], t.columns[3]])
 
     return doc
 
@@ -528,39 +563,39 @@ def dca_narratives(doc: Document, master: Dict, project_name: str) -> None:
         compare_text_new_and_old(text_one, text_two, doc)
 
 
-def pm_one_line(doc: Document, p_master: Dict, p_name: str) -> None:
-    doc.add_paragraph()
-    # p = doc.add_paragraph()
-    # text = "*Red text highlights changes in narratives from last quarter"
-    # p.add_run(text).font.color.rgb = RGBColor(255, 0, 0)
-
-    narrative_keys_list = [
-        "SHORT UPDATE FOR PM NOTE",
-    ]
-
-    headings_list = [
-        "Short update for PM",
-    ]
-
-    for x in range(len(headings_list)):
-        try:  # overall try statement relates to data_bridge
-            text_one = str(
-                p_master[narrative_keys_list[x]]
-            )
-            try:
-                text_two = str(
-                    p_master[narrative_keys_list[x]]
-                )
-            except (KeyError, IndexError):  # index error relates to data_bridge
-                text_two = text_one
-        except KeyError:
-            break
-
-        doc.add_paragraph().add_run(str(p_name)).bold = True
-        compare_text_new_and_old(text_one, text_two, doc)
-
-    return doc
-
+# def pm_one_line(doc: Document, p_master: Dict, p_name: str) -> None:
+#     doc.add_paragraph()
+#     # p = doc.add_paragraph()
+#     # text = "*Red text highlights changes in narratives from last quarter"
+#     # p.add_run(text).font.color.rgb = RGBColor(255, 0, 0)
+#
+#     narrative_keys_list = [
+#         "SHORT UPDATE FOR PM NOTE",
+#     ]
+#
+#     headings_list = [
+#         "Short update for PM",
+#     ]
+#
+#     for x in range(len(headings_list)):
+#         try:  # overall try statement relates to data_bridge
+#             text_one = str(
+#                 p_master[narrative_keys_list[x]]
+#             )
+#             try:
+#                 text_two = str(
+#                     p_master[narrative_keys_list[x]]
+#                 )
+#             except (KeyError, IndexError):  # index error relates to data_bridge
+#                 text_two = text_one
+#         except KeyError:
+#             break
+#
+#         doc.add_paragraph().add_run(str(p_name)).bold = True
+#         compare_text_new_and_old(text_one, text_two, doc)
+#
+#     return doc
+#
 
 def milestone_info_handling(output_list: list, t_list: list) -> list:
     """helper function for handling and cleaning up milestone date generated
