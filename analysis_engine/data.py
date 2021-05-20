@@ -1365,102 +1365,129 @@ class BenefitsData:
 
         self.iter_list = get_iter_list(self.kwargs, self.master)
         lower_dict = {}
-        for tp in self.iter_list:
-            delivered = 0
-            profiled = 0
-            unprofiled = 0
-            cash_dev = 0
-            uncash_dev = 0
-            economic_dev = 0
-            disben_dev = 0
-            cash_profiled = 0
-            uncash_profiled = 0
-            economic_profiled = 0
-            disben_profiled = 0
-            cash_unprofiled = 0
-            uncash_unprofiled = 0
-            economic_unprofiled = 0
-            disben_unprofiled = 0
-            self.group = get_group(self.master, tp, self.kwargs)
-            for x, key in enumerate(BEN_TYPE_KEY_LIST):
-                # group_total = 0
-                for p in self.group:
-                    p_data = get_correct_p_data(
-                        self.kwargs, self.master, self.baseline_type, p, tp
-                    )
-                    if p_data is None:
-                        continue
-                    try:
-                        cash = round(p_data[key[0]])
-                        if cash is None:
+
+        if "data_type" in self.kwargs:
+            if self.kwargs["data_type"] == "cdg":
+                for tp in self.iter_list:
+                    b_achieved = 0
+                    b_remaining = 0
+                    b_total = 0
+                    self.group = get_group(self.master, tp, self.kwargs)
+                    for project_name in self.group:
+                        p_data = get_correct_p_data(
+                            self.kwargs,
+                            self.master,
+                            self.baseline_type,
+                            project_name,
+                            tp,
+                        )
+                        b_achieved += convert_none_types(p_data["Benefits delivered"])
+                        b_remaining += convert_none_types(p_data["Benefits to be delivered"])
+                        b_total += convert_none_types(p_data["Total Benefits"])
+
+                    lower_dict[tp] = {
+                            "delivered": b_achieved,
+                            "prof": b_remaining,
+                            "total": b_total,
+                            }
+
+        else:
+            for tp in self.iter_list:
+                delivered = 0
+                profiled = 0
+                unprofiled = 0
+                cash_dev = 0
+                uncash_dev = 0
+                economic_dev = 0
+                disben_dev = 0
+                cash_profiled = 0
+                uncash_profiled = 0
+                economic_profiled = 0
+                disben_profiled = 0
+                cash_unprofiled = 0
+                uncash_unprofiled = 0
+                economic_unprofiled = 0
+                disben_unprofiled = 0
+                self.group = get_group(self.master, tp, self.kwargs)
+                for x, key in enumerate(BEN_TYPE_KEY_LIST):
+                    # group_total = 0
+                    for p in self.group:
+                        p_data = get_correct_p_data(
+                            self.kwargs, self.master, self.baseline_type, p, tp
+                        )
+                        if p_data is None:
+                            continue
+                        try:
+                            cash = round(p_data[key[0]])
+                            if cash is None:
+                                cash = 0
+                            uncash = round(p_data[key[1]])
+                            if uncash is None:
+                                uncash = 0
+                            economic = round(p_data[key[2]])
+                            if economic is None:
+                                economic = 0
+                            disben = round(p_data[key[3]])
+                            if disben is None:
+                                disben = 0
+                            total = round(cash + uncash + economic + disben)
+                            # group_total += total
+                        except TypeError:  # handle None types, which are present if project not reporting last quarter.
                             cash = 0
-                        uncash = round(p_data[key[1]])
-                        if uncash is None:
                             uncash = 0
-                        economic = round(p_data[key[2]])
-                        if economic is None:
                             economic = 0
-                        disben = round(p_data[key[3]])
-                        if disben is None:
                             disben = 0
-                        total = round(cash + uncash + economic + disben)
-                        # group_total += total
-                    except TypeError:  # handle None types, which are present if project not reporting last quarter.
-                        cash = 0
-                        uncash = 0
-                        economic = 0
-                        disben = 0
-                        total = 0
-                        # group_total += total
+                            total = 0
+                            # group_total += total
 
-                    if self.iter_list.index(tp) == 0:  # current quarter
+                        if self.iter_list.index(tp) == 0:  # current quarter
+                            if x == 0:  # spent
+                                cash_dev += cash
+                                uncash_dev += uncash
+                                economic_dev += economic
+                                disben_dev += disben
+                            if x == 1:  # profiled
+                                cash_profiled += cash
+                                uncash_profiled += uncash
+                                economic_profiled += economic
+                                disben_profiled += disben
+                            if x == 2:  # unprofiled
+                                cash_unprofiled += cash
+                                uncash_unprofiled += uncash
+                                economic_unprofiled += economic
+                                disben_unprofiled += disben
+
                         if x == 0:  # spent
-                            cash_dev += cash
-                            uncash_dev += uncash
-                            economic_dev += economic
-                            disben_dev += disben
+                            delivered += total
                         if x == 1:  # profiled
-                            cash_profiled += cash
-                            uncash_profiled += uncash
-                            economic_profiled += economic
-                            disben_profiled += disben
+                            profiled += total
                         if x == 2:  # unprofiled
-                            cash_unprofiled += cash
-                            uncash_unprofiled += uncash
-                            economic_unprofiled += economic
-                            disben_unprofiled += disben
+                            unprofiled += total
 
-                    if x == 0:  # spent
-                        delivered += total
-                    if x == 1:  # profiled
-                        profiled += total
-                    if x == 2:  # unprofiled
-                        unprofiled += total
-
-            cat_spent = [cash_dev, uncash_dev, economic_dev, disben_dev]
-            cat_profiled = [
-                cash_profiled,
-                uncash_profiled,
-                economic_profiled,
-                disben_profiled,
-            ]
-            cat_unprofiled = [
-                cash_unprofiled,
-                uncash_unprofiled,
-                economic_unprofiled,
-                disben_unprofiled,
-            ]
-            cat_profiled = calculate_profiled(cat_profiled, cat_spent, cat_unprofiled)
-            adj_profiled = calculate_profiled(profiled, delivered, unprofiled)
-            lower_dict[tp] = {
-                "cat_spent": cat_spent,
-                "cat_prof": cat_profiled,
-                "cat_unprof": cat_unprofiled,
-                "delivered": delivered,
-                "prof": adj_profiled,
-                "unprof": unprofiled,
-                "total": profiled,
-            }
+                cat_spent = [cash_dev, uncash_dev, economic_dev, disben_dev]
+                cat_profiled = [
+                    cash_profiled,
+                    uncash_profiled,
+                    economic_profiled,
+                    disben_profiled,
+                ]
+                cat_unprofiled = [
+                    cash_unprofiled,
+                    uncash_unprofiled,
+                    economic_unprofiled,
+                    disben_unprofiled,
+                ]
+                cat_profiled = calculate_profiled(cat_profiled, cat_spent, cat_unprofiled)
+                adj_profiled = calculate_profiled(profiled, delivered, unprofiled)
+                lower_dict[tp] = {
+                    "cat_spent": cat_spent,
+                    "cat_prof": cat_profiled,
+                    "cat_unprof": cat_unprofiled,
+                    "delivered": delivered,
+                    "prof": adj_profiled,
+                    "unprof": unprofiled,
+                    "total": profiled,
+                }
 
         self.b_totals = lower_dict
 
@@ -8020,10 +8047,10 @@ def dandelion_number_text(number: int) -> str:
             round_total = int(round(number))
             return "£" + str(round_total) + "m"
         if total_len <= 3:
-            round_total = int(round(number, -1))
+            round_total = int(round(number))
             return "£" + str(round_total) + "m"
         if total_len == 4:
-            round_total = int(round(number, -2))
+            round_total = int(round(number, -1))
             if str(round_total)[1] != "0":
                 return "£" + str(round_total)[0] + "," + str(round_total)[1] + "bn"
             else:
@@ -8058,17 +8085,21 @@ def cal_group_angle(dist_no: int, group: List[str], **kwargs):
 
 
 def get_dandelion_type_total(
-    master: Master, tp: str, g: str or List[str], kwargs
+    master: Master, kwargs
 ) -> int or str:  # Note no **kwargs as existing kwargs dict passed in
+    tp = kwargs["quarter"][0]  # only one quarter for dandelion
     if "type" in kwargs:
         if kwargs["type"] == "remaining":
-            cost = CostData(master, quarter=[tp], group=[g])  # group costs data
+            cost = CostData(master, **kwargs)  # group costs data
             return cost.c_totals[tp]["prof"] + cost.c_totals[tp]["unprof"]
         if kwargs["type"] == "spent":
-            cost = CostData(master, quarter=[tp], group=[g])  # group costs data
+            cost = CostData(master, **kwargs)
             return cost.c_totals[tp]["spent"]
+        if kwargs["type"] == "income":
+            cost = CostData(master, **kwargs)
+            return cost.c_totals[tp]["income_total"]
         if kwargs["type"] == "benefits":
-            benefits = BenefitsData(master, quarter=[tp], group=[g])
+            benefits = BenefitsData(master, **kwargs)
             return benefits.b_totals[tp]["total"]
 
     else:
@@ -8091,6 +8122,13 @@ class DandelionData:
         self.get_data()
 
     def get_data(self):
+
+        if "data_type" in self.kwargs:
+            if self.kwargs["data_type"] == "cdg":
+                dca_confidence = "Overall Delivery Confidence"
+        else:
+            dca_confidence = "Departmental DCA"
+
         self.iter_list = get_iter_list(self.kwargs, self.master)
         for (
             tp
@@ -8125,7 +8163,7 @@ class DandelionData:
             l_g_d = {}  # lower group dictionary
 
             pf_wlc = get_dandelion_type_total(
-                self.master, tp, self.group, self.kwargs
+                self.master, self.kwargs
             )  # portfolio wlc
             if "pc" in self.kwargs:  # pc portfolio colour
                 pf_colour = COLOUR_DICT[self.kwargs["pc"]]
@@ -8152,7 +8190,7 @@ class DandelionData:
                 if g == "pipeline":
                     g_wlc = self.master.pipeline_dict["pipeline"]["wlc"]
                 else:
-                    g_wlc = get_dandelion_type_total(self.master, tp, g, self.kwargs)
+                    g_wlc = get_dandelion_type_total(self.master, self.kwargs)
                 if len(self.group) > 1:
                     y_axis = 0 + (
                         (math.sqrt(pf_wlc) * 3.25) * math.sin(math.radians(g_ang_l[i]))
@@ -8212,7 +8250,7 @@ class DandelionData:
                         p_value = self.master.pipeline_dict[p]["wlc"]
                     else:
                         p_value = get_dandelion_type_total(
-                            self.master, tp, p, self.kwargs
+                            self.master, self.kwargs
                         )  # project wlc
                     p_list.append((p_value, p))
                 l_g_d[g] = list(reversed(sorted(p_list)))
@@ -8244,7 +8282,7 @@ class DandelionData:
                             rag = p_data[DCA_KEYS[self.kwargs["confidence"]]]
                         else:
                             try:
-                                rag = p_data["Departmental DCA"]
+                                rag = p_data[dca_confidence]
                             except KeyError:  # top35 has no rag data
                                 rag = None
                         colour = COLOUR_DICT[convert_rag_text(rag)]  # bubble colour
@@ -8276,16 +8314,14 @@ class DandelionData:
                             multi = (pf_wlc / g_wlc) ** 1.1
                         elif 15 >= len(p_list) >= 11:
                             multi = (pf_wlc / g_wlc) ** (1.0 / 2.0)  # square root
+                        elif len(p_list) == 1:
+                            multi = 2.2
                         else:
                             if g_wlc / pf_wlc >= 0.33:
-                                multi = (pf_wlc / g_wlc) ** (1.0 / 2.0)  # cube root
+                                multi = (pf_wlc / g_wlc) ** (1.0 / 2.0)
                             else:
                                 multi = (pf_wlc / g_wlc) ** (1.0 / 3.0)  # cube root
-                        #
-                        # if len(p_list) >= 14:
-                        #     multi = (pf_wlc / g_wlc) ** (1.0 / 1.75)  # square root
-                        # else:
-                        #     multi = (pf_wlc / g_wlc) ** (1.0 / 3.0)  # cube root
+
                         p_y_axis = g_y_axis + (g_radius * multi) * math.sin(
                             math.radians(ang_l[i])
                         )

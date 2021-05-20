@@ -72,18 +72,18 @@ STAGE_GROUPS = ["pipeline", "pre-SOBC", "SOBC", "OBC", "FBC"]
 word_doc_landscape = open_word_doc(root_path / "input/summary_temp_landscape.docx")
 
 
-top35_data_dict = {
-    "docx_save_path": str(top35_root_path / "output/{}.docx"),
-    "master": Master(top35_get_master_data(), top35_get_project_information(), data_type="top35"),
-    "op_args": {
-        "quarter": ["Q4 20/21"],
-        "group": ["HSRG", "RSS", "RIG", "RPE"],
-        # "group": ["MML Prog"],
-        "chart": False,
-        "data_type": "top35",
-        "circle_colour": "No",
-    },
-}
+# top35_data_dict = {
+#     "docx_save_path": str(top35_root_path / "output/{}.docx"),
+#     "master": Master(top35_get_master_data(), top35_get_project_information(), data_type="top35"),
+#     "op_args": {
+#         "quarter": ["Q4 20/21"],
+#         "group": ["HSRG", "RSS", "RIG", "RPE"],
+#         # "group": ["MML Prog"],
+#         "chart": False,
+#         "data_type": "top35",
+#         "circle_colour": "No",
+#     },
+# }
 
 # ipdc_data_dict = {
 #     "docx_save_path": str(root_path / "output/{}.docx"),
@@ -98,23 +98,24 @@ top35_data_dict = {
 #     },
 # }
 
-# cdg_data_dict = {
-#     "docx_save_path": str(cdg_root_path / "output/{}.docx"),
-#     "master": Master(cdg_get_master_data(), cdg_get_project_information(), data_type="cdg"),
-#     "op_args": {
-#         "quarter": ["Q4 20/21"],
-#         "quarter": ["standard"],
-#         "group": ["GF", "CFPD", "SCS"],
-#         "chart": True,
-#         "data_type": "cdg",
-#     },
-# }
+cdg_data_dict = {
+    "docx_save_path": str(cdg_root_path / "output/{}.docx"),
+    "master": Master(cdg_get_master_data(), cdg_get_project_information(), data_type="cdg"),
+    "op_args": {
+        "quarter": ["Q4 20/21"],
+        # "quarter": ["standard"],
+        "group": ["GF", "CFPD", "SCS"],
+        "chart": True,
+        "data_type": "cdg",
+        "type": "income",
+    },
+}
 
-data = top35_data_dict
+data = cdg_data_dict
 
 ## DANDELION
-# dl_data = DandelionData(data["master"], **data["op_args"])
-# d_lion = make_a_dandelion_auto(dl_data, **data["op_args"])
+dl_data = DandelionData(data["master"], **data["op_args"])
+d_lion = make_a_dandelion_auto(dl_data, **data["op_args"])
 # put_matplotlib_fig_into_word(word_doc_landscape, d_lion, size=7)
 # word_doc_landscape.save(data["docx_save_path"].format("dandelion_graph"))
 
@@ -154,7 +155,7 @@ data = top35_data_dict
 # cost_profile_graph(c, m, chart=True, group=c.start_group)
 
 # SUMMARIES
-top35_run_p_reports(data["master"], **data["op_args"])
+# top35_run_p_reports(data["master"], **data["op_args"])
 
 ## VFM
 # c = VfMData(m, group=DFm = Master(*data["data"], **data["op_args"] )T_GROUP, quarter=["standard"])  # c is class
