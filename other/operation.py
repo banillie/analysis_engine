@@ -6,7 +6,13 @@ import numpy as np
 from matplotlib import pyplot as plt
 
 # matplotlib==3.3.0
-from analysis_engine.cdg_data import cdg_root_path, cdg_get_master_data, cdg_get_project_information, cdg_dashboard
+from analysis_engine.cdg_data import (
+    cdg_root_path,
+    cdg_get_master_data,
+    cdg_get_project_information,
+    cdg_dashboard,
+    cdg_run_p_reports,
+)
 from analysis_engine.data import (
     open_pickle_file,
     root_path,
@@ -46,7 +52,9 @@ from analysis_engine.data import (
     dca_changes_into_word,
     radar_chart,
     JsonData,
-    open_json_file, get_input_doc, ipdc_dashboard,
+    open_json_file,
+    get_input_doc,
+    ipdc_dashboard,
 )
 
 ## GENERATE CLI OPTIONS
@@ -57,7 +65,8 @@ from analysis_engine.data import (
 from analysis_engine.top35_data import (
     top35_get_master_data,
     top35_get_project_information,
-    top35_root_path, top35_run_p_reports,
+    top35_root_path,
+    top35_run_p_reports,
 )
 
 # master = Master(get_master_data(), get_project_information())
@@ -72,18 +81,18 @@ STAGE_GROUPS = ["pipeline", "pre-SOBC", "SOBC", "OBC", "FBC"]
 word_doc_landscape = open_word_doc(root_path / "input/summary_temp_landscape.docx")
 
 
-# top35_data_dict = {
-#     "docx_save_path": str(top35_root_path / "output/{}.docx"),
-#     "master": Master(top35_get_master_data(), top35_get_project_information(), data_type="top35"),
-#     "op_args": {
-#         "quarter": ["Q4 20/21"],
-#         "group": ["HSRG", "RSS", "RIG", "RPE"],
-#         # "group": ["MML Prog"],
-#         "chart": False,
-#         "data_type": "top35",
-#         "circle_colour": "No",
-#     },
-# }
+top35_data_dict = {
+    "docx_save_path": str(top35_root_path / "output/{}.docx"),
+    "master": Master(top35_get_master_data(), top35_get_project_information(), data_type="top35"),
+    "op_args": {
+        "quarter": ["Q4 20/21"],
+        "group": ["HSRG", "RSS", "RIG", "RPE"],
+        # "group": ["HS2 Prog"],
+        "chart": False,
+        "data_type": "top35",
+        "circle_colour": "No",
+    },
+}
 
 # ipdc_data_dict = {
 #     "docx_save_path": str(root_path / "output/{}.docx"),
@@ -98,22 +107,28 @@ word_doc_landscape = open_word_doc(root_path / "input/summary_temp_landscape.doc
 #     },
 # }
 
-cdg_data_dict = {
-    "docx_save_path": str(cdg_root_path / "output/{}.docx"),
-    "master": Master(cdg_get_master_data(), cdg_get_project_information(), data_type="cdg"),
-    "op_args": {
-        "quarter": ["Q4 20/21"],
-        # "quarter": ["standard"],
-        "group": ["GF", "CFPD", "SCS"],
-        "chart": True,
-        "data_type": "cdg",
-        "type": "income",
-    },
-    "dashboard": str(cdg_root_path / "input/dashboard_master.xlsx"),
-    "excel_save_path": str(cdg_root_path / "output/{}.xlsx")
-}
+# cdg_data_dict = {
+#     "docx_save_path": str(cdg_root_path / "output/{}.docx"),
+#     "master": Master(
+#         cdg_get_master_data(), cdg_get_project_information(), data_type="cdg"
+#     ),
+#     "op_args": {
+#         "quarter": ["Q4 20/21"],
+#         # "quarter": ["standard"],
+#         "group": ["GF", "CFPD", "SCS"],
+#         # "chart": True,
+#         "data_type": "cdg",
+#         "type": "income",
+#         "blue_line": "Today",
+#     },
+#     "dashboard": str(cdg_root_path / "input/dashboard_master.xlsx"),
+#     "excel_save_path": str(cdg_root_path / "output/{}.xlsx"),
+#     "word_save_path": str(cdg_root_path / "output/{}.docx")
+# }
 
-data = cdg_data_dict
+data = top35_data_dict
+
+hoz_doc = open_word_doc(root_path / "input/summary_temp_landscape.docx")
 
 ## DANDELION
 # dl_data = DandelionData(data["master"], **data["op_args"])
@@ -123,23 +138,14 @@ data = cdg_data_dict
 
 
 ## MILESTONES
-# ms = MilestoneData(m, **op_args)
-# ms.filter_chart_info(dates=["1/4/2021", "1/5/2021"])
+# ms = MilestoneData(data["master"], **data["op_args"])
+# # ms.filter_chart_info(dates=["1/4/2021", "1/5/2021"])
 # wb = put_milestones_into_wb(ms)
-# wb.save(root_path / "output/test_milestone_data_output.xlsx")
-# chart_kwargs = {**{"blue_line": "today", "Chart": True}, **ms.kwargs}
-# milestone_chart(ms, m, **chart_kwargs)
-# wb.save(root_path / "output/gmpp_milestones_data.xlsx")
-# doc = open_word_doc(root_path / "input/summary_temp_landscape.docx")
-# for p in m.dft_groups["Q3 20/21"]["GMPP"]:
-#     try:
-#         ms = MilestoneData(m, quarter=[str(m.current_quarter)], group=[p])
-#         ms.filter_chart_info(dates=["1/1/2021", "1/1/2030"])
-#         graph = milestone_chart(ms, blue_line="Today", chart=True)
-#         put_matplotlib_fig_into_word(doc, graph, size=8, transparent=False)
-#     except ValueError:
-#         pass
-# doc.save(root_path / "output/gmpp_milestones_charts.docx".format(p))
+# wb.save(data["excel_save_path"].format("milestones"))
+# # chart_kwargs = {**{"blue_line": "today", "Chart": True}, **ms.kwargs}
+# g = milestone_chart(ms, data["master"], **data["op_args"])
+# put_matplotlib_fig_into_word(hoz_doc, g, size=8, transparent=False)
+# hoz_doc.save(data["word_save_path"].format("milestone_graph"))
 
 # b = BenefitsData(m, baseline=["all"])
 # total_costs_benefits_bar_chart(c, b, chart=True)
@@ -157,7 +163,7 @@ data = cdg_data_dict
 # cost_profile_graph(c, m, chart=True, group=c.start_group)
 
 # SUMMARIES
-# top35_run_p_reports(data["master"], **data["op_args"])
+top35_run_p_reports(data["master"], **data["op_args"])
 
 ## VFM
 # c = VfMData(m, group=DFm = Master(*data["data"], **data["op_args"] )T_GROUP, quarter=["standard"])  # c is class
@@ -197,5 +203,5 @@ data = cdg_data_dict
 
 
 ## DASHBOARD
-wb = cdg_dashboard(data["master"], data["dashboard"])
-wb.save(data["excel_save_path"].format("q4_2021_cdg_dashboard"))
+# wb = cdg_dashboard(data["master"], data["dashboard"])
+# wb.save(data["excel_save_path"].format("q4_2021_cdg_dashboard_with_narrative"))

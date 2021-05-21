@@ -616,6 +616,15 @@ def milestone_info_handling(output_list: list, t_list: list) -> list:
                 pass
 
 
+def cs_info_handling(output_list: list, t_list: list) -> list:
+    """helper function for handling and cleaning up milestone date generated
+    via MilestoneDate class. Removes none type milestone names and non date
+    string values"""
+    if t_list[1][1] is None:
+        pass
+    else:
+        return output_list.append(t_list)
+
 # class MilestoneData:
 #     def __init__(
 #             self,
@@ -983,7 +992,7 @@ class CentralSupportData:
                     continue
                 # i loops below removes None Milestone names and rejects non-datetime date values.
                 p = self.master.abbreviations[project_name]["abb"]
-                for i in range(1, 20):
+                for i in range(1, 16):
                     t = [
                         ("Project", p),
                         ("Requirement", p_data["R" + str(i) + " name"]),
@@ -991,9 +1000,24 @@ class CentralSupportData:
                         ("Date", p_data["R" + str(i) + " needed by"]),
                         ("Escalated", p_data["R" + str(i) + " escalated to"]),
                         ("Type", p_data["R" + str(i) + " type"]),
-                        ("Secured", p_data["R" + str(i) + " secured"]),
+                        ("Central Response", p_data["R" + str(i) + " Central Response"]),
+                        ("PoC", p_data["R" + str(i) + " Point of Contact"]),
+                        ("Secured", p_data["R" + str(i) + " secured"])
                     ]
-                    milestone_info_handling(project_list, t)
+                    # project_list.append(t)
+                    cs_info_handling(project_list, t)
+                for i in range(17, 20):
+                    t = [
+                        ("Project", p),
+                        ("Requirement", p_data["R" + str(i) + " name"]),
+                        ("Date", p_data["R" + str(i) + " needed by"]),
+                        ("Escalated", p_data["R" + str(i) + " escalated to"]),
+                        ("Type", p_data["R" + str(i) + " type"]),
+
+                    ]
+                    cs_info_handling(project_list, t)
+                    # project_list.append(t)
+
 
                 # loop to stop keys names being the same. Done at project level.
                 # not particularly concise code.
@@ -1037,6 +1061,8 @@ class CentralSupportData:
             escalated = []
             type = []
             secured = []
+            cr = []
+            poc = []
             for v in self.milestone_dict[self.iter_list[0]].values():
                 p = None  # project
                 mn = None  # milestone name
@@ -1056,7 +1082,18 @@ class CentralSupportData:
                         r_dates.append(d)
                         escalated.append(x["Escalated"])
                         type.append(x["Type"])
-                        secured.append(x["Secured"])
+                        try:
+                            secured.append(x["Secured"])
+                        except KeyError:
+                            secured.append("NEW")
+                        try:
+                            poc.append(x["PoC"])
+                        except KeyError:
+                            poc.append("NEW")
+                        try:
+                            cr.append(x["Central Response"])
+                        except KeyError:
+                            cr.append("NEW")
                         break
                 if p is None and mn is None and d is None:
                     p = v["Project"]
@@ -1077,6 +1114,8 @@ class CentralSupportData:
                 "escalated": escalated,
                 "type": type,
                 "secured": secured,
+                "cr": cr,
+                "poc": poc,
             }
 
         self.sorted_milestone_dict = output_dict
@@ -1365,32 +1404,65 @@ def print_out_central_support(
     if not centrals.sorted_milestone_dict[centrals.iter_list[0]]["names"]:
         doc.add_paragraph().add_run("No requirements reported")
     else:
-        table = doc.add_table(rows=1, cols=5)
+        table = doc.add_table(rows=1, cols=6)
         hdr_cells = table.rows[0].cells
         hdr_cells[0].text = "Requirement"
         hdr_cells[1].text = "Need by"
         hdr_cells[2].text = "Escalated to"
         hdr_cells[3].text = "Type"
-        hdr_cells[4].text = "Secured"
+        hdr_cells[4].text = "Central Response"
+        # hdr_cells[5].text = "PoC"
+        hdr_cells[5].text = "Secured"
 
         for i, m in enumerate(
                 centrals.sorted_milestone_dict[centrals.iter_list[0]]["names"]
         ):
             row_cells = table.add_row().cells
-            if len(centrals.group) == 1:
-                no_name = m.split(",")[1]
-                row_cells[0].text = no_name
-            else:
-                row_cells[0].text = m
-            row_cells[1].text = centrals.sorted_milestone_dict[centrals.iter_list[0]][
-                "r_dates"
-            ][i].strftime("%d/%m/%Y")
+            # if len(centrals.group) == 1:
+            #     no_name = m.split(",")[1]
+            #     row_cells[0].text = no_name
+            # else:
+            row_cells[0].text = m
+            paragraph = row_cells[0].paragraphs[0]
+            run = paragraph.runs
+            font = run[0].font
+            font.size = Pt(8)  # font size = 8
+            try:
+                row_cells[1].text = centrals.sorted_milestone_dict[centrals.iter_list[0]][
+                    "r_dates"
+                ][i].strftime("%d/%m/%Y")
+                paragraph = row_cells[1].paragraphs[0]
+                run = paragraph.runs
+                font = run[0].font
+                font.size = Pt(9)  # font size = 8
+            except AttributeError:
+                row_cells[1].text = "None"
             row_cells[2].text = str(centrals.sorted_milestone_dict[centrals.iter_list[0]][
                 "escalated"][i])
+            paragraph = row_cells[2].paragraphs[0]
+            run = paragraph.runs
+            font = run[0].font
+            font.size = Pt(9)  # font size = 8
             row_cells[3].text = str(centrals.sorted_milestone_dict[centrals.iter_list[0]][
                 "type"][i])
+            paragraph = row_cells[3].paragraphs[0]
+            run = paragraph.runs
+            font = run[0].font
+            font.size = Pt(9)  # font size = 8
             row_cells[4].text = str(centrals.sorted_milestone_dict[centrals.iter_list[0]][
+                                        "cr"][i])
+            paragraph = row_cells[4].paragraphs[0]
+            run = paragraph.runs
+            font = run[0].font
+            font.size = Pt(8)  # font size = 8
+            # row_cells[5].text = str(centrals.sorted_milestone_dict[centrals.iter_list[0]][
+            #                             "poc"][i])
+            row_cells[5].text = str(centrals.sorted_milestone_dict[centrals.iter_list[0]][
                 "secured"][i])
+            paragraph = row_cells[5].paragraphs[0]
+            run = paragraph.runs
+            font = run[0].font
+            font.size = Pt(9)  # font size = 8
             # try:
             #     row_cells[2].text = plus_minus_days(
             #         (
@@ -1431,8 +1503,10 @@ def print_out_central_support(
         table.style = "Table Grid"
 
         # column widths
-        column_widths = (Cm(6), Cm(2.5), Cm(2.5), Cm(2.5), Cm(2.5))
+        column_widths = (Cm(6), Cm(2), Cm(2), Cm(2), Cm(4), Cm(2))
         set_col_widths(table, column_widths)
+        # column_widths = (Cm(6), Cm(2.6), Cm(2.6), Cm(10))
+        # set_col_widths(table, column_widths)
     # make_columns_bold([table.columns[0], table.columns[3]])  # make keys bold
     # make_text_red([table.columns[1], table.columns[4]])  # make 'not reported red'
 

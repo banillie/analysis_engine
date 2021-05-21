@@ -18,6 +18,8 @@ from openpyxl.formatting import Rule
 from openpyxl.styles import Font, PatternFill, Border
 from openpyxl.styles.differential import DifferentialStyle
 
+# from analysis_engine.top35_data import wd_heading
+
 from analysis_engine.data import (
     convert_bc_stage_text,
     plus_minus_days,
@@ -36,6 +38,8 @@ from analysis_engine.data import (
     make_columns_bold,
     change_text_size,
     Master,
+    get_group,
+    compare_text_new_and_old,
 )
 
 
@@ -570,7 +574,7 @@ def cdg_dashboard(
     wb = load_workbook(wb_path)
     ws = wb.active
 
-    data_key_dict = {
+    DATA_KEY_DICT = {
         "IPDC approval point": "Last Business Case (BC) achieved",
         "Total Forecast": "Total Costs",
         "Departmental DCA": "Overall Delivery Confidence",
@@ -588,7 +592,7 @@ def cdg_dashboard(
             # Abbreviation
             ws.cell(row=row_num, column=4).value = master.project_information.data[project_name]["Abbreviations"]
             # Stage
-            bc_stage = master.master_data[0].data[project_name][data_key_dict["IPDC approval point"]]
+            bc_stage = master.master_data[0].data[project_name][DATA_KEY_DICT["IPDC approval point"]]
             ws.cell(row=row_num, column=5).value = convert_bc_stage_text(bc_stage)
             # try:
             #     bc_stage_lst_qrt = master.master_data[1].data[project_name][
@@ -605,7 +609,7 @@ def cdg_dashboard(
             #     pass
 
             # Total Costs
-            costs = master.master_data[0].data[project_name][data_key_dict["Total Forecast"]]
+            costs = master.master_data[0].data[project_name][DATA_KEY_DICT["Total Forecast"]]
             ws.cell(row=row_num, column=6).value = add_sterling_symbol(costs)
             # try:
             #     wlc_lst_quarter = master.master_data[1].data[project_name][
@@ -800,7 +804,7 @@ def cdg_dashboard(
 
             # DCA ratings
             overall_dca = convert_rag_text(
-                master.master_data[0].data[project_name][data_key_dict["Departmental DCA"]]
+                master.master_data[0].data[project_name][DATA_KEY_DICT["Departmental DCA"]]
             )
             ws.cell(row=row_num, column=10).value = overall_dca
             if overall_dca == "None":
@@ -860,6 +864,12 @@ def cdg_dashboard(
             #     master.master_data[bl_i].data[project_name]["Departmental DCA"]
             # )
 
+            def sro_narrative():
+                sro_n = master.master_data[0].data[project_name]["SRO Narrative"]
+                ws.cell(row=row_num, column=22).value = sro_n
+
+            sro_narrative()
+
         """list of columns with conditional formatting"""
         list_columns = ["j", "k", "l", "m"]
 
@@ -882,3 +892,70 @@ def cdg_dashboard(
                     ws.cell(row=row_num, column=col_num).value = "-"
 
     return wb
+
+
+def cdg_run_p_reports(master: Master, **kwargs) -> None:
+    group = get_group(master, str(master.current_quarter), kwargs)
+    for p in group:
+        p_name = master.project_information.data[p]["Abbreviations"]
+        print("Compiling summary for " + p_name)
+        report_doc = open_word_doc(cdg_root_path / "input/summary_temp.docx")
+        output = cdg_compile_p_report(report_doc, master, p, **kwargs)
+        output.save(
+            cdg_root_path / "output/{}_report.docx".format(p_name)
+        )  # add quarter here
+
+
+def cdg_compile_p_report(
+    doc: Document,
+    master: Master,
+    project_name: str,
+    **kwargs,
+) -> Document:
+    r_args = [doc, master, project_name]
+    wd_heading(doc, master.project_information, project_name)
+    # key_contacts(*r_args)
+    # project_scope_text(*r_args)
+    dca_narratives(*r_args)
+    return doc
+
+
+def project_scope_text(doc: Document, master: Master, project_name: str) -> Document:
+    doc.add_paragraph().add_run("Short project description").bold = True
+    text_one = str(master.master_data[0].data[project_name]["Brief Description"])
+    # try:
+    # text_two = str(master.master_data[1].data[project_name]["Brief Description"])
+    # except IndexError:
+    #     text_two = text_one
+    compare_text_new_and_old(text_one, text_one, doc)
+    return doc
+
+
+def dca_narratives(doc: Document, master: Dict, project_name: str) -> None:
+    # doc.add_paragraph()
+    # p = doc.add_paragraph()
+    # text = "*Red text highlights changes in narratives from last quarter"
+    # p.add_run(text).font.color.rgb = RGBColor(255, 0, 0)
+
+    narrative_keys_list = [
+        "SRO Narrative",
+        "Cost Narrative",
+        "Benefit Narrative",
+        "Schedule Narrative",
+    ]
+
+    headings_list = [
+        "SRO assessment narrative",
+        "SRO single biggest concern",
+        "Short update for PM",
+    ]
+
+    for x in range(len(narrative_keys_list)):
+        text_one = str(
+            master.master_data[0].data[project_name][narrative_keys_list[x]]
+        )
+        # text_two = str(
+        #     master.master_data[1].data[project_name][narrative_keys_list[x]]
+        # )
+        doc.add_paragraph().add_run(str(narrative_keys_list[x])).bold = True
+        compare_text_new_and_old(text_one, text_one, doc)

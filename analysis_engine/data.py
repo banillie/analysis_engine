@@ -1607,6 +1607,15 @@ class MilestoneData:
                                 ("Status", p_data["MM" + str(i) + " status"]),
                             ]
                             milestone_info_handling(project_list, t)
+                    if self.kwargs["data_type"] == "cdg":
+                        for i in range(1, 12):
+                            t = [
+                                ("Project", p),
+                                ("Milestone", p_data["MM" + str(i)]),
+                                ("Notes", p_data["MM" + str(i) + " NOTES"]),
+                                ("Date", p_data["MM" + str(i) + " DATE"])
+                            ]
+                            milestone_info_handling(project_list, t)
 
                 else:
                     for i in range(1, 50):
@@ -2834,6 +2843,16 @@ def wd_heading(
 
 
 def key_contacts(doc: Document, master: Master, project_name: str) -> None:
+
+    # WP
+    DATA_KEY_DICT = {
+        "IPDC approval point": "Last Business Case (BC) achieved",
+        "Total Forecast": "Total Costs",
+        "Departmental DCA": "Overall Delivery Confidence",
+        "Senior Responsible Owner (SRO)": "SRO",
+        "Senior Responsible Owner (SRO) - Email": "SRO email",
+    }
+
     """Function adds keys contact details"""
     sro_name = master.master_data[0].data[project_name][
         "Senior Responsible Owner (SRO)"
