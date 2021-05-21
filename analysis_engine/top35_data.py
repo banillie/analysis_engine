@@ -15,17 +15,24 @@ from analysis_engine.data import (
     set_col_widths,
     make_columns_bold,
     get_iter_list,
-    get_milestone_date, get_correct_p_data, COLOUR_DICT, dandelion_number_text, cal_group_angle, convert_rag_text,
-    Master, logger, MilestoneData,
+    get_milestone_date,
+    get_correct_p_data,
+    COLOUR_DICT,
+    dandelion_number_text,
+    cal_group_angle,
+    convert_rag_text,
+    Master,
+    logger,
+    MilestoneData,
 )
-from datamaps.api import project_data_from_master
+from datamaps.api import project_data_from_master_month, project_data_from_master
 import platform
 from pathlib import Path
 from docx import Document, table
 from dateutil import parser
 from dateutil.parser import ParserError
 
-from docx.enum.section import WD_SECTION_START
+# from docx.enum.section import WD_SECTION_START
 from docx.shared import Cm, RGBColor, Pt
 
 
@@ -47,11 +54,11 @@ def top35_get_master_data() -> List[
 ]:  # how specify a list of dictionaries?
     """Returns a list of dictionaries each containing quarter data"""
     master_data_list = [
-        project_data_from_master(
-            top35_root_path / "core_data/250_Master_May_21.xlsx", 4, 2020
+        project_data_from_master_month(
+            top35_root_path / "core_data/250_Master_May_21.xlsx", 5, 2021
         ),
-        project_data_from_master(
-            top35_root_path / "core_data/250_Master_April_21.xlsx", 3, 2020
+        project_data_from_master_month(
+            top35_root_path / "core_data/250_Master_April_21.xlsx", 4, 2021
         ),
     ]
     return master_data_list
@@ -381,22 +388,20 @@ def compile_p_report(
     kwargs["group"] = [project_name]
     ms = MilestoneData(master, "ipdc_milestones", **kwargs)  # milestones
     print_out_project_milestones(doc, ms)
-    cs = CentralSupportData(master, **kwargs) # central support
+    cs = CentralSupportData(master, **kwargs)  # central support
     print_out_central_support(doc, cs)
     return doc
 
 
 def wd_heading(
-        doc: Document, project_info: Dict[str, Union[str, int]], project_name: str
+    doc: Document, project_info: Dict[str, Union[str, int]], project_name: str
 ) -> None:
     """Function adds header to word doc"""
     font = doc.styles["Normal"].font
     font.name = "Arial"
     font.size = Pt(12)
 
-    heading = str(
-        project_info.data[project_name]["ID Number"]
-    )  # integrate into master
+    heading = str(project_info.data[project_name]["ID Number"])  # integrate into master
     intro = doc.add_heading(str(heading), 0)
     intro.alignment = 1
     intro.bold = True
@@ -425,9 +430,13 @@ def key_contacts(doc: Document, master: Dict, project_name: str) -> None:
 
 def project_scope_text(doc: Document, master: Master, project_name: str) -> Document:
     doc.add_paragraph().add_run("Short project description").bold = True
-    text_one = str(master.master_data[0].data[project_name]["SHORT PROJECT DESCRIPTION"])
+    text_one = str(
+        master.master_data[0].data[project_name]["SHORT PROJECT DESCRIPTION"]
+    )
     # try:
-    text_two = str(master.master_data[1].data[project_name]["SHORT PROJECT DESCRIPTION"])
+    text_two = str(
+        master.master_data[1].data[project_name]["SHORT PROJECT DESCRIPTION"]
+    )
     # except IndexError:
     #     text_two = text_one
     compare_text_new_and_old(text_one, text_two, doc)
@@ -435,9 +444,10 @@ def project_scope_text(doc: Document, master: Master, project_name: str) -> Docu
 
 
 def deliverables(doc: Document, master: Dict, project_name: str) -> Document:
-    dels = ["TOP 3 PROJECT DELIVERABLES 1",  # deliverables
-            "TOP 3 PROJECT DELIVERABLES 2",
-            "TOP 3 PROJECT DELIVERABLES 3",
+    dels = [
+        "TOP 3 PROJECT DELIVERABLES 1",  # deliverables
+        "TOP 3 PROJECT DELIVERABLES 2",
+        "TOP 3 PROJECT DELIVERABLES 3",
     ]
 
     doc.add_paragraph().add_run("Top 3 Deliverables").bold = True
@@ -473,9 +483,9 @@ def cell_colouring(word_table_cell: table.Table.cell, one, two) -> None:
 
 
 def project_report_meta_data(
-        doc: Document,
-        master: Dict,
-        project_name: str,
+    doc: Document,
+    master: Dict,
+    project_name: str,
 ):
     p_master = master.master_data[0].data[project_name]
     p_master_last = master.master_data[1].data[project_name]
@@ -489,7 +499,9 @@ def project_report_meta_data(
 
     if p_master["WLC COMMENTS"] is not None:
         # doc.add_paragraph()
-        doc.add_paragraph().add_run("* Total costs comment. " + p_master["WLC COMMENTS"])
+        doc.add_paragraph().add_run(
+            "* Total costs comment. " + p_master["WLC COMMENTS"]
+        )
 
     """Costs meta data"""
     t = doc.add_table(rows=1, cols=4)
@@ -553,12 +565,8 @@ def dca_narratives(doc: Document, master: Dict, project_name: str) -> None:
     ]
 
     for x in range(len(headings_list)):
-        text_one = str(
-            master.master_data[0].data[project_name][narrative_keys_list[x]]
-        )
-        text_two = str(
-            master.master_data[1].data[project_name][narrative_keys_list[x]]
-        )
+        text_one = str(master.master_data[0].data[project_name][narrative_keys_list[x]])
+        text_two = str(master.master_data[1].data[project_name][narrative_keys_list[x]])
         doc.add_paragraph().add_run(str(headings_list[x])).bold = True
         compare_text_new_and_old(text_one, text_two, doc)
 
@@ -597,6 +605,7 @@ def dca_narratives(doc: Document, master: Dict, project_name: str) -> None:
 #     return doc
 #
 
+
 def milestone_info_handling(output_list: list, t_list: list) -> list:
     """helper function for handling and cleaning up milestone date generated
     via MilestoneDate class. Removes none type milestone names and non date
@@ -624,6 +633,7 @@ def cs_info_handling(output_list: list, t_list: list) -> list:
         pass
     else:
         return output_list.append(t_list)
+
 
 # class MilestoneData:
 #     def __init__(
@@ -950,28 +960,28 @@ def cs_info_handling(output_list: list, t_list: list) -> list:
 
 class CentralSupportData:
     def __init__(
-            self,
-            master: Master,
-            # baseline_type: str = "ipdc_milestones",
-            **kwargs,
+        self,
+        master: Master,
+        # baseline_type: str = "ipdc_milestones",
+        **kwargs,
     ):
         self.master = master
         self.group = []
         self.iter_list = []  # iteration list
         self.kwargs = kwargs
         # self.baseline_type = baseline_type
-        self.milestone_dict = {}
-        self.sorted_milestone_dict = {}
+        self.cs_dict = {}
+        self.sorted_cs_dict = {}
         self.max_date = None
         self.min_date = None
         self.schedule_change = {}
         self.schedule_key_last = None
         self.schedule_key_baseline = None
-        self.get_milestones()
-        self.get_chart_info()
+        self.get_cs_milestones()
+        self.get_cs_chart_info()
         # self.calculate_schedule_changes()
 
-    def get_milestones(self) -> None:
+    def get_cs_milestones(self) -> None:
         """
         Creates project milestone dictionaries for current, last_quarter, and
         baselines when provided with group and baseline type.
@@ -1000,11 +1010,13 @@ class CentralSupportData:
                         ("Date", p_data["R" + str(i) + " needed by"]),
                         ("Escalated", p_data["R" + str(i) + " escalated to"]),
                         ("Type", p_data["R" + str(i) + " type"]),
-                        ("Central Response", p_data["R" + str(i) + " Central Response"]),
+                        (
+                            "Central Response",
+                            p_data["R" + str(i) + " Central Response"],
+                        ),
                         ("PoC", p_data["R" + str(i) + " Point of Contact"]),
-                        ("Secured", p_data["R" + str(i) + " secured"])
+                        ("Secured", p_data["R" + str(i) + " secured"]),
                     ]
-                    # project_list.append(t)
                     cs_info_handling(project_list, t)
                 for i in range(17, 20):
                     t = [
@@ -1013,11 +1025,8 @@ class CentralSupportData:
                         ("Date", p_data["R" + str(i) + " needed by"]),
                         ("Escalated", p_data["R" + str(i) + " escalated to"]),
                         ("Type", p_data["R" + str(i) + " type"]),
-
                     ]
                     cs_info_handling(project_list, t)
-                    # project_list.append(t)
-
 
                 # loop to stop keys names being the same. Done at project level.
                 # not particularly concise code.
@@ -1031,7 +1040,7 @@ class CentralSupportData:
                         lower_counter_list.append(entry[1][1])
                         lower_count = Counter(lower_counter_list)
                         new_require_key = (
-                                entry[1][1] + " (" + str(lower_count[entry[1][1]]) + ")"
+                            entry[1][1] + " (" + str(lower_count[entry[1][1]]) + ")"
                         )
                         entry[1] = ("Milestone", new_require_key)
                         raw_list.append(entry)
@@ -1045,16 +1054,16 @@ class CentralSupportData:
                 lower_dict["Requirement " + str(r)] = dict(sorted_list[r])
 
             sp_dict[tp] = lower_dict
-        self.milestone_dict = sp_dict
+        self.cs_dict = sp_dict
 
-    def get_chart_info(self) -> None:
+    def get_cs_chart_info(self) -> None:
         """returns data lists for matplotlib chart"""
         # Note this code could refactored so that it collects all milestones
         # reported across current, last and baseline. At the moment it only
         # uses milestones that are present in the current quarter.
 
         output_dict = {}
-        for i in self.milestone_dict:
+        for i in self.cs_dict:
             key_names = []
             g_dates = []  # graph dates
             r_dates = []  # raw dates
@@ -1063,14 +1072,14 @@ class CentralSupportData:
             secured = []
             cr = []
             poc = []
-            for v in self.milestone_dict[self.iter_list[0]].values():
+            for v in self.cs_dict[self.iter_list[0]].values():
                 p = None  # project
                 mn = None  # milestone name
                 d = None  # date
-                for x in self.milestone_dict[i].values():
+                for x in self.cs_dict[i].values():
                     if (
-                            x["Project"] == v["Project"]
-                            and x["Requirement"] == v["Requirement"]
+                        x["Project"] == v["Project"]
+                        and x["Requirement"] == v["Requirement"]
                     ):
                         p = x["Project"]
                         mn = x["Requirement"]
@@ -1118,21 +1127,21 @@ class CentralSupportData:
                 "poc": poc,
             }
 
-        self.sorted_milestone_dict = output_dict
+        self.sorted_cs_dict = output_dict
 
     def filter_chart_info(self, **filter_kwargs):
         # bug handling required in the event that there are no milestones with the filter.
         # i.e. the filter returns no milestones.
         filtered_dict = {}
         if (
-                "type" in filter_kwargs
-                and "key" in filter_kwargs
-                and "dates" in filter_kwargs
+            "type" in filter_kwargs
+            and "key" in filter_kwargs
+            and "dates" in filter_kwargs
         ):
             start_date, end_date = zip(*filter_kwargs["dates"])
             start = parser.parse(start_date, dayfirst=True)
             end = parser.parse(end_date, dayfirst=True)
-            for i, v in enumerate(self.milestone_dict[self.iter_list[0]].values()):
+            for i, v in enumerate(self.cs_dict[self.iter_list[0]].values()):
                 if v["Type"] in filter_kwargs["type"]:
                     if v["Milestone"] in filter_kwargs["keys"]:
                         if start.date() <= filter_kwargs["dates"] <= end.date():
@@ -1140,7 +1149,7 @@ class CentralSupportData:
                             continue
 
         elif "type" in filter_kwargs and "key" in filter_kwargs:
-            for i, v in enumerate(self.milestone_dict[self.iter_list[0]].values()):
+            for i, v in enumerate(self.cs_dict[self.iter_list[0]].values()):
                 if v["Type"] in filter_kwargs["type"]:
                     if v["Milestone"] in filter_kwargs["keys"]:
                         filtered_dict["Milestone " + str(i)] = v
@@ -1150,7 +1159,7 @@ class CentralSupportData:
             start_date, end_date = zip(filter_kwargs["dates"])
             start = parser.parse(start_date[0], dayfirst=True)
             end = parser.parse(end_date[0], dayfirst=True)
-            for i, v in enumerate(self.milestone_dict[self.iter_list[0]].values()):
+            for i, v in enumerate(self.cs_dict[self.iter_list[0]].values()):
                 if v["Type"] in filter_kwargs["type"]:
                     if start.date() <= v["Date"] <= end.date():
                         filtered_dict["Milestone " + str(i)] = v
@@ -1160,20 +1169,20 @@ class CentralSupportData:
             start_date, end_date = zip(filter_kwargs["dates"])
             start = parser.parse(start_date[0], dayfirst=True)
             end = parser.parse(end_date[0], dayfirst=True)
-            for i, v in enumerate(self.milestone_dict[self.iter_list[0]].values()):
+            for i, v in enumerate(self.cs_dict[self.iter_list[0]].values()):
                 if v["Milestone"] in filter_kwargs["key"]:
                     if start.date() <= v["Date"] <= end.date():
                         filtered_dict["Milestone " + str(i)] = v
                         continue
 
         elif "type" in filter_kwargs:
-            for i, v in enumerate(self.milestone_dict[self.iter_list[0]].values()):
+            for i, v in enumerate(self.cs_dict[self.iter_list[0]].values()):
                 if v["Type"] in filter_kwargs["type"]:
                     filtered_dict["Milestone " + str(i)] = v
                     continue
 
         elif "key" in filter_kwargs:
-            for i, v in enumerate(self.milestone_dict[self.iter_list[0]].values()):
+            for i, v in enumerate(self.cs_dict[self.iter_list[0]].values()):
                 if v["Milestone"] in filter_kwargs["key"]:
                     filtered_dict["Milestone " + str(i)] = v
                     continue
@@ -1182,35 +1191,35 @@ class CentralSupportData:
             start_date, end_date = zip(filter_kwargs["dates"])
             start = parser.parse(start_date[0], dayfirst=True)
             end = parser.parse(end_date[0], dayfirst=True)
-            for i, v in enumerate(self.milestone_dict[self.iter_list[0]].values()):
+            for i, v in enumerate(self.cs_dict[self.iter_list[0]].values()):
                 if start.date() <= v["Date"] <= end.date():
                     filtered_dict["Milestone " + str(i)] = v
                     continue
 
         output_dict = {}
-        for dict in self.milestone_dict.keys():
+        for dict in self.cs_dict.keys():
             if dict == self.iter_list[0]:
                 output_dict[dict] = filtered_dict
             else:
-                output_dict[dict] = self.milestone_dict[dict]
+                output_dict[dict] = self.cs_dict[dict]
 
-        self.milestone_dict = output_dict
-        self.get_chart_info()
+        self.cs_dict = output_dict
+        self.get_cs_chart_info()
 
     def calculate_schedule_changes(self) -> None:
         """calculates the changes in project schedules. If standard key for calculation
         not available it using the best next one available"""
 
         self.filter_chart_info(milestone_type=["Delivery", "Approval"])
-        m_dict_keys = list(self.milestone_dict.keys())
+        m_dict_keys = list(self.cs_dict.keys())
 
         def schedule_info(
-                project_name: str,
-                other_key_list: List[str],
-                c_key_list: List[str],
-                miles_dict: dict,
-                dict_l_current: str,
-                dict_l_other: str,
+            project_name: str,
+            other_key_list: List[str],
+            c_key_list: List[str],
+            miles_dict: dict,
+            dict_l_current: str,
+            dict_l_other: str,
         ):
             output_dict = {}
             schedule_info = []
@@ -1277,9 +1286,9 @@ class CentralSupportData:
                 milestone_key_baseline = baseline_key.split(",")[1]
                 if project_name == p:
                     if (
-                            milestone_key_baseline
-                            != " Project - Business Case End Date"
-                            # and milestone_key_baseline != " Project End Date"
+                        milestone_key_baseline
+                        != " Project - Business Case End Date"
+                        # and milestone_key_baseline != " Project End Date"
                     ):
                         baseline_key_list.append(milestone_key_baseline)
 
@@ -1287,7 +1296,7 @@ class CentralSupportData:
                 project_name,
                 baseline_key_list,
                 current_key_list,
-                self.milestone_dict,
+                self.cs_dict,
                 m_dict_keys[0],
                 m_dict_keys[2],
             )
@@ -1295,7 +1304,7 @@ class CentralSupportData:
                 project_name,
                 last_key_list,
                 current_key_list,
-                self.milestone_dict,
+                self.cs_dict,
                 m_dict_keys[0],
                 m_dict_keys[1],
             )
@@ -1307,8 +1316,8 @@ class CentralSupportData:
 
 
 def print_out_project_milestones(
-        doc: Document,
-        milestones: MilestoneData,
+    doc: Document,
+    milestones: MilestoneData,
 ) -> Document:
     # doc.add_section(WD_SECTION_START.NEW_PAGE)
     # table heading
@@ -1327,7 +1336,7 @@ def print_out_project_milestones(
         doc.add_paragraph().add_run("No milestones reported")
     else:
         for i, m in enumerate(
-                milestones.sorted_milestone_dict[milestones.iter_list[0]]["names"]
+            milestones.sorted_milestone_dict[milestones.iter_list[0]]["names"]
         ):
             row_cells = table.add_row().cells
             if len(milestones.group) == 1:
@@ -1335,11 +1344,12 @@ def print_out_project_milestones(
                 row_cells[0].text = no_name
             else:
                 row_cells[0].text = m
-            row_cells[1].text = milestones.sorted_milestone_dict[milestones.iter_list[0]][
-                "r_dates"
-            ][i].strftime("%d/%m/%Y")
-            row_cells[2].text = milestones.sorted_milestone_dict[milestones.iter_list[0]][
-                "status"][i]
+            row_cells[1].text = milestones.sorted_milestone_dict[
+                milestones.iter_list[0]
+            ]["r_dates"][i].strftime("%d/%m/%Y")
+            row_cells[2].text = milestones.sorted_milestone_dict[
+                milestones.iter_list[0]
+            ]["status"][i]
             # try:
             #     row_cells[2].text = plus_minus_days(
             #         (
@@ -1392,8 +1402,8 @@ def print_out_project_milestones(
 
 
 def print_out_central_support(
-        doc: Document,
-        centrals: CentralSupportData,
+    doc: Document,
+    centrals: CentralSupportData,
 ) -> Document:
     # doc.add_section(WD_SECTION_START.NEW_PAGE)
     # table heading
@@ -1401,7 +1411,7 @@ def print_out_central_support(
     doc.add_paragraph()
     doc.add_paragraph().add_run("Central govnt support requirements").bold = True
 
-    if not centrals.sorted_milestone_dict[centrals.iter_list[0]]["names"]:
+    if not centrals.sorted_cs_dict[centrals.iter_list[0]]["names"]:
         doc.add_paragraph().add_run("No requirements reported")
     else:
         table = doc.add_table(rows=1, cols=6)
@@ -1414,9 +1424,7 @@ def print_out_central_support(
         # hdr_cells[5].text = "PoC"
         hdr_cells[5].text = "Secured"
 
-        for i, m in enumerate(
-                centrals.sorted_milestone_dict[centrals.iter_list[0]]["names"]
-        ):
+        for i, m in enumerate(centrals.sorted_cs_dict[centrals.iter_list[0]]["names"]):
             row_cells = table.add_row().cells
             # if len(centrals.group) == 1:
             #     no_name = m.split(",")[1]
@@ -1428,7 +1436,7 @@ def print_out_central_support(
             font = run[0].font
             font.size = Pt(8)  # font size = 8
             try:
-                row_cells[1].text = centrals.sorted_milestone_dict[centrals.iter_list[0]][
+                row_cells[1].text = centrals.sorted_cs_dict[centrals.iter_list[0]][
                     "r_dates"
                 ][i].strftime("%d/%m/%Y")
                 paragraph = row_cells[1].paragraphs[0]
@@ -1437,28 +1445,32 @@ def print_out_central_support(
                 font.size = Pt(9)  # font size = 8
             except AttributeError:
                 row_cells[1].text = "None"
-            row_cells[2].text = str(centrals.sorted_milestone_dict[centrals.iter_list[0]][
-                "escalated"][i])
+            row_cells[2].text = str(
+                centrals.sorted_cs_dict[centrals.iter_list[0]]["escalated"][i]
+            )
             paragraph = row_cells[2].paragraphs[0]
             run = paragraph.runs
             font = run[0].font
             font.size = Pt(9)  # font size = 8
-            row_cells[3].text = str(centrals.sorted_milestone_dict[centrals.iter_list[0]][
-                "type"][i])
+            row_cells[3].text = str(
+                centrals.sorted_cs_dict[centrals.iter_list[0]]["type"][i]
+            )
             paragraph = row_cells[3].paragraphs[0]
             run = paragraph.runs
             font = run[0].font
             font.size = Pt(9)  # font size = 8
-            row_cells[4].text = str(centrals.sorted_milestone_dict[centrals.iter_list[0]][
-                                        "cr"][i])
+            row_cells[4].text = str(
+                centrals.sorted_cs_dict[centrals.iter_list[0]]["cr"][i]
+            )
             paragraph = row_cells[4].paragraphs[0]
             run = paragraph.runs
             font = run[0].font
             font.size = Pt(8)  # font size = 8
             # row_cells[5].text = str(centrals.sorted_milestone_dict[centrals.iter_list[0]][
             #                             "poc"][i])
-            row_cells[5].text = str(centrals.sorted_milestone_dict[centrals.iter_list[0]][
-                "secured"][i])
+            row_cells[5].text = str(
+                centrals.sorted_cs_dict[centrals.iter_list[0]]["secured"][i]
+            )
             paragraph = row_cells[5].paragraphs[0]
             run = paragraph.runs
             font = run[0].font
@@ -1516,230 +1528,235 @@ def print_out_central_support(
     return doc
 
 
-class DandelionData:
-    def __init__(self, master: Master, **kwargs):
-        self.master = master
-        self.kwargs = kwargs
-        self.baseline_type = "ipdc_costs"
-        self.group = []
-        self.iter_list = []
-        self.d_data = {}
-        self.get_data()
+# class DandelionData:
+#     def __init__(self, master: Master, **kwargs):
+#         self.master = master
+#         self.kwargs = kwargs
+#         self.baseline_type = "ipdc_costs"
+#         self.group = []
+#         self.iter_list = []
+#         self.d_data = {}
+#         self.get_data()
+#
+#     def get_data(self):
+#         self.iter_list = get_iter_list(self.kwargs, self.master)
+#         for (
+#             tp
+#         ) in self.iter_list:  # although tp is iterated only one can be handled for now.
+#             #  for dandelion need groups of groups.
+#             if "group" in self.kwargs:
+#                 self.group = self.kwargs["group"]
+#             elif "stage" in self.kwargs:
+#                 self.group = self.kwargs["stage"]
+#
+#             if len(self.group) == 5:
+#                 g_ang_l = [260, 310, 360, 50, 100]  # group angle list
+#             if len(self.group) == 4:
+#                 g_ang_l = [260, 326, 32, 100]
+#             if len(self.group) == 3:
+#                 g_ang_l = [280, 360, 80]
+#             if len(self.group) == 2:
+#                 g_ang_l = [290, 70]
+#             if len(self.group) == 1:
+#                 pass
+#             g_d = {}  # group dictionary. first outer circle.
+#             l_g_d = {}  # lower group dictionary
+#
+#             pf_wlc = get_dandelion_type_total(
+#                 self.master, tp, self.group, self.kwargs
+#             )  # portfolio wlc
+#             if "pc" in self.kwargs:  # pc portfolio colour
+#                 pf_colour = COLOUR_DICT[self.kwargs["pc"]]
+#                 pf_colour_edge = COLOUR_DICT[self.kwargs["pc"]]
+#             else:
+#                 pf_colour = "#FFFFFF"
+#                 pf_colour_edge = "grey"
+#             pf_text = "Portfolio\n" + dandelion_number_text(
+#                 pf_wlc
+#             )  # option to specify pf name
+#
+#             ## center circle
+#             g_d["portfolio"] = {
+#                 "axis": (0, 0),
+#                 "r": math.sqrt(pf_wlc),
+#                 "colour": pf_colour,
+#                 "text": pf_text,
+#                 "fill": "solid",
+#                 "ec": pf_colour_edge,
+#                 "alignment": ("center", "center"),
+#             }
+#
+#             ## first outer circle
+#             for i, g in enumerate(self.group):
+#                 self.kwargs["group"] = [g]
+#                 g_wlc = get_dandelion_type_total(self.master, tp, g, self.kwargs)
+#                 if len(self.group) > 1:
+#                     y_axis = 0 + (
+#                         (math.sqrt(pf_wlc) * 3.25) * math.sin(math.radians(g_ang_l[i]))
+#                     )
+#                     x_axis = 0 + (math.sqrt(pf_wlc) * 2.75) * math.cos(
+#                         math.radians(g_ang_l[i])
+#                     )
+#                     g_text = g + "\n" + dandelion_number_text(g_wlc)  # group text
+#                     if g_wlc == 0:
+#                         g_wlc = pf_wlc / 20
+#                     g_d[g] = {
+#                         "axis": (y_axis, x_axis),
+#                         "r": math.sqrt(g_wlc),
+#                         "wlc": g_wlc,
+#                         "colour": "#FFFFFF",
+#                         "text": g_text,
+#                         "fill": "dashed",
+#                         "ec": "grey",
+#                         "alignment": ("center", "center"),
+#                         "angle": g_ang_l[i],
+#                     }
+#
+#                 else:
+#                     g_d = {}
+#                     pf_wlc = g_wlc * 3
+#                     g_text = g + "\n" + dandelion_number_text(g_wlc)  # group text
+#                     if g_wlc == 0:
+#                         g_wlc = 5
+#                     g_d[g] = {
+#                         "axis": (0, 0),
+#                         "r": math.sqrt(g_wlc),
+#                         "wlc": g_wlc,
+#                         "colour": "#FFFFFF",
+#                         "text": g_text,
+#                         "fill": "dashed",
+#                         "ec": "grey",
+#                         "alignment": ("center", "center"),
+#                     }
+#
+#             ## second outer circle
+#             for i, g in enumerate(self.group):
+#                 self.kwargs["group"] = [g]
+#                 group = get_group(self.master, tp, self.kwargs)  # lower group
+#                 p_list = []
+#                 for p in group:
+#                     self.kwargs["group"] = [p]
+#                     p_value = get_dandelion_type_total(
+#                         self.master, tp, p, self.kwargs
+#                     )  # project wlc
+#                     p_list.append((p_value, p))
+#                 l_g_d[g] = list(reversed(sorted(p_list)))
+#
+#             for g in self.group:
+#                 g_wlc = g_d[g]["wlc"]
+#                 g_radius = g_d[g]["r"]
+#                 g_y_axis = g_d[g]["axis"][0]  # group y axis
+#                 g_x_axis = g_d[g]["axis"][1]  # group x axis
+#                 try:
+#                     p_values_list, p_list = zip(*l_g_d[g])
+#                 except ValueError:  # handles no projects in l_g_d list
+#                     continue
+#                 if len(p_list) > 3 or len(self.group) == 1:
+#                     ang_l = cal_group_angle(360, p_list, all=True)
+#                 else:
+#                     if len(p_list) == 1:
+#                         ang_l = [g_d[g]["angle"]]
+#                     if len(p_list) == 2:
+#                         ang_l = [g_d[g]["angle"], g_d[g]["angle"] + 60]
+#                     if len(p_list) == 3:
+#                         ang_l = [
+#                             g_d[g]["angle"],
+#                             g_d[g]["angle"] + 60,
+#                             g_d[g]["angle"] + 120,
+#                         ]
+#
+#                 for i, p in enumerate(p_list):
+#                     p_value = p_values_list[i]
+#                     p_data = get_correct_p_data(
+#                         self.kwargs, self.master, self.baseline_type, p, tp
+#                     )
+#                     # change confidence type here
+#                     # SRO Schedule Confidence
+#                     # Departmental DCA
+#                     # SRO Benefits RAG
+#                     # rag = p_data["Departmental DCA"]
+#                     colour = COLOUR_DICT[convert_rag_text(None)]  # no rags for 250
+#                     project_text = (
+#                         self.master.abbreviations[p]["abb"]
+#                         + "\n"
+#                         + dandelion_number_text(p_value)
+#                     )
+#                     if p_value == 0:
+#                         p_value = 200
+#                     if p in self.master.dft_groups[tp]["GMPP"]:
+#                         edge_colour = "#000000"  # edge of bubble
+#                     else:
+#                         edge_colour = colour
+#
+#                     # multi = math.sqrt(pf_wlc/g_wlc)  # multiplier
+#                     # multi = (1 - (g_wlc / pf_wlc)) * 3
+#                     try:
+#                         if len(p_list) >= 14:
+#                             multi = (pf_wlc / g_wlc) ** (1.0 / 2.0)  # square root
+#                         else:
+#                             multi = (pf_wlc / g_wlc) ** (1.0 / 3.0)  # cube root
+#                         p_y_axis = g_y_axis + (g_radius * multi) * math.sin(
+#                             math.radians(ang_l[i])
+#                         )
+#                         p_x_axis = g_x_axis + (g_radius * multi) * math.cos(
+#                             math.radians(ang_l[i])
+#                         )
+#                     except ZeroDivisionError:
+#                         p_y_axis = g_y_axis + 100 * math.sin(math.radians(ang_l[i]))
+#                         p_x_axis = g_x_axis + 100 * math.cos(math.radians(ang_l[i]))
+#
+#                     if 185 >= ang_l[i] >= 175:
+#                         text_angle = ("center", "top")
+#                     if 5 >= ang_l[i] or 355 <= ang_l[i]:
+#                         text_angle = ("center", "bottom")
+#                     if 174 >= ang_l[i] >= 6:
+#                         text_angle = ("left", "center")
+#                     if 354 >= ang_l[i] >= 186:
+#                         text_angle = ("right", "center")
+#
+#                     try:
+#                         t_multi = (g_wlc / p_value) ** (1.0 / 4.0)
+#                         # t_multi = (1 - (p_value/g_wlc)) * 2  # text multiplier
+#                     except ZeroDivisionError:
+#                         t_multi = 1
+#                     yx_text_position = (
+#                         p_y_axis
+#                         + (math.sqrt(p_value) * t_multi)
+#                         * math.sin(math.radians(ang_l[i])),
+#                         p_x_axis
+#                         + (math.sqrt(p_value) * t_multi)
+#                         * math.cos(math.radians(ang_l[i])),
+#                     )
+#
+#                     g_d[p] = {
+#                         "axis": (p_y_axis, p_x_axis),
+#                         "r": math.sqrt(p_value),
+#                         "wlc": p_value,
+#                         "colour": colour,
+#                         "text": project_text,
+#                         "fill": "solid",
+#                         "ec": "grey",
+#                         "alignment": text_angle,
+#                         "tp": yx_text_position,
+#                     }
+#
+#         self.d_data = g_d
 
-    def get_data(self):
-        self.iter_list = get_iter_list(self.kwargs, self.master)
-        for tp in self.iter_list:  # although tp is iterated only one can be handled for now.
-            #  for dandelion need groups of groups.
-            if "group" in self.kwargs:
-                self.group = self.kwargs["group"]
-            elif "stage" in self.kwargs:
-                self.group = self.kwargs["stage"]
 
-            if len(self.group) == 5:
-                g_ang_l = [260, 310, 360, 50, 100]  # group angle list
-            if len(self.group) == 4:
-                g_ang_l = [260, 326, 32, 100]
-            if len(self.group) == 3:
-                g_ang_l = [280, 360, 80]
-            if len(self.group) == 2:
-                g_ang_l = [290, 70]
-            if len(self.group) == 1:
-                pass
-            g_d = {}  # group dictionary. first outer circle.
-            l_g_d = {}  # lower group dictionary
-
-            pf_wlc = get_dandelion_type_total(
-                self.master, tp, self.group, self.kwargs
-            )  # portfolio wlc
-            if "pc" in self.kwargs:  # pc portfolio colour
-                pf_colour = COLOUR_DICT[self.kwargs["pc"]]
-                pf_colour_edge = COLOUR_DICT[self.kwargs["pc"]]
-            else:
-                pf_colour = "#FFFFFF"
-                pf_colour_edge = "grey"
-            pf_text = "Portfolio\n" + dandelion_number_text(
-                pf_wlc
-            )  # option to specify pf name
-
-            ## center circle
-            g_d["portfolio"] = {
-                "axis": (0, 0),
-                "r": math.sqrt(pf_wlc),
-                "colour": pf_colour,
-                "text": pf_text,
-                "fill": "solid",
-                "ec": pf_colour_edge,
-                "alignment": ("center", "center"),
-            }
-
-            ## first outer circle
-            for i, g in enumerate(self.group):
-                self.kwargs["group"] = [g]
-                g_wlc = get_dandelion_type_total(self.master, tp, g, self.kwargs)
-                if len(self.group) > 1:
-                    y_axis = 0 + (
-                            (math.sqrt(pf_wlc) * 3.25) * math.sin(math.radians(g_ang_l[i]))
-                    )
-                    x_axis = 0 + (math.sqrt(pf_wlc) * 2.75) * math.cos(
-                        math.radians(g_ang_l[i])
-                    )
-                    g_text = g + "\n" + dandelion_number_text(g_wlc)  # group text
-                    if g_wlc == 0:
-                        g_wlc = pf_wlc/20
-                    g_d[g] = {
-                        "axis": (y_axis, x_axis),
-                        "r": math.sqrt(g_wlc),
-                        "wlc": g_wlc,
-                        "colour": "#FFFFFF",
-                        "text": g_text,
-                        "fill": "dashed",
-                        "ec": "grey",
-                        "alignment": ("center", "center"),
-                        "angle": g_ang_l[i],
-                    }
-
-                else:
-                    g_d = {}
-                    pf_wlc = g_wlc * 3
-                    g_text = g + "\n" + dandelion_number_text(g_wlc)  # group text
-                    if g_wlc == 0:
-                        g_wlc = 5
-                    g_d[g] = {
-                        "axis": (0, 0),
-                        "r": math.sqrt(g_wlc),
-                        "wlc": g_wlc,
-                        "colour": "#FFFFFF",
-                        "text": g_text,
-                        "fill": "dashed",
-                        "ec": "grey",
-                        "alignment": ("center", "center"),
-                    }
-
-            ## second outer circle
-            for i, g in enumerate(self.group):
-                self.kwargs["group"] = [g]
-                group = get_group(self.master, tp, self.kwargs)  # lower group
-                p_list = []
-                for p in group:
-                    self.kwargs["group"] = [p]
-                    p_value = get_dandelion_type_total(
-                        self.master, tp, p, self.kwargs
-                    )  # project wlc
-                    p_list.append((p_value, p))
-                l_g_d[g] = list(reversed(sorted(p_list)))
-
-            for g in self.group:
-                g_wlc = g_d[g]["wlc"]
-                g_radius = g_d[g]["r"]
-                g_y_axis = g_d[g]["axis"][0]  # group y axis
-                g_x_axis = g_d[g]["axis"][1]  # group x axis
-                try:
-                    p_values_list, p_list = zip(*l_g_d[g])
-                except ValueError:  # handles no projects in l_g_d list
-                    continue
-                if len(p_list) > 3 or len(self.group) == 1:
-                    ang_l = cal_group_angle(360, p_list, all=True)
-                else:
-                    if len(p_list) == 1:
-                        ang_l = [g_d[g]["angle"]]
-                    if len(p_list) == 2:
-                        ang_l = [g_d[g]["angle"], g_d[g]["angle"] + 60]
-                    if len(p_list) == 3:
-                        ang_l = [g_d[g]["angle"], g_d[g]["angle"] + 60, g_d[g]["angle"] + 120]
-
-                for i, p in enumerate(p_list):
-                    p_value = p_values_list[i]
-                    p_data = get_correct_p_data(
-                        self.kwargs, self.master, self.baseline_type, p, tp
-                    )
-                    # change confidence type here
-                    # SRO Schedule Confidence
-                    # Departmental DCA
-                    # SRO Benefits RAG
-                    # rag = p_data["Departmental DCA"]
-                    colour = COLOUR_DICT[convert_rag_text(None)]  # no rags for 250
-                    project_text = (
-                            self.master.abbreviations[p]["abb"]
-                            + "\n"
-                            + dandelion_number_text(p_value)
-                    )
-                    if p_value == 0:
-                        p_value = 200
-                    if p in self.master.dft_groups[tp]["GMPP"]:
-                        edge_colour = "#000000"  # edge of bubble
-                    else:
-                        edge_colour = colour
-
-                    # multi = math.sqrt(pf_wlc/g_wlc)  # multiplier
-                    # multi = (1 - (g_wlc / pf_wlc)) * 3
-                    try:
-                        if len(p_list) >= 14:
-                            multi = ((pf_wlc / g_wlc) ** (1.0 / 2.0))  # square root
-                        else:
-                            multi = (pf_wlc / g_wlc) ** (1.0 / 3.0)  # cube root
-                        p_y_axis = g_y_axis + (g_radius * multi) * math.sin(
-                            math.radians(ang_l[i])
-                        )
-                        p_x_axis = g_x_axis + (g_radius * multi) * math.cos(
-                            math.radians(ang_l[i])
-                        )
-                    except ZeroDivisionError:
-                        p_y_axis = g_y_axis + 100 * math.sin(math.radians(ang_l[i]))
-                        p_x_axis = g_x_axis + 100 * math.cos(math.radians(ang_l[i]))
-
-                    if 185 >= ang_l[i] >= 175:
-                        text_angle = ("center", "top")
-                    if 5 >= ang_l[i] or 355 <= ang_l[i]:
-                        text_angle = ("center", "bottom")
-                    if 174 >= ang_l[i] >= 6:
-                        text_angle = ("left", "center")
-                    if 354 >= ang_l[i] >= 186:
-                        text_angle = ("right", "center")
-
-                    try:
-                        t_multi = (g_wlc / p_value) ** (1.0 / 4.0)
-                        # t_multi = (1 - (p_value/g_wlc)) * 2  # text multiplier
-                    except ZeroDivisionError:
-                        t_multi = 1
-                    yx_text_position = (
-                        p_y_axis
-                        + (math.sqrt(p_value) * t_multi)
-                        * math.sin(math.radians(ang_l[i])),
-                        p_x_axis
-                        + (math.sqrt(p_value) * t_multi)
-                        * math.cos(math.radians(ang_l[i])),
-                    )
-
-                    g_d[p] = {
-                        "axis": (p_y_axis, p_x_axis),
-                        "r": math.sqrt(p_value),
-                        "wlc": p_value,
-                        "colour": colour,
-                        "text": project_text,
-                        "fill": "solid",
-                        "ec": "grey",
-                        "alignment": text_angle,
-                        "tp": yx_text_position,
-                    }
-
-        self.d_data = g_d
-
-
-def get_dandelion_type_total(
-        master: Master, tp: str, g: str or List[str], kwargs
-) -> int or str:  # Note no **kwargs as existing kwargs dict passed in
-    if "type" in kwargs:
-        if kwargs["type"] == "remaining":
-            cost = CostData(master, quarter=[tp], group=[g])  # group costs data
-            return cost.c_totals[tp]["prof"] + cost.c_totals[tp]["unprof"]
-        if kwargs["type"] == "spent":
-            cost = CostData(master, quarter=[tp], group=[g])  # group costs data
-            return cost.c_totals[tp]["spent"]
-        # if kwargs["type"] == "benefits":
-        #     benefits = BenefitsData(master, quarter=[tp], group=[g])
-        #     return benefits.b_totals[tp]["total"]
-
-    else:
-        cost = CostData(master, **kwargs)  # group costs data
-        return cost.c_totals[tp]["total"]
-
+# def get_dandelion_type_total(
+#     master: Master, tp: str, g: str or List[str], kwargs
+# ) -> int or str:  # Note no **kwargs as existing kwargs dict passed in
+#     if "type" in kwargs:
+#         if kwargs["type"] == "remaining":
+#             cost = CostData(master, quarter=[tp], group=[g])  # group costs data
+#             return cost.c_totals[tp]["prof"] + cost.c_totals[tp]["unprof"]
+#         if kwargs["type"] == "spent":
+#             cost = CostData(master, quarter=[tp], group=[g])  # group costs data
+#             return cost.c_totals[tp]["spent"]
+#         # if kwargs["type"] == "benefits":
+#         #     benefits = BenefitsData(master, quarter=[tp], group=[g])
+#         #     return benefits.b_totals[tp]["total"]
+#
+#     else:
+#         cost = CostData(master, **kwargs)  # group costs data
+#         return cost.c_totals[tp]["total"]

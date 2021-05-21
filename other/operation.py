@@ -77,15 +77,14 @@ m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
 ## GROUPS
 DFT_GROUP = ["HSRG", "RSS", "RIG", "AMIS", "RPE"]
 STAGE_GROUPS = ["pipeline", "pre-SOBC", "SOBC", "OBC", "FBC"]
-
-word_doc_landscape = open_word_doc(root_path / "input/summary_temp_landscape.docx")
-
+hoz_doc = open_word_doc(root_path / "input/summary_temp_landscape.docx")
+doc = open_word_doc(root_path / "input/summary_temp.docx")
 
 top35_data_dict = {
     "docx_save_path": str(top35_root_path / "output/{}.docx"),
     "master": Master(top35_get_master_data(), top35_get_project_information(), data_type="top35"),
     "op_args": {
-        "quarter": ["Q4 20/21"],
+        "quarter": ["Month(May), 2021"],
         "group": ["HSRG", "RSS", "RIG", "RPE"],
         # "group": ["HS2 Prog"],
         "chart": False,
@@ -118,7 +117,7 @@ top35_data_dict = {
 #         "group": ["GF", "CFPD", "SCS"],
 #         # "chart": True,
 #         "data_type": "cdg",
-#         "type": "income",
+#         # "type": "income",
 #         "blue_line": "Today",
 #     },
 #     "dashboard": str(cdg_root_path / "input/dashboard_master.xlsx"),
@@ -128,13 +127,11 @@ top35_data_dict = {
 
 data = top35_data_dict
 
-hoz_doc = open_word_doc(root_path / "input/summary_temp_landscape.docx")
-
 ## DANDELION
 # dl_data = DandelionData(data["master"], **data["op_args"])
 # d_lion = make_a_dandelion_auto(dl_data, **data["op_args"])
-# put_matplotlib_fig_into_word(word_doc_landscape, d_lion, size=7)
-# word_doc_landscape.save(data["docx_save_path"].format("dandelion_graph"))
+# put_matplotlib_fig_into_word(hoz_doc, d_lion, size=7)
+# hoz_doc.save(data["docx_save_path"].format("dandelion_graph"))
 
 
 ## MILESTONES
@@ -176,12 +173,10 @@ top35_run_p_reports(data["master"], **data["op_args"])
 # SPEED DIALS
 # dca_data = DcaData(data["master"], **data["op_args"])
 # dca_data.get_changes()
-# land_doc = open_word_doc(root_path / "input/summary_temp_landscape.docx")
-# build_speedials(dca_data, land_doc)
-# land_doc.save(root_path / "output/speed_dial_graph.docx")
-# doc = open_word_doc(root_path / "input/summary_temp.docx")
+# build_speedials(dca_data, hoz_doc)
+# hoz_doc.save(data["docx_save_path"].format("speedial_graphs"))
 # doc = dca_changes_into_word(dca_data, doc)
-# doc.save(root_path / "output/speed_dials.docx")
+# doc.save(data["docx_save_path"].format("speedial_dca_changes"))
 
 
 ## RADAR CHART

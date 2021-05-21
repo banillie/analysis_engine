@@ -617,6 +617,7 @@ class Master:
         # self.check_baselines()
         self.get_project_groups()
         self.pipeline_projects_information()
+        self.get_current_tp()
 
     def get_project_abbreviations(self) -> None:
         """gets the abbreviations for all current projects.
@@ -788,7 +789,10 @@ class Master:
                 group_list.append(dft_group)
                 stage_list.append(stage)
 
-            raw_dict[str(master.quarter)] = lower_dict
+            try:
+                raw_dict[str(master.month) + ", " + str(master.year)] = lower_dict
+            except KeyError:
+                raw_dict[str(master.quarter)] = lower_dict
 
         group_list = list(set(group_list))
         stage_list = list(set(stage_list))
@@ -848,7 +852,10 @@ class Master:
     def get_quarter_list(self) -> None:
         output_list = []
         for master in self.master_data:
-            output_list.append(str(master.quarter))
+            try:
+                output_list.append(str(master.month) + ", " + str(master.year))
+            except KeyError:
+                output_list.append(str(master.quarter))
         self.quarter_list = output_list
 
     def pipeline_projects_information(self) -> None:
@@ -867,6 +874,13 @@ class Master:
 
         self.pipeline_dict = pipeline_dict
         self.pipeline_list = pipeline_list
+
+    def get_current_tp(self):
+        try:
+            self.current_quarter = str(self.master_data[0].month) + ", " + str(self.master_data[0].year)
+        except KeyError:
+            self.current_quarter = self.master_data[0].quarter
+
 
 
 def convert_none_types(x):
@@ -2844,15 +2858,6 @@ def wd_heading(
 
 def key_contacts(doc: Document, master: Master, project_name: str) -> None:
 
-    # WP
-    DATA_KEY_DICT = {
-        "IPDC approval point": "Last Business Case (BC) achieved",
-        "Total Forecast": "Total Costs",
-        "Departmental DCA": "Overall Delivery Confidence",
-        "Senior Responsible Owner (SRO)": "SRO",
-        "Senior Responsible Owner (SRO) - Email": "SRO email",
-    }
-
     """Function adds keys contact details"""
     sro_name = master.master_data[0].data[project_name][
         "Senior Responsible Owner (SRO)"
@@ -4158,6 +4163,15 @@ def get_correct_p_data(
 
 bl_iter_list = ["current", "last", "bl_one", "bl_two", "bl_three"]
 
+CDG_DATA_KEY_DICT = {
+        "IPDC approval point": "Last Business Case (BC) achieved",
+        "Total Forecast": "Total Costs",
+        "Departmental DCA": "Overall Delivery Confidence",
+        "Senior Responsible Owner (SRO)": "SRO",
+        "Senior Responsible Owner (SRO) - Email": "SRO email",
+        "Total Forecast": "Total Costs",
+    }
+
 
 class DcaData:
     def __init__(self, master: Master, **kwargs):
@@ -4206,7 +4220,11 @@ class DcaData:
                         dca_type = dca_keys[conf_type]
                         colour = p_data[dca_type]
                         score = DCA_RATING_SCORES[p_data[dca_type]]
-                        costs = p_data["Total Forecast"]  # Here
+                        if "data_type" in self.kwargs:
+                            if self.kwargs["data_type"] == "cdg":
+                                costs = p_data[CDG_DATA_KEY_DICT["Total Forecast"]]
+                        else:
+                            costs = p_data["Total Forecast"]
                         dca_colour = [("DCA", colour)]
                         dca_score = [("DCA score", score)]
                         t = [("Type", dca_type)]
@@ -4226,8 +4244,14 @@ class DcaData:
     def get_changes(self) -> None:
         """compiles dictionary of changes in dca ratings when provided with two quarter arguments"""
 
+        if "data_type" in self.kwargs:
+            if self.kwargs["data_type"] == "cdg":
+                dca_keys = CPG_DCA_KEYS
+        else:
+            dca_keys = DCA_KEYS
+
         c_dict = {}
-        for conf_type in self.conf_list:  # confidence type
+        for conf_type in list(dca_keys.keys()):  # confidence type
             lower_dict = {}
             for project_name in list(
                 self.dca_dictionary[self.iter_list[0]][conf_type].keys()
@@ -5115,8 +5139,11 @@ def build_speedials(dca_data: DcaData, doc) -> None:
         for colour in DCA_WA.keys():
             c_no = dca_data.dca_count[dca_data.iter_list[0]][conf_type][colour]["count"]
             c_count.append(c_no)
-            l_no = dca_data.dca_count[dca_data.iter_list[1]][conf_type][colour]["count"]
-            l_count.append(l_no)
+            try:  # to capture reporting process with only one quarters data
+                l_no = dca_data.dca_count[dca_data.iter_list[1]][conf_type][colour]["count"]
+                l_count.append(l_no)
+            except KeyError:
+                l_count.append(c_no)
         c_total = dca_data.dca_count[dca_data.iter_list[0]][conf_type]["Total"]["count"]
 
         up = 0
