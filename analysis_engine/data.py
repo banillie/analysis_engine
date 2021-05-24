@@ -351,8 +351,13 @@ SRO_CONF_KEY_LIST = [
 ]
 
 IPDC_DATE = datetime.date(
-    2021, 4, 24
+    2021, 5, 24
 )  # ipdc date. Python date format is Year, Month, day
+
+CDG_DATE = datetime.date(
+    2021, 5, 27
+)  # ipdc date. Python date format is Year, Month, day
+
 
 LIST_OF_TITLES = [
     "ALL",
@@ -3817,6 +3822,17 @@ def milestone_chart(
                     0.98,
                     0.01,
                     "Line represents IPDC date",
+                    horizontalalignment="right",
+                    fontsize=10,
+                    fontweight="bold",
+                )
+        elif blue_line == "CDG":
+            if min_date <= CDG_DATE <= max_date:
+                plt.axvline(CDG_DATE)
+                plt.figtext(
+                    0.98,
+                    0.01,
+                    "Line represents CDG Board date",
                     horizontalalignment="right",
                     fontsize=10,
                     fontweight="bold",
@@ -8360,7 +8376,8 @@ class DandelionData:
                             multi = (pf_wlc / g_wlc) ** 1.1
                         elif 15 >= len(p_list) >= 11:
                             multi = (pf_wlc / g_wlc) ** (1.0 / 2.0)  # square root
-                        elif len(p_list) == 1:
+                        #  only one/two bubbles don't distribute well
+                        elif len(p_list) == 1 or len(p_list) == 2:
                             multi = 2.2
                         else:
                             if g_wlc / pf_wlc >= 0.33:

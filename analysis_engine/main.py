@@ -46,7 +46,8 @@ from analysis_engine.data import (
 
 import logging
 
-from analysis_engine.top35_data import top35_get_master_data, top35_get_project_information, top35_run_p_reports
+from analysis_engine.top35_data import top35_get_master_data, top35_get_project_information, top35_run_p_reports, \
+    top35_root_path
 
 logging.basicConfig(
     level=logging.INFO,
@@ -272,20 +273,48 @@ def top250_run_general(args):
                 op_args["group"] = ["HSRG", "RSS", "RIG", "RPE"]
         if "quarter" not in op_args:
             if "baseline" not in op_args:
-                op_args["quarter"] = ["Q4 20/21"]
+                op_args["quarter"] = ["Month(May), 2021"]
 
         op_args["data_type"] = "top35"
 
         if programme == "summaries":
             top35_run_p_reports(m, **op_args)
 
+        if programme == "milestones":
+            ms = MilestoneData(m, **op_args)
+
+            if (
+                "type" in op_args
+                or "dates" in op_args
+                or "koi" in op_args
+                or "koi_fn" in op_args
+            ):
+                op_args = return_koi_fn_keys(op_args)
+                ms.filter_chart_info(**op_args)
+
+            if "chart" not in op_args:
+                pass
+            else:
+                if op_args["chart"] == "save":
+                    op_args["chart"] = False
+                    ms_graph = milestone_chart(ms, m, **op_args)
+                    doc = get_input_doc(top35_root_path / "input/summary_temp_landscape.docx")
+                    put_matplotlib_fig_into_word(
+                        doc, ms_graph, size=8, transparent=False
+                    )
+                    doc.save(top35_root_path / "output/milestones_chart.docx")
+                if op_args["chart"] == "show":
+                    milestone_chart(ms, m, **op_args)
+
+            wb = put_milestones_into_wb(ms)
+
         check_remove(op_args)
 
-        # try:
-        #     if programme != "dashboards":
-        #         wb.save(root_path / "output/{}.xlsx".format(programme))
-        # except UnboundLocalError:
-        #     pass
+        try:
+            if programme != "dashboards":
+                wb.save(top35_root_path / "output/{}.xlsx".format(programme))
+        except UnboundLocalError:
+            pass
 
         print(programme + " analysis has been compiled. Enjoy!")
 
@@ -680,21 +709,66 @@ class main():
         )
         subparsers = parser.add_subparsers(dest="subparser_name")
         subparsers.metavar = "                      "
-        parser_summaries = subparsers.add_parser("summaries", help="summary reports")
-        parser_summaries.add_argument(
-            "--group",
+        top250_parser_summaries = subparsers.add_parser("summaries", help="summary reports")
+        top250_parser_milestones = subparsers.add_parser(
+            "milestones",
+            help="milestone schedule graphs and data.",
+        )
+        for sub in [top250_parser_milestones, top250_parser_summaries]:
+            sub.add_argument(
+                "--group",
+                type=str,
+                metavar="",
+                action="store",
+                nargs="+",
+                help="Returns analysis for specified project(s), only. User must enter one or a combination of "
+                     'DfT Group names; "HSRG", "RSS", "RIG", "RPE", or the project(s) acronym or full name.',
+            )
+
+        top250_parser_milestones.add_argument(
+                "--remove",
+                type=str,
+                metavar="",
+                action="store",
+                nargs="+",
+                help="Removes specified projects from analysis. User must enter one or a combination of either"
+                     " a recognised DfT Group name, a recognised planning stage or the project(s) acronym or full"
+                     " name.",
+            )
+
+        top250_parser_milestones.add_argument(
+            "--dates",
             type=str,
             metavar="",
             action="store",
-            nargs="+",
-            help="Returns analysis for specified project(s), only. User must enter one or a combination of "
-                 'DfT Group names; "HSRG", "RSS", "RIG", "RPE", or the project(s) acronym or full name.',
+            nargs=2,
+            help="dates for analysis. Must provide start date and then end date in format e.g. '1/1/2021' '1/1/2022'.",
         )
+
+        top250_parser_milestones.add_argument(
+                "--chart",
+                type=str,
+                metavar="",
+                action="store",
+                choices=["show", "save"],
+                help="options for building and saving graph output. Commands are 'show' or 'save' ",
+            )
+
+        top250_parser_milestones.add_argument(
+            "--blue_line",
+            type=str,
+            metavar="",
+            action="store",
+            help="Insert blue line into chart to represent a date. "
+                 'Options are "Today" "CDG" or a date in correct format e.g. "1/1/2021".',
+        )
+
         args = parser.parse_args(sys.argv[2:])
         # print(vars(args))
         top250_run_general(vars(args))
 
 
+## old method for handling argparse commands.
 # def main():
 #     ae_description = (
 #         "Welcome to the DfT Major Projects Portfolio Office analysis engine.\n\n"

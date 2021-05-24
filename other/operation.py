@@ -11,7 +11,7 @@ from analysis_engine.cdg_data import (
     cdg_get_master_data,
     cdg_get_project_information,
     cdg_dashboard,
-    cdg_run_p_reports,
+    cdg_run_p_reports, cdg_narrative_dashboard,
 )
 from analysis_engine.data import (
     open_pickle_file,
@@ -91,6 +91,8 @@ top35_data_dict = {
         "data_type": "top35",
         "circle_colour": "No",
     },
+    "excel_save_path": str(top35_root_path / "output/{}.xlsx"),
+    "word_save_path": str(top35_root_path / "output/{}.docx")
 }
 
 # ipdc_data_dict = {
@@ -114,13 +116,16 @@ top35_data_dict = {
 #     "op_args": {
 #         "quarter": ["Q4 20/21"],
 #         # "quarter": ["standard"],
-#         "group": ["GF", "CFPD", "SCS"],
+#         "group": ["SCS", "CFPD", "GF"],
 #         # "chart": True,
 #         "data_type": "cdg",
-#         # "type": "income",
-#         "blue_line": "Today",
+#         "type": "benefits",
+#         "blue_line": "CDG",
+#         "dates": ["1/10/2020", "1/5/2022"],
+#         "fig_size": "half_horizontal",
 #     },
 #     "dashboard": str(cdg_root_path / "input/dashboard_master.xlsx"),
+#     "narrative_dashboard": str(cdg_root_path / "input/narrative_dashboard_master.xlsx"),
 #     "excel_save_path": str(cdg_root_path / "output/{}.xlsx"),
 #     "word_save_path": str(cdg_root_path / "output/{}.docx")
 # }
@@ -135,13 +140,14 @@ data = top35_data_dict
 
 
 ## MILESTONES
-# ms = MilestoneData(data["master"], **data["op_args"])
-# # ms.filter_chart_info(dates=["1/4/2021", "1/5/2021"])
-# wb = put_milestones_into_wb(ms)
-# wb.save(data["excel_save_path"].format("milestones"))
-# # chart_kwargs = {**{"blue_line": "today", "Chart": True}, **ms.kwargs}
+ms = MilestoneData(data["master"], **data["op_args"])
+# ms.filter_chart_info(**data["op_args"])
+# ms.filter_chart_info(dates=["1/4/2021", "1/5/2021"])
+wb = put_milestones_into_wb(ms)
+wb.save(data["excel_save_path"].format("milestones"))
+# chart_kwargs = {**{"blue_line": "today", "Chart": True}, **ms.kwargs}
 # g = milestone_chart(ms, data["master"], **data["op_args"])
-# put_matplotlib_fig_into_word(hoz_doc, g, size=8, transparent=False)
+# put_matplotlib_fig_into_word(hoz_doc, g, size=7, transparent=False)
 # hoz_doc.save(data["word_save_path"].format("milestone_graph"))
 
 # b = BenefitsData(m, baseline=["all"])
@@ -160,7 +166,7 @@ data = top35_data_dict
 # cost_profile_graph(c, m, chart=True, group=c.start_group)
 
 # SUMMARIES
-top35_run_p_reports(data["master"], **data["op_args"])
+# top35_run_p_reports(data["master"], **data["op_args"])
 
 ## VFM
 # c = VfMData(m, group=DFm = Master(*data["data"], **data["op_args"] )T_GROUP, quarter=["standard"])  # c is class
@@ -199,4 +205,6 @@ top35_run_p_reports(data["master"], **data["op_args"])
 
 ## DASHBOARD
 # wb = cdg_dashboard(data["master"], data["dashboard"])
-# wb.save(data["excel_save_path"].format("q4_2021_cdg_dashboard_with_narrative"))
+# wb.save(data["excel_save_path"].format("q4_2021_dashboard"))
+# wb = cdg_narrative_dashboard(data["master"], data["narrative_dashboard"])
+# wb.save(data["excel_save_path"].format("q4_2021_narrative_dashboard"))
