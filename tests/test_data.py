@@ -99,6 +99,17 @@ def test_master_in_a_pickle(full_test_masters_dict, project_info):
     assert str(mickle.master.master_data[0].quarter) == "Q1 20/21"
 
 
+@pytest.mark.slow(reason="lengthy. Only required to inspect JsonData Class.")
+def test_json_master_save(full_test_masters_dict, project_info, json_path):
+    master = Master(full_test_masters_dict, project_info)
+    JsonData(master, json_path)
+
+
+def test_json_master_open(json_path):
+    m = open_json_file(json_path + ".json")
+    assert isinstance(m, (dict,))
+
+
 def test_opening_a_pickle(master_pickle_file_path):
     mickle = open_pickle_file(master_pickle_file_path)
     assert str(mickle.master_data[0].quarter) == "Q1 20/21"
@@ -572,15 +583,6 @@ def test_radar_chart(sp_data, master_pickle, word_doc):
 def test_strategic_priority_data(sp_data, master_pickle):
     sp_dict = get_strategic_priorities_data(sp_data, master_pickle)
     assert isinstance(sp_dict, (list,))
-
-
-def test_json_master_save(basic_masters_dicts, project_info, json_path):
-    JsonData(basic_masters_dicts[0], json_path)
-
-
-def test_json_master_open(json_path):
-    m = open_json_file(json_path + ".json")
-    assert isinstance(m, (dict,))
 
 
 @pytest.mark.skip(reason="temp code for now. No plans for long term ae intergration")

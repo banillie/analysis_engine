@@ -6977,23 +6977,43 @@ def json_date_converter(o):
 
 
 class JsonData:
-    def __init__(self, master: Dict, save_path: str):
+    def __init__(self, master: Master, save_path: str):
         self.master = master
         self.path = save_path
         self.put_into_json()
 
     def put_into_json(self) -> None:
-        data = self.master.data
-        projects = self.master.projects
-        qrt = str(str(self.master.quarter))
-        b = {
-            "data": data,
-            "projects": projects,
-            "quarter": qrt,
+        master_list = []
+        for m in self.master.master_data:
+            data = m.data
+            projects = m.projects
+            qrt = str(str(m.quarter))
+            d = {
+                "data": data,
+                "projects": projects,
+                "quarter": qrt,
+            }
+            master_list.append(d)
+
+        json_dict = {
+            "abbreviations": self.master.abbreviations,
+            "bl_index": self.master.bl_index,
+            "bl_info": self.master.bl_info,
+            "current_projects": self.master.current_projects,
+            "current_quarter": self.master.current_quarter,
+            "dft_groups": self.master.dft_groups,
+            "full_names": self.master.full_names,
+            "kwargs": self.master.kwargs,
+            "master_data": master_list,
+            "pipeline_dict": self.master.pipeline_dict,
+            "pipeline_list": self.master.pipeline_list,
+            "project_group": self.master.project_group,
+            "project_information": self.master.project_information,
+            "project_stage": self.master.project_stage,
+            "quarter_list": self.master.quarter_list,
         }
         with open(self.path + ".json", "w") as write_file:
-            json.dump(b, write_file, default=json_date_converter)
-            # json.dump(self.master, write_file)
+            json.dump(json_dict, write_file, default=json_date_converter)
 
 
 def open_json_file(path: str):

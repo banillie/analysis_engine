@@ -8,7 +8,7 @@ from analysis_engine.cdg_data import (
     cdg_get_master_data,
     cdg_get_project_information,
 )
-from analysis_engine.data import open_word_doc, open_pickle_file, root_path
+from analysis_engine.data import open_word_doc, open_pickle_file, root_path, Master
 from analysis_engine.top35_data import top35_root_path, top35_get_master_data, top35_get_project_information
 
 
@@ -230,7 +230,10 @@ def top35_project_information():
 def top35_data():
     return {
         "docx_save_path": "resources/{}.docx",
-            "data": (top35_master(), top35_project_information()),
+            "data": Master(top35_master(),
+                           top35_project_information(),
+                           data_type="top35"
+                           ),
             "op_args": {
                 "quarter": ["Q4 20/21"],
                 # "group": ["HSRG", "RSS", "RIG", "RPE"],
