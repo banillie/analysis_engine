@@ -8,7 +8,7 @@ from analysis_engine.cdg_data import (
     cdg_get_master_data,
     cdg_get_project_information,
 )
-from analysis_engine.data import open_word_doc, open_pickle_file, root_path, Master
+from analysis_engine.data import open_word_doc, open_pickle_file, root_path, Master, open_json_file
 from analysis_engine.top35_data import top35_root_path, top35_get_master_data, top35_get_project_information
 
 
@@ -127,13 +127,14 @@ def cdg_masters():
 
 
 @pytest.fixture()
-def json_path():
+def master_json_path():
     return os.path.join(os.getcwd(), "resources/" "json_master")
 
 
 @pytest.fixture()
-def master_pickle():
-    return open_pickle_file(os.path.join(os.getcwd(), "resources/test_master.pickle"))
+def master():
+    jm = open_json_file(os.path.join(os.getcwd(), "resources/" "json_master.json"))
+    return Master(jm)
 
 
 @pytest.fixture()

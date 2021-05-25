@@ -593,7 +593,7 @@ def calculate_profiled(
         return p - (s + unpro)
 
 
-class Master:
+class JsonMaster:
     def __init__(
         self,
         master_data: List[Dict[str, Union[str, int, datetime.date, float]]],
@@ -886,6 +886,27 @@ class Master:
         except KeyError:
             self.current_quarter = self.master_data[0].quarter
 
+
+class Master:
+    def __init__(
+        self,
+        json_master: JsonMaster
+    ) -> None:
+        self.master_data = json_master["master_data"]
+        self.project_information = json_master["project_information"]
+        self.kwargs = json_master["kwargs"]
+        self.current_quarter = json_master["current_quarter"]
+        self.current_projects = json_master["current_projects"]
+        self.abbreviations = json_master["abbreviations"]
+        self.full_names = json_master["full_names"]
+        self.bl_info = json_master["bl_info"]
+        self.bl_index = json_master["bl_index"]
+        self.dft_groups = json_master["dft_groups"]
+        self.project_group = json_master["project_group"]
+        self.project_stage = json_master["project_stage"]
+        self.pipeline_dict = json_master["pipeline_dict"]
+        self.pipeline_list = json_master["pipeline_list"]
+        self.quarter_list = json_master["quarter_list"]
 
 
 def convert_none_types(x):
@@ -2822,7 +2843,7 @@ def spent_calculation(
     total = 0
     for k in keys:
         try:
-            total += master.data[project][k]
+            total += master["data"][project][k]
         except TypeError:  # None types
             pass
 
@@ -2863,20 +2884,17 @@ def wd_heading(
 
 def key_contacts(doc: Document, master: Master, project_name: str) -> None:
 
+    data = master.master_data[0]["data"][project_name]
     """Function adds keys contact details"""
-    sro_name = master.master_data[0].data[project_name][
-        "Senior Responsible Owner (SRO)"
-    ]
+    sro_name = data["Senior Responsible Owner (SRO)"]
     if sro_name is None:
         sro_name = "tbc"
 
-    sro_email = master.master_data[0].data[project_name][
-        "Senior Responsible Owner (SRO) - Email"
-    ]
+    sro_email = data["Senior Responsible Owner (SRO) - Email"]
     if sro_email is None:
         sro_email = "email: tbc"
 
-    sro_phone = master.master_data[0].data[project_name]["SRO Phone No."]
+    sro_phone = data["SRO Phone No."]
     if sro_phone == None:
         sro_phone = "phone number: tbc"
 
@@ -2884,15 +2902,15 @@ def key_contacts(doc: Document, master: Master, project_name: str) -> None:
         "SRO: " + str(sro_name) + ", " + str(sro_email) + ", " + str(sro_phone)
     )
 
-    pd_name = master.master_data[0].data[project_name]["Project Director (PD)"]
+    pd_name = data["Project Director (PD)"]
     if pd_name is None:
         pd_name = "TBC"
 
-    pd_email = master.master_data[0].data[project_name]["Project Director (PD) - Email"]
+    pd_email = data["Project Director (PD) - Email"]
     if pd_email is None:
         pd_email = "email: tbc"
 
-    pd_phone = master.master_data[0].data[project_name]["PD Phone No."]
+    pd_phone = data["PD Phone No."]
     if pd_phone is None:
         pd_phone = "phone: tbc"
 
@@ -2900,17 +2918,15 @@ def key_contacts(doc: Document, master: Master, project_name: str) -> None:
         "PD: " + str(pd_name) + ", " + str(pd_email) + ", " + str(pd_phone)
     )
 
-    contact_name = master.master_data[0].data[project_name]["Working Contact Name"]
+    contact_name = data["Working Contact Name"]
     if contact_name is None:
         contact_name = "tbc"
 
-    contact_email = master.master_data[0].data[project_name]["Working Contact Email"]
+    contact_email = data["Working Contact Email"]
     if contact_email is None:
         contact_email = "email: tbc"
 
-    contact_phone = master.master_data[0].data[project_name][
-        "Working Contact Telephone"
-    ]
+    contact_phone = data["Working Contact Telephone"]
     if contact_phone is None:
         contact_phone = "phone: tbc"
 
@@ -2930,26 +2946,16 @@ def dca_table(doc: Document, master: Master, project_name: str) -> None:
     hdr_cells = w_table.rows[0].cells
     hdr_cells[0].text = "Delivery confidence"
     hdr_cells[1].text = "This quarter"
-    # hard code is due to setting up data_bridge
-    try:
-        hdr_cells[2].text = str(master.master_data[1].quarter)
-    except IndexError:
-        hdr_cells[2].text = "Q2 20/21"
-    try:
-        hdr_cells[3].text = str(master.master_data[2].quarter)
-    except IndexError:
-        hdr_cells[3].text = "Q1 20/21"
-    try:
-        hdr_cells[4].text = str(master.master_data[3].quarter)
-    except IndexError:
-        hdr_cells[4].text = "Q4 19/20"
+    hdr_cells[2].text = str(master.master_data[1]["quarter"])
+    hdr_cells[3].text = str(master.master_data[2]["quarter"])
+    hdr_cells[4].text = str(master.master_data[3]["quarter"])
 
     for x, dca_key in enumerate(SRO_CONF_KEY_LIST):
         row_cells = w_table.add_row().cells
         row_cells[0].text = dca_key
         for i, m in enumerate(master.master_data[:4]):  # last four masters taken
             try:
-                rating = convert_rag_text(m.data[project_name][dca_key])
+                rating = convert_rag_text(m["data"][project_name][dca_key])
                 row_cells[i + 1].text = rating
                 cell_colouring(row_cells[i + 1], rating)
             except (KeyError, TypeError):
@@ -2993,14 +2999,16 @@ def dca_narratives(doc: Document, master: Master, project_name: str) -> None:
         "Milestone Commentary",
     ]
 
+    data = master.master_data[0]["data"]
+
     for x in range(len(headings_list)):
         try:  # overall try statement relates to data_bridge
             text_one = str(
-                master.master_data[0].data[project_name][narrative_keys_list[x]]
+                data[project_name][narrative_keys_list[x]]
             )
             try:
                 text_two = str(
-                    master.master_data[1].data[project_name][narrative_keys_list[x]]
+                    data[project_name][narrative_keys_list[x]]
                 )
             except (KeyError, IndexError):  # index error relates to data_bridge
                 text_two = text_one
@@ -4157,21 +4165,21 @@ def get_correct_p_data(
         bl_index = master.bl_index[baseline_type][project_name]
         tp_idx = bl_iter_list.index(time_period)
         try:
-            return master.master_data[bl_index[tp_idx]].data[project_name]
+            return master.master_data[bl_index[tp_idx]]["data"][project_name]
         # TypeError handles project not reporting in last quarter.
         # IndexError handles len of project bl index.
         # cost baselines return bl data available, not None, due to how
         # cost trend chart is composed
         except (TypeError, IndexError):
             if "costs" in baseline_type:
-                return master.master_data[bl_index[-1]].data[project_name]
+                return master.master_data[bl_index[-1]]["data"][project_name]
             else:
                 return None
 
     elif "quarter" in class_kwargs:
         tp_idx = master.quarter_list.index(time_period)
         try:
-            return master.master_data[tp_idx].data[project_name]
+            return master.master_data[tp_idx]["data"][project_name]
         # KeyError handles project not reporting in quarter.
         except KeyError:
             return None

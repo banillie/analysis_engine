@@ -80,20 +80,20 @@ STAGE_GROUPS = ["pipeline", "pre-SOBC", "SOBC", "OBC", "FBC"]
 hoz_doc = open_word_doc(root_path / "input/summary_temp_landscape.docx")
 doc = open_word_doc(root_path / "input/summary_temp.docx")
 
-top35_data_dict = {
-    "docx_save_path": str(top35_root_path / "output/{}.docx"),
-    "master": Master(top35_get_master_data(), top35_get_project_information(), data_type="top35"),
-    "op_args": {
-        "quarter": ["Month(May), 2021"],
-        "group": ["HSRG", "RSS", "RIG", "RPE"],
-        # "group": ["HS2 Prog"],
-        "chart": False,
-        "data_type": "top35",
-        "circle_colour": "No",
-    },
-    "excel_save_path": str(top35_root_path / "output/{}.xlsx"),
-    "word_save_path": str(top35_root_path / "output/{}.docx")
-}
+# top35_data_dict = {
+#     "docx_save_path": str(top35_root_path / "output/{}.docx"),
+#     "master": Master(top35_get_master_data(), top35_get_project_information(), data_type="top35"),
+#     "op_args": {
+#         "quarter": ["Month(May), 2021"],
+#         "group": ["HSRG", "RSS", "RIG", "RPE"],
+#         # "group": ["HS2 Prog"],
+#         "chart": False,
+#         "data_type": "top35",
+#         "circle_colour": "No",
+#     },
+#     "excel_save_path": str(top35_root_path / "output/{}.xlsx"),
+#     "word_save_path": str(top35_root_path / "output/{}.docx")
+# }
 
 # ipdc_data_dict = {
 #     "docx_save_path": str(root_path / "output/{}.docx"),
@@ -108,43 +108,43 @@ top35_data_dict = {
 #     },
 # }
 
-# cdg_data_dict = {
-#     "docx_save_path": str(cdg_root_path / "output/{}.docx"),
-#     "master": Master(
-#         cdg_get_master_data(), cdg_get_project_information(), data_type="cdg"
-#     ),
-#     "op_args": {
-#         "quarter": ["Q4 20/21"],
-#         # "quarter": ["standard"],
-#         "group": ["SCS", "CFPD", "GF"],
-#         # "chart": True,
-#         "data_type": "cdg",
-#         "type": "benefits",
-#         "blue_line": "CDG",
-#         "dates": ["1/10/2020", "1/5/2022"],
-#         "fig_size": "half_horizontal",
-#     },
-#     "dashboard": str(cdg_root_path / "input/dashboard_master.xlsx"),
-#     "narrative_dashboard": str(cdg_root_path / "input/narrative_dashboard_master.xlsx"),
-#     "excel_save_path": str(cdg_root_path / "output/{}.xlsx"),
-#     "word_save_path": str(cdg_root_path / "output/{}.docx")
-# }
+cdg_data_dict = {
+    "docx_save_path": str(cdg_root_path / "output/{}.docx"),
+    "master": Master(
+        cdg_get_master_data(), cdg_get_project_information(), data_type="cdg"
+    ),
+    "op_args": {
+        "quarter": ["Q4 20/21"],
+        # "quarter": ["standard"],
+        "group": ["SCS", "CFPD", "GF"],
+        # "chart": True,
+        "data_type": "cdg",
+        "type": "benefits",
+        "blue_line": "CDG",
+        "dates": ["1/10/2020", "1/5/2022"],
+        "fig_size": "half_horizontal",
+    },
+    "dashboard": str(cdg_root_path / "input/dashboard_master.xlsx"),
+    "narrative_dashboard": str(cdg_root_path / "input/narrative_dashboard_master.xlsx"),
+    "excel_save_path": str(cdg_root_path / "output/{}.xlsx"),
+    "word_save_path": str(cdg_root_path / "output/{}.docx")
+}
 
-data = top35_data_dict
+data = cdg_data_dict
 
 ## DANDELION
 # dl_data = DandelionData(data["master"], **data["op_args"])
 # d_lion = make_a_dandelion_auto(dl_data, **data["op_args"])
 # put_matplotlib_fig_into_word(hoz_doc, d_lion, size=7)
-# hoz_doc.save(data["docx_save_path"].format("dandelion_graph"))
+# hoz_doc.save(data["docx_save_path"].format("dandelion_graph_benefits"))
 
 
 ## MILESTONES
-ms = MilestoneData(data["master"], **data["op_args"])
+# ms = MilestoneData(data["master"], **data["op_args"])
 # ms.filter_chart_info(**data["op_args"])
 # ms.filter_chart_info(dates=["1/4/2021", "1/5/2021"])
-wb = put_milestones_into_wb(ms)
-wb.save(data["excel_save_path"].format("milestones"))
+# wb = put_milestones_into_wb(ms)
+# wb.save(data["excel_save_path"].format("milestones"))
 # chart_kwargs = {**{"blue_line": "today", "Chart": True}, **ms.kwargs}
 # g = milestone_chart(ms, data["master"], **data["op_args"])
 # put_matplotlib_fig_into_word(hoz_doc, g, size=7, transparent=False)
@@ -204,7 +204,7 @@ wb.save(data["excel_save_path"].format("milestones"))
 
 
 ## DASHBOARD
-# wb = cdg_dashboard(data["master"], data["dashboard"])
-# wb.save(data["excel_save_path"].format("q4_2021_dashboard"))
+wb = cdg_dashboard(data["master"], data["dashboard"])
+wb.save(data["excel_save_path"].format("q4_2021_dashboard_final"))
 # wb = cdg_narrative_dashboard(data["master"], data["narrative_dashboard"])
 # wb.save(data["excel_save_path"].format("q4_2021_narrative_dashboard"))
