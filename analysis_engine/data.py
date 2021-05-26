@@ -601,10 +601,11 @@ class JsonMaster:
         **kwargs,
     ) -> None:
         self.master_data = master_data
-        self.project_information = project_information
+        self.project_information = project_information.data
+        self.all_projects = project_information.projects
         self.kwargs = kwargs
-        self.current_quarter = self.master_data[0].quarter
-        self.current_projects = self.master_data[0].projects
+        self.current_quarter = str(master_data[0].quarter)
+        self.current_projects = master_data[0].projects
         self.abbreviations = {}
         self.full_names = {}
         self.bl_info = {}
@@ -630,7 +631,7 @@ class JsonMaster:
         abb_dict = {}
         fn_dict = {}
         error_case = []
-        for p in self.project_information.projects:
+        for p in self.all_projects:
             abb = self.project_information[p]["Abbreviations"]
             abb_dict[p] = {"abb": abb, "full name": p}
             fn_dict[abb] = p
@@ -701,7 +702,7 @@ class JsonMaster:
         Stops the programme if not"""
         error_cases = []
         for p in self.current_projects:
-            if p not in self.project_information.projects:
+            if p not in self.all_projects:
                 error_cases.append(p)
 
         if error_cases:
@@ -867,7 +868,7 @@ class JsonMaster:
         pipeline_dict = {}
         pipeline_list = []
         total_wlc = 0
-        for p in self.project_information.projects:
+        for p in self.all_projects:
             if self.project_information[p]["Pipeline"] is not None:
                 wlc = convert_none_types(self.project_information[p]["WLC"])
                 pipeline_dict[p] = {
@@ -1174,7 +1175,7 @@ class CostData:
                             cost_total += cost
                         except KeyError:  # handles data across different financial years via proj_info
                             try:
-                                cost = self.master.project_information.data[p][
+                                cost = self.master.project_information["data"][p][
                                     year + cost_type
                                 ]
                             except KeyError:
@@ -1552,15 +1553,16 @@ def milestone_info_handling(output_list: list, t_list: list) -> list:
                 pass
 
 
-def remove_project_name_from_milestone_key(
-    project_name: str, milestone_key_list: List[str]
-) -> List[str]:
-    """In this instance project_name is the abbreviation"""
-    output_list = []
-    for key in milestone_key_list:
-        alter_key = key.replace(project_name + ", ", "")
-        output_list.append(alter_key)
-    return output_list
+# Not required. Now done in milestone class
+# def remove_project_name_from_milestone_key(
+#     project_name: str, milestone_key_list: List[str]
+# ) -> List[str]:
+#     """In this instance project_name is the abbreviation"""
+#     output_list = []
+#     for key in milestone_key_list:
+#         alter_key = key.replace(project_name + ", ", "")
+#         output_list.append(alter_key)
+#     return output_list
 
 
 def remove_none_types(input_list):
@@ -1800,7 +1802,10 @@ class MilestoneData:
                     ):
                         p = x["Project"]
                         mn = x["Milestone"]
-                        join = p + ", " + mn
+                        if len(self.kwargs["group"]) == 1:
+                            join = mn
+                        else:
+                            join = p + ", " + mn
                         # if join not in key_names:  # stop duplicates
                         key_names.append(join)
                         d = x["Date"]
@@ -1815,7 +1820,10 @@ class MilestoneData:
                 if p is None and mn is None and d is None:
                     p = v["Project"]
                     mn = v["Milestone"]
-                    join = p + ", " + mn
+                    if len(self.kwargs["group"]) == 1:
+                        join = mn
+                    else:
+                        join = p + ", " + mn
                     # if join not in key_names:
                     key_names.append(join)
                     g_dates.append(v["Date"])
@@ -2434,11 +2442,12 @@ def put_milestones_into_wb(milestones: MilestoneData) -> Workbook:
 
     row_num = 2
     ms_names = milestones.sorted_milestone_dict[milestones.iter_list[0]]["names"]
-    if len(milestones.group) == 1:
-        pn = milestones.master.abbreviations[milestones.group[0]][
-            "abb"
-        ]  # pn project name
-        ms_names = remove_project_name_from_milestone_key(pn, ms_names)
+
+    # if len(milestones.group) == 1:
+    #     pn = milestones.master.abbreviations[milestones.group[0]][
+    #         "abb"
+    #     ]  # pn project name
+    #     # ms_names = remove_project_name_from_milestone_key(pn, ms_names)
 
     for i, m in enumerate(ms_names):
         for x, tp in enumerate(milestones.iter_list):
@@ -2843,7 +2852,7 @@ def spent_calculation(
     total = 0
     for k in keys:
         try:
-            total += master["data"][project][k]
+            total += master[project][k]
         except TypeError:  # None types
             pass
 
@@ -3734,9 +3743,10 @@ def milestone_chart(
     plt.suptitle(title, fontweight="bold", fontsize=20)
 
     ms_names = milestones.sorted_milestone_dict[milestones.iter_list[0]]["names"]
-    if len(milestones.group) == 1:
-        pn = milestones.master.abbreviations[milestones.group[0]]["abb"]
-        ms_names = remove_project_name_from_milestone_key(pn, ms_names)
+
+    # if len(milestones.group) == 1:
+    #     pn = milestones.master.abbreviations[milestones.group[0]]["abb"]
+    #     ms_names = remove_project_name_from_milestone_key(pn, ms_names)
 
     ms_names = handle_long_keys(ms_names)
 
@@ -4586,7 +4596,7 @@ class RiskData:
                         risk_list = []
                         risk = (
                             "Group",
-                            self.master.project_information.data[p]["Group"],
+                            self.master.project_information[p]["Group"],
                         )
                         risk_list.append(risk)
                         for risk_type in RISK_LIST:
@@ -4836,7 +4846,7 @@ class VfMData:
                 if p_data is None:
                     continue
                 vfm_list = []
-                vfm = ("Group", self.master.project_information.data[p]["Group"])
+                vfm = ("Group", self.master.project_information[p]["Group"])
                 vfm_list.append(vfm)
                 for vfm_type in VFM_LIST:
                     try:
@@ -5203,7 +5213,7 @@ def sort_projects_by_dca(
     # returns a list of projects sorted by dca rag rating
     rag_list = []
     for project_name in projects:
-        rag = master_data.data[project_name]["Departmental DCA"]
+        rag = master_data["data"][project_name]["Departmental DCA"]
         rag_list.append((project_name, rag))
 
     rag_list_sorted = sorted(rag_list, key=lambda x: x[1])
@@ -5422,12 +5432,13 @@ def project_report_meta_data(
     font = run.font
     font.bold = True
     font.underline = True
+    master_data = costs.master.master_data[0]["data"]
     t = doc.add_table(rows=1, cols=4)
     hdr_cells = t.rows[0].cells
     hdr_cells[0].text = "WLC:"
     hdr_cells[1].text = (
         "£"
-        + str(round(costs.master.master_data[0].data[project_name]["Total Forecast"]))
+        + str(round(master_data[project_name]["Total Forecast"]))
         + "m"
     )
     hdr_cells[2].text = "Spent:"
@@ -5436,7 +5447,7 @@ def project_report_meta_data(
     )
     row_cells = t.add_row().cells
     row_cells[0].text = "RDEL Total:"
-    rdel_total = costs.master.master_data[0].data[project_name][
+    rdel_total = master_data[project_name][
         "Total RDEL Forecast Total"
     ]
     row_cells[1].text = "£" + str(round(rdel_total)) + "m"
@@ -5445,7 +5456,7 @@ def project_report_meta_data(
         "£" + str(round(costs.c_totals[costs.iter_list[0]]["prof"])) + "m"
     )  # first in list is current
     row_cells = t.add_row().cells
-    cdel_total = costs.master.master_data[0].data[project_name][
+    cdel_total = master_data[project_name][
         "Total CDEL Forecast one off new costs"
     ]
     # sum(costs.cdel_profile[4:])
@@ -5456,7 +5467,7 @@ def project_report_meta_data(
         "£" + str(round(costs.c_totals[costs.iter_list[0]]["unprof"])) + "m"
     )
     row_cells = t.add_row().cells
-    n_gov_total = costs.master.master_data[0].data[project_name][
+    n_gov_total = master_data[project_name][
         "Non-Gov Total Forecast"
     ]
     if n_gov_total is None:
@@ -5485,10 +5496,10 @@ def project_report_meta_data(
     hdr_cells = table.rows[0].cells
     hdr_cells[0].text = "Type of funding:"
     hdr_cells[1].text = str(
-        costs.master.master_data[0].data[project_name]["Source of Finance"]
+        master_data[project_name]["Source of Finance"]
     )
     hdr_cells[2].text = "Contingency:"
-    contingency = costs.master.master_data[0].data[project_name][
+    contingency = master_data[project_name][
         "Overall contingency (£m)"
     ]
     if contingency is None:  # can this be refactored?
@@ -5497,7 +5508,7 @@ def project_report_meta_data(
         hdr_cells[3].text = "£" + str(round(contingency)) + "m"
     row_cells = table.add_row().cells
     row_cells[0].text = "Optimism Bias (OB):"
-    ob = costs.master.master_data[0].data[project_name][
+    ob = master_data[project_name][
         "Overall figure for Optimism Bias (£m)"
     ]
     if ob is None:
@@ -5508,7 +5519,7 @@ def project_report_meta_data(
         except TypeError:
             row_cells[1].text = ob
     row_cells[2].text = "Contingency in costs:"
-    con_included_wlc = costs.master.master_data[0].data[project_name][
+    con_included_wlc = master_data[project_name][
         "Is this Continency amount included within the WLC?"
     ]
     if con_included_wlc is None:
@@ -5517,7 +5528,7 @@ def project_report_meta_data(
         row_cells[3].text = con_included_wlc
     row_cells = table.add_row().cells
     row_cells[0].text = "OB in costs:"
-    ob_included_wlc = costs.master.master_data[0].data[project_name][
+    ob_included_wlc = master_data[project_name][
         "Is this Optimism Bias included within the WLC?"
     ]
     if ob_included_wlc is None:
@@ -5546,10 +5557,10 @@ def project_report_meta_data(
     hdr_cells = table.rows[0].cells
     hdr_cells[0].text = "Business case stage:"
     hdr_cells[1].text = convert_bc_stage_text(
-        costs.master.master_data[0].data[project_name]["IPDC approval point"]
+        master_data[project_name]["IPDC approval point"]
     )
     hdr_cells[2].text = "Delivery stage:"
-    delivery_stage = costs.master.master_data[0].data[project_name]["Project stage"]
+    delivery_stage = master_data[project_name]["Project stage"]
     if delivery_stage is None:
         hdr_cells[3].text = "Not reported"
     else:
@@ -5635,7 +5646,7 @@ def project_report_meta_data(
     table = doc.add_table(rows=1, cols=4)
     hdr_cells = table.rows[0].cells
     hdr_cells[0].text = "VfM category:"
-    vfm_cat = costs.master.master_data[0].data[project_name][
+    vfm_cat = master_data[project_name][
         "VfM Category single entry"
     ]
     if vfm_cat is None:
@@ -5643,7 +5654,7 @@ def project_report_meta_data(
     else:
         hdr_cells[1].text = vfm_cat
     hdr_cells[2].text = "BCR:"
-    bcr = costs.master.master_data[0].data[project_name][
+    bcr = master_data[project_name][
         "Adjusted Benefits Cost Ratio (BCR)"
     ]
     hdr_cells[3].text = str(bcr)
@@ -5671,7 +5682,7 @@ def project_report_meta_data(
         "£"
         + str(
             round(
-                benefits.master.master_data[0].data[project_name]["BEN Totals Forecast"]
+                master_data[project_name]["BEN Totals Forecast"]
             )
         )
         + "m"
@@ -6195,12 +6206,12 @@ def data_query_into_wb(master: Master, **kwargs) -> Workbook:
         for y, p in enumerate(group):  # p is project name
             p_data = get_correct_p_data(kwargs, master, "ipdc_costs", p, tp)
             abb = master.abbreviations[p]["abb"]
-            ws.cell(row=2 + y, column=1).value = master.project_information.data[p][
+            ws.cell(row=2 + y, column=1).value = master.project_information[p][
                 "Group"
             ]
             ws.cell(row=2 + y, column=2).value = p
             ws.cell(row=2 + y, column=3).value = abb
-            ws.cell(row=2 + y, column=4).value = master.project_information.data[p][
+            ws.cell(row=2 + y, column=4).value = master.project_information[p][
                 "GMPP"
             ]
             try:
@@ -7008,7 +7019,7 @@ class JsonData:
             "bl_index": self.master.bl_index,
             "bl_info": self.master.bl_info,
             "current_projects": self.master.current_projects,
-            "current_quarter": self.master.current_quarter,
+            "current_quarter": str(self.master.current_quarter),
             "dft_groups": self.master.dft_groups,
             "full_names": self.master.full_names,
             "kwargs": self.master.kwargs,
@@ -7148,15 +7159,20 @@ def financial_dashboard(master: Master, wb: Workbook) -> Workbook:
     ws = wb.worksheets[0]
     # overall_ws = wb.worksheets[3]
 
+    current_data = master.master_data[0]["data"]
+    last_data = master.master_data[1]["data"]
+
     for row_num in range(2, ws.max_row + 1):
         project_name = ws.cell(row=row_num, column=3).value
         if project_name in master.current_projects:
+            bl = master.bl_index["ipdc_costs"][project_name][2]
+            baseline_data = master.master_data[bl]["data"]
             """BC Stage"""
-            bc_stage = master.master_data[0].data[project_name]["IPDC approval point"]
+            bc_stage = current_data[project_name]["IPDC approval point"]
             ws.cell(row=row_num, column=4).value = convert_bc_stage_text(bc_stage)
             # overall_ws.cell(row=row_num, column=3).value = convert_bc_stage_text(bc_stage)
             try:
-                bc_stage_lst_qrt = master.master_data[1].data[project_name][
+                bc_stage_lst_qrt = last_data[project_name][
                     "IPDC approval point"
                 ]
                 if bc_stage != bc_stage_lst_qrt:
@@ -7170,11 +7186,11 @@ def financial_dashboard(master: Master, wb: Workbook) -> Workbook:
                 pass
 
             """planning stage"""
-            plan_stage = master.master_data[0].data[project_name]["Project stage"]
+            plan_stage = current_data[project_name]["Project stage"]
             ws.cell(row=row_num, column=5).value = plan_stage
             # overall_ws.cell(row=row_num, column=4).value = plan_stage
             try:
-                plan_stage_lst_qrt = master.master_data[1].data[project_name][
+                plan_stage_lst_qrt = last_data[project_name][
                     "Project stage"
                 ]
                 if plan_stage != plan_stage_lst_qrt:
@@ -7188,12 +7204,12 @@ def financial_dashboard(master: Master, wb: Workbook) -> Workbook:
                 pass
 
             """Total WLC"""
-            wlc_now = master.master_data[0].data[project_name]["Total Forecast"]
+            wlc_now = current_data[project_name]["Total Forecast"]
             ws.cell(row=row_num, column=6).value = wlc_now
             # overall_ws.cell(row=row_num, column=5).value = wlc_now
             """WLC variance against lst quarter"""
             try:
-                wlc_lst_quarter = master.master_data[1].data[project_name][
+                wlc_lst_quarter = last_data[project_name][
                     "Total Forecast"
                 ]
                 diff_lst_qrt = wlc_now - wlc_lst_quarter
@@ -7220,8 +7236,7 @@ def financial_dashboard(master: Master, wb: Workbook) -> Workbook:
                 ws.cell(row=row_num, column=7).value = "-"
 
             """WLC variance against baseline quarter"""
-            bl = master.bl_index["ipdc_costs"][project_name][2]
-            wlc_baseline = master.master_data[bl].data[project_name]["Total Forecast"]
+            wlc_baseline = baseline_data[project_name]["Total Forecast"]
             try:
                 diff_bl = wlc_now - wlc_baseline
                 if float(diff_bl) > 0.49 or float(diff_bl) < -0.49:
@@ -7250,7 +7265,7 @@ def financial_dashboard(master: Master, wb: Workbook) -> Workbook:
                 pass
 
             """Aggregate Spent"""
-            spent = spent_calculation(master.master_data[0], project_name)
+            spent = spent_calculation(current_data, project_name)
             ws.cell(row=row_num, column=9).value = spent
 
             """Committed spend"""
@@ -7258,43 +7273,43 @@ def financial_dashboard(master: Master, wb: Workbook) -> Workbook:
             """P-Value"""
 
             """Contigency"""
-            ws.cell(row=row_num, column=13).value = master.master_data[0].data[
+            ws.cell(row=row_num, column=13).value = current_data[
                 project_name
             ]["Overall contingency (£m)"]
 
             """OB"""
-            ws.cell(row=row_num, column=14).value = master.master_data[0].data[
+            ws.cell(row=row_num, column=14).value = current_data[
                 project_name
             ]["Overall figure for Optimism Bias (£m)"]
 
             """financial DCA rating - this quarter"""
             ws.cell(row=row_num, column=15).value = convert_rag_text(
-                master.master_data[0].data[project_name]["SRO Finance confidence"]
+                current_data[project_name]["SRO Finance confidence"]
             )
             """financial DCA rating - last qrt"""
             try:
                 ws.cell(row=row_num, column=16).value = convert_rag_text(
-                    master.master_data[1].data[project_name]["SRO Finance confidence"]
+                    last_data[project_name]["SRO Finance confidence"]
                 )
             except KeyError:
                 ws.cell(row=row_num, column=16).value = ""
             """financial DCA rating - 2 qrts ago"""
             try:
                 ws.cell(row=row_num, column=17).value = convert_rag_text(
-                    master.master_data[2].data[project_name]["SRO Finance confidence"]
+                    master.master_data[2]["data"][project_name]["SRO Finance confidence"]
                 )
             except (KeyError, IndexError):
                 ws.cell(row=row_num, column=17).value = ""
             """financial DCA rating - 3 qrts ago"""
             try:
                 ws.cell(row=row_num, column=18).value = convert_rag_text(
-                    master.master_data[3].data[project_name]["SRO Finance confidence"]
+                    master.master_data[3]["data"][project_name]["SRO Finance confidence"]
                 )
             except (KeyError, IndexError):
                 ws.cell(row=row_num, column=18).value = ""
             """financial DCA rating - baseline"""
             ws.cell(row=row_num, column=19).value = convert_rag_text(
-                master.master_data[bl].data[project_name]["SRO Finance confidence"]
+                baseline_data[project_name]["SRO Finance confidence"]
             )
 
     """list of columns with conditional formatting"""
@@ -7325,14 +7340,17 @@ def schedule_dashboard(
     ws = wb.worksheets[1]
     # overall_ws = wb.worksheets[3]
 
+    current_data = master.master_data[0]["data"]
+    last_data = master.master_data[1]["data"]
+
     for row_num in range(2, ws.max_row + 1):
         project_name = ws.cell(row=row_num, column=3).value
         if project_name in master.current_projects:
             """IPDC approval point"""
-            bc_stage = master.master_data[0].data[project_name]["IPDC approval point"]
+            bc_stage = current_data[project_name]["IPDC approval point"]
             ws.cell(row=row_num, column=4).value = convert_bc_stage_text(bc_stage)
             try:
-                bc_stage_lst_qrt = master.master_data[1].data[project_name][
+                bc_stage_lst_qrt = last_data[project_name][
                     "IPDC approval point"
                 ]
                 if bc_stage != bc_stage_lst_qrt:
@@ -7343,10 +7361,10 @@ def schedule_dashboard(
                 pass
 
             """stage"""
-            plan_stage = master.master_data[0].data[project_name]["Project stage"]
+            plan_stage = current_data[project_name]["Project stage"]
             ws.cell(row=row_num, column=5).value = plan_stage
             try:
-                plan_stage_lst_qrt = master.master_data[1].data[project_name][
+                plan_stage_lst_qrt = last_data[project_name][
                     "Project stage"
                 ]
                 if plan_stage != plan_stage_lst_qrt:
@@ -7465,26 +7483,26 @@ def schedule_dashboard(
 
             """schedule DCA rating - this quarter"""
             ws.cell(row=row_num, column=22).value = convert_rag_text(
-                master.master_data[0].data[project_name]["SRO Schedule Confidence"]
+                current_data[project_name]["SRO Schedule Confidence"]
             )
             """schedule DCA rating - last qrt"""
             try:
                 ws.cell(row=row_num, column=23).value = convert_rag_text(
-                    master.master_data[1].data[project_name]["SRO Schedule Confidence"]
+                    last_data[project_name]["SRO Schedule Confidence"]
                 )
             except KeyError:
                 ws.cell(row=row_num, column=23).value = ""
             """schedule DCA rating - 2 qrts ago"""
             try:
                 ws.cell(row=row_num, column=24).value = convert_rag_text(
-                    master.master_data[2].data[project_name]["SRO Schedule Confidence"]
+                    master.master_data[2]["data"][project_name]["SRO Schedule Confidence"]
                 )
             except (KeyError, IndexError):
                 ws.cell(row=row_num, column=24).value = ""
             """schedule DCA rating - 3 qrts ago"""
             try:
                 ws.cell(row=row_num, column=25).value = convert_rag_text(
-                    master.master_data[3].data[project_name]["SRO Schedule Confidence"]
+                    master.master_data[3]["data"][project_name]["SRO Schedule Confidence"]
                 )
             except (KeyError, IndexError):
                 ws.cell(row=row_num, column=25).value = ""
@@ -7492,7 +7510,7 @@ def schedule_dashboard(
             bl_i = master.bl_index["ipdc_milestones"][project_name][2]
             try:
                 ws.cell(row=row_num, column=26).value = convert_rag_text(
-                    master.master_data[bl_i].data[project_name][
+                    master.master_data[bl_i]["data"][project_name][
                         "SRO Schedule Confidence"
                     ]
                 )
@@ -7525,15 +7543,20 @@ def benefits_dashboard(master: Master, wb: Workbook) -> Workbook:
     ws = wb.worksheets[2]
     # overall_ws = wb.worksheets[3]
 
+    current_data = master.master_data[0]["data"]
+    last_data = master.master_data[1]["data"]
+
     for row_num in range(2, ws.max_row + 1):
         project_name = ws.cell(row=row_num, column=3).value
         if project_name in master.current_projects:
+            bl_i = master.bl_index["ipdc_benefits"][project_name][2]
+            baseline_data = master.master_data[bl_i]["data"]
 
             """BICC approval point"""
-            bc_stage = master.master_data[0].data[project_name]["IPDC approval point"]
+            bc_stage = current_data[project_name]["IPDC approval point"]
             ws.cell(row=row_num, column=4).value = convert_bc_stage_text(bc_stage)
             try:
-                bc_stage_lst_qrt = master.master_data[1].data[project_name][
+                bc_stage_lst_qrt = last_data[project_name][
                     "IPDC approval point"
                 ]
                 if bc_stage != bc_stage_lst_qrt:
@@ -7543,10 +7566,10 @@ def benefits_dashboard(master: Master, wb: Workbook) -> Workbook:
             except KeyError:
                 pass
             """Next stage"""
-            proj_stage = master.master_data[0].data[project_name]["Project stage"]
+            proj_stage = current_data[project_name]["Project stage"]
             ws.cell(row=row_num, column=5).value = proj_stage
             try:
-                proj_stage_lst_qrt = master.master_data[1].data[project_name][
+                proj_stage_lst_qrt = last_data[project_name][
                     "Project stage"
                 ]
                 if proj_stage != proj_stage_lst_qrt:
@@ -7557,14 +7580,13 @@ def benefits_dashboard(master: Master, wb: Workbook) -> Workbook:
                 pass
 
             """initial bcr"""
-            initial_bcr = master.master_data[0].data[project_name][
+            initial_bcr = current_data[project_name][
                 "Initial Benefits Cost Ratio (BCR)"
             ]
             ws.cell(row=row_num, column=6).value = initial_bcr
             """initial bcr baseline"""
-            bl_i = master.bl_index["ipdc_benefits"][project_name][2]
             # try:
-            baseline_initial_bcr = master.master_data[bl_i].data[project_name][
+            baseline_initial_bcr = baseline_data[project_name][
                 "Initial Benefits Cost Ratio (BCR)"
             ]
             if baseline_initial_bcr != 0:
@@ -7585,13 +7607,13 @@ def benefits_dashboard(master: Master, wb: Workbook) -> Workbook:
             #     ws.cell(row=row_num, column=7).value = ""
 
             """adjusted bcr"""
-            adjusted_bcr = master.master_data[0].data[project_name][
+            adjusted_bcr = current_data[project_name][
                 "Adjusted Benefits Cost Ratio (BCR)"
             ]
             ws.cell(row=row_num, column=8).value = adjusted_bcr
             """adjusted bcr baseline"""
             # try:
-            baseline_adjusted_bcr = master.master_data[bl_i].data[project_name][
+            baseline_adjusted_bcr = baseline_data[project_name][
                 "Adjusted Benefits Cost Ratio (BCR)"
             ]
             if baseline_adjusted_bcr != 0:
@@ -7611,18 +7633,18 @@ def benefits_dashboard(master: Master, wb: Workbook) -> Workbook:
 
             """vfm category now"""
             if (
-                master.master_data[0].data[project_name]["VfM Category single entry"]
+                current_data[project_name]["VfM Category single entry"]
                 is None
             ):
                 vfm_cat = (
                     str(
-                        master.master_data[0].data[project_name][
+                        current_data[project_name][
                             "VfM Category lower range"
                         ]
                     )
                     + " - "
                     + str(
-                        master.master_data[0].data[project_name][
+                        current_data[project_name][
                             "VfM Category upper range"
                         ]
                     )
@@ -7631,7 +7653,7 @@ def benefits_dashboard(master: Master, wb: Workbook) -> Workbook:
                 # overall_ws.cell(row=row_num, column=8).value = vfm_cat
 
             else:
-                vfm_cat = master.master_data[0].data[project_name][
+                vfm_cat = current_data[project_name][
                     "VfM Category single entry"
                 ]
                 ws.cell(row=row_num, column=10).value = vfm_cat
@@ -7640,39 +7662,39 @@ def benefits_dashboard(master: Master, wb: Workbook) -> Workbook:
             """vfm category baseline"""
             try:
                 if (
-                    master.master_data[bl_i].data[project_name][
+                    baseline_data[project_name][
                         "VfM Category single entry"
                     ]
                     is None
                 ):
                     vfm_cat_baseline = (
                         str(
-                            master.master_data[bl_i].data[project_name][
+                            baseline_data[project_name][
                                 "VfM Category lower range"
                             ]
                         )
                         + " - "
                         + str(
-                            master.master_data[bl_i].data[project_name][
+                            baseline_data[project_name][
                                 "VfM Category upper range"
                             ]
                         )
                     )
                     ws.cell(row=row_num, column=11).value = vfm_cat_baseline
                 else:
-                    vfm_cat_baseline = master.master_data[bl_i].data[project_name][
+                    vfm_cat_baseline = baseline_data[project_name][
                         "VfM Category single entry"
                     ]
                     ws.cell(row=row_num, column=11).value = vfm_cat_baseline
 
             except KeyError:
                 try:
-                    vfm_cat_baseline = master.master_data[bl_i].data[project_name][
+                    vfm_cat_baseline = baseline_data[project_name][
                         "VfM Category single entry"
                     ]
                     ws.cell(row=row_num, column=11).value = vfm_cat_baseline
                 except KeyError:
-                    vfm_cat_baseline = master.master_data[bl_i].data[project_name][
+                    vfm_cat_baseline = baseline_data[project_name][
                         "VfM Category"
                     ]
                     ws.cell(row=row_num, column=11).value = vfm_cat_baseline
@@ -7692,12 +7714,12 @@ def benefits_dashboard(master: Master, wb: Workbook) -> Workbook:
                     # )
 
             """total monetised benefits"""
-            tmb = master.master_data[0].data[project_name][
+            tmb = current_data[project_name][
                 "Total BEN Forecast - Total Monetised Benefits"
             ]
             ws.cell(row=row_num, column=12).value = tmb
             """tmb variance"""
-            baseline_tmb = master.master_data[bl_i].data[project_name][
+            baseline_tmb = baseline_data[project_name][
                 "Total BEN Forecast - Total Monetised Benefits"
             ]
             tmb_variance = tmb - baseline_tmb
@@ -7714,10 +7736,10 @@ def benefits_dashboard(master: Master, wb: Workbook) -> Workbook:
                 pass
 
             # In year benefits
-            iyb = master.master_data[0].data[project_name]["BEN Forecast In-Year"]
+            iyb = current_data[project_name]["BEN Forecast In-Year"]
             ws.cell(row=row_num, column=14).value = iyb
             try:
-                iyb_bl = master.master_data[bl_i].data[project_name][
+                iyb_bl = baseline_data[project_name][
                     "BEN Forecast In-Year"
                 ]
                 iyb_diff = iyb - iyb_bl
@@ -7734,33 +7756,33 @@ def benefits_dashboard(master: Master, wb: Workbook) -> Workbook:
 
             """benefits DCA rating - this quarter"""
             ws.cell(row=row_num, column=16).value = convert_rag_text(
-                master.master_data[0].data[project_name]["SRO Benefits RAG"]
+                current_data[project_name]["SRO Benefits RAG"]
             )
             """benefits DCA rating - last qrt"""
             try:
                 ws.cell(row=row_num, column=17).value = convert_rag_text(
-                    master.master_data[1].data[project_name]["SRO Benefits RAG"]
+                    last_data[project_name]["SRO Benefits RAG"]
                 )
             except KeyError:
                 ws.cell(row=row_num, column=17).value = ""
             """benefits DCA rating - 2 qrts ago"""
             try:
                 ws.cell(row=row_num, column=18).value = convert_rag_text(
-                    master.master_data[2].data[project_name]["SRO Benefits RAG"]
+                    master.master_data[2]["data"][project_name]["SRO Benefits RAG"]
                 )
             except (KeyError, IndexError):
                 ws.cell(row=row_num, column=18).value = ""
             """benefits DCA rating - 3 qrts ago"""
             try:
                 ws.cell(row=row_num, column=19).value = convert_rag_text(
-                    master.master_data[3].data[project_name]["SRO Benefits RAG"]
+                    master.master_data[3]["data"][project_name]["SRO Benefits RAG"]
                 )
             except (KeyError, IndexError):
                 ws.cell(row=row_num, column=19).value = ""
             """benefits DCA rating - baseline"""
 
             ws.cell(row=row_num, column=20).value = convert_rag_text(
-                master.master_data[bl_i].data[project_name]["SRO Benefits RAG"]
+                baseline_data[project_name]["SRO Benefits RAG"]
             )
 
         """list of columns with conditional formatting"""
@@ -9222,7 +9244,7 @@ def get_strategic_priorities_data(
             # p_list.append(
             #     vfm_scoring[master.master_data[0].data[p]["VfM Category single entry"]]
             # )
-            p_list.append(master.master_data[0].data[p]["Departmental DCA"])
+            p_list.append(master.master_data[0]["data"][p]["Departmental DCA"])
         except KeyError:
             print(p)
             # p_list.append(0)  # if vfm included

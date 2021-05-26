@@ -66,7 +66,7 @@ from analysis_engine.data import (
     cost_profile_into_wb,
     data_query_into_wb,
     get_data_query_key_names,
-    remove_project_name_from_milestone_key,
+    # remove_project_name_from_milestone_key,
     get_sp_data,
     cost_stackplot_graph,
     get_group,
@@ -247,7 +247,7 @@ def test_changing_word_doc_to_landscape(word_doc):
 
 def test_get_stackplot_costs_chart(master):
     sp = get_sp_data(master, group=TEST_GROUP, quarter=["standard"])
-    cost_stackplot_graph(sp, master, chart=False)
+    cost_stackplot_graph(sp, master, chart=True)
 
 
 def test_get_project_total_cost_calculations_for_project(master):
@@ -370,7 +370,7 @@ def test_compile_milestone_chart_with_filter(master):
         master,
         title="Group Test",
         blue_line="Today",
-        chart=True,
+        chart=False,
     )
 
 
@@ -384,7 +384,7 @@ def test_removing_project_name_from_milestone_keys(master):
     milestones = MilestoneData(master, group=[SOT], baseline=["all"])
     milestones.filter_chart_info(dates=["1/1/2013", "1/1/2014"])
     key_names = milestones.sorted_milestone_dict["current"]["names"]
-    key_names = remove_project_name_from_milestone_key("SoT", key_names)
+    # key_names = remove_project_name_from_milestone_key("SoT", key_names)
     assert key_names == [
         "Sputnik Radiation",
         "Lunar Magma",
@@ -484,7 +484,7 @@ def test_financial_dashboard(master, dashboard_template):
 
 
 def test_schedule_dashboard(master, dashboard_template):
-    milestones = MilestoneData(master, baseline=["all"])
+    milestones = MilestoneData(master, baseline=["all"], group=[master.current_projects])
     milestones.filter_chart_info(milestone_type=["Approval", "Delivery"])
     wb = schedule_dashboard(master, milestones, dashboard_template)
     wb.save("resources/test_dashboards_master_altered.xlsx")
@@ -502,10 +502,10 @@ def test_overall_dashboard(master, dashboard_template):
     wb.save("resources/test_dashboards_master_altered.xlsx")
 
 
-def test_build_dandelion_graph(word_doc_landscape, ipdc_data):
+def test_build_dandelion_graph(word_doc_landscape, ipdc_data, master):
     # m = Master(*d["data"], **d["op_args"])  # currently necessary for cdg and top35 data
     # dl_data = DandelionData(m, **d["op_args"])
-    dl_data = DandelionData(ipdc_data["master"], **ipdc_data["op_args"])
+    dl_data = DandelionData(master, **ipdc_data["op_args"])
     d_lion = make_a_dandelion_auto(dl_data, **ipdc_data["op_args"])
     put_matplotlib_fig_into_word(word_doc_landscape, d_lion, size=7)
     word_doc_landscape.save(ipdc_data["docx_save_path"].format("ipdc_d_graph"))

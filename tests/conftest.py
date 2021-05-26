@@ -67,9 +67,9 @@ def cdg_project_info():
 def basic_masters_dicts():
     test_master_data = [
         project_data_from_master(
-            os.path.join(os.getcwd(), "resources/" "cut_down_master_4_2016.xlsx"),
+            os.path.join(os.getcwd(), "resources/" "cut_down_master_4_2018.xlsx"),
             4,
-            2016,
+            2018,
         ),
         project_data_from_master(
             os.path.join(os.getcwd(), "resources/" "cut_down_master_4_2017.xlsx"),
@@ -77,9 +77,9 @@ def basic_masters_dicts():
             2017,
         ),
         project_data_from_master(
-            os.path.join(os.getcwd(), "resources/" "cut_down_master_4_2018.xlsx"),
+            os.path.join(os.getcwd(), "resources/" "cut_down_master_4_2016.xlsx"),
             4,
-            2018,
+            2016,
         ),
     ]
     return test_master_data
