@@ -165,7 +165,7 @@ def test_get_project_abbreviations(basic_masters_dicts, project_info):
 
 
 def test_calculating_spent(master):
-    test_dict = master.master_data[0]
+    test_dict = master.master_data[0]["data"]
     spent = spent_calculation(test_dict, "Sea of Tranquility")
     assert spent == 1409.33
 
@@ -568,7 +568,7 @@ def test_build_horizontal_bar_chart_manually(
 
 
 def test_radar_chart(sp_data, master, word_doc):
-    chart = radar_chart(sp_data, master, chart=True)
+    chart = radar_chart(sp_data, master, chart=False)
     put_matplotlib_fig_into_word(word_doc, chart, size=5)
     word_doc.save("resources/test_radar.docx")
 
@@ -586,5 +586,4 @@ def test_annual_report_summaries():
 
 
 def test_top35_summaries(top35_data):
-    m = Master(*top35_data["data"], **top35_data["op_args"] )
-    top35_run_p_reports(m, **top35_data["op_args"])
+    top35_run_p_reports(top35_data["master"], **top35_data["op_args"])

@@ -327,7 +327,7 @@ def top35_get_project_information() -> Dict[str, Union[str, int]]:
 def top35_run_p_reports(master: Master, **kwargs) -> None:
     group = get_group(master, str(master.current_quarter), kwargs)
     for p in group:
-        p_name = master.project_information.data[p]["Abbreviations"]
+        p_name = master.project_information[p]["Abbreviations"]
         print("Compiling summary for " + p_name)
         report_doc = open_word_doc(top35_root_path / "input/summary_temp.docx")
         output = compile_p_report(report_doc, master, p, **kwargs)
@@ -401,7 +401,7 @@ def wd_heading(
     font.name = "Arial"
     font.size = Pt(12)
 
-    heading = str(project_info.data[project_name]["ID Number"])  # integrate into master
+    heading = str(project_info[project_name]["ID Number"])  # integrate into master
     intro = doc.add_heading(str(heading), 0)
     intro.alignment = 1
     intro.bold = True

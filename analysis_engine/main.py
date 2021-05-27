@@ -41,7 +41,7 @@ from analysis_engine.data import (
     get_sp_data,
     DFT_GROUP,
     get_input_doc,
-    InputError,
+    InputError, JsonMaster, JsonData, open_json_file,
 )
 
 import logging
@@ -72,15 +72,16 @@ def check_remove(op_args):  # subcommand arg
 def initiate(args):
     print("creating a master data file for analysis_engine")
     try:
-        master = Master(get_master_data(), get_project_information())
+        master = JsonMaster(get_master_data(), get_project_information())
         master.get_baseline_data()
         master.check_baselines()
     except (ProjectNameError, ProjectGroupError, ProjectStageError) as e:
         logger.critical(e)
         sys.exit(1)
 
-    path_str = str("{0}/core_data/pickle/master".format(root_path))
-    Pickle(master, path_str)
+    master_json_path = str("{0}/core_data/json/master".format(root_path))
+    # Pickle(master, path_str)
+    JsonData(master, master_json_path)
 
 
 def ipdc_run_general(args):
@@ -92,7 +93,7 @@ def ipdc_run_general(args):
         print("Further command required. Use --help flag for guidance")
         sys.exit(1)
 
-    m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
+    m = Master(open_json_file(str(root_path / "core_data/json/master.json")))
 
     try:
         op_args = {k: v for k, v in args.items() if v}  # removes None values

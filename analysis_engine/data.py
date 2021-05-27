@@ -9062,16 +9062,8 @@ def so_matplotlib():
 
 
 def radar_chart(sp_data_path: TextIO, master: Master, **kwargs):
-
+    from matplotlib.path import Path
     data = get_strategic_priorities_data(sp_data_path, master, **kwargs)
-
-    # import matplotlib.pyplot as plt
-    # from matplotlib.patches import Circle, RegularPolygon
-    # from matplotlib.path import Path
-    # from matplotlib.projections.polar import PolarAxes
-    # from matplotlib.projections import register_projection
-    # from matplotlib.spines import Spine
-    # from matplotlib.transforms import Affine2D
 
     def radar_factory(num_vars, frame="circle"):
         """Create a radar chart with `num_vars` axes.
