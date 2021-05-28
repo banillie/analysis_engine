@@ -210,16 +210,14 @@ def ipdc_run_general(args):
                     make_a_dandelion_auto(d_data, **op_args)
 
         if programme == "dashboards":
+            op_args["baseline"] = ["standard"]
             dashboard_master = get_input_doc(root_path / "input/dashboards_master.xlsx")
-            wb = ipdc_dashboard(m, dashboard_master)
+            wb = ipdc_dashboard(m, dashboard_master, op_args)
             wb.save(root_path / "output/completed_ipdc_dashboard.xlsx")
 
         if programme == "summaries":
             op_args["baseline"] = "standard"
-            if "group" in op_args:
-                run_p_reports(m, **op_args)
-            else:
-                run_p_reports(m, **op_args)
+            run_p_reports(m, **op_args)
 
         if programme == "top_250_summaries":
             if op_args["group"] == DFT_GROUP:

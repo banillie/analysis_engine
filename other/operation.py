@@ -72,7 +72,7 @@ from analysis_engine.top35_data import (
 # master = Master(get_master_data(), get_project_information())
 
 ## PICKLE
-m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
+# m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
 
 ## GROUPS
 DFT_GROUP = ["HSRG", "RSS", "RIG", "AMIS", "RPE"]
@@ -95,42 +95,45 @@ doc = open_word_doc(root_path / "input/summary_temp.docx")
 #     "word_save_path": str(top35_root_path / "output/{}.docx")
 # }
 
-# ipdc_data_dict = {
-#     "docx_save_path": str(root_path / "output/{}.docx"),
-#     "master": open_pickle_file(str(root_path / "core_data/pickle/master.pickle")),
-#     "op_args": {
-#         "quarter": ["Q4 20/21"],
-#         "baseline": ["standard"],
-#         # "group": ["HSRG", "RSS", "RIG", "AMIS", "RPE"],
-#         "group": ["HS2 2a"],
-#         "chart": True,
-#         "circle_colour": "No",
-#     },
-# }
-
-cdg_data_dict = {
-    "docx_save_path": str(cdg_root_path / "output/{}.docx"),
-    "master": Master(
-        cdg_get_master_data(), cdg_get_project_information(), data_type="cdg"
-    ),
+ipdc_data_dict = {
+    "docx_save_path": str(root_path / "output/{}.docx"),
+    "master": Master(open_json_file(str(root_path / "core_data/json/master.json"))),
     "op_args": {
-        "quarter": ["Q4 20/21"],
         # "quarter": ["standard"],
-        "group": ["SCS", "CFPD", "GF"],
-        # "chart": True,
-        "data_type": "cdg",
-        "type": "benefits",
-        "blue_line": "CDG",
-        "dates": ["1/10/2020", "1/5/2022"],
-        "fig_size": "half_horizontal",
+        # "quarter": ["Q4 20/21"],
+        "baseline": ["standard"],
+        "group": ["HSRG", "RSS", "RIG", "AMIS", "RPE"],
+        # "group": ["HS2 Ph 2a"],
+        "chart": True,
+        "circle_colour": "No",
     },
-    "dashboard": str(cdg_root_path / "input/dashboard_master.xlsx"),
-    "narrative_dashboard": str(cdg_root_path / "input/narrative_dashboard_master.xlsx"),
-    "excel_save_path": str(cdg_root_path / "output/{}.xlsx"),
-    "word_save_path": str(cdg_root_path / "output/{}.docx")
+    "dashboard": get_input_doc(root_path / "input/dashboards_master.xlsx"),
+    "excel_save_path": str(root_path / "output/{}.xlsx"),
 }
 
-data = cdg_data_dict
+# cdg_data_dict = {
+#     "docx_save_path": str(cdg_root_path / "output/{}.docx"),
+#     "master": Master(
+#         cdg_get_master_data(), cdg_get_project_information(), data_type="cdg"
+#     ),
+#     "op_args": {
+#         "quarter": ["Q4 20/21"],
+#         # "quarter": ["standard"],
+#         "group": ["SCS", "CFPD", "GF"],
+#         # "chart": True,
+#         "data_type": "cdg",
+#         "type": "benefits",
+#         "blue_line": "CDG",
+#         "dates": ["1/10/2020", "1/5/2022"],
+#         "fig_size": "half_horizontal",
+#     },
+#     "dashboard": str(cdg_root_path / "input/dashboard_master.xlsx"),
+#     "narrative_dashboard": str(cdg_root_path / "input/narrative_dashboard_master.xlsx"),
+#     "excel_save_path": str(cdg_root_path / "output/{}.xlsx"),
+#     "word_save_path": str(cdg_root_path / "output/{}.docx")
+# }
+
+data = ipdc_data_dict
 
 ## DANDELION
 # dl_data = DandelionData(data["master"], **data["op_args"])
@@ -166,7 +169,7 @@ data = cdg_data_dict
 # cost_profile_graph(c, m, chart=True, group=c.start_group)
 
 # SUMMARIES
-# top35_run_p_reports(data["master"], **data["op_args"])
+# run_p_reports(data["master"], **data["op_args"])
 
 ## VFM
 # c = VfMData(m, group=DFm = Master(*data["data"], **data["op_args"] )T_GROUP, quarter=["standard"])  # c is class
@@ -204,7 +207,7 @@ data = cdg_data_dict
 
 
 ## DASHBOARD
-wb = cdg_dashboard(data["master"], data["dashboard"])
+wb = ipdc_dashboard(data["master"], data["dashboard"], data["op_args"])
 wb.save(data["excel_save_path"].format("q4_2021_dashboard_final"))
 # wb = cdg_narrative_dashboard(data["master"], data["narrative_dashboard"])
 # wb.save(data["excel_save_path"].format("q4_2021_narrative_dashboard"))

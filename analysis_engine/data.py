@@ -3008,16 +3008,14 @@ def dca_narratives(doc: Document, master: Master, project_name: str) -> None:
         "Milestone Commentary",
     ]
 
-    data = master.master_data[0]["data"]
-
     for x in range(len(headings_list)):
         try:  # overall try statement relates to data_bridge
             text_one = str(
-                data[project_name][narrative_keys_list[x]]
+                master.master_data[0]["data"][project_name][narrative_keys_list[x]]
             )
             try:
                 text_two = str(
-                    data[project_name][narrative_keys_list[x]]
+                    master.master_data[1]["data"][project_name][narrative_keys_list[x]]
                 )
             except (KeyError, IndexError):  # index error relates to data_bridge
                 text_two = text_one
@@ -5424,7 +5422,7 @@ def project_report_meta_data(
     doc.add_section(WD_SECTION_START.NEW_PAGE)
     paragraph = doc.add_paragraph()
     paragraph.alignment = WD_ALIGN_PARAGRAPH.RIGHT
-    paragraph.add_run("Annex A. High level MI data and analysis_engine").bold = True
+    paragraph.add_run("Annex A. High level MI data and analysis").bold = True
 
     """Costs meta data"""
     # this chuck is pretty messy because the data is messy
@@ -5853,9 +5851,9 @@ def print_out_project_milestones(
 
 def project_scope_text(doc: Document, master: Master, project_name: str) -> Document:
     doc.add_paragraph().add_run("Project Scope").bold = True
-    text_one = str(master.master_data[0].data[project_name]["Project Scope"])
+    text_one = str(master.master_data[0]["data"][project_name]["Project Scope"])
     try:
-        text_two = str(master.master_data[1].data[project_name]["Project Scope"])
+        text_two = str(master.master_data[1]["data"][project_name]["Project Scope"])
     except KeyError:
         text_two = text_one
     # different options for comparing costs
@@ -5938,7 +5936,7 @@ def run_p_reports(master: Master, **kwargs) -> None:
     for p in group:
         print("Compiling summary for " + p)
         report_doc = get_input_doc(root_path / "input/summary_temp.docx")
-        qrt = make_file_friendly(str(master.master_data[0].quarter))
+        qrt = make_file_friendly(str(master.current_quarter))
         output = compile_p_report(report_doc, get_project_information(), master, p)
         output.save(
             root_path / "output/{}_report_{}.docx".format(p, qrt)
@@ -7819,15 +7817,19 @@ def overall_dashboard(
 ) -> Workbook:
     ws = wb.worksheets[3]
 
+    current_data = master.master_data[0]["data"]
+    last_data = master.master_data[1]["data"]
+
+
     for row_num in range(2, ws.max_row + 1):
         project_name = ws.cell(row=row_num, column=2).value
         if project_name in master.current_projects:
             """BC Stage"""
-            bc_stage = master.master_data[0].data[project_name]["IPDC approval point"]
+            bc_stage = current_data[project_name]["IPDC approval point"]
             # ws.cell(row=row_num, column=4).value = convert_bc_stage_text(bc_stage)
             ws.cell(row=row_num, column=3).value = convert_bc_stage_text(bc_stage)
             try:
-                bc_stage_lst_qrt = master.master_data[1].data[project_name][
+                bc_stage_lst_qrt = last_data[project_name][
                     "IPDC approval point"
                 ]
                 if bc_stage != bc_stage_lst_qrt:
@@ -7841,11 +7843,11 @@ def overall_dashboard(
                 pass
 
             """planning stage"""
-            plan_stage = master.master_data[0].data[project_name]["Project stage"]
+            plan_stage = current_data[project_name]["Project stage"]
             # ws.cell(row=row_num, column=5).value = plan_stage
             ws.cell(row=row_num, column=4).value = plan_stage
             try:
-                plan_stage_lst_qrt = master.master_data[1].data[project_name][
+                plan_stage_lst_qrt = last_data[project_name][
                     "Project stage"
                 ]
                 if plan_stage != plan_stage_lst_qrt:
@@ -7859,12 +7861,12 @@ def overall_dashboard(
                 pass
 
             """Total WLC"""
-            wlc_now = master.master_data[0].data[project_name]["Total Forecast"]
+            wlc_now = current_data[project_name]["Total Forecast"]
             # ws.cell(row=row_num, column=6).value = wlc_now
             ws.cell(row=row_num, column=5).value = wlc_now
             """WLC variance against lst quarter"""
             try:
-                wlc_lst_quarter = master.master_data[1].data[project_name][
+                wlc_lst_quarter = last_data[project_name][
                     "Total Forecast"
                 ]
                 diff_lst_qrt = wlc_now - wlc_lst_quarter
@@ -7892,7 +7894,7 @@ def overall_dashboard(
 
             """WLC variance against baseline quarter"""
             bl = master.bl_index["ipdc_costs"][project_name][2]
-            wlc_baseline = master.master_data[bl].data[project_name]["Total Forecast"]
+            wlc_baseline = master.master_data[bl]["data"][project_name]["Total Forecast"]
             try:
                 diff_bl = wlc_now - wlc_baseline
                 if float(diff_bl) > 0.49 or float(diff_bl) < -0.49:
@@ -7922,18 +7924,18 @@ def overall_dashboard(
 
             """vfm category now"""
             if (
-                master.master_data[0].data[project_name]["VfM Category single entry"]
+                current_data[project_name]["VfM Category single entry"]
                 is None
             ):
                 vfm_cat = (
                     str(
-                        master.master_data[0].data[project_name][
+                        current_data[project_name][
                             "VfM Category lower range"
                         ]
                     )
                     + " - "
                     + str(
-                        master.master_data[0].data[project_name][
+                        current_data[project_name][
                             "VfM Category upper range"
                         ]
                     )
@@ -7942,7 +7944,7 @@ def overall_dashboard(
                 ws.cell(row=row_num, column=8).value = vfm_cat
 
             else:
-                vfm_cat = master.master_data[0].data[project_name][
+                vfm_cat = current_data[project_name][
                     "VfM Category single entry"
                 ]
                 # ws.cell(row=row_num, column=10).value = vfm_cat
@@ -7952,39 +7954,39 @@ def overall_dashboard(
             bl_i = master.bl_index["ipdc_benefits"][project_name][2]
             try:
                 if (
-                    master.master_data[bl_i].data[project_name][
+                    master.master_data[bl_i]["data"][project_name][
                         "VfM Category single entry"
                     ]
                     is None
                 ):
                     vfm_cat_baseline = (
                         str(
-                            master.master_data[bl_i].data[project_name][
+                            master.master_data[bl_i]["data"][project_name][
                                 "VfM Category lower range"
                             ]
                         )
                         + " - "
                         + str(
-                            master.master_data[bl_i].data[project_name][
+                            master.master_data[bl_i]["data"][project_name][
                                 "VfM Category upper range"
                             ]
                         )
                     )
                     # ws.cell(row=row_num, column=11).value = vfm_cat_baseline
                 else:
-                    vfm_cat_baseline = master.master_data[bl_i].data[project_name][
+                    vfm_cat_baseline = master.master_data[bl_i]["data"][project_name][
                         "VfM Category single entry"
                     ]
                     # ws.cell(row=row_num, column=11).value = vfm_cat_baseline
 
             except KeyError:
                 try:
-                    vfm_cat_baseline = master.master_data[bl_i].data[project_name][
+                    vfm_cat_baseline = master.master_data[bl_i]["data"][project_name][
                         "VfM Category single entry"
                     ]
                     # ws.cell(row=row_num, column=11).value = vfm_cat_baseline
                 except KeyError:
-                    vfm_cat_baseline = master.master_data[bl_i].data[project_name][
+                    vfm_cat_baseline = master.master_data[bl_i]["data"][project_name][
                         "VfM Category"
                     ]
                     # ws.cell(row=row_num, column=11).value = vfm_cat_baseline
@@ -8047,7 +8049,7 @@ def overall_dashboard(
 
             """IPA DCA rating"""
             ipa_dca = convert_rag_text(
-                master.master_data[0].data[project_name]["GMPP - IPA DCA"]
+                current_data[project_name]["GMPP - IPA DCA"]
             )
             ws.cell(row=row_num, column=15).value = ipa_dca
             if ipa_dca == "None":
@@ -8055,33 +8057,33 @@ def overall_dashboard(
 
             """DCA rating - this quarter"""
             ws.cell(row=row_num, column=17).value = convert_rag_text(
-                master.master_data[0].data[project_name]["Departmental DCA"]
+                current_data[project_name]["Departmental DCA"]
             )
             """DCA rating - last qrt"""
             try:
                 ws.cell(row=row_num, column=19).value = convert_rag_text(
-                    master.master_data[1].data[project_name]["Departmental DCA"]
+                    last_data[project_name]["Departmental DCA"]
                 )
             except KeyError:
                 ws.cell(row=row_num, column=19).value = ""
             """DCA rating - 2 qrts ago"""
             try:
                 ws.cell(row=row_num, column=20).value = convert_rag_text(
-                    master.master_data[2].data[project_name]["Departmental DCA"]
+                    master.master_data[2]["data"][project_name]["Departmental DCA"]
                 )
             except (KeyError, IndexError):
                 ws.cell(row=row_num, column=20).value = ""
             """DCA rating - 3 qrts ago"""
             try:
                 ws.cell(row=row_num, column=21).value = convert_rag_text(
-                    master.master_data[3].data[project_name]["Departmental DCA"]
+                    master.master_data[3]["data"][project_name]["Departmental DCA"]
                 )
             except (KeyError, IndexError):
                 ws.cell(row=row_num, column=21).value = ""
             """DCA rating - baseline"""
             bl_i = master.bl_index["ipdc_costs"][project_name][2]
             ws.cell(row=row_num, column=23).value = convert_rag_text(
-                master.master_data[bl_i].data[project_name]["Departmental DCA"]
+                master.master_data[bl_i]["data"][project_name]["Departmental DCA"]
             )
 
         """list of columns with conditional formatting"""
@@ -8108,10 +8110,10 @@ def overall_dashboard(
     return wb
 
 
-def ipdc_dashboard(master: Master, wb: Workbook) -> Workbook:
+def ipdc_dashboard(master: Master, wb: Workbook, kwargs) -> Workbook:
     financial_dashboard(master, wb)
 
-    milestone_class = MilestoneData(master, baseline=["standard"])
+    milestone_class = MilestoneData(master, **kwargs)
     milestone_class.filter_chart_info(type=["Approval", "Delivery"])
     schedule_dashboard(master, milestone_class, wb)
 
