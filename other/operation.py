@@ -54,7 +54,7 @@ from analysis_engine.data import (
     JsonData,
     open_json_file,
     get_input_doc,
-    ipdc_dashboard,
+    ipdc_dashboard, JsonMaster,
 )
 
 ## GENERATE CLI OPTIONS
@@ -66,7 +66,7 @@ from analysis_engine.top35_data import (
     top35_get_master_data,
     top35_get_project_information,
     top35_root_path,
-    top35_run_p_reports,
+    top35_run_p_reports, CentralSupportData,
 )
 
 # master = Master(get_master_data(), get_project_information())
@@ -80,37 +80,37 @@ STAGE_GROUPS = ["pipeline", "pre-SOBC", "SOBC", "OBC", "FBC"]
 hoz_doc = open_word_doc(root_path / "input/summary_temp_landscape.docx")
 doc = open_word_doc(root_path / "input/summary_temp.docx")
 
-# top35_data_dict = {
-#     "docx_save_path": str(top35_root_path / "output/{}.docx"),
-#     "master": Master(top35_get_master_data(), top35_get_project_information(), data_type="top35"),
-#     "op_args": {
-#         "quarter": ["Month(May), 2021"],
-#         "group": ["HSRG", "RSS", "RIG", "RPE"],
-#         # "group": ["HS2 Prog"],
-#         "chart": False,
-#         "data_type": "top35",
-#         "circle_colour": "No",
-#     },
-#     "excel_save_path": str(top35_root_path / "output/{}.xlsx"),
-#     "word_save_path": str(top35_root_path / "output/{}.docx")
-# }
-
-ipdc_data_dict = {
-    "docx_save_path": str(root_path / "output/{}.docx"),
-    "master": Master(open_json_file(str(root_path / "core_data/json/master.json"))),
+top35_data_dict = {
+    "docx_save_path": str(top35_root_path / "output/{}.docx"),
+    "master": Master(open_json_file(str(top35_root_path / "core_data/json/master.json"))),
     "op_args": {
-        "quarter": ["standard"],
-        # "quarter": ["Q4 20/21"],
-        # "baseline": ["bl_one"],
-        # "group": ["HSRG", "RSS", "RIG", "AMIS", "RPE"],
-        "group": ["RIG"],
-        "dates": ["1/6/2021", "1/7/2021"],
-        "chart": True,
+        "quarter": ["Month(April), 2021"],
+        "group": ["HSRG", "RSS", "RIG", "RPE"],
+        # "group": ["HS2 Prog"],
+        "chart": False,
+        "data_type": "top35",
         "circle_colour": "No",
     },
-    "dashboard": get_input_doc(root_path / "input/dashboards_master.xlsx"),
-    "excel_save_path": str(root_path / "output/{}.xlsx"),
+    "excel_save_path": str(top35_root_path / "output/{}.xlsx"),
+    "word_save_path": str(top35_root_path / "output/{}.docx")
 }
+
+# ipdc_data_dict = {
+#     "docx_save_path": str(root_path / "output/{}.docx"),
+#     "master": Master(open_json_file(str(root_path / "core_data/json/master.json"))),
+#     "op_args": {
+#         "quarter": ["standard"],
+#         # "quarter": ["Q4 20/21"],
+#         # "baseline": ["bl_one"],
+#         # "group": ["HSRG", "RSS", "RIG", "AMIS", "RPE"],
+#         "group": ["RIG"],
+#         "dates": ["1/6/2021", "1/7/2021"],
+#         "chart": True,
+#         "circle_colour": "No",
+#     },
+#     "dashboard": get_input_doc(root_path / "input/dashboards_master.xlsx"),
+#     "excel_save_path": str(root_path / "output/{}.xlsx"),
+# }
 
 # cdg_data_dict = {
 #     "docx_save_path": str(cdg_root_path / "output/{}.docx"),
@@ -134,7 +134,7 @@ ipdc_data_dict = {
 #     "word_save_path": str(cdg_root_path / "output/{}.docx")
 # }
 
-data = ipdc_data_dict
+data = top35_data_dict
 
 ## DANDELION
 # dl_data = DandelionData(data["master"], **data["op_args"])
@@ -144,10 +144,10 @@ data = ipdc_data_dict
 
 
 # MILESTONES
-ms = MilestoneData(data["master"], **data["op_args"])
-ms.filter_chart_info(**data["op_args"])
-wb = put_milestones_into_wb(ms)
-wb.save(data["excel_save_path"].format("milestones"))
+# ms = MilestoneData(data["master"], **data["op_args"])
+# ms.filter_chart_info(**data["op_args"])
+# wb = put_milestones_into_wb(ms)
+# wb.save(data["excel_save_path"].format("milestones"))
 # chart_kwargs = {**{"blue_line": "today", "Chart": True}, **ms.kwargs}
 # g = milestone_chart(ms, data["master"], **data["op_args"])
 # put_matplotlib_fig_into_word(hoz_doc, g, size=7, transparent=False)
@@ -170,7 +170,7 @@ wb.save(data["excel_save_path"].format("milestones"))
 # cost_profile_graph(c, data["master"], chart=True, group=c.start_group)
 
 # SUMMARIES
-# run_p_reports(data["master"], **data["op_args"])
+# top35_run_p_reports(data["master"], **data["op_args"])
 
 ## VFM
 # c = VfMData(m, group=DFm = Master(*data["data"], **data["op_args"] )T_GROUP, quarter=["standard"])  # c is class
@@ -212,3 +212,10 @@ wb.save(data["excel_save_path"].format("milestones"))
 # wb.save(data["excel_save_path"].format("q4_2021_dashboard_final"))
 # wb = cdg_narrative_dashboard(data["master"], data["narrative_dashboard"])
 # wb.save(data["excel_save_path"].format("q4_2021_narrative_dashboard"))
+
+##CENTRAL SUPPORT
+cs = CentralSupportData(data["master"], **data["op_args"])
+# Here. look at top250/output/central_support. also need to do re-testing
+# of summary sheet milestone and cs printing as have made changes to dict structure.
+wb = put_milestones_into_wb(cs)
+wb.save(data["excel_save_path"].format("central_support"))

@@ -1533,24 +1533,39 @@ class BenefitsData:
         self.b_totals = lower_dict
 
 
-def milestone_info_handling(output_list: list, t_list: list) -> list:
+def milestone_info_handling(output_list: list, t_list: list, **kwargs) -> list:
     """helper function for handling and cleaning up milestone date generated
     via MilestoneDate class. Removes none type milestone names and non date
     string values"""
-    # here use name tuple?
+
+    # if t_list[1][1] is None or t_list[1][1] == "Project - Business Case End Date":
+    #     pass
+    # else:
+    #     if isinstance(t_list[3][1], datetime.date):
+    #         return output_list.append(t_list)
+    #     else:
+    #         try:
+    #             d = parser.parse(t_list[3][1], dayfirst=True)
+    #             t_list[3] = ("Date", d.date())
+    #             return output_list.append(t_list)
+    #         # ParserError for non-date string. TypeError for None types
+    #         except (ParserError, TypeError):
+    #             pass
+
     if t_list[1][1] is None or t_list[1][1] == "Project - Business Case End Date":
         pass
     else:
-        if isinstance(t_list[3][1], datetime.date):
+        try:
+            d = parser.parse(t_list[3][1], dayfirst=True)
+            t_list[3] = ("Date", d.date())
             return output_list.append(t_list)
-        else:
-            try:
-                d = parser.parse(t_list[3][1], dayfirst=True)
-                t_list[3] = ("Date", d.date())
-                return output_list.append(t_list)
-            # ParserError for non-date string. TypeError for None types
-            except (ParserError, TypeError):
-                pass
+        except TypeError:  # None Types
+            if "type" in kwargs:
+                if kwargs["type"] == "central support":
+                    if t_list[3][1] is None:
+                        return output_list.append(t_list)
+        except ParserError:  # Non-date strings
+            pass
 
 
 # Not required. Now done in milestone class
@@ -2463,31 +2478,6 @@ def put_milestones_into_wb(milestones: MilestoneData) -> Workbook:
             ms_date = milestones.sorted_milestone_dict[tp]["r_dates"][i]
             ws.cell(row=row_num + i, column=3 + x).value = ms_date
             ws.cell(row=row_num + i, column=3 + x).number_format = "dd/mm/yy"
-            # try:
-            # ws.cell(row=row_num + i, column=4).value = milestones.sorted_milestone_dict[x]["r_dates"][i]
-            # ws.cell(row=row_num + i, column=4).number_format = "dd/mm/yy"
-            # except AttributeError:
-            #     pass
-            # try:
-            #     ws.cell(row=row_num + i, column=5).value = milestones.sorted_milestone_dict[
-            #         milestones.iter_list[2]
-            #     ]["r_dates"][i]
-            #     ws.cell(row=row_num + i, column=5).number_format = "dd/mm/yy"
-            # except AttributeError:
-            #     pass
-            # try:
-            #     ws.cell(
-            #         row=row_num + i, column=6
-            #     ).value = milestones.milestones.sorted_milestone_dict[
-            #         milestones.iter_list[3]
-            #     ][
-            #         "r_dates"
-            #     ][
-            #         i
-            #     ]
-            #     ws.cell(row=row_num + i, column=6).number_format = "dd/mm/yy"
-            # except AttributeError:
-            #     pass
             notes = milestones.sorted_milestone_dict[tp]["notes"][i]
             ws.cell(row=row_num + i, column=len(milestones.iter_list) + 3).value = notes
 

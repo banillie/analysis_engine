@@ -69,8 +69,8 @@ def check_remove(op_args):  # subcommand arg
                 )
 
 
-def initiate(args):
-    print("creating a master data file for analysis_engine")
+def ipdc_initiate(args):
+    print("creating a master data file for ipdc and gmpp portfolio reporting.")
     try:
         master = JsonMaster(get_master_data(), get_project_information())
         master.get_baseline_data()
@@ -80,7 +80,18 @@ def initiate(args):
         sys.exit(1)
 
     master_json_path = str("{0}/core_data/json/master".format(root_path))
-    # Pickle(master, path_str)
+    JsonData(master, master_json_path)
+
+
+def top250_initiate(args):
+    print("creating a master data file for top 250 reporting.")
+    try:
+        master = JsonMaster(top35_get_master_data(), top35_get_project_information(), data_type="top35")
+    except (ProjectNameError, ProjectGroupError, ProjectStageError) as e:
+        logger.critical(e)
+        sys.exit(1)
+
+    master_json_path = str("{0}/core_data/json/master".format(top35_root_path))
     JsonData(master, master_json_path)
 
 
@@ -263,7 +274,7 @@ def ipdc_run_general(args):
 def top250_run_general(args):
     programme = args["subparser_name"]
     print("compiling top250 " + programme + " analysis")
-    m = Master(top35_get_master_data(), top35_get_project_information(), data_type="top35")
+    m = Master(open_json_file(str(top35_root_path / "core_data/json/master.json")))
 
     try:
         op_args = {k: v for k, v in args.items() if v}  # removes None values
@@ -272,7 +283,7 @@ def top250_run_general(args):
                 op_args["group"] = ["HSRG", "RSS", "RIG", "RPE"]
         if "quarter" not in op_args:
             if "baseline" not in op_args:
-                op_args["quarter"] = ["Month(May), 2021"]
+                op_args["quarter"] = ["standard"]
 
         op_args["data_type"] = "top35"
 
@@ -698,7 +709,7 @@ class main():
         args = parser.parse_args(sys.argv[2:])
         # print(vars(args))
         if vars(args)["subparser_name"] == "initiate":
-            initiate(vars(args))
+            ipdc_initiate(vars(args))
         else:
             ipdc_run_general(vars(args))
 
@@ -708,6 +719,9 @@ class main():
         )
         subparsers = parser.add_subparsers(dest="subparser_name")
         subparsers.metavar = "                      "
+        top250_parser_initiate = subparsers.add_parser(
+            "initiate", help="creates a master data file"
+        )
         top250_parser_summaries = subparsers.add_parser("summaries", help="summary reports")
         top250_parser_milestones = subparsers.add_parser(
             "milestones",
@@ -764,7 +778,10 @@ class main():
 
         args = parser.parse_args(sys.argv[2:])
         # print(vars(args))
-        top250_run_general(vars(args))
+        if vars(args)["subparser_name"] == "initiate":
+            top250_initiate(vars(args))
+        else:
+            top250_run_general(vars(args))
 
 
 ## old method for handling argparse commands.
