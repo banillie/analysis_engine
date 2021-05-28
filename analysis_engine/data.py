@@ -1175,7 +1175,7 @@ class CostData:
                             cost_total += cost
                         except KeyError:  # handles data across different financial years via proj_info
                             try:
-                                cost = self.master.project_information["data"][p][
+                                cost = self.master.project_information[p][
                                     year + cost_type
                                 ]
                             except KeyError:
@@ -1802,7 +1802,7 @@ class MilestoneData:
                     ):
                         p = x["Project"]
                         mn = x["Milestone"]
-                        if len(self.kwargs["group"]) == 1:
+                        if len(self.group) == 1:
                             join = mn
                         else:
                             join = p + ", " + mn
@@ -1820,7 +1820,7 @@ class MilestoneData:
                 if p is None and mn is None and d is None:
                     p = v["Project"]
                     mn = v["Milestone"]
-                    if len(self.kwargs["group"]) == 1:
+                    if len(self.group) == 1:
                         join = mn
                     else:
                         join = p + ", " + mn

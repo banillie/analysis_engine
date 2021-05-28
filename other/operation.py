@@ -99,11 +99,12 @@ ipdc_data_dict = {
     "docx_save_path": str(root_path / "output/{}.docx"),
     "master": Master(open_json_file(str(root_path / "core_data/json/master.json"))),
     "op_args": {
-        # "quarter": ["standard"],
+        "quarter": ["standard"],
         # "quarter": ["Q4 20/21"],
-        "baseline": ["standard"],
-        "group": ["HSRG", "RSS", "RIG", "AMIS", "RPE"],
-        # "group": ["HS2 Ph 2a"],
+        # "baseline": ["bl_one"],
+        # "group": ["HSRG", "RSS", "RIG", "AMIS", "RPE"],
+        "group": ["RIG"],
+        "dates": ["1/6/2021", "1/7/2021"],
         "chart": True,
         "circle_colour": "No",
     },
@@ -142,12 +143,11 @@ data = ipdc_data_dict
 # hoz_doc.save(data["docx_save_path"].format("dandelion_graph_benefits"))
 
 
-## MILESTONES
-# ms = MilestoneData(data["master"], **data["op_args"])
-# ms.filter_chart_info(**data["op_args"])
-# ms.filter_chart_info(dates=["1/4/2021", "1/5/2021"])
-# wb = put_milestones_into_wb(ms)
-# wb.save(data["excel_save_path"].format("milestones"))
+# MILESTONES
+ms = MilestoneData(data["master"], **data["op_args"])
+ms.filter_chart_info(**data["op_args"])
+wb = put_milestones_into_wb(ms)
+wb.save(data["excel_save_path"].format("milestones"))
 # chart_kwargs = {**{"blue_line": "today", "Chart": True}, **ms.kwargs}
 # g = milestone_chart(ms, data["master"], **data["op_args"])
 # put_matplotlib_fig_into_word(hoz_doc, g, size=7, transparent=False)
@@ -165,8 +165,9 @@ data = ipdc_data_dict
 # cost_stackplot_graph(sp_data, m, group=DFT_GROUP)
 
 # COSTS
-# c = CostData(m, **op_args)
-# cost_profile_graph(c, m, chart=True, group=c.start_group)
+# c = CostData(data["master"], **data["op_args"])
+# c.get_cost_profile()
+# cost_profile_graph(c, data["master"], chart=True, group=c.start_group)
 
 # SUMMARIES
 # run_p_reports(data["master"], **data["op_args"])
@@ -207,7 +208,7 @@ data = ipdc_data_dict
 
 
 ## DASHBOARD
-wb = ipdc_dashboard(data["master"], data["dashboard"], data["op_args"])
-wb.save(data["excel_save_path"].format("q4_2021_dashboard_final"))
+# wb = ipdc_dashboard(data["master"], data["dashboard"], data["op_args"])
+# wb.save(data["excel_save_path"].format("q4_2021_dashboard_final"))
 # wb = cdg_narrative_dashboard(data["master"], data["narrative_dashboard"])
 # wb.save(data["excel_save_path"].format("q4_2021_narrative_dashboard"))
