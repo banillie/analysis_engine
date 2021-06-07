@@ -25,6 +25,7 @@ from analysis_engine.data import (
     logger,
     MilestoneData,
     milestone_info_handling,
+    wd_heading,
 )
 from datamaps.api import project_data_from_master_month, project_data_from_master
 import platform
@@ -394,18 +395,18 @@ def compile_p_report(
     return doc
 
 
-def wd_heading(
-    doc: Document, project_info: Dict[str, Union[str, int]], project_name: str
-) -> None:
-    """Function adds header to word doc"""
-    font = doc.styles["Normal"].font
-    font.name = "Arial"
-    font.size = Pt(12)
-
-    heading = str(project_info[project_name]["ID Number"])  # integrate into master
-    intro = doc.add_heading(str(heading), 0)
-    intro.alignment = 1
-    intro.bold = True
+# def wd_heading(
+#     doc: Document, project_info: Dict[str, Union[str, int]], project_name: str
+# ) -> None:
+#     """Function adds header to word doc"""
+#     font = doc.styles["Normal"].font
+#     font.name = "Arial"
+#     font.size = Pt(12)
+#
+#     heading = str(project_info[project_name]["ID Number"])  # integrate into master
+#     intro = doc.add_heading(str(heading), 0)
+#     intro.alignment = 1
+#     intro.bold = True
 
 
 def key_contacts(doc: Document, master: Dict, project_name: str) -> None:
@@ -512,24 +513,29 @@ def project_report_meta_data(
     on_time_old = str(p_master_last["PROJECT DEL TO CURRENT TIMINGS ?"])
     hdr_cells[1].text = on_time
     # cell_colouring(hdr_cells[1], on_time, on_time_old)
-    # make_text_red(hdr_cells[1], on_time, on_time_old)
+    make_text_red(hdr_cells[1], on_time, on_time_old)
     hdr_cells[2].text = "ON GMPP:"
     on_gmpp = str(p_master["GMPP ID: IS THIS PROJECT ON GMPP"])
     on_gmpp_last = str(p_master_last["GMPP ID: IS THIS PROJECT ON GMPP"])
     hdr_cells[3].text = on_gmpp
+    make_text_red(hdr_cells[3], on_gmpp, on_gmpp_last)
     # cell_colouring(hdr_cells[3], on_gmpp, on_gmpp_last)
     row_cells = t.add_row().cells
     row_cells[0].text = "ON BUDGET:"
     on_budget = str(p_master["PROJECT ON BUDGET?"])
     on_budget_last = str(p_master_last["PROJECT ON BUDGET?"])
     row_cells[1].text = on_budget
+    make_text_red(row_cells[1], on_budget, on_budget_last)
     # cell_colouring(row_cells[1], on_budget, on_budget_last)
     row_cells[2].text = "TOTAL COST:"
     if p_master["WLC NON GOV"] is None or p_master["WLC NON GOV"] == 0:
-        total = p_master["WLC TOTAL"]
+        total = dandelion_number_text(p_master["WLC TOTAL"])
+        total_last = dandelion_number_text(p_master_last["WLC TOTAL"])
     else:
-        total = p_master["WLC TOTAL"] + p_master["WLC NON GOV"]
-    row_cells[3].text = str(round(total))
+        total = dandelion_number_text(p_master["WLC TOTAL"] + p_master["WLC NON GOV"])
+        total_last = dandelion_number_text(p_master_last["WLC TOTAL"] + p_master_last["WLC NON GOV"])
+    row_cells[3].text = total
+    make_text_red(row_cells[3], total, total_last)
     # row_cells = t.add_row().cells
     # row_cells[0].text = "SRO CLEARANCE DATE:"
     # row_cells[1].text = str(p_master["DATE CLEARED BY SRO"])
@@ -1153,7 +1159,7 @@ def print_out_central_support(
             font = run[0].font
             font.size = Pt(9)  # font size = 8
             row_cells[4].text = str(
-                centrals.sorted_milestone_dict[centrals.iter_list[0]]["cr"][i]
+                centrals.sorted_milestone_dict[centrals.iter_list[0]]["notes"][i]
             )
             paragraph = row_cells[4].paragraphs[0]
             run = paragraph.runs

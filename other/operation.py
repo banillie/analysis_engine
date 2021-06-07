@@ -84,14 +84,17 @@ top35_data_dict = {
     "docx_save_path": str(top35_root_path / "output/{}.docx"),
     "master": Master(open_json_file(str(top35_root_path / "core_data/json/master.json"))),
     "op_args": {
-        # "quarter": ["Month(May), 2021"],
-        "quarter": ["standard"],
+        "quarter": ["Month(May), 2021"],
+        # "quarter": ["standard"],
         "group": ["HSRG", "RSS", "RIG", "RPE"],
-        # "group": ["HS2 Prog"],
+        # "group": ["RFR"],
         "chart": False,
         "data_type": "top35",
         "circle_colour": "No",
-        "dates": ["1/6/2021", "1/7/2021"],
+        # "dates": ["1/6/2021", "1/7/2021"],
+        # "key": ["PROJECT DEL TO CURRENT TIMINGS ?",
+        #         "GMPP ID: IS THIS PROJECT ON GMPP",
+        #         "PROJECT ON BUDGET?"],
     },
     "excel_save_path": str(top35_root_path / "output/{}.xlsx"),
     "word_save_path": str(top35_root_path / "output/{}.docx")
@@ -139,27 +142,27 @@ top35_data_dict = {
 data = top35_data_dict
 
 ## DANDELION
-# dl_data = DandelionData(data["master"], **data["op_args"])
-# d_lion = make_a_dandelion_auto(dl_data, **data["op_args"])
+dl_data = DandelionData(data["master"], **data["op_args"])
+d_lion = make_a_dandelion_auto(dl_data, **data["op_args"])
 # put_matplotlib_fig_into_word(hoz_doc, d_lion, size=7)
 # hoz_doc.save(data["docx_save_path"].format("dandelion_graph_benefits"))
 
 
 # MILESTONES
-ms = MilestoneData(data["master"], **data["op_args"])
-ms.filter_chart_info(**data["op_args"])
-wb = put_milestones_into_wb(ms)
-wb.save(data["excel_save_path"].format("milestones"))
-g = milestone_chart(ms, data["master"], **data["op_args"])
-put_matplotlib_fig_into_word(hoz_doc, g, size=7, transparent=False)
-hoz_doc.save(data["word_save_path"].format("milestone_graph"))
+# ms = MilestoneData(data["master"], **data["op_args"])
+# ms.filter_chart_info(**data["op_args"])
+# wb = put_milestones_into_wb(ms)
+# wb.save(data["excel_save_path"].format("milestones"))
+# g = milestone_chart(ms, data["master"], **data["op_args"])
+# put_matplotlib_fig_into_word(hoz_doc, g, size=7, transparent=False)
+# hoz_doc.save(data["word_save_path"].format("milestone_graph"))
 
 # b = BenefitsData(m, baseline=["all"])
 # total_costs_benefits_bar_chart(c, b, chart=True)
 
-# # QUERY
-# # wb = data_query_into_wb(m, keys=["Senior Responsible Owner (SRO)"], quarter=["Q3 19/20"], group=DFT_GROUP)
-# # wb.save(root_path / "output/query_test.xlsx")
+# QUERY
+# wb = data_query_into_wb(data["master"], **data["op_args"])
+# wb.save(data["excel_save_path"].format("query_test"))
 
 # ## STACKPLOT
 # sp_data = get_sp_data(m, quarter=["standard"], group=["RIG"])
@@ -220,3 +223,6 @@ hoz_doc.save(data["word_save_path"].format("milestone_graph"))
 # of summary sheet milestone and cs printing as have made changes to dict structure.
 # wb = put_milestones_into_wb(cs)
 # wb.save(data["excel_save_path"].format("central_support"))
+# g = milestone_chart(cs, data["master"], **data["op_args"])
+# put_matplotlib_fig_into_word(hoz_doc, g, size=7, transparent=False)
+# hoz_doc.save(data["word_save_path"].format("central_support_graph"))

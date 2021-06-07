@@ -47,7 +47,7 @@ from analysis_engine.data import (
 import logging
 
 from analysis_engine.top35_data import top35_get_master_data, top35_get_project_information, top35_run_p_reports, \
-    top35_root_path
+    top35_root_path, CentralSupportData
 
 logging.basicConfig(
     level=logging.INFO,
@@ -290,8 +290,11 @@ def top250_run_general(args):
         if programme == "summaries":
             top35_run_p_reports(m, **op_args)
 
-        if programme == "milestones":
-            ms = MilestoneData(m, **op_args)
+        if programme == "milestones" or programme == "central_support":
+            if programme == "milestones":
+                d = MilestoneData(m, **op_args)  # data
+            if programme == "central_support":
+                d = CentralSupportData(m, **op_args)
 
             if (
                 "type" in op_args
@@ -300,23 +303,23 @@ def top250_run_general(args):
                 or "koi_fn" in op_args
             ):
                 op_args = return_koi_fn_keys(op_args)
-                ms.filter_chart_info(**op_args)
+                d.filter_chart_info(**op_args)
 
             if "chart" not in op_args:
                 pass
             else:
                 if op_args["chart"] == "save":
                     op_args["chart"] = False
-                    ms_graph = milestone_chart(ms, m, **op_args)
+                    ms_graph = milestone_chart(d, m, **op_args)
                     doc = get_input_doc(top35_root_path / "input/summary_temp_landscape.docx")
                     put_matplotlib_fig_into_word(
                         doc, ms_graph, size=8, transparent=False
                     )
                     doc.save(top35_root_path / "output/milestones_chart.docx")
                 if op_args["chart"] == "show":
-                    milestone_chart(ms, m, **op_args)
+                    milestone_chart(d, m, **op_args)
 
-            wb = put_milestones_into_wb(ms)
+            wb = put_milestones_into_wb(d)
 
         check_remove(op_args)
 
@@ -727,7 +730,16 @@ class main():
             "milestones",
             help="milestone schedule graphs and data.",
         )
-        for sub in [top250_parser_milestones, top250_parser_summaries]:
+        top250_parser_cs = subparsers.add_parser(
+            "central_support",
+            help="central support schedule graphs and data.",
+        )
+
+        for sub in [
+            top250_parser_milestones,
+            top250_parser_summaries,
+            top250_parser_cs,
+        ]:
             sub.add_argument(
                 "--group",
                 type=str,
@@ -738,43 +750,60 @@ class main():
                      'DfT Group names; "HSRG", "RSS", "RIG", "RPE", or the project(s) acronym or full name.',
             )
 
-        top250_parser_milestones.add_argument(
-                "--remove",
+        for sub in [
+            top250_parser_milestones,
+            top250_parser_cs,
+        ]:
+            sub.add_argument(
+                    "--remove",
+                    type=str,
+                    metavar="",
+                    action="store",
+                    nargs="+",
+                    help="Removes specified projects from analysis. User must enter one or a combination of either"
+                         " a recognised DfT Group name, a recognised planning stage or the project(s) acronym or full"
+                         " name.",
+                )
+
+        for sub in [
+            top250_parser_milestones,
+            top250_parser_cs,
+        ]:
+            sub.add_argument(
+                "--dates",
                 type=str,
                 metavar="",
                 action="store",
-                nargs="+",
-                help="Removes specified projects from analysis. User must enter one or a combination of either"
-                     " a recognised DfT Group name, a recognised planning stage or the project(s) acronym or full"
-                     " name.",
+                nargs=2,
+                help="dates for analysis. Must provide start date and then end date in format e.g. '1/1/2021' '1/1/2022'.",
             )
 
-        top250_parser_milestones.add_argument(
-            "--dates",
-            type=str,
-            metavar="",
-            action="store",
-            nargs=2,
-            help="dates for analysis. Must provide start date and then end date in format e.g. '1/1/2021' '1/1/2022'.",
-        )
+        for sub in [
+            top250_parser_milestones,
+            top250_parser_cs,
 
-        top250_parser_milestones.add_argument(
-                "--chart",
+        ]:
+            sub.add_argument(
+                    "--chart",
+                    type=str,
+                    metavar="",
+                    action="store",
+                    choices=["show", "save"],
+                    help="options for building and saving graph output. Commands are 'show' or 'save' ",
+                )
+
+        for sub in[
+            top250_parser_milestones,
+            top250_parser_cs,
+        ]:
+            sub.add_argument(
+                "--blue_line",
                 type=str,
                 metavar="",
                 action="store",
-                choices=["show", "save"],
-                help="options for building and saving graph output. Commands are 'show' or 'save' ",
+                help="Insert blue line into chart to represent a date. "
+                     'Options are "Today" "CDG" or a date in correct format e.g. "1/1/2021".',
             )
-
-        top250_parser_milestones.add_argument(
-            "--blue_line",
-            type=str,
-            metavar="",
-            action="store",
-            help="Insert blue line into chart to represent a date. "
-                 'Options are "Today" "CDG" or a date in correct format e.g. "1/1/2021".',
-        )
 
         args = parser.parse_args(sys.argv[2:])
         # print(vars(args))

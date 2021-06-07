@@ -2482,8 +2482,10 @@ def put_milestones_into_wb(milestones: MilestoneData) -> Workbook:
             ms_date = milestones.sorted_milestone_dict[tp]["r_dates"][i]
             ws.cell(row=row_num + i, column=3 + x).value = ms_date
             ws.cell(row=row_num + i, column=3 + x).number_format = "dd/mm/yy"
-            notes = milestones.sorted_milestone_dict[tp]["notes"][i]
-            ws.cell(row=row_num + i, column=len(milestones.iter_list) + 3).value = notes
+
+    for i, m in enumerate(ms_names):  # want the latest notes.
+        notes = milestones.sorted_milestone_dict[milestones.iter_list[0]]["notes"][i]
+        ws.cell(row=row_num + i, column=len(milestones.iter_list) + 3).value = notes
 
     ws.cell(row=1, column=1).value = "Project"
     ws.cell(row=1, column=2).value = "Milestone"
@@ -2875,11 +2877,11 @@ def wd_heading(
     font.name = "Arial"
     font.size = Pt(12)
 
-    if "data_type" in kwargs:
-        if kwargs["data_type"] == "ar":
-            heading = project_name
-    else:
-        heading = str(project_info.data[project_name]["Abbreviations"])
+    # if "data_type" in kwargs:
+    #     if kwargs["data_type"] == "ar":
+    #         heading = project_name
+    # else:
+    heading = str(project_info[project_name]["Abbreviations"])
     intro = doc.add_heading(str(heading), 0)
     intro.alignment = 1
     intro.bold = True
@@ -3705,10 +3707,13 @@ def calculate_max_min_date(milestones: MilestoneData, **kwargs) -> int:
     for i in milestones.sorted_milestone_dict.keys():
         m_list += milestones.sorted_milestone_dict[i]["g_dates"]
 
+    # This step required for central support milestone dates which can be None.
+    final_m_list = [x for x in m_list if x is not None]
+
     if kwargs["value"] == "max":
-        return max(m_list)
+        return max(final_m_list)
     if kwargs["value"] == "min":
-        return min(m_list)
+        return min(final_m_list)
 
 
 def handle_long_keys(key_names: List[str]) -> List[str]:
@@ -3760,9 +3765,11 @@ def milestone_chart(
     # c_list = ["#436f70", "#4c7e80", "#5f9ea0"]
 
     for i, tp in enumerate(milestones.iter_list):
+        m = [x for x in milestones.sorted_milestone_dict[tp]["g_dates"] if x is not None]
         ax1.scatter(
-            milestones.sorted_milestone_dict[tp]["g_dates"],
-            ms_names,
+            m,
+            # milestones.sorted_milestone_dict[tp]["g_dates"],
+            ms_names[0: len(m)],
             label=tp,
             s=200,
             # color=c_list[i],
@@ -8157,14 +8164,11 @@ def dandelion_number_text(number: int) -> str:
         if number == 0:
             return "£TBC"
         total_len = len(str(int(number)))
-        if total_len <= 2:
-            round_total = int(round(number))
-            return "£" + str(round_total) + "m"
         if total_len <= 3:
-            round_total = int(round(number))
+            round_total = round(number, -1)
             return "£" + str(round_total) + "m"
         if total_len == 4:
-            round_total = int(round(number, -1))
+            round_total = round(number, -2)
             if str(round_total)[1] != "0":
                 return "£" + str(round_total)[0] + "," + str(round_total)[1] + "bn"
             else:
@@ -8181,6 +8185,30 @@ def dandelion_number_text(number: int) -> str:
                 return "£" + str(round_total)[:3] + "," + str(round_total)[3] + "bn"
             else:
                 return "£" + str(round_total)[:3] + "bn"
+
+        # this bit is for top250
+        if total_len == 7:
+            round_total = round(number, -5)
+            return "£" + str(round_total)[:1] + "m"
+        if total_len == 8:
+            round_total = round(number, -6)
+            return "£" + str(round_total)[:2] + "m"
+        if total_len == 9:
+            round_total = round(number, -7)
+            return "£" + str(round_total)[:3] + "m"
+        if total_len == 10:
+            round_total = round(number, -8)
+            if str(round_total)[1] != "0":
+                return "£" + str(round_total)[:1] + "," + str(round_total)[1] + "bn"
+            else:
+                return "£" + str(round_total)[:1] + "bn"
+        if total_len == 11:
+            round_total = round(number, -9)
+            if str(round_total)[2] != "0":
+                return "£" + str(round_total)[:2] + "," + str(round_total)[2] + "bn"
+            else:
+                return "£" + str(round_total)[:2] + "bn"
+
     except ValueError:
         print("not number")
 
@@ -8240,6 +8268,8 @@ class DandelionData:
         if "data_type" in self.kwargs:
             if self.kwargs["data_type"] == "cdg":
                 dca_confidence = "Overall Delivery Confidence"
+            if self.kwargs["data_type"] == "top35":
+                dca_confidence = None
         else:
             dca_confidence = "Departmental DCA"
 
