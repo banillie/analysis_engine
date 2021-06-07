@@ -1801,6 +1801,7 @@ class MilestoneData:
 
         output_dict = {}
         for i in self.milestone_dict:
+            p_names = []
             key_names = []
             g_dates = []  # graph dates
             r_dates = []  # raw dates
@@ -1817,12 +1818,13 @@ class MilestoneData:
                     ):
                         p = x["Project"]
                         mn = x["Milestone"]
-                        if len(self.group) == 1:
-                            join = mn
-                        else:
-                            join = p + ", " + mn
+                        # if len(self.group) == 1:
+                        #     join = mn
+                        # else:
+                        #     join = p + ", " + mn
                         # if join not in key_names:  # stop duplicates
-                        key_names.append(join)
+                        p_names.append(p)
+                        key_names.append(mn)
                         d = x["Date"]
                         g_dates.append(d)
                         r_dates.append(d)
@@ -1835,18 +1837,20 @@ class MilestoneData:
                 if p is None and mn is None and d is None:
                     p = v["Project"]
                     mn = v["Milestone"]
-                    if len(self.group) == 1:
-                        join = mn
-                    else:
-                        join = p + ", " + mn
+                    # if len(self.group) == 1:
+                    #     join = mn
+                    # else:
+                    #     join = p + ", " + mn
                     # if join not in key_names:
-                    key_names.append(join)
+                    p_names.append(p)
+                    key_names.append(mn)
                     g_dates.append(v["Date"])
                     r_dates.append(None)
                     notes.append(None)
                     status.append(None)
 
             output_dict[i] = {
+                "project": p_names,
                 "names": key_names,
                 "g_dates": g_dates,
                 "r_dates": r_dates,
@@ -2466,15 +2470,15 @@ def put_milestones_into_wb(milestones: MilestoneData) -> Workbook:
 
     for i, m in enumerate(ms_names):
         for x, tp in enumerate(milestones.iter_list):
-            if len(milestones.group) == 1:
-                project_name = milestones.group[0]
-                ws.cell(row=row_num + i, column=1).value = project_name
-                ws.cell(row=row_num + i, column=2).value = m
-            else:
-                project_name = m.split(",")[0]
-                pm = m.split(",")[1][1:]
-                ws.cell(row=row_num + i, column=1).value = project_name  # project name
-                ws.cell(row=row_num + i, column=2).value = pm  # milestone
+            # if len(milestones.group) == 1:
+            #     project_name = milestones.group[0]
+            #     ws.cell(row=row_num + i, column=1).value = project_name
+            #     ws.cell(row=row_num + i, column=2).value = m
+            # else:
+            #     project_name = m.split(",")[0]
+            #     pm = m.split(",")[1][1:]
+            ws.cell(row=row_num + i, column=1).value = milestones.sorted_milestone_dict[tp]["project"][i]  # project name
+            ws.cell(row=row_num + i, column=2).value = milestones.sorted_milestone_dict[tp]["names"][i]  # milestone
             ms_date = milestones.sorted_milestone_dict[tp]["r_dates"][i]
             ws.cell(row=row_num + i, column=3 + x).value = ms_date
             ws.cell(row=row_num + i, column=3 + x).number_format = "dd/mm/yy"
@@ -3730,13 +3734,19 @@ def milestone_chart(
     title = get_chart_title(master, "schedule", **kwargs)
     plt.suptitle(title, fontweight="bold", fontsize=20)
 
+    project = milestones.sorted_milestone_dict[milestones.iter_list[0]]["project"]
     ms_names = milestones.sorted_milestone_dict[milestones.iter_list[0]]["names"]
+
+    def merge_project_milestone_name(no):
+        return project[no] + ", " + ms_names[no]
+    combined = [merge_project_milestone_name(i) for i, p in enumerate(project)]
+
 
     # if len(milestones.group) == 1:
     #     pn = milestones.master.abbreviations[milestones.group[0]]["abb"]
     #     ms_names = remove_project_name_from_milestone_key(pn, ms_names)
 
-    ms_names = handle_long_keys(ms_names)
+    ms_names = handle_long_keys(combined)
 
     # for i in reversed(milestones.iter_list):
     #     ax1.scatter(

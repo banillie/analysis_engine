@@ -751,6 +751,7 @@ class CentralSupportData:
 
         output_dict = {}
         for i in self.cs_dict:
+            p_name = []
             key_names = []
             g_dates = []  # graph dates
             r_dates = []  # raw dates
@@ -770,12 +771,13 @@ class CentralSupportData:
                     ):
                         p = x["Project"]
                         mn = x["Requirement"]
-                        if len(self.group) == 1:
-                            join = mn
-                        else:
-                            join = p + ", " + mn
+                        # if len(self.group) == 1:
+                        #     join = mn
+                        # else:
+                        #     join = p + ", " + mn
                         # if join not in key_names:  # stop duplicates
-                        key_names.append(join)
+                        p_name.append(p)
+                        key_names.append(mn)
                         d = x["Date"]
                         g_dates.append(d)
                         r_dates.append(d)
@@ -797,12 +799,13 @@ class CentralSupportData:
                 if p is None and mn is None and d is None:
                     p = v["Project"]
                     mn = v["Requirement"]
-                    if len(self.group) == 1:
-                        join = mn
-                    else:
-                        join = p + ", " + mn
+                    # if len(self.group) == 1:
+                    #     join = mn
+                    # else:
+                    #     join = p + ", " + mn
                     # if join not in key_names:
-                    key_names.append(join)
+                    p_name.append(p)
+                    key_names.append(mn)
                     g_dates.append(v["Date"])
                     r_dates.append(None)
                     escalated.append(None)
@@ -810,13 +813,14 @@ class CentralSupportData:
                     secured.append(None)
 
             output_dict[i] = {
+                "project": p_name,
                 "names": key_names,
                 "g_dates": g_dates,
                 "r_dates": r_dates,
                 "escalated": escalated,
                 "type": type,
-                "notes": secured,  # this was secured
-                "cr": cr,
+                "notes": cr,  # putting cr into notes for now
+                "secured": secured,
                 "poc": poc,
             }
 

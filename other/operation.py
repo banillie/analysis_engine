@@ -84,12 +84,14 @@ top35_data_dict = {
     "docx_save_path": str(top35_root_path / "output/{}.docx"),
     "master": Master(open_json_file(str(top35_root_path / "core_data/json/master.json"))),
     "op_args": {
-        "quarter": ["Month(April), 2021"],
+        # "quarter": ["Month(May), 2021"],
+        "quarter": ["standard"],
         "group": ["HSRG", "RSS", "RIG", "RPE"],
         # "group": ["HS2 Prog"],
         "chart": False,
         "data_type": "top35",
         "circle_colour": "No",
+        "dates": ["1/6/2021", "1/7/2021"],
     },
     "excel_save_path": str(top35_root_path / "output/{}.xlsx"),
     "word_save_path": str(top35_root_path / "output/{}.docx")
@@ -144,14 +146,13 @@ data = top35_data_dict
 
 
 # MILESTONES
-# ms = MilestoneData(data["master"], **data["op_args"])
-# ms.filter_chart_info(**data["op_args"])
-# wb = put_milestones_into_wb(ms)
-# wb.save(data["excel_save_path"].format("milestones"))
-# chart_kwargs = {**{"blue_line": "today", "Chart": True}, **ms.kwargs}
-# g = milestone_chart(ms, data["master"], **data["op_args"])
-# put_matplotlib_fig_into_word(hoz_doc, g, size=7, transparent=False)
-# hoz_doc.save(data["word_save_path"].format("milestone_graph"))
+ms = MilestoneData(data["master"], **data["op_args"])
+ms.filter_chart_info(**data["op_args"])
+wb = put_milestones_into_wb(ms)
+wb.save(data["excel_save_path"].format("milestones"))
+g = milestone_chart(ms, data["master"], **data["op_args"])
+put_matplotlib_fig_into_word(hoz_doc, g, size=7, transparent=False)
+hoz_doc.save(data["word_save_path"].format("milestone_graph"))
 
 # b = BenefitsData(m, baseline=["all"])
 # total_costs_benefits_bar_chart(c, b, chart=True)
@@ -214,8 +215,8 @@ data = top35_data_dict
 # wb.save(data["excel_save_path"].format("q4_2021_narrative_dashboard"))
 
 ##CENTRAL SUPPORT
-cs = CentralSupportData(data["master"], **data["op_args"])
+# cs = CentralSupportData(data["master"], **data["op_args"])
 # Here. look at top250/output/central_support. also need to do re-testing
 # of summary sheet milestone and cs printing as have made changes to dict structure.
-wb = put_milestones_into_wb(cs)
-wb.save(data["excel_save_path"].format("central_support"))
+# wb = put_milestones_into_wb(cs)
+# wb.save(data["excel_save_path"].format("central_support"))
