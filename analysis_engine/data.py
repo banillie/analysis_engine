@@ -2870,19 +2870,24 @@ def wd_heading(
     doc: Document,
     project_info: Dict[str, Union[str, int]],
     project_name: str,
-    **kwargs,
 ) -> None:
-    """Function adds header to word doc"""
-    font = doc.styles["Normal"].font
-    font.name = "Arial"
-    font.size = Pt(12)
+    # Function adds header to word document
 
-    # if "data_type" in kwargs:
-    #     if kwargs["data_type"] == "ar":
-    #         heading = project_name
-    # else:
+    def delete_paragraph(paragraph):
+        """helper function to remove empyt para at top of summary_temp doc.
+        only used here. """
+        p = paragraph._element
+        p.getparent().remove(p)
+        p._p = p._element = None
+
+    # currently not in use as styling saved into summary_temp doc.
+    # font = doc.styles["Normal"].font
+    # font.name = "Arial"
+    # font.size = Pt(12)
+
+    delete_paragraph(doc.paragraphs[0])
     heading = str(project_info[project_name]["Abbreviations"])
-    intro = doc.add_heading(str(heading), 0)
+    intro = doc.add_heading(heading, 0)
     intro.alignment = 1
     intro.bold = True
 
@@ -3124,48 +3129,61 @@ def compare_text_new_and_old(text_1: str, text_2: str, doc: Document) -> None:
 
     comp = difflib.Differ()
     diff = list(comp.compare(text_2.split(), text_1.split()))
-    # new_text = diff
+    diff = [x for x in diff if x[0] is not "-"]  # remove all deleted text
+    diff = [x for x in diff if x[0] is not "?"]  # remove ?. not sure what these represent.
     y = doc.add_paragraph()
+    for i, text in enumerate(diff):
+        # f = len(diff) - 1
+        # if i < f:
+        #     a = i - 1
+        # else:
+        #     a = i
 
-    for i in range(0, len(diff)):
-        f = len(diff) - 1
-        if i < f:
-            a = i - 1
-        else:
-            a = i
-
-        if diff[i][0:3] == "  |":
-            j = i + 1
-            if diff[i][0:3] and diff[a][0:3] == "  |":
-                y = doc.add_paragraph()
-            else:
-                pass
-        elif diff[i][0:3] == "+ |":
-            if diff[i][0:3] and diff[a][0:3] == "+ |":
-                y = doc.add_paragraph()
-            else:
-                pass
-        elif diff[i][0:3] == "- |":
-            pass
-        elif diff[i][0:3] == "  -":
+        if text[0:3] == "  |" or text[0:3] == "+ |":
+            # j = i + 1
+            # if diff[i][:3] == "  |"
+            # if diff[i][0:3] and diff[a][0:3] == "  |":
             y = doc.add_paragraph()
-            g = diff[i][2]
-            y.add_run(g)
-        elif diff[i][0:3] == "  •":
-            y = doc.add_paragraph()
-            g = diff[i][2]
-            y.add_run(g)
-        elif diff[i][0] == "+":
-            w = len(diff[i])
-            g = diff[i][1:w]
-            y.add_run(g).font.color.rgb = RGBColor(255, 0, 0)
-        elif diff[i][0] == "-":
-            pass
-        elif diff[i][0] == "?":
-            pass
-        else:
-            if diff[i] != "+ |":
-                y.add_run(diff[i][1:])
+            # else:
+            #     pass
+        # elif text[0:3] == "+ |":
+        #     if diff[i][0:3] and diff[a][0:3] == "+ |":
+        #         y = doc.add_paragraph()
+        #     else:
+        #         pass
+        # if text[0:3] == "- |":
+        #     pass
+        # if text[0:3] == "  -":
+        #     y = doc.add_paragraph()
+        #     g = diff[i][2]
+        #     y.add_run(g)
+        # elif text[0:3] == "  •":
+        #     y = doc.add_paragraph()
+        #     g = text[2]
+        #     y.add_run(g)
+        if text[0] == " ":
+            # total_nc += 1
+            if i == 0:
+                y.add_run(text[2:])
+            # if total_nc == 1:
+            #     y.add_run(text[2:])
+            else:
+                y.add_run(text[1:])
+        if text[0] == "+":
+            # w = len(diff[i])
+            # g = diff[i][1:w]
+            # total_plus += 1  # new text might not be first
+            if i == 0:
+                y.add_run(text[2:]).font.color.rgb = RGBColor(255, 0, 0)
+            else:
+                y.add_run(text[1:]).font.color.rgb = RGBColor(255, 0, 0)
+        # if diff[i][0] == "-":
+        #     pass
+        # if diff[i][0] == "?":
+        #     pass
+        # else:
+        #     if diff[i] != "+ |":
+        #         y.add_run(diff[i][1:])
 
 
 def make_file_friendly(quarter_str: str) -> str:

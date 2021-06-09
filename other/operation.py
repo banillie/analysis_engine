@@ -86,8 +86,8 @@ top35_data_dict = {
     "op_args": {
         "quarter": ["Month(May), 2021"],
         # "quarter": ["standard"],
-        # "group": ["HSRG", "RSS", "RIG", "RPE"],
-        "group": ["A303"],
+        "group": ["HSRG", "RSS", "RIG", "RPE"],
+        # "group": ["NPR"],
         "chart": False,
         "data_type": "top35",
         "circle_colour": "No",
