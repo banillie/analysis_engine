@@ -1002,12 +1002,12 @@ class CostData:
                         rdel += convert_none_types(p_data["WLC GOV RDEL"])
                         cdel += convert_none_types(p_data["WLC GOV CDEL"])
                         c_total += convert_none_types(p_data["WLC TOTAL"])
-                        non_gov += convert_none_types(p_data["WLC TOTAL"])
+                        non_gov += convert_none_types(p_data["WLC NON GOV"])
 
                     lower_dict[tp] = {
                         "costs_rdel": rdel,
                         "costs_cdel": cdel,
-                        "total": c_total,
+                        "total": c_total + non_gov,
                         "non_gov": non_gov,
                     }
 
@@ -3124,7 +3124,7 @@ def compare_text_new_and_old(text_1: str, text_2: str, doc: Document) -> None:
 
     comp = difflib.Differ()
     diff = list(comp.compare(text_2.split(), text_1.split()))
-    new_text = diff
+    # new_text = diff
     y = doc.add_paragraph()
 
     for i in range(0, len(diff)):

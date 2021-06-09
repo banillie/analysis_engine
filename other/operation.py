@@ -86,8 +86,8 @@ top35_data_dict = {
     "op_args": {
         "quarter": ["Month(May), 2021"],
         # "quarter": ["standard"],
-        "group": ["HSRG", "RSS", "RIG", "RPE"],
-        # "group": ["RFR"],
+        # "group": ["HSRG", "RSS", "RIG", "RPE"],
+        "group": ["A303"],
         "chart": False,
         "data_type": "top35",
         "circle_colour": "No",
@@ -142,8 +142,8 @@ top35_data_dict = {
 data = top35_data_dict
 
 ## DANDELION
-dl_data = DandelionData(data["master"], **data["op_args"])
-d_lion = make_a_dandelion_auto(dl_data, **data["op_args"])
+# dl_data = DandelionData(data["master"], **data["op_args"])
+# d_lion = make_a_dandelion_auto(dl_data, **data["op_args"])
 # put_matplotlib_fig_into_word(hoz_doc, d_lion, size=7)
 # hoz_doc.save(data["docx_save_path"].format("dandelion_graph_benefits"))
 
@@ -174,7 +174,7 @@ d_lion = make_a_dandelion_auto(dl_data, **data["op_args"])
 # cost_profile_graph(c, data["master"], chart=True, group=c.start_group)
 
 # SUMMARIES
-# top35_run_p_reports(data["master"], **data["op_args"])
+top35_run_p_reports(data["master"], **data["op_args"])
 
 ## VFM
 # c = VfMData(m, group=DFm = Master(*data["data"], **data["op_args"] )T_GROUP, quarter=["standard"])  # c is class
