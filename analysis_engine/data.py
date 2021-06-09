@@ -8221,7 +8221,7 @@ def dandelion_number_text(number: int) -> str:
             else:
                 return "£" + str(round_total)[:1] + "bn"
         if total_len == 11:
-            round_total = round(number, -9)
+            round_total = round(number, -8)
             if str(round_total)[2] != "0":
                 return "£" + str(round_total)[:2] + "," + str(round_total)[2] + "bn"
             else:

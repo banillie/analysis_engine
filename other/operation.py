@@ -84,17 +84,21 @@ top35_data_dict = {
     "docx_save_path": str(top35_root_path / "output/{}.docx"),
     "master": Master(open_json_file(str(top35_root_path / "core_data/json/master.json"))),
     "op_args": {
-        "quarter": ["Month(May), 2021"],
-        # "quarter": ["standard"],
+        # "quarter": ["Month(May), 2021"],
+        "quarter": ["standard"],
         "group": ["HSRG", "RSS", "RIG", "RPE"],
         # "group": ["NPR"],
         "chart": False,
         "data_type": "top35",
         "circle_colour": "No",
-        # "dates": ["1/6/2021", "1/7/2021"],
-        # "key": ["PROJECT DEL TO CURRENT TIMINGS ?",
-        #         "GMPP ID: IS THIS PROJECT ON GMPP",
-        #         "PROJECT ON BUDGET?"],
+        "dates": ["1/6/2021", "1/7/2021"],
+        "key": [
+            "PROJECT DEL TO CURRENT TIMINGS ?",
+            "GMPP ID: IS THIS PROJECT ON GMPP",
+            "PROJECT ON BUDGET?",
+            "WLC TOTAL",
+            "WLC NON GOV",
+        ],
     },
     "excel_save_path": str(top35_root_path / "output/{}.xlsx"),
     "word_save_path": str(top35_root_path / "output/{}.docx")
@@ -161,8 +165,8 @@ data = top35_data_dict
 # total_costs_benefits_bar_chart(c, b, chart=True)
 
 # QUERY
-# wb = data_query_into_wb(data["master"], **data["op_args"])
-# wb.save(data["excel_save_path"].format("query_test"))
+wb = data_query_into_wb(data["master"], **data["op_args"])
+wb.save(data["excel_save_path"].format("query_test"))
 
 # ## STACKPLOT
 # sp_data = get_sp_data(m, quarter=["standard"], group=["RIG"])
@@ -174,7 +178,7 @@ data = top35_data_dict
 # cost_profile_graph(c, data["master"], chart=True, group=c.start_group)
 
 # SUMMARIES
-top35_run_p_reports(data["master"], **data["op_args"])
+# top35_run_p_reports(data["master"], **data["op_args"])
 
 ## VFM
 # c = VfMData(m, group=DFm = Master(*data["data"], **data["op_args"] )T_GROUP, quarter=["standard"])  # c is class
