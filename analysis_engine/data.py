@@ -1538,20 +1538,6 @@ def milestone_info_handling(output_list: list, t_list: list, **kwargs) -> list:
     via MilestoneDate class. Removes none type milestone names and non date
     string values"""
 
-    # if t_list[1][1] is None or t_list[1][1] == "Project - Business Case End Date":
-    #     pass
-    # else:
-    #     if isinstance(t_list[3][1], datetime.date):
-    #         return output_list.append(t_list)
-    #     else:
-    #         try:
-    #             d = parser.parse(t_list[3][1], dayfirst=True)
-    #             t_list[3] = ("Date", d.date())
-    #             return output_list.append(t_list)
-    #         # ParserError for non-date string. TypeError for None types
-    #         except (ParserError, TypeError):
-    #             pass
-
     if t_list[1][1] is None or t_list[1][1] == "Project - Business Case End Date":
         pass
     else:
@@ -1610,6 +1596,11 @@ def get_milestone_notes(
                 return m_dict[k]["Notes"]
 
 
+def convert_top250_date(str):
+    # underlying top 250 date data format is y-d-m
+    return datetime.datetime.strptime(str, "%Y-%m-%d").strftime("%Y-%d-%m")
+
+
 class MilestoneData:
     def __init__(
         self,
@@ -1653,17 +1644,28 @@ class MilestoneData:
                     continue
                 # i loops below removes None Milestone names and rejects non-datetime date values.
                 p = self.master.abbreviations[project_name]["abb"]
+                category = "Milestone"
                 if "data_type" in self.kwargs:
                     if self.kwargs["data_type"] == "top35":
+                        report = "Top 250"
                         for i in range(1, 20):
+                            try:
+                                date = convert_top250_date(p_data["MM" + str(i) + " date"])
+                            except TypeError:
+                                date = None
+                            except ValueError:
+                                #messaging here
+                                date = p_data["MM" + str(i) + " date"]
                             t = [
                                 ("Project", p),
                                 ("Milestone", p_data["MM" + str(i) + " name"]),
                                 ("Notes", p_data["MM" + str(i) + " Comment"]),
-                                ("Date", p_data["MM" + str(i) + " date"]),
+                                ("Date", date),
                                 ("Status", p_data["MM" + str(i) + " status"]),
+                                ("Report", report),
+                                ("Cat", category),
                             ]
-                            milestone_info_handling(project_list, t)
+                            milestone_info_handling(project_list, t, **self.kwargs)
                     if self.kwargs["data_type"] == "cdg":
                         for i in range(1, 12):
                             t = [
@@ -1675,6 +1677,7 @@ class MilestoneData:
                             milestone_info_handling(project_list, t)
 
                 else:
+                    report = "IPDC/GMPP"
                     for i in range(1, 50):
                         try:
                             t = [
@@ -1688,6 +1691,8 @@ class MilestoneData:
                                     ],
                                 ),
                                 ("Notes", p_data["Approval MM" + str(i) + " Notes"]),
+                                ("Report", report),
+                                ("Cat", category),
                             ]
                             milestone_info_handling(project_list, t)
                             t = [
@@ -1701,6 +1706,8 @@ class MilestoneData:
                                     ],
                                 ),
                                 ("Notes", p_data["Assurance MM" + str(i) + " Notes"]),
+                                ("Report", report),
+                                ("Cat", category),
                             ]
                             milestone_info_handling(project_list, t)
                         except KeyError:  # handles inconsistent keys naming for approval milestones.
@@ -1721,6 +1728,8 @@ class MilestoneData:
                                         "Notes",
                                         p_data["Approval MM" + str(i) + " Notes"],
                                     ),
+                                    ("Report", report),
+                                    ("Cat", category),
                                 ]
                                 milestone_info_handling(project_list, t)
                             except KeyError:
@@ -1740,6 +1749,8 @@ class MilestoneData:
                                     ],
                                 ),
                                 ("Notes", p_data["Project MM" + str(i) + " Notes"]),
+                                ("Report", report),
+                                ("Cat", category),
                             ]
                             milestone_info_handling(project_list, t)
                         except KeyError:
@@ -1760,6 +1771,8 @@ class MilestoneData:
                                     ],
                                 ),
                                 ("Notes", p_data["HMT Approval " + str(i) + " Notes"]),
+                                ("Report", report),
+                                ("Cat", category),
                             ]
                             milestone_info_handling(project_list, t)
                         except KeyError:
@@ -1801,6 +1814,8 @@ class MilestoneData:
 
         output_dict = {}
         for i in self.milestone_dict:
+            report = []
+            category = []
             p_names = []
             key_names = []
             g_dates = []  # graph dates
@@ -1829,6 +1844,8 @@ class MilestoneData:
                         g_dates.append(d)
                         r_dates.append(d)
                         notes.append(x["Notes"])
+                        report.append(x["Report"])
+                        category.append(x["Cat"])
                         try:
                             status.append(x["Status"])
                         except KeyError:
@@ -1848,6 +1865,8 @@ class MilestoneData:
                     r_dates.append(None)
                     notes.append(None)
                     status.append(None)
+                    report.append(x["Report"])
+                    category.append(x["Cat"])
 
             output_dict[i] = {
                 "project": p_names,
@@ -1856,6 +1875,8 @@ class MilestoneData:
                 "r_dates": r_dates,
                 "notes": notes,
                 "status": status,  # only present for top35
+                "report": report,
+                "cat": category,
             }
 
         self.sorted_milestone_dict = output_dict
@@ -2462,36 +2483,52 @@ def put_milestones_into_wb(milestones: MilestoneData) -> Workbook:
     row_num = 2
     ms_names = milestones.sorted_milestone_dict[milestones.iter_list[0]]["names"]
 
-    # if len(milestones.group) == 1:
-    #     pn = milestones.master.abbreviations[milestones.group[0]][
-    #         "abb"
-    #     ]  # pn project name
-    #     # ms_names = remove_project_name_from_milestone_key(pn, ms_names)
-
     for i, m in enumerate(ms_names):
         for x, tp in enumerate(milestones.iter_list):
-            # if len(milestones.group) == 1:
-            #     project_name = milestones.group[0]
-            #     ws.cell(row=row_num + i, column=1).value = project_name
-            #     ws.cell(row=row_num + i, column=2).value = m
-            # else:
-            #     project_name = m.split(",")[0]
-            #     pm = m.split(",")[1][1:]
-            ws.cell(row=row_num + i, column=1).value = milestones.sorted_milestone_dict[tp]["project"][i]  # project name
-            ws.cell(row=row_num + i, column=2).value = milestones.sorted_milestone_dict[tp]["names"][i]  # milestone
             ms_date = milestones.sorted_milestone_dict[tp]["r_dates"][i]
-            ws.cell(row=row_num + i, column=3 + x).value = ms_date
-            ws.cell(row=row_num + i, column=3 + x).number_format = "dd/mm/yy"
+            ws.cell(row=row_num + i, column=5 + x).value = ms_date
+            ws.cell(row=row_num + i, column=5 + x).number_format = "dd/mm/yy"
 
     for i, m in enumerate(ms_names):  # want the latest notes.
-        notes = milestones.sorted_milestone_dict[milestones.iter_list[0]]["notes"][i]
-        ws.cell(row=row_num + i, column=len(milestones.iter_list) + 3).value = notes
+        ws.cell(row=row_num + i, column=1).value = milestones.sorted_milestone_dict[milestones.iter_list[0]]["project"][i]  # project name
+        ws.cell(row=row_num + i, column=2).value = milestones.sorted_milestone_dict[milestones.iter_list[0]]["report"][i]  # milestone
+        ws.cell(row=row_num + i, column=3).value = milestones.sorted_milestone_dict[milestones.iter_list[0]]["cat"][i]  # milestone
+        ws.cell(row=row_num + i, column=4).value = milestones.sorted_milestone_dict[milestones.iter_list[0]]["names"][i]  # milestone
+        try:
+            notes = milestones.sorted_milestone_dict[milestones.iter_list[0]]["notes"][i]
+            ws.cell(row=row_num + i, column=len(milestones.iter_list) + 9).value = notes
+        except KeyError:  # "notes" not in central support dict
+            pass
+        try:  # only present in top250 milestones
+            status = milestones.sorted_milestone_dict[milestones.iter_list[0]]["status"][i]
+            ws.cell(row=row_num + i, column=len(milestones.iter_list) + 5).value = status
+        except (IndexError, KeyError):
+            # IndexError for ipdc rpting. "status" is in dict, but list is empty.
+            # KeyError for top250 central support, which does not have "status" in dict.
+            pass
+        try:  # only present in top250 central support
+            escalated = milestones.sorted_milestone_dict[milestones.iter_list[0]]["escalated"][i]
+            cs_type = milestones.sorted_milestone_dict[milestones.iter_list[0]]["type"][i]
+            cs_response = milestones.sorted_milestone_dict[milestones.iter_list[0]]["cs_response"][i]
+            secured = milestones.sorted_milestone_dict[milestones.iter_list[0]]["secured"][i]
+            ws.cell(row=row_num + i, column=len(milestones.iter_list) + 6).value = escalated
+            ws.cell(row=row_num + i, column=len(milestones.iter_list) + 7).value = cs_type
+            ws.cell(row=row_num + i, column=len(milestones.iter_list) + 8).value = secured
+        except KeyError:  # all above not in ipdc or top250 milestones
+            pass
 
     ws.cell(row=1, column=1).value = "Project"
-    ws.cell(row=1, column=2).value = "Milestone"
+    ws.cell(row=1, column=2).value = "Report"
+    ws.cell(row=1, column=3).value = "Type"
+    ws.cell(row=1, column=4).value = "Milestone"
     for x, tp in enumerate(milestones.iter_list):
-        ws.cell(row=1, column=3 + x).value = tp
-    ws.cell(row=1, column=len(milestones.iter_list) + 3).value = "Notes"
+        ws.cell(row=1, column=5 + x).value = tp
+    ws.cell(row=1, column=len(milestones.iter_list) + 5).value = "Status (top 250 ms)"
+    ws.cell(row=1, column=len(milestones.iter_list) + 6).value = "Escalated"
+    ws.cell(row=1, column=len(milestones.iter_list) + 7).value = "CS Type"
+    ws.cell(row=1, column=len(milestones.iter_list) + 8).value = "Secured"
+    ws.cell(row=1, column=len(milestones.iter_list) + 9).value = "Notes"
+
 
     return wb
 
@@ -8361,7 +8398,7 @@ class DandelionData:
                         math.radians(g_ang_l[i])
                     )
                     g_text = g + "\n" + dandelion_number_text(g_wlc)  # group text
-                    if g_wlc == 0:
+                    if g_wlc < pf_wlc / 20:
                         g_wlc = pf_wlc / 20
                     g_d[g] = {
                         "axis": (y_axis, x_axis),
@@ -8458,8 +8495,8 @@ class DandelionData:
                         + "\n"
                         + dandelion_number_text(p_value)
                     )
-                    if p_value == 0:
-                        p_value = g_wlc / 10
+                    if p_value < pf_wlc / 500: # achieve some consistency for zero / low values
+                        p_value = pf_wlc / 500
                     if colour == "#FFFFFF" or colour == FACE_COLOUR:
                         if p in self.master.dft_groups[tp]["GMPP"]:
                             edge_colour = "#000000"

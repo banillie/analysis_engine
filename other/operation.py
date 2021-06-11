@@ -86,12 +86,12 @@ top35_data_dict = {
     "op_args": {
         # "quarter": ["Month(May), 2021"],
         "quarter": ["standard"],
-        "group": ["HSRG", "RSS", "RIG", "RPE"],
-        # "group": ["NPR"],
+        # "group": ["HSRG", "RSS", "RIG", "RPE"],
+        "group": ["Crossrail"],
         "chart": False,
         "data_type": "top35",
         "circle_colour": "No",
-        "dates": ["1/6/2021", "1/7/2021"],
+        # "dates": ["1/6/2021", "1/7/2021"],
         "key": [
             "PROJECT DEL TO CURRENT TIMINGS ?",
             "GMPP ID: IS THIS PROJECT ON GMPP",
@@ -99,27 +99,29 @@ top35_data_dict = {
             "WLC TOTAL",
             "WLC NON GOV",
         ],
+        # "key": ["Start of Trial Running"],
     },
     "excel_save_path": str(top35_root_path / "output/{}.xlsx"),
     "word_save_path": str(top35_root_path / "output/{}.docx")
 }
 
-# ipdc_data_dict = {
-#     "docx_save_path": str(root_path / "output/{}.docx"),
-#     "master": Master(open_json_file(str(root_path / "core_data/json/master.json"))),
-#     "op_args": {
-#         "quarter": ["standard"],
-#         # "quarter": ["Q4 20/21"],
-#         # "baseline": ["bl_one"],
-#         # "group": ["HSRG", "RSS", "RIG", "AMIS", "RPE"],
-#         "group": ["RIG"],
-#         "dates": ["1/6/2021", "1/7/2021"],
-#         "chart": True,
-#         "circle_colour": "No",
-#     },
-#     "dashboard": get_input_doc(root_path / "input/dashboards_master.xlsx"),
-#     "excel_save_path": str(root_path / "output/{}.xlsx"),
-# }
+ipdc_data_dict = {
+    "docx_save_path": str(root_path / "output/{}.docx"),
+    "master": Master(open_json_file(str(root_path / "core_data/json/master.json"))),
+    "op_args": {
+        "quarter": ["standard"],
+        # "quarter": ["Q4 20/21"],
+        # "baseline": ["bl_one"],
+        # "group": ["HSRG", "RSS", "RIG", "AMIS", "RPE"],
+        "group": ["Crossrail"],
+        # "dates": ["1/6/2021", "1/7/2021"],
+        "chart": True,
+        "circle_colour": "No",
+        # "key": ["Start of Trial Running"]
+    },
+    "dashboard": get_input_doc(root_path / "input/dashboards_master.xlsx"),
+    "excel_save_path": str(root_path / "output/{}.xlsx"),
+}
 
 # cdg_data_dict = {
 #     "docx_save_path": str(cdg_root_path / "output/{}.docx"),
@@ -153,10 +155,10 @@ data = top35_data_dict
 
 
 # MILESTONES
-# ms = MilestoneData(data["master"], **data["op_args"])
+ms = MilestoneData(data["master"], **data["op_args"])
 # ms.filter_chart_info(**data["op_args"])
-# wb = put_milestones_into_wb(ms)
-# wb.save(data["excel_save_path"].format("milestones"))
+wb = put_milestones_into_wb(ms)
+wb.save(data["excel_save_path"].format("milestone_testing"))
 # g = milestone_chart(ms, data["master"], **data["op_args"])
 # put_matplotlib_fig_into_word(hoz_doc, g, size=7, transparent=False)
 # hoz_doc.save(data["word_save_path"].format("milestone_graph"))
@@ -165,8 +167,8 @@ data = top35_data_dict
 # total_costs_benefits_bar_chart(c, b, chart=True)
 
 # QUERY
-wb = data_query_into_wb(data["master"], **data["op_args"])
-wb.save(data["excel_save_path"].format("query_test"))
+# wb = data_query_into_wb(data["master"], **data["op_args"])
+# wb.save(data["excel_save_path"].format("query_test"))
 
 # ## STACKPLOT
 # sp_data = get_sp_data(m, quarter=["standard"], group=["RIG"])
@@ -223,10 +225,8 @@ wb.save(data["excel_save_path"].format("query_test"))
 
 ##CENTRAL SUPPORT
 # cs = CentralSupportData(data["master"], **data["op_args"])
-# Here. look at top250/output/central_support. also need to do re-testing
-# of summary sheet milestone and cs printing as have made changes to dict structure.
 # wb = put_milestones_into_wb(cs)
-# wb.save(data["excel_save_path"].format("central_support"))
+# wb.save(data["excel_save_path"].format("central_support_testing"))
 # g = milestone_chart(cs, data["master"], **data["op_args"])
 # put_matplotlib_fig_into_word(hoz_doc, g, size=7, transparent=False)
 # hoz_doc.save(data["word_save_path"].format("central_support_graph"))

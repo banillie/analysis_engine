@@ -25,7 +25,7 @@ from analysis_engine.data import (
     logger,
     MilestoneData,
     milestone_info_handling,
-    wd_heading,
+    wd_heading, convert_top250_date,
 )
 from datamaps.api import project_data_from_master_month, project_data_from_master
 import platform
@@ -687,8 +687,16 @@ class CentralSupportData:
                     continue
                 # i loops below removes None Milestone names and rejects non-datetime date values.
                 p = self.master.abbreviations[project_name]["abb"]
+                report = "Top 250"
+                category = "Central Resource"
                 for i in range(1, 16):
-
+                    try:
+                        date = convert_top250_date(p_data["R" + str(i) + " needed by"])
+                    except TypeError:
+                        date = None
+                    except ValueError:
+                        # messaging here
+                        date = p_data["R" + str(i) + " needed by"]
                     # these keys not present in all monthly masters.
                     try:
                         cs_response = p_data["R" + str(i) + " Central Response"]
@@ -704,20 +712,31 @@ class CentralSupportData:
                         ("Requirement", p_data["R" + str(i) + " name"]),
                         # ("Type", "Approval"),
                         ("Escalated", p_data["R" + str(i) + " escalated to"]),
-                        ("Date", p_data["R" + str(i) + " needed by"]),
+                        ("Date", date),
                         ("Type", p_data["R" + str(i) + " type"]),
                         ("Central Response", cs_response),
                         ("PoC", poc),
                         ("Secured", p_data["R" + str(i) + " secured"]),
+                        ("Report", report),
+                        ("Cat", category),
                     ]
                     milestone_info_handling(project_list, t, type="central support")
                 for i in range(17, 20):
+                    try:
+                        date = convert_top250_date(p_data["R" + str(i) + " needed by"])
+                    except TypeError:
+                        date = None
+                    except ValueError:
+                        # messaging here
+                        date = p_data["R" + str(i) + " needed by"]
                     t = [
                         ("Project", p),
                         ("Requirement", p_data["R" + str(i) + " name"]),
                         ("Escalated", p_data["R" + str(i) + " escalated to"]),
-                        ("Date", p_data["R" + str(i) + " needed by"]),
+                        ("Date", date),
                         ("Type", p_data["R" + str(i) + " type"]),
+                        ("Report", report),
+                        ("Cat", category),
                     ]
                     milestone_info_handling(project_list, t, type="central support")
 
@@ -757,6 +776,8 @@ class CentralSupportData:
 
         output_dict = {}
         for i in self.cs_dict:
+            report = []
+            category = []
             p_name = []
             key_names = []
             g_dates = []  # graph dates
@@ -789,6 +810,8 @@ class CentralSupportData:
                         r_dates.append(d)
                         escalated.append(x["Escalated"])
                         type.append(x["Type"])
+                        report.append(x["Report"])
+                        category.append(x["Cat"])
                         try:
                             secured.append(x["Secured"])
                         except KeyError:
@@ -817,6 +840,8 @@ class CentralSupportData:
                     escalated.append(None)
                     type.append(None)
                     secured.append(None)
+                    report.append(x["Report"])
+                    category.append(x["Cat"])
 
             output_dict[i] = {
                 "project": p_name,
@@ -825,9 +850,11 @@ class CentralSupportData:
                 "r_dates": r_dates,
                 "escalated": escalated,
                 "type": type,
-                "notes": cr,  # putting cr into notes for now
+                "cs_response": cr,  # putting cr into notes for now
                 "secured": secured,
                 "poc": poc,
+                "report": report,
+                "cat": category,
             }
 
         self.sorted_milestone_dict = output_dict

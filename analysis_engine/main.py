@@ -321,6 +321,26 @@ def top250_run_general(args):
 
             wb = put_milestones_into_wb(d)
 
+        if programme == "dandelion":
+            if op_args["quarter"] == [
+                "standard"
+            ]:  # converts "standard" default to current quarter
+                op_args["quarter"] = [str(m.current_quarter)]
+            d_data = DandelionData(m, **op_args)
+            if "chart" not in op_args:
+                op_args["chart"] = True
+                make_a_dandelion_auto(d_data, **op_args)
+            else:
+                if op_args["chart"] == "save":
+                    op_args["chart"] = False
+                    d_graph = make_a_dandelion_auto(d_data, **op_args)
+                    doc = get_input_doc(top35_root_path / "input/summary_temp_landscape.docx")
+                    put_matplotlib_fig_into_word(doc, d_graph, size=7)
+                    doc.save(top35_root_path / "output/dandelion_graph.docx")
+                if op_args["chart"] == "show":
+                    make_a_dandelion_auto(d_data, **op_args)
+
+
         check_remove(op_args)
 
         try:
@@ -734,11 +754,24 @@ class main():
             "central_support",
             help="central support schedule graphs and data.",
         )
+        dandelion_description = (
+            "Creates the 'dandelion' graph. See below optional arguments for changing the "
+            "dandelion that is compiled. The command analysis dandelion returns the default "
+            'dandelion graph. The user must specify --chart "save" to save the chart, otherwise '
+            "only a temporary matplotlib chart will be generated."
+        )
+        top250_parser_dandelion = subparsers.add_parser(
+            "dandelion",
+            help="Dandelion graph.",
+            description=dandelion_description,
+            # formatter_class=RawTextHelpFormatter,  # can't use as effects how optional arguments are shown.
+        )
 
         for sub in [
             top250_parser_milestones,
             top250_parser_summaries,
             top250_parser_cs,
+            top250_parser_dandelion,
         ]:
             sub.add_argument(
                 "--group",
@@ -753,6 +786,7 @@ class main():
         for sub in [
             top250_parser_milestones,
             top250_parser_cs,
+            top250_parser_dandelion,
         ]:
             sub.add_argument(
                     "--remove",
@@ -781,7 +815,7 @@ class main():
         for sub in [
             top250_parser_milestones,
             top250_parser_cs,
-
+            top250_parser_dandelion,
         ]:
             sub.add_argument(
                     "--chart",
@@ -804,6 +838,16 @@ class main():
                 help="Insert blue line into chart to represent a date. "
                      'Options are "Today" "CDG" or a date in correct format e.g. "1/1/2021".',
             )
+
+        top250_parser_dandelion.add_argument(
+            "--angles",
+            type=int,
+            metavar="",
+            action="store",
+            nargs="+",
+            # choices=['sro', 'finance', 'benefits', 'schedule', 'resource'],
+            help="Use can manually enter angles for group bubbles",
+        )
 
         args = parser.parse_args(sys.argv[2:])
         # print(vars(args))
