@@ -1796,6 +1796,7 @@ class MilestoneData:
                 lower_dict["Milestone " + str(r)] = dict(sorted_list[r])
 
             m_dict[tp] = lower_dict
+            # HERE POTENTIAL TO MERGE DICTS
         self.milestone_dict = m_dict
 
     def get_chart_info(self) -> None:

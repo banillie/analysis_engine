@@ -340,6 +340,14 @@ def top250_run_general(args):
                 if op_args["chart"] == "show":
                     make_a_dandelion_auto(d_data, **op_args)
 
+        if programme == "query":
+            if "koi" not in op_args and "koi_fn" not in op_args:
+                logger.critical(
+                    "Please enter a key name(s) using either --keys or --file_name"
+                )
+                sys.exit(1)
+            op_args = return_koi_fn_keys(op_args)
+            wb = data_query_into_wb(m, **op_args)
 
         check_remove(op_args)
 
@@ -360,7 +368,11 @@ def return_koi_fn_keys(oa: Dict):  # op_args
     """small helper function to convert key names in file into list of strings
     and place in op_args dictionary"""
     if "koi_fn" in oa:
-        keys = get_data_query_key_names(root_path / "input/{}.csv".format(oa["koi_fn"]))
+        if "data_type" in oa:
+            if oa["data_type"] == "top35":
+                keys = get_data_query_key_names(top35_root_path / "input/{}.csv".format(oa["koi_fn"]))
+        else:
+            keys = get_data_query_key_names(root_path / "input/{}.csv".format(oa["koi_fn"]))
         oa["key"] = keys
         return oa
     if "koi" in oa:
@@ -766,12 +778,16 @@ class main():
             description=dandelion_description,
             # formatter_class=RawTextHelpFormatter,  # can't use as effects how optional arguments are shown.
         )
+        top250_parser_data_query = subparsers.add_parser(
+            "query", help="return data from core data"
+        )
 
         for sub in [
             top250_parser_milestones,
             top250_parser_summaries,
             top250_parser_cs,
             top250_parser_dandelion,
+            top250_parser_data_query,
         ]:
             sub.add_argument(
                 "--group",
@@ -787,6 +803,7 @@ class main():
             top250_parser_milestones,
             top250_parser_cs,
             top250_parser_dandelion,
+            top250_parser_data_query,
         ]:
             sub.add_argument(
                     "--remove",
@@ -826,7 +843,19 @@ class main():
                     help="options for building and saving graph output. Commands are 'show' or 'save' ",
                 )
 
-        for sub in[
+        for sub in [
+            top250_parser_milestones,
+            top250_parser_data_query,
+        ]:
+            sub.add_argument(
+                "--koi",
+                type=str,
+                action="store",
+                nargs="+",
+                help="Returns the specified keys of interest (KOI).",
+            )
+
+        for sub in [
             top250_parser_milestones,
             top250_parser_cs,
         ]:
@@ -837,6 +866,17 @@ class main():
                 action="store",
                 help="Insert blue line into chart to represent a date. "
                      'Options are "Today" "CDG" or a date in correct format e.g. "1/1/2021".',
+            )
+
+        for sub in [
+            top250_parser_milestones,
+            top250_parser_data_query,
+        ]:
+            sub.add_argument(
+                "--koi_fn",
+                type=str,
+                action="store",
+                help="provide name of csc file contain key names",
             )
 
         top250_parser_dandelion.add_argument(

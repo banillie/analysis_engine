@@ -57,6 +57,9 @@ def top35_get_master_data() -> List[
     """Returns a list of dictionaries each containing quarter data"""
     master_data_list = [
         project_data_from_master_month(
+            top35_root_path / "core_data/250_Master_June_21.xlsx", 6, 2021
+        ),
+        project_data_from_master_month(
             top35_root_path / "core_data/250_Master_May_21.xlsx", 5, 2021
         ),
         project_data_from_master_month(
@@ -502,7 +505,7 @@ def project_report_meta_data(
     if p_master["WLC COMMENTS"] is not None:
         # doc.add_paragraph()
         doc.add_paragraph().add_run(
-            "* Total costs comment. " + p_master["WLC COMMENTS"]
+            "* Total costs comment. " + str(p_master["WLC COMMENTS"])
         )
 
     """Costs meta data"""
@@ -689,7 +692,7 @@ class CentralSupportData:
                 p = self.master.abbreviations[project_name]["abb"]
                 report = "Top 250"
                 category = "Central Resource"
-                for i in range(1, 20):
+                for i in range(1, 30):
                     # these keys not present in all monthly masters.
                     try:
                         cs_response = p_data["R" + str(i) + " Central Response"]
