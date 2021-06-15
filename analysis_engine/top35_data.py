@@ -25,7 +25,7 @@ from analysis_engine.data import (
     logger,
     MilestoneData,
     milestone_info_handling,
-    wd_heading, convert_top250_date,
+    wd_heading, convert_date,
 )
 from datamaps.api import project_data_from_master_month, project_data_from_master
 import platform
@@ -689,14 +689,7 @@ class CentralSupportData:
                 p = self.master.abbreviations[project_name]["abb"]
                 report = "Top 250"
                 category = "Central Resource"
-                for i in range(1, 16):
-                    try:
-                        date = convert_top250_date(p_data["R" + str(i) + " needed by"])
-                    except TypeError:
-                        date = None
-                    except ValueError:
-                        # messaging here
-                        date = p_data["R" + str(i) + " needed by"]
+                for i in range(1, 20):
                     # these keys not present in all monthly masters.
                     try:
                         cs_response = p_data["R" + str(i) + " Central Response"]
@@ -706,39 +699,37 @@ class CentralSupportData:
                         poc = p_data["R" + str(i) + " Point of Contact"]
                     except KeyError:
                         poc = None
+                    # this not present in new entries
+                    try:
+                        secured = p_data["R" + str(i) + " secured"]
+                    except KeyError:
+                        secured = None
 
                     t = [
                         ("Project", p),
                         ("Requirement", p_data["R" + str(i) + " name"]),
                         # ("Type", "Approval"),
                         ("Escalated", p_data["R" + str(i) + " escalated to"]),
-                        ("Date", date),
+                        ("Date", convert_date(p_data["R" + str(i) + " needed by"])),
                         ("Type", p_data["R" + str(i) + " type"]),
                         ("Central Response", cs_response),
                         ("PoC", poc),
-                        ("Secured", p_data["R" + str(i) + " secured"]),
+                        ("Secured", secured),
                         ("Report", report),
                         ("Cat", category),
                     ]
                     milestone_info_handling(project_list, t, type="central support")
-                for i in range(17, 20):
-                    try:
-                        date = convert_top250_date(p_data["R" + str(i) + " needed by"])
-                    except TypeError:
-                        date = None
-                    except ValueError:
-                        # messaging here
-                        date = p_data["R" + str(i) + " needed by"]
-                    t = [
-                        ("Project", p),
-                        ("Requirement", p_data["R" + str(i) + " name"]),
-                        ("Escalated", p_data["R" + str(i) + " escalated to"]),
-                        ("Date", date),
-                        ("Type", p_data["R" + str(i) + " type"]),
-                        ("Report", report),
-                        ("Cat", category),
-                    ]
-                    milestone_info_handling(project_list, t, type="central support")
+                # for i in range(17, 20):
+                #     t = [
+                #         ("Project", p),
+                #         ("Requirement", p_data["R" + str(i) + " name"]),
+                #         ("Escalated", p_data["R" + str(i) + " escalated to"]),
+                #         ("Date", convert_date(p_data["R" + str(i) + " needed by"])),
+                #         ("Type", p_data["R" + str(i) + " type"]),
+                #         ("Report", report),
+                #         ("Cat", category),
+                #     ]
+                #     milestone_info_handling(project_list, t, type="central support")
 
                 # loop to stop keys names being the same. Done at project level.
                 # not particularly concise code.
@@ -850,7 +841,7 @@ class CentralSupportData:
                 "r_dates": r_dates,
                 "escalated": escalated,
                 "type": type,
-                "cs_response": cr,  # putting cr into notes for now
+                "notes": cr,  # putting cr into notes for now
                 "secured": secured,
                 "poc": poc,
                 "report": report,
@@ -1131,9 +1122,7 @@ def print_out_central_support(
     doc: Document,
     centrals: CentralSupportData,
 ) -> Document:
-    # doc.add_section(WD_SECTION_START.NEW_PAGE)
-    # table heading
-    # ab = milestones.master.abbreviations[project_name]["abb"]
+
     doc.add_paragraph()
     doc.add_paragraph().add_run("Central govnt support requirements").bold = True
 
@@ -1147,15 +1136,10 @@ def print_out_central_support(
         hdr_cells[2].text = "Escalated to"
         hdr_cells[3].text = "Type"
         hdr_cells[4].text = "Central Response"
-        # hdr_cells[5].text = "PoC"
         hdr_cells[5].text = "Secured"
 
         for i, m in enumerate(centrals.sorted_milestone_dict[centrals.iter_list[0]]["names"]):
             row_cells = table.add_row().cells
-            # if len(centrals.group) == 1:
-            #     no_name = m.split(",")[1]
-            #     row_cells[0].text = no_name
-            # else:
             row_cells[0].text = m
             paragraph = row_cells[0].paragraphs[0]
             run = paragraph.runs
@@ -1168,7 +1152,7 @@ def print_out_central_support(
                 paragraph = row_cells[1].paragraphs[0]
                 run = paragraph.runs
                 font = run[0].font
-                font.size = Pt(9)  # font size = 8
+                font.size = Pt(9)
             except AttributeError:
                 row_cells[1].text = "None"
             row_cells[2].text = str(
@@ -1177,14 +1161,14 @@ def print_out_central_support(
             paragraph = row_cells[2].paragraphs[0]
             run = paragraph.runs
             font = run[0].font
-            font.size = Pt(9)  # font size = 8
+            font.size = Pt(9)
             row_cells[3].text = str(
                 centrals.sorted_milestone_dict[centrals.iter_list[0]]["type"][i]
             )
             paragraph = row_cells[3].paragraphs[0]
             run = paragraph.runs
             font = run[0].font
-            font.size = Pt(9)  # font size = 8
+            font.size = Pt(9)
             row_cells[4].text = str(
                 centrals.sorted_milestone_dict[centrals.iter_list[0]]["notes"][i]
             )
@@ -1192,8 +1176,6 @@ def print_out_central_support(
             run = paragraph.runs
             font = run[0].font
             font.size = Pt(8)  # font size = 8
-            # row_cells[5].text = str(centrals.sorted_milestone_dict[centrals.iter_list[0]][
-            #                             "poc"][i])
             row_cells[5].text = str(
                 centrals.sorted_milestone_dict[centrals.iter_list[0]]["secured"][i]
             )

@@ -1551,19 +1551,9 @@ def milestone_info_handling(output_list: list, t_list: list, **kwargs) -> list:
                     if t_list[3][1] is None:
                         return output_list.append(t_list)
         except ParserError:  # Non-date strings
+            logger.info(t_list[0][1] + ": incorrect date format for entry '" + t_list[1][1] + ""
+                      "', requires amending or will not be included.")
             pass
-
-
-# Not required. Now done in milestone class
-# def remove_project_name_from_milestone_key(
-#     project_name: str, milestone_key_list: List[str]
-# ) -> List[str]:
-#     """In this instance project_name is the abbreviation"""
-#     output_list = []
-#     for key in milestone_key_list:
-#         alter_key = key.replace(project_name + ", ", "")
-#         output_list.append(alter_key)
-#     return output_list
 
 
 def remove_none_types(input_list):
@@ -1596,9 +1586,18 @@ def get_milestone_notes(
                 return m_dict[k]["Notes"]
 
 
-def convert_top250_date(str):
-    # underlying top 250 date data format is y-d-m
-    return datetime.datetime.strptime(str, "%Y-%m-%d").strftime("%Y-%d-%m")
+def convert_date(date_str: str):
+    """
+    When date converted into json file the dates take the standard python format
+    year-month-day. This function converts format to year-day-month. This function is
+    used when the MilestoneData class is created. Seems to be the best place to deploy.
+    """
+    try:
+        return datetime.datetime.strptime(date_str, "%Y-%m-%d").strftime("%Y-%d-%m")
+    except TypeError:
+        pass
+    except ValueError:
+        return date_str
 
 
 class MilestoneData:
@@ -1648,19 +1647,12 @@ class MilestoneData:
                 if "data_type" in self.kwargs:
                     if self.kwargs["data_type"] == "top35":
                         report = "Top 250"
-                        for i in range(1, 20):
-                            try:
-                                date = convert_top250_date(p_data["MM" + str(i) + " date"])
-                            except TypeError:
-                                date = None
-                            except ValueError:
-                                #messaging here
-                                date = p_data["MM" + str(i) + " date"]
+                        for i in range(1, 30):
                             t = [
                                 ("Project", p),
                                 ("Milestone", p_data["MM" + str(i) + " name"]),
                                 ("Notes", p_data["MM" + str(i) + " Comment"]),
-                                ("Date", date),
+                                ("Date", convert_date(p_data["MM" + str(i) + " date"])),
                                 ("Status", p_data["MM" + str(i) + " status"]),
                                 ("Report", report),
                                 ("Cat", category),
@@ -1686,9 +1678,9 @@ class MilestoneData:
                                 ("Type", "Approval"),
                                 (
                                     "Date",
-                                    p_data[
+                                    convert_date(p_data[
                                         "Approval MM" + str(i) + " Forecast / Actual"
-                                    ],
+                                    ]),
                                 ),
                                 ("Notes", p_data["Approval MM" + str(i) + " Notes"]),
                                 ("Report", report),
@@ -1701,9 +1693,9 @@ class MilestoneData:
                                 ("Type", "Assurance"),
                                 (
                                     "Date",
-                                    p_data[
+                                    convert_date(p_data[
                                         "Assurance MM" + str(i) + " Forecast - Actual"
-                                    ],
+                                    ]),
                                 ),
                                 ("Notes", p_data["Assurance MM" + str(i) + " Notes"]),
                                 ("Report", report),
@@ -1718,11 +1710,11 @@ class MilestoneData:
                                     ("Type", "Approval"),
                                     (
                                         "Date",
-                                        p_data[
+                                        convert_date(p_data[
                                             "Approval MM"
                                             + str(i)
                                             + " Forecast - Actual"
-                                        ],
+                                        ]),
                                     ),
                                     (
                                         "Notes",
@@ -1744,9 +1736,9 @@ class MilestoneData:
                                 ("Type", "Delivery"),
                                 (
                                     "Date",
-                                    p_data[
+                                    convert_date(p_data[
                                         "Project MM" + str(i) + " Forecast - Actual"
-                                    ],
+                                    ]),
                                 ),
                                 ("Notes", p_data["Project MM" + str(i) + " Notes"]),
                                 ("Report", report),
@@ -1766,9 +1758,9 @@ class MilestoneData:
                                 ("Type", "Approval"),
                                 (
                                     "Date",
-                                    p_data[
+                                    convert_date(p_data[
                                         "HMT Approval " + str(i) + " Forecast / Actual"
-                                    ],
+                                    ]),
                                 ),
                                 ("Notes", p_data["HMT Approval " + str(i) + " Notes"]),
                                 ("Report", report),
@@ -1833,11 +1825,6 @@ class MilestoneData:
                     ):
                         p = x["Project"]
                         mn = x["Milestone"]
-                        # if len(self.group) == 1:
-                        #     join = mn
-                        # else:
-                        #     join = p + ", " + mn
-                        # if join not in key_names:  # stop duplicates
                         p_names.append(p)
                         key_names.append(mn)
                         d = x["Date"]
@@ -1854,11 +1841,6 @@ class MilestoneData:
                 if p is None and mn is None and d is None:
                     p = v["Project"]
                     mn = v["Milestone"]
-                    # if len(self.group) == 1:
-                    #     join = mn
-                    # else:
-                    #     join = p + ", " + mn
-                    # if join not in key_names:
                     p_names.append(p)
                     key_names.append(mn)
                     g_dates.append(v["Date"])
@@ -2524,11 +2506,10 @@ def put_milestones_into_wb(milestones: MilestoneData) -> Workbook:
     for x, tp in enumerate(milestones.iter_list):
         ws.cell(row=1, column=5 + x).value = tp
     ws.cell(row=1, column=len(milestones.iter_list) + 5).value = "Status (top 250 ms)"
-    ws.cell(row=1, column=len(milestones.iter_list) + 6).value = "Escalated"
-    ws.cell(row=1, column=len(milestones.iter_list) + 7).value = "CS Type"
-    ws.cell(row=1, column=len(milestones.iter_list) + 8).value = "Secured"
-    ws.cell(row=1, column=len(milestones.iter_list) + 9).value = "Notes"
-
+    ws.cell(row=1, column=len(milestones.iter_list) + 6).value = "Escalated (top 250 cs)"
+    ws.cell(row=1, column=len(milestones.iter_list) + 7).value = "Type (top 250 cs)"
+    ws.cell(row=1, column=len(milestones.iter_list) + 8).value = "Secured (top 250 cs)"
+    ws.cell(row=1, column=len(milestones.iter_list) + 9).value = "Notes / Central Response (top 250 cs)"
 
     return wb
 

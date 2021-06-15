@@ -87,7 +87,7 @@ top35_data_dict = {
         # "quarter": ["Month(May), 2021"],
         "quarter": ["standard"],
         # "group": ["HSRG", "RSS", "RIG", "RPE"],
-        "group": ["Crossrail"],
+        "group": ["IRP"],
         "chart": False,
         "data_type": "top35",
         "circle_colour": "No",
@@ -105,23 +105,23 @@ top35_data_dict = {
     "word_save_path": str(top35_root_path / "output/{}.docx")
 }
 
-ipdc_data_dict = {
-    "docx_save_path": str(root_path / "output/{}.docx"),
-    "master": Master(open_json_file(str(root_path / "core_data/json/master.json"))),
-    "op_args": {
-        "quarter": ["standard"],
-        # "quarter": ["Q4 20/21"],
-        # "baseline": ["bl_one"],
-        # "group": ["HSRG", "RSS", "RIG", "AMIS", "RPE"],
-        "group": ["Crossrail"],
-        # "dates": ["1/6/2021", "1/7/2021"],
-        "chart": True,
-        "circle_colour": "No",
-        # "key": ["Start of Trial Running"]
-    },
-    "dashboard": get_input_doc(root_path / "input/dashboards_master.xlsx"),
-    "excel_save_path": str(root_path / "output/{}.xlsx"),
-}
+# ipdc_data_dict = {
+#     "docx_save_path": str(root_path / "output/{}.docx"),
+#     "master": Master(open_json_file(str(root_path / "core_data/json/master.json"))),
+#     "op_args": {
+#         "quarter": ["standard"],
+#         # "quarter": ["Q4 20/21"],
+#         # "baseline": ["bl_one"],
+#         # "group": ["HSRG", "RSS", "RIG", "AMIS", "RPE"],
+#         "group": ["A66"],
+#         # "dates": ["1/6/2021", "1/7/2021"],
+#         "chart": True,
+#         "circle_colour": "No",
+#         # "key": ["Start of Trial Running"]
+#     },
+#     "dashboard": get_input_doc(root_path / "input/dashboards_master.xlsx"),
+#     "excel_save_path": str(root_path / "output/{}.xlsx"),
+# }
 
 # cdg_data_dict = {
 #     "docx_save_path": str(cdg_root_path / "output/{}.docx"),
@@ -158,7 +158,7 @@ data = top35_data_dict
 ms = MilestoneData(data["master"], **data["op_args"])
 # ms.filter_chart_info(**data["op_args"])
 wb = put_milestones_into_wb(ms)
-wb.save(data["excel_save_path"].format("milestone_testing"))
+# wb.save(data["excel_save_path"].format("milestone_testing"))
 # g = milestone_chart(ms, data["master"], **data["op_args"])
 # put_matplotlib_fig_into_word(hoz_doc, g, size=7, transparent=False)
 # hoz_doc.save(data["word_save_path"].format("milestone_graph"))
