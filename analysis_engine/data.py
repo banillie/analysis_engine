@@ -1552,8 +1552,7 @@ def milestone_info_handling(output_list: list, t_list: list, **kwargs) -> list:
                         return output_list.append(t_list)
         except ParserError:  # Non-date strings
             logger.info(t_list[0][1] + ": incorrect date format for entry '" + t_list[1][1] + ""
-                      "', requires amending or will not be included.")
-            pass
+                      "', requires amending or will not be included. " + str(kwargs["tp"]) + " data.")
 
 
 def remove_none_types(input_list):
@@ -1631,11 +1630,12 @@ class MilestoneData:
         m_dict = {}
         self.iter_list = get_iter_list(self.kwargs, self.master)
         for tp in self.iter_list:  # tp time period
+            self.kwargs["tp"] = tp
             lower_dict = {}
             raw_list = []
             self.group = get_group(self.master, tp, self.kwargs)
             for project_name in self.group:
-                project_list = []
+                project_milestones = []
                 p_data = get_correct_p_data(
                     self.kwargs, self.master, self.baseline_type, project_name, tp
                 )
@@ -1648,7 +1648,7 @@ class MilestoneData:
                     if self.kwargs["data_type"] == "top35":
                         report = "Top 250"
                         for i in range(1, 30):
-                            t = [
+                            entry = [
                                 ("Project", p),
                                 ("Milestone", p_data["MM" + str(i) + " name"]),
                                 ("Notes", p_data["MM" + str(i) + " Comment"]),
@@ -1657,22 +1657,22 @@ class MilestoneData:
                                 ("Report", report),
                                 ("Cat", category),
                             ]
-                            milestone_info_handling(project_list, t, **self.kwargs)
+                            milestone_info_handling(project_milestones, entry, **self.kwargs)
                     if self.kwargs["data_type"] == "cdg":
                         for i in range(1, 12):
-                            t = [
+                            entry = [
                                 ("Project", p),
                                 ("Milestone", p_data["MM" + str(i)]),
                                 ("Notes", p_data["MM" + str(i) + " NOTES"]),
                                 ("Date", p_data["MM" + str(i) + " DATE"])
                             ]
-                            milestone_info_handling(project_list, t)
+                            milestone_info_handling(project_milestones, entry)
 
                 else:
                     report = "IPDC/GMPP"
                     for i in range(1, 50):
                         try:
-                            t = [
+                            entry = [
                                 ("Project", p),
                                 ("Milestone", p_data["Approval MM" + str(i)]),
                                 ("Type", "Approval"),
@@ -1686,8 +1686,8 @@ class MilestoneData:
                                 ("Report", report),
                                 ("Cat", category),
                             ]
-                            milestone_info_handling(project_list, t)
-                            t = [
+                            milestone_info_handling(project_milestones, entry)
+                            entry = [
                                 ("Project", p),
                                 ("Milestone", p_data["Assurance MM" + str(i)]),
                                 ("Type", "Assurance"),
@@ -1701,10 +1701,10 @@ class MilestoneData:
                                 ("Report", report),
                                 ("Cat", category),
                             ]
-                            milestone_info_handling(project_list, t)
+                            milestone_info_handling(project_milestones, entry)
                         except KeyError:  # handles inconsistent keys naming for approval milestones.
                             try:
-                                t = [
+                                entry = [
                                     ("Project", p),
                                     ("Milestone", p_data["Approval MM" + str(i)]),
                                     ("Type", "Approval"),
@@ -1723,14 +1723,14 @@ class MilestoneData:
                                     ("Report", report),
                                     ("Cat", category),
                                 ]
-                                milestone_info_handling(project_list, t)
+                                milestone_info_handling(project_milestones, entry)
                             except KeyError:
                                 pass
 
                     # handles inconsistent number of Milestone. could be incorporated above.
                     for i in range(18, 67):
                         try:
-                            t = [
+                            entry = [
                                 ("Project", p),
                                 ("Milestone", p_data["Project MM" + str(i)]),
                                 ("Type", "Delivery"),
@@ -1744,7 +1744,7 @@ class MilestoneData:
                                 ("Report", report),
                                 ("Cat", category),
                             ]
-                            milestone_info_handling(project_list, t)
+                            milestone_info_handling(project_milestones, entry)
                         except KeyError:
                             pass
 
@@ -1752,7 +1752,7 @@ class MilestoneData:
                     # this loop picks them up
                     for i in range(1, 4):
                         try:
-                            t = [
+                            entry = [
                                 ("Project", p),
                                 ("Milestone", p_data["HMT Approval " + str(i)]),
                                 ("Type", "Approval"),
@@ -1766,18 +1766,18 @@ class MilestoneData:
                                 ("Report", report),
                                 ("Cat", category),
                             ]
-                            milestone_info_handling(project_list, t)
+                            milestone_info_handling(project_milestones, entry)
                         except KeyError:
                             pass
 
                 # loop to stop keys names being the same. Done at project level.
                 # not particularly concise code.
                 upper_counter_list = []
-                for entry in project_list:
+                for entry in project_milestones:
                     upper_counter_list.append(entry[1][1])
                 upper_count = Counter(upper_counter_list)
                 lower_counter_list = []
-                for entry in project_list:
+                for entry in project_milestones:
                     if upper_count[entry[1][1]] > 1:
                         lower_counter_list.append(entry[1][1])
                         lower_count = Counter(lower_counter_list)
@@ -5231,9 +5231,9 @@ def build_speedials(dca_data: DcaData, doc) -> None:
             if change == "Down":
                 down += 1
 
-        rate = [1, 0.75, 0.5, 0.25, 0]
-        dial_one = 1 - (np.average(rate, weights=c_count))
-        dial_two = 1 - (np.average(rate, weights=l_count))
+        rate = [0, 0.25, 0.5, 0.75, 1]
+        dial_one = np.average(rate, weights=c_count)
+        dial_two = np.average(rate, weights=l_count)
 
         graph = gauge(
             c_count,
@@ -8842,7 +8842,8 @@ def make_a_dandelion_auto(dl: DandelionData, **kwargs):
     DandelionData class."""
 
     fig, ax = plt.subplots(figsize=(10, 8), facecolor=FACE_COLOUR)
-    ax.set_facecolor(FACE_COLOUR)
+    # fig, ax = plt.subplots(figsize=(10, 8))
+    # ax.set_facecolor(FACE_COLOUR)
     ## title not currently in use
     # title = get_chart_title(dl_data, kwargs, "dandelion")
     # plt.suptitle(title, fontweight="bold", fontsize=10)

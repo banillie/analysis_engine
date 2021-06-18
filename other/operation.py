@@ -84,11 +84,11 @@ top35_data_dict = {
     "docx_save_path": str(top35_root_path / "output/{}.docx"),
     "master": Master(open_json_file(str(top35_root_path / "core_data/json/master.json"))),
     "op_args": {
-        # "quarter": ["Month(May), 2021"],
+        # "quarter": ["Month(June), 2021"],
         "quarter": ["standard"],
         # "group": ["HSRG", "RSS", "RIG", "RPE"],
-        "group": ["A66"],
-        "chart": False,
+        "group": ["RIS2"],
+        # "chart": False,
         "data_type": "top35",
         "circle_colour": "No",
         # "dates": ["1/6/2021", "1/7/2021"],
@@ -105,23 +105,23 @@ top35_data_dict = {
     "word_save_path": str(top35_root_path / "output/{}.docx")
 }
 
-ipdc_data_dict = {
-    "docx_save_path": str(root_path / "output/{}.docx"),
-    "master": Master(open_json_file(str(root_path / "core_data/json/master.json"))),
-    "op_args": {
-        "quarter": ["standard"],
-        # "quarter": ["Q4 20/21"],
-        # "baseline": ["bl_one"],
-        # "group": ["HSRG", "RSS", "RIG", "AMIS", "RPE"],
-        "group": ["A66"],
-        # "dates": ["1/6/2021", "1/7/2021"],
-        "chart": True,
-        "circle_colour": "No",
-        # "key": ["Start of Trial Running"]
-    },
-    "dashboard": get_input_doc(root_path / "input/dashboards_master.xlsx"),
-    "excel_save_path": str(root_path / "output/{}.xlsx"),
-}
+# ipdc_data_dict = {
+#     "docx_save_path": str(root_path / "output/{}.docx"),
+#     "master": Master(open_json_file(str(root_path / "core_data/json/master.json"))),
+#     "op_args": {
+#         # "quarter": ["standard"],
+#         "quarter": ["Q4 20/21"],
+#         # "baseline": ["bl_one"],
+#         "group": ["HSRG", "RSS", "RIG", "AMIS", "RPE"],
+#         # "group": ["A66"],
+#         # "dates": ["1/6/2021", "1/7/2021"],
+#         "chart": True,
+#         # "circle_colour": "No",
+#         # "key": ["Start of Trial Running"]
+#     },
+#     "dashboard": get_input_doc(root_path / "input/dashboards_master.xlsx"),
+#     "excel_save_path": str(root_path / "output/{}.xlsx"),
+# }
 
 # cdg_data_dict = {
 #     "docx_save_path": str(cdg_root_path / "output/{}.docx"),
@@ -155,11 +155,11 @@ data = top35_data_dict
 
 
 # MILESTONES
-ms = MilestoneData(data["master"], **data["op_args"])
+# ms = MilestoneData(data["master"], **data["op_args"])
 # ipdc_ms = MilestoneData(ipdc_data_dict["master"], **ipdc_data_dict["op_args"])
 # ms.filter_chart_info(**data["op_args"])
-wb = put_milestones_into_wb(ms)
-wb.save(data["excel_save_path"].format("milestone_testing"))
+# wb = put_milestones_into_wb(ms)
+# wb.save(data["excel_save_path"].format("milestone_testing"))
 # g = milestone_chart(ms, data["master"], **data["op_args"])
 # put_matplotlib_fig_into_word(hoz_doc, g, size=7, transparent=False)
 # hoz_doc.save(data["word_save_path"].format("milestone_graph"))
@@ -171,7 +171,7 @@ wb.save(data["excel_save_path"].format("milestone_testing"))
 # wb = data_query_into_wb(data["master"], **data["op_args"])
 # wb.save(data["excel_save_path"].format("query_test"))
 
-# ## STACKPLOT
+# STACKPLOT
 # sp_data = get_sp_data(m, quarter=["standard"], group=["RIG"])
 # cost_stackplot_graph(sp_data, m, group=DFT_GROUP)
 
@@ -181,7 +181,7 @@ wb.save(data["excel_save_path"].format("milestone_testing"))
 # cost_profile_graph(c, data["master"], chart=True, group=c.start_group)
 
 # SUMMARIES
-# top35_run_p_reports(data["master"], **data["op_args"])
+top35_run_p_reports(data["master"], **data["op_args"])
 
 ## VFM
 # c = VfMData(m, group=DFm = Master(*data["data"], **data["op_args"] )T_GROUP, quarter=["standard"])  # c is class
