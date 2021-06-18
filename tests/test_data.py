@@ -1,6 +1,7 @@
 """
 Tests for analysis_engine
 """
+import configparser
 import csv
 import os
 import datetime
@@ -9,12 +10,8 @@ import pickle
 import numpy as np
 from matplotlib import pyplot as plt
 import pytest
+from datamaps.api import project_data_from_master
 
-from analysis_engine.cdg_data import (
-    cdg_get_master_data,
-    cdg_get_project_information,
-    cdg_root_path,
-)
 from analysis_engine.ar_data import get_ar_data, ar_run_p_reports
 from analysis_engine.data import (
     Master,
@@ -587,3 +584,16 @@ def test_annual_report_summaries():
 
 def test_top35_summaries(top35_data):
     top35_run_p_reports(top35_data["master"], **top35_data["op_args"])
+
+
+def test_config_file():
+    config = configparser.ConfigParser()
+    config.read('resources/example.ini')
+    # config.sections()
+    year = int(config['MASTERS']['1'][-5:-1])
+    quarter = int(config['MASTERS']['1'][-8:-7])
+    path = config['MASTERS']['1'][2:-11]
+    m = project_data_from_master(path, quarter, year)
+    print(m.quarter)
+
+

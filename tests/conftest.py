@@ -1,3 +1,4 @@
+import configparser
 import os
 import pytest
 from datamaps.api import project_data_from_master
@@ -244,3 +245,9 @@ def top35_data():
                 "circle_colour": 'No',
             },
         }
+
+
+# @pytest.fixture()
+# def ini_file():
+#     config = configparser.ConfigParser()
+#     config.read('example.ini')

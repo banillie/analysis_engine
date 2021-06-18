@@ -10,7 +10,7 @@ import re
 import sys
 import typing
 import random
-from collections import Counter
+from collections import Counter, OrderedDict
 from typing import List, Dict, Union, Optional, Tuple, TextIO
 
 # import matplotlib.pyplot as plt
@@ -28,6 +28,7 @@ from matplotlib.transforms import Affine2D
 from dateutil import parser
 import numpy as np
 from datamaps.api import project_data_from_master
+from datamaps.process import Cleanser
 import platform
 from pathlib import Path
 
@@ -229,10 +230,44 @@ def get_datamap_file_paths():
     pass
 
 
+def get_project_info_data(master_file: str) -> Dict:
+    # taken from datamaps project_data_from_master
+    wb = load_workbook(master_file)
+    ws = wb.active
+    for cell in ws["A"]:
+        # we don't want to clean None...
+        if cell.value is None:
+            continue
+        c = Cleanser(cell.value)
+        cell.value = c.clean()
+    p_dict = {}
+    for col in ws.iter_cols(min_col=2):
+        project_name = ""
+        o = OrderedDict()
+        for cell in col:
+            if cell.row == 1:
+                project_name = cell.value
+                p_dict[project_name] = o
+            else:
+                val = ws.cell(row=cell.row, column=1).value
+                if type(cell.value) == datetime:
+                    d_value = date(cell.value.year, cell.value.month,
+                                   cell.value.day)
+                    p_dict[project_name][val] = d_value
+                else:
+                    p_dict[project_name][val] = cell.value
+    # remove any "None" projects that were pulled from the master
+    try:
+        del p_dict[None]
+    except KeyError:
+        pass
+    return p_dict
+
+
 def get_project_information() -> Dict[str, Union[str, int]]:
     """Returns dictionary containing all project meta data"""
-    return project_data_from_master(
-        root_path / "core_data/data_mgmt/project_info.xlsx", 2, 2020
+    return get_project_info_data(
+        root_path / "core_data/data_mgmt/project_info.xlsx"
     )
 
 
@@ -601,8 +636,8 @@ class JsonMaster:
         **kwargs,
     ) -> None:
         self.master_data = master_data
-        self.project_information = project_information.data
-        self.all_projects = project_information.projects
+        self.project_information = project_information
+        self.all_projects = list(project_information.keys())
         self.kwargs = kwargs
         self.current_quarter = str(master_data[0].quarter)
         self.current_projects = master_data[0].projects

@@ -61,7 +61,6 @@ from analysis_engine.data import (
 # arg_list = ["quarters", "group", "stage", "remove", "type"]
 # calculate_arg_combinations(arg_list)
 
-## INITIATE
 from analysis_engine.top35_data import (
     top35_get_master_data,
     top35_get_project_information,
@@ -69,41 +68,43 @@ from analysis_engine.top35_data import (
     top35_run_p_reports, CentralSupportData,
 )
 
-# master = Master(get_master_data(), get_project_information())
-
-## PICKLE
-# m = open_pickle_file(str(root_path / "core_data/pickle/master.pickle"))
+# INITIATE
+# master = JsonMaster(top35_get_master_data(), top35_get_project_information(), data_type="top35")
+# master_json_path = str("{0}/core_data/json/master".format(top35_root_path))
+master = JsonMaster(get_master_data(), get_project_information())
+master_json_path = str("{0}/core_data/json/master".format(root_path))
+JsonData(master, master_json_path)
 
 ## GROUPS
-DFT_GROUP = ["HSRG", "RSS", "RIG", "AMIS", "RPE"]
-STAGE_GROUPS = ["pipeline", "pre-SOBC", "SOBC", "OBC", "FBC"]
-hoz_doc = open_word_doc(root_path / "input/summary_temp_landscape.docx")
-doc = open_word_doc(root_path / "input/summary_temp.docx")
+# DFT_GROUP = ["HSRG", "RSS", "RIG", "AMIS", "RPE"]
+# STAGE_GROUPS = ["pipeline", "pre-SOBC", "SOBC", "OBC", "FBC"]
+# hoz_doc = open_word_doc(root_path / "input/summary_temp_landscape.docx")
+# doc = open_word_doc(root_path / "input/summary_temp.docx")
 
-top35_data_dict = {
-    "docx_save_path": str(top35_root_path / "output/{}.docx"),
-    "master": Master(open_json_file(str(top35_root_path / "core_data/json/master.json"))),
-    "op_args": {
-        # "quarter": ["Month(June), 2021"],
-        "quarter": ["standard"],
-        # "group": ["HSRG", "RSS", "RIG", "RPE"],
-        "group": ["RIS2"],
-        # "chart": False,
-        "data_type": "top35",
-        "circle_colour": "No",
-        # "dates": ["1/6/2021", "1/7/2021"],
-        "key": [
-            "PROJECT DEL TO CURRENT TIMINGS ?",
-            "GMPP ID: IS THIS PROJECT ON GMPP",
-            "PROJECT ON BUDGET?",
-            "WLC TOTAL",
-            "WLC NON GOV",
-        ],
-        # "key": ["Start of Trial Running"],
-    },
-    "excel_save_path": str(top35_root_path / "output/{}.xlsx"),
-    "word_save_path": str(top35_root_path / "output/{}.docx")
-}
+# top35_data_dict = {
+#     "docx_save_path": str(top35_root_path / "output/{}.docx"),
+#     "master": Master(open_json_file(str(top35_root_path / "core_data/json/master.json"))),
+#     "op_args": {
+#         # "quarter": ["Month(June), 2021"],
+#         "quarter": ["standard"],
+#         # "group": ["HSRG", "RSS", "RIG", "RPE"],
+#         "group": ["RIS2"],
+#         # "chart": False,
+#         "data_type": "top35",
+#         "circle_colour": "No",
+#         # "dates": ["1/6/2021", "1/7/2021"],
+#         "key": [
+#             "PROJECT DEL TO CURRENT TIMINGS ?",
+#             "GMPP ID: IS THIS PROJECT ON GMPP",
+#             "PROJECT ON BUDGET?",
+#             "WLC TOTAL",
+#             "WLC NON GOV",
+#         ],
+#         # "key": ["Start of Trial Running"],
+#     },
+#     "excel_save_path": str(top35_root_path / "output/{}.xlsx"),
+#     "word_save_path": str(top35_root_path / "output/{}.docx")
+# }
 
 # ipdc_data_dict = {
 #     "docx_save_path": str(root_path / "output/{}.docx"),
@@ -145,7 +146,7 @@ top35_data_dict = {
 #     "word_save_path": str(cdg_root_path / "output/{}.docx")
 # }
 
-data = top35_data_dict
+# data = top35_data_dict
 
 ## DANDELION
 # dl_data = DandelionData(data["master"], **data["op_args"])
@@ -181,7 +182,7 @@ data = top35_data_dict
 # cost_profile_graph(c, data["master"], chart=True, group=c.start_group)
 
 # SUMMARIES
-top35_run_p_reports(data["master"], **data["op_args"])
+# top35_run_p_reports(data["master"], **data["op_args"])
 
 ## VFM
 # c = VfMData(m, group=DFm = Master(*data["data"], **data["op_args"] )T_GROUP, quarter=["standard"])  # c is class

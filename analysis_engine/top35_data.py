@@ -1,11 +1,12 @@
 import datetime
 import math
-from collections import Counter
+from collections import Counter, OrderedDict
 from typing import List, Dict, Union
 from datetime import date
 
 from docx.oxml import parse_xml
 from docx.oxml.ns import nsdecls
+from openpyxl import load_workbook
 
 from analysis_engine.data import (
     get_group,
@@ -25,7 +26,7 @@ from analysis_engine.data import (
     logger,
     MilestoneData,
     milestone_info_handling,
-    wd_heading, convert_date,
+    wd_heading, convert_date, get_project_info_data,
 )
 from datamaps.api import project_data_from_master_month, project_data_from_master
 import platform
@@ -71,262 +72,9 @@ def top35_get_master_data() -> List[
 
 def top35_get_project_information() -> Dict[str, Union[str, int]]:
     """Returns dictionary containing all project meta data"""
-    return project_data_from_master(
-        top35_root_path / "core_data/top_250_project_info.xlsx", 2, 2020
+    return get_project_info_data(
+        top35_root_path / "core_data/top_250_project_info.xlsx"
     )
-
-
-# class Master:
-#     def __init__(
-#         self,
-#         master_data: List[Dict[str, Union[str, int, datetime.date, float]]],
-#         project_information: Dict[str, Union[str, int]],
-#     ) -> None:
-#         self.master_data = master_data
-#         self.project_information = project_information
-#         self.current_quarter = self.master_data[0].quarter
-#         self.current_projects = self.master_data[0].projects
-#         self.abbreviations = {}
-#         self.full_names = {}
-#         self.bl_info = {}
-#         self.bl_index = {}
-#         self.dft_groups = {}
-#         self.project_group = {}
-#         self.project_stage = {}
-#         self.quarter_list = []
-#         self.get_quarter_list()
-#         # self.get_baseline_data()
-#         self.check_project_information()
-#         self.get_project_abbreviations()
-#         # self.check_baselines()
-#         self.get_project_groups()
-#
-#     """This is the entry point for all data. It converts a list of excel wbs (note at the moment)
-#     this is actually done prior to being passed into the Master class. The Master class does a number
-#     of things.
-#     compiles and checks all baseline data for projects. These index reference points.
-#     compiles lists of different project groups. e.g stage and DfT Group
-#     gets a list of projects currently in the portfolio.
-#     checks data returned by projects is consistent with whats in project_information
-#     gets project abbreviations
-#
-#     """
-#
-#     def get_project_abbreviations(self) -> None:
-#         """gets the abbreviations for all current projects.
-#         held in the project info document"""
-#         abb_dict = {}
-#         fn_dict = {}
-#         error_case = []
-#         for p in self.project_information.projects:
-#             abb = self.project_information[p]["Abbreviations"]
-#             abb_dict[p] = {"abb": abb, "full name": p}
-#             fn_dict[abb] = p
-#             if abb is None:
-#                 error_case.append(p)
-#
-#         if error_case:
-#             for p in error_case:
-#                 logger.critical("No abbreviation provided for " + p + ".")
-#             raise ProjectNameError(
-#                 "Abbreviations must be provided for all projects in project_info. Program stopping. Please amend"
-#             )
-#
-#         self.abbreviations = abb_dict
-#         self.full_names = fn_dict
-#
-#     # def get_baseline_data(self) -> None:
-#     #     """
-#     #     Returns the two dictionaries baseline_info and baseline_index for all projects for all
-#     #     baseline types
-#     #     """
-#     #
-#     #     baseline_info = {}
-#     #     baseline_index = {}
-#     #
-#     #     for b_type in list(BASELINE_TYPES.keys()):
-#     #         project_baseline_info = {}
-#     #         project_baseline_index = {}
-#     #         for name in self.current_projects:
-#     #             bc_list = []
-#     #             lower_list = []
-#     #             for i, master in reversed(list(enumerate(self.master_data))):
-#     #                 if name in master.projects:
-#     #                     try:
-#     #                         approved_bc = master.data[name][b_type]
-#     #                         quarter = str(master.quarter)
-#     #                     # exception handling in here in case data keys across masters are not consistent.
-#     #                     # not sure this is necessary any more
-#     #                     except KeyError:
-#     #                         print(
-#     #                             str(b_type)
-#     #                             + " keys not present in "
-#     #                             + str(master.quarter)
-#     #                         )
-#     #                     if approved_bc == "Yes":
-#     #                         bc_list.append(approved_bc)
-#     #                         lower_list.append((approved_bc, quarter, i))
-#     #                 else:
-#     #                     pass
-#     #             for i in reversed(range(2)):
-#     #                 if name in self.master_data[i].projects:
-#     #                     approved_bc = self.master_data[i][name][b_type]
-#     #                     quarter = str(self.master_data[i].quarter)
-#     #                     lower_list.append((approved_bc, quarter, i))
-#     #                 else:
-#     #                     quarter = str(self.master_data[i].quarter)
-#     #                     lower_list.append((None, quarter, None))
-#     #
-#     #             index_list = []
-#     #             for x in lower_list:
-#     #                 index_list.append(x[2])
-#     #
-#     #             project_baseline_info[name] = list(reversed(lower_list))
-#     #             project_baseline_index[name] = list(reversed(index_list))
-#     #
-#     #         baseline_info[BASELINE_TYPES[b_type]] = project_baseline_info
-#     #         baseline_index[BASELINE_TYPES[b_type]] = project_baseline_index
-#     #
-#     #     self.bl_info = baseline_info
-#     #     self.bl_index = baseline_index
-#
-#     def check_project_information(self) -> None:
-#         """Checks that project names in master are present/the same as in project info.
-#         Stops the programme if not"""
-#         error_cases = []
-#         for p in self.current_projects:
-#             if p not in self.project_information.projects:
-#                 error_cases.append(p)
-#
-#         if error_cases:
-#             for p in error_cases:
-#                 logger.critical(p + " has not been found in the project_info document.")
-#             raise ProjectNameError(
-#                 "Project names in "
-#                 + str(self.master_data[0].quarter)
-#                 + " master and project_info must match. Program stopping. Please amend."
-#             )
-#         else:
-#             logger.info("The latest master and project information match")
-#
-#     # def check_baselines(self) -> None:
-#     #     """checks that projects have the correct baseline information. stops the
-#     #     programme if baselines are missing"""
-#     #     for v in IPDC_BASELINE_TYPES.values():
-#     #         for p in self.current_projects:
-#     #             baselines = self.bl_index[v][p]
-#     #             if len(baselines) <= 2:
-#     #                 logger.critical(
-#     #                     p
-#     #                     + " does not have a baseline point for "
-#     #                     + v
-#     #                     + " this could cause the programme to "
-#     #                       "crash. Therefore the programme is stopping. "
-#     #                       "Please amend the data for " + p + " so that "
-#     #                                                          " it has at least one baseline point for " + v
-#     #                 )
-#
-#     def get_project_groups(self) -> None:
-#         """gets the groups that projects are part of e.g. business case
-#         stage or dft group"""
-#
-#         raw_dict = {}
-#         raw_list = []
-#         group_list = []
-#         stage_list = []
-#         for i, master in enumerate(self.master_data):
-#             lower_dict = {}
-#             for p in master.projects:
-#                 dft_group = self.project_information[p][
-#                     "Group"
-#                 ]  # different groups cleaned here
-#                 if dft_group is None:
-#                     logger.critical(
-#                         str(p)
-#                         + " does not have a Group value in the project information document."
-#                     )
-#                     raise ProjectGroupError(
-#                         "Program stopping as this could cause a crash. Please check project Group info."
-#                     )
-#                 if dft_group not in list(DFT_GROUP_DICT.keys()):
-#                     logger.critical(
-#                         str(p)
-#                         + " Group value is "
-#                         + str(dft_group)
-#                         + " . This is not a recognised group"
-#                     )
-#                     raise ProjectGroupError(
-#                         "Program stopping as this could cause a crash. Please check project Group info."
-#                     )
-#                 # stage = BC_STAGE_DICT[master[p]["IPDC approval point"]]
-#                 raw_list.append(("group", dft_group))
-#                 # raw_list.append(("stage", stage))
-#                 lower_dict[p] = dict(raw_list)
-#                 group_list.append(dft_group)
-#                 # stage_list.append(stage)
-#
-#             raw_dict[str(master.quarter)] = lower_dict
-#
-#         group_list = list(set(group_list))
-#         # stage_list = list(set(stage_list))
-#
-#         group_dict = {}
-#         for i, quarter in enumerate(raw_dict.keys()):
-#             lower_g_dict = {}
-#             for group_type in group_list:
-#                 g_list = []
-#                 for p in raw_dict[quarter].keys():
-#                     p_group = raw_dict[quarter][p]["group"]
-#                     if p_group == group_type:
-#                         g_list.append(p)
-#                 lower_g_dict[group_type] = g_list
-#
-#             gmpp_list = []
-#             for p in self.master_data[i].projects:
-#                 gmpp = self.project_information[p]["GMPP"]
-#                 if gmpp is not None:
-#                     gmpp_list.append(p)
-#                 lower_g_dict["GMPP"] = gmpp_list
-#
-#             group_dict[quarter] = lower_g_dict
-#
-#         stage_dict = {}
-#         for quarter in raw_dict.keys():
-#             lower_s_dict = {}
-#             for stage_type in stage_list:
-#                 s_list = []
-#                 for p in raw_dict[quarter].keys():
-#                     p_stage = raw_dict[quarter][p]["stage"]
-#                     if p_stage == stage_type:
-#                         s_list.append(p)
-#                 if stage_type is None:
-#                     if s_list:
-#                         if quarter == self.current_quarter:
-#                             for x in s_list:
-#                                 logger.critical(str(x) + " has no IPDC stage date")
-#                                 raise ProjectStageError(
-#                                     "Programme stopping as this could cause incomplete analysis"
-#                                 )
-#                         else:
-#                             for x in s_list:
-#                                 logger.warning(
-#                                     "In "
-#                                     + str(quarter)
-#                                     + " master "
-#                                     + str(x)
-#                                     + " IPDC stage data is currently None. Please amend."
-#                                 )
-#                 lower_s_dict[stage_type] = s_list
-#             stage_dict[quarter] = lower_s_dict
-#
-#         self.dft_groups = group_dict
-#         self.project_stage = stage_dict
-#
-#     def get_quarter_list(self) -> None:
-#         output_list = []
-#         for master in self.master_data:
-#             output_list.append(str(master.quarter))
-#         self.quarter_list = output_list
 
 
 def top35_run_p_reports(master: Master, **kwargs) -> None:
