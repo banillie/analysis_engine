@@ -69,10 +69,10 @@ from analysis_engine.top35_data import (
 )
 
 # INITIATE
-# master = JsonMaster(top35_get_master_data(), top35_get_project_information(), data_type="top35")
-# master_json_path = str("{0}/core_data/json/master".format(top35_root_path))
-master = JsonMaster(get_master_data(), get_project_information())
-master_json_path = str("{0}/core_data/json/master".format(root_path))
+master = JsonMaster(top35_get_master_data(), top35_get_project_information(), data_type="top35")
+master_json_path = str("{0}/core_data/json/master".format(top35_root_path))
+# master = JsonMaster(get_master_data(), get_project_information())
+# master_json_path = str("{0}/core_data/json/master".format(root_path))
 JsonData(master, master_json_path)
 
 ## GROUPS

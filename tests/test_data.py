@@ -589,11 +589,14 @@ def test_top35_summaries(top35_data):
 def test_config_file():
     config = configparser.ConfigParser()
     config.read('resources/example.ini')
-    # config.sections()
-    year = int(config['MASTERS']['1'][-5:-1])
-    quarter = int(config['MASTERS']['1'][-8:-7])
-    path = config['MASTERS']['1'][2:-11]
-    m = project_data_from_master(path, quarter, year)
-    print(m.quarter)
+    master_data_list = []
+    for key in config['MASTERS']:
+        year = int(config['MASTERS'][key][-4:])
+        quarter = int(config['MASTERS'][key][-7:-6])
+        path = "resources/" + config['MASTERS'][key][:-9]
+        m = project_data_from_master(path, quarter, year)
+        master_data_list.append(m)
+
+    print(list(reversed(master_data_list)))
 
 

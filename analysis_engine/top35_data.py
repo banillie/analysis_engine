@@ -1,3 +1,4 @@
+import configparser
 import datetime
 import math
 from collections import Counter, OrderedDict
@@ -54,27 +55,38 @@ top35_root_path = _top_35_platform_docs_dir()
 
 def top35_get_master_data() -> List[
     Dict[str, Union[str, int, datetime.date, float]]
-]:  # how specify a list of dictionaries?
+]:
     """Returns a list of dictionaries each containing quarter data"""
-    master_data_list = [
-        project_data_from_master_month(
-            top35_root_path / "core_data/250_Master_June_21.xlsx", 6, 2021
-        ),
-        project_data_from_master_month(
-            top35_root_path / "core_data/250_Master_May_21.xlsx", 5, 2021
-        ),
-        project_data_from_master_month(
-            top35_root_path / "core_data/250_Master_April_21.xlsx", 4, 2021
-        ),
-    ]
-    return master_data_list
+    config = configparser.ConfigParser()
+    config.read(top35_root_path/'core_data/confi.ini')
+    master_data_list = []
+    for key in config['MASTERS']:
+        year = int(config['MASTERS'][key][-4:])
+        quarter = int(config['MASTERS'][key][-7:-6])
+        path = str(top35_root_path) + "/core_data/" + config['MASTERS'][key][:-9]
+        m = project_data_from_master_month(path, quarter, year)
+        master_data_list.append(m)
+
+    # master_data_list = [
+    #     project_data_from_master_month(
+    #         top35_root_path / "core_data/250_Master_June_21.xlsx", 6, 2021
+    #     ),
+    #     project_data_from_master_month(
+    #         top35_root_path / "core_data/250_Master_May_21.xlsx", 5, 2021
+    #     ),
+    #     project_data_from_master_month(
+    #         top35_root_path / "core_data/250_Master_April_21.xlsx", 4, 2021
+    #     ),
+    # ]
+    return list(reversed(master_data_list))
 
 
 def top35_get_project_information() -> Dict[str, Union[str, int]]:
     """Returns dictionary containing all project meta data"""
-    return get_project_info_data(
-        top35_root_path / "core_data/top_250_project_info.xlsx"
-    )
+    config = configparser.ConfigParser()
+    config.read(top35_root_path / 'core_data/confi.ini')
+    path = str(top35_root_path) + "/core_data/" + config['PROJECT INFO']['projects']
+    return get_project_info_data(path)
 
 
 def top35_run_p_reports(master: Master, **kwargs) -> None:
