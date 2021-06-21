@@ -61,17 +61,25 @@ from analysis_engine.data import (
 # arg_list = ["quarters", "group", "stage", "remove", "type"]
 # calculate_arg_combinations(arg_list)
 
+from datamaps.api import project_data_from_master_month, project_data_from_master
+
 from analysis_engine.top35_data import (
-    top35_get_master_data,
-    top35_get_project_information,
     top35_root_path,
     top35_run_p_reports, CentralSupportData,
 )
 
 # INITIATE
-master = JsonMaster(top35_get_master_data(), top35_get_project_information(), data_type="top35")
+master = JsonMaster(
+    get_master_data(str(top35_root_path) + "/core_data/", project_data_from_master_month),
+    get_project_information(str(top35_root_path) + "/core_data/", str(top35_root_path) + "/core_data/"),
+    data_type="top35"
+)
 master_json_path = str("{0}/core_data/json/master".format(top35_root_path))
-# master = JsonMaster(get_master_data(), get_project_information())
+# master = JsonMaster(
+#     get_master_data(str(root_path) + "/core_data/", project_data_from_master),
+#     get_project_information(str(root_path) + "/core_data/", str(root_path) + "/core_data/data_mgmt/")
+#
+# )
 # master_json_path = str("{0}/core_data/json/master".format(root_path))
 JsonData(master, master_json_path)
 

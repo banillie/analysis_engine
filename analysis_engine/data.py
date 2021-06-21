@@ -1,3 +1,4 @@
+import configparser
 import csv
 import datetime
 import difflib
@@ -118,32 +119,49 @@ def calculate_arg_combinations(args_list: List):
             print(subset)
 
 
-def get_master_data() -> List[
-    Dict[str, Union[str, int, datetime.date, float]]
-]:  # how specify a list of dictionaries?
-    """Returns a list of dictionaries each containing quarter data"""
-    master_data_list = [
-        project_data_from_master(root_path / "core_data/master_4_2020.xlsx", 4, 2020),
-        project_data_from_master(root_path / "core_data/master_3_2020.xlsx", 3, 2020),
-        project_data_from_master(root_path / "core_data/master_2_2020.xlsx", 2, 2020),
-        project_data_from_master(root_path / "core_data/master_1_2020.xlsx", 1, 2020),
-        project_data_from_master(root_path / "core_data/master_4_2019.xlsx", 4, 2019),
-        project_data_from_master(root_path / "core_data/master_3_2019.xlsx", 3, 2019),
-        project_data_from_master(root_path / "core_data/master_2_2019.xlsx", 2, 2019),
-        project_data_from_master(root_path / "core_data/master_1_2019.xlsx", 1, 2019),
-        project_data_from_master(root_path / "core_data/master_4_2018.xlsx", 4, 2018),
-        project_data_from_master(root_path / "core_data/master_3_2018.xlsx", 3, 2018),
-        project_data_from_master(root_path / "core_data/master_2_2018.xlsx", 2, 2018),
-        project_data_from_master(root_path / "core_data/master_1_2018.xlsx", 1, 2018),
-        project_data_from_master(root_path / "core_data/master_4_2017.xlsx", 4, 2017),
-        project_data_from_master(root_path / "core_data/master_3_2017.xlsx", 3, 2017),
-        project_data_from_master(root_path / "core_data/master_2_2017.xlsx", 2, 2017),
-        project_data_from_master(root_path / "core_data/master_1_2017.xlsx", 1, 2017),
-        project_data_from_master(root_path / "core_data/master_4_2016.xlsx", 4, 2016),
-        project_data_from_master(root_path / "core_data/master_3_2016.xlsx", 3, 2016),
-    ]
+# def get_master_data() -> List[
+#     Dict[str, Union[str, int, datetime.date, float]]
+# ]:  # how specify a list of dictionaries?
+#     """Returns a list of dictionaries each containing quarter data"""
+#     master_data_list = [
+#         project_data_from_master(root_path / "core_data/master_4_2020.xlsx", 4, 2020),
+#         project_data_from_master(root_path / "core_data/master_3_2020.xlsx", 3, 2020),
+#         project_data_from_master(root_path / "core_data/master_2_2020.xlsx", 2, 2020),
+#         project_data_from_master(root_path / "core_data/master_1_2020.xlsx", 1, 2020),
+#         project_data_from_master(root_path / "core_data/master_4_2019.xlsx", 4, 2019),
+#         project_data_from_master(root_path / "core_data/master_3_2019.xlsx", 3, 2019),
+#         project_data_from_master(root_path / "core_data/master_2_2019.xlsx", 2, 2019),
+#         project_data_from_master(root_path / "core_data/master_1_2019.xlsx", 1, 2019),
+#         project_data_from_master(root_path / "core_data/master_4_2018.xlsx", 4, 2018),
+#         project_data_from_master(root_path / "core_data/master_3_2018.xlsx", 3, 2018),
+#         project_data_from_master(root_path / "core_data/master_2_2018.xlsx", 2, 2018),
+#         project_data_from_master(root_path / "core_data/master_1_2018.xlsx", 1, 2018),
+#         project_data_from_master(root_path / "core_data/master_4_2017.xlsx", 4, 2017),
+#         project_data_from_master(root_path / "core_data/master_3_2017.xlsx", 3, 2017),
+#         project_data_from_master(root_path / "core_data/master_2_2017.xlsx", 2, 2017),
+#         project_data_from_master(root_path / "core_data/master_1_2017.xlsx", 1, 2017),
+#         project_data_from_master(root_path / "core_data/master_4_2016.xlsx", 4, 2016),
+#         project_data_from_master(root_path / "core_data/master_3_2016.xlsx", 3, 2016),
+#     ]
+#
+#     return master_data_list
 
-    return master_data_list
+
+def get_master_data(path: Path, get_data_function) -> List[
+    Dict[str, Union[str, int, datetime.date, float]]
+]:
+    """Returns a list of dictionaries each containing quarter data"""
+    config = configparser.ConfigParser()
+    config.read(path + 'confi.ini')
+    master_data_list = []
+    for key in config['MASTERS']:
+        year = int(config['MASTERS'][key][-4:])
+        quarter = int(config['MASTERS'][key][-7:-6])
+        m_path = str(path) + config['MASTERS'][key][:-9]
+        m = get_data_function(m_path, quarter, year)
+        master_data_list.append(m)
+
+    return list(reversed(master_data_list))
 
 
 def get_master_data_json_test() -> Dict:
@@ -264,11 +282,23 @@ def get_project_info_data(master_file: str) -> Dict:
     return p_dict
 
 
-def get_project_information() -> Dict[str, Union[str, int]]:
-    """Returns dictionary containing all project meta data"""
-    return get_project_info_data(
-        root_path / "core_data/data_mgmt/project_info.xlsx"
-    )
+# def get_project_information() -> Dict[str, Union[str, int]]:
+#     """Returns dictionary containing all project meta data"""
+#     return get_project_info_data(
+#         root_path / "core_data/data_mgmt/project_info.xlsx"
+#     )
+
+def get_project_information(
+        confi_path: Path,
+        pi_path: Path,
+) -> Dict[str, Union[str, int]]:
+    """Returns dictionary containing all project meta data.
+    confi_path is ini file path.
+    pi_path is project_info path."""
+    config = configparser.ConfigParser()
+    config.read(confi_path + 'confi.ini')
+    path = str(pi_path) + config['PROJECT INFO']['projects']
+    return get_project_info_data(path)
 
 
 def get_project_information_file_path() -> typing.TextIO:
