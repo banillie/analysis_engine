@@ -3,7 +3,7 @@ from argparse import RawTextHelpFormatter
 import sys
 from typing import Dict
 
-from openpyxl import load_workbook
+from datamaps.api import project_data_from_master, project_data_from_master_month
 
 from analysis_engine.data import (
     get_master_data,
@@ -46,7 +46,7 @@ from analysis_engine.data import (
 
 import logging
 
-from analysis_engine.top35_data import top35_get_master_data, top35_get_project_information, top35_run_p_reports, \
+from analysis_engine.top35_data import top35_run_p_reports, \
     top35_root_path, CentralSupportData
 
 logging.basicConfig(
@@ -72,7 +72,17 @@ def check_remove(op_args):  # subcommand arg
 def ipdc_initiate(args):
     print("creating a master data file for ipdc and gmpp portfolio reporting.")
     try:
-        master = JsonMaster(get_master_data(), get_project_information())
+        master = JsonMaster(
+            get_master_data(
+                str(root_path) + "/core_data/confi.ini",
+                str(root_path) + "/core_data/",
+                project_data_from_master
+            ),
+            get_project_information(
+                str(root_path) + "/core_data/confi.ini",
+                str(root_path) + "/core_data/data_mgmt/"
+            ),
+        )
         master.get_baseline_data()
         master.check_baselines()
     except (ProjectNameError, ProjectGroupError, ProjectStageError) as e:
@@ -86,7 +96,18 @@ def ipdc_initiate(args):
 def top250_initiate(args):
     print("creating a master data file for top 250 reporting.")
     try:
-        master = JsonMaster(top35_get_master_data(), top35_get_project_information(), data_type="top35")
+        master = JsonMaster(
+            get_master_data(
+                str(top35_root_path) + "/core_data/confi.ini",
+                str(top35_root_path) + "/core_data/",
+                project_data_from_master_month
+            ),
+            get_project_information(
+                str(top35_root_path) + "/core_data/confi.ini",
+                str(top35_root_path) + "/core_data/"
+            ),
+            data_type="top35"
+        )
     except (ProjectNameError, ProjectGroupError, ProjectStageError) as e:
         logger.critical(e)
         sys.exit(1)

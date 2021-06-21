@@ -588,7 +588,7 @@ def test_top35_summaries(top35_data):
 
 def test_config_file():
     config = configparser.ConfigParser()
-    config.read('resources/example.ini')
+    config.read('resources/basic_m_confi.ini')
     master_data_list = []
     for key in config['MASTERS']:
         year = int(config['MASTERS'][key][-4:])

@@ -70,16 +70,23 @@ from analysis_engine.top35_data import (
 
 # INITIATE
 master = JsonMaster(
-    get_master_data(str(top35_root_path) + "/core_data/", project_data_from_master_month),
-    get_project_information(str(top35_root_path) + "/core_data/", str(top35_root_path) + "/core_data/"),
+    get_master_data(
+        str(top35_root_path) + "/core_data/confi.ini",
+        str(top35_root_path) + "/core_data/",
+        project_data_from_master_month
+    ),
+    get_project_information(
+        str(top35_root_path) + "/core_data/confi.ini",
+        str(top35_root_path) + "/core_data/"
+    ),
     data_type="top35"
 )
 master_json_path = str("{0}/core_data/json/master".format(top35_root_path))
-# master = JsonMaster(
-#     get_master_data(str(root_path) + "/core_data/", project_data_from_master),
-#     get_project_information(str(root_path) + "/core_data/", str(root_path) + "/core_data/data_mgmt/")
-#
-# )
+master = JsonMaster(
+    get_master_data(str(root_path) + "/core_data/", project_data_from_master),
+    get_project_information(str(root_path) + "/core_data/",
+                            str(root_path) + "/core_data/data_mgmt/")
+)
 # master_json_path = str("{0}/core_data/json/master".format(root_path))
 JsonData(master, master_json_path)
 

@@ -147,17 +147,20 @@ def calculate_arg_combinations(args_list: List):
 #     return master_data_list
 
 
-def get_master_data(path: Path, get_data_function) -> List[
-    Dict[str, Union[str, int, datetime.date, float]]
-]:
+def get_master_data(
+        confi_path: Path,
+        pi_path: Path,
+        get_data_function
+) -> List[
+    Dict[str, Union[str, int, datetime.date, float]]]:
     """Returns a list of dictionaries each containing quarter data"""
     config = configparser.ConfigParser()
-    config.read(path + 'confi.ini')
+    config.read(confi_path)
     master_data_list = []
     for key in config['MASTERS']:
         year = int(config['MASTERS'][key][-4:])
         quarter = int(config['MASTERS'][key][-7:-6])
-        m_path = str(path) + config['MASTERS'][key][:-9]
+        m_path = str(pi_path) + config['MASTERS'][key][:-9]
         m = get_data_function(m_path, quarter, year)
         master_data_list.append(m)
 
@@ -282,12 +285,6 @@ def get_project_info_data(master_file: str) -> Dict:
     return p_dict
 
 
-# def get_project_information() -> Dict[str, Union[str, int]]:
-#     """Returns dictionary containing all project meta data"""
-#     return get_project_info_data(
-#         root_path / "core_data/data_mgmt/project_info.xlsx"
-#     )
-
 def get_project_information(
         confi_path: Path,
         pi_path: Path,
@@ -296,7 +293,7 @@ def get_project_information(
     confi_path is ini file path.
     pi_path is project_info path."""
     config = configparser.ConfigParser()
-    config.read(confi_path + 'confi.ini')
+    config.read(confi_path)
     path = str(pi_path) + config['PROJECT INFO']['projects']
     return get_project_info_data(path)
 
@@ -6046,7 +6043,10 @@ def run_p_reports(master: Master, **kwargs) -> None:
         print("Compiling summary for " + p)
         report_doc = get_input_doc(root_path / "input/summary_temp.docx")
         qrt = make_file_friendly(str(master.current_quarter))
-        output = compile_p_report(report_doc, get_project_information(), master, p)
+        p_info = get_project_information(
+            str(root_path) + "/core_data/confi.ini", str(root_path) + "/core_data/data_mgmt/"
+        )
+        output = compile_p_report(report_doc, p_info, master, p)
         output.save(
             root_path / "output/{}_report_{}.docx".format(p, qrt)
         )  # add quarter here

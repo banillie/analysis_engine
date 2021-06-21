@@ -9,8 +9,8 @@ from analysis_engine.cdg_data import (
     cdg_get_master_data,
     cdg_get_project_information,
 )
-from analysis_engine.data import open_word_doc, open_pickle_file, root_path, Master, open_json_file, JsonMaster
-from analysis_engine.top35_data import top35_root_path, top35_get_master_data, top35_get_project_information
+from analysis_engine.data import open_word_doc, open_pickle_file, root_path, Master, open_json_file, JsonMaster, \
+    get_master_data, get_project_information
 
 
 def pytest_addoption(parser):
@@ -49,63 +49,36 @@ def word_doc_landscape():
 
 @pytest.fixture
 def project_info():
-    return project_data_from_master(
-        os.path.join(os.getcwd(), "resources/" "test_project_info.xlsx"),
-        1,
-        2020,
+    return get_project_information(
+        "resources/basic_m_confi.ini",
+        "resources/"
     )
 
 
-def cdg_project_info():
-    return project_data_from_master(
-        os.path.join(os.getcwd(), "resources/" "test_cdg_proj_info.xlsx"),
-        1,
-        2020,
-    )
+# def cdg_project_info():
+#     return project_data_from_master(
+#         os.path.join(os.getcwd(), "resources/" "test_cdg_proj_info.xlsx"),
+#         1,
+#         2020,
+#     )
 
 
 @pytest.fixture()
 def basic_masters_dicts():
-    test_master_data = [
-        project_data_from_master(
-            os.path.join(os.getcwd(), "resources/" "cut_down_master_4_2018.xlsx"),
-            4,
-            2018,
-        ),
-        project_data_from_master(
-            os.path.join(os.getcwd(), "resources/" "cut_down_master_4_2017.xlsx"),
-            4,
-            2017,
-        ),
-        project_data_from_master(
-            os.path.join(os.getcwd(), "resources/" "cut_down_master_4_2016.xlsx"),
-            4,
-            2016,
-        ),
-    ]
-    return test_master_data
+    return get_master_data(
+        "resources/basic_m_confi.ini",
+        "resources/",
+        project_data_from_master
+    )
 
 
 @pytest.fixture()
 def full_test_masters_dict():
-    test_master_data = [
-        project_data_from_master(
-            os.path.join(os.getcwd(), "resources/" "test_master_1_2020.xlsx"), 1, 2020
-        ),
-        project_data_from_master(
-            os.path.join(os.getcwd(), "resources/" "test_master_4_2019.xlsx"), 4, 2019
-        ),
-        project_data_from_master(
-            os.path.join(os.getcwd(), "resources/" "test_master_4_2018.xlsx"), 4, 2018
-        ),
-        project_data_from_master(
-            os.path.join(os.getcwd(), "resources/" "test_master_4_2017.xlsx"), 4, 2017
-        ),
-        project_data_from_master(
-            os.path.join(os.getcwd(), "resources/" "test_master_4_2016.xlsx"), 4, 2016
-        ),
-    ]
-    return test_master_data
+    return get_master_data(
+        "resources/full_m_confi.ini",
+        "resources/",
+        project_data_from_master
+    )
 
 
 @pytest.fixture()
@@ -222,6 +195,11 @@ def top35_master():
         ),
     ]
     return master_data_list
+    # return get_master_data(
+    #     "resources/full_m_confi.ini",
+    #     "resources/",
+    #     project_data_from_master
+    # )
 
 
 def top35_project_information():
@@ -250,4 +228,4 @@ def top35_data():
 # @pytest.fixture()
 # def ini_file():
 #     config = configparser.ConfigParser()
-#     config.read('example.ini')
+#     config.read('basic_m_confi.ini')
