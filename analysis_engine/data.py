@@ -304,10 +304,9 @@ def get_project_information_file_path() -> typing.TextIO:
 
 def get_gmpp_projects(project_info_dict) -> List[str]:
     # returns list of projects that are in gmpp
-    project_list = list(project_info_dict.data.keys())
     output_list = []
-    for p in project_list:
-        if project_info_dict.data[p]["GMPP"]:
+    for p in project_info_dict.keys():
+        if project_info_dict[p]["GMPP"]:
             output_list.append(p)
 
     return output_list

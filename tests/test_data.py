@@ -120,6 +120,13 @@ def test_creation_of_masters_class(basic_masters_dicts, project_info):
     assert isinstance(master.master_data, (list,))
 
 
+def test_creation_of_top250_master_json_file(
+        top35_master, top35_project_info, top35_master_json_path
+):
+    m = JsonMaster(top35_master, top35_project_info, data_type="top35")
+    JsonData(m, top35_master_json_path)
+
+
 def test_getting_baseline_data_from_masters(basic_masters_dicts, project_info):
     master = JsonMaster(basic_masters_dicts, project_info)
     master.get_baseline_data()
@@ -300,32 +307,6 @@ def test_compare_changes_between_masters(basic_masters_file_paths, project_info)
     gmpp_list = get_gmpp_projects(project_info)
     wb = compare_masters(basic_masters_file_paths, gmpp_list)
     wb.save(os.path.join(os.getcwd(), "resources/cut_down_master_compared.xlsx"))
-
-
-## nolonger using this meta data. gmpp taken from elsewhere
-# def test_get_gmpp_projects(project_info):
-#     gmpp_list = get_gmpp_projects(project_info)
-#     assert gmpp_list == ["Sea of Tranquility"]
-
-
-# this method has probably now been superceded by save_graph
-# def test_saving_cost_profile_graph_files(costs_masters, project_info):
-#     master = Master(costs_masters, project_info)
-#     costs = CostData(master, sot)
-#     standard_profile(costs)
-#     costs = CostData(master, group)
-#     standard_profile(costs, title="Python", fig_size=FIGURE_STYLE[1])
-
-
-# this method has probably now been superceded by save_graph
-# def test_saving_total_cost_benefit_graph_files(costs_masters, project_info):
-#     master = Master(costs_masters, project_info)
-#     costs = CostData(master, f9)
-#     benefits = BenefitsData(master, f9)
-#     totals_chart(costs, benefits)
-#     costs = CostData(master, group)
-#     benefits = BenefitsData(master, group)
-#     totals_chart(costs, benefits, title="Test Group")
 
 
 def test_get_milestone_data_bl(master):

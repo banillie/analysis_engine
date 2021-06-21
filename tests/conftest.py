@@ -1,7 +1,7 @@
 import configparser
 import os
 import pytest
-from datamaps.api import project_data_from_master
+from datamaps.api import project_data_from_master, project_data_from_master_month
 from openpyxl import load_workbook
 
 from analysis_engine.cdg_data import (
@@ -10,7 +10,7 @@ from analysis_engine.cdg_data import (
     cdg_get_project_information,
 )
 from analysis_engine.data import open_word_doc, open_pickle_file, root_path, Master, open_json_file, JsonMaster, \
-    get_master_data, get_project_information
+    get_master_data, get_project_information, JsonData
 
 
 def pytest_addoption(parser):
@@ -106,6 +106,11 @@ def master_json_path():
 
 
 @pytest.fixture()
+def top35_master_json_path():
+    return os.path.join(os.getcwd(), "resources/" "top250_json_master")
+
+
+@pytest.fixture()
 def master():
     jm = open_json_file(os.path.join(os.getcwd(), "resources/" "json_master.json"))
     return Master(jm)
@@ -158,20 +163,20 @@ def sp_data():
     return os.path.join(os.getcwd(), "resources/test_sp_master.xlsx")
 
 
-@pytest.fixture()
-def cdg_data():
-    return {
-        "test": {
-            "docx_save_path": "resources/{}.docx",
-            "data": (cdg_masters(), cdg_project_info()),
-            "op_args": {
-                "quarter": ["Q4 20/21"],
-                "group": ["CFPD"],
-                "chart": True,
-                "data_type": "cdg",
-            },
-        },
-    }
+# @pytest.fixture()
+# def cdg_data():
+#     return {
+#         "test": {
+#             "docx_save_path": "resources/{}.docx",
+#             "data": (cdg_masters(), cdg_project_info()),
+#             "op_args": {
+#                 "quarter": ["Q4 20/21"],
+#                 "group": ["CFPD"],
+#                 "chart": True,
+#                 "data_type": "cdg",
+#             },
+#         },
+#     }
 
 
 @pytest.fixture()
@@ -187,45 +192,36 @@ def ipdc_data():
     }
 
 
+@pytest.fixture()
 def top35_master():
-    master_data_list = [
-        project_data_from_master("resources/250_master_test_2.xlsx", 4, 2020
-        ),
-        project_data_from_master("resources/250_master_test_1.xlsx", 3, 2020
-        ),
-    ]
-    return master_data_list
-    # return get_master_data(
-    #     "resources/full_m_confi.ini",
-    #     "resources/",
-    #     project_data_from_master
-    # )
+    return get_master_data(
+            "resources/top250_confi.ini",
+            "resources/",
+            project_data_from_master_month
+        )
 
 
-def top35_project_information():
-    return project_data_from_master("resources/250_project_info_test.xlsx", 2, 2020)
+@pytest.fixture()
+def top35_project_info():
+    return get_project_information(
+            "resources/top250_confi.ini",
+            "resources/"
+        )
 
 
 @pytest.fixture()
 def top35_data():
     return {
         "docx_save_path": "resources/{}.docx",
-            "master": JsonMaster(top35_master(),
-                           top35_project_information(),
-                           data_type="top35"
-                           ),
-            "op_args": {
-                "quarter": ["Q4 20/21"],
-                # "group": ["HSRG", "RSS", "RIG", "RPE"],
-                "group": ["RIG"],
-                "chart": True,
-                "data_type": "top35",
-                "circle_colour": 'No',
-            },
-        }
+        "master": Master(open_json_file("resources/top250_json_master.json")),
+        "op_args": {
+            # "quarter": ["Month(June), 2021"],
+            "quarter": ["standard"],
+            # "group": ["HSRG", "RSS", "RIG", "RPE"],
+            "group": ["RIG"],
+            "chart": True,
+            "data_type": "top35",
+            "circle_colour": 'No',
+        },
+    }
 
-
-# @pytest.fixture()
-# def ini_file():
-#     config = configparser.ConfigParser()
-#     config.read('basic_m_confi.ini')
