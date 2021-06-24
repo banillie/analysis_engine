@@ -69,26 +69,26 @@ from analysis_engine.top35_data import (
 )
 
 # INITIATE
-master = JsonMaster(
-    get_master_data(
-        str(top35_root_path) + "/core_data/confi.ini",
-        str(top35_root_path) + "/core_data/",
-        project_data_from_master_month
-    ),
-    get_project_information(
-        str(top35_root_path) + "/core_data/confi.ini",
-        str(top35_root_path) + "/core_data/"
-    ),
-    data_type="top35"
-)
-master_json_path = str("{0}/core_data/json/master".format(top35_root_path))
-master = JsonMaster(
-    get_master_data(str(root_path) + "/core_data/", project_data_from_master),
-    get_project_information(str(root_path) + "/core_data/",
-                            str(root_path) + "/core_data/data_mgmt/")
-)
+# master = JsonMaster(
+#     get_master_data(
+#         str(top35_root_path) + "/core_data/confi.ini",
+#         str(top35_root_path) + "/core_data/",
+#         project_data_from_master_month
+#     ),
+#     get_project_information(
+#         str(top35_root_path) + "/core_data/confi.ini",
+#         str(top35_root_path) + "/core_data/"
+#     ),
+#     data_type="top35"
+# )
+# master_json_path = str("{0}/core_data/json/master".format(top35_root_path))
+# master = JsonMaster(
+#     get_master_data(str(root_path) + "/core_data/", project_data_from_master),
+#     get_project_information(str(root_path) + "/core_data/",
+#                             str(root_path) + "/core_data/data_mgmt/")
+# )
 # master_json_path = str("{0}/core_data/json/master".format(root_path))
-JsonData(master, master_json_path)
+# JsonData(master, master_json_path)
 
 ## GROUPS
 # DFT_GROUP = ["HSRG", "RSS", "RIG", "AMIS", "RPE"]
@@ -96,30 +96,30 @@ JsonData(master, master_json_path)
 # hoz_doc = open_word_doc(root_path / "input/summary_temp_landscape.docx")
 # doc = open_word_doc(root_path / "input/summary_temp.docx")
 
-# top35_data_dict = {
-#     "docx_save_path": str(top35_root_path / "output/{}.docx"),
-#     "master": Master(open_json_file(str(top35_root_path / "core_data/json/master.json"))),
-#     "op_args": {
-#         # "quarter": ["Month(June), 2021"],
-#         "quarter": ["standard"],
-#         # "group": ["HSRG", "RSS", "RIG", "RPE"],
-#         "group": ["RIS2"],
-#         # "chart": False,
-#         "data_type": "top35",
-#         "circle_colour": "No",
-#         # "dates": ["1/6/2021", "1/7/2021"],
-#         "key": [
-#             "PROJECT DEL TO CURRENT TIMINGS ?",
-#             "GMPP ID: IS THIS PROJECT ON GMPP",
-#             "PROJECT ON BUDGET?",
-#             "WLC TOTAL",
-#             "WLC NON GOV",
-#         ],
-#         # "key": ["Start of Trial Running"],
-#     },
-#     "excel_save_path": str(top35_root_path / "output/{}.xlsx"),
-#     "word_save_path": str(top35_root_path / "output/{}.docx")
-# }
+top35_data_dict = {
+    "docx_save_path": str(top35_root_path / "output/{}.docx"),
+    "master": Master(open_json_file(str(top35_root_path / "core_data/json/master.json"))),
+    "op_args": {
+        # "quarter": ["Month(June), 2021"],
+        "quarter": ["standard"],
+        # "group": ["HSRG", "RSS", "RIG", "RPE"],
+        "group": ["RIG"],
+        # "chart": False,
+        "data_type": "top35",
+        "circle_colour": "No",
+        # "dates": ["1/6/2021", "1/7/2021"],
+        "key": [
+            "PROJECT DEL TO CURRENT TIMINGS ?",
+            "GMPP ID: IS THIS PROJECT ON GMPP",
+            "PROJECT ON BUDGET?",
+            "WLC TOTAL",
+            "WLC NON GOV",
+        ],
+        # "key": ["Start of Trial Running"],
+    },
+    "excel_save_path": str(top35_root_path / "output/{}.xlsx"),
+    "word_save_path": str(top35_root_path / "output/{}.docx")
+}
 
 # ipdc_data_dict = {
 #     "docx_save_path": str(root_path / "output/{}.docx"),
@@ -161,7 +161,7 @@ JsonData(master, master_json_path)
 #     "word_save_path": str(cdg_root_path / "output/{}.docx")
 # }
 
-# data = top35_data_dict
+data = top35_data_dict
 
 ## DANDELION
 # dl_data = DandelionData(data["master"], **data["op_args"])
@@ -171,7 +171,7 @@ JsonData(master, master_json_path)
 
 
 # MILESTONES
-# ms = MilestoneData(data["master"], **data["op_args"])
+ms = MilestoneData(data["master"], **data["op_args"])
 # ipdc_ms = MilestoneData(ipdc_data_dict["master"], **ipdc_data_dict["op_args"])
 # ms.filter_chart_info(**data["op_args"])
 # wb = put_milestones_into_wb(ms)

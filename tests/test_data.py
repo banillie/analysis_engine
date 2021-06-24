@@ -567,17 +567,5 @@ def test_top35_summaries(top35_data):
     top35_run_p_reports(top35_data["master"], **top35_data["op_args"])
 
 
-def test_config_file():
-    config = configparser.ConfigParser()
-    config.read('resources/basic_m_confi.ini')
-    master_data_list = []
-    for key in config['MASTERS']:
-        year = int(config['MASTERS'][key][-4:])
-        quarter = int(config['MASTERS'][key][-7:-6])
-        path = "resources/" + config['MASTERS'][key][:-9]
-        m = project_data_from_master(path, quarter, year)
-        master_data_list.append(m)
-
-    print(list(reversed(master_data_list)))
 
 
