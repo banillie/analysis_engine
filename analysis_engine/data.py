@@ -101,11 +101,11 @@ class InputError(Exception):
 def _platform_docs_dir() -> Path:
     #  Cross plaform file path handling
     if platform.system() == "Linux":
-        return Path.home() / "Documents" / "analysis_engine"
+        return Path.home() / "Documents" / "ipdc"
     if platform.system() == "Darwin":
-        return Path.home() / "Documents" / "analysis_engine"
+        return Path.home() / "Documents" / "ipdc"
     else:
-        return Path.home() / "Documents" / "analysis_engine"
+        return Path.home() / "Documents" / "ipdc"
 
 
 root_path = _platform_docs_dir()

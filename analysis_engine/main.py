@@ -80,7 +80,7 @@ def ipdc_initiate(args):
             ),
             get_project_information(
                 str(root_path) + "/core_data/confi.ini",
-                str(root_path) + "/core_data/data_mgmt/"
+                str(root_path) + "/core_data/"
             ),
         )
         master.get_baseline_data()
