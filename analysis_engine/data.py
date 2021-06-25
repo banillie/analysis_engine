@@ -3209,8 +3209,8 @@ def compare_text_new_and_old(text_1: str, text_2: str, doc: Document) -> None:
 
     comp = difflib.Differ()
     diff = list(comp.compare(text_2.split(), text_1.split()))
-    diff = [x for x in diff if x[0] is not "-"]  # remove all deleted text
-    diff = [x for x in diff if x[0] is not "?"]  # remove ?. not sure what these represent.
+    diff = [x for x in diff if x[0] != "-"]  # remove all deleted text
+    diff = [x for x in diff if x[0] != "?"]  # remove ?. not sure what these represent.
     y = doc.add_paragraph()
     for i, text in enumerate(diff):
         # f = len(diff) - 1

@@ -1,6 +1,7 @@
 ../.idea/
 .venv/
 __pycache__
+tests/__pycache__
 live.db
 other/create_test_files.py
 .idea/
