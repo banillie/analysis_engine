@@ -66,7 +66,7 @@ for which are set out below.
 line prompt construction process and the user should use it for guidance on what subcommands
 and arguments are available for use. 
 
-analysis_engine currently has the following _subcommands_:
+analysis_engine currently has the following _arguments_:
 
 `initiate` The user must enter this command
 every time master data, contained in the core_data directory, is updated.

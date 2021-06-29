@@ -9384,3 +9384,40 @@ def get_strategic_priorities_data(
     radar_data = [categories, (title, top_list)]
 
     return radar_data
+
+
+def get_gmpp_data():
+    wb = load_workbook("/home/will/Downloads/GMPP_DATA.xlsm")
+    ws = wb.active
+
+    output_dict = {}
+    for x in range(2, ws.max_row + 1):
+        project_name = ws.cell(row=x, column=2).value
+        key = ws.cell(row=x, column=6).value
+        value = ws.cell(row=x, column=7).value
+        if project_name in list(output_dict.keys()):
+            output_dict[project_name][key] = value
+        else:
+            output_dict[project_name] = {key: value}
+
+    return output_dict
+
+
+def print_gmpp_data(gmpp_dict: Dict):
+    wb = Workbook()
+    ws = wb.active
+
+    for x, project in enumerate(list(gmpp_dict.keys())):
+        ws.cell(row=1, column=2+x).value = project
+        for i, k in enumerate(gmpp_dict['A303 Amesbury to Berwick Down']):
+            # k is key. Using A303 now as has most keys
+            if x == 0:
+                ws.cell(row=2 + i, column=1).value = k
+            try:
+                ws.cell(row=2 + i, column=2 + x).value = gmpp_dict[project][k]
+            except KeyError:
+                pass
+
+    ws.cell(row=1, column=1).value = "Project Name"
+
+    wb.save("/home/will/Downloads/GMPP_DATA_DFT_FORMAT.xlsx")

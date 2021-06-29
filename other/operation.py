@@ -54,7 +54,10 @@ from analysis_engine.data import (
     JsonData,
     open_json_file,
     get_input_doc,
-    ipdc_dashboard, JsonMaster,
+    ipdc_dashboard,
+    JsonMaster,
+    get_gmpp_data,
+    print_gmpp_data,
 )
 
 ## GENERATE CLI OPTIONS
@@ -96,30 +99,30 @@ from analysis_engine.top35_data import (
 # hoz_doc = open_word_doc(root_path / "input/summary_temp_landscape.docx")
 # doc = open_word_doc(root_path / "input/summary_temp.docx")
 
-top35_data_dict = {
-    "docx_save_path": str(top35_root_path / "output/{}.docx"),
-    "master": Master(open_json_file(str(top35_root_path / "core_data/json/master.json"))),
-    "op_args": {
-        # "quarter": ["Month(June), 2021"],
-        "quarter": ["standard"],
-        # "group": ["HSRG", "RSS", "RIG", "RPE"],
-        "group": ["RIG"],
-        # "chart": False,
-        "data_type": "top35",
-        "circle_colour": "No",
-        # "dates": ["1/6/2021", "1/7/2021"],
-        "key": [
-            "PROJECT DEL TO CURRENT TIMINGS ?",
-            "GMPP ID: IS THIS PROJECT ON GMPP",
-            "PROJECT ON BUDGET?",
-            "WLC TOTAL",
-            "WLC NON GOV",
-        ],
-        # "key": ["Start of Trial Running"],
-    },
-    "excel_save_path": str(top35_root_path / "output/{}.xlsx"),
-    "word_save_path": str(top35_root_path / "output/{}.docx")
-}
+# top35_data_dict = {
+#     "docx_save_path": str(top35_root_path / "output/{}.docx"),
+#     "master": Master(open_json_file(str(top35_root_path / "core_data/json/master.json"))),
+#     "op_args": {
+#         # "quarter": ["Month(June), 2021"],
+#         "quarter": ["standard"],
+#         # "group": ["HSRG", "RSS", "RIG", "RPE"],
+#         "group": ["RIG"],
+#         # "chart": False,
+#         "data_type": "top35",
+#         "circle_colour": "No",
+#         # "dates": ["1/6/2021", "1/7/2021"],
+#         "key": [
+#             "PROJECT DEL TO CURRENT TIMINGS ?",
+#             "GMPP ID: IS THIS PROJECT ON GMPP",
+#             "PROJECT ON BUDGET?",
+#             "WLC TOTAL",
+#             "WLC NON GOV",
+#         ],
+#         # "key": ["Start of Trial Running"],
+#     },
+#     "excel_save_path": str(top35_root_path / "output/{}.xlsx"),
+#     "word_save_path": str(top35_root_path / "output/{}.docx")
+# }
 
 # ipdc_data_dict = {
 #     "docx_save_path": str(root_path / "output/{}.docx"),
@@ -161,7 +164,7 @@ top35_data_dict = {
 #     "word_save_path": str(cdg_root_path / "output/{}.docx")
 # }
 
-data = top35_data_dict
+# data = top35_data_dict
 
 ## DANDELION
 # dl_data = DandelionData(data["master"], **data["op_args"])
@@ -171,7 +174,7 @@ data = top35_data_dict
 
 
 # MILESTONES
-ms = MilestoneData(data["master"], **data["op_args"])
+# ms = MilestoneData(data["master"], **data["op_args"])
 # ipdc_ms = MilestoneData(ipdc_data_dict["master"], **ipdc_data_dict["op_args"])
 # ms.filter_chart_info(**data["op_args"])
 # wb = put_milestones_into_wb(ms)
@@ -247,3 +250,7 @@ ms = MilestoneData(data["master"], **data["op_args"])
 # g = milestone_chart(cs, data["master"], **data["op_args"])
 # put_matplotlib_fig_into_word(hoz_doc, g, size=7, transparent=False)
 # hoz_doc.save(data["word_save_path"].format("central_support_graph"))
+
+
+a = get_gmpp_data()
+print_gmpp_data(a)
