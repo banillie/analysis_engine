@@ -58,6 +58,9 @@ from analysis_engine.data import (
     JsonMaster,
     get_gmpp_data,
     print_gmpp_data,
+    get_risk_data,
+    print_risk_data,
+    get_key_map,
 )
 
 ## GENERATE CLI OPTIONS
@@ -251,6 +254,12 @@ from analysis_engine.top35_data import (
 # put_matplotlib_fig_into_word(hoz_doc, g, size=7, transparent=False)
 # hoz_doc.save(data["word_save_path"].format("central_support_graph"))
 
-
+#GMPP data
 a = get_gmpp_data()
 print_gmpp_data(a)
+
+# Risk data
+# risks = get_risk_data()
+# print_risk_data(risks)
+
+# keys = get_key_map()

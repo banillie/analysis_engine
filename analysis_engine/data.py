@@ -9386,9 +9386,21 @@ def get_strategic_priorities_data(
     return radar_data
 
 
+def get_key_map():
+    wb = load_workbook("/home/will/Downloads/KEY_MAP.xlsx")
+    ws = wb.active
+    output_dict = {}
+    for x in range(2, ws.max_row + 1):
+        output_dict[ws.cell(row=x, column=1).value] = ws.cell(row=x, column=2).value
+
+    return output_dict
+
+
 def get_gmpp_data():
     wb = load_workbook("/home/will/Downloads/GMPP_DATA.xlsm")
     ws = wb.active
+
+    map = get_key_map()
 
     output_dict = {}
     for x in range(2, ws.max_row + 1):
@@ -9396,9 +9408,15 @@ def get_gmpp_data():
         key = ws.cell(row=x, column=6).value
         value = ws.cell(row=x, column=7).value
         if project_name in list(output_dict.keys()):
-            output_dict[project_name][key] = value
+            try:
+                output_dict[project_name][map[key]] = value
+            except KeyError:
+                output_dict[project_name][key] = value
         else:
-            output_dict[project_name] = {key: value}
+            try:
+                output_dict[project_name] = {map[key]: value}
+            except KeyError:
+                output_dict[project_name] = {key: value}
 
     return output_dict
 
@@ -9421,3 +9439,59 @@ def print_gmpp_data(gmpp_dict: Dict):
     ws.cell(row=1, column=1).value = "Project Name"
 
     wb.save("/home/will/Downloads/GMPP_DATA_DFT_FORMAT.xlsx")
+
+
+def get_risk_data():
+    wb = load_workbook("/home/will/Downloads/BasicRiskReport.xlsx")
+    ws = wb.active
+
+    output_dict = {}
+    for x in range(2, ws.max_row + 1):
+        code = ws.cell(row=x, column=2).value
+        output_dict[code] = {
+            "name": ws.cell(row=x, column=3).value,
+            "likelihood": ws.cell(row=x, column=4).value,
+            "impact": ws.cell(row=x, column=5).value,
+            "exposure": ws.cell(row=x, column=6).value,
+            "date": ws.cell(row=x, column=12).value,
+            "planned": ws.cell(row=x, column=13).value,
+            "implemented": ws.cell(row=x, column=15).value,
+            "cause": ws.cell(row=x, column=17).value,
+            "event": ws.cell(row=x, column=18).value,
+            "effect": ws.cell(row=x, column=19).value,
+        }
+
+    return output_dict
+
+
+def print_risk_data(risk_data: Dict):
+    wb = Workbook()
+    ws = wb.active
+
+    for x, code in enumerate(list(risk_data.keys())):
+        ws.cell(row=x + 2, column=1).value = code
+        ws.cell(row=x + 2, column=2).value = risk_data[code]["name"]
+        ws.cell(row=x + 2, column=3).value = risk_data[code]["likelihood"]
+        ws.cell(row=x + 2, column=4).value = risk_data[code]["impact"]
+        ws.cell(row=x + 2, column=5).value = risk_data[code]["exposure"]
+        ws.cell(row=x + 2, column=6).value = risk_data[code]["date"]
+        ws.cell(row=x + 2, column=6).number_format = "dd/mm/yy"
+        ws.cell(row=x + 2, column=7).value = risk_data[code]["planned"]
+        ws.cell(row=x + 2, column=8).value = risk_data[code]["implemented"]
+        ws.cell(row=x + 2, column=9).value = risk_data[code]["cause"]
+        ws.cell(row=x + 2, column=10).value = risk_data[code]["event"]
+        ws.cell(row=x + 2, column=11).value = risk_data[code]["effect"]
+
+    ws.cell(row=1, column=1).value = "code"
+    ws.cell(row=1, column=2).value = "name"
+    ws.cell(row=1, column=3).value = "likelihood"
+    ws.cell(row=1, column=4).value = "impact"
+    ws.cell(row=1, column=5).value = "exposure"
+    ws.cell(row=1, column=6).value = "date"
+    ws.cell(row=1, column=7).value = "planned"
+    ws.cell(row=1, column=8).value = "implemented"
+    ws.cell(row=1, column=9).value = "cause"
+    ws.cell(row=1, column=10).value = "event"
+    ws.cell(row=1, column=11).value = "effect"
+
+    wb.save("/home/will/Downloads/exco_risks_HSRG.xlsx")
