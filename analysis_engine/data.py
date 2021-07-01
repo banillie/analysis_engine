@@ -6329,15 +6329,25 @@ def data_query_into_wb(master: Master, **kwargs) -> Workbook:
             for x, key in enumerate(kwargs["key"]):
                 ws.cell(row=1, column=5 + x, value=key)
                 try:  # standard keys
-                    value = p_data[key]
+                    value = convert_date(p_data[key])
+                    try:
+                        value = parser.parse(value, dayfirst=True)
+                    except (ParserError, TypeError):  # Non-date strings
+                        value = value
                     if value is None:
                         ws.cell(row=2 + y, column=5 + x).value = "md"
                         ws.cell(row=2 + y, column=5 + x).fill = AMBER_FILL
                     else:
                         ws.cell(row=2 + y, column=5 + x, value=value)
+                        if isinstance(value, datetime.datetime):
+                            ws.cell(row=2 + y, column=5 + x, value=value).number_format = "dd/mm/yy"
 
                     try:  # checks for change against next master in loop
-                        lst_value = p_data_last[key]
+                        lst_value = convert_date(p_data_last[key])
+                        try:
+                            lst_value = parser.parse(lst_value, dayfirst=True)
+                        except (ParserError, TypeError):  # Non-date strings
+                            lst_value = lst_value
                         if value != lst_value:
                             ws.cell(row=2 + y, column=5 + x).fill = SALMON_FILL
                     except (KeyError, UnboundLocalError, TypeError):
@@ -9386,12 +9396,12 @@ def get_strategic_priorities_data(
     return radar_data
 
 
-def get_key_map():
-    wb = load_workbook("/home/will/Downloads/KEY_MAP.xlsx")
+def get_map(wb):
     ws = wb.active
     output_dict = {}
     for x in range(2, ws.max_row + 1):
-        output_dict[ws.cell(row=x, column=1).value] = ws.cell(row=x, column=2).value
+        if ws.cell(row=x, column=2).value is not None:
+            output_dict[ws.cell(row=x, column=1).value] = ws.cell(row=x, column=2).value
 
     return output_dict
 
@@ -9400,25 +9410,75 @@ def get_gmpp_data():
     wb = load_workbook("/home/will/Downloads/GMPP_DATA.xlsm")
     ws = wb.active
 
-    map = get_key_map()
-
     output_dict = {}
     for x in range(2, ws.max_row + 1):
         project_name = ws.cell(row=x, column=2).value
         key = ws.cell(row=x, column=6).value
         value = ws.cell(row=x, column=7).value
         if project_name in list(output_dict.keys()):
-            try:
-                output_dict[project_name][map[key]] = value
-            except KeyError:
-                output_dict[project_name][key] = value
+            output_dict[project_name][key] = value
         else:
-            try:
-                output_dict[project_name] = {map[key]: value}
-            except KeyError:
-                output_dict[project_name] = {key: value}
+            output_dict[project_name] = {key: value}
 
     return output_dict
+
+
+def data_check_print_out(gmpp_data: Dict, ipdc_data: Dict):
+
+    key_map = get_map(load_workbook("/home/will/Downloads/KEY_MAP.xlsx"))
+    project_map = get_map(load_workbook("/home/will/Downloads/PROJECT_MAP.xlsx"))
+
+    wb = Workbook()
+    ws = wb.active
+
+    start_row = 2
+    for x, project in enumerate(list(gmpp_data.keys())):
+        for i, k in enumerate(gmpp_data[project]):
+            if k == '0.1.3: Project Name':
+                # this key not present in ipdc dicts. naming checked else where. so removed.
+                continue
+            ws.cell(row=start_row, column=1).value = project
+            try:
+                dft_project_name = project_map[project]
+                project_check = 'PASS'
+            except KeyError:
+                dft_project_name = ''
+                project_check = 'FAILED'
+            ws.cell(row=start_row, column=2).value = dft_project_name
+            ws.cell(row=start_row, column=3).value = project_check
+            ws.cell(row=start_row, column=4).value = k
+            try:
+                dft_key_name = key_map[k]
+                key_check = 'PASS'
+            except KeyError:
+                dft_key_name = ''
+                key_check = 'FAILED'
+            ws.cell(row=start_row, column=5).value = dft_key_name
+            ws.cell(row=start_row, column=6).value = key_check
+            ws.cell(row=start_row, column=7).value = gmpp_data[project][k]
+            try:
+                ipdc_value = ipdc_data[dft_project_name][dft_key_name]
+            except KeyError:
+                ipdc_value = ''
+            ws.cell(row=start_row, column=8).value = ipdc_value
+            if gmpp_data[project][k] == ipdc_value:
+                ws.cell(row=start_row, column=9).value = 'MATCH'
+            else:
+                ws.cell(row=start_row, column=9).value = 'DIFFERENT'
+
+            start_row += 1
+
+    ws.cell(row=1, column=1).value = 'GMPP PROJECT NAME'
+    ws.cell(row=1, column=2).value = 'DFT PROJECT NAME'
+    ws.cell(row=1, column=3).value = 'NAME CHECK'
+    ws.cell(row=1, column=4).value = 'GMPP KEY'
+    ws.cell(row=1, column=5).value = 'DFT KEY'
+    ws.cell(row=1, column=6).value = 'KEY CHECK'
+    ws.cell(row=1, column=7).value = 'GMPP VALUE'
+    ws.cell(row=1, column=8).value = 'DFT VALUE'
+    ws.cell(row=1, column=9).value = 'VALUE CHECK'
+
+    wb.save("/home/will/Downloads/GMPP_IPDC_DATA_CHECK.xlsx")
 
 
 def print_gmpp_data(gmpp_dict: Dict):

@@ -4,6 +4,7 @@ import numpy as np
 
 # from typing import List
 from matplotlib import pyplot as plt
+from openpyxl import load_workbook
 
 # matplotlib==3.3.0
 from analysis_engine.cdg_data import (
@@ -60,7 +61,7 @@ from analysis_engine.data import (
     print_gmpp_data,
     get_risk_data,
     print_risk_data,
-    get_key_map,
+    get_map, get_project_info_data, data_check_print_out,
 )
 
 ## GENERATE CLI OPTIONS
@@ -127,23 +128,23 @@ from analysis_engine.top35_data import (
 #     "word_save_path": str(top35_root_path / "output/{}.docx")
 # }
 
-# ipdc_data_dict = {
-#     "docx_save_path": str(root_path / "output/{}.docx"),
-#     "master": Master(open_json_file(str(root_path / "core_data/json/master.json"))),
-#     "op_args": {
-#         # "quarter": ["standard"],
-#         "quarter": ["Q4 20/21"],
-#         # "baseline": ["bl_one"],
-#         "group": ["HSRG", "RSS", "RIG", "AMIS", "RPE"],
-#         # "group": ["A66"],
-#         # "dates": ["1/6/2021", "1/7/2021"],
-#         "chart": True,
-#         # "circle_colour": "No",
-#         # "key": ["Start of Trial Running"]
-#     },
-#     "dashboard": get_input_doc(root_path / "input/dashboards_master.xlsx"),
-#     "excel_save_path": str(root_path / "output/{}.xlsx"),
-# }
+ipdc_data_dict = {
+    "docx_save_path": str(root_path / "output/{}.docx"),
+    "master": Master(open_json_file(str(root_path / "core_data/json/master.json"))),
+    "op_args": {
+        "quarter": ["standard"],
+        # "quarter": ["Q4 20/21"],
+        # "baseline": ["bl_one"],
+        "group": ["HSRG", "RSS", "RIG", "AMIS", "RPE"],
+        # "group": ["A66"],
+        # "dates": ["1/6/2021", "1/7/2021"],
+        "chart": True,
+        # "circle_colour": "No",
+        "key": ["SRO Tenure Start Date"]
+    },
+    "dashboard": get_input_doc(root_path / "input/dashboards_master.xlsx"),
+    "excel_save_path": str(root_path / "output/{}.xlsx"),
+}
 
 # cdg_data_dict = {
 #     "docx_save_path": str(cdg_root_path / "output/{}.docx"),
@@ -167,7 +168,7 @@ from analysis_engine.top35_data import (
 #     "word_save_path": str(cdg_root_path / "output/{}.docx")
 # }
 
-# data = top35_data_dict
+data = ipdc_data_dict
 
 ## DANDELION
 # dl_data = DandelionData(data["master"], **data["op_args"])
@@ -190,8 +191,8 @@ from analysis_engine.top35_data import (
 # total_costs_benefits_bar_chart(c, b, chart=True)
 
 # QUERY
-# wb = data_query_into_wb(data["master"], **data["op_args"])
-# wb.save(data["excel_save_path"].format("query_test"))
+wb = data_query_into_wb(data["master"], **data["op_args"])
+wb.save(data["excel_save_path"].format("query_test"))
 
 # STACKPLOT
 # sp_data = get_sp_data(m, quarter=["standard"], group=["RIG"])
@@ -254,12 +255,13 @@ from analysis_engine.top35_data import (
 # put_matplotlib_fig_into_word(hoz_doc, g, size=7, transparent=False)
 # hoz_doc.save(data["word_save_path"].format("central_support_graph"))
 
-#GMPP data
-a = get_gmpp_data()
-print_gmpp_data(a)
+# GMPP data
+# a = get_gmpp_data()
+# print_gmpp_data(a)
+# gmpp_d = get_project_info_data("/home/will/Downloads/GMPP_DATA_DFT_FORMAT.xlsx")
+# ipdc_d = get_project_info_data(root_path / "core_data/master_4_2020.xlsx")
+# data_check_print_out(gmpp_d, ipdc_d)
 
 # Risk data
 # risks = get_risk_data()
 # print_risk_data(risks)
-
-# keys = get_key_map()
