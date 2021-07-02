@@ -148,19 +148,16 @@ def calculate_arg_combinations(args_list: List):
 
 
 def get_master_data(
-        confi_path: Path,
-        pi_path: Path,
-        get_data_function
-) -> List[
-    Dict[str, Union[str, int, datetime.date, float]]]:
+    confi_path: Path, pi_path: Path, get_data_function
+) -> List[Dict[str, Union[str, int, datetime.date, float]]]:
     """Returns a list of dictionaries each containing quarter data"""
     config = configparser.ConfigParser()
     config.read(confi_path)
     master_data_list = []
-    for key in config['MASTERS']:
-        year = int(config['MASTERS'][key][-4:])
-        quarter = int(config['MASTERS'][key][-7:-6])
-        m_path = str(pi_path) + config['MASTERS'][key][:-9]
+    for key in config["MASTERS"]:
+        year = int(config["MASTERS"][key][-4:])
+        quarter = int(config["MASTERS"][key][-7:-6])
+        m_path = str(pi_path) + config["MASTERS"][key][:-9]
         m = get_data_function(m_path, quarter, year)
         master_data_list.append(m)
 
@@ -272,8 +269,7 @@ def get_project_info_data(master_file: str) -> Dict:
             else:
                 val = ws.cell(row=cell.row, column=1).value
                 if type(cell.value) == datetime:
-                    d_value = date(cell.value.year, cell.value.month,
-                                   cell.value.day)
+                    d_value = date(cell.value.year, cell.value.month, cell.value.day)
                     p_dict[project_name][val] = d_value
                 else:
                     p_dict[project_name][val] = cell.value
@@ -286,15 +282,15 @@ def get_project_info_data(master_file: str) -> Dict:
 
 
 def get_project_information(
-        confi_path: Path,
-        pi_path: Path,
+    confi_path: Path,
+    pi_path: Path,
 ) -> Dict[str, Union[str, int]]:
     """Returns dictionary containing all project meta data.
     confi_path is ini file path.
     pi_path is project_info path."""
     config = configparser.ConfigParser()
     config.read(confi_path)
-    path = str(pi_path) + config['PROJECT INFO']['projects']
+    path = str(pi_path) + config["PROJECT INFO"]["projects"]
     return get_project_info_data(path)
 
 
@@ -944,16 +940,15 @@ class JsonMaster:
 
     def get_current_tp(self):
         try:
-            self.current_quarter = str(self.master_data[0].month) + ", " + str(self.master_data[0].year)
+            self.current_quarter = (
+                str(self.master_data[0].month) + ", " + str(self.master_data[0].year)
+            )
         except KeyError:
             self.current_quarter = self.master_data[0].quarter
 
 
 class Master:
-    def __init__(
-        self,
-        json_master: JsonMaster
-    ) -> None:
+    def __init__(self, json_master: JsonMaster) -> None:
         self.master_data = json_master["master_data"]
         self.project_information = json_master["project_information"]
         self.kwargs = json_master["kwargs"]
@@ -1168,17 +1163,25 @@ class CostData:
                         try:
                             profiled = (
                                 profiled
-                                - p_data["Total Forecast - Income both Revenue and Capital"]
+                                - p_data[
+                                    "Total Forecast - Income both Revenue and Capital"
+                                ]
                             )
                             total = (
                                 total
-                                - p_data["Total Forecast - Income both Revenue and Capital"]
+                                - p_data[
+                                    "Total Forecast - Income both Revenue and Capital"
+                                ]
                             )
                         except KeyError:  # some older masters do have key.
                             pass
 
-                    if project_name == "Northern Powerhouse Rail":  # hacked fix for now.
-                        profiled = profiled + p_data["Total CDEL Forecast recurring new costs"]
+                    if (
+                        project_name == "Northern Powerhouse Rail"
+                    ):  # hacked fix for now.
+                        profiled = (
+                            profiled + p_data["Total CDEL Forecast recurring new costs"]
+                        )
 
                 cat_spent = [spent_rdel, spent_cdel, spent_ngov]
                 cat_profiled = [prof_rdel, prof_cdel, prof_ngov]
@@ -1484,14 +1487,16 @@ class BenefitsData:
                             tp,
                         )
                         b_achieved += convert_none_types(p_data["Benefits delivered"])
-                        b_remaining += convert_none_types(p_data["Benefits to be delivered"])
+                        b_remaining += convert_none_types(
+                            p_data["Benefits to be delivered"]
+                        )
                         b_total += convert_none_types(p_data["Total Benefits"])
 
                     lower_dict[tp] = {
-                            "delivered": b_achieved,
-                            "prof": b_remaining,
-                            "total": b_total,
-                            }
+                        "delivered": b_achieved,
+                        "prof": b_remaining,
+                        "total": b_total,
+                    }
 
         else:
             for tp in self.iter_list:
@@ -1579,7 +1584,9 @@ class BenefitsData:
                     economic_unprofiled,
                     disben_unprofiled,
                 ]
-                cat_profiled = calculate_profiled(cat_profiled, cat_spent, cat_unprofiled)
+                cat_profiled = calculate_profiled(
+                    cat_profiled, cat_spent, cat_unprofiled
+                )
                 adj_profiled = calculate_profiled(profiled, delivered, unprofiled)
                 lower_dict[tp] = {
                     "cat_spent": cat_spent,
@@ -1603,17 +1610,29 @@ def milestone_info_handling(output_list: list, t_list: list, **kwargs) -> list:
         pass
     else:
         try:
-            d = parser.parse(t_list[3][1], dayfirst=True)
-            t_list[3] = ("Date", d.date())
+            t_list[3] = ("Date", t_list[3][1].date())
             return output_list.append(t_list)
-        except TypeError:  # None Types
+        except AttributeError:  # Non-datetime values
             if "type" in kwargs:
                 if kwargs["type"] == "central support":
                     if t_list[3][1] is None:
                         return output_list.append(t_list)
-        except ParserError:  # Non-date strings
-            logger.info(t_list[0][1] + ": incorrect date format for entry '" + t_list[1][1] + ""
-                      "', requires amending or will not be included. " + str(kwargs["tp"]) + " data.")
+                    else:
+                        logger.info(
+                            t_list[0][1]
+                            + ": incorrect date format for entry '"
+                            + t_list[1][1]
+                            + ""
+                            "', requires amending or will not be included. "
+                            + str(kwargs["tp"])
+                            + " data."
+                        )
+            logger.info(
+                t_list[0][1] + ": incorrect date format for entry '" + t_list[1][1] + ""
+                "', requires amending or will not be included. "
+                + str(kwargs["tp"])
+                + " data."
+            )
 
 
 def remove_none_types(input_list):
@@ -1653,11 +1672,12 @@ def convert_date(date_str: str):
     used when the MilestoneData class is created. Seems to be the best place to deploy.
     """
     try:
-        return datetime.datetime.strptime(date_str, "%Y-%m-%d").strftime("%Y-%d-%m")
-    except TypeError:
-        pass
-    except ValueError:
+        return parser.parse(date_str)  # returns datetime
+    except TypeError:  # for a different data value e.g integer.
         return date_str
+    except ValueError:  # for string data that is not a date.
+        return date_str
+    # is a ParserError necessary here also?
 
 
 class MilestoneData:
@@ -1718,14 +1738,16 @@ class MilestoneData:
                                 ("Report", report),
                                 ("Cat", category),
                             ]
-                            milestone_info_handling(project_milestones, entry, **self.kwargs)
+                            milestone_info_handling(
+                                project_milestones, entry, **self.kwargs
+                            )
                     if self.kwargs["data_type"] == "cdg":
                         for i in range(1, 12):
                             entry = [
                                 ("Project", p),
                                 ("Milestone", p_data["MM" + str(i)]),
                                 ("Notes", p_data["MM" + str(i) + " NOTES"]),
-                                ("Date", p_data["MM" + str(i) + " DATE"])
+                                ("Date", p_data["MM" + str(i) + " DATE"]),
                             ]
                             milestone_info_handling(project_milestones, entry)
 
@@ -1739,9 +1761,13 @@ class MilestoneData:
                                 ("Type", "Approval"),
                                 (
                                     "Date",
-                                    convert_date(p_data[
-                                        "Approval MM" + str(i) + " Forecast / Actual"
-                                    ]),
+                                    convert_date(
+                                        p_data[
+                                            "Approval MM"
+                                            + str(i)
+                                            + " Forecast / Actual"
+                                        ]
+                                    ),
                                 ),
                                 ("Notes", p_data["Approval MM" + str(i) + " Notes"]),
                                 ("Report", report),
@@ -1754,9 +1780,13 @@ class MilestoneData:
                                 ("Type", "Assurance"),
                                 (
                                     "Date",
-                                    convert_date(p_data[
-                                        "Assurance MM" + str(i) + " Forecast - Actual"
-                                    ]),
+                                    convert_date(
+                                        p_data[
+                                            "Assurance MM"
+                                            + str(i)
+                                            + " Forecast - Actual"
+                                        ]
+                                    ),
                                 ),
                                 ("Notes", p_data["Assurance MM" + str(i) + " Notes"]),
                                 ("Report", report),
@@ -1771,11 +1801,13 @@ class MilestoneData:
                                     ("Type", "Approval"),
                                     (
                                         "Date",
-                                        convert_date(p_data[
-                                            "Approval MM"
-                                            + str(i)
-                                            + " Forecast - Actual"
-                                        ]),
+                                        convert_date(
+                                            p_data[
+                                                "Approval MM"
+                                                + str(i)
+                                                + " Forecast - Actual"
+                                            ]
+                                        ),
                                     ),
                                     (
                                         "Notes",
@@ -1797,9 +1829,11 @@ class MilestoneData:
                                 ("Type", "Delivery"),
                                 (
                                     "Date",
-                                    convert_date(p_data[
-                                        "Project MM" + str(i) + " Forecast - Actual"
-                                    ]),
+                                    convert_date(
+                                        p_data[
+                                            "Project MM" + str(i) + " Forecast - Actual"
+                                        ]
+                                    ),
                                 ),
                                 ("Notes", p_data["Project MM" + str(i) + " Notes"]),
                                 ("Report", report),
@@ -1819,9 +1853,13 @@ class MilestoneData:
                                 ("Type", "Approval"),
                                 (
                                     "Date",
-                                    convert_date(p_data[
-                                        "HMT Approval " + str(i) + " Forecast / Actual"
-                                    ]),
+                                    convert_date(
+                                        p_data[
+                                            "HMT Approval "
+                                            + str(i)
+                                            + " Forecast / Actual"
+                                        ]
+                                    ),
                                 ),
                                 ("Notes", p_data["HMT Approval " + str(i) + " Notes"]),
                                 ("Report", report),
@@ -2534,30 +2572,66 @@ def put_milestones_into_wb(milestones: MilestoneData) -> Workbook:
             ws.cell(row=row_num + i, column=5 + x).number_format = "dd/mm/yy"
 
     for i, m in enumerate(ms_names):  # want the latest notes.
-        ws.cell(row=row_num + i, column=1).value = milestones.sorted_milestone_dict[milestones.iter_list[0]]["project"][i]  # project name
-        ws.cell(row=row_num + i, column=2).value = milestones.sorted_milestone_dict[milestones.iter_list[0]]["report"][i]  # milestone
-        ws.cell(row=row_num + i, column=3).value = milestones.sorted_milestone_dict[milestones.iter_list[0]]["cat"][i]  # milestone
-        ws.cell(row=row_num + i, column=4).value = milestones.sorted_milestone_dict[milestones.iter_list[0]]["names"][i]  # milestone
+        ws.cell(row=row_num + i, column=1).value = milestones.sorted_milestone_dict[
+            milestones.iter_list[0]
+        ]["project"][
+            i
+        ]  # project name
+        ws.cell(row=row_num + i, column=2).value = milestones.sorted_milestone_dict[
+            milestones.iter_list[0]
+        ]["report"][
+            i
+        ]  # milestone
+        ws.cell(row=row_num + i, column=3).value = milestones.sorted_milestone_dict[
+            milestones.iter_list[0]
+        ]["cat"][
+            i
+        ]  # milestone
+        ws.cell(row=row_num + i, column=4).value = milestones.sorted_milestone_dict[
+            milestones.iter_list[0]
+        ]["names"][
+            i
+        ]  # milestone
         try:
-            notes = milestones.sorted_milestone_dict[milestones.iter_list[0]]["notes"][i]
+            notes = milestones.sorted_milestone_dict[milestones.iter_list[0]]["notes"][
+                i
+            ]
             ws.cell(row=row_num + i, column=len(milestones.iter_list) + 9).value = notes
         except KeyError:  # "notes" not in central support dict
             pass
         try:  # only present in top250 milestones
-            status = milestones.sorted_milestone_dict[milestones.iter_list[0]]["status"][i]
-            ws.cell(row=row_num + i, column=len(milestones.iter_list) + 5).value = status
+            status = milestones.sorted_milestone_dict[milestones.iter_list[0]][
+                "status"
+            ][i]
+            ws.cell(
+                row=row_num + i, column=len(milestones.iter_list) + 5
+            ).value = status
         except (IndexError, KeyError):
             # IndexError for ipdc rpting. "status" is in dict, but list is empty.
             # KeyError for top250 central support, which does not have "status" in dict.
             pass
         try:  # only present in top250 central support
-            escalated = milestones.sorted_milestone_dict[milestones.iter_list[0]]["escalated"][i]
-            cs_type = milestones.sorted_milestone_dict[milestones.iter_list[0]]["type"][i]
-            cs_response = milestones.sorted_milestone_dict[milestones.iter_list[0]]["cs_response"][i]
-            secured = milestones.sorted_milestone_dict[milestones.iter_list[0]]["secured"][i]
-            ws.cell(row=row_num + i, column=len(milestones.iter_list) + 6).value = escalated
-            ws.cell(row=row_num + i, column=len(milestones.iter_list) + 7).value = cs_type
-            ws.cell(row=row_num + i, column=len(milestones.iter_list) + 8).value = secured
+            escalated = milestones.sorted_milestone_dict[milestones.iter_list[0]][
+                "escalated"
+            ][i]
+            cs_type = milestones.sorted_milestone_dict[milestones.iter_list[0]]["type"][
+                i
+            ]
+            cs_response = milestones.sorted_milestone_dict[milestones.iter_list[0]][
+                "cs_response"
+            ][i]
+            secured = milestones.sorted_milestone_dict[milestones.iter_list[0]][
+                "secured"
+            ][i]
+            ws.cell(
+                row=row_num + i, column=len(milestones.iter_list) + 6
+            ).value = escalated
+            ws.cell(
+                row=row_num + i, column=len(milestones.iter_list) + 7
+            ).value = cs_type
+            ws.cell(
+                row=row_num + i, column=len(milestones.iter_list) + 8
+            ).value = secured
         except KeyError:  # all above not in ipdc or top250 milestones
             pass
 
@@ -2568,10 +2642,14 @@ def put_milestones_into_wb(milestones: MilestoneData) -> Workbook:
     for x, tp in enumerate(milestones.iter_list):
         ws.cell(row=1, column=5 + x).value = tp
     ws.cell(row=1, column=len(milestones.iter_list) + 5).value = "Status (top 250 ms)"
-    ws.cell(row=1, column=len(milestones.iter_list) + 6).value = "Escalated (top 250 cs)"
+    ws.cell(
+        row=1, column=len(milestones.iter_list) + 6
+    ).value = "Escalated (top 250 cs)"
     ws.cell(row=1, column=len(milestones.iter_list) + 7).value = "Type (top 250 cs)"
     ws.cell(row=1, column=len(milestones.iter_list) + 8).value = "Secured (top 250 cs)"
-    ws.cell(row=1, column=len(milestones.iter_list) + 9).value = "Notes / Central Response (top 250 cs)"
+    ws.cell(
+        row=1, column=len(milestones.iter_list) + 9
+    ).value = "Notes / Central Response (top 250 cs)"
 
     return wb
 
@@ -2955,7 +3033,7 @@ def wd_heading(
 
     def delete_paragraph(paragraph):
         """helper function to remove empyt para at top of summary_temp doc.
-        only used here. """
+        only used here."""
         p = paragraph._element
         p.getparent().remove(p)
         p._p = p._element = None
@@ -3842,8 +3920,8 @@ def milestone_chart(
 
     def merge_project_milestone_name(no):
         return project[no] + ", " + ms_names[no]
-    combined = [merge_project_milestone_name(i) for i, p in enumerate(project)]
 
+    combined = [merge_project_milestone_name(i) for i, p in enumerate(project)]
 
     # if len(milestones.group) == 1:
     #     pn = milestones.master.abbreviations[milestones.group[0]]["abb"]
@@ -3863,11 +3941,13 @@ def milestone_chart(
     # c_list = ["#436f70", "#4c7e80", "#5f9ea0"]
 
     for i, tp in enumerate(milestones.iter_list):
-        m = [x for x in milestones.sorted_milestone_dict[tp]["g_dates"] if x is not None]
+        m = [
+            x for x in milestones.sorted_milestone_dict[tp]["g_dates"] if x is not None
+        ]
         ax1.scatter(
             m,
             # milestones.sorted_milestone_dict[tp]["g_dates"],
-            ms_names[0: len(m)],
+            ms_names[0 : len(m)],
             label=tp,
             s=200,
             # color=c_list[i],
@@ -4301,13 +4381,13 @@ def get_correct_p_data(
 bl_iter_list = ["current", "last", "bl_one", "bl_two", "bl_three"]
 
 CDG_DATA_KEY_DICT = {
-        "IPDC approval point": "Last Business Case (BC) achieved",
-        "Total Forecast": "Total Costs",
-        "Departmental DCA": "Overall Delivery Confidence",
-        "Senior Responsible Owner (SRO)": "SRO",
-        "Senior Responsible Owner (SRO) - Email": "SRO email",
-        "Total Forecast": "Total Costs",
-    }
+    "IPDC approval point": "Last Business Case (BC) achieved",
+    "Total Forecast": "Total Costs",
+    "Departmental DCA": "Overall Delivery Confidence",
+    "Senior Responsible Owner (SRO)": "SRO",
+    "Senior Responsible Owner (SRO) - Email": "SRO email",
+    "Total Forecast": "Total Costs",
+}
 
 
 class DcaData:
@@ -5277,7 +5357,9 @@ def build_speedials(dca_data: DcaData, doc) -> None:
             c_no = dca_data.dca_count[dca_data.iter_list[0]][conf_type][colour]["count"]
             c_count.append(c_no)
             try:  # to capture reporting process with only one quarters data
-                l_no = dca_data.dca_count[dca_data.iter_list[1]][conf_type][colour]["count"]
+                l_no = dca_data.dca_count[dca_data.iter_list[1]][conf_type][colour][
+                    "count"
+                ]
                 l_count.append(l_no)
             except KeyError:
                 l_count.append(c_no)
@@ -5540,9 +5622,7 @@ def project_report_meta_data(
     hdr_cells = t.rows[0].cells
     hdr_cells[0].text = "WLC:"
     hdr_cells[1].text = (
-        "£"
-        + str(round(master_data[project_name]["Total Forecast"]))
-        + "m"
+        "£" + str(round(master_data[project_name]["Total Forecast"])) + "m"
     )
     hdr_cells[2].text = "Spent:"
     hdr_cells[3].text = (
@@ -5550,18 +5630,14 @@ def project_report_meta_data(
     )
     row_cells = t.add_row().cells
     row_cells[0].text = "RDEL Total:"
-    rdel_total = master_data[project_name][
-        "Total RDEL Forecast Total"
-    ]
+    rdel_total = master_data[project_name]["Total RDEL Forecast Total"]
     row_cells[1].text = "£" + str(round(rdel_total)) + "m"
     row_cells[2].text = "Profiled:"
     row_cells[3].text = (
         "£" + str(round(costs.c_totals[costs.iter_list[0]]["prof"])) + "m"
     )  # first in list is current
     row_cells = t.add_row().cells
-    cdel_total = master_data[project_name][
-        "Total CDEL Forecast one off new costs"
-    ]
+    cdel_total = master_data[project_name]["Total CDEL Forecast one off new costs"]
     # sum(costs.cdel_profile[4:])
     row_cells[0].text = "CDEL Total:"
     row_cells[1].text = "£" + str(round(cdel_total)) + "m"
@@ -5570,9 +5646,7 @@ def project_report_meta_data(
         "£" + str(round(costs.c_totals[costs.iter_list[0]]["unprof"])) + "m"
     )
     row_cells = t.add_row().cells
-    n_gov_total = master_data[project_name][
-        "Non-Gov Total Forecast"
-    ]
+    n_gov_total = master_data[project_name]["Non-Gov Total Forecast"]
     if n_gov_total is None:
         n_gov_total = 0
     # n_gov_std = costs.master.master_data[0].data[project_name]["20-21 CDEL STD Non Gov costs"]
@@ -5598,22 +5672,16 @@ def project_report_meta_data(
     table = doc.add_table(rows=1, cols=4)
     hdr_cells = table.rows[0].cells
     hdr_cells[0].text = "Type of funding:"
-    hdr_cells[1].text = str(
-        master_data[project_name]["Source of Finance"]
-    )
+    hdr_cells[1].text = str(master_data[project_name]["Source of Finance"])
     hdr_cells[2].text = "Contingency:"
-    contingency = master_data[project_name][
-        "Overall contingency (£m)"
-    ]
+    contingency = master_data[project_name]["Overall contingency (£m)"]
     if contingency is None:  # can this be refactored?
         hdr_cells[3].text = "None"
     else:
         hdr_cells[3].text = "£" + str(round(contingency)) + "m"
     row_cells = table.add_row().cells
     row_cells[0].text = "Optimism Bias (OB):"
-    ob = master_data[project_name][
-        "Overall figure for Optimism Bias (£m)"
-    ]
+    ob = master_data[project_name]["Overall figure for Optimism Bias (£m)"]
     if ob is None:
         row_cells[1].text = str(ob)
     else:
@@ -5749,17 +5817,13 @@ def project_report_meta_data(
     table = doc.add_table(rows=1, cols=4)
     hdr_cells = table.rows[0].cells
     hdr_cells[0].text = "VfM category:"
-    vfm_cat = master_data[project_name][
-        "VfM Category single entry"
-    ]
+    vfm_cat = master_data[project_name]["VfM Category single entry"]
     if vfm_cat is None:
         hdr_cells[1].text = "Not reported"
     else:
         hdr_cells[1].text = vfm_cat
     hdr_cells[2].text = "BCR:"
-    bcr = master_data[project_name][
-        "Adjusted Benefits Cost Ratio (BCR)"
-    ]
+    bcr = master_data[project_name]["Adjusted Benefits Cost Ratio (BCR)"]
     hdr_cells[3].text = str(bcr)
 
     # set column width
@@ -5782,13 +5846,7 @@ def project_report_meta_data(
     hdr_cells = table.rows[0].cells
     hdr_cells[0].text = "Total Benefits:"
     hdr_cells[1].text = (
-        "£"
-        + str(
-            round(
-                master_data[project_name]["BEN Totals Forecast"]
-            )
-        )
-        + "m"
+        "£" + str(round(master_data[project_name]["BEN Totals Forecast"])) + "m"
     )
     hdr_cells[2].text = "Benefits delivered:"
     hdr_cells[3].text = (
@@ -6043,7 +6101,8 @@ def run_p_reports(master: Master, **kwargs) -> None:
         report_doc = get_input_doc(root_path / "input/summary_temp.docx")
         qrt = make_file_friendly(str(master.current_quarter))
         p_info = get_project_information(
-            str(root_path) + "/core_data/confi.ini", str(root_path) + "/core_data/data_mgmt/"
+            str(root_path) + "/core_data/confi.ini",
+            str(root_path) + "/core_data/data_mgmt/",
         )
         output = compile_p_report(report_doc, p_info, master, p)
         output.save(
@@ -6312,14 +6371,10 @@ def data_query_into_wb(master: Master, **kwargs) -> Workbook:
         for y, p in enumerate(group):  # p is project name
             p_data = get_correct_p_data(kwargs, master, "ipdc_costs", p, tp)
             abb = master.abbreviations[p]["abb"]
-            ws.cell(row=2 + y, column=1).value = master.project_information[p][
-                "Group"
-            ]
+            ws.cell(row=2 + y, column=1).value = master.project_information[p]["Group"]
             ws.cell(row=2 + y, column=2).value = p
             ws.cell(row=2 + y, column=3).value = abb
-            ws.cell(row=2 + y, column=4).value = master.project_information[p][
-                "GMPP"
-            ]
+            ws.cell(row=2 + y, column=4).value = master.project_information[p]["GMPP"]
             try:
                 p_data_last = get_correct_p_data(
                     kwargs, master, "ipdc_costs", p, iter_list[z + 1]
@@ -6330,24 +6385,18 @@ def data_query_into_wb(master: Master, **kwargs) -> Workbook:
                 ws.cell(row=1, column=5 + x, value=key)
                 try:  # standard keys
                     value = convert_date(p_data[key])
-                    try:
-                        value = parser.parse(value, dayfirst=True)
-                    except (ParserError, TypeError):  # Non-date strings
-                        value = value
                     if value is None:
                         ws.cell(row=2 + y, column=5 + x).value = "md"
                         ws.cell(row=2 + y, column=5 + x).fill = AMBER_FILL
                     else:
                         ws.cell(row=2 + y, column=5 + x, value=value)
                         if isinstance(value, datetime.datetime):
-                            ws.cell(row=2 + y, column=5 + x, value=value).number_format = "dd/mm/yy"
+                            ws.cell(
+                                row=2 + y, column=5 + x, value=value
+                            ).number_format = "dd/mm/yy"
 
                     try:  # checks for change against next master in loop
                         lst_value = convert_date(p_data_last[key])
-                        try:
-                            lst_value = parser.parse(lst_value, dayfirst=True)
-                        except (ParserError, TypeError):  # Non-date strings
-                            lst_value = lst_value
                         if value != lst_value:
                             ws.cell(row=2 + y, column=5 + x).fill = SALMON_FILL
                     except (KeyError, UnboundLocalError, TypeError):
@@ -7288,9 +7337,7 @@ def financial_dashboard(master: Master, wb: Workbook) -> Workbook:
             ws.cell(row=row_num, column=4).value = convert_bc_stage_text(bc_stage)
             # overall_ws.cell(row=row_num, column=3).value = convert_bc_stage_text(bc_stage)
             try:
-                bc_stage_lst_qrt = last_data[project_name][
-                    "IPDC approval point"
-                ]
+                bc_stage_lst_qrt = last_data[project_name]["IPDC approval point"]
                 if bc_stage != bc_stage_lst_qrt:
                     ws.cell(row=row_num, column=4).font = Font(
                         name="Arial", size=10, color="00fc2525"
@@ -7306,9 +7353,7 @@ def financial_dashboard(master: Master, wb: Workbook) -> Workbook:
             ws.cell(row=row_num, column=5).value = plan_stage
             # overall_ws.cell(row=row_num, column=4).value = plan_stage
             try:
-                plan_stage_lst_qrt = last_data[project_name][
-                    "Project stage"
-                ]
+                plan_stage_lst_qrt = last_data[project_name]["Project stage"]
                 if plan_stage != plan_stage_lst_qrt:
                     ws.cell(row=row_num, column=5).font = Font(
                         name="Arial", size=10, color="00fc2525"
@@ -7325,9 +7370,7 @@ def financial_dashboard(master: Master, wb: Workbook) -> Workbook:
             # overall_ws.cell(row=row_num, column=5).value = wlc_now
             """WLC variance against lst quarter"""
             try:
-                wlc_lst_quarter = last_data[project_name][
-                    "Total Forecast"
-                ]
+                wlc_lst_quarter = last_data[project_name]["Total Forecast"]
                 diff_lst_qrt = wlc_now - wlc_lst_quarter
                 if float(diff_lst_qrt) > 0.49 or float(diff_lst_qrt) < -0.49:
                     ws.cell(row=row_num, column=7).value = diff_lst_qrt
@@ -7389,14 +7432,14 @@ def financial_dashboard(master: Master, wb: Workbook) -> Workbook:
             """P-Value"""
 
             """Contigency"""
-            ws.cell(row=row_num, column=13).value = current_data[
-                project_name
-            ]["Overall contingency (£m)"]
+            ws.cell(row=row_num, column=13).value = current_data[project_name][
+                "Overall contingency (£m)"
+            ]
 
             """OB"""
-            ws.cell(row=row_num, column=14).value = current_data[
-                project_name
-            ]["Overall figure for Optimism Bias (£m)"]
+            ws.cell(row=row_num, column=14).value = current_data[project_name][
+                "Overall figure for Optimism Bias (£m)"
+            ]
 
             """financial DCA rating - this quarter"""
             ws.cell(row=row_num, column=15).value = convert_rag_text(
@@ -7412,14 +7455,18 @@ def financial_dashboard(master: Master, wb: Workbook) -> Workbook:
             """financial DCA rating - 2 qrts ago"""
             try:
                 ws.cell(row=row_num, column=17).value = convert_rag_text(
-                    master.master_data[2]["data"][project_name]["SRO Finance confidence"]
+                    master.master_data[2]["data"][project_name][
+                        "SRO Finance confidence"
+                    ]
                 )
             except (KeyError, IndexError):
                 ws.cell(row=row_num, column=17).value = ""
             """financial DCA rating - 3 qrts ago"""
             try:
                 ws.cell(row=row_num, column=18).value = convert_rag_text(
-                    master.master_data[3]["data"][project_name]["SRO Finance confidence"]
+                    master.master_data[3]["data"][project_name][
+                        "SRO Finance confidence"
+                    ]
                 )
             except (KeyError, IndexError):
                 ws.cell(row=row_num, column=18).value = ""
@@ -7466,9 +7513,7 @@ def schedule_dashboard(
             bc_stage = current_data[project_name]["IPDC approval point"]
             ws.cell(row=row_num, column=4).value = convert_bc_stage_text(bc_stage)
             try:
-                bc_stage_lst_qrt = last_data[project_name][
-                    "IPDC approval point"
-                ]
+                bc_stage_lst_qrt = last_data[project_name]["IPDC approval point"]
                 if bc_stage != bc_stage_lst_qrt:
                     ws.cell(row=row_num, column=4).font = Font(
                         name="Arial", size=10, color="00fc2525"
@@ -7480,9 +7525,7 @@ def schedule_dashboard(
             plan_stage = current_data[project_name]["Project stage"]
             ws.cell(row=row_num, column=5).value = plan_stage
             try:
-                plan_stage_lst_qrt = last_data[project_name][
-                    "Project stage"
-                ]
+                plan_stage_lst_qrt = last_data[project_name]["Project stage"]
                 if plan_stage != plan_stage_lst_qrt:
                     ws.cell(row=row_num, column=5).font = Font(
                         name="Arial", size=10, color="00fc2525"
@@ -7611,14 +7654,18 @@ def schedule_dashboard(
             """schedule DCA rating - 2 qrts ago"""
             try:
                 ws.cell(row=row_num, column=24).value = convert_rag_text(
-                    master.master_data[2]["data"][project_name]["SRO Schedule Confidence"]
+                    master.master_data[2]["data"][project_name][
+                        "SRO Schedule Confidence"
+                    ]
                 )
             except (KeyError, IndexError):
                 ws.cell(row=row_num, column=24).value = ""
             """schedule DCA rating - 3 qrts ago"""
             try:
                 ws.cell(row=row_num, column=25).value = convert_rag_text(
-                    master.master_data[3]["data"][project_name]["SRO Schedule Confidence"]
+                    master.master_data[3]["data"][project_name][
+                        "SRO Schedule Confidence"
+                    ]
                 )
             except (KeyError, IndexError):
                 ws.cell(row=row_num, column=25).value = ""
@@ -7672,9 +7719,7 @@ def benefits_dashboard(master: Master, wb: Workbook) -> Workbook:
             bc_stage = current_data[project_name]["IPDC approval point"]
             ws.cell(row=row_num, column=4).value = convert_bc_stage_text(bc_stage)
             try:
-                bc_stage_lst_qrt = last_data[project_name][
-                    "IPDC approval point"
-                ]
+                bc_stage_lst_qrt = last_data[project_name]["IPDC approval point"]
                 if bc_stage != bc_stage_lst_qrt:
                     ws.cell(row=row_num, column=4).font = Font(
                         name="Arial", size=10, color="00fc2525"
@@ -7685,9 +7730,7 @@ def benefits_dashboard(master: Master, wb: Workbook) -> Workbook:
             proj_stage = current_data[project_name]["Project stage"]
             ws.cell(row=row_num, column=5).value = proj_stage
             try:
-                proj_stage_lst_qrt = last_data[project_name][
-                    "Project stage"
-                ]
+                proj_stage_lst_qrt = last_data[project_name]["Project stage"]
                 if proj_stage != proj_stage_lst_qrt:
                     ws.cell(row=row_num, column=5).font = Font(
                         name="Arial", size=10, color="00fc2525"
@@ -7748,53 +7791,27 @@ def benefits_dashboard(master: Master, wb: Workbook) -> Workbook:
             #     ws.cell(row=row_num, column=9).value = ""
 
             """vfm category now"""
-            if (
-                current_data[project_name]["VfM Category single entry"]
-                is None
-            ):
+            if current_data[project_name]["VfM Category single entry"] is None:
                 vfm_cat = (
-                    str(
-                        current_data[project_name][
-                            "VfM Category lower range"
-                        ]
-                    )
+                    str(current_data[project_name]["VfM Category lower range"])
                     + " - "
-                    + str(
-                        current_data[project_name][
-                            "VfM Category upper range"
-                        ]
-                    )
+                    + str(current_data[project_name]["VfM Category upper range"])
                 )
                 ws.cell(row=row_num, column=10).value = vfm_cat
                 # overall_ws.cell(row=row_num, column=8).value = vfm_cat
 
             else:
-                vfm_cat = current_data[project_name][
-                    "VfM Category single entry"
-                ]
+                vfm_cat = current_data[project_name]["VfM Category single entry"]
                 ws.cell(row=row_num, column=10).value = vfm_cat
                 # overall_ws.cell(row=row_num, column=8).value = vfm_cat
 
             """vfm category baseline"""
             try:
-                if (
-                    baseline_data[project_name][
-                        "VfM Category single entry"
-                    ]
-                    is None
-                ):
+                if baseline_data[project_name]["VfM Category single entry"] is None:
                     vfm_cat_baseline = (
-                        str(
-                            baseline_data[project_name][
-                                "VfM Category lower range"
-                            ]
-                        )
+                        str(baseline_data[project_name]["VfM Category lower range"])
                         + " - "
-                        + str(
-                            baseline_data[project_name][
-                                "VfM Category upper range"
-                            ]
-                        )
+                        + str(baseline_data[project_name]["VfM Category upper range"])
                     )
                     ws.cell(row=row_num, column=11).value = vfm_cat_baseline
                 else:
@@ -7810,9 +7827,7 @@ def benefits_dashboard(master: Master, wb: Workbook) -> Workbook:
                     ]
                     ws.cell(row=row_num, column=11).value = vfm_cat_baseline
                 except KeyError:
-                    vfm_cat_baseline = baseline_data[project_name][
-                        "VfM Category"
-                    ]
+                    vfm_cat_baseline = baseline_data[project_name]["VfM Category"]
                     ws.cell(row=row_num, column=11).value = vfm_cat_baseline
 
             if vfm_cat != vfm_cat_baseline:
@@ -7855,9 +7870,7 @@ def benefits_dashboard(master: Master, wb: Workbook) -> Workbook:
             iyb = current_data[project_name]["BEN Forecast In-Year"]
             ws.cell(row=row_num, column=14).value = iyb
             try:
-                iyb_bl = baseline_data[project_name][
-                    "BEN Forecast In-Year"
-                ]
+                iyb_bl = baseline_data[project_name]["BEN Forecast In-Year"]
                 iyb_diff = iyb - iyb_bl
                 ws.cell(row=row_num, column=15).value = iyb_diff
                 if iyb_diff == 0:
@@ -7938,7 +7951,6 @@ def overall_dashboard(
     current_data = master.master_data[0]["data"]
     last_data = master.master_data[1]["data"]
 
-
     for row_num in range(2, ws.max_row + 1):
         project_name = ws.cell(row=row_num, column=2).value
         if project_name in master.current_projects:
@@ -7947,9 +7959,7 @@ def overall_dashboard(
             # ws.cell(row=row_num, column=4).value = convert_bc_stage_text(bc_stage)
             ws.cell(row=row_num, column=3).value = convert_bc_stage_text(bc_stage)
             try:
-                bc_stage_lst_qrt = last_data[project_name][
-                    "IPDC approval point"
-                ]
+                bc_stage_lst_qrt = last_data[project_name]["IPDC approval point"]
                 if bc_stage != bc_stage_lst_qrt:
                     # ws.cell(row=row_num, column=4).font = Font(
                     #     name="Arial", size=10, color="00fc2525"
@@ -7965,9 +7975,7 @@ def overall_dashboard(
             # ws.cell(row=row_num, column=5).value = plan_stage
             ws.cell(row=row_num, column=4).value = plan_stage
             try:
-                plan_stage_lst_qrt = last_data[project_name][
-                    "Project stage"
-                ]
+                plan_stage_lst_qrt = last_data[project_name]["Project stage"]
                 if plan_stage != plan_stage_lst_qrt:
                     # ws.cell(row=row_num, column=5).font = Font(
                     #     name="Arial", size=10, color="00fc2525"
@@ -7984,9 +7992,7 @@ def overall_dashboard(
             ws.cell(row=row_num, column=5).value = wlc_now
             """WLC variance against lst quarter"""
             try:
-                wlc_lst_quarter = last_data[project_name][
-                    "Total Forecast"
-                ]
+                wlc_lst_quarter = last_data[project_name]["Total Forecast"]
                 diff_lst_qrt = wlc_now - wlc_lst_quarter
                 if float(diff_lst_qrt) > 0.49 or float(diff_lst_qrt) < -0.49:
                     # ws.cell(row=row_num, column=7).value = diff_lst_qrt
@@ -8012,7 +8018,9 @@ def overall_dashboard(
 
             """WLC variance against baseline quarter"""
             bl = master.bl_index["ipdc_costs"][project_name][2]
-            wlc_baseline = master.master_data[bl]["data"][project_name]["Total Forecast"]
+            wlc_baseline = master.master_data[bl]["data"][project_name][
+                "Total Forecast"
+            ]
             try:
                 diff_bl = wlc_now - wlc_baseline
                 if float(diff_bl) > 0.49 or float(diff_bl) < -0.49:
@@ -8041,30 +8049,17 @@ def overall_dashboard(
                 pass
 
             """vfm category now"""
-            if (
-                current_data[project_name]["VfM Category single entry"]
-                is None
-            ):
+            if current_data[project_name]["VfM Category single entry"] is None:
                 vfm_cat = (
-                    str(
-                        current_data[project_name][
-                            "VfM Category lower range"
-                        ]
-                    )
+                    str(current_data[project_name]["VfM Category lower range"])
                     + " - "
-                    + str(
-                        current_data[project_name][
-                            "VfM Category upper range"
-                        ]
-                    )
+                    + str(current_data[project_name]["VfM Category upper range"])
                 )
                 # ws.cell(row=row_num, column=10).value = vfm_cat
                 ws.cell(row=row_num, column=8).value = vfm_cat
 
             else:
-                vfm_cat = current_data[project_name][
-                    "VfM Category single entry"
-                ]
+                vfm_cat = current_data[project_name]["VfM Category single entry"]
                 # ws.cell(row=row_num, column=10).value = vfm_cat
                 ws.cell(row=row_num, column=8).value = vfm_cat
 
@@ -8166,9 +8161,7 @@ def overall_dashboard(
             #     )
 
             """IPA DCA rating"""
-            ipa_dca = convert_rag_text(
-                current_data[project_name]["GMPP - IPA DCA"]
-            )
+            ipa_dca = convert_rag_text(current_data[project_name]["GMPP - IPA DCA"])
             ws.cell(row=row_num, column=15).value = ipa_dca
             if ipa_dca == "None":
                 ws.cell(row=row_num, column=15).value = ""
@@ -8417,9 +8410,7 @@ class DandelionData:
             g_d = {}  # group dictionary. first outer circle.
             l_g_d = {}  # lower group dictionary
 
-            pf_wlc = get_dandelion_type_total(
-                self.master, self.kwargs
-            )  # portfolio wlc
+            pf_wlc = get_dandelion_type_total(self.master, self.kwargs)  # portfolio wlc
             if "pc" in self.kwargs:  # pc portfolio colour
                 pf_colour = COLOUR_DICT[self.kwargs["pc"]]
                 pf_colour_edge = COLOUR_DICT[self.kwargs["pc"]]
@@ -8551,7 +8542,9 @@ class DandelionData:
                         + "\n"
                         + dandelion_number_text(p_value)
                     )
-                    if p_value < pf_wlc / 500: # achieve some consistency for zero / low values
+                    if (
+                        p_value < pf_wlc / 500
+                    ):  # achieve some consistency for zero / low values
                         p_value = pf_wlc / 500
                     if colour == "#FFFFFF" or colour == FACE_COLOUR:
                         if p in self.master.dft_groups[tp]["GMPP"]:
@@ -9207,6 +9200,7 @@ def so_matplotlib():
 
 def radar_chart(sp_data_path: TextIO, master: Master, **kwargs):
     from matplotlib.path import Path
+
     data = get_strategic_priorities_data(sp_data_path, master, **kwargs)
 
     def radar_factory(num_vars, frame="circle"):
@@ -9267,7 +9261,7 @@ def radar_chart(sp_data_path: TextIO, master: Master, **kwargs):
                     raise ValueError("unknown value for 'frame': %s" % frame)
 
             def draw(self, renderer):
-                """ Draw. If frame is polygon, make gridlines polygon-shaped """
+                """Draw. If frame is polygon, make gridlines polygon-shaped"""
                 if frame == "polygon":
                     gridlines = self.yaxis.get_gridlines()
                     for gl in gridlines:
@@ -9374,7 +9368,7 @@ def get_strategic_priorities_data(
             continue
         p_list = []
         for c in categories:  # no vfm
-        # for c in categories[:-1]:  # if vfm included
+            # for c in categories[:-1]:  # if vfm included
             p_list.append(sp_scoring[sp_data.data[p][c]])
         try:
             # p_list.append(
@@ -9434,49 +9428,49 @@ def data_check_print_out(gmpp_data: Dict, ipdc_data: Dict):
     start_row = 2
     for x, project in enumerate(list(gmpp_data.keys())):
         for i, k in enumerate(gmpp_data[project]):
-            if k == '0.1.3: Project Name':
+            if k == "0.1.3: Project Name":
                 # this key not present in ipdc dicts. naming checked else where. so removed.
                 continue
             ws.cell(row=start_row, column=1).value = project
             try:
                 dft_project_name = project_map[project]
-                project_check = 'PASS'
+                project_check = "PASS"
             except KeyError:
-                dft_project_name = ''
-                project_check = 'FAILED'
+                dft_project_name = ""
+                project_check = "FAILED"
             ws.cell(row=start_row, column=2).value = dft_project_name
             ws.cell(row=start_row, column=3).value = project_check
             ws.cell(row=start_row, column=4).value = k
             try:
                 dft_key_name = key_map[k]
-                key_check = 'PASS'
+                key_check = "PASS"
             except KeyError:
-                dft_key_name = ''
-                key_check = 'FAILED'
+                dft_key_name = ""
+                key_check = "FAILED"
             ws.cell(row=start_row, column=5).value = dft_key_name
             ws.cell(row=start_row, column=6).value = key_check
             ws.cell(row=start_row, column=7).value = gmpp_data[project][k]
             try:
                 ipdc_value = ipdc_data[dft_project_name][dft_key_name]
             except KeyError:
-                ipdc_value = ''
+                ipdc_value = ""
             ws.cell(row=start_row, column=8).value = ipdc_value
             if gmpp_data[project][k] == ipdc_value:
-                ws.cell(row=start_row, column=9).value = 'MATCH'
+                ws.cell(row=start_row, column=9).value = "MATCH"
             else:
-                ws.cell(row=start_row, column=9).value = 'DIFFERENT'
+                ws.cell(row=start_row, column=9).value = "DIFFERENT"
 
             start_row += 1
 
-    ws.cell(row=1, column=1).value = 'GMPP PROJECT NAME'
-    ws.cell(row=1, column=2).value = 'DFT PROJECT NAME'
-    ws.cell(row=1, column=3).value = 'NAME CHECK'
-    ws.cell(row=1, column=4).value = 'GMPP KEY'
-    ws.cell(row=1, column=5).value = 'DFT KEY'
-    ws.cell(row=1, column=6).value = 'KEY CHECK'
-    ws.cell(row=1, column=7).value = 'GMPP VALUE'
-    ws.cell(row=1, column=8).value = 'DFT VALUE'
-    ws.cell(row=1, column=9).value = 'VALUE CHECK'
+    ws.cell(row=1, column=1).value = "GMPP PROJECT NAME"
+    ws.cell(row=1, column=2).value = "DFT PROJECT NAME"
+    ws.cell(row=1, column=3).value = "NAME CHECK"
+    ws.cell(row=1, column=4).value = "GMPP KEY"
+    ws.cell(row=1, column=5).value = "DFT KEY"
+    ws.cell(row=1, column=6).value = "KEY CHECK"
+    ws.cell(row=1, column=7).value = "GMPP VALUE"
+    ws.cell(row=1, column=8).value = "DFT VALUE"
+    ws.cell(row=1, column=9).value = "VALUE CHECK"
 
     wb.save("/home/will/Downloads/GMPP_IPDC_DATA_CHECK.xlsx")
 
@@ -9486,8 +9480,8 @@ def print_gmpp_data(gmpp_dict: Dict):
     ws = wb.active
 
     for x, project in enumerate(list(gmpp_dict.keys())):
-        ws.cell(row=1, column=2+x).value = project
-        for i, k in enumerate(gmpp_dict['A303 Amesbury to Berwick Down']):
+        ws.cell(row=1, column=2 + x).value = project
+        for i, k in enumerate(gmpp_dict["A303 Amesbury to Berwick Down"]):
             # k is key. Using A303 now as has most keys
             if x == 0:
                 ws.cell(row=2 + i, column=1).value = k

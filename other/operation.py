@@ -140,7 +140,7 @@ ipdc_data_dict = {
         # "dates": ["1/6/2021", "1/7/2021"],
         "chart": True,
         # "circle_colour": "No",
-        "key": ["SRO Tenure Start Date"]
+        "key": ["SRO Tenure Start Date", "Total Forecast"]
     },
     "dashboard": get_input_doc(root_path / "input/dashboards_master.xlsx"),
     "excel_save_path": str(root_path / "output/{}.xlsx"),
@@ -178,7 +178,7 @@ data = ipdc_data_dict
 
 
 # MILESTONES
-# ms = MilestoneData(data["master"], **data["op_args"])
+ms = MilestoneData(data["master"], **data["op_args"])
 # ipdc_ms = MilestoneData(ipdc_data_dict["master"], **ipdc_data_dict["op_args"])
 # ms.filter_chart_info(**data["op_args"])
 # wb = put_milestones_into_wb(ms)
@@ -191,8 +191,8 @@ data = ipdc_data_dict
 # total_costs_benefits_bar_chart(c, b, chart=True)
 
 # QUERY
-wb = data_query_into_wb(data["master"], **data["op_args"])
-wb.save(data["excel_save_path"].format("query_test"))
+# wb = data_query_into_wb(data["master"], **data["op_args"])
+# wb.save(data["excel_save_path"].format("query_test"))
 
 # STACKPLOT
 # sp_data = get_sp_data(m, quarter=["standard"], group=["RIG"])
