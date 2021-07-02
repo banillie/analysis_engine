@@ -407,9 +407,17 @@ SRO_CONF_KEY_LIST = [
     "SRO Schedule Confidence",
 ]
 
-IPDC_DATE = datetime.date(
-    2021, 5, 24
-)  # ipdc date. Python date format is Year, Month, day
+
+def get_ipdc_date(confi_path):
+    config = configparser.ConfigParser()
+    config.read(confi_path)
+    return config["GLOBALS"]["ipdc_date"]
+
+
+IPDC_DATE = parser.parse(get_ipdc_date(str(root_path) + "/core_data/ipdc_confi.ini"), dayfirst=True).date()
+#     datetime.date(
+#     2021, 5, 24
+# )  # ipdc date. Python date format is Year, Month, day
 
 CDG_DATE = datetime.date(
     2021, 5, 27
@@ -6049,28 +6057,31 @@ def compile_p_report(
     put_matplotlib_fig_into_word(doc, total_profile, transparent=False, size=8)
     #  handling of no milestones within filtered period.
     ab = master.abbreviations[project_name]["abb"]
+    # requires refactor here.
+    start_date = calculate_dates("minus 3 months").strftime('%d/%m/%Y')
+    end_date = calculate_dates("2 years").strftime('%d/%m/%Y')
     try:
-        milestones.filter_chart_info(dates=["1/1/2021", "31/12/2022"])
+        milestones.filter_chart_info(dates=[start_date, end_date])
         milestones_chart = milestone_chart(
             milestones,
             master,
             blue_line="IPDC",
-            title=ab + " schedule (2021 - 22)",
+            title=ab + " schedule next two years",
             show="No",
         )
         put_matplotlib_fig_into_word(doc, milestones_chart, transparent=False, size=8)
-        # print_out_project_milestones(doc, milestones, project_name)
-    except ValueError:  # extends the time period.
-        milestones = MilestoneData(master, group=[project_name], baseline=["standard"])
-        milestones.filter_chart_info(dates=["1/9/2020", "30/12/2024"])
-        milestones_chart = milestone_chart(
-            milestones,
-            master,
-            blue_line="IPDC",
-            title=ab + " schedule (2021 - 24)",
-            show="No",
-        )
-        put_matplotlib_fig_into_word(doc, milestones_chart)
+    except ValueError:
+        pass
+    #     milestones = MilestoneData(master, group=[project_name], baseline=["standard"])
+    #     milestones.filter_chart_info(dates=["1/9/2020", "31/12/2024"])
+    #     milestones_chart = milestone_chart(
+    #         milestones,
+    #         master,
+    #         blue_line="IPDC",
+    #         title=ab + " schedule (2021 - 24)",
+    #         show="No",
+    #     )
+    #     put_matplotlib_fig_into_word(doc, milestones_chart)
     print_out_project_milestones(doc, milestones, project_name)
     change_word_doc_portrait(doc)
     project_scope_text(doc, master, project_name)
@@ -6102,7 +6113,7 @@ def run_p_reports(master: Master, **kwargs) -> None:
         qrt = make_file_friendly(str(master.current_quarter))
         p_info = get_project_information(
             str(root_path) + "/core_data/confi.ini",
-            str(root_path) + "/core_data/data_mgmt/",
+            str(root_path) + "/core_data/",
         )
         output = compile_p_report(report_doc, p_info, master, p)
         output.save(
@@ -9549,3 +9560,21 @@ def print_risk_data(risk_data: Dict):
     ws.cell(row=1, column=11).value = "effect"
 
     wb.save("/home/will/Downloads/exco_risks_HSRG.xlsx")
+
+
+from dateutil.relativedelta import relativedelta
+
+
+def calculate_dates(date_str):
+    if date_str == "today":
+        return datetime.date.today()
+    if date_str == "minus 3 months":
+        return datetime.date.today() + relativedelta(months=-3)
+    if date_str == "minus 6 months":
+        return datetime.date.today() + relativedelta(months=-6)
+    if date_str == "2 years":
+        return datetime.date.today() + relativedelta(months=24)
+
+
+
+

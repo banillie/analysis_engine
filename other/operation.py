@@ -1,5 +1,7 @@
 import json
 import math
+from dateutil import parser
+
 import numpy as np
 
 # from typing import List
@@ -61,7 +63,7 @@ from analysis_engine.data import (
     print_gmpp_data,
     get_risk_data,
     print_risk_data,
-    get_map, get_project_info_data, data_check_print_out,
+    get_map, get_project_info_data, data_check_print_out, get_ipdc_date,
 )
 
 ## GENERATE CLI OPTIONS
@@ -135,8 +137,8 @@ ipdc_data_dict = {
         "quarter": ["standard"],
         # "quarter": ["Q4 20/21"],
         # "baseline": ["bl_one"],
-        "group": ["HSRG", "RSS", "RIG", "AMIS", "RPE"],
-        # "group": ["A66"],
+        # "group": ["HSRG", "RSS", "RIG", "AMIS", "RPE"],
+        "group": ["Great Western Route Modernisation"],
         # "dates": ["1/6/2021", "1/7/2021"],
         "chart": True,
         # "circle_colour": "No",
@@ -178,7 +180,7 @@ data = ipdc_data_dict
 
 
 # MILESTONES
-ms = MilestoneData(data["master"], **data["op_args"])
+# ms = MilestoneData(data["master"], **data["op_args"])
 # ipdc_ms = MilestoneData(ipdc_data_dict["master"], **ipdc_data_dict["op_args"])
 # ms.filter_chart_info(**data["op_args"])
 # wb = put_milestones_into_wb(ms)
@@ -204,7 +206,7 @@ ms = MilestoneData(data["master"], **data["op_args"])
 # cost_profile_graph(c, data["master"], chart=True, group=c.start_group)
 
 # SUMMARIES
-# top35_run_p_reports(data["master"], **data["op_args"])
+# run_p_reports(data["master"], **data["op_args"])
 
 ## VFM
 # c = VfMData(m, group=DFm = Master(*data["data"], **data["op_args"] )T_GROUP, quarter=["standard"])  # c is class
@@ -265,3 +267,6 @@ ms = MilestoneData(data["master"], **data["op_args"])
 # Risk data
 # risks = get_risk_data()
 # print_risk_data(risks)
+
+
+a = parser.parse(get_ipdc_date(str(root_path) + "/core_data/ipdc_confi.ini"), dayfirst=True).date()
