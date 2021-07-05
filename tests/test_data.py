@@ -75,7 +75,7 @@ from analysis_engine.data import (
     get_strategic_priorities_data,
     JsonData,
     open_json_file,
-    get_project_information, run_p_reports, JsonMaster,
+    get_project_information, run_p_reports, JsonMaster, build_speedials,
 )
 from analysis_engine.top35_data import top35_run_p_reports
 
@@ -387,10 +387,17 @@ def test_dca_analysis(master):
 
 
 def test_speedial_print_out(master, word_doc):
-    dca = DcaData(master, baseline=["standard"])
+    dca = DcaData(master, quarter=["standard"])
     dca.get_changes()
     dca_changes_into_word(dca, word_doc)
     word_doc.save("resources/dca_checks.docx")
+
+
+def test_speedial_graph(master, word_doc):
+    dca_data = DcaData(master, quarter=["standard"], conf_type='sro', rag_number="3")
+    dca_data.get_changes()
+    build_speedials(dca_data, word_doc)
+    word_doc.save("resources/speedial_graph.docx")
 
 
 def test_risk_analysis(master):

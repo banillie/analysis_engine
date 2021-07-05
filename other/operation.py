@@ -42,7 +42,7 @@ from analysis_engine.data import (
     make_a_dandelion_auto,
     BenefitsData,
     total_costs_benefits_bar_chart,
-    gauge,
+    gauge_five_rag,
     calculate_arg_combinations,
     get_sp_data,
     cal_group,
@@ -216,9 +216,9 @@ data = cdg_data_dict
 # wb = risks_into_excel(c)
 
 # SPEED DIALS
-# dca_data = DcaData(data["master"], **data["op_args"])
-# dca_data.get_changes()
-# build_speedials(dca_data, hoz_doc)
+dca_data = DcaData(data["master"], **data["op_args"])
+dca_data.get_changes()
+build_speedials(dca_data, hoz_doc)
 # hoz_doc.save(data["docx_save_path"].format("speedial_graphs"))
 # doc = dca_changes_into_word(dca_data, doc)
 # doc.save(data["docx_save_path"].format("speedial_dca_changes"))
@@ -245,8 +245,8 @@ data = cdg_data_dict
 ## DASHBOARD
 # wb = ipdc_dashboard(data["master"], data["dashboard"], data["op_args"])
 # wb.save(data["excel_save_path"].format("q4_2021_dashboard_final"))
-wb = cdg_narrative_dashboard(data["master"], data["narrative_dashboard"])
-wb.save(data["excel_save_path"].format("q1_2021_narrative_dashboard"))
+# wb = cdg_narrative_dashboard(data["master"], data["narrative_dashboard"])
+# wb.save(data["excel_save_path"].format("q1_2021_narrative_dashboard"))
 
 ##CENTRAL SUPPORT
 # cs = CentralSupportData(data["master"], **data["op_args"])

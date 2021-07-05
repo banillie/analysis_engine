@@ -4,11 +4,6 @@ import pytest
 from datamaps.api import project_data_from_master, project_data_from_master_month
 from openpyxl import load_workbook
 
-from analysis_engine.cdg_data import (
-    cdg_root_path,
-    cdg_get_master_data,
-    cdg_get_project_information,
-)
 from analysis_engine.data import open_word_doc, open_pickle_file, root_path, Master, open_json_file, JsonMaster, \
     get_master_data, get_project_information, JsonData
 

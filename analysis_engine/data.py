@@ -4418,17 +4418,24 @@ class DcaData:
 
         if "data_type" in self.kwargs:
             if self.kwargs["data_type"] == "cdg":
-                dca_keys = CPG_DCA_KEYS
+                self.dca_keys = CPG_DCA_KEYS
         else:
-            dca_keys = DCA_KEYS
+            self.dca_keys = DCA_KEYS
 
-        # if "type" in self.kwargs:  # option here to change confidence types
-        #     self.conf_list = self.kwargs["type"]
+        if "conf_type" in self.kwargs:  # option here to change confidence types
+            if self.kwargs["conf_type"] == "sro_three":
+                self.dca_keys = {
+                    "sro_three": 'GMPP - SRO DCA',
+                }
+            else:
+                self.dca_keys = {
+                    self.kwargs["conf_type"]: DCA_KEYS[self.kwargs["conf_type"]],
+                }
 
         for tp in self.iter_list:
             self.group = get_group(self.master, tp, self.kwargs)
             type_dict = {}
-            for conf_type in list(dca_keys.keys()):  # confidence type
+            for conf_type in list(self.dca_keys.keys()):  # confidence type
                 dca_dict = {}
                 try:
                     for project_name in self.group:
@@ -4441,7 +4448,7 @@ class DcaData:
                         )
                         if p_data is None:
                             continue
-                        dca_type = dca_keys[conf_type]
+                        dca_type = self.dca_keys[conf_type]
                         colour = p_data[dca_type]
                         score = DCA_RATING_SCORES[p_data[dca_type]]
                         if "data_type" in self.kwargs:
@@ -4467,15 +4474,14 @@ class DcaData:
 
     def get_changes(self) -> None:
         """compiles dictionary of changes in dca ratings when provided with two quarter arguments"""
-
-        if "data_type" in self.kwargs:
-            if self.kwargs["data_type"] == "cdg":
-                dca_keys = CPG_DCA_KEYS
-        else:
-            dca_keys = DCA_KEYS
+        # if "data_type" in self.kwargs:
+        #     if self.kwargs["data_type"] == "cdg":
+        #         dca_keys = CPG_DCA_KEYS
+        # else:
+        #     dca_keys = DCA_KEYS
 
         c_dict = {}
-        for conf_type in list(dca_keys.keys()):  # confidence type
+        for conf_type in list(self.dca_keys.keys()):  # confidence type
             lower_dict = {}
             for project_name in list(
                 self.dca_dictionary[self.iter_list[0]][conf_type].keys()
@@ -5177,10 +5183,7 @@ def rot_text(ang):
     return rotation
 
 
-DCA_WA = {"Green": 5, "Amber/Green": 4, "Amber": 3, "Amber/Red": 2, "Red": 1}
-
-
-def gauge(
+def gauge_five_rag(
     labels: List[str],
     total: str,
     arrow_one: float,
@@ -5194,14 +5197,20 @@ def gauge(
     fig.set_size_inches(18.5, 10.5)
     ax.set_facecolor(FACE_COLOUR)  # TBC if face colour is required
     ang_range, mid_points = degree_range(no)
-    colours = [
-        COLOUR_DICT["R"],
-        COLOUR_DICT["A/R"],
-        COLOUR_DICT["A"],
-        COLOUR_DICT["A/G"],
-        COLOUR_DICT["G"],
-    ]
-    # ["#c00000", "#e77200", "#ffba00", "#92a700", "#007d00"]
+    if no == 3:
+        colours = [
+            COLOUR_DICT["R"],
+            COLOUR_DICT["A"],
+            COLOUR_DICT["G"],
+        ]
+    else:
+        colours = [
+            COLOUR_DICT["R"],
+            COLOUR_DICT["A/R"],
+            COLOUR_DICT["A"],
+            COLOUR_DICT["A/G"],
+            COLOUR_DICT["G"],
+        ]
 
     patches = []
     for ang, c in zip(ang_range, colours):
@@ -5355,12 +5364,16 @@ def gauge(
     return fig
 
 
-def build_speedials(dca_data: DcaData, doc) -> None:
+def build_speedials(dca_data: DcaData, doc, **kwargs) -> None:
     """function for build speed dial graphical output"""
     for conf_type in dca_data.dca_count[dca_data.iter_list[0]]:
         c_count = []
         l_count = []
-        for colour in DCA_WA.keys():
+        if dca_data.kwargs["rag_number"] == "3":
+            rag_no = {"Green": 5, "Amber": 3, "Red": 1}
+        if dca_data.kwargs["rag_number"] == "5":
+            rag_no = {"Green": 5, "Amber/Green": 4, "Amber": 3, "Amber/Red": 2, "Red": 1}
+        for colour in rag_no.keys():
             c_no = dca_data.dca_count[dca_data.iter_list[0]][conf_type][colour]["count"]
             c_count.append(c_no)
             try:  # to capture reporting process with only one quarters data
@@ -5381,11 +5394,14 @@ def build_speedials(dca_data: DcaData, doc) -> None:
             if change == "Down":
                 down += 1
 
-        rate = [0, 0.25, 0.5, 0.75, 1]
+        if dca_data.kwargs["rag_number"] == "3":
+            rate = [0, 0.5, 1]
+        if dca_data.kwargs["rag_number"] == "5":
+            rate = [0, 0.25, 0.5, 0.75, 1]
         dial_one = np.average(rate, weights=c_count)
         dial_two = np.average(rate, weights=l_count)
 
-        graph = gauge(
+        graph = gauge_five_rag(
             c_count,
             str(c_total),
             dial_one,
