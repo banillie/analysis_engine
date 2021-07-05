@@ -63,7 +63,10 @@ from analysis_engine.data import (
     print_gmpp_data,
     get_risk_data,
     print_risk_data,
-    get_map, get_project_info_data, data_check_print_out, get_ipdc_date,
+    get_map, get_project_info_data,
+    data_check_print_out,
+    get_ipdc_date,
+    IPDC_DATE
 )
 
 ## GENERATE CLI OPTIONS
@@ -80,24 +83,19 @@ from analysis_engine.top35_data import (
 # INITIATE
 # master = JsonMaster(
 #     get_master_data(
-#         str(top35_root_path) + "/core_data/confi.ini",
-#         str(top35_root_path) + "/core_data/",
-#         project_data_from_master_month
+#         str(cdg_root_path) + "/core_data/cdg_confi.ini",
+#         str(cdg_root_path) + "/core_data/",
+#         project_data_from_master
 #     ),
 #     get_project_information(
-#         str(top35_root_path) + "/core_data/confi.ini",
-#         str(top35_root_path) + "/core_data/"
+#         str(cdg_root_path) + "/core_data/cdg_confi.ini",
+#         str(cdg_root_path) + "/core_data/"
 #     ),
-#     data_type="top35"
+#     data_type="cdg"
 # )
-# master_json_path = str("{0}/core_data/json/master".format(top35_root_path))
-# master = JsonMaster(
-#     get_master_data(str(root_path) + "/core_data/", project_data_from_master),
-#     get_project_information(str(root_path) + "/core_data/",
-#                             str(root_path) + "/core_data/data_mgmt/")
-# )
-# master_json_path = str("{0}/core_data/json/master".format(root_path))
+# master_json_path = str("{0}/core_data/json/master".format(cdg_root_path))
 # JsonData(master, master_json_path)
+
 
 ## GROUPS
 # DFT_GROUP = ["HSRG", "RSS", "RIG", "AMIS", "RPE"]
@@ -130,51 +128,50 @@ from analysis_engine.top35_data import (
 #     "word_save_path": str(top35_root_path / "output/{}.docx")
 # }
 
-ipdc_data_dict = {
-    "docx_save_path": str(root_path / "output/{}.docx"),
-    "master": Master(open_json_file(str(root_path / "core_data/json/master.json"))),
-    "op_args": {
-        "quarter": ["standard"],
-        # "quarter": ["Q4 20/21"],
-        # "baseline": ["bl_one"],
-        # "group": ["HSRG", "RSS", "RIG", "AMIS", "RPE"],
-        "group": ["Great Western Route Modernisation"],
-        # "dates": ["1/6/2021", "1/7/2021"],
-        "chart": True,
-        # "circle_colour": "No",
-        "key": ["SRO Tenure Start Date", "Total Forecast"]
-    },
-    "dashboard": get_input_doc(root_path / "input/dashboards_master.xlsx"),
-    "excel_save_path": str(root_path / "output/{}.xlsx"),
-}
-
-# cdg_data_dict = {
-#     "docx_save_path": str(cdg_root_path / "output/{}.docx"),
-#     "master": Master(
-#         cdg_get_master_data(), cdg_get_project_information(), data_type="cdg"
-#     ),
+# ipdc_data_dict = {
+#     "docx_save_path": str(root_path / "output/{}.docx"),
+#     "master": Master(open_json_file(str(root_path / "core_data/json/master.json"))),
 #     "op_args": {
-#         "quarter": ["Q4 20/21"],
-#         # "quarter": ["standard"],
-#         "group": ["SCS", "CFPD", "GF"],
-#         # "chart": True,
-#         "data_type": "cdg",
-#         "type": "benefits",
-#         "blue_line": "CDG",
-#         "dates": ["1/10/2020", "1/5/2022"],
-#         "fig_size": "half_horizontal",
+#         "quarter": ["standard"],
+#         # "quarter": ["Q4 20/21"],
+#         # "baseline": ["bl_one"],
+#         # "group": ["HSRG", "RSS", "RIG", "AMIS", "RPE"],
+#         "group": ["Great Western Route Modernisation"],
+#         # "dates": ["1/6/2021", "1/7/2021"],
+#         "chart": True,
+#         # "circle_colour": "No",
+#         "key": ["SRO Tenure Start Date", "Total Forecast"]
 #     },
-#     "dashboard": str(cdg_root_path / "input/dashboard_master.xlsx"),
-#     "narrative_dashboard": str(cdg_root_path / "input/narrative_dashboard_master.xlsx"),
-#     "excel_save_path": str(cdg_root_path / "output/{}.xlsx"),
-#     "word_save_path": str(cdg_root_path / "output/{}.docx")
+#     "dashboard": get_input_doc(root_path / "input/dashboards_master.xlsx"),
+#     "excel_save_path": str(root_path / "output/{}.xlsx"),
 # }
 
-data = ipdc_data_dict
+cdg_data_dict = {
+    "docx_save_path": str(cdg_root_path / "output/{}.docx"),
+    "master": Master(open_json_file(str(cdg_root_path / "core_data/json/master.json"))),
+    "op_args": {
+        "quarter": ["Q1 21/22"],
+        # "quarter": ["standard"],
+        # "group": ["SCS", "CFPD", "GF"],
+        "group": ["SCS", "GF"],
+        "chart": True,
+        "data_type": "cdg",
+        # "type": "benefits",
+        "blue_line": "CDG",
+        "dates": ["1/10/2020", "1/5/2022"],
+        "fig_size": "half_horizontal",
+    },
+    "dashboard": str(cdg_root_path / "input/dashboard_master.xlsx"),
+    "narrative_dashboard": str(cdg_root_path / "input/narrative_dashboard_master.xlsx"),
+    "excel_save_path": str(cdg_root_path / "output/{}.xlsx"),
+    "word_save_path": str(cdg_root_path / "output/{}.docx")
+}
+
+data = cdg_data_dict
 
 ## DANDELION
-# dl_data = DandelionData(data["master"], **data["op_args"])
-# d_lion = make_a_dandelion_auto(dl_data, **data["op_args"])
+dl_data = DandelionData(data["master"], **data["op_args"])
+d_lion = make_a_dandelion_auto(dl_data, **data["op_args"])
 # put_matplotlib_fig_into_word(hoz_doc, d_lion, size=7)
 # hoz_doc.save(data["docx_save_path"].format("dandelion_graph_benefits"))
 
@@ -268,5 +265,3 @@ data = ipdc_data_dict
 # risks = get_risk_data()
 # print_risk_data(risks)
 
-
-a = parser.parse(get_ipdc_date(str(root_path) + "/core_data/ipdc_confi.ini"), dayfirst=True).date()

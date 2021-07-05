@@ -8,6 +8,7 @@ from datamaps.api import project_data_from_master
 import platform
 from pathlib import Path
 
+from dateutil import parser
 from docx import Document, table
 
 from docx.shared import Pt, Cm, RGBColor, Inches
@@ -40,6 +41,7 @@ from analysis_engine.data import (
     Master,
     get_group,
     compare_text_new_and_old,
+    get_ipdc_date,
 )
 
 
@@ -55,6 +57,9 @@ def _cdg_platform_docs_dir() -> Path:
 
 cdg_root_path = _cdg_platform_docs_dir()
 
+# Python date format is Year, Month, day
+CDG_DATE = parser.parse(get_ipdc_date(str(cdg_root_path) + "/core_data/cdg_confi.ini", "cdg_date"), dayfirst=True).date()
+
 
 def cdg_get_master_data() -> List[
     Dict[str, Union[str, int, datetime.date, float]]
@@ -62,14 +67,14 @@ def cdg_get_master_data() -> List[
     """Returns a list of dictionaries each containing quarter data"""
     master_data_list = [
         project_data_from_master(
+            cdg_root_path / "core_data/cdg_master_1_2021.xlsx", 1, 2021
+        ),
+        project_data_from_master(
             cdg_root_path / "core_data/cdg_master_4_2020.xlsx", 4, 2020
         ),
         project_data_from_master(
             cdg_root_path / "core_data/cdg_master_3_2020.xlsx", 3, 2020
         ),
-        # project_data_from_master(
-        #     cdg_root_path / "core_data/cdg_master_2_2020.xlsx", 2, 2020
-        # ),
     ]
     return master_data_list
 

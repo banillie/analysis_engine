@@ -27,6 +27,7 @@ from matplotlib.spines import Spine
 from matplotlib.transforms import Affine2D
 
 from dateutil import parser
+from dateutil.relativedelta import relativedelta
 import numpy as np
 from datamaps.api import project_data_from_master
 from datamaps.process import Cleanser
@@ -408,22 +409,13 @@ SRO_CONF_KEY_LIST = [
 ]
 
 
-def get_ipdc_date(confi_path):
+def get_ipdc_date(confi_path, board_str):
     config = configparser.ConfigParser()
     config.read(confi_path)
-    return config["GLOBALS"]["ipdc_date"]
+    return config["GLOBALS"][board_str]
 
-
-IPDC_DATE = parser.parse(get_ipdc_date(str(root_path) + "/core_data/ipdc_confi.ini"), dayfirst=True).date()
-#     datetime.date(
-#     2021, 5, 24
-# )  # ipdc date. Python date format is Year, Month, day
-
-CDG_DATE = datetime.date(
-    2021, 5, 27
-)  # ipdc date. Python date format is Year, Month, day
-
-
+# Python date format is Year, Month, day
+IPDC_DATE = parser.parse(get_ipdc_date(str(root_path) + "/core_data/ipdc_confi.ini", "ipdc_date"), dayfirst=True).date()
 LIST_OF_TITLES = [
     "ALL",
     "HE",
@@ -8279,9 +8271,12 @@ def dandelion_number_text(number: int) -> str:
         if number == 0:
             return "£TBC"
         total_len = len(str(int(number)))
-        if total_len <= 3:
+        if total_len <= 2:
+            # round_total = round(number, -1)
+            return "£" + str(int(number)) + "m"
+        if total_len == 3:
             round_total = round(number, -1)
-            return "£" + str(round_total) + "m"
+            return "£" + str(int(round_total)) + "m"
         if total_len == 4:
             round_total = round(number, -2)
             if str(round_total)[1] != "0":
@@ -9560,9 +9555,6 @@ def print_risk_data(risk_data: Dict):
     ws.cell(row=1, column=11).value = "effect"
 
     wb.save("/home/will/Downloads/exco_risks_HSRG.xlsx")
-
-
-from dateutil.relativedelta import relativedelta
 
 
 def calculate_dates(date_str):
