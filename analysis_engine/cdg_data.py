@@ -41,50 +41,34 @@ from analysis_engine.data import (
     Master,
     get_group,
     compare_text_new_and_old,
-    get_ipdc_date,
+    get_ipdc_date, dandelion_number_text,
 )
 
 
-def _cdg_platform_docs_dir() -> Path:
-    #  Cross plaform file path handling
-    if platform.system() == "Linux":
-        return Path.home() / "Documents" / "cdg"
-    if platform.system() == "Darwin":
-        return Path.home() / "Documents" / "cdg"
-    else:
-        return Path.home() / "Documents" / "cdg"
+# def cdg_get_master_data() -> List[
+#     Dict[str, Union[str, int, datetime.date, float]]
+# ]:  # how specify a list of dictionaries?
+#     """Returns a list of dictionaries each containing quarter data"""
+#     master_data_list = [
+#         project_data_from_master(
+#             cdg_root_path / "core_data/cdg_master_1_2021.xlsx", 1, 2021
+#         ),
+#         project_data_from_master(
+#             cdg_root_path / "core_data/cdg_master_4_2020.xlsx", 4, 2020
+#         ),
+#         project_data_from_master(
+#             cdg_root_path / "core_data/cdg_master_3_2020.xlsx", 3, 2020
+#         ),
+#     ]
+#     return master_data_list
 
 
-cdg_root_path = _cdg_platform_docs_dir()
-
-# Python date format is Year, Month, day
-CDG_DATE = parser.parse(get_ipdc_date(str(cdg_root_path) + "/core_data/cdg_confi.ini", "cdg_date"), dayfirst=True).date()
-
-
-def cdg_get_master_data() -> List[
-    Dict[str, Union[str, int, datetime.date, float]]
-]:  # how specify a list of dictionaries?
-    """Returns a list of dictionaries each containing quarter data"""
-    master_data_list = [
-        project_data_from_master(
-            cdg_root_path / "core_data/cdg_master_1_2021.xlsx", 1, 2021
-        ),
-        project_data_from_master(
-            cdg_root_path / "core_data/cdg_master_4_2020.xlsx", 4, 2020
-        ),
-        project_data_from_master(
-            cdg_root_path / "core_data/cdg_master_3_2020.xlsx", 3, 2020
-        ),
-    ]
-    return master_data_list
-
-
-def cdg_get_project_information() -> Dict[str, Union[str, int]]:
-    """Returns dictionary containing all project meta data"""
-    return project_data_from_master(
-        cdg_root_path / "core_data/cdg_project_info.xlsx", 2, 2020
-    )
-
+# def cdg_get_project_information() -> Dict[str, Union[str, int]]:
+#     """Returns dictionary containing all project meta data"""
+#     return project_data_from_master(
+#         cdg_root_path / "core_data/cdg_project_info.xlsx", 2, 2020
+#     )
+#
 
 def place_data_into_new_master_format(master_data: Dict):  # throw away
     wb = load_workbook(cdg_root_path / "core_data/CDG_portfolio_report.xlsx")
@@ -595,11 +579,11 @@ def cdg_dashboard(
         project_name = ws.cell(row=row_num, column=3).value
         if project_name in master.current_projects:
             # Group
-            ws.cell(row=row_num, column=2).value = master.project_information.data[project_name]["Directorate"]
+            ws.cell(row=row_num, column=2).value = master.project_information[project_name]["Directorate"]
             # Abbreviation
-            ws.cell(row=row_num, column=4).value = master.project_information.data[project_name]["Abbreviations"]
+            ws.cell(row=row_num, column=4).value = master.project_information[project_name]["Abbreviations"]
             # Stage
-            bc_stage = master.master_data[0].data[project_name][DATA_KEY_DICT["IPDC approval point"]]
+            bc_stage = master.master_data[0]["data"][project_name][DATA_KEY_DICT["IPDC approval point"]]
             ws.cell(row=row_num, column=5).value = convert_bc_stage_text(bc_stage)
             # try:
             #     bc_stage_lst_qrt = master.master_data[1].data[project_name][
@@ -616,8 +600,8 @@ def cdg_dashboard(
             #     pass
 
             # Total Costs
-            costs = master.master_data[0].data[project_name][DATA_KEY_DICT["Total Forecast"]]
-            ws.cell(row=row_num, column=6).value = add_sterling_symbol(costs)
+            costs = master.master_data[0]["data"][project_name][DATA_KEY_DICT["Total Forecast"]]
+            ws.cell(row=row_num, column=6).value = dandelion_number_text(costs, none_handle="none")
             # try:
             #     wlc_lst_quarter = master.master_data[1].data[project_name][
             #         "Total Forecast"
@@ -645,13 +629,13 @@ def cdg_dashboard(
             #     ws.cell(row=row_num, column=6).value = "-"
 
             # Total Income
-            income = master.master_data[0].data[project_name]["Total Income"]
-            ws.cell(row=row_num, column=7).value = add_sterling_symbol(income)
+            income = master.master_data[0]["data"][project_name]["Total Income"]
+            ws.cell(row=row_num, column=7).value = dandelion_number_text(income, none_handle="none")
             # Total Benefits
-            benefits = master.master_data[0].data[project_name]["Total Benefits"]
-            ws.cell(row=row_num, column=8).value = add_sterling_symbol(benefits)
+            benefits = master.master_data[0]["data"][project_name]["Total Benefits"]
+            ws.cell(row=row_num, column=8).value = dandelion_number_text(benefits, none_handle="none")
             # VfM Category
-            vfm = master.master_data[0].data[project_name]["VfM Category"]
+            vfm = master.master_data[0]["data"][project_name]["VfM Category"]
             ws.cell(row=row_num, column=9).value = vfm
 
 
@@ -811,7 +795,7 @@ def cdg_dashboard(
 
             # DCA ratings
             overall_dca = convert_rag_text(
-                master.master_data[0].data[project_name][DATA_KEY_DICT["Departmental DCA"]]
+                master.master_data[0]["data"][project_name][DATA_KEY_DICT["Departmental DCA"]]
             )
             ws.cell(row=row_num, column=10).value = overall_dca
             if overall_dca == "None":
@@ -820,7 +804,7 @@ def cdg_dashboard(
             conf_list = ["Costs Confidence", "Schedule Confidence", "Benefits Confidence"]
             for i, key in enumerate(conf_list):
                 dca = convert_rag_text(
-                    master.master_data[0].data[project_name][key]
+                    master.master_data[0]["data"][project_name][key]
                 )
                 ws.cell(row=row_num, column=11+i).value = dca
 
@@ -836,7 +820,7 @@ def cdg_dashboard(
                 ]
 
             for i, key in enumerate(risk_list):
-                risk = master.master_data[0].data[project_name][key]
+                risk = master.master_data[0]["data"][project_name][key]
                 if risk == "YES":
                     ws.cell(row=row_num, column=14+i).value = risk
 
@@ -913,23 +897,23 @@ def cdg_narrative_dashboard(
         project_name = ws.cell(row=row_num, column=3).value
         if project_name in master.current_projects:
             # Group
-            ws.cell(row=row_num, column=2).value = master.project_information.data[project_name]["Directorate"]
+            ws.cell(row=row_num, column=2).value = master.project_information[project_name]["Directorate"]
             # Abbreviation
-            ws.cell(row=row_num, column=4).value = master.project_information.data[project_name]["Abbreviations"]
+            ws.cell(row=row_num, column=4).value = master.project_information[project_name]["Abbreviations"]
             # Stage
-            bc_stage = master.master_data[0].data[project_name][DATA_KEY_DICT["IPDC approval point"]]
+            bc_stage = master.master_data[0]["data"][project_name][DATA_KEY_DICT["IPDC approval point"]]
             ws.cell(row=row_num, column=5).value = convert_bc_stage_text(bc_stage)
-            costs = master.master_data[0].data[project_name][DATA_KEY_DICT["Total Forecast"]]
-            ws.cell(row=row_num, column=6).value = add_sterling_symbol(costs)
+            costs = master.master_data[0]["data"][project_name][DATA_KEY_DICT["Total Forecast"]]
+            ws.cell(row=row_num, column=6).value = dandelion_number_text(costs)
 
             overall_dca = convert_rag_text(
-                master.master_data[0].data[project_name][DATA_KEY_DICT["Departmental DCA"]]
+                master.master_data[0]["data"][project_name][DATA_KEY_DICT["Departmental DCA"]]
             )
             ws.cell(row=row_num, column=7).value = overall_dca
             if overall_dca == "None":
                 ws.cell(row=row_num, column=7).value = ""
 
-            sro_n = master.master_data[0].data[project_name]["SRO Narrative"]
+            sro_n = master.master_data[0]["data"][project_name]["SRO Narrative"]
             ws.cell(row=row_num, column=8).value = sro_n
 
 

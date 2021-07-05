@@ -10,13 +10,15 @@ from openpyxl import load_workbook
 
 # matplotlib==3.3.0
 from analysis_engine.cdg_data import (
-    cdg_root_path,
-    cdg_get_master_data,
-    cdg_get_project_information,
+    # cdg_root_path,
+    # cdg_get_master_data,
+    # cdg_get_project_information,
     cdg_dashboard,
-    cdg_run_p_reports, cdg_narrative_dashboard,
+    cdg_run_p_reports,
+    cdg_narrative_dashboard,
 )
 from analysis_engine.data import (
+    cdg_root_path,
     open_pickle_file,
     root_path,
     DcaData,
@@ -100,8 +102,8 @@ from analysis_engine.top35_data import (
 ## GROUPS
 # DFT_GROUP = ["HSRG", "RSS", "RIG", "AMIS", "RPE"]
 # STAGE_GROUPS = ["pipeline", "pre-SOBC", "SOBC", "OBC", "FBC"]
-# hoz_doc = open_word_doc(root_path / "input/summary_temp_landscape.docx")
-# doc = open_word_doc(root_path / "input/summary_temp.docx")
+hoz_doc = open_word_doc(root_path / "input/summary_temp_landscape.docx")
+doc = open_word_doc(root_path / "input/summary_temp.docx")
 
 # top35_data_dict = {
 #     "docx_save_path": str(top35_root_path / "output/{}.docx"),
@@ -150,15 +152,15 @@ cdg_data_dict = {
     "docx_save_path": str(cdg_root_path / "output/{}.docx"),
     "master": Master(open_json_file(str(cdg_root_path / "core_data/json/master.json"))),
     "op_args": {
-        "quarter": ["Q1 21/22"],
-        # "quarter": ["standard"],
+        # "quarter": ["Q1 21/22"],
+        "quarter": ["standard"],
         # "group": ["SCS", "CFPD", "GF"],
         "group": ["SCS", "GF"],
         "chart": True,
         "data_type": "cdg",
         # "type": "benefits",
         "blue_line": "CDG",
-        "dates": ["1/10/2020", "1/5/2022"],
+        "dates": ["1/6/2020", "1/6/2022"],
         "fig_size": "half_horizontal",
     },
     "dashboard": str(cdg_root_path / "input/dashboard_master.xlsx"),
@@ -170,10 +172,10 @@ cdg_data_dict = {
 data = cdg_data_dict
 
 ## DANDELION
-dl_data = DandelionData(data["master"], **data["op_args"])
-d_lion = make_a_dandelion_auto(dl_data, **data["op_args"])
+# dl_data = DandelionData(data["master"], **data["op_args"])
+# d_lion = make_a_dandelion_auto(dl_data, **data["op_args"])
 # put_matplotlib_fig_into_word(hoz_doc, d_lion, size=7)
-# hoz_doc.save(data["docx_save_path"].format("dandelion_graph_benefits"))
+# hoz_doc.save(data["word_save_path"].format("dandelion_graph"))
 
 
 # MILESTONES
@@ -181,7 +183,7 @@ d_lion = make_a_dandelion_auto(dl_data, **data["op_args"])
 # ipdc_ms = MilestoneData(ipdc_data_dict["master"], **ipdc_data_dict["op_args"])
 # ms.filter_chart_info(**data["op_args"])
 # wb = put_milestones_into_wb(ms)
-# wb.save(data["excel_save_path"].format("milestone_testing"))
+# wb.save(data["excel_save_path"].format("milestones"))
 # g = milestone_chart(ms, data["master"], **data["op_args"])
 # put_matplotlib_fig_into_word(hoz_doc, g, size=7, transparent=False)
 # hoz_doc.save(data["word_save_path"].format("milestone_graph"))
@@ -243,8 +245,8 @@ d_lion = make_a_dandelion_auto(dl_data, **data["op_args"])
 ## DASHBOARD
 # wb = ipdc_dashboard(data["master"], data["dashboard"], data["op_args"])
 # wb.save(data["excel_save_path"].format("q4_2021_dashboard_final"))
-# wb = cdg_narrative_dashboard(data["master"], data["narrative_dashboard"])
-# wb.save(data["excel_save_path"].format("q4_2021_narrative_dashboard"))
+wb = cdg_narrative_dashboard(data["master"], data["narrative_dashboard"])
+wb.save(data["excel_save_path"].format("q1_2021_narrative_dashboard"))
 
 ##CENTRAL SUPPORT
 # cs = CentralSupportData(data["master"], **data["op_args"])

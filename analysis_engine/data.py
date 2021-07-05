@@ -13,19 +13,15 @@ import typing
 import random
 from collections import Counter, OrderedDict
 from typing import List, Dict, Union, Optional, Tuple, TextIO
-
 # import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from datetime import timedelta, date
-
-# import matplotlib.pyplot as plt
 from matplotlib.patches import Circle, RegularPolygon
 from matplotlib.path import Path
 from matplotlib.projections.polar import PolarAxes
 from matplotlib.projections import register_projection
 from matplotlib.spines import Spine
 from matplotlib.transforms import Affine2D
-
 from dateutil import parser
 from dateutil.relativedelta import relativedelta
 import numpy as np
@@ -33,8 +29,7 @@ from datamaps.api import project_data_from_master
 from datamaps.process import Cleanser
 import platform
 from pathlib import Path
-
-from dateutil.parser import ParserError
+# from dateutil.parser import ParserError
 from docx import Document, table
 from docx.enum.section import WD_SECTION_START, WD_ORIENTATION
 from docx.enum.text import WD_ALIGN_PARAGRAPH
@@ -45,20 +40,12 @@ from matplotlib import cm, pyplot as plt
 from matplotlib.patches import Wedge, Rectangle, Circle, ArrowStyle
 from openpyxl import load_workbook, Workbook
 from openpyxl.chart import BubbleChart, Reference, Series
-
-# from openpyxl.chart.series import Series
-# from openpyxl.styles import Font, PatternFill
-# from openpyxl.styles.differential import DifferentialStyle
-# from openpyxl.formatting import Rule
 from openpyxl.formatting import Rule
 from openpyxl.styles import Font, PatternFill, Border
 from openpyxl.styles.differential import DifferentialStyle
-
 from openpyxl.workbook import workbook
 from textwrap import wrap
-
 import logging
-
 from pdf2image import convert_from_path
 
 logging.basicConfig(
@@ -110,6 +97,20 @@ def _platform_docs_dir() -> Path:
 
 
 root_path = _platform_docs_dir()
+
+
+def _cdg_platform_docs_dir() -> Path:
+    #  Cross plaform file path handling
+    if platform.system() == "Linux":
+        return Path.home() / "Documents" / "cdg"
+    if platform.system() == "Darwin":
+        return Path.home() / "Documents" / "cdg"
+    else:
+        return Path.home() / "Documents" / "cdg"
+
+
+cdg_root_path = _cdg_platform_docs_dir()
+
 
 
 def calculate_arg_combinations(args_list: List):
@@ -416,6 +417,7 @@ def get_ipdc_date(confi_path, board_str):
 
 # Python date format is Year, Month, day
 IPDC_DATE = parser.parse(get_ipdc_date(str(root_path) + "/core_data/ipdc_confi.ini", "ipdc_date"), dayfirst=True).date()
+CDG_DATE = parser.parse(get_ipdc_date(str(cdg_root_path) + "/core_data/cdg_confi.ini", "cdg_date"), dayfirst=True).date()
 LIST_OF_TITLES = [
     "ALL",
     "HE",
@@ -1742,14 +1744,19 @@ class MilestoneData:
                                 project_milestones, entry, **self.kwargs
                             )
                     if self.kwargs["data_type"] == "cdg":
+                        report = "CDG"
                         for i in range(1, 12):
                             entry = [
                                 ("Project", p),
                                 ("Milestone", p_data["MM" + str(i)]),
                                 ("Notes", p_data["MM" + str(i) + " NOTES"]),
-                                ("Date", p_data["MM" + str(i) + " DATE"]),
+                                ("Date", convert_date(p_data["MM" + str(i) + " DATE"])),
+                                ("Report", report),
+                                ("Cat", category),
                             ]
-                            milestone_info_handling(project_milestones, entry)
+                            milestone_info_handling(
+                                project_milestones, entry, **self.kwargs
+                            )
 
                 else:
                     report = "IPDC/GMPP"
@@ -1773,7 +1780,7 @@ class MilestoneData:
                                 ("Report", report),
                                 ("Cat", category),
                             ]
-                            milestone_info_handling(project_milestones, entry)
+                            milestone_info_handling(project_milestones, entry, **self.kwargs)
                             entry = [
                                 ("Project", p),
                                 ("Milestone", p_data["Assurance MM" + str(i)]),
@@ -1792,7 +1799,7 @@ class MilestoneData:
                                 ("Report", report),
                                 ("Cat", category),
                             ]
-                            milestone_info_handling(project_milestones, entry)
+                            milestone_info_handling(project_milestones, entry, **self.kwargs)
                         except KeyError:  # handles inconsistent keys naming for approval milestones.
                             try:
                                 entry = [
@@ -1816,7 +1823,7 @@ class MilestoneData:
                                     ("Report", report),
                                     ("Cat", category),
                                 ]
-                                milestone_info_handling(project_milestones, entry)
+                                milestone_info_handling(project_milestones, entry, **self.kwargs)
                             except KeyError:
                                 pass
 
@@ -1839,7 +1846,7 @@ class MilestoneData:
                                 ("Report", report),
                                 ("Cat", category),
                             ]
-                            milestone_info_handling(project_milestones, entry)
+                            milestone_info_handling(project_milestones, entry, **self.kwargs)
                         except KeyError:
                             pass
 
@@ -1865,7 +1872,7 @@ class MilestoneData:
                                 ("Report", report),
                                 ("Cat", category),
                             ]
-                            milestone_info_handling(project_milestones, entry)
+                            milestone_info_handling(project_milestones, entry, **self.kwargs)
                         except KeyError:
                             pass
 
@@ -8266,14 +8273,18 @@ def dandelion_project_text(number: int, project: str) -> str:
         )
 
 
-def dandelion_number_text(number: int) -> str:
+def dandelion_number_text(number: int, **kwargs) -> str:
+    total_len = len(str(int(number)))
     try:
         if number == 0:
-            return "£TBC"
-        total_len = len(str(int(number)))
+            if "none_handle" in kwargs:
+                if kwargs["none_handle"] == "none":
+                    return "£0m"
+            else:
+                return "£TBC"
         if total_len <= 2:
             # round_total = round(number, -1)
-            return "£" + str(int(number)) + "m"
+            return "£" + str(int(round(number))) + "m"
         if total_len == 3:
             round_total = round(number, -1)
             return "£" + str(int(round_total)) + "m"
