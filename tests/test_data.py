@@ -387,7 +387,7 @@ def test_dca_analysis(master):
 
 
 def test_speedial_print_out(master, word_doc):
-    dca = DcaData(master, quarter=["standard"])
+    dca = DcaData(master, quarter=["standard"], conf_type='sro')
     dca.get_changes()
     dca_changes_into_word(dca, word_doc)
     word_doc.save("resources/dca_checks.docx")

@@ -4410,7 +4410,7 @@ class DcaData:
         self.dca_count = {}
         self.get_dictionary()
         self.get_count()
-        self.get_changes()
+        # self.get_changes()  # call when needed
 
     def get_dictionary(self) -> None:
         self.iter_list = get_iter_list(self.kwargs, self.master)
@@ -4425,7 +4425,8 @@ class DcaData:
         if "conf_type" in self.kwargs:  # option here to change confidence types
             if self.kwargs["conf_type"] == "sro_three":
                 self.dca_keys = {
-                    "sro_three": 'GMPP - SRO DCA',
+                    "sro_three": "Departmental DCA",
+                        # 'GMPP - SRO DCA',
                 }
             else:
                 self.dca_keys = {
@@ -4474,12 +4475,6 @@ class DcaData:
 
     def get_changes(self) -> None:
         """compiles dictionary of changes in dca ratings when provided with two quarter arguments"""
-        # if "data_type" in self.kwargs:
-        #     if self.kwargs["data_type"] == "cdg":
-        #         dca_keys = CPG_DCA_KEYS
-        # else:
-        #     dca_keys = DCA_KEYS
-
         c_dict = {}
         for conf_type in list(self.dca_keys.keys()):  # confidence type
             lower_dict = {}
@@ -5183,7 +5178,7 @@ def rot_text(ang):
     return rotation
 
 
-def gauge_five_rag(
+def gauge(
     labels: List[str],
     total: str,
     arrow_one: float,
@@ -5214,9 +5209,6 @@ def gauge_five_rag(
 
     patches = []
     for ang, c in zip(ang_range, colours):
-        # sectors
-        # patches.append(Wedge((0.0, 0.0), 0.1, *ang, facecolor="w", lw=2))
-        # arcs
         patches.append(
             Wedge(
                 (0.0, 0.0),
@@ -5254,21 +5246,6 @@ def gauge_five_rag(
         fontname=FONT_TYPE,
     )
 
-    # r = Rectangle((-0.4, -0.1), 0.8, 0.1, facecolor="w", lw=2)
-    # ax.add_patch(r)
-
-    # ax.text(
-    #     0,
-    #     -0.1,
-    #     total + "\nSRO ratings",
-    #     horizontalalignment="center",
-    #     verticalalignment="center",
-    #     fontsize=35,
-    #     fontweight="bold",
-    #     fontname=FONT_TYPE,
-    #     zorder=1,
-    # )
-
     ax.text(
         0,
         -0.1,
@@ -5296,19 +5273,7 @@ def gauge_five_rag(
     def get_arrow_point(score: float):
         return (240 * score) - 120
 
-    ## different way of making arrows
-    # ax.arrow(
-    #     0,
-    #     0,
-    #     0.225 * np.cos(np.radians(get_arrow_point(arrow_one))),
-    #     0.225 * np.sin(np.radians(get_arrow_point(arrow_one))),
-    #     width=0.04,
-    #     head_width=0.09,
-    #     head_length=0.05,
-    #     fc="k",
-    #     ec="k",
-    #     zorder=10
-    # )
+
 
     ax.annotate(
         "",
@@ -5336,26 +5301,27 @@ def gauge_five_rag(
     ax.add_patch(Circle((0, 0), radius=0.01, facecolor="w", zorder=11))
 
     ## arrows around the dial
-    plt.annotate(
-        "",
-        xy=(-0.2, 0.4),
-        xycoords="data",
-        xytext=(-0.4, 0.2),
-        textcoords="data",
-        arrowprops=dict(arrowstyle="->", connectionstyle="arc3, rad=-0.3", linewidth=4),
-    )
-    ax.text(-0.35, 0.35, down, fontsize=30, fontname=FONT_TYPE)
+    if arrow_one != arrow_two:  # only done if two quarters data available.
+        plt.annotate(
+            "",
+            xy=(-0.2, 0.4),
+            xycoords="data",
+            xytext=(-0.4, 0.2),
+            textcoords="data",
+            arrowprops=dict(arrowstyle="->", connectionstyle="arc3, rad=-0.3", linewidth=4),
+        )
+        ax.text(-0.35, 0.35, down, fontsize=30, fontname=FONT_TYPE)
 
-    ax.text(0.35, 0.35, up, fontsize=30, fontname=FONT_TYPE)
+        ax.text(0.35, 0.35, up, fontsize=30, fontname=FONT_TYPE)
 
-    plt.annotate(
-        "",
-        xy=(0.4, 0.2),
-        xycoords="data",
-        xytext=(0.2, 0.4),
-        textcoords="data",
-        arrowprops=dict(arrowstyle="<-", connectionstyle="arc3, rad=-0.3", linewidth=4),
-    )
+        plt.annotate(
+            "",
+            xy=(0.4, 0.2),
+            xycoords="data",
+            xytext=(0.2, 0.4),
+            textcoords="data",
+            arrowprops=dict(arrowstyle="<-", connectionstyle="arc3, rad=-0.3", linewidth=4),
+        )
 
     plt.axis("scaled")
     plt.axis("off")
@@ -5383,25 +5349,32 @@ def build_speedials(dca_data: DcaData, doc, **kwargs) -> None:
                 l_count.append(l_no)
             except KeyError:
                 l_count.append(c_no)
+            except IndexError:
+                pass
         c_total = dca_data.dca_count[dca_data.iter_list[0]][conf_type]["Total"]["count"]
 
         up = 0
         down = 0
-        for p in dca_data.dca_changes[conf_type]:
-            change = dca_data.dca_changes[conf_type][p]["Change"]
-            if change == "Up":
-                up += 1
-            if change == "Down":
-                down += 1
+
+        if bool(dca_data.dca_changes):  # empty dictionaries evaluation to false
+            for p in dca_data.dca_changes[conf_type]:
+                change = dca_data.dca_changes[conf_type][p]["Change"]
+                if change == "Up":
+                    up += 1
+                if change == "Down":
+                    down += 1
 
         if dca_data.kwargs["rag_number"] == "3":
             rate = [0, 0.5, 1]
         if dca_data.kwargs["rag_number"] == "5":
             rate = [0, 0.25, 0.5, 0.75, 1]
         dial_one = np.average(rate, weights=c_count)
-        dial_two = np.average(rate, weights=l_count)
+        try:
+            dial_two = np.average(rate, weights=l_count)
+        except TypeError:  # no previous quarter data
+            dial_two = dial_one
 
-        graph = gauge_five_rag(
+        graph = gauge(
             c_count,
             str(c_total),
             dial_one,

@@ -42,7 +42,7 @@ from analysis_engine.data import (
     make_a_dandelion_auto,
     BenefitsData,
     total_costs_benefits_bar_chart,
-    gauge_five_rag,
+    gauge,
     calculate_arg_combinations,
     get_sp_data,
     cal_group,
@@ -130,46 +130,49 @@ doc = open_word_doc(root_path / "input/summary_temp.docx")
 #     "word_save_path": str(top35_root_path / "output/{}.docx")
 # }
 
-# ipdc_data_dict = {
-#     "docx_save_path": str(root_path / "output/{}.docx"),
-#     "master": Master(open_json_file(str(root_path / "core_data/json/master.json"))),
-#     "op_args": {
-#         "quarter": ["standard"],
-#         # "quarter": ["Q4 20/21"],
-#         # "baseline": ["bl_one"],
-#         # "group": ["HSRG", "RSS", "RIG", "AMIS", "RPE"],
-#         "group": ["Great Western Route Modernisation"],
-#         # "dates": ["1/6/2021", "1/7/2021"],
-#         "chart": True,
-#         # "circle_colour": "No",
-#         "key": ["SRO Tenure Start Date", "Total Forecast"]
-#     },
-#     "dashboard": get_input_doc(root_path / "input/dashboards_master.xlsx"),
-#     "excel_save_path": str(root_path / "output/{}.xlsx"),
-# }
-
-cdg_data_dict = {
-    "docx_save_path": str(cdg_root_path / "output/{}.docx"),
-    "master": Master(open_json_file(str(cdg_root_path / "core_data/json/master.json"))),
+ipdc_data_dict = {
+    "docx_save_path": str(root_path / "output/{}.docx"),
+    "master": Master(open_json_file(str(root_path / "core_data/json/master.json"))),
     "op_args": {
-        # "quarter": ["Q1 21/22"],
-        "quarter": ["standard"],
-        # "group": ["SCS", "CFPD", "GF"],
-        "group": ["SCS", "GF"],
+        # "quarter": ["standard"],
+        "quarter": ["Q4 20/21"],
+        # "baseline": ["bl_one"],
+        "group": ["HSRG", "RSS", "RIG", "AMIS", "RPE"],
+        # "group": ["Great Western Route Modernisation"],
+        # "dates": ["1/6/2021", "1/7/2021"],
+        "type": "Approval",
         "chart": True,
-        "data_type": "cdg",
-        # "type": "benefits",
-        "blue_line": "CDG",
-        "dates": ["1/6/2020", "1/6/2022"],
-        "fig_size": "half_horizontal",
+        # "circle_colour": "No",
+        # "key": ["SRO Tenure Start Date", "Total Forecast"],
+        "conf_type": "sro_three",
+        "rag_number": "3",
     },
-    "dashboard": str(cdg_root_path / "input/dashboard_master.xlsx"),
-    "narrative_dashboard": str(cdg_root_path / "input/narrative_dashboard_master.xlsx"),
-    "excel_save_path": str(cdg_root_path / "output/{}.xlsx"),
-    "word_save_path": str(cdg_root_path / "output/{}.docx")
+    "dashboard": get_input_doc(root_path / "input/dashboards_master.xlsx"),
+    "excel_save_path": str(root_path / "output/{}.xlsx"),
 }
 
-data = cdg_data_dict
+# cdg_data_dict = {
+#     "docx_save_path": str(cdg_root_path / "output/{}.docx"),
+#     "master": Master(open_json_file(str(cdg_root_path / "core_data/json/master.json"))),
+#     "op_args": {
+#         # "quarter": ["Q1 21/22"],
+#         "quarter": ["standard"],
+#         # "group": ["SCS", "CFPD", "GF"],
+#         "group": ["SCS", "GF"],
+#         "chart": True,
+#         "data_type": "cdg",
+#         # "type": "benefits",
+#         "blue_line": "CDG",
+#         "dates": ["1/6/2020", "1/6/2022"],
+#         "fig_size": "half_horizontal",
+#     },
+#     "dashboard": str(cdg_root_path / "input/dashboard_master.xlsx"),
+#     "narrative_dashboard": str(cdg_root_path / "input/narrative_dashboard_master.xlsx"),
+#     "excel_save_path": str(cdg_root_path / "output/{}.xlsx"),
+#     "word_save_path": str(cdg_root_path / "output/{}.docx")
+# }
+
+data = ipdc_data_dict
 
 ## DANDELION
 # dl_data = DandelionData(data["master"], **data["op_args"])
@@ -217,9 +220,9 @@ data = cdg_data_dict
 
 # SPEED DIALS
 dca_data = DcaData(data["master"], **data["op_args"])
-dca_data.get_changes()
+# dca_data.get_changes()
 build_speedials(dca_data, hoz_doc)
-# hoz_doc.save(data["docx_save_path"].format("speedial_graphs"))
+hoz_doc.save(data["docx_save_path"].format("speedial_graphs"))
 # doc = dca_changes_into_word(dca_data, doc)
 # doc.save(data["docx_save_path"].format("speedial_dca_changes"))
 

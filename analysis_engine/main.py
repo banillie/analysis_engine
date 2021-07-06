@@ -184,15 +184,31 @@ def ipdc_run_general(args):
                     cost_stackplot_graph(sp_data, m, **op_args)
 
         if programme == "speedial":
-            data = DcaData(m, **op_args)
-            data.get_changes()
             doc = get_input_doc(root_path / "input/summary_temp.docx")
-            doc = dca_changes_into_word(data, doc)
-            doc.save(root_path / "output/speed_dials_text.docx")
             land_doc = get_input_doc(root_path / "input/summary_temp_landscape.docx")
-            build_speedials(data, land_doc)
-            land_doc.save(root_path / "output/speed_dial_graph.docx")
-            # print("Speed dial analysis has been compiled. Enjoy!")
+            if "conf_type" in op_args:
+                if op_args["conf_type"] == "sro_three":
+                    op_args["rag_number"] = "3"
+                    op_args["quarter"] = [str(m.current_quarter)]
+                    data = DcaData(m, **op_args)
+                    build_speedials(data, land_doc)
+                    land_doc.save(root_path / "output/speed_dial_graph.docx")
+                else:  # refactor!!
+                    op_args["rag_number"] = "5"
+                    data = DcaData(m, **op_args)
+                    data.get_changes()
+                    doc = dca_changes_into_word(data, doc)
+                    doc.save(root_path / "output/speed_dials_text.docx")
+                    build_speedials(data, land_doc)
+                    land_doc.save(root_path / "output/speed_dial_graph.docx")
+            else:
+                op_args["rag_number"] = "5"
+                data = DcaData(m, **op_args)
+                data.get_changes()
+                doc = dca_changes_into_word(data, doc)
+                doc.save(root_path / "output/speed_dials_text.docx")
+                build_speedials(data, land_doc)
+                land_doc.save(root_path / "output/speed_dial_graph.docx")
 
         if programme == "milestones":
             ms = MilestoneData(m, **op_args)
@@ -647,6 +663,18 @@ class main():
             nargs="+",
             choices=["Approval", "Assurance", "Delivery"],
             help="Returns analysis for specified type of milestones.",
+        )
+
+        parser_speedial.add_argument(
+            "--conf_type",
+            type=str,
+            metavar="",
+            action="store",
+            choices=["sro", "finance", "benefits", "schedule", "resource", "sro_three"],
+            help="Returns analysis for specified confidence types. options are"
+                 "'sro', 'finance', 'benefits', 'schedule', 'resource', and 'sro_three'."
+                 "The 'sro_three' analysis will return a three rag speed dial. As of Q1 "
+                 "20/21 it only provides a dial for the latest quarter's data.",
         )
 
         for sub in [parser_milestones, parser_data_query]:
