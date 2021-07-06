@@ -1629,12 +1629,15 @@ def milestone_info_handling(output_list: list, t_list: list, **kwargs) -> list:
                             + str(kwargs["tp"])
                             + " data."
                         )
-            logger.info(
-                t_list[0][1] + ": incorrect date format for entry '" + t_list[1][1] + ""
-                "', requires amending or will not be included. "
-                + str(kwargs["tp"])
-                + " data."
-            )
+            if t_list[3][1] is None:
+                pass
+            else:
+                logger.info(
+                    t_list[0][1] + ": incorrect date format for entry '" + t_list[1][1] + ""
+                    "', requires amending or will not be included. "
+                    + str(kwargs["tp"])
+                    + " data."
+                )
 
 
 def remove_none_types(input_list):
@@ -4424,9 +4427,9 @@ class DcaData:
 
         if "conf_type" in self.kwargs:  # option here to change confidence types
             if self.kwargs["conf_type"] == "sro_three":
+                # key value to be changed to 'GMPP - SRO DCA' when data available.
                 self.dca_keys = {
                     "sro_three": "Departmental DCA",
-                        # 'GMPP - SRO DCA',
                 }
             else:
                 self.dca_keys = {

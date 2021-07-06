@@ -182,10 +182,10 @@ data = ipdc_data_dict
 
 
 # MILESTONES
-# ms = MilestoneData(data["master"], **data["op_args"])
+ms = MilestoneData(data["master"], **data["op_args"])
 # ipdc_ms = MilestoneData(ipdc_data_dict["master"], **ipdc_data_dict["op_args"])
-# ms.filter_chart_info(**data["op_args"])
-# wb = put_milestones_into_wb(ms)
+ms.filter_chart_info(**data["op_args"])
+wb = put_milestones_into_wb(ms)
 # wb.save(data["excel_save_path"].format("milestones"))
 # g = milestone_chart(ms, data["master"], **data["op_args"])
 # put_matplotlib_fig_into_word(hoz_doc, g, size=7, transparent=False)
@@ -219,10 +219,10 @@ data = ipdc_data_dict
 # wb = risks_into_excel(c)
 
 # SPEED DIALS
-dca_data = DcaData(data["master"], **data["op_args"])
+# dca_data = DcaData(data["master"], **data["op_args"])
 # dca_data.get_changes()
-build_speedials(dca_data, hoz_doc)
-hoz_doc.save(data["docx_save_path"].format("speedial_graphs"))
+# build_speedials(dca_data, hoz_doc)
+# hoz_doc.save(data["docx_save_path"].format("speedial_graphs"))
 # doc = dca_changes_into_word(dca_data, doc)
 # doc.save(data["docx_save_path"].format("speedial_dca_changes"))
 
