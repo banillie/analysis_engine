@@ -13,6 +13,7 @@ import typing
 import random
 from collections import Counter, OrderedDict
 from typing import List, Dict, Union, Optional, Tuple, TextIO
+
 # import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from datetime import timedelta, date
@@ -29,6 +30,7 @@ from datamaps.api import project_data_from_master
 from datamaps.process import Cleanser
 import platform
 from pathlib import Path
+
 # from dateutil.parser import ParserError
 from docx import Document, table
 from docx.enum.section import WD_SECTION_START, WD_ORIENTATION
@@ -110,7 +112,6 @@ def _cdg_platform_docs_dir() -> Path:
 
 
 cdg_root_path = _cdg_platform_docs_dir()
-
 
 
 def calculate_arg_combinations(args_list: List):
@@ -415,9 +416,12 @@ def get_ipdc_date(confi_path, board_str):
     config.read(confi_path)
     return config["GLOBALS"][board_str]
 
+
 # Python date format is Year, Month, day
-IPDC_DATE = parser.parse(get_ipdc_date(str(root_path) + "/core_data/ipdc_confi.ini", "ipdc_date"), dayfirst=True).date()
-CDG_DATE = parser.parse(get_ipdc_date(str(cdg_root_path) + "/core_data/cdg_confi.ini", "cdg_date"), dayfirst=True).date()
+IPDC_DATE = parser.parse(
+    get_ipdc_date(str(root_path) + "/core_data/ipdc_confi.ini", "ipdc_date"),
+    dayfirst=True,
+).date()
 LIST_OF_TITLES = [
     "ALL",
     "HE",
@@ -1633,7 +1637,10 @@ def milestone_info_handling(output_list: list, t_list: list, **kwargs) -> list:
                 pass
             else:
                 logger.info(
-                    t_list[0][1] + ": incorrect date format for entry '" + t_list[1][1] + ""
+                    t_list[0][1]
+                    + ": incorrect date format for entry '"
+                    + t_list[1][1]
+                    + ""
                     "', requires amending or will not be included. "
                     + str(kwargs["tp"])
                     + " data."
@@ -1783,7 +1790,9 @@ class MilestoneData:
                                 ("Report", report),
                                 ("Cat", category),
                             ]
-                            milestone_info_handling(project_milestones, entry, **self.kwargs)
+                            milestone_info_handling(
+                                project_milestones, entry, **self.kwargs
+                            )
                             entry = [
                                 ("Project", p),
                                 ("Milestone", p_data["Assurance MM" + str(i)]),
@@ -1802,7 +1811,9 @@ class MilestoneData:
                                 ("Report", report),
                                 ("Cat", category),
                             ]
-                            milestone_info_handling(project_milestones, entry, **self.kwargs)
+                            milestone_info_handling(
+                                project_milestones, entry, **self.kwargs
+                            )
                         except KeyError:  # handles inconsistent keys naming for approval milestones.
                             try:
                                 entry = [
@@ -1826,7 +1837,9 @@ class MilestoneData:
                                     ("Report", report),
                                     ("Cat", category),
                                 ]
-                                milestone_info_handling(project_milestones, entry, **self.kwargs)
+                                milestone_info_handling(
+                                    project_milestones, entry, **self.kwargs
+                                )
                             except KeyError:
                                 pass
 
@@ -1849,7 +1862,9 @@ class MilestoneData:
                                 ("Report", report),
                                 ("Cat", category),
                             ]
-                            milestone_info_handling(project_milestones, entry, **self.kwargs)
+                            milestone_info_handling(
+                                project_milestones, entry, **self.kwargs
+                            )
                         except KeyError:
                             pass
 
@@ -1875,7 +1890,9 @@ class MilestoneData:
                                 ("Report", report),
                                 ("Cat", category),
                             ]
-                            milestone_info_handling(project_milestones, entry, **self.kwargs)
+                            milestone_info_handling(
+                                project_milestones, entry, **self.kwargs
+                            )
                         except KeyError:
                             pass
 
@@ -4038,6 +4055,12 @@ def milestone_chart(
                     fontweight="bold",
                 )
         elif blue_line == "CDG":
+            CDG_DATE = parser.parse(
+                get_ipdc_date(
+                    str(cdg_root_path) + "/core_data/cdg_confi.ini", "cdg_date"
+                ),
+                dayfirst=True,
+            ).date()
             if min_date <= CDG_DATE <= max_date:
                 plt.axvline(CDG_DATE)
                 plt.figtext(
@@ -5276,8 +5299,6 @@ def gauge(
     def get_arrow_point(score: float):
         return (240 * score) - 120
 
-
-
     ax.annotate(
         "",
         xy=(
@@ -5311,7 +5332,9 @@ def gauge(
             xycoords="data",
             xytext=(-0.4, 0.2),
             textcoords="data",
-            arrowprops=dict(arrowstyle="->", connectionstyle="arc3, rad=-0.3", linewidth=4),
+            arrowprops=dict(
+                arrowstyle="->", connectionstyle="arc3, rad=-0.3", linewidth=4
+            ),
         )
         ax.text(-0.35, 0.35, down, fontsize=30, fontname=FONT_TYPE)
 
@@ -5323,7 +5346,9 @@ def gauge(
             xycoords="data",
             xytext=(0.2, 0.4),
             textcoords="data",
-            arrowprops=dict(arrowstyle="<-", connectionstyle="arc3, rad=-0.3", linewidth=4),
+            arrowprops=dict(
+                arrowstyle="<-", connectionstyle="arc3, rad=-0.3", linewidth=4
+            ),
         )
 
     plt.axis("scaled")
@@ -5341,7 +5366,13 @@ def build_speedials(dca_data: DcaData, doc, **kwargs) -> None:
         if dca_data.kwargs["rag_number"] == "3":
             rag_no = {"Green": 5, "Amber": 3, "Red": 1}
         if dca_data.kwargs["rag_number"] == "5":
-            rag_no = {"Green": 5, "Amber/Green": 4, "Amber": 3, "Amber/Red": 2, "Red": 1}
+            rag_no = {
+                "Green": 5,
+                "Amber/Green": 4,
+                "Amber": 3,
+                "Amber/Red": 2,
+                "Red": 1,
+            }
         for colour in rag_no.keys():
             c_no = dca_data.dca_count[dca_data.iter_list[0]][conf_type][colour]["count"]
             c_count.append(c_no)
@@ -6049,8 +6080,8 @@ def compile_p_report(
     #  handling of no milestones within filtered period.
     ab = master.abbreviations[project_name]["abb"]
     # requires refactor here.
-    start_date = calculate_dates("minus 3 months").strftime('%d/%m/%Y')
-    end_date = calculate_dates("2 years").strftime('%d/%m/%Y')
+    start_date = calculate_dates("minus 3 months").strftime("%d/%m/%Y")
+    end_date = calculate_dates("2 years").strftime("%d/%m/%Y")
     try:
         milestones.filter_chart_info(dates=[start_date, end_date])
         milestones_chart = milestone_chart(
@@ -9569,7 +9600,3 @@ def calculate_dates(date_str):
         return datetime.date.today() + relativedelta(months=-6)
     if date_str == "2 years":
         return datetime.date.today() + relativedelta(months=24)
-
-
-
-

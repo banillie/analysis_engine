@@ -6,14 +6,14 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="analysis_engine",
-    version="0.0.34",
+    version="0.0.37",
     author="Will Grant",
     author_email="will.granty@yahoo.co.uk",
     description="Analysis for the UK Department for Transport's major projects portfolio",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/banillie/analysis_engine",
-    packages=setuptools.find_packages(),
+    packages=['analysis_engine'],
     entry_points={"console_scripts": ["analysis = analysis_engine.main:main"]},
     setup_requires=["wheel"],
     install_requires=[
