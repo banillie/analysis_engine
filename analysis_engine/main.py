@@ -74,12 +74,12 @@ def ipdc_initiate(args):
     try:
         master = JsonMaster(
             get_master_data(
-                str(root_path) + "/core_data/ipdc_confi.ini",
+                str(root_path) + "/core_data/ipdc_config.ini",
                 str(root_path) + "/core_data/",
                 project_data_from_master
             ),
             get_project_information(
-                str(root_path) + "/core_data/ipdc_confi.ini",
+                str(root_path) + "/core_data/ipdc_config.ini",
                 str(root_path) + "/core_data/"
             ),
         )
@@ -98,12 +98,12 @@ def top250_initiate(args):
     try:
         master = JsonMaster(
             get_master_data(
-                str(top35_root_path) + "/core_data/top250_confi.ini",
+                str(top35_root_path) + "/core_data/top250_config.ini",
                 str(top35_root_path) + "/core_data/",
                 project_data_from_master_month
             ),
             get_project_information(
-                str(top35_root_path) + "/core_data/top250_confi.ini",
+                str(top35_root_path) + "/core_data/top250_config.ini",
                 str(top35_root_path) + "/core_data/"
             ),
             data_type="top35"

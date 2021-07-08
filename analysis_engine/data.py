@@ -4054,7 +4054,7 @@ def milestone_chart(
         elif blue_line == "CDG":
             CDG_DATE = parser.parse(
                 get_ipdc_date(
-                    str(cdg_root_path) + "/core_data/cdg_confi.ini", "cdg_date"
+                    str(cdg_root_path) + "/core_data/cdg_config.ini", "cdg_date"
                 ),
                 dayfirst=True,
             ).date()
