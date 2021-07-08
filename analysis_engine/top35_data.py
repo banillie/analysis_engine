@@ -106,7 +106,7 @@ def compile_p_report(
 ) -> Document:
     # p_master = master.master_data[0].data[project_name]
     r_args = [doc, master, project_name]
-    wd_heading(doc, master.project_information, project_name)
+    wd_heading(doc, master, project_name)
     key_contacts(*r_args)
     project_scope_text(*r_args)
     deliverables(*r_args)

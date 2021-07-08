@@ -418,10 +418,10 @@ def get_ipdc_date(confi_path, board_str):
 
 
 # Python date format is Year, Month, day
-IPDC_DATE = parser.parse(
-    get_ipdc_date(str(root_path) + "/core_data/ipdc_confi.ini", "ipdc_date"),
-    dayfirst=True,
-).date()
+# IPDC_DATE = parser.parse(
+#     get_ipdc_date(str(root_path) + "/core_data/ipdc_config.ini", "ipdc_date"),
+#     dayfirst=True,
+# ).date()
 LIST_OF_TITLES = [
     "ALL",
     "HE",
@@ -4041,6 +4041,10 @@ def milestone_chart(
                     fontweight="bold",
                 )
         elif blue_line == "IPDC":
+            IPDC_DATE = parser.parse(
+                get_ipdc_date(str(root_path) + "/core_data/ipdc_config.ini", "ipdc_date"),
+                dayfirst=True,
+            ).date()
             if min_date <= IPDC_DATE <= max_date:
                 plt.axvline(IPDC_DATE)
                 plt.figtext(
@@ -7238,12 +7242,16 @@ fill_colour_list = [ag_fill, ar_fill, red_fill, green_fill, amber_fill]
 rag_txt_list = ["A/G", "A/R", "R", "G", "A"]
 
 
-def concatenate_dates(date: date, IPDC_DATE: date):
+def concatenate_dates(date: date):
     """
     function for converting dates into concatenated written time periods
     :param date: datetime.date
     :return: concatenated date
     """
+    IPDC_DATE = parser.parse(
+        get_ipdc_date(str(root_path) + "/core_data/ipdc_config.ini", "ipdc_date"),
+        dayfirst=True,
+    ).date()
     if date is not None:
         a = (date - IPDC_DATE).days
         year = 365
@@ -7530,6 +7538,10 @@ def schedule_dashboard(
 
     current_data = master.master_data[0]["data"]
     last_data = master.master_data[1]["data"]
+    IPDC_DATE = parser.parse(
+        get_ipdc_date(str(root_path) + "/core_data/ipdc_config.ini", "ipdc_date"),
+        dayfirst=True,
+    ).date()
 
     for row_num in range(2, ws.max_row + 1):
         project_name = ws.cell(row=row_num, column=3).value
@@ -7975,6 +7987,11 @@ def overall_dashboard(
 
     current_data = master.master_data[0]["data"]
     last_data = master.master_data[1]["data"]
+
+    IPDC_DATE = parser.parse(
+        get_ipdc_date(str(root_path) + "/core_data/ipdc_config.ini", "ipdc_date"),
+        dayfirst=True,
+    ).date()
 
     for row_num in range(2, ws.max_row + 1):
         project_name = ws.cell(row=row_num, column=2).value
