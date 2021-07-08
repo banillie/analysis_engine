@@ -137,8 +137,8 @@ ipdc_data_dict = {
         # "quarter": ["standard"],
         "quarter": ["Q4 20/21"],
         # "baseline": ["bl_one"],
-        "group": ["HSRG", "RSS", "RIG", "AMIS", "RPE"],
-        # "group": ["Great Western Route Modernisation"],
+        # "group": ["HSRG", "RSS", "RIG", "AMIS", "RPE"],
+        "group": ["HS2 Ph 2b"],
         # "dates": ["1/6/2021", "1/7/2021"],
         "type": "Approval",
         "chart": True,
@@ -157,14 +157,15 @@ ipdc_data_dict = {
 #     "op_args": {
 #         # "quarter": ["Q1 21/22"],
 #         "quarter": ["standard"],
-#         # "group": ["SCS", "CFPD", "GF"],
-#         "group": ["SCS", "GF"],
+#         "group": ["SCS", "CFPD", "GF"],
+#         # "group": ["SCS", "GF"],
 #         "chart": True,
 #         "data_type": "cdg",
 #         # "type": "benefits",
 #         "blue_line": "CDG",
-#         "dates": ["1/6/2020", "1/6/2022"],
+#         "dates": ["1/3/2021", "1/6/2022"],
 #         "fig_size": "half_horizontal",
+#         "rag_number": "5",
 #     },
 #     "dashboard": str(cdg_root_path / "input/dashboard_master.xlsx"),
 #     "narrative_dashboard": str(cdg_root_path / "input/narrative_dashboard_master.xlsx"),
@@ -182,10 +183,10 @@ data = ipdc_data_dict
 
 
 # MILESTONES
-ms = MilestoneData(data["master"], **data["op_args"])
+# ms = MilestoneData(data["master"], **data["op_args"])
 # ipdc_ms = MilestoneData(ipdc_data_dict["master"], **ipdc_data_dict["op_args"])
-ms.filter_chart_info(**data["op_args"])
-wb = put_milestones_into_wb(ms)
+# ms.filter_chart_info(**data["op_args"])
+# wb = put_milestones_into_wb(ms)
 # wb.save(data["excel_save_path"].format("milestones"))
 # g = milestone_chart(ms, data["master"], **data["op_args"])
 # put_matplotlib_fig_into_word(hoz_doc, g, size=7, transparent=False)
@@ -208,7 +209,7 @@ wb = put_milestones_into_wb(ms)
 # cost_profile_graph(c, data["master"], chart=True, group=c.start_group)
 
 # SUMMARIES
-# run_p_reports(data["master"], **data["op_args"])
+run_p_reports(data["master"], **data["op_args"])
 
 ## VFM
 # c = VfMData(m, group=DFm = Master(*data["data"], **data["op_args"] )T_GROUP, quarter=["standard"])  # c is class
@@ -250,6 +251,8 @@ wb = put_milestones_into_wb(ms)
 # wb.save(data["excel_save_path"].format("q4_2021_dashboard_final"))
 # wb = cdg_narrative_dashboard(data["master"], data["narrative_dashboard"])
 # wb.save(data["excel_save_path"].format("q1_2021_narrative_dashboard"))
+# wb = cdg_dashboard(data["master"], data["dashboard"])
+# wb.save(data["excel_save_path"].format("q1_2021_dashboard"))
 
 ##CENTRAL SUPPORT
 # cs = CentralSupportData(data["master"], **data["op_args"])

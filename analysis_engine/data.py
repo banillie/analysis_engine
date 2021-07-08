@@ -897,6 +897,9 @@ class JsonMaster:
                         s_list.append(p)
                 if stage_type is None:
                     if s_list:
+                        if "data_type" in self.kwargs:
+                            if self.kwargs["data_type"] == "cdg":
+                                continue  # not actively using stages for cdg data yet so can pass
                         if quarter == self.current_quarter:
                             for x in s_list:
                                 logger.critical(str(x) + " has no IPDC stage date")
@@ -3053,10 +3056,9 @@ def get_word_doc() -> Document():
 
 def wd_heading(
     doc: Document,
-    project_info: Dict[str, Union[str, int]],
+    master: Master,
     project_name: str,
 ) -> None:
-    # Function adds header to word document
 
     def delete_paragraph(paragraph):
         """helper function to remove empyt para at top of summary_temp doc.
@@ -3065,13 +3067,8 @@ def wd_heading(
         p.getparent().remove(p)
         p._p = p._element = None
 
-    # currently not in use as styling saved into summary_temp doc.
-    # font = doc.styles["Normal"].font
-    # font.name = "Arial"
-    # font.size = Pt(12)
-
     delete_paragraph(doc.paragraphs[0])
-    heading = str(project_info[project_name]["Abbreviations"])
+    heading = str(master.abbreviations[project_name]['abb'])
     intro = doc.add_heading(heading, 0)
     intro.alignment = 1
     intro.bold = True
@@ -6057,11 +6054,10 @@ def project_scope_text(doc: Document, master: Master, project_name: str) -> Docu
 
 def compile_p_report(
     doc: Document,
-    project_info: Dict[str, Union[str, int, date, float]],
     master: Master,
     project_name: str,
 ) -> Document:
-    wd_heading(doc, project_info, project_name)
+    wd_heading(doc, master, project_name)
     key_contacts(doc, master, project_name)
     dca_table(doc, master, project_name)
     dca_narratives(doc, master, project_name)
@@ -6133,14 +6129,10 @@ def run_p_reports(master: Master, **kwargs) -> None:
         print("Compiling summary for " + p)
         report_doc = get_input_doc(root_path / "input/summary_temp.docx")
         qrt = make_file_friendly(str(master.current_quarter))
-        p_info = get_project_information(
-            str(root_path) + "/core_data/confi.ini",
-            str(root_path) + "/core_data/",
-        )
-        output = compile_p_report(report_doc, p_info, master, p)
+        output = compile_p_report(report_doc, master, p)
         output.save(
             root_path / "output/{}_report_{}.docx".format(p, qrt)
-        )  # add quarter here
+        )
 
 
 # TODO refactor all code below
