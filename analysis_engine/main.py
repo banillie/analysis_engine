@@ -243,6 +243,7 @@ def ipdc_run_general(args):
                 "standard"
             ]:  # converts "standard" default to current quarter
                 op_args["quarter"] = [str(m.current_quarter)]
+            # op_args["order_by"] = "schedule"
             d_data = DandelionData(m, **op_args)
             if "chart" not in op_args:
                 op_args["chart"] = True
@@ -359,9 +360,8 @@ def top250_run_general(args):
             wb = put_milestones_into_wb(d)
 
         if programme == "dandelion":
-            if op_args["quarter"] == [
-                "standard"
-            ]:  # converts "standard" default to current quarter
+            if op_args["quarter"] == ["standard"]:
+                # converts "standard" default to current quarter
                 op_args["quarter"] = [str(m.current_quarter)]
             d_data = DandelionData(m, **op_args)
             if "chart" not in op_args:
@@ -711,6 +711,16 @@ class main():
             choices=["spent", "remaining", "benefits"],
             help="Provide the type of value to include in dandelion. Options are"
                  ' "spent", "remaining", "benefits".',
+        )
+
+        parser_dandelion.add_argument(
+            "--order_by",
+            type=str,
+            metavar="",
+            action="store",
+            choices=["schedule"],
+            help="Specify how project circles should be ordered: 'schedule' only current"
+                 " option.",
         )
 
         parser_costs_sp.add_argument(

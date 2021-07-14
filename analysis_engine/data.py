@@ -151,7 +151,7 @@ def calculate_arg_combinations(args_list: List):
 
 
 def get_master_data(
-    confi_path: Path, pi_path: Path, get_data_function
+        confi_path: Path, pi_path: Path, get_data_function
 ) -> List[Dict[str, Union[str, int, datetime.date, float]]]:
     """Returns a list of dictionaries each containing quarter data"""
     config = configparser.ConfigParser()
@@ -285,8 +285,8 @@ def get_project_info_data(master_file: str) -> Dict:
 
 
 def get_project_information(
-    confi_path: Path,
-    pi_path: Path,
+        confi_path: Path,
+        pi_path: Path,
 ) -> Dict[str, Union[str, int]]:
     """Returns dictionary containing all project meta data.
     confi_path is ini file path.
@@ -477,6 +477,7 @@ BC_STAGE_DICT = {
     "Other ": "Other",
     "To be confirmed": None,
     "To be confirmed ": None,
+    "Ongoing Board papers": None,
 }
 # DFT_GROUP_DICT_OLD = {
 #     "High Speed Rail Group": "HSMRPG",
@@ -639,7 +640,7 @@ COLOUR_DICT = {
 
 
 def calculate_profiled(
-    p: int or List[int], s: int or List[int], unpro: int or List[int]
+        p: int or List[int], s: int or List[int], unpro: int or List[int]
 ) -> list:
     """small helper function to calculate the proper profiled amount. This is necessary as
     other wise 'profiled' would actually be the total figure.
@@ -658,10 +659,10 @@ def calculate_profiled(
 
 class JsonMaster:
     def __init__(
-        self,
-        master_data: List[Dict[str, Union[str, int, datetime.date, float]]],
-        project_information: Dict[str, Union[str, int]],
-        **kwargs,
+            self,
+            master_data: List[Dict[str, Union[str, int, datetime.date, float]]],
+            project_information: Dict[str, Union[str, int]],
+            **kwargs,
     ) -> None:
         self.master_data = master_data
         self.project_information = project_information
@@ -798,9 +799,9 @@ class JsonMaster:
                         + " does not have a baseline point for "
                         + v
                         + " this could cause the programme to "
-                        "crash. Therefore the programme is stopping. "
-                        "Please amend the data for " + p + " so that "
-                        " it has at least one baseline point for " + v
+                          "crash. Therefore the programme is stopping. "
+                          "Please amend the data for " + p + " so that "
+                                                             " it has at least one baseline point for " + v
                     )
 
     def get_project_groups(self) -> None:
@@ -950,7 +951,7 @@ class JsonMaster:
     def get_current_tp(self):
         try:
             self.current_quarter = (
-                str(self.master_data[0].month) + ", " + str(self.master_data[0].year)
+                    str(self.master_data[0].month) + ", " + str(self.master_data[0].year)
             )
         except KeyError:
             self.current_quarter = self.master_data[0].quarter
@@ -1158,8 +1159,8 @@ class CostData:
                                 std_list = filter(None, std_list)
                                 spent += round(total + sum(std_list))
                             except (
-                                KeyError,
-                                TypeError,
+                                    KeyError,
+                                    TypeError,
                             ):  # Note. TypeError here as projects may have no baseline
                                 spent += total
                         if x == 1:  # profiled
@@ -1171,25 +1172,25 @@ class CostData:
                     if project_name == "HS2 Phase 2b" or project_name == "HS2 Phase2a":
                         try:
                             profiled = (
-                                profiled
-                                - p_data[
-                                    "Total Forecast - Income both Revenue and Capital"
-                                ]
+                                    profiled
+                                    - p_data[
+                                        "Total Forecast - Income both Revenue and Capital"
+                                    ]
                             )
                             total = (
-                                total
-                                - p_data[
-                                    "Total Forecast - Income both Revenue and Capital"
-                                ]
+                                    total
+                                    - p_data[
+                                        "Total Forecast - Income both Revenue and Capital"
+                                    ]
                             )
                         except KeyError:  # some older masters do have key.
                             pass
 
                     if (
-                        project_name == "Northern Powerhouse Rail"
+                            project_name == "Northern Powerhouse Rail"
                     ):  # hacked fix for now.
                         profiled = (
-                            profiled + p_data["Total CDEL Forecast recurring new costs"]
+                                profiled + p_data["Total CDEL Forecast recurring new costs"]
                         )
 
                 cat_spent = [spent_rdel, spent_cdel, spent_ngov]
@@ -1250,7 +1251,7 @@ class CostData:
                             try:
                                 cost = self.master.project_information[p][
                                     year + cost_type
-                                ]
+                                    ]
                             except KeyError:
                                 cost = 0
                             if cost is None:
@@ -1410,7 +1411,7 @@ def get_sp_data(master: Master, **kwargs) -> Dict[str, float]:
 
 
 def sort_group_by_key(
-    key: str, group_idx: int, master: Master, baseline_type: str, tp: str, kwargs
+        key: str, group_idx: int, master: Master, baseline_type: str, tp: str, kwargs
 ) -> List:  # no ** in front as passing in existing kwargs dict
     """
     Helper function. orders projects by key value e.g. total forecast
@@ -1632,7 +1633,7 @@ def milestone_info_handling(output_list: list, t_list: list, **kwargs) -> list:
                             + ": incorrect date format for entry '"
                             + t_list[1][1]
                             + ""
-                            "', requires amending or will not be included. "
+                              "', requires amending or will not be included. "
                             + str(kwargs["tp"])
                             + " data."
                         )
@@ -1644,7 +1645,7 @@ def milestone_info_handling(output_list: list, t_list: list, **kwargs) -> list:
                     + ": incorrect date format for entry '"
                     + t_list[1][1]
                     + ""
-                    "', requires amending or will not be included. "
+                      "', requires amending or will not be included. "
                     + str(kwargs["tp"])
                     + " data."
                 )
@@ -1655,23 +1656,24 @@ def remove_none_types(input_list):
 
 
 def get_milestone_date(
-    project_name: str,
-    milestone_dictionary: Dict[str, Union[datetime.date, str]],
-    quarter_bl: str,
-    milestone_name: str,
+        project_name: str,
+        milestone_dictionary: Dict[str, Union[datetime.date, str]],
+        quarter_bl: str,
+        milestone_name: str,
 ) -> datetime:
     m_dict = milestone_dictionary[quarter_bl]
     for k in m_dict.keys():
         if m_dict[k]["Project"] == project_name:
-            if m_dict[k]["Milestone"] == milestone_name[1:]:
+            if m_dict[k]["Milestone"] == milestone_name:
+                # removed milestone_name[1:]
                 return m_dict[k]["Date"]
 
 
 def get_milestone_notes(
-    project_name: str,
-    milestone_dictionary: Dict[str, Union[datetime.date, str]],
-    tp: str,  # time period
-    milestone_name: str,
+        project_name: str,
+        milestone_dictionary: Dict[str, Union[datetime.date, str]],
+        tp: str,  # time period
+        milestone_name: str,
 ) -> datetime:
     m_dict = milestone_dictionary[tp]
     for k in m_dict.keys():
@@ -1697,10 +1699,10 @@ def convert_date(date_str: str):
 
 class MilestoneData:
     def __init__(
-        self,
-        master: Master,
-        baseline_type: str = "ipdc_milestones",
-        **kwargs,
+            self,
+            master: Master,
+            baseline_type: str = "ipdc_milestones",
+            **kwargs,
     ):
         self.master = master
         self.group = []
@@ -1786,7 +1788,7 @@ class MilestoneData:
                                             "Approval MM"
                                             + str(i)
                                             + " Forecast / Actual"
-                                        ]
+                                            ]
                                     ),
                                 ),
                                 ("Notes", p_data["Approval MM" + str(i) + " Notes"]),
@@ -1807,7 +1809,7 @@ class MilestoneData:
                                             "Assurance MM"
                                             + str(i)
                                             + " Forecast - Actual"
-                                        ]
+                                            ]
                                     ),
                                 ),
                                 ("Notes", p_data["Assurance MM" + str(i) + " Notes"]),
@@ -1830,7 +1832,7 @@ class MilestoneData:
                                                 "Approval MM"
                                                 + str(i)
                                                 + " Forecast - Actual"
-                                            ]
+                                                ]
                                         ),
                                     ),
                                     (
@@ -1858,7 +1860,7 @@ class MilestoneData:
                                     convert_date(
                                         p_data[
                                             "Project MM" + str(i) + " Forecast - Actual"
-                                        ]
+                                            ]
                                     ),
                                 ),
                                 ("Notes", p_data["Project MM" + str(i) + " Notes"]),
@@ -1886,7 +1888,7 @@ class MilestoneData:
                                             "HMT Approval "
                                             + str(i)
                                             + " Forecast / Actual"
-                                        ]
+                                            ]
                                     ),
                                 ),
                                 ("Notes", p_data["HMT Approval " + str(i) + " Notes"]),
@@ -1911,7 +1913,7 @@ class MilestoneData:
                         lower_counter_list.append(entry[1][1])
                         lower_count = Counter(lower_counter_list)
                         new_milestone_key = (
-                            entry[1][1] + " (" + str(lower_count[entry[1][1]]) + ")"
+                                entry[1][1] + " (" + str(lower_count[entry[1][1]]) + ")"
                         )
                         entry[1] = ("Milestone", new_milestone_key)
                         raw_list.append(entry)
@@ -1950,8 +1952,8 @@ class MilestoneData:
                 d = None  # date
                 for x in self.milestone_dict[i].values():
                     if (
-                        x["Project"] == v["Project"]
-                        and x["Milestone"] == v["Milestone"]
+                            x["Project"] == v["Project"]
+                            and x["Milestone"] == v["Milestone"]
                     ):
                         p = x["Project"]
                         mn = x["Milestone"]
@@ -2098,9 +2100,9 @@ class MilestoneData:
         # i.e. the filter returns no milestones.
         filtered_dict = {}
         if (
-            "type" in filter_kwargs
-            and "key" in filter_kwargs
-            and "dates" in filter_kwargs
+                "type" in filter_kwargs
+                and "key" in filter_kwargs
+                and "dates" in filter_kwargs
         ):
             start_date, end_date = zip(*filter_kwargs["dates"])
             start = parser.parse(start_date, dayfirst=True)
@@ -2178,12 +2180,12 @@ class MilestoneData:
         m_dict_keys = list(self.milestone_dict.keys())
 
         def schedule_info(
-            project_name: str,
-            other_key_list: List[str],
-            c_key_list: List[str],
-            miles_dict: dict,
-            dict_l_current: str,
-            dict_l_other: str,
+                project_name: str,
+                other_key_list: List[str],
+                c_key_list: List[str],
+                miles_dict: dict,
+                dict_l_current: str,
+                dict_l_other: str,
         ):
             output_dict = {}
             schedule_info = []
@@ -2250,9 +2252,9 @@ class MilestoneData:
                 milestone_key_baseline = baseline_key.split(",")[1]
                 if project_name == p:
                     if (
-                        milestone_key_baseline
-                        != " Project - Business Case End Date"
-                        # and milestone_key_baseline != " Project End Date"
+                            milestone_key_baseline
+                            != " Project - Business Case End Date"
+                            # and milestone_key_baseline != " Project End Date"
                     ):
                         baseline_key_list.append(milestone_key_baseline)
 
@@ -2763,9 +2765,9 @@ def set_fig_size(kwargs, fig: plt.figure) -> plt.figure:
 
 
 def get_chart_title(
-    master: Master,
-    title_end: str,
-    **c_kwargs,  # chart kwargs
+        master: Master,
+        title_end: str,
+        **c_kwargs,  # chart kwargs
 ) -> str:
     if "title" in c_kwargs:
         title = c_kwargs["title"]
@@ -2779,7 +2781,7 @@ def get_chart_title(
         elif len(c_kwargs["group"]) == 1:
             try:
                 title = (
-                    master.abbreviations[c_kwargs["group"][0]]["abb"] + " " + title_end
+                        master.abbreviations[c_kwargs["group"][0]]["abb"] + " " + title_end
                 )
             except KeyError:
                 title = c_kwargs["group"][0] + " " + title_end
@@ -2788,7 +2790,7 @@ def get_chart_title(
             title = None
 
     elif (
-        "stage" in c_kwargs
+            "stage" in c_kwargs
     ):  # not clear when this loop would be used. leaving in for now.,
         if set(c_kwargs["stage"]) == set(DFT_STAGE):
             title = "Portfolio " + title_end
@@ -2797,7 +2799,7 @@ def get_chart_title(
         elif len(c_kwargs["stage"]) == 1:
             try:
                 title = (
-                    master.abbreviations[c_kwargs["stage"][0]]["abb"] + " " + title_end
+                        master.abbreviations[c_kwargs["stage"][0]]["abb"] + " " + title_end
                 )
             except KeyError:
                 title = c_kwargs["stage"][0] + " " + title_end
@@ -2903,7 +2905,7 @@ def cost_profile_graph(costs: CostData, master: Master, **kwargs) -> plt.figure:
 
 
 def cost_profile_baseline_graph(
-    cost_master: CostData, *title: Tuple[Optional[str]]
+        cost_master: CostData, *title: Tuple[Optional[str]]
 ) -> plt.figure:
     """Compiles a matplotlib line chart for costs of GROUP of projects contained within cost_master class.
     As as default last quarters profile is not included. It creates two plots. First plot shows overall
@@ -2919,7 +2921,7 @@ def cost_profile_baseline_graph(
 
     # Overall cost profile chart
     if (
-        sum(cost_master.baseline_profile_three) != 0
+            sum(cost_master.baseline_profile_three) != 0
     ):  # handling in the event that group of projects have no baseline profile.
         ax1.plot(
             YEAR_LIST,
@@ -2931,7 +2933,7 @@ def cost_profile_baseline_graph(
     else:
         pass
     if (
-        sum(cost_master.baseline_profile_two) != 0
+            sum(cost_master.baseline_profile_two) != 0
     ):  # handling in the event that group of projects have no baseline profile.
         ax1.plot(
             YEAR_LIST,
@@ -2943,7 +2945,7 @@ def cost_profile_baseline_graph(
     else:
         pass
     if (
-        sum(cost_master.baseline_profile_one) != 0
+            sum(cost_master.baseline_profile_one) != 0
     ):  # handling in the event that group of projects have no last quarter profile
         ax1.plot(
             YEAR_LIST,
@@ -2976,7 +2978,7 @@ def cost_profile_baseline_graph(
 
     # plot rdel, cdel, non-gov chart data
     if (
-        sum(cost_master.ngov_profile) != 0
+            sum(cost_master.ngov_profile) != 0
     ):  # if statement as most projects don't have ngov cost.
         ax2.plot(
             YEAR_LIST,
@@ -3022,7 +3024,7 @@ def cost_profile_baseline_graph(
 
 
 def spent_calculation(
-    master: Dict[str, Union[str, datetime.date, int, float]], project: str
+        master: Dict[str, Union[str, datetime.date, int, float]], project: str
 ) -> int:
     keys = [
         "Pre-profile RDEL",
@@ -3055,11 +3057,10 @@ def get_word_doc() -> Document():
 
 
 def wd_heading(
-    doc: Document,
-    master: Master,
-    project_name: str,
+        doc: Document,
+        master: Master,
+        project_name: str,
 ) -> None:
-
     def delete_paragraph(paragraph):
         """helper function to remove empyt para at top of summary_temp doc.
         only used here."""
@@ -3075,7 +3076,6 @@ def wd_heading(
 
 
 def key_contacts(doc: Document, master: Master, project_name: str) -> None:
-
     data = master.master_data[0]["data"][project_name]
     """Function adds keys contact details"""
     sro_name = data["Senior Responsible Owner (SRO)"]
@@ -3231,7 +3231,7 @@ def change_word_doc_portrait(doc: Document) -> Document:
 
 
 def put_matplotlib_fig_into_word(
-    doc: Document, fig: plt.figure or plt, **kwargs
+        doc: Document, fig: plt.figure or plt, **kwargs
 ) -> None:
     """Does rendering of matplotlib graph into word. Best method I could find for
     maintain high quality render output it to firstly save as pdf and then convert
@@ -3376,7 +3376,7 @@ def make_file_friendly(quarter_str: str) -> str:
 
 
 def total_costs_benefits_bar_chart(
-    costs: CostData, ben: BenefitsData, master: Master, **kwargs
+        costs: CostData, ben: BenefitsData, master: Master, **kwargs
 ) -> plt.figure:
     """compiles a matplotlib bar chart which shows total project costs"""
     fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2)  # four sub plots
@@ -3467,7 +3467,7 @@ def total_costs_benefits_bar_chart(
         np.array(costs.c_totals[costs.iter_list[0]]["cat_unprof"]),
         width,
         bottom=np.array(costs.c_totals[costs.iter_list[0]]["cat_spent"])
-        + np.array(costs.c_totals[costs.iter_list[0]]["cat_prof"]),
+               + np.array(costs.c_totals[costs.iter_list[0]]["cat_prof"]),
         label="Unprofiled",
     )
     ax2.legend(prop={"size": 10})
@@ -3553,7 +3553,7 @@ def total_costs_benefits_bar_chart(
         np.array(ben.b_totals[ben.iter_list[0]]["cat_unprof"]),
         width,
         bottom=np.array(ben.b_totals[ben.iter_list[0]]["cat_spent"])
-        + np.array(ben.b_totals[ben.iter_list[0]]["cat_prof"]),
+               + np.array(ben.b_totals[ben.iter_list[0]]["cat_prof"]),
         label="Unprofiled",
     )
     ax4.legend(prop={"size": 10})
@@ -3573,9 +3573,9 @@ def total_costs_benefits_bar_chart(
     )
 
     check_min = (
-        ben.b_totals[ben.iter_list[0]]["cat_spent"][3]
-        + ben.b_totals[ben.iter_list[0]]["cat_prof"][3]
-        + ben.b_totals[ben.iter_list[0]]["cat_unprof"][3]
+            ben.b_totals[ben.iter_list[0]]["cat_spent"][3]
+            + ben.b_totals[ben.iter_list[0]]["cat_prof"][3]
+            + ben.b_totals[ben.iter_list[0]]["cat_unprof"][3]
     )
 
     if check_min == 0:
@@ -3606,9 +3606,9 @@ def check_baselines(master: Master) -> None:
                     + " does not have a baseline point for "
                     + v
                     + " this could cause the programme to"
-                    "crash. Therefore the programme is stopping. "
-                    "Please amend the data for " + p + " so that "
-                    " it has at least one baseline point for " + v
+                      "crash. Therefore the programme is stopping. "
+                      "Please amend the data for " + p + " so that "
+                                                         " it has at least one baseline point for " + v
                 )
                 break
         else:
@@ -3621,7 +3621,7 @@ def percentage(percent: int, whole: float) -> int:
 
 
 def get_old_fy_cost_data(
-    master_file: typing.TextIO, project_id_wb: typing.TextIO
+        master_file: typing.TextIO, project_id_wb: typing.TextIO
 ) -> None:
     """
     Gets all old financial data from a specified master and places into project id document.
@@ -3649,13 +3649,13 @@ def get_old_fy_cost_data(
 
 def run_get_old_fy_data(master_files_list: list, project_id_wb: typing.TextIO) -> None:
     for f in reversed(
-        master_files_list
+            master_files_list
     ):  # reversed so it gets the latest data in masters
         get_old_fy_cost_data(f, project_id_wb)
 
 
 def place_old_fy_data_into_master_wb(
-    master_file: typing.TextIO, project_id_wb: typing.TextIO
+        master_file: typing.TextIO, project_id_wb: typing.TextIO
 ) -> None:
     """
     places all old financial year data into master files.
@@ -3682,7 +3682,7 @@ def place_old_fy_data_into_master_wb(
 
 
 def run_place_old_fy_data_into_masters(
-    master_files_list: list, project_id_wb: typing.TextIO
+        master_files_list: list, project_id_wb: typing.TextIO
 ) -> None:
     for f in master_files_list:
         place_old_fy_data_into_master_wb(f, project_id_wb)
@@ -3705,7 +3705,7 @@ def put_key_change_master_into_dict(key_change_file: typing.TextIO) -> Dict[str,
 
 
 def alter_wb_master_file_key_names(
-    master_file: typing.TextIO, key_change_dict: Dict[str, str]
+        master_file: typing.TextIO, key_change_dict: Dict[str, str]
 ) -> workbook:
     """
     places altered keys names, from the keys change master dictionary, into master wb(s).
@@ -3715,14 +3715,14 @@ def alter_wb_master_file_key_names(
 
     for row_num in range(2, ws.max_row + 1):
         for (
-            key
+                key
         ) in key_change_dict.keys():  # changes stored in the altered keys change log wb
             if ws.cell(row=row_num, column=1).value == key:
                 ws.cell(row=row_num, column=1).value = key_change_dict[key]
         for year in YEAR_LIST:  # changes to yearly profile keys
             if ws.cell(row=row_num, column=1).value == year + " CDEL Forecast Total":
                 ws.cell(row=row_num, column=1).value = (
-                    year + " CDEL Forecast one off new costs"
+                        year + " CDEL Forecast one off new costs"
                 )
 
     return wb.save(master_file)
@@ -3784,7 +3784,7 @@ def compare_masters(files: List[typing.TextIO], projects: List[str] or str) -> w
                         change_count += 1
                 except KeyError:
                     if (
-                        project_name in last_master.projects
+                            project_name in last_master.projects
                     ):  # keys error due to keys not being present.
                         ws.cell(row=row_num, column=1).fill = PatternFill(
                             start_color="ffba00", end_color="ffba00", fill_type="solid"
@@ -3929,9 +3929,9 @@ def handle_long_keys(key_names: List[str]) -> List[str]:
 
 
 def milestone_chart(
-    milestones: MilestoneData,
-    master: Master,
-    **kwargs,
+        milestones: MilestoneData,
+        master: Master,
+        **kwargs,
 ) -> plt.figure:
     fig, ax1 = plt.subplots()
     fig = set_fig_size(kwargs, fig)
@@ -3971,7 +3971,7 @@ def milestone_chart(
         ax1.scatter(
             m,
             # milestones.sorted_milestone_dict[tp]["g_dates"],
-            ms_names[0 : len(m)],
+            ms_names[0: len(m)],
             label=tp,
             s=200,
             # color=c_list[i],
@@ -4282,10 +4282,10 @@ def get_group(master: Master, tp: str, class_kwargs, group_indx=None) -> List[st
 
 
 def cal_group(
-    input_list: List[str] or List[List[str]],
-    master: Master,
-    tp_indx: int,
-    input_list_indx=None,
+        input_list: List[str] or List[List[str]],
+        master: Master,
+        tp_indx: int,
+        input_list_indx=None,
 ) -> List[str]:
     error_case = []
     output = []
@@ -4326,11 +4326,11 @@ def cal_group(
 
 
 def remove_from_group(
-    pg_list: List[str],
-    remove_list: List[str] or List[list[str]],
-    master: Master,
-    tp_index: int,
-    c_kwargs,  # class_kwargs
+        pg_list: List[str],
+        remove_list: List[str] or List[list[str]],
+        master: Master,
+        tp_index: int,
+        c_kwargs,  # class_kwargs
 ) -> List[str]:
     if any(isinstance(x, list) for x in remove_list):
         remove_list = [item for sublist in remove_list for item in sublist]
@@ -4382,11 +4382,11 @@ def remove_from_group(
 
 
 def get_correct_p_data(
-    class_kwargs,
-    master: Master,
-    baseline_type: str,
-    project_name: str,
-    time_period: str,
+        class_kwargs,
+        master: Master,
+        baseline_type: str,
+        project_name: str,
+        time_period: str,
 ) -> Dict[str, Union[str, int, datetime.date, float]]:
     if "baseline" in class_kwargs:
         bl_index = master.bl_index[baseline_type][project_name]
@@ -4506,7 +4506,7 @@ class DcaData:
         for conf_type in list(self.dca_keys.keys()):  # confidence type
             lower_dict = {}
             for project_name in list(
-                self.dca_dictionary[self.iter_list[0]][conf_type].keys()
+                    self.dca_dictionary[self.iter_list[0]][conf_type].keys()
             ):
                 t = [("Type", conf_type)]
                 try:
@@ -4577,7 +4577,7 @@ class DcaData:
                     total = 0
                     cost_total = 0
                     for y, project in enumerate(
-                        list(self.dca_dictionary[quarter][dca_type].keys())
+                            list(self.dca_dictionary[quarter][dca_type].keys())
                     ):
                         total += 1
                         try:
@@ -4593,8 +4593,8 @@ class DcaData:
                             )
                             pass
                         if (
-                            self.dca_dictionary[quarter][dca_type][project]["DCA"]
-                            == colour
+                                self.dca_dictionary[quarter][dca_type][project]["DCA"]
+                                == colour
                         ):
                             count += 1
                             try:
@@ -4626,11 +4626,11 @@ class DcaData:
 
 def dca_changes_into_word(dca_data: DcaData, doc: Document) -> Document:
     header = (
-        "Showing changes between "
-        + str(dca_data.iter_list[0])
-        + " and "
-        + str(dca_data.iter_list[1])
-        + "."
+            "Showing changes between "
+            + str(dca_data.iter_list[0])
+            + " and "
+            + str(dca_data.iter_list[1])
+            + "."
     )
     top = doc.add_paragraph()
     top.add_run(header).bold = True
@@ -4726,7 +4726,7 @@ def dca_changes_into_excel(dca_data: DcaData) -> workbook:
             ws.cell(row=start_row + i, column=4).value = "Costs"
             ws.cell(row=start_row + i, column=5).value = "Proportion costs"
             for x, colour in enumerate(
-                ["Green", "Amber/Green", "Amber", "Amber/Red", "Red", None, "Total"]
+                    ["Green", "Amber/Green", "Amber", "Amber/Red", "Red", None, "Total"]
             ):
                 ws.cell(row=start_row + i + x + 1, column=2).value = colour
                 ws.cell(row=start_row + i + x + 1, column=3).value = dca_data.dca_count[
@@ -4829,7 +4829,7 @@ class RiskData:
                             except KeyError:
                                 try:
                                     amended_risk_type = (
-                                        risk_type[:4] + str(x) + risk_type[3:]
+                                            risk_type[:4] + str(x) + risk_type[3:]
                                     )
                                     risk = (
                                         risk_type,
@@ -4840,14 +4840,14 @@ class RiskData:
                                     try:
                                         if risk_type == "Severity Score Risk Category":
                                             impact = (
-                                                "BRD Residual Impact"[:4]
-                                                + str(x)
-                                                + "BRD Residual Impact"[3:]
+                                                    "BRD Residual Impact"[:4]
+                                                    + str(x)
+                                                    + "BRD Residual Impact"[3:]
                                             )
                                             likelihoood = (
-                                                "BRD Residual Likelihood"[:4]
-                                                + str(x)
-                                                + "BRD Residual Likelihood"[3:]
+                                                    "BRD Residual Likelihood"[:4]
+                                                    + str(x)
+                                                    + "BRD Residual Likelihood"[3:]
                                             )
                                             score = risk_score(
                                                 p_data[impact],
@@ -4890,10 +4890,10 @@ class RiskData:
                 count_list = []
                 impact_list = []
                 for y, project_name in enumerate(
-                    list(self.risk_dictionary[quarter].keys())
+                        list(self.risk_dictionary[quarter].keys())
                 ):
                     for x, number in enumerate(
-                        list(self.risk_dictionary[quarter][project_name].keys())
+                            list(self.risk_dictionary[quarter][project_name].keys())
                     ):
                         try:
                             risk_value = self.risk_dictionary[quarter][project_name][
@@ -4929,7 +4929,7 @@ def risks_into_excel(risk_data: RiskData) -> workbook:
 
         for y, project_name in enumerate(list(risk_data.risk_dictionary[q].keys())):
             for x, number in enumerate(
-                list(risk_data.risk_dictionary[q][project_name].keys())
+                    list(risk_data.risk_dictionary[q][project_name].keys())
             ):
                 try:
                     r_description = risk_data.risk_dictionary[q][project_name][number][
@@ -4978,8 +4978,8 @@ def risks_into_excel(risk_data: RiskData) -> workbook:
         start_row = 3
         for v, risk_cat in enumerate(list(risk_data.risk_count[q].keys())):
             if (
-                risk_cat == "Brief Risk Description "
-                or risk_cat == "BRD Mitigation - Actions taken (brief description)"
+                    risk_cat == "Brief Risk Description "
+                    or risk_cat == "BRD Mitigation - Actions taken (brief description)"
             ):
                 pass
             else:
@@ -5036,9 +5036,9 @@ VFM_CAT = [
 
 class VfMData:
     def __init__(
-        self,
-        master: Master,
-        **kwargs,
+            self,
+            master: Master,
+            **kwargs,
     ):
         self.master = master
         self.iter_list = []
@@ -5153,7 +5153,7 @@ def vfm_into_excel(vfm_data: VfMData) -> workbook:
             abb = vfm_data.master.abbreviations[project_name]["abb"]
             ws.cell(row=start_row + i, column=2).value = abb
             for x, key in enumerate(
-                list(vfm_data.vfm_dictionary[quarter][project_name].keys())
+                    list(vfm_data.vfm_dictionary[quarter][project_name].keys())
             ):
                 ws.cell(row=2, column=3 + x).value = key
                 ws.cell(
@@ -5206,13 +5206,13 @@ def rot_text(ang):
 
 
 def gauge(
-    labels: List[str],
-    total: str,
-    arrow_one: float,
-    arrow_two: float,
-    up: str,
-    down: str,
-    title: str,
+        labels: List[str],
+        total: str,
+        arrow_one: float,
+        arrow_two: float,
+        up: str,
+        down: str,
+        title: str,
 ):
     no = len(labels)
     fig, ax = plt.subplots(facecolor=FACE_COLOUR)
@@ -5423,8 +5423,8 @@ def build_speedials(dca_data: DcaData, doc, **kwargs) -> None:
 
 
 def sort_projects_by_dca(
-    master_data: List[Dict[str, Union[str, int, datetime.date, float]]],
-    projects: List[str] or str,
+        master_data: List[Dict[str, Union[str, int, datetime.date, float]]],
+        projects: List[str] or str,
 ) -> List[str]:
     # returns a list of projects sorted by dca rag rating
     rag_list = []
@@ -5630,11 +5630,11 @@ def make_text_red(columns: list) -> None:
 
 
 def project_report_meta_data(
-    doc: Document,
-    costs: CostData,
-    milestones: MilestoneData,
-    benefits: BenefitsData,
-    project_name: str,
+        doc: Document,
+        costs: CostData,
+        milestones: MilestoneData,
+        benefits: BenefitsData,
+        project_name: str,
 ):
     """Meta data table"""
     doc.add_section(WD_SECTION_START.NEW_PAGE)
@@ -5653,11 +5653,11 @@ def project_report_meta_data(
     hdr_cells = t.rows[0].cells
     hdr_cells[0].text = "WLC:"
     hdr_cells[1].text = (
-        "£" + str(round(master_data[project_name]["Total Forecast"])) + "m"
+            "£" + str(round(master_data[project_name]["Total Forecast"])) + "m"
     )
     hdr_cells[2].text = "Spent:"
     hdr_cells[3].text = (
-        "£" + str(round(costs.c_totals[costs.iter_list[0]]["spent"])) + "m"
+            "£" + str(round(costs.c_totals[costs.iter_list[0]]["spent"])) + "m"
     )
     row_cells = t.add_row().cells
     row_cells[0].text = "RDEL Total:"
@@ -5665,7 +5665,7 @@ def project_report_meta_data(
     row_cells[1].text = "£" + str(round(rdel_total)) + "m"
     row_cells[2].text = "Profiled:"
     row_cells[3].text = (
-        "£" + str(round(costs.c_totals[costs.iter_list[0]]["prof"])) + "m"
+            "£" + str(round(costs.c_totals[costs.iter_list[0]]["prof"])) + "m"
     )  # first in list is current
     row_cells = t.add_row().cells
     cdel_total = master_data[project_name]["Total CDEL Forecast one off new costs"]
@@ -5674,7 +5674,7 @@ def project_report_meta_data(
     row_cells[1].text = "£" + str(round(cdel_total)) + "m"
     row_cells[2].text = "Unprofiled:"
     row_cells[3].text = (
-        "£" + str(round(costs.c_totals[costs.iter_list[0]]["unprof"])) + "m"
+            "£" + str(round(costs.c_totals[costs.iter_list[0]]["unprof"])) + "m"
     )
     row_cells = t.add_row().cells
     n_gov_total = master_data[project_name]["Non-Gov Total Forecast"]
@@ -5877,20 +5877,20 @@ def project_report_meta_data(
     hdr_cells = table.rows[0].cells
     hdr_cells[0].text = "Total Benefits:"
     hdr_cells[1].text = (
-        "£" + str(round(master_data[project_name]["BEN Totals Forecast"])) + "m"
+            "£" + str(round(master_data[project_name]["BEN Totals Forecast"])) + "m"
     )
     hdr_cells[2].text = "Benefits delivered:"
     hdr_cells[3].text = (
-        "£" + str(round(benefits.b_totals[benefits.iter_list[0]]["delivered"])) + "m"
+            "£" + str(round(benefits.b_totals[benefits.iter_list[0]]["delivered"])) + "m"
     )  # first in list is current
     row_cells = table.add_row().cells
     row_cells[0].text = "Benefits profiled:"
     row_cells[1].text = (
-        "£" + str(round(benefits.b_totals[benefits.iter_list[0]]["prof"])) + "m"
+            "£" + str(round(benefits.b_totals[benefits.iter_list[0]]["prof"])) + "m"
     )
     row_cells[2].text = "Benefits unprofiled:"
     row_cells[3].text = (
-        "£" + str(round(benefits.b_totals[benefits.iter_list[0]]["unprof"])) + "m"
+            "£" + str(round(benefits.b_totals[benefits.iter_list[0]]["unprof"])) + "m"
     )
 
     # set column width
@@ -5920,7 +5920,7 @@ def plus_minus_days(change_value):
 
 
 def print_out_project_milestones(
-    doc: Document, milestones: MilestoneData, project_name: str
+        doc: Document, milestones: MilestoneData, project_name: str
 ) -> Document:
     doc.add_section(WD_SECTION_START.NEW_PAGE)
     # table heading
@@ -5938,7 +5938,7 @@ def print_out_project_milestones(
     hdr_cells[4].text = "Notes"
 
     for i, m in enumerate(
-        milestones.sorted_milestone_dict[milestones.iter_list[0]]["names"]
+            milestones.sorted_milestone_dict[milestones.iter_list[0]]["names"]
     ):
         row_cells = table.add_row().cells
         row_cells[0].text = m
@@ -5948,12 +5948,12 @@ def print_out_project_milestones(
         try:
             row_cells[2].text = plus_minus_days(
                 (
-                    milestones.sorted_milestone_dict[milestones.iter_list[0]][
-                        "r_dates"
-                    ][i]
-                    - milestones.sorted_milestone_dict[milestones.iter_list[1]][
-                        "r_dates"
-                    ][i]
+                        milestones.sorted_milestone_dict[milestones.iter_list[0]][
+                            "r_dates"
+                        ][i]
+                        - milestones.sorted_milestone_dict[milestones.iter_list[1]][
+                            "r_dates"
+                        ][i]
                 ).days
             )
         except TypeError:
@@ -5961,12 +5961,12 @@ def print_out_project_milestones(
         try:
             row_cells[3].text = plus_minus_days(
                 (
-                    milestones.sorted_milestone_dict[milestones.iter_list[0]][
-                        "r_dates"
-                    ][i]
-                    - milestones.sorted_milestone_dict[milestones.iter_list[2]][
-                        "r_dates"
-                    ][i]
+                        milestones.sorted_milestone_dict[milestones.iter_list[0]][
+                            "r_dates"
+                        ][i]
+                        - milestones.sorted_milestone_dict[milestones.iter_list[2]][
+                            "r_dates"
+                        ][i]
                 ).days
             )
         except TypeError:
@@ -6057,9 +6057,9 @@ def project_scope_text(doc: Document, master: Master, project_name: str) -> Docu
 
 
 def compile_p_report(
-    doc: Document,
-    master: Master,
-    project_name: str,
+        doc: Document,
+        master: Master,
+        project_name: str,
 ) -> Document:
     wd_heading(doc, master, project_name)
     key_contacts(doc, master, project_name)
@@ -6165,13 +6165,13 @@ def run_p_reports(master: Master, **kwargs) -> None:
 #
 #
 def conditional_formatting(
-    ws,
-    list_columns,
-    list_conditional_text,
-    list_text_colours,
-    list_background_colours,
-    row_start,
-    row_end,
+        ws,
+        list_columns,
+        list_conditional_text,
+        list_text_colours,
+        list_background_colours,
+        row_start,
+        row_end,
 ):  # not working
     for column in list_columns:
         for i, txt in enumerate(list_conditional_text):
@@ -7451,8 +7451,8 @@ def financial_dashboard(master: Master, wb: Workbook) -> Workbook:
                     # )
 
             except (
-                ZeroDivisionError,
-                TypeError,
+                    ZeroDivisionError,
+                    TypeError,
             ):  # zerodivision error obvious, type error handling as above
                 pass
 
@@ -7531,7 +7531,7 @@ def financial_dashboard(master: Master, wb: Workbook) -> Workbook:
 
 
 def schedule_dashboard(
-    master: Master, milestones: MilestoneData, wb: Workbook
+        master: Master, milestones: MilestoneData, wb: Workbook
 ) -> Workbook:
     ws = wb.worksheets[1]
     # overall_ws = wb.worksheets[3]
@@ -7830,9 +7830,9 @@ def benefits_dashboard(master: Master, wb: Workbook) -> Workbook:
             """vfm category now"""
             if current_data[project_name]["VfM Category single entry"] is None:
                 vfm_cat = (
-                    str(current_data[project_name]["VfM Category lower range"])
-                    + " - "
-                    + str(current_data[project_name]["VfM Category upper range"])
+                        str(current_data[project_name]["VfM Category lower range"])
+                        + " - "
+                        + str(current_data[project_name]["VfM Category upper range"])
                 )
                 ws.cell(row=row_num, column=10).value = vfm_cat
                 # overall_ws.cell(row=row_num, column=8).value = vfm_cat
@@ -7846,9 +7846,9 @@ def benefits_dashboard(master: Master, wb: Workbook) -> Workbook:
             try:
                 if baseline_data[project_name]["VfM Category single entry"] is None:
                     vfm_cat_baseline = (
-                        str(baseline_data[project_name]["VfM Category lower range"])
-                        + " - "
-                        + str(baseline_data[project_name]["VfM Category upper range"])
+                            str(baseline_data[project_name]["VfM Category lower range"])
+                            + " - "
+                            + str(baseline_data[project_name]["VfM Category upper range"])
                     )
                     ws.cell(row=row_num, column=11).value = vfm_cat_baseline
                 else:
@@ -7981,7 +7981,7 @@ def benefits_dashboard(master: Master, wb: Workbook) -> Workbook:
 
 
 def overall_dashboard(
-    master: Master, milestones: MilestoneData, wb: Workbook
+        master: Master, milestones: MilestoneData, wb: Workbook
 ) -> Workbook:
     ws = wb.worksheets[3]
 
@@ -8085,17 +8085,17 @@ def overall_dashboard(
                     )
 
             except (
-                ZeroDivisionError,
-                TypeError,
+                    ZeroDivisionError,
+                    TypeError,
             ):  # zerodivision error obvious, type error handling as above
                 pass
 
             """vfm category now"""
             if current_data[project_name]["VfM Category single entry"] is None:
                 vfm_cat = (
-                    str(current_data[project_name]["VfM Category lower range"])
-                    + " - "
-                    + str(current_data[project_name]["VfM Category upper range"])
+                        str(current_data[project_name]["VfM Category lower range"])
+                        + " - "
+                        + str(current_data[project_name]["VfM Category upper range"])
                 )
                 # ws.cell(row=row_num, column=10).value = vfm_cat
                 ws.cell(row=row_num, column=8).value = vfm_cat
@@ -8109,23 +8109,23 @@ def overall_dashboard(
             bl_i = master.bl_index["ipdc_benefits"][project_name][2]
             try:
                 if (
-                    master.master_data[bl_i]["data"][project_name][
-                        "VfM Category single entry"
-                    ]
-                    is None
+                        master.master_data[bl_i]["data"][project_name][
+                            "VfM Category single entry"
+                        ]
+                        is None
                 ):
                     vfm_cat_baseline = (
-                        str(
-                            master.master_data[bl_i]["data"][project_name][
-                                "VfM Category lower range"
-                            ]
-                        )
-                        + " - "
-                        + str(
-                            master.master_data[bl_i]["data"][project_name][
-                                "VfM Category upper range"
-                            ]
-                        )
+                            str(
+                                master.master_data[bl_i]["data"][project_name][
+                                    "VfM Category lower range"
+                                ]
+                            )
+                            + " - "
+                            + str(
+                        master.master_data[bl_i]["data"][project_name][
+                            "VfM Category upper range"
+                        ]
+                    )
                     )
                     # ws.cell(row=row_num, column=11).value = vfm_cat_baseline
                 else:
@@ -8380,7 +8380,7 @@ def cal_group_angle(dist_no: int, group: List[str], **kwargs):
 
 
 def get_dandelion_type_total(
-    master: Master, kwargs
+        master: Master, kwargs
 ) -> int or str:  # Note no **kwargs as existing kwargs dict passed in
     tp = kwargs["quarter"][0]  # only one quarter for dandelion
     if "type" in kwargs:
@@ -8428,7 +8428,7 @@ class DandelionData:
 
         self.iter_list = get_iter_list(self.kwargs, self.master)
         for (
-            tp
+                tp
         ) in self.iter_list:  # although tp is iterated only one can be handled for now.
 
             #  for dandelion need groups of groups.
@@ -8488,7 +8488,7 @@ class DandelionData:
                     g_wlc = get_dandelion_type_total(self.master, self.kwargs)
                 if len(self.group) > 1:
                     y_axis = 0 + (
-                        (math.sqrt(pf_wlc) * 3.25) * math.sin(math.radians(g_ang_l[i]))
+                            (math.sqrt(pf_wlc) * 3.25) * math.sin(math.radians(g_ang_l[i]))
                     )
                     x_axis = 0 + (math.sqrt(pf_wlc) * 2.75) * math.cos(
                         math.radians(g_ang_l[i])
@@ -8547,8 +8547,40 @@ class DandelionData:
                         p_value = get_dandelion_type_total(
                             self.master, self.kwargs
                         )  # project wlc
-                    p_list.append((p_value, p))
-                l_g_d[g] = list(reversed(sorted(p_list)))
+                    if g == "pipeline":
+                        p_schedule = self.master.pipeline_dict[p]["wlc"]
+                    else:
+                        NEXT_STAGE_DICT = {
+                            "pre-SOBC": "SOBC - IPDC Approval",
+                            "SOBC": "OBC - IPDC Approval",
+                            "OBC": 'FBC - IPDC Approval',
+                            # 'FBC - IPDC Approval'
+                            "FBC": "Project End Date",
+                        }
+                        tp_idx = self.master.quarter_list.index(tp)
+                        bc = BC_STAGE_DICT[self.master.master_data[tp_idx]["data"][p]["IPDC approval point"]]
+                        ms = MilestoneData(self.master, **self.kwargs)
+                        next_stage = NEXT_STAGE_DICT[bc]
+                        try:
+                            d = get_milestone_date(
+                                self.master.abbreviations[p]['abb'],
+                                ms.milestone_dict,
+                                tp,
+                                next_stage)
+                            p_schedule = (d - datetime.date.today()).days
+                        except TypeError:
+                            p_schedule = 0
+                            print("can't calculate " + p + "'s schedule")
+                    p_list.append((p_value, p_schedule, p))
+                if "order_by" in self.kwargs:
+                    if self.kwargs["order_by"] == "schedule":
+                        p_list.sort(key=lambda x: x[1])
+                        if g == "pipeline":
+                            l_g_d[g] = list(reversed(p_list))
+                        else:
+                            l_g_d[g] = p_list
+                else:
+                    l_g_d[g] = list(reversed(sorted(p_list)))
 
             for g in self.group:
                 g_wlc = g_d[g]["wlc"]
@@ -8556,7 +8588,7 @@ class DandelionData:
                 g_y_axis = g_d[g]["axis"][0]  # group y axis
                 g_x_axis = g_d[g]["axis"][1]  # group x axis
                 try:
-                    p_values_list, p_list = zip(*l_g_d[g])
+                    p_values_list, p_schedule_list, p_list = zip(*l_g_d[g])
                 except ValueError:  # handles no projects in l_g_d list
                     continue
                 if len(p_list) > 2 or len(self.group) == 1:
@@ -8587,12 +8619,12 @@ class DandelionData:
                         if self.kwargs["circle_colour"] == "No":
                             colour = FACE_COLOUR
                     project_text = (
-                        self.master.abbreviations[p]["abb"]
-                        + "\n"
-                        + dandelion_number_text(p_value)
+                            self.master.abbreviations[p]["abb"]
+                            + "\n"
+                            + dandelion_number_text(p_value)
                     )
                     if (
-                        p_value < pf_wlc / 500
+                            p_value < pf_wlc / 500
                     ):  # achieve some consistency for zero / low values
                         p_value = pf_wlc / 500
                     if colour == "#FFFFFF" or colour == FACE_COLOUR:
@@ -8883,7 +8915,7 @@ def put_stackplot_data_into_wb(sp_data: Dict) -> workbook:
 
 
 def cost_stackplot_graph(
-    sp_dict: Dict[str, float], master: Master, **kwargs
+        sp_dict: Dict[str, float], master: Master, **kwargs
 ) -> plt.figure:
     sp_list = []  # stackplot list
     labels = list(sp_dict[str(master.current_quarter)].keys())
@@ -9368,11 +9400,10 @@ def radar_chart(sp_data_path: TextIO, master: Master, **kwargs):
 
 
 def get_strategic_priorities_data(
-    wb_path: TextIO,
-    master: Master,
-    **kwargs,
+        wb_path: TextIO,
+        master: Master,
+        **kwargs,
 ):
-
     sp_data = project_data_from_master(wb_path, 1, 2021)
 
     categories = [
@@ -9449,25 +9480,66 @@ def get_map(wb):
     return output_dict
 
 
+def get_gmpp_keys():
+    wb = load_workbook("/home/will/Downloads/GMPP_DATA.xlsm")
+    ws = wb.active
+
+    output_list = []
+    for x in range(2, ws.max_row + 1):
+        key = ws.cell(row=x, column=6).value
+        if key not in output_list:
+            output_list.append(key)
+
+    wb = Workbook()
+    ws = wb.active
+
+    for i, key in enumerate(output_list):
+        ws.cell(row=i + 1, column=1).value = key
+
+    wb.save("/home/will/Downloads/GMPP_KEYS.xlsx")
+
+
 def get_gmpp_data():
     wb = load_workbook("/home/will/Downloads/GMPP_DATA.xlsm")
     ws = wb.active
 
-    output_dict = {}
+    initial_dict = {}
     for x in range(2, ws.max_row + 1):
         project_name = ws.cell(row=x, column=2).value
         key = ws.cell(row=x, column=6).value
         value = ws.cell(row=x, column=7).value
-        if project_name in list(output_dict.keys()):
-            output_dict[project_name][key] = value
+        if project_name in list(initial_dict.keys()):
+            initial_dict[project_name][key] = value
         else:
-            output_dict[project_name] = {key: value}
+            initial_dict[project_name] = {key: value}
+
+    wb = load_workbook("/home/will/Downloads/GMPP_KEYS.xlsx")
+    ws = wb.active
+
+    key_list = []
+    for x in range(1, ws.max_row + 1):
+        key = ws.cell(row=x, column=1).value
+        key_list.append(key)
+
+    output_dict = {}
+    for p in initial_dict.keys():
+        p_dict = initial_dict[p]
+        for k in key_list:
+            if p in list(output_dict.keys()):
+                try:
+                    output_dict[p][k] = p_dict[k]
+                except KeyError:
+                    output_dict[p][k] = ''
+            else:
+                try:
+                    output_dict[p] = {k: p_dict[k]}
+                except KeyError:
+                    output_dict[p] = {k: ''}
 
     return output_dict
 
 
 def data_check_print_out(gmpp_data: Dict, ipdc_data: Dict):
-
     key_map = get_map(load_workbook("/home/will/Downloads/KEY_MAP.xlsx"))
     project_map = get_map(load_workbook("/home/will/Downloads/PROJECT_MAP.xlsx"))
 
@@ -9528,14 +9600,19 @@ def print_gmpp_data(gmpp_dict: Dict):
     wb = Workbook()
     ws = wb.active
 
+    key_map = get_map(load_workbook("/home/will/Downloads/KEY_MAP.xlsx"))
+
     for x, project in enumerate(list(gmpp_dict.keys())):
-        ws.cell(row=1, column=2 + x).value = project
-        for i, k in enumerate(gmpp_dict["A303 Amesbury to Berwick Down"]):
-            # k is key. Using A303 now as has most keys
+        ws.cell(row=1, column=3 + x).value = project
+        for i, k in enumerate(gmpp_dict[project]):  # k is key
             if x == 0:
                 ws.cell(row=2 + i, column=1).value = k
+                try:
+                    ws.cell(row=2 + i, column=2).value = key_map[k]
+                except KeyError:
+                    ws.cell(row=2 + i, column=2).value = ''
             try:
-                ws.cell(row=2 + i, column=2 + x).value = gmpp_dict[project][k]
+                ws.cell(row=2 + i, column=3 + x).value = gmpp_dict[project][k]
             except KeyError:
                 pass
 
@@ -9609,3 +9686,44 @@ def calculate_dates(date_str):
         return datetime.date.today() + relativedelta(months=-6)
     if date_str == "2 years":
         return datetime.date.today() + relativedelta(months=24)
+
+
+def doughut(dca_data: DcaData, **kwargs):
+    fig, ax = plt.subplots(figsize=(6, 3), subplot_kw=dict(aspect="equal"))
+
+    number = []
+    colours = []
+    q, = kwargs["quarter"]
+    for c in ["Green", "Amber/Green", "Amber", "Amber/Red", "Red", None]:
+        count = dca_data.dca_count[q][kwargs["conf_type"]][c][kwargs["weighting"]]
+        if kwargs["weighting"] == "ct":
+            count = round(count*100, 2)
+        if count != 0:
+            number.append(count)
+            colours.append(COLOUR_DICT[c])
+
+    wedges, texts = ax.pie(
+        number,
+        colors=colours,
+        wedgeprops=dict(width=0.5),
+        startangle=-40
+    )
+
+    bbox_props = dict(boxstyle="square,pad=0.3", fc="w", ec="k", lw=0.72)
+    kw = dict(arrowprops=dict(arrowstyle="-"),
+              bbox=bbox_props, zorder=0, va="center")
+
+    for i, p in enumerate(wedges):
+        ang = (p.theta2 - p.theta1) / 2. + p.theta1
+        y = np.sin(np.deg2rad(ang))
+        x = np.cos(np.deg2rad(ang))
+        horizontalalignment = {-1: "right", 1: "left"}[int(np.sign(x))]
+        connectionstyle = "angle,angleA=0,angleB={}".format(ang)
+        kw["arrowprops"].update({"connectionstyle": connectionstyle})
+        ax.annotate(number[i], xy=(x, y), xytext=(1.35 * np.sign(x), 1.4 * y),
+                    horizontalalignment=horizontalalignment, **kw)
+
+    ax.set_title(kwargs["conf_type"] + " confidence, simple count: a donut")
+
+    plt.show()
+    return fig
