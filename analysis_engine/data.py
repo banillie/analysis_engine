@@ -8547,30 +8547,34 @@ class DandelionData:
                         p_value = get_dandelion_type_total(
                             self.master, self.kwargs
                         )  # project wlc
-                    if g == "pipeline":
-                        p_schedule = self.master.pipeline_dict[p]["wlc"]
+
+                    if "data_type" not in self.kwargs:
+                        if g == "pipeline":
+                            p_schedule = self.master.pipeline_dict[p]["wlc"]
+                        else:
+                            NEXT_STAGE_DICT = {
+                                "pre-SOBC": "SOBC - IPDC Approval",
+                                "SOBC": "OBC - IPDC Approval",
+                                "OBC": 'FBC - IPDC Approval',
+                                # 'FBC - IPDC Approval'
+                                "FBC": "Project End Date",
+                            }
+                            tp_idx = self.master.quarter_list.index(tp)
+                            bc = BC_STAGE_DICT[self.master.master_data[tp_idx]["data"][p]["IPDC approval point"]]
+                            ms = MilestoneData(self.master, **self.kwargs)
+                            next_stage = NEXT_STAGE_DICT[bc]
+                            try:
+                                d = get_milestone_date(
+                                    self.master.abbreviations[p]['abb'],
+                                    ms.milestone_dict,
+                                    tp,
+                                    next_stage)
+                                p_schedule = (d - datetime.date.today()).days
+                            except TypeError:
+                                p_schedule = 0
+                                print("can't calculate " + p + "'s schedule")
                     else:
-                        NEXT_STAGE_DICT = {
-                            "pre-SOBC": "SOBC - IPDC Approval",
-                            "SOBC": "OBC - IPDC Approval",
-                            "OBC": 'FBC - IPDC Approval',
-                            # 'FBC - IPDC Approval'
-                            "FBC": "Project End Date",
-                        }
-                        tp_idx = self.master.quarter_list.index(tp)
-                        bc = BC_STAGE_DICT[self.master.master_data[tp_idx]["data"][p]["IPDC approval point"]]
-                        ms = MilestoneData(self.master, **self.kwargs)
-                        next_stage = NEXT_STAGE_DICT[bc]
-                        try:
-                            d = get_milestone_date(
-                                self.master.abbreviations[p]['abb'],
-                                ms.milestone_dict,
-                                tp,
-                                next_stage)
-                            p_schedule = (d - datetime.date.today()).days
-                        except TypeError:
-                            p_schedule = 0
-                            print("can't calculate " + p + "'s schedule")
+                        p_schedule = 0
                     p_list.append((p_value, p_schedule, p))
                 if "order_by" in self.kwargs:
                     if self.kwargs["order_by"] == "schedule":
@@ -8621,7 +8625,7 @@ class DandelionData:
                     project_text = (
                             self.master.abbreviations[p]["abb"]
                             + "\n"
-                            + dandelion_number_text(p_value)
+                            + dandelion_number_text(p_value, **self.kwargs)
                     )
                     if (
                             p_value < pf_wlc / 500

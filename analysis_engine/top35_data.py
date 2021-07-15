@@ -400,12 +400,12 @@ class CentralSupportData:
         sp_dict = {}
         self.iter_list = get_iter_list(self.kwargs, self.master)
         for tp in self.iter_list:  # tp time period
+            self.kwargs["tp"] = tp
             lower_dict = {}
             raw_list = []
             self.group = get_group(self.master, tp, self.kwargs)
             for project_name in self.group:
                 project_list = []
-                # p_data = self.master.master_data[0]["data"][project_name]
                 p_data = get_correct_p_data(
                     self.kwargs, self.master, self.baseline_type, project_name, tp
                 )
@@ -415,7 +415,7 @@ class CentralSupportData:
                 p = self.master.abbreviations[project_name]["abb"]
                 report = "Top 250"
                 category = "Central Resource"
-                for i in range(1, 30):
+                for i in range(1, 17):
                     # these keys not present in all monthly masters.
                     try:
                         cs_response = p_data["R" + str(i) + " Central Response"]
@@ -444,7 +444,7 @@ class CentralSupportData:
                         ("Report", report),
                         ("Cat", category),
                     ]
-                    milestone_info_handling(project_list, t, type="central support")
+                    milestone_info_handling(project_list, t, **self.kwargs)
                 # for i in range(17, 20):
                 #     t = [
                 #         ("Project", p),
@@ -861,8 +861,8 @@ def print_out_central_support(
         hdr_cells[1].text = "Need by"
         hdr_cells[2].text = "Escalated to"
         hdr_cells[3].text = "Type"
-        hdr_cells[4].text = "Central Response"
-        hdr_cells[5].text = "Secured"
+        hdr_cells[4].text = "Type - other"
+        hdr_cells[5].text = "Further details"
 
         for i, m in enumerate(centrals.sorted_milestone_dict[centrals.iter_list[0]]["names"]):
             row_cells = table.add_row().cells

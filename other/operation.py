@@ -106,57 +106,57 @@ from analysis_engine.top35_data import (
 hoz_doc = open_word_doc(root_path / "input/summary_temp_landscape.docx")
 doc = open_word_doc(root_path / "input/summary_temp.docx")
 
-# top35_data_dict = {
-#     "docx_save_path": str(top35_root_path / "output/{}.docx"),
-#     "master": Master(open_json_file(str(top35_root_path / "core_data/json/master.json"))),
-#     "op_args": {
-#         # "quarter": ["Month(June), 2021"],
-#         "quarter": ["standard"],
-#         # "group": ["HSRG", "RSS", "RIG", "RPE"],
-#         "group": ["RIG"],
-#         # "chart": False,
-#         "data_type": "top35",
-#         "circle_colour": "No",
-#         # "dates": ["1/6/2021", "1/7/2021"],
-#         "key": [
-#             "PROJECT DEL TO CURRENT TIMINGS ?",
-#             "GMPP ID: IS THIS PROJECT ON GMPP",
-#             "PROJECT ON BUDGET?",
-#             "WLC TOTAL",
-#             "WLC NON GOV",
-#         ],
-#         # "key": ["Start of Trial Running"],
-#     },
-#     "excel_save_path": str(top35_root_path / "output/{}.xlsx"),
-#     "word_save_path": str(top35_root_path / "output/{}.docx")
-# }
-
-ipdc_data_dict = {
-    "docx_save_path": str(root_path / "output/{}.docx"),
-    "master": Master(open_json_file(str(root_path / "core_data/json/master.json"))),
+top35_data_dict = {
+    "docx_save_path": str(top35_root_path / "output/{}.docx"),
+    "master": Master(open_json_file(str(top35_root_path / "core_data/json/master.json"))),
     "op_args": {
-        # "quarter": ["standard"],
-        "quarter": ["Q4 20/21"],
-        # "baseline": ["standard"],
-        # "group": ["HSRG", "RSS", "RIG", "AMIS", "RPE"],
-        # "group": ["RPE"],
-        "stage": ["pre-SOBC", "SOBC", "OBC", "FBC"],
-        # "group": ["HS2 Ph 2b"],
+        # "quarter": ["Month(June), 2021"],
+        "quarter": ["standard"],
+        # "group": ["HSRG", "RSS", "RIG", "RPE"],
+        "group": ["LIC"],
+        # "chart": False,
+        "data_type": "top35",
+        "circle_colour": "No",
         # "dates": ["1/6/2021", "1/7/2021"],
-        "type": "remaining",
-        "chart": True,
-        # "circle_colour": "No",
-        # "key": ["SRO Tenure Start Date", "Total Forecast"],
-        "conf_type": "sro",
-        # "rag_number": "3",
-        # "order_by": "schedule",
-        "angles": [240, 290, 22, 120],
-        "weighting": "count",
+        "key": [
+            "PROJECT DEL TO CURRENT TIMINGS ?",
+            "GMPP ID: IS THIS PROJECT ON GMPP",
+            "PROJECT ON BUDGET?",
+            "WLC TOTAL",
+            "WLC NON GOV",
+        ],
+        # "key": ["Start of Trial Running"],
     },
-    "dashboard": get_input_doc(root_path / "input/dashboards_master.xlsx"),
-    "excel_save_path": str(root_path / "output/{}.xlsx"),
-    "word_save_path": str(root_path / "output/{}.docx"),
+    "excel_save_path": str(top35_root_path / "output/{}.xlsx"),
+    "word_save_path": str(top35_root_path / "output/{}.docx")
 }
+
+# ipdc_data_dict = {
+#     "docx_save_path": str(root_path / "output/{}.docx"),
+#     "master": Master(open_json_file(str(root_path / "core_data/json/master.json"))),
+#     "op_args": {
+#         # "quarter": ["standard"],
+#         "quarter": ["Q4 20/21"],
+#         # "baseline": ["standard"],
+#         # "group": ["HSRG", "RSS", "RIG", "AMIS", "RPE"],
+#         # "group": ["RPE"],
+#         "stage": ["pre-SOBC", "SOBC", "OBC", "FBC"],
+#         # "group": ["HS2 Ph 2b"],
+#         # "dates": ["1/6/2021", "1/7/2021"],
+#         "type": "remaining",
+#         "chart": True,
+#         # "circle_colour": "No",
+#         # "key": ["SRO Tenure Start Date", "Total Forecast"],
+#         "conf_type": "sro",
+#         # "rag_number": "3",
+#         # "order_by": "schedule",
+#         "angles": [240, 290, 22, 120],
+#         "weighting": "count",
+#     },
+#     "dashboard": get_input_doc(root_path / "input/dashboards_master.xlsx"),
+#     "excel_save_path": str(root_path / "output/{}.xlsx"),
+#     "word_save_path": str(root_path / "output/{}.docx"),
+# }
 
 # cdg_data_dict = {
 #     "docx_save_path": str(cdg_root_path / "output/{}.docx"),
@@ -168,13 +168,14 @@ ipdc_data_dict = {
 #         # "group": ["SCS", "GF"],
 #         "chart": True,
 #         "data_type": "cdg",
-#         # "type": "benefits",
+#         "type": "income",
 #         "blue_line": "CDG",
 #         "dates": ["1/3/2021", "1/6/2022"],
 #         "fig_size": "half_horizontal",
 #         "rag_number": "5",
-#         "order_by": "cost",
-#         "angles": [310, 360, 50],
+#         # "order_by": "cost",
+#         "angles": [300, 360, 60],
+#         "none_handle": "none",
 #     },
 #     "dashboard": str(cdg_root_path / "input/dashboard_master.xlsx"),
 #     "narrative_dashboard": str(cdg_root_path / "input/narrative_dashboard_master.xlsx"),
@@ -182,13 +183,13 @@ ipdc_data_dict = {
 #     "word_save_path": str(cdg_root_path / "output/{}.docx")
 # }
 
-data = ipdc_data_dict
+data = top35_data_dict
 
 ## DANDELION
 # dl_data = DandelionData(data["master"], **data["op_args"])
 # d_lion = make_a_dandelion_auto(dl_data, **data["op_args"])
 # put_matplotlib_fig_into_word(hoz_doc, d_lion, size=7)
-# hoz_doc.save(data["word_save_path"].format("dandelion_sorted_by_schedule"))
+# hoz_doc.save(data["word_save_path"].format("dandelion_income"))
 
 
 # MILESTONES
@@ -217,7 +218,7 @@ data = ipdc_data_dict
 # cost_profile_graph(c, data["master"], chart=True, group=c.start_group)
 
 # SUMMARIES
-# top35_run_p_reports(data["master"], **data["op_args"])
+top35_run_p_reports(data["master"], **data["op_args"])
 
 ## VFM
 # c = VfMData(m, group=DFm = Master(*data["data"], **data["op_args"] )T_GROUP, quarter=["standard"])  # c is class
@@ -228,7 +229,7 @@ data = ipdc_data_dict
 # wb = risks_into_excel(c)
 
 # SPEED DIALS
-dca_data = DcaData(data["master"], **data["op_args"])
+# dca_data = DcaData(data["master"], **data["op_args"])
 # dca_data.get_changes()
 # build_speedials(dca_data, hoz_doc)
 # hoz_doc.save(data["docx_save_path"].format("speedial_graphs"))
@@ -240,9 +241,9 @@ dca_data = DcaData(data["master"], **data["op_args"])
 # wb.save(data["excel_save_path"].format("dcas_testing"))
 
 # DOUGHUTS
-dough = doughut(dca_data, **data["op_args"])
-put_matplotlib_fig_into_word(hoz_doc, dough, size=7.5)
-hoz_doc.save(data["docx_save_path"].format("sro_count_doughut"))
+# dough = doughut(dca_data, **data["op_args"])
+# put_matplotlib_fig_into_word(hoz_doc, dough, size=7.5)
+# hoz_doc.save(data["docx_save_path"].format("sro_count_doughut"))
 
 ## RADAR CHART
 # sp_data = root_path / "core_data/sp_master.xlsx"
