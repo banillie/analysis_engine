@@ -78,10 +78,10 @@ from analysis_engine.data import (
 
 from datamaps.api import project_data_from_master_month, project_data_from_master
 
-from analysis_engine.top35_data import (
-    top35_root_path,
-    top35_run_p_reports, CentralSupportData,
-)
+# from analysis_engine.top35_data import (
+#     top35_root_path,
+#     top35_run_p_reports, CentralSupportData,
+# )
 
 # INITIATE
 # master = JsonMaster(
@@ -103,60 +103,60 @@ from analysis_engine.top35_data import (
 ## GROUPS
 # DFT_GROUP = ["HSRG", "RSS", "RIG", "AMIS", "RPE"]
 # STAGE_GROUPS = ["pipeline", "pre-SOBC", "SOBC", "OBC", "FBC"]
-hoz_doc = open_word_doc(root_path / "input/summary_temp_landscape.docx")
-doc = open_word_doc(root_path / "input/summary_temp.docx")
+# hoz_doc = open_word_doc(root_path / "input/summary_temp_landscape.docx")
+# doc = open_word_doc(root_path / "input/summary_temp.docx")
 
-top35_data_dict = {
-    "docx_save_path": str(top35_root_path / "output/{}.docx"),
-    "master": Master(open_json_file(str(top35_root_path / "core_data/json/master.json"))),
-    "op_args": {
-        # "quarter": ["Month(June), 2021"],
-        "quarter": ["standard"],
-        # "group": ["HSRG", "RSS", "RIG", "RPE"],
-        "group": ["LIC"],
-        # "chart": False,
-        "data_type": "top35",
-        "circle_colour": "No",
-        # "dates": ["1/6/2021", "1/7/2021"],
-        "key": [
-            "PROJECT DEL TO CURRENT TIMINGS ?",
-            "GMPP ID: IS THIS PROJECT ON GMPP",
-            "PROJECT ON BUDGET?",
-            "WLC TOTAL",
-            "WLC NON GOV",
-        ],
-        # "key": ["Start of Trial Running"],
-    },
-    "excel_save_path": str(top35_root_path / "output/{}.xlsx"),
-    "word_save_path": str(top35_root_path / "output/{}.docx")
-}
-
-# ipdc_data_dict = {
-#     "docx_save_path": str(root_path / "output/{}.docx"),
-#     "master": Master(open_json_file(str(root_path / "core_data/json/master.json"))),
+# top35_data_dict = {
+#     "docx_save_path": str(top35_root_path / "output/{}.docx"),
+#     "master": Master(open_json_file(str(top35_root_path / "core_data/json/master.json"))),
 #     "op_args": {
-#         # "quarter": ["standard"],
-#         "quarter": ["Q4 20/21"],
-#         # "baseline": ["standard"],
-#         # "group": ["HSRG", "RSS", "RIG", "AMIS", "RPE"],
-#         # "group": ["RPE"],
-#         "stage": ["pre-SOBC", "SOBC", "OBC", "FBC"],
-#         # "group": ["HS2 Ph 2b"],
+#         # "quarter": ["Month(June), 2021"],
+#         "quarter": ["standard"],
+#         # "group": ["HSRG", "RSS", "RIG", "RPE"],
+#         "group": ["LIC"],
+#         # "chart": False,
+#         "data_type": "top35",
+#         "circle_colour": "No",
 #         # "dates": ["1/6/2021", "1/7/2021"],
-#         "type": "remaining",
-#         "chart": True,
-#         # "circle_colour": "No",
-#         # "key": ["SRO Tenure Start Date", "Total Forecast"],
-#         "conf_type": "sro",
-#         # "rag_number": "3",
-#         # "order_by": "schedule",
-#         "angles": [240, 290, 22, 120],
-#         "weighting": "count",
+#         "key": [
+#             "PROJECT DEL TO CURRENT TIMINGS ?",
+#             "GMPP ID: IS THIS PROJECT ON GMPP",
+#             "PROJECT ON BUDGET?",
+#             "WLC TOTAL",
+#             "WLC NON GOV",
+#         ],
+#         # "key": ["Start of Trial Running"],
 #     },
-#     "dashboard": get_input_doc(root_path / "input/dashboards_master.xlsx"),
-#     "excel_save_path": str(root_path / "output/{}.xlsx"),
-#     "word_save_path": str(root_path / "output/{}.docx"),
+#     "excel_save_path": str(top35_root_path / "output/{}.xlsx"),
+#     "word_save_path": str(top35_root_path / "output/{}.docx")
 # }
+
+ipdc_data_dict = {
+    "docx_save_path": str(root_path / "output/{}.docx"),
+    "master": Master(open_json_file(str(root_path / "core_data/json/master.json"))),
+    "op_args": {
+        # "quarter": ["standard"],
+        "quarter": ["Q4 20/21"],
+        # "baseline": ["standard"],
+        # "group": ["HSRG", "RSS", "RIG", "AMIS", "RPE"],
+        # "group": ["RPE"],
+        "stage": ["pre-SOBC", "SOBC", "OBC", "FBC"],
+        # "group": ["HS2 Ph 2b"],
+        # "dates": ["1/6/2021", "1/7/2021"],
+        "type": "remaining",
+        "chart": True,
+        # "circle_colour": "No",
+        # "key": ["SRO Tenure Start Date", "Total Forecast"],
+        "conf_type": "sro",
+        # "rag_number": "3",
+        # "order_by": "schedule",
+        "angles": [240, 290, 22, 120],
+        "weighting": "count",
+    },
+    "dashboard": get_input_doc(root_path / "input/dashboards_master.xlsx"),
+    "excel_save_path": str(root_path / "output/{}.xlsx"),
+    "word_save_path": str(root_path / "output/{}.docx"),
+}
 
 # cdg_data_dict = {
 #     "docx_save_path": str(cdg_root_path / "output/{}.docx"),
@@ -183,7 +183,7 @@ top35_data_dict = {
 #     "word_save_path": str(cdg_root_path / "output/{}.docx")
 # }
 
-data = top35_data_dict
+data = ipdc_data_dict
 
 ## DANDELION
 # dl_data = DandelionData(data["master"], **data["op_args"])
@@ -213,12 +213,13 @@ data = top35_data_dict
 # cost_stackplot_graph(sp_data, m, group=DFT_GROUP)
 
 # COSTS
-# c = CostData(data["master"], **data["op_args"])
+c = CostData(data["master"], **data["op_args"])
+c.get_baseline_cost_profile()
 # c.get_cost_profile()
 # cost_profile_graph(c, data["master"], chart=True, group=c.start_group)
 
 # SUMMARIES
-top35_run_p_reports(data["master"], **data["op_args"])
+# top35_run_p_reports(data["master"], **data["op_args"])
 
 ## VFM
 # c = VfMData(m, group=DFm = Master(*data["data"], **data["op_args"] )T_GROUP, quarter=["standard"])  # c is class
@@ -290,5 +291,11 @@ top35_run_p_reports(data["master"], **data["op_args"])
 # Risk data
 # risks = get_risk_data()
 # print_risk_data(risks)
+
+from analysis_engine.data import get_baseline_keys
+
+# t = get_baseline_keys()
+
+
 
 
