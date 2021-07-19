@@ -994,6 +994,7 @@ class CostData:
         self.c_totals = {}
         self.c_profiles = {}
         self.baseline_profiles = {}
+        self.forecast_profiles = {}
         self.wlc_dict = {}
         self.wlc_change = {}
         # self.stack_p = {}
@@ -1280,9 +1281,87 @@ class CostData:
             }
         self.c_profiles = lower_dict
 
-    def get_baseline_cost_profile(self):
+    def get_forecast_cost_profile(self) -> None:
         COST_CAT = [" RDEL ", " CDEL "]
         self.iter_list = get_iter_list(self.kwargs, self.master)
+        tp_dict = {}
+        for tp in self.iter_list:
+            self.group = get_group(self.master, tp, self.kwargs)
+            project_dict = {}
+            list_total_total = []
+            for p in self.group:
+                RDEL_FORECAST_COST_KEYS = {
+                    "Forecast one off new costs": [],
+                    "Forecast recurring new costs": [],
+                    "Forecast recurring old costs": [],
+                    "Forecast Non Gov costs": [],
+                    "Forecast Total": [],
+                    "Forecast Income": [],
+                }
+                CDEL_FORECAST_COST_KEYS = {
+                    "Forecast one off new costs": [],
+                    "Forecast recurring new costs": [],
+                    "Forecast recurring old costs": [],
+                    " Forecast Non-Gov": [],
+                    "Forecast Total WLC": [],
+                    " Forecast - Income both Revenue and Capital": [],
+                }
+                p_data = get_correct_p_data(
+                    self.kwargs, self.master, self.baseline_type, p, tp
+                )
+                if p_data is None:
+                    continue
+                for y in YEAR_LIST:
+                    for cat in COST_CAT:
+                        if cat == ' RDEL ':
+                            for k in RDEL_FORECAST_COST_KEYS.keys():
+                                if y in ["16-17", "17-18", "18-19"]:
+                                    try:
+                                        rdel = convert_none_types(self.master.project_information[p][y + cat + k])
+                                    except KeyError:
+                                        rdel = 0
+                                        print(y + cat + k + " not found.")
+                                else:
+                                    rdel = p_data[y + cat + k]
+                                RDEL_FORECAST_COST_KEYS[k].append(rdel)
+                        if cat == ' CDEL ':
+                            for k in CDEL_FORECAST_COST_KEYS.keys():
+                                if y in ["16-17", "17-18", "18-19"]:
+                                    try:
+                                        cdel = convert_none_types(self.master.project_information[p][y + cat + k])
+                                    except KeyError:
+                                        try:
+                                            cdel = convert_none_types(self.master.project_information[p][y + k])
+                                        except KeyError:
+                                            cdel = 0
+                                            print(y + k + " not found.")
+                                else:
+                                    try:
+                                        cdel = p_data[y + cat + k]
+                                    except KeyError:
+                                        try:
+                                            cdel = p_data[y + k]
+                                        except KeyError:
+                                            # user messaging if necessary
+                                            # print(tp + " " + y + k + ' could not be found. Check')
+                                            cdel = 0
+                                CDEL_FORECAST_COST_KEYS[k].append(cdel)
+                    adding = [RDEL_FORECAST_COST_KEYS["Forecast Total"], CDEL_FORECAST_COST_KEYS["Forecast Total WLC"]]
+                    year_total = [sum(x) for x in zip(*adding)]
+                project_dict[p] = {
+                    "rdel": RDEL_FORECAST_COST_KEYS["Forecast Total"],
+                    "cdel": CDEL_FORECAST_COST_KEYS["Forecast Total WLC"],
+                    "total": year_total,
+                }
+                list_total_total.append(year_total)
+            project_dict["total"] = [sum(x) for x in zip(*list_total_total)]
+            tp_dict[tp] = project_dict
+        self.forecast_profiles = tp_dict
+
+    def get_baseline_cost_profile(self) -> None:
+        COST_CAT = [" RDEL ", " CDEL "]
+        # self.iter_list = get_iter_list(self.kwargs, self.master)
+        self.iter_list = [self.master.current_quarter]
         tp_dict = {}
         for tp in self.iter_list:
             self.group = get_group(self.master, tp, self.kwargs)
@@ -1305,9 +1384,6 @@ class CostData:
                     "BL WLC": [],
                     " BL Income both Revenue and Capital": [],
                 }
-                # year_rdel = []
-                # year_cdel = []
-                # year_total = []
                 p_data = get_correct_p_data(
                     self.kwargs, self.master, self.baseline_type, p, tp
                 )
@@ -1317,14 +1393,14 @@ class CostData:
                     for cat in COST_CAT:
                         if cat == ' RDEL ':
                             for k in RDEL_BL_COST_KEYS.keys():
-                                if y in ["16-17", "17-18", "18-19", "19-20"]:
+                                if y in ["16-17", "17-18", "18-19"]:
                                     rdel = 0
                                 else:
                                     rdel = p_data[y + cat + k]
                                 RDEL_BL_COST_KEYS[k].append(rdel)
                         if cat == ' CDEL ':
                             for k in CDEL_BL_COST_KEYS.keys():
-                                if y in ["16-17", "17-18", "18-19", "19-20"]:
+                                if y in ["16-17", "17-18", "18-19"]:
                                     cdel = 0
                                 else:
                                     try:
@@ -1346,7 +1422,7 @@ class CostData:
                 }
                 list_total_total.append(year_total)
             project_dict["total"] = [sum(x) for x in zip(*list_total_total)]
-            tp_dict[tp] = project_dict
+            tp_dict["baseline"] = project_dict
         self.baseline_profiles = tp_dict
 
     def get_wlc_data(self) -> None:
@@ -1525,7 +1601,6 @@ def get_cost_forecast_keys():
         " Forecast Non-Gov",
         "Forecast Total WLC",
         " Forecast - Income both Revenue and Capital",
-
     ]
 
     COST_CAT = [" RDEL ", " CDEL "]
@@ -3018,13 +3093,25 @@ def cost_profile_graph(costs: CostData, master: Master, **kwargs) -> plt.figure:
     # Overall cost profile chart
     for i, iter in enumerate(costs.iter_list):
         ax1.plot(
-            YEAR_LIST[:-1],
-            np.array(costs.c_profiles[iter]["prof_ra"]),
+            # YEAR_LIST[:-1],
+            YEAR_LIST,
+            # np.array(costs.c_profiles[iter]["prof_ra"]),
+            np.array(costs.forecast_profiles[iter]["total"]),
             label=iter,
             linewidth=5.0,
             marker="o",
             zorder=10 - i,
         )
+    ax1.plot(
+        # YEAR_LIST[:-1],
+        YEAR_LIST,
+        # np.array(costs.c_profiles[iter]["prof_ra"]),
+        np.array(costs.baseline_profiles["baseline"]["total"]),
+        label="Baseline",
+        linewidth=5.0,
+        marker="o",
+        zorder=10 - i,
+    )
 
     # Chart styling
     plt.xticks(rotation=45, size=16)

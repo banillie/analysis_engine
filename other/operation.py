@@ -103,7 +103,7 @@ from datamaps.api import project_data_from_master_month, project_data_from_maste
 ## GROUPS
 # DFT_GROUP = ["HSRG", "RSS", "RIG", "AMIS", "RPE"]
 # STAGE_GROUPS = ["pipeline", "pre-SOBC", "SOBC", "OBC", "FBC"]
-# hoz_doc = open_word_doc(root_path / "input/summary_temp_landscape.docx")
+hoz_doc = open_word_doc(root_path / "input/summary_temp_landscape.docx")
 # doc = open_word_doc(root_path / "input/summary_temp.docx")
 
 # top35_data_dict = {
@@ -135,12 +135,12 @@ ipdc_data_dict = {
     "docx_save_path": str(root_path / "output/{}.docx"),
     "master": Master(open_json_file(str(root_path / "core_data/json/master.json"))),
     "op_args": {
-        "quarter": ["standard"],
-        # "quarter": ["Q4 20/21"],
+        # "quarter": ["standard"],
+        "quarter": ["Q4 20/21"],
         # "baseline": ["standard"],
-        # "group": ["HSRG", "RSS", "RIG", "AMIS", "RPE"],
-        # "group": ["RPE"],
-        "stage": ["pre-SOBC", "SOBC", "OBC", "FBC"],
+        "group": ["HSRG", "RSS", "RIG", "AMIS", "RPE"],
+        # "group": ["A14"],
+        # "stage": ["pre-SOBC", "SOBC", "OBC", "FBC"],
         # "group": ["HS2 Ph 2b"],
         # "dates": ["1/6/2021", "1/7/2021"],
         "type": "remaining",
@@ -215,8 +215,11 @@ data = ipdc_data_dict
 # COSTS
 c = CostData(data["master"], **data["op_args"])
 c.get_baseline_cost_profile()
+c.get_forecast_cost_profile()
 # c.get_cost_profile()
-# cost_profile_graph(c, data["master"], chart=True, group=c.start_group)
+g = cost_profile_graph(c, data["master"], chart=True, group=c.start_group)
+put_matplotlib_fig_into_word(hoz_doc, g, size=7, transparent=False)
+hoz_doc.save(data["word_save_path"].format("baseline_costs"))
 
 # SUMMARIES
 # top35_run_p_reports(data["master"], **data["op_args"])
