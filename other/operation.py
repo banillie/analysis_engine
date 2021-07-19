@@ -69,7 +69,7 @@ from analysis_engine.data import (
     data_check_print_out,
     get_ipdc_date, get_gmpp_keys,
     doughut,
-    dca_changes_into_excel
+    dca_changes_into_excel, get_cost_forecast_keys
 )
 
 ## GENERATE CLI OPTIONS
@@ -135,8 +135,8 @@ ipdc_data_dict = {
     "docx_save_path": str(root_path / "output/{}.docx"),
     "master": Master(open_json_file(str(root_path / "core_data/json/master.json"))),
     "op_args": {
-        # "quarter": ["standard"],
-        "quarter": ["Q4 20/21"],
+        "quarter": ["standard"],
+        # "quarter": ["Q4 20/21"],
         # "baseline": ["standard"],
         # "group": ["HSRG", "RSS", "RIG", "AMIS", "RPE"],
         # "group": ["RPE"],
@@ -292,9 +292,9 @@ c.get_baseline_cost_profile()
 # risks = get_risk_data()
 # print_risk_data(risks)
 
-from analysis_engine.data import get_baseline_keys
+from analysis_engine.data import get_cost_baseline_keys
 
-# t = get_baseline_keys()
+# t = get_cost_forecast_keys()
 
 
 

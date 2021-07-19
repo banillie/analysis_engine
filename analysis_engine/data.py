@@ -1281,26 +1281,7 @@ class CostData:
         self.c_profiles = lower_dict
 
     def get_baseline_cost_profile(self):
-        RDEL_BL_COST_KEYS = [
-            # "BL one off new costs",
-            # "BL recurring new costs",
-            # "BL recurring old costs",
-            # "BL Non Gov costs",
-            "BL Total",
-            # "BL Income",
-        ]
-
-        CDEL_BL_COST_KEYS = [
-            # "BL one off new costs",
-            # "BL recurring new costs",
-            # "BL recurring old costs",
-            # " BL Non-Gov",
-            "BL WLC",
-            # " BL Income both Revenue and Capital",
-        ]
-
         COST_CAT = [" RDEL ", " CDEL "]
-
         self.iter_list = get_iter_list(self.kwargs, self.master)
         tp_dict = {}
         for tp in self.iter_list:
@@ -1308,33 +1289,60 @@ class CostData:
             project_dict = {}
             list_total_total = []
             for p in self.group:
-                year_rdel = []
-                year_cdel = []
-                year_total = []
+                RDEL_BL_COST_KEYS = {
+                    "BL one off new costs": [],
+                    "BL recurring new costs": [],
+                    "BL recurring old costs": [],
+                    "BL Non Gov costs": [],
+                    "BL Total": [],
+                    "BL Income": [],
+                }
+                CDEL_BL_COST_KEYS = {
+                    "BL one off new costs": [],
+                    "BL recurring new costs": [],
+                    "BL recurring old costs": [],
+                    " BL Non-Gov": [],
+                    "BL WLC": [],
+                    " BL Income both Revenue and Capital": [],
+                }
+                # year_rdel = []
+                # year_cdel = []
+                # year_total = []
                 p_data = get_correct_p_data(
                     self.kwargs, self.master, self.baseline_type, p, tp
                 )
                 if p_data is None:
                     continue
                 for y in YEAR_LIST:
-                    if y in ["16-17", "17-18", "18-19", "19-20"]:
-                        rdel = 0
-                        cdel = 0
-                    else:
-                        for cat in COST_CAT:
-                            if cat == ' RDEL ':
-                                for k in RDEL_BL_COST_KEYS:
+                    for cat in COST_CAT:
+                        if cat == ' RDEL ':
+                            for k in RDEL_BL_COST_KEYS.keys():
+                                if y in ["16-17", "17-18", "18-19", "19-20"]:
+                                    rdel = 0
+                                else:
                                     rdel = p_data[y + cat + k]
-                            if cat == ' CDEL ':
-                                for k in CDEL_BL_COST_KEYS:
-                                    cdel = p_data[y + cat + k]
-                    year_rdel.append(rdel)
-                    year_cdel.append(cdel)
-                    year_total.append(rdel + cdel)
+                                RDEL_BL_COST_KEYS[k].append(rdel)
+                        if cat == ' CDEL ':
+                            for k in CDEL_BL_COST_KEYS.keys():
+                                if y in ["16-17", "17-18", "18-19", "19-20"]:
+                                    cdel = 0
+                                else:
+                                    try:
+                                        cdel = p_data[y + cat + k]
+                                    except KeyError:
+                                        try:
+                                            cdel = p_data[y + k]
+                                        except KeyError:
+                                            # user messaging if necessary
+                                            # print(tp + " " + y + k + ' could not be found. Check')
+                                            cdel = 0
+                                CDEL_BL_COST_KEYS[k].append(cdel)
+                    adding = [RDEL_BL_COST_KEYS["BL Total"], CDEL_BL_COST_KEYS["BL WLC"]]
+                    year_total = [sum(x) for x in zip(*adding)]
                 project_dict[p] = {
-                    "rdel": year_rdel,
-                    "cdel": year_cdel,
-                    "total": year_total
+                    "rdel": RDEL_BL_COST_KEYS["BL Total"],
+                    "cdel": CDEL_BL_COST_KEYS["BL WLC"],
+                    "total": year_total,
                 }
                 list_total_total.append(year_total)
             project_dict["total"] = [sum(x) for x in zip(*list_total_total)]
@@ -1429,7 +1437,7 @@ class CostData:
         self.wlc_change = wlc_change_dict
 
 
-def get_baseline_keys():
+def get_cost_baseline_keys():
     wb = load_workbook("/home/will/Downloads/cost_baselines.xlsx")
     ws = wb.active
 
@@ -1491,6 +1499,65 @@ def get_baseline_keys():
     return created_list
 
 
+def get_cost_forecast_keys():
+    wb = load_workbook("/home/will/Downloads/cost_baselines.xlsx")
+    ws = wb.active
+
+    ws_keys = []
+    for x in range(1, ws.max_row + 1):
+        v = ws.cell(row=x, column=1).value
+        if v is not None:
+            ws_keys.append(v)
+
+    RDEL_FORECAST_COST_KEYS = [
+        "Forecast one off new costs",
+        "Forecast recurring new costs",
+        "Forecast recurring old costs",
+        "Forecast Non Gov costs",
+        "Forecast Total",
+        "Forecast Income",
+    ]
+
+    CDEL_FORECAST_COST_KEYS = [
+        "Forecast one off new costs",
+        "Forecast recurring new costs",
+        "Forecast recurring old costs",
+        " Forecast Non-Gov",
+        "Forecast Total WLC",
+        " Forecast - Income both Revenue and Capital",
+
+    ]
+
+    COST_CAT = [" RDEL ", " CDEL "]
+
+    wb = Workbook()
+    ws = wb.active
+
+    for i, key in enumerate(ws_keys):
+        ws.cell(row=i+1, column=1).value= key
+
+    created_list = []
+    for cat in COST_CAT:
+        if cat == " RDEL ":
+            for y in YEAR_LIST:
+                for k in RDEL_FORECAST_COST_KEYS:
+                    created_list.append(y + cat + k)
+        if cat == " CDEL ":
+            for y in YEAR_LIST:
+                for k in CDEL_FORECAST_COST_KEYS:
+                    if k == " Forecast Non-Gov" or k == " Forecast - Income both Revenue and Capital":
+                        created_list.append(y + k)
+                    else:
+                        created_list.append(y + cat + k)
+
+    for i in range(1, ws.max_row + 1):
+        v = ws.cell(row=i + 1, column=1).value
+        if v in created_list:
+            ws.cell(row=i + 1, column=2).value = v
+
+    wb.save("/home/will/Downloads/messy_af_keys.xlsx")
+
+    return created_list
 
 
 def get_sp_data(master: Master, **kwargs) -> Dict[str, float]:
