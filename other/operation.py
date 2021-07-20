@@ -138,10 +138,10 @@ ipdc_data_dict = {
         "quarter": ["standard"],
         # "quarter": ["Q4 20/21"],
         # "baseline": ["standard"],
-        "group": ["HSRG", "RSS", "RIG", "AMIS", "RPE"],
-        # "group": ["RSS"],
+        # "group": ["HSRG", "RSS", "RIG", "AMIS", "RPE"],
+        "group": ["HSRG"],
         # "stage": ["pre-SOBC", "SOBC", "OBC", "FBC"],
-        # "group": ["HS2 Ph 2b"],
+        # "remove": ["HS2 Ph 2b", "HS2 Ph 2a", "NPR"],
         # "dates": ["1/6/2021", "1/7/2021"],
         "type": "remaining",
         "chart": True,
@@ -213,18 +213,18 @@ data = ipdc_data_dict
 # cost_stackplot_graph(sp_data, m, group=DFT_GROUP)
 
 # COSTS
-c = CostData(data["master"], **data["op_args"])
-c.get_baseline_cost_profile()
-c.get_forecast_cost_profile()
+# c = CostData(data["master"], **data["op_args"])
+# c.get_baseline_cost_profile()
+# c.get_forecast_cost_profile()
 # c.get_cost_profile()
-g = cost_profile_graph_new(c, data["master"], chart=True, group=c.start_group)
+# g = cost_profile_graph_new(c, data["master"], chart=True, group=c.start_group)
 # put_matplotlib_fig_into_word(hoz_doc, g, size=7, transparent=False)
-# hoz_doc.save(data["word_save_path"].format("new_method_portfolio"))
-wb = cost_profile_into_wb_new(c)
-wb.save(data["excel_save_path"].format("cost_checking_portfolio"))
+# hoz_doc.save(data["word_save_path"].format("bl_portfolio_no_npr_hs22a2b"))
+# wb = cost_profile_into_wb_new(c)
+# wb.save(data["excel_save_path"].format("bl_portfolio_no_npr_hs22a2b"))
 
 # SUMMARIES
-# top35_run_p_reports(data["master"], **data["op_args"])
+run_p_reports(data["master"], **data["op_args"])
 
 ## VFM
 # c = VfMData(m, group=DFm = Master(*data["data"], **data["op_args"] )T_GROUP, quarter=["standard"])  # c is class

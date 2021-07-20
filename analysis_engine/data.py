@@ -998,7 +998,7 @@ class CostData:
         self.wlc_dict = {}
         self.wlc_change = {}
         # self.stack_p = {}
-        self.get_cost_totals()
+        self.get_cost_totals_new()
         # self.get_baseline_cost_profile()
         # self.get_cost_profile()
         # self.get_wlc_data()
@@ -1222,6 +1222,112 @@ class CostData:
 
         self.c_totals = lower_dict
 
+    def get_cost_totals_new(self) -> None:
+        """to write"""
+
+        self.iter_list = get_iter_list(self.kwargs, self.master)
+        lower_dict = {}
+        for tp in self.iter_list:
+            self.group = get_group(self.master, tp, self.kwargs)
+            rdel_spent = []
+            cdel_spent = []
+            spent = []
+            rdel_unprofiled = []
+            cdel_unprofiled = []
+            unprofiled = []
+            rdel_total = []
+            cdel_total = []
+            total = []
+            rdel_profiled = []
+            cdel_profiled = []
+            profiled = []
+            for project_name in self.group:
+                p_data = get_correct_p_data(
+                    self.kwargs, self.master, self.baseline_type, project_name, tp
+                )
+                if p_data is None:
+                    continue
+                # spent_list = [
+                #     "Pre-profile RDEL",
+                #     "20-21 RDEL STD Total",
+                #     "Pre-profile CDEL",
+                #     "20-21 CDEL STD Total",
+                # ]
+                try:
+                    rstd = p_data["20-21 RDEL STD Total"]
+                except KeyError:
+                    rstd = 0
+                rs = p_data["Pre-profile RDEL"] + rstd
+                rdel_spent.append(rs)
+                try:
+                    cstd = p_data["20-21 CDEL STD Total"]
+                except KeyError:
+                    cstd = 0
+                # print(tp)
+                cs = p_data["Pre-profile CDEL"] + cstd
+                cdel_spent.append(cs)
+                s = rs + cs
+                spent.append(s)
+
+                # unprofiled_list = ["Unprofiled RDEL Forecast Total", "Unprofiled CDEL Forecast Total WLC"]
+                ru = p_data["Unprofiled RDEL Forecast Total"]
+                rdel_unprofiled.append(ru)
+                cu = p_data["Unprofiled CDEL Forecast Total WLC"]
+                cdel_unprofiled.append(cu)
+                # for x in unprofiled_list:
+                u = ru + cu
+                unprofiled.append(u)
+
+                # total_list = ["Total RDEL Forecast Total", "Total CDEL BL WLC"]
+                # for x in total_list:
+                rt = p_data["Total RDEL Forecast Total"]
+                rdel_total.append(rt)
+                ct = p_data["Total CDEL Forecast Total WLC"]
+                cdel_total.append(ct)
+                t = p_data["Total Forecast"]
+                total.append(t)
+
+                rdel_profiled.append(rt - (rs + ru))
+                cdel_profiled.append(ct - (cs + cu))
+                profiled.append(t - (s + u))
+
+                # # hard coded due to current use need.
+                # if project_name == "HS2 Phase 2b" or project_name == "HS2 Phase2a":
+                #     try:
+                #         profiled = (
+                #                 profiled
+                #                 - p_data[
+                #                     "Total Forecast - Income both Revenue and Capital"
+                #                 ]
+                #         )
+                #         total = (
+                #                 total
+                #                 - p_data[
+                #                     "Total Forecast - Income both Revenue and Capital"
+                #                 ]
+                #         )
+                #     except KeyError:  # some older masters do have key.
+                #         pass
+                #
+                # if (
+                #         project_name == "Northern Powerhouse Rail"
+                # ):  # hacked fix for now.
+                #     profiled = (
+                #             profiled + p_data["Total CDEL Forecast recurring new costs"]
+                #     )
+
+            lower_dict[tp] = {
+                "cat_spent": [sum(rdel_spent), sum(cdel_spent)],
+                "cat_prof": [sum(rdel_profiled), sum(cdel_profiled)],
+                "cat_unprof": [sum(rdel_unprofiled), sum(cdel_unprofiled)],
+                "spent": sum(spent),
+                "prof": sum(profiled),
+                "unprof": sum(unprofiled),
+                "total": sum(total),
+            }
+
+        self.c_totals = lower_dict
+
     def get_cost_profile(self) -> None:
         """Returns several lists which contain the sum of different cost profiles for the group of project
         contained with the master"""
@@ -1349,9 +1455,11 @@ class CostData:
                                             # print(tp + " " + y + k + ' could not be found. Check')
                                             cdel = 0
                                 CDEL_FORECAST_COST_KEYS[k].append(cdel)
-                    total_adding = [RDEL_FORECAST_COST_KEYS["Forecast Total"], CDEL_FORECAST_COST_KEYS["Forecast Total WLC"]]
+                    total_adding = [RDEL_FORECAST_COST_KEYS["Forecast Total"],
+                                    CDEL_FORECAST_COST_KEYS["Forecast Total WLC"]]
                     year_total = [sum(x) for x in zip(*total_adding)]
-                    ngov_adding = [RDEL_FORECAST_COST_KEYS["Forecast Non Gov costs"], CDEL_FORECAST_COST_KEYS[" Forecast Non-Gov"]]
+                    ngov_adding = [RDEL_FORECAST_COST_KEYS["Forecast Non Gov costs"],
+                                   CDEL_FORECAST_COST_KEYS[" Forecast Non-Gov"]]
                     ngov_total = [sum(x) for x in zip(*ngov_adding)]
                 # adding individual project data to dict is not necessary
                 # project_dict[p] = {
@@ -1573,7 +1681,7 @@ def get_cost_baseline_keys():
     ws = wb.active
 
     for i, key in enumerate(ws_keys):
-        ws.cell(row=i+1, column=1).value= key
+        ws.cell(row=i + 1, column=1).value = key
 
     created_list = []
     for cat in COST_CAT:
@@ -1633,7 +1741,7 @@ def get_cost_forecast_keys():
     ws = wb.active
 
     for i, key in enumerate(ws_keys):
-        ws.cell(row=i+1, column=1).value= key
+        ws.cell(row=i + 1, column=1).value = key
 
     created_list = []
     for cat in COST_CAT:
@@ -10015,7 +10123,7 @@ def doughut(dca_data: DcaData, **kwargs):
     for c in ["Green", "Amber/Green", "Amber", "Amber/Red", "Red", None]:
         count = dca_data.dca_count[q][kwargs["conf_type"]][c][kwargs["weighting"]]
         if kwargs["weighting"] == "ct":
-            count = round(count*100, 2)
+            count = round(count * 100, 2)
         if count != 0:
             number.append(count)
             colours.append(COLOUR_DICT[c])
