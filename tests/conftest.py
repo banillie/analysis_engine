@@ -182,7 +182,7 @@ def ipdc_data():
         "op_args": {
             "quarter": ["Q1 20/21"],
             "group": ["HSRG", "RSS", "RIG", "AMIS", "RPE"],
-            "chart": True,
+            "chart": False,
         },
     }
 

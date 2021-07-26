@@ -187,8 +187,8 @@ def test_open_word_doc(word_doc):
     )
 
 
-def test_word_doc_heading(word_doc, project_info):
-    wd_heading(word_doc, project_info, "Apollo 11")
+def test_word_doc_heading(word_doc, master):
+    wd_heading(word_doc, master, "Apollo 11")
     word_doc.save("resources/summary_temp_altered.docx")
 
 
@@ -251,7 +251,7 @@ def test_changing_word_doc_to_landscape(word_doc):
 
 def test_get_stackplot_costs_chart(master):
     sp = get_sp_data(master, group=TEST_GROUP, quarter=["standard"])
-    cost_stackplot_graph(sp, master, chart=True)
+    cost_stackplot_graph(sp, master, chart=False)
 
 
 def test_get_project_total_cost_calculations_for_project(master):
