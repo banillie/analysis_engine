@@ -69,7 +69,8 @@ from analysis_engine.data import (
     data_check_print_out,
     get_ipdc_date, get_gmpp_keys,
     doughut,
-    dca_changes_into_excel, get_cost_forecast_keys, cost_profile_graph_new, cost_profile_into_wb_new
+    dca_changes_into_excel, get_cost_forecast_keys, cost_profile_graph_new, cost_profile_into_wb_new,
+    change_gmpp_keys_order, put_n02_into_master
 )
 
 ## GENERATE CLI OPTIONS
@@ -224,7 +225,7 @@ data = ipdc_data_dict
 # wb.save(data["excel_save_path"].format("bl_portfolio_no_npr_hs22a2b"))
 
 # SUMMARIES
-run_p_reports(data["master"], **data["op_args"])
+# run_p_reports(data["master"], **data["op_args"])
 
 ## VFM
 # c = VfMData(m, group=DFm = Master(*data["data"], **data["op_args"] )T_GROUP, quarter=["standard"])  # c is class
@@ -289,16 +290,20 @@ run_p_reports(data["master"], **data["op_args"])
 # get_gmpp_keys()
 # a = get_gmpp_data()
 # print_gmpp_data(a)
-# gmpp_d = get_project_info_data("/home/will/Downloads/GMPP_DATA_DFT_FORMAT.xlsx")
-# ipdc_d = get_project_info_data(root_path / "core_data/master_4_2020.xlsx")
-# data_check_print_out(gmpp_d, ipdc_d)
+gmpp_d = get_project_info_data("/home/will/Downloads/GMPP_DATA_DFT_FORMAT_v6.xlsx")
+ipdc_d = get_project_info_data(root_path / "core_data/master_1_2021.xlsx")
+data_check_print_out(gmpp_d, ipdc_d)
+
+# a = semantic_ordering()
+# change_gmpp_keys_order(ipdc_d)
+# put_n02_into_master()
 
 # Risk data
 # risks = get_risk_data()
 # print_risk_data(risks)
 
-from analysis_engine.data import get_cost_baseline_keys
-
+# work for cost data. to delete.
+# from analysis_engine.data import get_cost_baseline_keys
 # t = get_cost_forecast_keys()
 
 
