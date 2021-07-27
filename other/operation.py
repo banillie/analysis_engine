@@ -70,7 +70,7 @@ from analysis_engine.data import (
     get_ipdc_date, get_gmpp_keys,
     doughut,
     dca_changes_into_excel, get_cost_forecast_keys, cost_profile_graph_new, cost_profile_into_wb_new,
-    change_gmpp_keys_order, put_n02_into_master
+    change_gmpp_keys_order, put_n02_into_master, data_query_into_wb_by_key
 )
 
 ## GENERATE CLI OPTIONS
@@ -136,18 +136,18 @@ ipdc_data_dict = {
     "docx_save_path": str(root_path / "output/{}.docx"),
     "master": Master(open_json_file(str(root_path / "core_data/json/master.json"))),
     "op_args": {
-        "quarter": ["standard"],
-        # "quarter": ["Q4 20/21"],
+        # "quarter": ["standard"],
+        "quarter": ["all"],
         # "baseline": ["standard"],
-        # "group": ["HSRG", "RSS", "RIG", "AMIS", "RPE"],
-        "group": ["HSRG"],
+        "group": ["HSRG", "RSS", "RIG", "AMIS", "RPE"],
+        # "group": ["HSRG"],
         # "stage": ["pre-SOBC", "SOBC", "OBC", "FBC"],
         # "remove": ["HS2 Ph 2b", "HS2 Ph 2a", "NPR"],
         # "dates": ["1/6/2021", "1/7/2021"],
         "type": "remaining",
         "chart": True,
         # "circle_colour": "No",
-        # "key": ["SRO Tenure Start Date", "Total Forecast"],
+        "key": ["VfM Category single entry"],
         "conf_type": "sro",
         # "rag_number": "3",
         # "order_by": "schedule",
@@ -206,8 +206,8 @@ data = ipdc_data_dict
 # total_costs_benefits_bar_chart(c, b, chart=True)
 
 # QUERY
-# wb = data_query_into_wb(data["master"], **data["op_args"])
-# wb.save(data["excel_save_path"].format("query_test"))
+# wb = data_query_into_wb_by_key(data["master"], **data["op_args"])
+# wb.save(data["excel_save_path"].format("query_vfm_single_cat"))
 
 # STACKPLOT
 # sp_data = get_sp_data(m, quarter=["standard"], group=["RIG"])
@@ -288,9 +288,9 @@ data = ipdc_data_dict
 
 # GMPP data
 # get_gmpp_keys()
-# a = get_gmpp_data()
+get_gmpp_data()
 # print_gmpp_data(a)
-gmpp_d = get_project_info_data("/home/will/Downloads/GMPP_DATA_DFT_FORMAT_v6.xlsx")
+gmpp_d = get_project_info_data("/home/will/Downloads/GMPP_DATA_DFT_FORMAT_v8.xlsx")
 ipdc_d = get_project_info_data(root_path / "core_data/master_1_2021.xlsx")
 data_check_print_out(gmpp_d, ipdc_d)
 

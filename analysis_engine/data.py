@@ -4653,6 +4653,8 @@ def get_iter_list(class_kwargs, master: Master) -> List[str]:
                 master.quarter_list[0],
                 master.quarter_list[1],
             ]
+        elif class_kwargs["quarter"] == ["all"]:
+            iter_list = master.quarter_list
         else:
             iter_list = class_kwargs["quarter"]
 
@@ -6800,6 +6802,111 @@ def get_data_query_key_names(key_file: csv) -> List[str]:
         for row in csv_reader:
             key_list.append(row[0])
     return key_list[1:]
+
+
+def data_query_into_wb_by_key(master: Master, **kwargs) -> Workbook:
+    """
+    Returns data values for keys of interest. Keys placed on one page.
+    Quarter data placed across different wbs.
+    """
+
+    wb = Workbook()
+    iter_list = get_iter_list(kwargs, master)
+    # for z, tp in enumerate(iter_list):
+    for z, key in enumerate(kwargs["key"]):
+        # i = master.quarter_list.index(tp)  # handling here. for wrong quarter string
+        ws = wb.create_sheet(
+            make_file_friendly(key)
+        )  # creating worksheets. names restricted to 30 characters.
+        ws.title = make_file_friendly(key)  # title of worksheet
+        """list project names, groups and stage in ws"""
+        for y, p in enumerate(list(master.project_information.keys())):
+            if master.project_information[p]['Pipeline'] == 'Yes':
+                break
+            else:
+                abb = master.abbreviations[p]["abb"]
+                ws.cell(row=2 + y, column=1).value = master.project_information[p]["Group"]
+                ws.cell(row=2 + y, column=2).value = p
+                ws.cell(row=2 + y, column=3).value = abb
+                ws.cell(row=2 + y, column=4).value = master.project_information[p]["GMPP"]
+                for x, tp in enumerate(iter_list):
+                    p_data = get_correct_p_data(kwargs, master, "ipdc_costs", p, tp)
+                    try:
+                        p_data_last = get_correct_p_data(
+                            kwargs, master, "ipdc_costs", p, iter_list[z + 1]
+                        )
+                    except IndexError:
+                        p_data_last = None
+
+                    ws.cell(row=1, column=5 + x, value=tp)
+                    try:  # standard keys
+                        value = convert_date(p_data[key])
+                        if value is None:
+                            ws.cell(row=2 + y, column=5 + x).value = "md"
+                            ws.cell(row=2 + y, column=5 + x).fill = AMBER_FILL
+                        else:
+                            ws.cell(row=2 + y, column=5 + x, value=value)
+                            if isinstance(value, datetime.datetime):
+                                ws.cell(
+                                    row=2 + y, column=5 + x, value=value
+                                ).number_format = "dd/mm/yy"
+
+                        try:  # checks for change against next master in loop
+                            lst_value = convert_date(p_data_last[key])
+                            if value != lst_value:
+                                ws.cell(row=2 + y, column=5 + x).fill = SALMON_FILL
+                        except (KeyError, UnboundLocalError, TypeError):
+                            # KeyError is key not present in master.
+                            # UnboundLocalError if there is no last_value.
+                            # TypeError if project not in master. p_data_last becomes None.
+                            pass
+                    except TypeError:
+                        pass
+                    except KeyError:  # milestone keys
+                        if "quarter" in kwargs:
+                            milestones_one = MilestoneData(master, quarter=[tp], group=[p])
+                            try:
+                                milestones_two = MilestoneData(
+                                    master, quarter=[iter_list[z + 1]], group=[p]
+                                )
+                            except IndexError:
+                                pass
+                        if "baseline" in kwargs:
+                            milestones_one = MilestoneData(master, baseline=[tp], group=[p])
+                            try:
+                                milestones_two = MilestoneData(
+                                    master, baseline=[iter_list[z + 1]], group=[p]
+                                )
+                            except IndexError:
+                                pass
+                        date = get_milestone_date(
+                            abb, milestones_one.milestone_dict, tp, " " + key
+                        )
+                        if date is None:
+                            ws.cell(row=2 + y, column=5 + x).value = "md"
+                            ws.cell(row=2 + y, column=5 + x).fill = AMBER_FILL
+                        else:
+                            ws.cell(row=2 + y, column=5 + x).value = date
+                            ws.cell(row=2 + y, column=5 + x).number_format = "dd/mm/yy"
+                        try:  # checks for changes against next master in loop
+                            lst_date = get_milestone_date(
+                                abb,
+                                milestones_two.milestone_dict,
+                                iter_list[z + 1],
+                                " " + key,
+                            )
+                            if date != lst_date:
+                                ws.cell(row=2 + y, column=5 + x).fill = SALMON_FILL
+                        except (KeyError, UnboundLocalError, TypeError, IndexError):
+                            pass
+
+        ws.cell(row=1, column=1).value = "Group"
+        ws.cell(row=1, column=2).value = "Project Name"
+        ws.cell(row=1, column=3).value = "Project Acronym"
+        ws.cell(row=1, column=4).value = "GMPP"
+
+    wb.remove(wb["Sheet"])
+    return wb
 
 
 def data_query_into_wb(master: Master, **kwargs) -> Workbook:
@@ -9949,7 +10056,7 @@ def get_gmpp_keys():
 
     output_list.sort(key=lambda s: list(map(int, s[0].split('.'))))
 
-    key_map = get_map(load_workbook("/home/will/Downloads/KEY_MAP_v4.xlsx"))
+    key_map = get_map(load_workbook("/home/will/Downloads/KEY_MAP_v8.xlsx"))
 
     wb = Workbook()
     ws = wb.active
@@ -9961,13 +10068,36 @@ def get_gmpp_keys():
         except KeyError:
             ws.cell(row=i + 1, column=2).value = ""
 
-    wb.save("/home/will/Downloads/KEY_MAP_v5.xlsx")
+    wb.save("/home/will/Downloads/KEY_MAP_v9.xlsx")
 
 
 def get_gmpp_data():
+    wb_one = load_workbook("/home/will/Downloads/GMPP_DATA_Q4.xlsm")
+    wb_two = load_workbook("/home/will/Downloads/GMPP_DATA_Q1.xlsm")
+    wb_list = [wb_one, wb_two]
+    pure_key_list = []
+    output_list = []
+    for wb in wb_list:
+        ws = wb.active
+        for x in range(24, ws.max_row):  # row 24 is where gmpp data starts.
+            key_pure = ws.cell(row=x, column=6).value
+            key = key_pure.split(':')
+            if key_pure not in pure_key_list:
+                if 'a' in key[0] or 'b' in key[0] or 'c' in key[0]:
+                    pass
+                else:
+                    output_list.append(key)
+                    pure_key_list.append(key_pure)
+
+    output_list.sort(key=lambda s: list(map(int, s[0].split('.'))))
+
+    ipa_key_list = []
+    for i, key in enumerate(output_list):
+        ipa_key_list.append(key[0] + ":" + key[1])
+
     from datetime import datetime
     import xlrd
-    wb = load_workbook("/home/will/Downloads/GMPP_DATA_NO2.xlsm")
+    wb = load_workbook("/home/will/Downloads/GMPP_DATA_Q1.xlsm")
     ws = wb.active
 
     initial_dict = {}
@@ -9977,50 +10107,46 @@ def get_gmpp_data():
         s_value = ws.cell(row=x, column=7).value
         n_value = ws.cell(row=x, column=8).value
         if key[0] == "12":
-            continue
+            break
         if n_value == 0:
             pass
-        else:
-            if key[0] == "6" or key[0] == "7" or "Date" in key or "date" in key:
-                if n_value > 20000:
-                    if "7.02.10" in key:
-                        pass
-                    else:
-                        s_value = datetime(*xlrd.xldate_as_tuple(n_value, 0))
+        # else:
+        if n_value != 0:
+            s_value = n_value
+        if key[0] == "6" or key[0] == "7" or "Date" in key or "date" in key:
+            if n_value > 20000:
+                if "7.02.10" in key:
+                    pass
                 else:
-                    s_value = n_value
-            else:
-                s_value = n_value
+                    s_value = datetime(*xlrd.xldate_as_tuple(n_value, 0))
+                # else:
+                #     s_value = n_value
 
         if project_name in list(initial_dict.keys()):
             initial_dict[project_name][key] = s_value
         else:
             initial_dict[project_name] = {key: s_value}
 
-    wb = load_workbook("/home/will/Downloads/GMPP_KEYS_SORTED.xlsx")
+    wb = Workbook()
     ws = wb.active
 
-    key_list = []
-    for x in range(1, ws.max_row + 1):
-        key = ws.cell(row=x, column=1).value
-        key_list.append(key)
+    # key_map = get_map(load_workbook("/home/will/Downloads/KEY_MAP_v8.xlsx"))
+    # key_map = semantic_ordering(load_workbook("/home/will/Downloads/semantic_v_nos.xlsx"))
 
-    output_dict = {}
-    for p in initial_dict.keys():
-        p_dict = initial_dict[p]
-        for k in key_list:
-            if p in list(output_dict.keys()):
-                try:
-                    output_dict[p][k] = p_dict[k]
-                except KeyError:
-                    output_dict[p][k] = ''
-            else:
-                try:
-                    output_dict[p] = {k: p_dict[k]}
-                except KeyError:
-                    output_dict[p] = {k: ''}
+    for x, project in enumerate(list(initial_dict.keys())):
+        ws.cell(row=1, column=2 + x).value = project
+        for i, k in enumerate(ipa_key_list):  # k is key
+            if x == 0:
+                ws.cell(row=2 + i, column=1).value = k
+            try:
+                ws.cell(row=2 + i, column=2 + x).value = initial_dict[project][k]
+            except KeyError:
+                pass
 
-    return output_dict
+    ws.cell(row=1, column=1).value = "Project Name"
+
+    wb.save("/home/will/Downloads/GMPP_DATA_DFT_FORMAT_v8.xlsx")
+
 
 
 GMPP_M_DICT = {
@@ -10042,7 +10168,7 @@ GMPP_M_DICT = {
 
 
 def data_check_print_out(gmpp_data: Dict, ipdc_data: Dict):
-    key_map = get_map(load_workbook("/home/will/Downloads/KEY_MAP_v6.xlsx"))
+    key_map = get_map(load_workbook("/home/will/Downloads/KEY_MAP_v8.xlsx"))
     project_map = get_map(load_workbook("/home/will/Downloads/PROJECT_MAP.xlsx"))
 
     wb = Workbook()
@@ -10060,8 +10186,11 @@ def data_check_print_out(gmpp_data: Dict, ipdc_data: Dict):
         "Finance Name",
         "Analysis Name",
         "Communications & Stakeholder Engagement Name",
+        "Legal Commercial & Contract Management Name",
+        "Approval Name",
+        "DCA - SRO Narrative",
+        "Project DCA - SRO Assessment Delivery confidence for whole project duration",
     ]
-
 
     def remove_keys(key):
         output = key
@@ -10110,13 +10239,16 @@ def data_check_print_out(gmpp_data: Dict, ipdc_data: Dict):
             except KeyError:
                 dft_val = ""
 
+            ws.cell(row=start_row, column=7).value = gmpp_val
             if isinstance(gmpp_val, datetime.datetime):
                 gmpp_val = gmpp_val.date()
+                ws.cell(row=start_row, column=7, value=gmpp_val).number_format = "dd/mm/yy"
+
+            ws.cell(row=start_row, column=8).value = dft_val
             if isinstance(dft_val, datetime.datetime):
                 dft_val = dft_val.date()
+                ws.cell(row=start_row, column=8, value=dft_val).number_format = "dd/mm/yy"
 
-            ws.cell(row=start_row, column=7).value = gmpp_val
-            ws.cell(row=start_row, column=8).value = dft_val
             if gmpp_val in list(GMPP_M_DICT.keys()):
                 if GMPP_M_DICT[gmpp_val] == dft_val:
                     ws.cell(row=start_row, column=9).value = "MATCH"
@@ -10133,6 +10265,14 @@ def data_check_print_out(gmpp_data: Dict, ipdc_data: Dict):
                 ws.cell(row=start_row, column=9).value = "MATCH"
             elif gmpp_val == "" and dft_val is None:
                 ws.cell(row=start_row, column=9).value = "MATCH"
+            elif gmpp_val is None and dft_val == 0:
+                ws.cell(row=start_row, column=9).value = "MATCH"
+            elif isinstance(gmpp_val, str):
+                try:
+                    if int(float(gmpp_val)) == int(dft_val):
+                        ws.cell(row=start_row, column=9).value = "MATCH"
+                except (ValueError, TypeError):
+                    ws.cell(row=start_row, column=9).value = "DIFFERENT"
             else:
                 ws.cell(row=start_row, column=9).value = "DIFFERENT"
 
@@ -10148,14 +10288,14 @@ def data_check_print_out(gmpp_data: Dict, ipdc_data: Dict):
     ws.cell(row=1, column=8).value = "DFT VALUE"
     ws.cell(row=1, column=9).value = "VALUE CHECK"
 
-    wb.save("/home/will/Downloads/GMPP_IPDC_DATA_CHECK_Q1_20_21_v15.xlsx")
+    wb.save("/home/will/Downloads/GMPP_IPDC_DATA_CHECK_Q1_20_21_v17.xlsx")
 
 
 def print_gmpp_data(gmpp_dict: Dict):
     wb = Workbook()
     ws = wb.active
 
-    key_map = get_map(load_workbook("/home/will/Downloads/KEY_MAP_v5.xlsx"))
+    key_map = get_map(load_workbook("/home/will/Downloads/KEY_MAP_v8.xlsx"))
     # key_map = semantic_ordering(load_workbook("/home/will/Downloads/semantic_v_nos.xlsx"))
 
     for x, project in enumerate(list(gmpp_dict.keys())):
@@ -10174,25 +10314,29 @@ def print_gmpp_data(gmpp_dict: Dict):
 
     ws.cell(row=1, column=1).value = "Project Name"
 
-    wb.save("/home/will/Downloads/GMPP_DATA_DFT_FORMAT_NO2.xlsx")
+    wb.save("/home/will/Downloads/GMPP_DATA_DFT_FORMAT_v7.xlsx")
 
 
 def change_gmpp_keys_order(ipdc_dict):
-    key_map = get_map(load_workbook("/home/will/Downloads/KEY_MAP.xlsx"))
+    key_map = get_map(load_workbook("/home/will/Downloads/KEY_MAP_v8.xlsx"))
 
     output_dict = {}
     for key in ipdc_dict['Crossrail Programme']:
         for x, value in key_map.items():
             if key == value:
-                output_dict[x] = key
+                output_dict[key] = x
 
     wb = Workbook()
     ws = wb.active
-    for i, key in enumerate(output_dict):
+    for i, key in enumerate(ipdc_dict['Crossrail Programme']):
         ws.cell(row=i + 2, column=1).value = key
-        ws.cell(row=i + 2, column=2).value = output_dict[key]
+        try:
+            ws.cell(row=i + 2, column=2).value = output_dict[key]
+        except KeyError:
+            print(key)
+            ws.cell(row=i + 2, column=2).value = None
 
-    wb.save("/home/will/Downloads/GMPP_KEYS_DFT_ORDER.xlsx")
+    wb.save("/home/will/Downloads/GMPP_KEYS_DFT_ORDER_v2.xlsx")
 
     return output_dict
 
