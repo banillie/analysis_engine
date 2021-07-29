@@ -998,7 +998,7 @@ class CostData:
         self.wlc_dict = {}
         self.wlc_change = {}
         # self.stack_p = {}
-        self.get_cost_totals()
+        self.get_cost_totals_new()
         # self.get_baseline_cost_profile()
         # self.get_cost_profile()
         # self.get_wlc_data()
@@ -1254,25 +1254,25 @@ class CostData:
                 #     "20-21 CDEL STD Total",
                 # ]
                 try:
-                    rstd = p_data["20-21 RDEL STD Total"]
+                    rstd = convert_none_types(p_data["20-21 RDEL STD Total"])
                 except KeyError:
                     rstd = 0
-                rs = p_data["Pre-profile RDEL"] + rstd
+                rs = convert_none_types(p_data["Pre-profile RDEL"]) + rstd
                 rdel_spent.append(rs)
                 try:
-                    cstd = p_data["20-21 CDEL STD Total"]
+                    cstd = convert_none_types(p_data["20-21 CDEL STD Total"])
                 except KeyError:
                     cstd = 0
                 # print(tp)
-                cs = p_data["Pre-profile CDEL"] + cstd
+                cs = convert_none_types(p_data["Pre-profile CDEL"]) + cstd
                 cdel_spent.append(cs)
                 s = rs + cs
                 spent.append(s)
 
                 # unprofiled_list = ["Unprofiled RDEL Forecast Total", "Unprofiled CDEL Forecast Total WLC"]
-                ru = p_data["Unprofiled RDEL Forecast Total"]
+                ru = convert_none_types(p_data["Unprofiled RDEL Forecast Total"])
                 rdel_unprofiled.append(ru)
-                cu = p_data["Unprofiled CDEL Forecast Total WLC"]
+                cu = convert_none_types(p_data["Unprofiled CDEL Forecast Total WLC"])
                 cdel_unprofiled.append(cu)
                 # for x in unprofiled_list:
                 u = ru + cu
@@ -1280,11 +1280,11 @@ class CostData:
 
                 # total_list = ["Total RDEL Forecast Total", "Total CDEL BL WLC"]
                 # for x in total_list:
-                rt = p_data["Total RDEL Forecast Total"]
+                rt = convert_none_types(p_data["Total RDEL Forecast Total"])
                 rdel_total.append(rt)
-                ct = p_data["Total CDEL Forecast Total WLC"]
+                ct = convert_none_types(p_data["Total CDEL Forecast Total WLC"])
                 cdel_total.append(ct)
-                t = p_data["Total Forecast"]
+                t = convert_none_types(p_data["Total Forecast"])
                 total.append(t)
 
                 rdel_profiled.append(rt - (rs + ru))
@@ -4877,7 +4877,7 @@ class DcaData:
             if self.kwargs["conf_type"] == "sro_three":
                 # key value to be changed to 'GMPP - SRO DCA' when data available.
                 self.dca_keys = {
-                    "sro_three": "Departmental DCA",
+                    "sro_three": "GMPP - SRO DCA",
                 }
             else:
                 self.dca_keys = {
@@ -6534,6 +6534,60 @@ def compile_p_report(
     return doc
 
 
+def compile_p_report_short_form(
+        doc: Document,
+        master: Master,
+        project_name: str,
+) -> Document:
+    wd_heading(doc, master, project_name)
+    key_contacts(doc, master, project_name)
+    dca_table(doc, master, project_name)
+    project_scope_text(doc, master, project_name)
+    dca_narratives(doc, master, project_name)
+    costs = CostData(master, group=[project_name], quarter=["standard"])
+    costs.get_cost_profile()
+    benefits = BenefitsData(master, group=[project_name], baseline=["standard"])
+    milestones = MilestoneData(master, group=[project_name], baseline=["standard"])
+    project_report_meta_data(doc, costs, milestones, benefits, project_name)
+    change_word_doc_landscape(doc)
+    cost_profile = cost_profile_graph(costs, master, show="No", group=milestones.group)
+    put_matplotlib_fig_into_word(doc, cost_profile, transparent=False, size=8)
+    # total_profile = total_costs_benefits_bar_chart(
+    #     costs, benefits, master, group=costs.group, show="No"
+    # )
+    # put_matplotlib_fig_into_word(doc, total_profile, transparent=False, size=8)
+    #  handling of no milestones within filtered period.
+    # ab = master.abbreviations[project_name]["abb"]
+    # requires refactor here.
+    # start_date = calculate_dates("minus 3 months").strftime("%d/%m/%Y")
+    # end_date = calculate_dates("2 years").strftime("%d/%m/%Y")
+    # try:
+    #     milestones.filter_chart_info(dates=[start_date, end_date])
+    #     milestones_chart = milestone_chart(
+    #         milestones,
+    #         master,
+    #         blue_line="IPDC",
+    #         title=ab + " schedule next two years",
+    #         show="No",
+    #     )
+    #     put_matplotlib_fig_into_word(doc, milestones_chart, transparent=False, size=8)
+    # except ValueError:
+    #     pass
+    #     milestones = MilestoneData(master, group=[project_name], baseline=["standard"])
+    #     milestones.filter_chart_info(dates=["1/9/2020", "31/12/2024"])
+    #     milestones_chart = milestone_chart(
+    #         milestones,
+    #         master,
+    #         blue_line="IPDC",
+    #         title=ab + " schedule (2021 - 24)",
+    #         show="No",
+    #     )
+    #     put_matplotlib_fig_into_word(doc, milestones_chart)
+    # print_out_project_milestones(doc, milestones, project_name)
+    # change_word_doc_portrait(doc)
+    return doc
+
+
 def get_input_doc(file_path: TextIO) -> Union[Workbook, Document, None]:
     """
     Returns blank documents in analysis_engine/input file used for saving outputs.
@@ -6557,10 +6611,16 @@ def run_p_reports(master: Master, **kwargs) -> None:
         print("Compiling summary for " + p)
         report_doc = get_input_doc(root_path / "input/summary_temp.docx")
         qrt = make_file_friendly(str(master.current_quarter))
-        output = compile_p_report(report_doc, master, p)
-        output.save(
-            root_path / "output/{}_report_{}.docx".format(p, qrt)
-        )
+        if kwargs["type"] == "long":
+            output = compile_p_report(report_doc, master, p)
+            output.save(
+                root_path / "output/{}_long_report_{}.docx".format(p, qrt)
+            )
+        if kwargs["type"] == "short":
+            output = compile_p_report_short_form(report_doc, master, p)
+            output.save(
+                root_path / "output/{}_short_report_{}.docx".format(p, qrt)
+            )
 
 
 # TODO refactor all code below
@@ -9087,6 +9147,7 @@ class DandelionData:
                                 "OBC": 'FBC - IPDC Approval',
                                 # 'FBC - IPDC Approval'
                                 "FBC": "Project End Date",
+                                "Other": None,
                             }
                             tp_idx = self.master.quarter_list.index(tp)
                             bc = BC_STAGE_DICT[self.master.master_data[tp_idx]["data"][p]["IPDC approval point"]]
@@ -9101,7 +9162,9 @@ class DandelionData:
                                 p_schedule = (d - datetime.date.today()).days
                             except TypeError:
                                 p_schedule = 0
-                                print("can't calculate " + p + "'s schedule")
+                                if "order_by" in self.kwargs:
+                                    if self.kwargs["order_by"] == "schedule":
+                                        print("can't calculate " + p + "'s schedule")
                     else:
                         p_schedule = 0
                     p_list.append((p_value, p_schedule, p))
@@ -10035,48 +10098,56 @@ def get_map(wb):
 #     return output_dict
 
 
-def get_gmpp_keys():
-    wb_one = load_workbook("/home/will/Downloads/GMPP_DATA_Q4.xlsm")
-    wb_two = load_workbook("/home/will/Downloads/GMPP_DATA_Q1.xlsm")
-
-    wb_list = [wb_one, wb_two]
-    pure_key_list = []
-    output_list = []
-    for wb in wb_list:
-        ws = wb.active
-        for x in range(24, ws.max_row):  # row 24 is where gmpp data starts.
-            key_pure = ws.cell(row=x, column=6).value
-            key = key_pure.split(':')
-            if key_pure not in pure_key_list:
-                if 'a' in key[0] or 'b' in key[0] or 'c' in key[0]:
-                    pass
-                else:
-                    output_list.append(key)
-                    pure_key_list.append(key_pure)
-
-    output_list.sort(key=lambda s: list(map(int, s[0].split('.'))))
-
-    key_map = get_map(load_workbook("/home/will/Downloads/KEY_MAP_v8.xlsx"))
-
-    wb = Workbook()
-    ws = wb.active
-
-    for i, key in enumerate(output_list):
-        ws.cell(row=i + 1, column=1).value = key[0] + ":" + key[1]
-        try:
-            ws.cell(row=i + 1, column=2).value = key_map[key[0] + ":" + key[1]]
-        except KeyError:
-            ws.cell(row=i + 1, column=2).value = ""
-
-    wb.save("/home/will/Downloads/KEY_MAP_v9.xlsx")
+# def get_gmpp_keys():
+#     wb_one = load_workbook("/home/will/Downloads/GMPP_DATA_Q4.xlsm")
+#     wb_two = load_workbook("/home/will/Downloads/GMPP_DATA_Q1.xlsm")
+#
+#     wb_list = [wb_one, wb_two]
+#     pure_key_list = []
+#     output_list = []
+#     for wb in wb_list:
+#         ws = wb.active
+#         for x in range(24, ws.max_row):  # row 24 is where gmpp data starts.
+#             key_pure = ws.cell(row=x, column=6).value
+#             key = key_pure.split(':')
+#             if key_pure not in pure_key_list:
+#                 if 'a' in key[0] or 'b' in key[0] or 'c' in key[0]:
+#                     pass
+#                 else:
+#                     output_list.append(key)
+#                     pure_key_list.append(key_pure)
+#
+#     output_list.sort(key=lambda s: list(map(int, s[0].split('.'))))
+#
+#     key_map = get_map(load_workbook("/home/will/Downloads/KEY_MAP_v8.xlsx"))
+#
+#     wb = Workbook()
+#     ws = wb.active
+#
+#     for i, key in enumerate(output_list):
+#         ws.cell(row=i + 1, column=1).value = key[0] + ":" + key[1]
+#         try:
+#             ws.cell(row=i + 1, column=2).value = key_map[key[0] + ":" + key[1]]
+#         except KeyError:
+#             ws.cell(row=i + 1, column=2).value = ""
+#
+#     wb.save("/home/will/Downloads/KEY_MAP_v9.xlsx")
 
 
 def get_gmpp_data():
-    wb_one = load_workbook("/home/will/Downloads/GMPP_DATA_Q4.xlsm")
-    wb_two = load_workbook("/home/will/Downloads/GMPP_DATA_Q1.xlsm")
-    wb_list = [wb_one, wb_two]
+    wb_one = load_workbook("/home/will/Downloads/GMPP_DATA_NO2_v2.xlsm")
+    # wb_two = load_workbook("/home/will/Downloads/GMPP_DATA_Q1.xlsm")
+    # wb_three = load_workbook("/home/will/Downloads/GMPP_DATA_Q4.xlsm")
+
+    wb_list = [wb_one]
     pure_key_list = []
     output_list = []
+    errant_keys = [
+        "6.03a: Has the project been using an evidenced range of  Project End Dates for planning and approval decisions?",
+        "6.03b: Schedule Project End Date Range (FORECAST),  From",
+        "6.03c: To",
+        "7.02a: Is this the Projects first GMPP data return?"
+    ]
     for wb in wb_list:
         ws = wb.active
         for x in range(24, ws.max_row):  # row 24 is where gmpp data starts.
@@ -10084,6 +10155,35 @@ def get_gmpp_data():
             key = key_pure.split(':')
             if key_pure not in pure_key_list:
                 if 'a' in key[0] or 'b' in key[0] or 'c' in key[0]:
+                    if key[0] == "6.03a":
+                        key[0] = "6.031"
+                        if key_pure not in pure_key_list:
+                            output_list.append(key)
+                            pure_key_list.append(key_pure)
+                    if key[0] == "6.03b":
+                        key[0] = "6.032"
+                        if key_pure not in pure_key_list:
+                            output_list.append(key)
+                            pure_key_list.append(key_pure)
+                    if key[0] == "6.03c":
+                        key[0] = "6.033"
+                        if key_pure not in pure_key_list:
+                            output_list.append(key)
+                            pure_key_list.append(key_pure)
+                    if key[0] == "7.02a":
+                        key[0] = "7.021"
+                        if key_pure not in pure_key_list:
+                            output_list.append(key)
+                            pure_key_list.append(key_pure)
+                    if key[0] == "7.02b":
+                        key[0] = "7.022"
+                        if key_pure not in pure_key_list:
+                            output_list.append(key)
+                            pure_key_list.append(key_pure)
+                    else:
+                        if key_pure not in errant_keys:
+                            print(key_pure)
+                elif '12' in key[0][:2]:
                     pass
                 else:
                     output_list.append(key)
@@ -10093,12 +10193,23 @@ def get_gmpp_data():
 
     ipa_key_list = []
     for i, key in enumerate(output_list):
+        if key[0] == "6.031":
+            key[0] = "6.03a"
+        if key[0] == "6.032":
+            key[0] = "6.03b"
+        if key[0] == "6.033":
+            key[0] = "6.03c"
+        if key[0] == "7.021":
+            key[0] = "7.02a"
+        if key[0] == "7.022":
+            key[0] = "7.02b"
         ipa_key_list.append(key[0] + ":" + key[1])
 
     from datetime import datetime
     import xlrd
-    wb = load_workbook("/home/will/Downloads/GMPP_DATA_Q1.xlsm")
-    ws = wb.active
+
+    # wb = load_workbook("/home/will/Downloads/GMPP_DATA_Q1.xlsm")
+    ws = wb_one.active
 
     initial_dict = {}
     for x in range(24, ws.max_row + 1):
@@ -10106,19 +10217,15 @@ def get_gmpp_data():
         key = ws.cell(row=x, column=6).value
         s_value = ws.cell(row=x, column=7).value
         n_value = ws.cell(row=x, column=8).value
-        if key[0] == "12":
-            break
-        if n_value == 0:
-            pass
-        # else:
         if n_value != 0:
             s_value = n_value
-        if key[0] == "6" or key[0] == "7" or "Date" in key or "date" in key:
+        if "Date" in key or "date" in key or "6.03c: To" in key:
+            # s_value = datetime(*xlrd.xldate_as_tuple(n_value, 0))
             if n_value > 20000:
-                if "7.02.10" in key:
-                    pass
-                else:
-                    s_value = datetime(*xlrd.xldate_as_tuple(n_value, 0))
+                # if "7.02.10" in key:
+                #     pass
+                # else:
+                s_value = datetime(*xlrd.xldate_as_tuple(n_value, 0))
                 # else:
                 #     s_value = n_value
 
@@ -10130,23 +10237,48 @@ def get_gmpp_data():
     wb = Workbook()
     ws = wb.active
 
-    # key_map = get_map(load_workbook("/home/will/Downloads/KEY_MAP_v8.xlsx"))
-    # key_map = semantic_ordering(load_workbook("/home/will/Downloads/semantic_v_nos.xlsx"))
+    key_map = get_map(load_workbook("/home/will/Downloads/KEY_MAP_v9.xlsx"))
+    ipdc_d = get_project_info_data(root_path / "core_data/master_1_2021.xlsx")
+
+    # output_dict = {}
+    # for key in ipdc_dict['Crossrail Programme']:
+    #     for x, value in key_map.items():
+    #         if key == value:
+    #             output_dict[key] = x
+
+    # old
+    # for x, project in enumerate(list(initial_dict.keys())):
+    #     ws.cell(row=1, column=3 + x).value = project
+    #     for i, k in enumerate(ipa_key_list):  # k is key
+    #         if x == 0:
+    #             ws.cell(row=2 + i, column=1).value = k
+    #         try:
+    #             ws.cell(row=2 + i, column=2 + x).value = initial_dict[project][k]
+    #         except KeyError:
+    #             pass
 
     for x, project in enumerate(list(initial_dict.keys())):
-        ws.cell(row=1, column=2 + x).value = project
-        for i, k in enumerate(ipa_key_list):  # k is key
-            if x == 0:
-                ws.cell(row=2 + i, column=1).value = k
-            try:
-                ws.cell(row=2 + i, column=2 + x).value = initial_dict[project][k]
-            except KeyError:
-                pass
+        ws.cell(row=1, column=3 + x).value = project
+        for i, dft_key in enumerate(ipdc_d['Crossrail Programme']):  # k is key
+            ws.cell(row=2 + i, column=1).value = dft_key
+            for ipa_key, value in key_map.items():
+                if dft_key == value:
+                    if x == 0:
+                        # ws.cell(row=2 + i, column=1).value = dft_key
+                        ws.cell(row=2 + i, column=2).value = ipa_key
+                    try:
+                        ipa_value = initial_dict[project][ipa_key]
+                        # if isinstance(ipa_value, datetime.datetime):
+                        #     ipa_value = ipa_value.date()
+                        #     ws.cell(row=2 + i, column=3 + x, value=ipa_value).number_format = "dd/mm/yy"
+                        ws.cell(row=2 + i, column=3 + x).value = ipa_value
+                    except KeyError:
+                        pass
 
-    ws.cell(row=1, column=1).value = "Project Name"
+    ws.cell(row=1, column=1).value = "Project Name (DfT Keys)"
+    ws.cell(row=1, column=2).value = "Project Name (IPA Keys)"
 
-    wb.save("/home/will/Downloads/GMPP_DATA_DFT_FORMAT_v8.xlsx")
-
+    wb.save("/home/will/Downloads/GMPP_DATA_DFT_FORMAT_v2.1_NO2.xlsx")
 
 
 GMPP_M_DICT = {
@@ -10168,7 +10300,7 @@ GMPP_M_DICT = {
 
 
 def data_check_print_out(gmpp_data: Dict, ipdc_data: Dict):
-    key_map = get_map(load_workbook("/home/will/Downloads/KEY_MAP_v8.xlsx"))
+    key_map = get_map(load_workbook("/home/will/Downloads/KEY_MAP_v9.xlsx"))
     project_map = get_map(load_workbook("/home/will/Downloads/PROJECT_MAP.xlsx"))
 
     wb = Workbook()
@@ -10190,6 +10322,8 @@ def data_check_print_out(gmpp_data: Dict, ipdc_data: Dict):
         "Approval Name",
         "DCA - SRO Narrative",
         "Project DCA - SRO Assessment Delivery confidence for whole project duration",
+        "2.01.3: Project IQA - IPA Quarterly Assessment for whole project duration",
+        "2.01.4: IQA - IPA Narrative",
     ]
 
     def remove_keys(key):
@@ -10200,7 +10334,9 @@ def data_check_print_out(gmpp_data: Dict, ipdc_data: Dict):
         return output
 
     start_row = 2
+    project_check_list = []
     for x, project in enumerate(list(project_map.keys())):
+        project_check_list.append(project)
         for i, k in enumerate(gmpp_data[project]):
             check_key = remove_keys(k)
             if check_key == "remove":
@@ -10256,8 +10392,19 @@ def data_check_print_out(gmpp_data: Dict, ipdc_data: Dict):
                     continue
 
             if isinstance(gmpp_val, str) and isinstance(dft_val, str):
-                gmpp_val = gmpp_val.split()
-                dft_val = dft_val.split()
+                if "Ver No" in dft_key_name or "Version No" in dft_key_name:
+                    gmpp_val = int(float(gmpp_val))
+                    try:
+                        dft_val = int(dft_val)
+                    except ValueError:
+                        dft_val = dft_val
+                else:
+                    gmpp_val = gmpp_val.split()
+                    dft_val = dft_val.split()
+
+            # if "CDEL" in dft_key_name or "RDEL" in dft_key_name or "Non-Gov" in dft_key_name or "Income":
+            #     if isinstance(dft_val, float):
+            #         dft_val = round(dft_val, 1)
 
             if gmpp_val == dft_val:
                 ws.cell(row=start_row, column=9).value = "MATCH"
@@ -10267,12 +10414,7 @@ def data_check_print_out(gmpp_data: Dict, ipdc_data: Dict):
                 ws.cell(row=start_row, column=9).value = "MATCH"
             elif gmpp_val is None and dft_val == 0:
                 ws.cell(row=start_row, column=9).value = "MATCH"
-            elif isinstance(gmpp_val, str):
-                try:
-                    if int(float(gmpp_val)) == int(dft_val):
-                        ws.cell(row=start_row, column=9).value = "MATCH"
-                except (ValueError, TypeError):
-                    ws.cell(row=start_row, column=9).value = "DIFFERENT"
+
             else:
                 ws.cell(row=start_row, column=9).value = "DIFFERENT"
 
@@ -10288,7 +10430,15 @@ def data_check_print_out(gmpp_data: Dict, ipdc_data: Dict):
     ws.cell(row=1, column=8).value = "DFT VALUE"
     ws.cell(row=1, column=9).value = "VALUE CHECK"
 
-    wb.save("/home/will/Downloads/GMPP_IPDC_DATA_CHECK_Q1_20_21_v17.xlsx")
+    p_check = [x for x in list(project_map.keys()) if x not in project_check_list]
+    if not p_check:
+        pass
+    else:
+        print("note following projects missing:")
+        for x in p_check:
+            print(x)
+
+    wb.save("/home/will/Downloads/GMPP_IPDC_DATA_CHECK_Q1_20_21_v3.0.xlsx")
 
 
 def print_gmpp_data(gmpp_dict: Dict):
@@ -10336,14 +10486,14 @@ def change_gmpp_keys_order(ipdc_dict):
             print(key)
             ws.cell(row=i + 2, column=2).value = None
 
-    wb.save("/home/will/Downloads/GMPP_KEYS_DFT_ORDER_v2.xlsx")
+    wb.save("/home/will/Downloads/GMPP_KEY_MAP_DFT_ORDER_v2.xlsx")
 
     return output_dict
 
 
 def put_n02_into_master():
     # q1 = get_project_info_data("/home/will/Documents/ipdc/core_data/master_1_2021.xlsx")
-    no2 = get_project_info_data("/home/will/Downloads/GMPP_DATA_DFT_FORMAT_NO2.xlsx")
+    no2 = get_project_info_data("/home/will/Downloads/GMPP_DATA_DFT_FORMAT_v2.1_NO2.xlsx")
 
     wb = load_workbook("/home/will/Documents/ipdc/core_data/master_1_2021.xlsx")
     ws = wb.active
@@ -10357,7 +10507,7 @@ def put_n02_into_master():
                 except KeyError:
                     pass
 
-    wb.save("/home/will/Documents/ipdc/core_data/master_1_2021_no2.xlsx")
+    wb.save("/home/will/Documents/ipdc/core_data/master_1_2021_no2_v2.xlsx")
 
 
 def get_risk_data():
@@ -10466,3 +10616,35 @@ def doughut(dca_data: DcaData, **kwargs):
 
     plt.show()
     return fig
+
+
+def amend_project_information():
+
+    key_list = [
+        "16 - 17 RDEL Baseline - One off new costs - investment in change",
+        "16 - 17 RDEL Baseline - Recurring new costs - investment in change",
+        "16 - 17 RDEL Baseline - Recurring old costs",
+        "16 - 17 RDEL Baseline - Whole Life Cost breakdown",
+        "16 - 17 CDEL Baseline - One off new costs - investment in change",
+        "16 - 17 CDEL Baseline - Recurring new costs - investment in change",
+        "16 - 17 CDEL Baseline - Recurring old costs",
+        "16 - 17 Baseline - Non - Gov both Revenue and Capital",
+        "16 - 17 CDEL Baseline - Whole Life Cost breakdown",
+        "16 - 17 Baseline - Income(£m) both Revenue and Capital",
+    ]
+
+    master = get_project_info_data(root_path / "core_data/master_4_2016.xlsx")
+
+    wb = load_workbook(root_path / "core_data/project_info.xlsx")
+    ws = wb.active
+
+    for x in range(2, ws.max_column + 1):
+        project_name = ws.cell(row=1, column=x).value
+        if project_name in list(master.keys()):
+            for y in range(2, ws.max_row + 1):
+                key = ws.cell(row=y, column=1).value
+                if key in key_list:
+                    print('yes')
+                    ws.cell(row=y, column=x).value = master[project_name][key]
+
+    wb.save(root_path / "core_data/project_info_amended.xlsx")

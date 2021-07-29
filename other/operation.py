@@ -67,10 +67,11 @@ from analysis_engine.data import (
     print_risk_data,
     get_map, get_project_info_data,
     data_check_print_out,
-    get_ipdc_date, get_gmpp_keys,
+    get_ipdc_date,
     doughut,
     dca_changes_into_excel, get_cost_forecast_keys, cost_profile_graph_new, cost_profile_into_wb_new,
-    change_gmpp_keys_order, put_n02_into_master, data_query_into_wb_by_key
+    change_gmpp_keys_order, put_n02_into_master, data_query_into_wb_by_key, amend_project_information,
+    compile_p_report, compile_p_report_short_form,
 )
 
 ## GENERATE CLI OPTIONS
@@ -136,23 +137,23 @@ ipdc_data_dict = {
     "docx_save_path": str(root_path / "output/{}.docx"),
     "master": Master(open_json_file(str(root_path / "core_data/json/master.json"))),
     "op_args": {
-        # "quarter": ["standard"],
-        "quarter": ["all"],
+        "quarter": ["standard"],
+        # "quarter": ["Q1 21/22"],
         # "baseline": ["standard"],
-        "group": ["HSRG", "RSS", "RIG", "AMIS", "RPE"],
-        # "group": ["HSRG"],
+        # "group": ["HSRG", "RSS", "RIG", "AMIS", "RPE"],
+        "group": ["GWRM"],
         # "stage": ["pre-SOBC", "SOBC", "OBC", "FBC"],
         # "remove": ["HS2 Ph 2b", "HS2 Ph 2a", "NPR"],
         # "dates": ["1/6/2021", "1/7/2021"],
-        "type": "remaining",
+        "type": "short",
         "chart": True,
         # "circle_colour": "No",
         "key": ["VfM Category single entry"],
-        "conf_type": "sro",
+        # "conf_type": "sro",
         # "rag_number": "3",
         # "order_by": "schedule",
-        "angles": [240, 290, 22, 120],
-        "weighting": "count",
+        # "angles": [240, 290, 22, 120],
+        # "weighting": "count",
     },
     "dashboard": get_input_doc(root_path / "input/dashboards_master.xlsx"),
     "excel_save_path": str(root_path / "output/{}.xlsx"),
@@ -225,7 +226,7 @@ data = ipdc_data_dict
 # wb.save(data["excel_save_path"].format("bl_portfolio_no_npr_hs22a2b"))
 
 # SUMMARIES
-# run_p_reports(data["master"], **data["op_args"])
+run_p_reports(data["master"], **data["op_args"])
 
 ## VFM
 # c = VfMData(m, group=DFm = Master(*data["data"], **data["op_args"] )T_GROUP, quarter=["standard"])  # c is class
@@ -287,14 +288,10 @@ data = ipdc_data_dict
 # hoz_doc.save(data["word_save_path"].format("central_support_graph"))
 
 # GMPP data
-# get_gmpp_keys()
-get_gmpp_data()
-# print_gmpp_data(a)
-gmpp_d = get_project_info_data("/home/will/Downloads/GMPP_DATA_DFT_FORMAT_v8.xlsx")
-ipdc_d = get_project_info_data(root_path / "core_data/master_1_2021.xlsx")
-data_check_print_out(gmpp_d, ipdc_d)
-
-# a = semantic_ordering()
+# get_gmpp_data()
+# gmpp_d = get_project_info_data("/home/will/Downloads/GMPP_DATA_DFT_FORMAT_v2.0.xlsx")
+# ipdc_d = get_project_info_data(root_path / "core_data/master_1_2021_latest.xlsx")
+# data_check_print_out(gmpp_d, ipdc_d)
 # change_gmpp_keys_order(ipdc_d)
 # put_n02_into_master()
 
@@ -307,5 +304,5 @@ data_check_print_out(gmpp_d, ipdc_d)
 # t = get_cost_forecast_keys()
 
 
-
+# amend_project_information()
 
