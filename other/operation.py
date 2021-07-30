@@ -145,8 +145,8 @@ ipdc_data_dict = {
         # "stage": ["pre-SOBC", "SOBC", "OBC", "FBC"],
         # "remove": ["HS2 Ph 2b", "HS2 Ph 2a", "NPR"],
         # "dates": ["1/6/2021", "1/7/2021"],
-        "type": "short",
-        "chart": True,
+        # "type": "short",
+        # "chart": True,
         # "circle_colour": "No",
         # "key": ["VfM Category single entry"],
         # "conf_type": "sro",
@@ -226,7 +226,7 @@ data = ipdc_data_dict
 # wb.save(data["excel_save_path"].format("bl_portfolio_no_npr_hs22a2b"))
 
 # SUMMARIES
-run_p_reports(data["master"], **data["op_args"])
+# run_p_reports(data["master"], **data["op_args"])
 
 ## VFM
 # c = VfMData(m, group=DFm = Master(*data["data"], **data["op_args"] )T_GROUP, quarter=["standard"])  # c is class
@@ -272,8 +272,8 @@ run_p_reports(data["master"], **data["op_args"])
 
 
 ## DASHBOARD
-# wb = ipdc_dashboard(data["master"], data["dashboard"], data["op_args"])
-# wb.save(data["excel_save_path"].format("q4_2021_dashboard_final"))
+wb = ipdc_dashboard(data["master"], data["dashboard"], data["op_args"])
+wb.save(data["excel_save_path"].format("ipdc_dashboard_testing"))
 # wb = cdg_narrative_dashboard(data["master"], data["narrative_dashboard"])
 # wb.save(data["excel_save_path"].format("q1_2021_narrative_dashboard"))
 # wb = cdg_dashboard(data["master"], data["dashboard"])

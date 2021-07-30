@@ -7912,39 +7912,39 @@ def financial_dashboard(master: Master, wb: Workbook) -> Workbook:
     for row_num in range(2, ws.max_row + 1):
         project_name = ws.cell(row=row_num, column=3).value
         if project_name in master.current_projects:
-            bl = master.bl_index["ipdc_costs"][project_name][2]
-            baseline_data = master.master_data[bl]["data"]
+            # bl = master.bl_index["ipdc_costs"][project_name][2]
+            # baseline_data = master.master_data[bl]["data"]
             """BC Stage"""
             bc_stage = current_data[project_name]["IPDC approval point"]
             ws.cell(row=row_num, column=4).value = convert_bc_stage_text(bc_stage)
             # overall_ws.cell(row=row_num, column=3).value = convert_bc_stage_text(bc_stage)
-            try:
-                bc_stage_lst_qrt = last_data[project_name]["IPDC approval point"]
-                if bc_stage != bc_stage_lst_qrt:
-                    ws.cell(row=row_num, column=4).font = Font(
-                        name="Arial", size=10, color="00fc2525"
-                    )
-                    # overall_ws.cell(row=row_num, column=3).font = Font(
-                    #     name="Arial", size=10, color="00fc2525"
-                    # )
-            except KeyError:
-                pass
+            # try:
+            #     bc_stage_lst_qrt = last_data[project_name]["IPDC approval point"]
+            #     if bc_stage != bc_stage_lst_qrt:
+            #         ws.cell(row=row_num, column=4).font = Font(
+            #             name="Arial", size=10, color="00fc2525"
+            #         )
+            #         # overall_ws.cell(row=row_num, column=3).font = Font(
+            #         #     name="Arial", size=10, color="00fc2525"
+            #         # )
+            # except KeyError:
+            #     pass
 
-            """planning stage"""
-            plan_stage = current_data[project_name]["Project stage"]
-            ws.cell(row=row_num, column=5).value = plan_stage
-            # overall_ws.cell(row=row_num, column=4).value = plan_stage
-            try:
-                plan_stage_lst_qrt = last_data[project_name]["Project stage"]
-                if plan_stage != plan_stage_lst_qrt:
-                    ws.cell(row=row_num, column=5).font = Font(
-                        name="Arial", size=10, color="00fc2525"
-                    )
-                    # overall_ws.cell(row=row_num, column=4).font = Font(
-                    #     name="Arial", size=10, color="00fc2525"
-                    # )
-            except KeyError:
-                pass
+            # """planning stage"""
+            # plan_stage = current_data[project_name]["Project stage"]
+            # ws.cell(row=row_num, column=5).value = plan_stage
+            # # overall_ws.cell(row=row_num, column=4).value = plan_stage
+            # try:
+            #     plan_stage_lst_qrt = last_data[project_name]["Project stage"]
+            #     if plan_stage != plan_stage_lst_qrt:
+            #         ws.cell(row=row_num, column=5).font = Font(
+            #             name="Arial", size=10, color="00fc2525"
+            #         )
+            #         # overall_ws.cell(row=row_num, column=4).font = Font(
+            #         #     name="Arial", size=10, color="00fc2525"
+            #         # )
+            # except KeyError:
+            #     pass
 
             """Total WLC"""
             wlc_now = current_data[project_name]["Total Forecast"]
@@ -7961,23 +7961,23 @@ def financial_dashboard(master: Master, wb: Workbook) -> Workbook:
                     ws.cell(row=row_num, column=7).value = "-"
                     # overall_ws.cell(row=row_num, column=6).value = "-"
 
-                try:
-                    percentage_change = ((wlc_now - wlc_lst_quarter) / wlc_now) * 100
-                    if percentage_change > 5 or percentage_change < -5:
-                        ws.cell(row=row_num, column=7).font = Font(
-                            name="Arial", size=10, color="00fc2525"
-                        )
-                        # overall_ws.cell(row=row_num, column=6).font = Font(
-                        #     name="Arial", size=10, color="00fc2525"
-                        # )
-                except ZeroDivisionError:
-                    pass
+                # try:
+                #     percentage_change = ((wlc_now - wlc_lst_quarter) / wlc_now) * 100
+                #     if percentage_change > 5 or percentage_change < -5:
+                #         ws.cell(row=row_num, column=7).font = Font(
+                #             name="Arial", size=10, color="00fc2525"
+                #         )
+                #         # overall_ws.cell(row=row_num, column=6).font = Font(
+                #         #     name="Arial", size=10, color="00fc2525"
+                #         # )
+                # except ZeroDivisionError:
+                #     pass
 
             except KeyError:
                 ws.cell(row=row_num, column=7).value = "-"
 
             """WLC variance against baseline quarter"""
-            wlc_baseline = baseline_data[project_name]["Total Forecast"]
+            wlc_baseline = current_data[project_name]["Total BL"]
             try:
                 diff_bl = wlc_now - wlc_baseline
                 if float(diff_bl) > 0.49 or float(diff_bl) < -0.49:
@@ -7989,39 +7989,45 @@ def financial_dashboard(master: Master, wb: Workbook) -> Workbook:
             except TypeError:  # exception is here as some projects e.g. Hs2 phase 2b have (real) written into historical totals
                 pass
 
-            try:
-                percentage_change = ((wlc_now - wlc_baseline) / wlc_now) * 100
-                if percentage_change > 5 or percentage_change < -5:
-                    ws.cell(row=row_num, column=8).font = Font(
-                        name="Arial", size=10, color="00fc2525"
-                    )
-                    # overall_ws.cell(row=row_num, column=7).font = Font(
-                    #     name="Arial", size=10, color="00fc2525"
-                    # )
-
-            except (
-                    ZeroDivisionError,
-                    TypeError,
-            ):  # zerodivision error obvious, type error handling as above
-                pass
+            # try:
+            #     percentage_change = ((wlc_now - wlc_baseline) / wlc_now) * 100
+            #     if percentage_change > 5 or percentage_change < -5:
+            #         ws.cell(row=row_num, column=8).font = Font(
+            #             name="Arial", size=10, color="00fc2525"
+            #         )
+            #         # overall_ws.cell(row=row_num, column=7).font = Font(
+            #         #     name="Arial", size=10, color="00fc2525"
+            #         # )
+            #
+            # except (
+            #         ZeroDivisionError,
+            #         TypeError,
+            # ):  # zerodivision error obvious, type error handling as above
+            #     pass
 
             """Aggregate Spent"""
-            spent = spent_calculation(current_data, project_name)
-            ws.cell(row=row_num, column=9).value = spent
+            # spent = spent_calculation(current_data, project_name)
+            # ws.cell(row=row_num, column=9).value = spent
 
             """Committed spend"""
             """remaining"""
             """P-Value"""
 
             """Contigency"""
-            ws.cell(row=row_num, column=13).value = current_data[project_name][
+            con = current_data[project_name][
                 "Overall contingency (£m)"
             ]
+            if con == 0 or con is None:
+                con = "-"
+            ws.cell(row=row_num, column=13).value = con
 
             """OB"""
-            ws.cell(row=row_num, column=14).value = current_data[project_name][
+            ob = current_data[project_name][
                 "Overall figure for Optimism Bias (£m)"
             ]
+            if ob == 0 or ob is None:
+                ob = "-"
+            ws.cell(row=row_num, column=14).value = ob
 
             """financial DCA rating - this quarter"""
             ws.cell(row=row_num, column=15).value = convert_rag_text(
@@ -8053,9 +8059,9 @@ def financial_dashboard(master: Master, wb: Workbook) -> Workbook:
             except (KeyError, IndexError):
                 ws.cell(row=row_num, column=18).value = ""
             """financial DCA rating - baseline"""
-            ws.cell(row=row_num, column=19).value = convert_rag_text(
-                baseline_data[project_name]["SRO Finance confidence"]
-            )
+            # ws.cell(row=row_num, column=19).value = convert_rag_text(
+            #     baseline_data[project_name]["SRO Finance confidence"]
+            # )
 
     """list of columns with conditional formatting"""
     list_columns = ["o", "p", "q", "r", "s"]
@@ -8080,7 +8086,10 @@ def financial_dashboard(master: Master, wb: Workbook) -> Workbook:
 
 
 def schedule_dashboard(
-        master: Master, milestones: MilestoneData, wb: Workbook
+        master: Master,
+        milestones: MilestoneData,
+        m_filtered,
+        wb: Workbook
 ) -> Workbook:
     ws = wb.worksheets[1]
     # overall_ws = wb.worksheets[3]
@@ -8092,138 +8101,139 @@ def schedule_dashboard(
         dayfirst=True,
     ).date()
 
+    def get_next_milestone(p_name: str, mils: MilestoneData) -> list:
+        for x in mils.milestone_dict[milestones.iter_list[0]].values():
+            if x["Project"] == p_name:
+                d = x["Date"]
+                ms = x["Milestone"]
+                if d > IPDC_DATE:
+                    return [ms, d]
+
     for row_num in range(2, ws.max_row + 1):
         project_name = ws.cell(row=row_num, column=3).value
         if project_name in master.current_projects:
             """IPDC approval point"""
             bc_stage = current_data[project_name]["IPDC approval point"]
             ws.cell(row=row_num, column=4).value = convert_bc_stage_text(bc_stage)
-            try:
-                bc_stage_lst_qrt = last_data[project_name]["IPDC approval point"]
-                if bc_stage != bc_stage_lst_qrt:
-                    ws.cell(row=row_num, column=4).font = Font(
-                        name="Arial", size=10, color="00fc2525"
-                    )
-            except KeyError:
-                pass
+            # try:
+            #     bc_stage_lst_qrt = last_data[project_name]["IPDC approval point"]
+            #     if bc_stage != bc_stage_lst_qrt:
+            #         ws.cell(row=row_num, column=4).font = Font(
+            #             name="Arial", size=10, color="00fc2525"
+            #         )
+            # except KeyError:
+            #     pass
 
-            """stage"""
-            plan_stage = current_data[project_name]["Project stage"]
-            ws.cell(row=row_num, column=5).value = plan_stage
-            try:
-                plan_stage_lst_qrt = last_data[project_name]["Project stage"]
-                if plan_stage != plan_stage_lst_qrt:
-                    ws.cell(row=row_num, column=5).font = Font(
-                        name="Arial", size=10, color="00fc2525"
-                    )
-            except KeyError:
-                pass
+            # """stage"""
+            # plan_stage = current_data[project_name]["Project stage"]
+            # ws.cell(row=row_num, column=5).value = plan_stage
+            # try:
+            #     plan_stage_lst_qrt = last_data[project_name]["Project stage"]
+            #     if plan_stage != plan_stage_lst_qrt:
+            #         ws.cell(row=row_num, column=5).font = Font(
+            #             name="Arial", size=10, color="00fc2525"
+            #         )
+            # except KeyError:
+            #     pass
 
             """Next milestone name and variance"""
 
-            def get_next_milestone(p_name: str, mils: MilestoneData) -> list:
-                for x in mils.milestone_dict[milestones.iter_list[0]].values():
-                    if x["Project"] == p_name:
-                        d = x["Date"]
-                        ms = x["Milestone"]
-                        if d > IPDC_DATE:
-                            return [ms, d]
-
             abb = master.abbreviations[project_name]["abb"]
             try:
-                g = get_next_milestone(abb, milestones)
+                g = get_next_milestone(abb, m_filtered)
                 milestone = g[0]
                 date = g[1]
                 ws.cell(row=row_num, column=6).value = milestone
                 ws.cell(row=row_num, column=7).value = date
 
-                lq_date = get_milestone_date(
-                    abb, milestones.milestone_dict, "last", " " + milestone
-                )
-                try:
-                    change = (date - lq_date).days
-                    ws.cell(row=row_num, column=8).value = plus_minus_days(change)
-                    if change > 25:
-                        ws.cell(row=row_num, column=8).font = Font(
-                            name="Arial", size=10, color="00fc2525"
-                        )
-                except TypeError:
-                    pass
-                    # ws.cell(row=row_num, column=8).value = ""
+                # lq_date = get_milestone_date(
+                #     abb, milestones.milestone_dict, "last", " " + milestone
+                # )
+                # try:
+                #     change = (date - lq_date).days
+                #     ws.cell(row=row_num, column=8).value = plus_minus_days(change)
+                #     if change > 25:
+                #         ws.cell(row=row_num, column=8).font = Font(
+                #             name="Arial", size=10, color="00fc2525"
+                #         )
+                # except TypeError:
+                #     pass
+                #     # ws.cell(row=row_num, column=8).value = ""
 
-                bl_date = get_milestone_date(
-                    abb, milestones.milestone_dict, "bl_one", " " + milestone
-                )
-                try:
-                    change = (date - bl_date).days
-                    ws.cell(row=row_num, column=9).value = plus_minus_days(change)
-                    if change > 25:
-                        ws.cell(row=row_num, column=9).font = Font(
-                            name="Arial", size=10, color="00fc2525"
-                        )
-                except TypeError:
-                    pass
+                # bl_date = get_milestone_date(
+                #     abb, milestones.milestone_dict, "bl_one", " " + milestone
+                # )
+                # try:
+                #     change = (date - bl_date).days
+                #     ws.cell(row=row_num, column=9).value = plus_minus_days(change)
+                #     if change > 25:
+                #         ws.cell(row=row_num, column=9).font = Font(
+                #             name="Arial", size=10, color="00fc2525"
+                #         )
+                # except TypeError:
+                #     pass
             except TypeError:
-                pass
+                ws.cell(row=row_num, column=6).value = "None"
+                ws.cell(row=row_num, column=7).value = None
 
             milestone_keys = [
-                " Start of Construction/build",
-                " Start of Operation",
-                " Full Operations",
-                " Project End Date",
+                "Start of Construction/build",
+                "Start of Operation",
+                "Full Operations",
+                "Project End Date",
             ]  # code legency needs a space at start of keys
             add_column = 0
             for m in milestone_keys:
                 abb = master.abbreviations[project_name]["abb"]
                 current = get_milestone_date(
-                    abb, milestones.milestone_dict, "current", m
+                    abb, milestones.milestone_dict, str(master.current_quarter), m
                 )
-                last_quarter = get_milestone_date(
-                    abb, milestones.milestone_dict, "last", m
-                )
-                bl = get_milestone_date(abb, milestones.milestone_dict, "bl_one", m)
+                # last_quarter = get_milestone_date(
+                #     abb, milestones.milestone_dict, "last", m
+                # )
+                # bl = get_milestone_date(abb, milestones.milestone_dict, "bl_one", m)
                 ws.cell(row=row_num, column=10 + add_column).value = current
                 if current is not None and current < IPDC_DATE:
                     # if m == "Full Operations":
                     #     overall_ws.cell(row=row_num, column=9).value = "Completed"
                     ws.cell(row=row_num, column=10 + add_column).value = "Completed"
-                try:
-                    last_change = (current - last_quarter).days
-                    # if m == "Full Operations":
-                    #     ws.cell(
-                    #         row=row_num, column=10).value = plus_minus_days(last_change)
-                    ws.cell(
-                        row=row_num, column=11 + add_column
-                    ).value = plus_minus_days(last_change)
-                    if last_change is not None and last_change > 46:
-                        # if m == "Full Operations":
-                        #     overall_ws.cell(row=row_num, column=10).font = Font(
-                        #         name="Arial", size=10, color="00fc2525"
-                        #     )
-                        ws.cell(row=row_num, column=11 + add_column).font = Font(
-                            name="Arial", size=10, color="00fc2525"
-                        )
-                except TypeError:
-                    pass
-                try:
-                    bl_change = (current - bl).days
-                    # if m == "Full Operations":
-                    #     overall_ws.cell(
-                    #         row=row_num, column=11
-                    #     ).value = plus_minus_days(bl_change)
-                    ws.cell(
-                        row=row_num, column=12 + add_column
-                    ).value = plus_minus_days(bl_change)
-                    if bl_change is not None and bl_change > 85:
-                        # if m == "Full Operations":
-                        #     overall_ws.cell(row=row_num, column=11).font = Font(
-                        #         name="Arial", size=10, color="00fc2525"
-                        #     )
-                        ws.cell(row=row_num, column=12 + add_column).font = Font(
-                            name="Arial", size=10, color="00fc2525"
-                        )
-                except TypeError:
-                    pass
+                # try:
+                #     last_change = (current - last_quarter).days
+                #     # if m == "Full Operations":
+                #     #     ws.cell(
+                #     #         row=row_num, column=10).value = plus_minus_days(last_change)
+                #     ws.cell(
+                #         row=row_num, column=11 + add_column
+                #     ).value = plus_minus_days(last_change)
+                #     if last_change is not None and last_change > 46:
+                #         # if m == "Full Operations":
+                #         #     overall_ws.cell(row=row_num, column=10).font = Font(
+                #         #         name="Arial", size=10, color="00fc2525"
+                #         #     )
+                #         ws.cell(row=row_num, column=11 + add_column).font = Font(
+                #             name="Arial", size=10, color="00fc2525"
+                #         )
+                # except TypeError:
+                #     pass
+                # try:
+                #     bl_change = (current - bl).days
+                #     # if m == "Full Operations":
+                #     #     overall_ws.cell(
+                #     #         row=row_num, column=11
+                #     #     ).value = plus_minus_days(bl_change)
+                #     ws.cell(
+                #         row=row_num, column=12 + add_column
+                #     ).value = plus_minus_days(bl_change)
+                #     if bl_change is not None and bl_change > 85:
+                #         # if m == "Full Operations":
+                #         #     overall_ws.cell(row=row_num, column=11).font = Font(
+                #         #         name="Arial", size=10, color="00fc2525"
+                #         #     )
+                #         ws.cell(row=row_num, column=12 + add_column).font = Font(
+                #             name="Arial", size=10, color="00fc2525"
+                #         )
+                # except TypeError:
+                #     pass
                 add_column += 3
 
             """schedule DCA rating - this quarter"""
@@ -8255,16 +8265,16 @@ def schedule_dashboard(
                 )
             except (KeyError, IndexError):
                 ws.cell(row=row_num, column=25).value = ""
-            """schedule DCA rating - baseline"""
-            bl_i = master.bl_index["ipdc_milestones"][project_name][2]
-            try:
-                ws.cell(row=row_num, column=26).value = convert_rag_text(
-                    master.master_data[bl_i]["data"][project_name][
-                        "SRO Schedule Confidence"
-                    ]
-                )
-            except KeyError:  # schedule confidence key not in all masters.
-                pass
+            # """schedule DCA rating - baseline"""
+            # bl_i = master.bl_index["ipdc_milestones"][project_name][2]
+            # try:
+            #     ws.cell(row=row_num, column=26).value = convert_rag_text(
+            #         master.master_data[bl_i]["data"][project_name][
+            #             "SRO Schedule Confidence"
+            #         ]
+            #     )
+            # except KeyError:  # schedule confidence key not in all masters.
+            #     pass
 
     """list of columns with conditional formatting"""
     list_columns = ["v", "w", "x", "y", "z"]
@@ -8815,13 +8825,14 @@ def overall_dashboard(
 def ipdc_dashboard(master: Master, wb: Workbook, kwargs) -> Workbook:
     financial_dashboard(master, wb)
 
-    milestone_class = MilestoneData(master, **kwargs)
-    milestone_class.filter_chart_info(type=["Approval", "Delivery"])
-    schedule_dashboard(master, milestone_class, wb)
-
-    benefits_dashboard(master, wb)
-
-    overall_dashboard(master, milestone_class, wb)
+    milestones = MilestoneData(master, **kwargs)
+    m_filtered = MilestoneData(master, **kwargs)
+    m_filtered.filter_chart_info(type=["Approval"])
+    schedule_dashboard(master, milestones, m_filtered, wb)
+    #
+    # benefits_dashboard(master, wb)
+    #
+    # overall_dashboard(master, milestone_class, wb)
 
     return wb
 
