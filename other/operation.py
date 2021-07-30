@@ -71,7 +71,7 @@ from analysis_engine.data import (
     doughut,
     dca_changes_into_excel, get_cost_forecast_keys, cost_profile_graph_new, cost_profile_into_wb_new,
     change_gmpp_keys_order, put_n02_into_master, data_query_into_wb_by_key, amend_project_information,
-    compile_p_report, compile_p_report_short_form,
+    compile_p_report, compile_p_report_new,
 )
 
 ## GENERATE CLI OPTIONS
@@ -137,8 +137,8 @@ ipdc_data_dict = {
     "docx_save_path": str(root_path / "output/{}.docx"),
     "master": Master(open_json_file(str(root_path / "core_data/json/master.json"))),
     "op_args": {
-        "quarter": ["standard"],
-        # "quarter": ["Q1 21/22"],
+        # "quarter": ["standard"],
+        "quarter": ["Q1 21/22"],
         # "baseline": ["standard"],
         # "group": ["HSRG", "RSS", "RIG", "AMIS", "RPE"],
         "group": ["GWRM"],
@@ -154,6 +154,7 @@ ipdc_data_dict = {
         # "order_by": "schedule",
         # "angles": [240, 290, 22, 120],
         # "weighting": "count",
+        # "show": "No",
     },
     "dashboard": get_input_doc(root_path / "input/dashboards_master.xlsx"),
     "excel_save_path": str(root_path / "output/{}.xlsx"),
@@ -218,8 +219,7 @@ data = ipdc_data_dict
 # c = CostData(data["master"], **data["op_args"])
 # c.get_baseline_cost_profile()
 # c.get_forecast_cost_profile()
-# c.get_cost_profile()
-# g = cost_profile_graph_new(c, data["master"], chart=True, group=c.start_group)
+# g = cost_profile_graph_new(c, data["master"], **data["op_args"])
 # put_matplotlib_fig_into_word(hoz_doc, g, size=7, transparent=False)
 # hoz_doc.save(data["word_save_path"].format("bl_portfolio_no_npr_hs22a2b"))
 # wb = cost_profile_into_wb_new(c)

@@ -402,13 +402,13 @@ SRO_CONF_TABLE_LIST = [
     "Resourcing DCA",
     "Schedule DCA",
 ]
-SRO_CONF_KEY_LIST = [
-    "Departmental DCA",
-    "SRO Finance confidence",
-    "SRO Benefits RAG",
-    "Overall Resource DCA - Now",
-    "SRO Schedule Confidence",
-]
+SRO_CONF_KEY_LIST = {
+    "Departmental DCA": "SRO Overall DCA",
+    "SRO Finance confidence": "SRO Cost DCA",
+    "SRO Benefits RAG": "SRO Benefits DCA",
+    "Overall Resource DCA - Now": "SRO Resource DCA",
+    "SRO Schedule Confidence": "SRO Schedule DCA",
+}
 
 
 def get_ipdc_date(confi_path, board_str):
@@ -514,11 +514,11 @@ CDG_DIR_DICT = {
     "SCS": "scs",
 }
 YEAR_LIST = [
-    "16-17",
-    "17-18",
-    "18-19",
-    "19-20",
-    "20-21",
+    # "16-17",
+    # "17-18",
+    # "18-19",
+    # "19-20",
+    # "20-21",
     "21-22",
     "22-23",
     "23-24",
@@ -999,6 +999,7 @@ class CostData:
         self.wlc_change = {}
         # self.stack_p = {}
         self.get_cost_totals_new()
+        # self.get_forecast_cost_profile()
         # self.get_baseline_cost_profile()
         # self.get_cost_profile()
         # self.get_wlc_data()
@@ -1229,54 +1230,50 @@ class CostData:
         lower_dict = {}
         for tp in self.iter_list:
             self.group = get_group(self.master, tp, self.kwargs)
-            rdel_spent = []
-            cdel_spent = []
-            spent = []
-            rdel_unprofiled = []
-            cdel_unprofiled = []
-            unprofiled = []
+            # lists have been hashed out as not currently in use. same applied to code below.
+            # rdel_spent = []
+            # cdel_spent = []
+            # spent = []
+            # rdel_unprofiled = []
+            # cdel_unprofiled = []
+            # unprofiled = []
             rdel_total = []
             cdel_total = []
+            ngov_total = []
             total = []
-            rdel_profiled = []
-            cdel_profiled = []
-            profiled = []
+            # rdel_profiled = []
+            # cdel_profiled = []
+            # profiled = []
             for project_name in self.group:
                 p_data = get_correct_p_data(
                     self.kwargs, self.master, self.baseline_type, project_name, tp
                 )
                 if p_data is None:
                     continue
-                # spent_list = [
-                #     "Pre-profile RDEL",
-                #     "20-21 RDEL STD Total",
-                #     "Pre-profile CDEL",
-                #     "20-21 CDEL STD Total",
-                # ]
-                try:
-                    rstd = convert_none_types(p_data["20-21 RDEL STD Total"])
-                except KeyError:
-                    rstd = 0
-                rs = convert_none_types(p_data["Pre-profile RDEL"]) + rstd
-                rdel_spent.append(rs)
-                try:
-                    cstd = convert_none_types(p_data["20-21 CDEL STD Total"])
-                except KeyError:
-                    cstd = 0
-                # print(tp)
-                cs = convert_none_types(p_data["Pre-profile CDEL"]) + cstd
-                cdel_spent.append(cs)
-                s = rs + cs
-                spent.append(s)
 
-                # unprofiled_list = ["Unprofiled RDEL Forecast Total", "Unprofiled CDEL Forecast Total WLC"]
-                ru = convert_none_types(p_data["Unprofiled RDEL Forecast Total"])
-                rdel_unprofiled.append(ru)
-                cu = convert_none_types(p_data["Unprofiled CDEL Forecast Total WLC"])
-                cdel_unprofiled.append(cu)
-                # for x in unprofiled_list:
-                u = ru + cu
-                unprofiled.append(u)
+
+                # try:
+                #     rstd = convert_none_types(p_data["20-21 RDEL STD Total"])
+                # except KeyError:
+                #     rstd = 0
+                # rs = convert_none_types(p_data["Pre-profile RDEL"]) + rstd
+                # rdel_spent.append(rs)
+                # try:
+                #     cstd = convert_none_types(p_data["20-21 CDEL STD Total"])
+                # except KeyError:
+                #     cstd = 0
+                # # print(tp)
+                # cs = convert_none_types(p_data["Pre-profile CDEL"]) + cstd
+                # cdel_spent.append(cs)
+                # s = rs + cs
+                # spent.append(s)
+
+                # ru = convert_none_types(p_data["Unprofiled RDEL Forecast Total"])
+                # rdel_unprofiled.append(ru)
+                # cu = convert_none_types(p_data["Unprofiled CDEL Forecast Total WLC"])
+                # cdel_unprofiled.append(cu)
+                # u = ru + cu
+                # unprofiled.append(u)
 
                 # total_list = ["Total RDEL Forecast Total", "Total CDEL BL WLC"]
                 # for x in total_list:
@@ -1284,46 +1281,27 @@ class CostData:
                 rdel_total.append(rt)
                 ct = convert_none_types(p_data["Total CDEL Forecast Total WLC"])
                 cdel_total.append(ct)
+                ng = convert_none_types(p_data["Non-Gov Total Forecast"])
+                ngov_total.append(ng)
                 t = convert_none_types(p_data["Total Forecast"])
                 total.append(t)
 
-                rdel_profiled.append(rt - (rs + ru))
-                cdel_profiled.append(ct - (cs + cu))
-                profiled.append(t - (s + u))
+                # rdel_profiled.append(rt - (rs + ru))
+                # cdel_profiled.append(ct - (cs + cu))
+                # profiled.append(t - (s + u))
 
-                # # hard coded due to current use need.
-                # if project_name == "HS2 Phase 2b" or project_name == "HS2 Phase2a":
-                #     try:
-                #         profiled = (
-                #                 profiled
-                #                 - p_data[
-                #                     "Total Forecast - Income both Revenue and Capital"
-                #                 ]
-                #         )
-                #         total = (
-                #                 total
-                #                 - p_data[
-                #                     "Total Forecast - Income both Revenue and Capital"
-                #                 ]
-                #         )
-                #     except KeyError:  # some older masters do have key.
-                #         pass
-                #
-                # if (
-                #         project_name == "Northern Powerhouse Rail"
-                # ):  # hacked fix for now.
-                #     profiled = (
-                #             profiled + p_data["Total CDEL Forecast recurring new costs"]
-                #     )
 
             lower_dict[tp] = {
-                "cat_spent": [sum(rdel_spent), sum(cdel_spent)],
-                "cat_prof": [sum(rdel_profiled), sum(cdel_profiled)],
-                "cat_unprof": [sum(rdel_unprofiled), sum(cdel_unprofiled)],
-                "spent": sum(spent),
-                "prof": sum(profiled),
-                "unprof": sum(unprofiled),
+                # "cat_spent": [sum(rdel_spent), sum(cdel_spent)],
+                # "cat_prof": [sum(rdel_profiled), sum(cdel_profiled)],
+                # "cat_unprof": [sum(rdel_unprofiled), sum(cdel_unprofiled)],
+                # "spent": sum(spent),
+                # "prof": sum(profiled),
+                # "unprof": sum(unprofiled),
                 "total": sum(total),
+                "rdel": sum(rdel_total),
+                "cdel": sum(cdel_total) - sum(ngov_total),
+                "ngov": sum(ngov_total),
             }
 
         self.c_totals = lower_dict
@@ -1508,9 +1486,11 @@ class CostData:
                     "BL WLC": [],
                     " BL Income both Revenue and Capital": [],
                 }
-                p_data = get_correct_p_data(
-                    self.kwargs, self.master, self.baseline_type, p, tp
-                )
+                # at moment bl only coming from current quarters data
+                p_data = self.master.master_data[0]["data"][p]
+                # p_data = get_correct_p_data(
+                #     self.kwargs, self.master, self.baseline_type, p, tp
+                # )
                 if p_data is None:
                     continue
                 for y in YEAR_LIST:
@@ -1865,6 +1845,9 @@ def moving_average(x, w):
 
 
 class BenefitsData:
+    """
+    Note currently in use for ipdc reporting. requires refactor.
+    """
     def __init__(self, master: Master, **kwargs):
         self.master = master
         self.baseline_type = "ipdc_benefits"
@@ -3289,14 +3272,22 @@ def cost_profile_graph_new(costs: CostData, master: Master, **kwargs) -> plt.fig
     title = get_chart_title(master, "cost profile trend", **kwargs)  # title
     plt.suptitle(title, fontweight="bold", fontsize=20)
 
+    tidy_label = {
+        str(master.current_quarter): "Forecast",
+        "baseline": "Baseline",
+        "current": "Forecast"
+    }
+
     # Overall cost profile chart
     for i, iter in enumerate(list(costs.profiles.keys())):
+        try:
+            label = tidy_label[iter]
+        except KeyError:
+            label = iter + " (Forecast)"
         ax1.plot(
-            # YEAR_LIST[:-1],
             YEAR_LIST,
-            # np.array(costs.c_profiles[iter]["prof_ra"]),
             np.array(costs.profiles[iter]["total"]),
-            label=iter,
+            label=label,
             linewidth=5.0,
             marker="o",
             zorder=10 - i,
@@ -3480,8 +3471,7 @@ def get_word_doc() -> Document():
 
 def wd_heading(
         doc: Document,
-        master: Master,
-        project_name: str,
+        **kwargs,
 ) -> None:
     def delete_paragraph(paragraph):
         """helper function to remove empyt para at top of summary_temp doc.
@@ -3491,14 +3481,14 @@ def wd_heading(
         p._p = p._element = None
 
     delete_paragraph(doc.paragraphs[0])
-    heading = str(master.abbreviations[project_name]['abb'])
+    heading = str(kwargs['group'][0])
     intro = doc.add_heading(heading, 0)
     intro.alignment = 1
     intro.bold = True
 
 
-def key_contacts(doc: Document, master: Master, project_name: str) -> None:
-    data = master.master_data[0]["data"][project_name]
+def key_contacts(doc: Document, master: Master, **kwargs) -> None:
+    data = master.master_data[0]["data"][kwargs["full_name"]]
     """Function adds keys contact details"""
     sro_name = data["Senior Responsible Owner (SRO)"]
     if sro_name is None:
@@ -3532,29 +3522,29 @@ def key_contacts(doc: Document, master: Master, project_name: str) -> None:
         "PD: " + str(pd_name) + ", " + str(pd_email) + ", " + str(pd_phone)
     )
 
-    contact_name = data["Working Contact Name"]
-    if contact_name is None:
-        contact_name = "tbc"
+    # contact_name = data["Working Contact Name"]
+    # if contact_name is None:
+    #     contact_name = "tbc"
 
-    contact_email = data["Working Contact Email"]
-    if contact_email is None:
-        contact_email = "email: tbc"
+    # contact_email = data["Working Contact Email"]
+    # if contact_email is None:
+    #     contact_email = "email: tbc"
+    #
+    # contact_phone = data["Working Contact Telephone"]
+    # if contact_phone is None:
+    #     contact_phone = "phone: tbc"
+    #
+    # doc.add_paragraph(
+    #     "PfM reporting lead: "
+    #     + str(contact_name)
+    #     + ", "
+    #     + str(contact_email)
+    #     + ", "
+    #     + str(contact_phone)
+    # )
 
-    contact_phone = data["Working Contact Telephone"]
-    if contact_phone is None:
-        contact_phone = "phone: tbc"
 
-    doc.add_paragraph(
-        "PfM reporting lead: "
-        + str(contact_name)
-        + ", "
-        + str(contact_email)
-        + ", "
-        + str(contact_phone)
-    )
-
-
-def dca_table(doc: Document, master: Master, project_name: str) -> None:
+def dca_table(doc: Document, master: Master, **kwargs) -> None:
     """Creates SRO confidence table"""
     w_table = doc.add_table(rows=1, cols=5)
     hdr_cells = w_table.rows[0].cells
@@ -3564,12 +3554,13 @@ def dca_table(doc: Document, master: Master, project_name: str) -> None:
     hdr_cells[3].text = str(master.master_data[2]["quarter"])
     hdr_cells[4].text = str(master.master_data[3]["quarter"])
 
-    for x, dca_key in enumerate(SRO_CONF_KEY_LIST):
+
+    for x, dca_key in enumerate(list(SRO_CONF_KEY_LIST.keys())):
         row_cells = w_table.add_row().cells
-        row_cells[0].text = dca_key
+        row_cells[0].text = SRO_CONF_KEY_LIST[dca_key]
         for i, m in enumerate(master.master_data[:4]):  # last four masters taken
             try:
-                rating = convert_rag_text(m["data"][project_name][dca_key])
+                rating = convert_rag_text(m["data"][kwargs["full_name"]][dca_key])
                 row_cells[i + 1].text = rating
                 cell_colouring(row_cells[i + 1], rating)
             except (KeyError, TypeError):
@@ -3582,14 +3573,16 @@ def dca_table(doc: Document, master: Master, project_name: str) -> None:
     set_col_widths(w_table, column_widths)
 
 
-def dca_narratives(doc: Document, master: Master, project_name: str) -> None:
+def dca_narratives(doc: Document,
+                   master: Master,
+                   **kwargs) -> None:
     """Places all narratives into document and checks for differences between
     current and last quarter"""
 
-    doc.add_paragraph()
-    p = doc.add_paragraph()
-    text = "*Red text highlights changes in narratives from last quarter"
-    p.add_run(text).font.color.rgb = RGBColor(255, 0, 0)
+    # doc.add_paragraph()
+    # p = doc.add_paragraph()
+    # text = "*Red text highlights changes in narratives from last quarter"
+    # p.add_run(text).font.color.rgb = RGBColor(255, 0, 0)
 
     headings_list = [
         "SRO delivery confidence narrative",
@@ -3613,14 +3606,17 @@ def dca_narratives(doc: Document, master: Master, project_name: str) -> None:
         "Milestone Commentary",
     ]
 
+    if kwargs["type"] == "short":
+        headings_list = headings_list[:1]
+
     for x in range(len(headings_list)):
         try:  # overall try statement relates to data_bridge
             text_one = str(
-                master.master_data[0]["data"][project_name][narrative_keys_list[x]]
+                master.master_data[0]["data"][kwargs["full_name"]][narrative_keys_list[x]]
             )
             try:
                 text_two = str(
-                    master.master_data[1]["data"][project_name][narrative_keys_list[x]]
+                    master.master_data[1]["data"][kwargs["full_name"]][narrative_keys_list[x]]
                 )
             except (KeyError, IndexError):  # index error relates to data_bridge
                 text_two = text_one
@@ -6055,10 +6051,11 @@ def make_text_red(columns: list) -> None:
 
 def project_report_meta_data(
         doc: Document,
+        master: Master,
         costs: CostData,
-        milestones: MilestoneData,
-        benefits: BenefitsData,
-        project_name: str,
+        # milestones: MilestoneData,
+        # benefits: BenefitsData,
+        **kwargs,
 ):
     """Meta data table"""
     doc.add_section(WD_SECTION_START.NEW_PAGE)
@@ -6068,48 +6065,34 @@ def project_report_meta_data(
 
     """Costs meta data"""
     # this chuck is pretty messy because the data is messy
-    run = doc.add_paragraph().add_run("Costs")
+    run = doc.add_paragraph().add_run("Costs - Forecast")
     font = run.font
     font.bold = True
     font.underline = True
-    master_data = costs.master.master_data[0]["data"]
+    # master_data = costs.master.master_data[0]["data"]
     t = doc.add_table(rows=1, cols=4)
     hdr_cells = t.rows[0].cells
-    hdr_cells[0].text = "WLC:"
+
+    hdr_cells[0].text = "Total:"
     hdr_cells[1].text = (
-            "£" + str(round(master_data[project_name]["Total Forecast"])) + "m"
+            "£" + str(round(costs.c_totals[kwargs["quarter"][0]]["total"])) + "m"
     )
-    hdr_cells[2].text = "Spent:"
+
+    hdr_cells[2].text = "CDEL:"
     hdr_cells[3].text = (
-            "£" + str(round(costs.c_totals[costs.iter_list[0]]["spent"])) + "m"
+            "£" + str(round(costs.c_totals[kwargs["quarter"][0]]["cdel"])) + "m"
     )
+
     row_cells = t.add_row().cells
-    row_cells[0].text = "RDEL Total:"
-    rdel_total = master_data[project_name]["Total RDEL Forecast Total"]
-    row_cells[1].text = "£" + str(round(rdel_total)) + "m"
-    row_cells[2].text = "Profiled:"
-    row_cells[3].text = (
-            "£" + str(round(costs.c_totals[costs.iter_list[0]]["prof"])) + "m"
-    )  # first in list is current
-    row_cells = t.add_row().cells
-    cdel_total = master_data[project_name]["Total CDEL Forecast one off new costs"]
-    # sum(costs.cdel_profile[4:])
-    row_cells[0].text = "CDEL Total:"
-    row_cells[1].text = "£" + str(round(cdel_total)) + "m"
-    row_cells[2].text = "Unprofiled:"
-    row_cells[3].text = (
-            "£" + str(round(costs.c_totals[costs.iter_list[0]]["unprof"])) + "m"
+    row_cells[0].text = "RDEL:"
+    row_cells[1].text = (
+            "£" + str(round(costs.c_totals[kwargs["quarter"][0]]["rdel"])) + "m"
     )
-    row_cells = t.add_row().cells
-    n_gov_total = master_data[project_name]["Non-Gov Total Forecast"]
-    if n_gov_total is None:
-        n_gov_total = 0
-    # n_gov_std = costs.master.master_data[0].data[project_name]["20-21 CDEL STD Non Gov costs"]
-    # if n_gov_std is None:
-    #     n_gov_std = 0
-    # ngov_total = n_gov_pre + sum(costs.ngov_profile[4:])
-    row_cells[0].text = "Non-gov Total:"
-    row_cells[1].text = "£" + str(round(n_gov_total)) + "m"
+    row_cells[2].text = "Non-Gov:"
+    row_cells[3].text = (
+            "£" + str(round(costs.c_totals[kwargs["quarter"][0]]["ngov"])) + "m"
+    )
+
 
     # set column width
     column_widths = (Cm(4), Cm(3), Cm(4), Cm(3))
@@ -6120,23 +6103,23 @@ def project_report_meta_data(
 
     """Financial data"""
     doc.add_paragraph()
-    run = doc.add_paragraph().add_run("Financial")
+    run = doc.add_paragraph().add_run("Costing data")
     font = run.font
     font.bold = True
     font.underline = True
     table = doc.add_table(rows=1, cols=4)
     hdr_cells = table.rows[0].cells
     hdr_cells[0].text = "Type of funding:"
-    hdr_cells[1].text = str(master_data[project_name]["Source of Finance"])
+    hdr_cells[1].text = str(master.master_data[0]["data"][kwargs["full_name"]]["Source of Finance"])
     hdr_cells[2].text = "Contingency:"
-    contingency = master_data[project_name]["Overall contingency (£m)"]
+    contingency = master.master_data[0]["data"][kwargs["full_name"]]["Overall contingency (£m)"]
     if contingency is None:  # can this be refactored?
         hdr_cells[3].text = "None"
     else:
         hdr_cells[3].text = "£" + str(round(contingency)) + "m"
     row_cells = table.add_row().cells
     row_cells[0].text = "Optimism Bias (OB):"
-    ob = master_data[project_name]["Overall figure for Optimism Bias (£m)"]
+    ob = master.master_data[0]["data"][kwargs["full_name"]]["Overall figure for Optimism Bias (£m)"]
     if ob is None:
         row_cells[1].text = str(ob)
     else:
@@ -6145,7 +6128,7 @@ def project_report_meta_data(
         except TypeError:
             row_cells[1].text = ob
     row_cells[2].text = "Contingency in costs:"
-    con_included_wlc = master_data[project_name][
+    con_included_wlc = master.master_data[0]["data"][kwargs["full_name"]][
         "Is this Continency amount included within the WLC?"
     ]
     if con_included_wlc is None:
@@ -6154,7 +6137,7 @@ def project_report_meta_data(
         row_cells[3].text = con_included_wlc
     row_cells = table.add_row().cells
     row_cells[0].text = "OB in costs:"
-    ob_included_wlc = master_data[project_name][
+    ob_included_wlc = master.master_data[0]["data"][kwargs["full_name"]][
         "Is this Optimism Bias included within the WLC?"
     ]
     if ob_included_wlc is None:
@@ -6175,7 +6158,7 @@ def project_report_meta_data(
 
     """Project Stage data"""
     doc.add_paragraph()
-    run = doc.add_paragraph().add_run("Stage")
+    run = doc.add_paragraph().add_run("Stage data")
     font = run.font
     font.bold = True
     font.underline = True
@@ -6183,10 +6166,10 @@ def project_report_meta_data(
     hdr_cells = table.rows[0].cells
     hdr_cells[0].text = "Business case stage:"
     hdr_cells[1].text = convert_bc_stage_text(
-        master_data[project_name]["IPDC approval point"]
+        master.master_data[0]["data"][kwargs["full_name"]]["IPDC approval point"]
     )
     hdr_cells[2].text = "Delivery stage:"
-    delivery_stage = master_data[project_name]["Project stage"]
+    delivery_stage = str(master.master_data[0]["data"][kwargs["full_name"]]["Project stage"])
     if delivery_stage is None:
         hdr_cells[3].text = "Not reported"
     else:
@@ -6202,56 +6185,56 @@ def project_report_meta_data(
     )
     make_text_red([table.columns[1], table.columns[3]])  # make 'not reported red'
 
-    """Milestone/Stage meta data"""
-    abb = milestones.master.abbreviations[project_name]["abb"]
-    doc.add_paragraph()
-    run = doc.add_paragraph().add_run("Schedule/Milestones")
-    font = run.font
-    font.bold = True
-    font.underline = True
-    table = doc.add_table(rows=1, cols=4)
-    hdr_cells = table.rows[0].cells
-    hdr_cells[0].text = "Start date:"
-    try:
-        start_project = get_milestone_date(
-            abb, milestones.milestone_dict, "current", " Start of Project"
-        )
-        hdr_cells[1].text = start_project.strftime("%d/%m/%Y")
-    except KeyError:
-        hdr_cells[1].text = "Not reported"
-    except AttributeError:
-        hdr_cells[1].text = "Not reported"
-    hdr_cells[2].text = "Start of operations:"
-    try:
-        start_ops = get_milestone_date(
-            abb, milestones.milestone_dict, "current", " Start of Operation"
-        )
-        hdr_cells[3].text = start_ops.strftime("%d/%m/%Y")
-    except KeyError:
-        hdr_cells[3].text = "Not reported"
-    except AttributeError:
-        hdr_cells[3].text = "Not reported"
-    row_cells = table.add_row().cells
-    row_cells[0].text = "Start of construction:"
-    try:
-        start_con = get_milestone_date(
-            abb, milestones.milestone_dict, "current", " Start of Construction/build"
-        )
-        row_cells[1].text = start_con.strftime("%d/%m/%Y")
-    except KeyError:
-        row_cells[1].text = "Not reported"
-    except AttributeError:
-        row_cells[1].text = "Not reported"
-    row_cells[2].text = "Full Operations:"  # check
-    try:
-        full_ops = get_milestone_date(
-            abb, milestones.milestone_dict, "current", " Full Operations"
-        )
-        row_cells[3].text = full_ops.strftime("%d/%m/%Y")
-    except KeyError:
-        row_cells[3].text = "Not reported"
-    except AttributeError:
-        row_cells[3].text = "Not reported"
+    # """Milestone/Stage meta data"""
+    # abb = milestones.master.abbreviations[project_name]["abb"]
+    # doc.add_paragraph()
+    # run = doc.add_paragraph().add_run("Schedule/Milestones")
+    # font = run.font
+    # font.bold = True
+    # font.underline = True
+    # table = doc.add_table(rows=1, cols=4)
+    # hdr_cells = table.rows[0].cells
+    # hdr_cells[0].text = "Start date:"
+    # try:
+    #     start_project = get_milestone_date(
+    #         abb, milestones.milestone_dict, "current", " Start of Project"
+    #     )
+    #     hdr_cells[1].text = start_project.strftime("%d/%m/%Y")
+    # except KeyError:
+    #     hdr_cells[1].text = "Not reported"
+    # except AttributeError:
+    #     hdr_cells[1].text = "Not reported"
+    # hdr_cells[2].text = "Start of operations:"
+    # try:
+    #     start_ops = get_milestone_date(
+    #         abb, milestones.milestone_dict, "current", " Start of Operation"
+    #     )
+    #     hdr_cells[3].text = start_ops.strftime("%d/%m/%Y")
+    # except KeyError:
+    #     hdr_cells[3].text = "Not reported"
+    # except AttributeError:
+    #     hdr_cells[3].text = "Not reported"
+    # row_cells = table.add_row().cells
+    # row_cells[0].text = "Start of construction:"
+    # try:
+    #     start_con = get_milestone_date(
+    #         abb, milestones.milestone_dict, "current", " Start of Construction/build"
+    #     )
+    #     row_cells[1].text = start_con.strftime("%d/%m/%Y")
+    # except KeyError:
+    #     row_cells[1].text = "Not reported"
+    # except AttributeError:
+    #     row_cells[1].text = "Not reported"
+    # row_cells[2].text = "Full Operations:"  # check
+    # try:
+    #     full_ops = get_milestone_date(
+    #         abb, milestones.milestone_dict, "current", " Full Operations"
+    #     )
+    #     row_cells[3].text = full_ops.strftime("%d/%m/%Y")
+    # except KeyError:
+    #     row_cells[3].text = "Not reported"
+    # except AttributeError:
+    #     row_cells[3].text = "Not reported"
 
     # set column width
     column_widths = (Cm(4), Cm(3), Cm(4), Cm(3))
@@ -6265,20 +6248,20 @@ def project_report_meta_data(
 
     """vfm meta data"""
     doc.add_paragraph()
-    run = doc.add_paragraph().add_run("VfM")
+    run = doc.add_paragraph().add_run("VfM data")
     font = run.font
     font.bold = True
     font.underline = True
     table = doc.add_table(rows=1, cols=4)
     hdr_cells = table.rows[0].cells
     hdr_cells[0].text = "VfM category:"
-    vfm_cat = master_data[project_name]["VfM Category single entry"]
+    vfm_cat = str(master.master_data[0]["data"][kwargs["full_name"]]["VfM Category single entry"])
     if vfm_cat is None:
         hdr_cells[1].text = "Not reported"
     else:
         hdr_cells[1].text = vfm_cat
     hdr_cells[2].text = "BCR:"
-    bcr = master_data[project_name]["Adjusted Benefits Cost Ratio (BCR)"]
+    bcr = str(master.master_data[0]["data"][kwargs["full_name"]]["Adjusted Benefits Cost Ratio (BCR)"])
     hdr_cells[3].text = str(bcr)
 
     # set column width
@@ -6293,28 +6276,36 @@ def project_report_meta_data(
 
     """benefits meta data"""
     doc.add_paragraph()
-    run = doc.add_paragraph().add_run("Benefits")
+    run = doc.add_paragraph().add_run("Benefits - Forecast")
     font = run.font
     font.bold = True
     font.underline = True
     table = doc.add_table(rows=1, cols=4)
     hdr_cells = table.rows[0].cells
-    hdr_cells[0].text = "Total Benefits:"
+    hdr_cells[0].text = "Total:"
     hdr_cells[1].text = (
-            "£" + str(round(master_data[project_name]["BEN Totals Forecast"])) + "m"
+            "£" + str(round(master.master_data[0]["data"][kwargs["full_name"]]["Total BEN Forecast - Total Monetised Benefits"])) + "m"
     )
-    hdr_cells[2].text = "Benefits delivered:"
+    hdr_cells[2].text = "Economic:"
     hdr_cells[3].text = (
-            "£" + str(round(benefits.b_totals[benefits.iter_list[0]]["delivered"])) + "m"
-    )  # first in list is current
-    row_cells = table.add_row().cells
-    row_cells[0].text = "Benefits profiled:"
-    row_cells[1].text = (
-            "£" + str(round(benefits.b_totals[benefits.iter_list[0]]["prof"])) + "m"
+            "£" + str(round(master.master_data[0]["data"][kwargs["full_name"]]["Total BEN Forecast - Economic (inc Private Partner)"])) + "m"
     )
-    row_cells[2].text = "Benefits unprofiled:"
+
+    row_cells = table.add_row().cells
+    row_cells[0].text = "Cashable:"
+    row_cells[1].text = (
+            "£" + str(round(master.master_data[0]["data"][kwargs["full_name"]]["Total BEN Forecast - Gov. Cashable"])) + "m"
+    )
+    row_cells[2].text = "Disbenefits:"
     row_cells[3].text = (
-            "£" + str(round(benefits.b_totals[benefits.iter_list[0]]["unprof"])) + "m"
+            "£" + str(round(master.master_data[0]["data"][kwargs["full_name"]]["Total BEN Forecast - Disbenefit UK Economic"])) + "m"
+    )
+
+    row_cells = table.add_row().cells
+    row_cells[0].text = "Non-Cashable:"
+    row_cells[1].text = (
+            "£" + str(
+        round(master.master_data[0]["data"][kwargs["full_name"]]["Total BEN Forecast - Gov. Non-Cashable"])) + "m"
     )
 
     # set column width
@@ -6467,11 +6458,17 @@ def print_out_project_milestones(
     return doc
 
 
-def project_scope_text(doc: Document, master: Master, project_name: str) -> Document:
+def project_scope_text(doc: Document, master: Master, **kwargs) -> Document:
+
+    doc.add_paragraph()
+    p = doc.add_paragraph()
+    text = "*Red text highlights changes in narratives from last quarter"
+    p.add_run(text).font.color.rgb = RGBColor(255, 0, 0)
+
     doc.add_paragraph().add_run("Project Scope").bold = True
-    text_one = str(master.master_data[0]["data"][project_name]["Project Scope"])
+    text_one = str(master.master_data[0]["data"][kwargs["full_name"]]["Project Scope"])
     try:
-        text_two = str(master.master_data[1]["data"][project_name]["Project Scope"])
+        text_two = str(master.master_data[1]["data"][kwargs["full_name"]]["Project Scope"])
     except KeyError:
         text_two = text_one
     # different options for comparing costs
@@ -6534,57 +6531,27 @@ def compile_p_report(
     return doc
 
 
-def compile_p_report_short_form(
+def compile_p_report_new(
         doc: Document,
         master: Master,
-        project_name: str,
+        **kwargs,
 ) -> Document:
-    wd_heading(doc, master, project_name)
-    key_contacts(doc, master, project_name)
-    dca_table(doc, master, project_name)
-    project_scope_text(doc, master, project_name)
-    dca_narratives(doc, master, project_name)
-    costs = CostData(master, group=[project_name], quarter=["standard"])
-    costs.get_cost_profile()
-    benefits = BenefitsData(master, group=[project_name], baseline=["standard"])
-    milestones = MilestoneData(master, group=[project_name], baseline=["standard"])
-    project_report_meta_data(doc, costs, milestones, benefits, project_name)
+    kwargs["full_name"] = master.full_names[kwargs["group"][0]]
+    wd_heading(doc, **kwargs)
+    key_contacts(doc, master, **kwargs)
+    dca_table(doc, master, **kwargs)
+    project_scope_text(doc, master, **kwargs)
+    dca_narratives(doc, master, **kwargs)
+    costs = CostData(master, **kwargs)
+    costs.get_forecast_cost_profile()
+    costs.get_baseline_cost_profile()
+    # costs.get_cost_profile()
+    # benefits = BenefitsData(master, **kwargs)
+    # milestones = MilestoneData(master, **kwargs)
+    project_report_meta_data(doc, master, costs, **kwargs)
     change_word_doc_landscape(doc)
-    cost_profile = cost_profile_graph(costs, master, show="No", group=milestones.group)
-    put_matplotlib_fig_into_word(doc, cost_profile, transparent=False, size=8)
-    # total_profile = total_costs_benefits_bar_chart(
-    #     costs, benefits, master, group=costs.group, show="No"
-    # )
-    # put_matplotlib_fig_into_word(doc, total_profile, transparent=False, size=8)
-    #  handling of no milestones within filtered period.
-    # ab = master.abbreviations[project_name]["abb"]
-    # requires refactor here.
-    # start_date = calculate_dates("minus 3 months").strftime("%d/%m/%Y")
-    # end_date = calculate_dates("2 years").strftime("%d/%m/%Y")
-    # try:
-    #     milestones.filter_chart_info(dates=[start_date, end_date])
-    #     milestones_chart = milestone_chart(
-    #         milestones,
-    #         master,
-    #         blue_line="IPDC",
-    #         title=ab + " schedule next two years",
-    #         show="No",
-    #     )
-    #     put_matplotlib_fig_into_word(doc, milestones_chart, transparent=False, size=8)
-    # except ValueError:
-    #     pass
-    #     milestones = MilestoneData(master, group=[project_name], baseline=["standard"])
-    #     milestones.filter_chart_info(dates=["1/9/2020", "31/12/2024"])
-    #     milestones_chart = milestone_chart(
-    #         milestones,
-    #         master,
-    #         blue_line="IPDC",
-    #         title=ab + " schedule (2021 - 24)",
-    #         show="No",
-    #     )
-    #     put_matplotlib_fig_into_word(doc, milestones_chart)
-    # print_out_project_milestones(doc, milestones, project_name)
-    # change_word_doc_portrait(doc)
+    cost_profile = cost_profile_graph_new(costs, master, **kwargs)
+    put_matplotlib_fig_into_word(doc, cost_profile, **kwargs)
     return doc
 
 
@@ -6611,13 +6578,13 @@ def run_p_reports(master: Master, **kwargs) -> None:
         print("Compiling summary for " + p)
         report_doc = get_input_doc(root_path / "input/summary_temp.docx")
         qrt = make_file_friendly(str(master.current_quarter))
+        output = compile_p_report_new(report_doc, master, **kwargs)
+        p = master.abbreviations[p]
         if kwargs["type"] == "long":
-            output = compile_p_report(report_doc, master, p)
             output.save(
                 root_path / "output/{}_long_report_{}.docx".format(p, qrt)
             )
         if kwargs["type"] == "short":
-            output = compile_p_report_short_form(report_doc, master, p)
             output.save(
                 root_path / "output/{}_short_report_{}.docx".format(p, qrt)
             )

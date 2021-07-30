@@ -41,7 +41,7 @@ from analysis_engine.data import (
     get_sp_data,
     DFT_GROUP,
     get_input_doc,
-    InputError, JsonMaster, JsonData, open_json_file,
+    InputError, JsonMaster, JsonData, open_json_file, cost_profile_into_wb_new, cost_profile_graph_new,
 )
 
 import logging
@@ -149,22 +149,29 @@ def ipdc_run_general(args):
             wb = dca_changes_into_excel(c)
 
         if programme == "costs":
-            c = CostData(m, **op_args)
-            c.get_cost_profile()
-            wb = cost_profile_into_wb(c)
+            if "baseline" in op_args:
+                if op_args["baseline"] == ["current"]:
+                    op_args["quarter"] = [str(m.current_quarter)]
+                    c = CostData(m, **op_args)
+                    c.get_forecast_cost_profile()
+                    c.get_baseline_cost_profile()
+            else:
+                c = CostData(m, **op_args)
+                c.get_forecast_cost_profile()
+            wb = cost_profile_into_wb_new(c)
             if "chart" not in op_args:
                 op_args["chart"] = True
-                cost_profile_graph(c, m, **op_args)
+                cost_profile_graph_new(c, m, **op_args)
             else:
                 if op_args["chart"] == "save":
                     op_args["chart"] = False
-                    cost_graph = cost_profile_graph(c, m, **op_args)
+                    cost_graph = cost_profile_graph_new(c, m, **op_args)
                     doc = get_input_doc(root_path / "input/summary_temp_landscape.docx")
                     put_matplotlib_fig_into_word(doc, cost_graph, size=7.5)
                     doc.save(root_path / "output/costs_graph.docx")
                 if op_args["chart"] == "show":
                     op_args["chart"] = True
-                    cost_profile_graph(c, m, **op_args)
+                    cost_profile_graph_new(c, m, **op_args)
 
         if programme == "costs_sp":
             sp_data = get_sp_data(m, **op_args)
@@ -265,7 +272,8 @@ def ipdc_run_general(args):
             wb.save(root_path / "output/completed_ipdc_dashboard.xlsx")
 
         if programme == "summaries":
-            op_args["baseline"] = "standard"
+            op_args["quarter"] = str(m.current_quarter)
+            op_args["type"] = "short"
             run_p_reports(m, **op_args)
 
         if programme == "top_250_summaries":
@@ -631,7 +639,7 @@ class main():
             parser_risks,
             parser_speedial,
             # parser_dandelion,
-            parser_costs,
+            # parser_costs,
             parser_data_query,
             parser_milestones,
         ]:
@@ -654,6 +662,16 @@ class main():
                      ' which are "current", "last", "bl_one", "bl_two", "bl_three", "standard", "all".'
                      ' The "all" option returns all, "standard" returns first three',
             )
+
+        parser_costs.add_argument(
+            "--baseline",
+            type=str,
+            metavar="",
+            action="store",
+            nargs="+",
+            choices=["current"],
+            help="baseline option for costs refactored in Q1 21/22. Choose current to return project "
+                 "reported bls as well as latest forecast profile")
 
         parser_milestones.add_argument(
             "--type",
