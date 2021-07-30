@@ -272,8 +272,9 @@ def ipdc_run_general(args):
             wb.save(root_path / "output/completed_ipdc_dashboard.xlsx")
 
         if programme == "summaries":
-            op_args["quarter"] = str(m.current_quarter)
-            op_args["type"] = "short"
+            op_args["quarter"] = [str(m.current_quarter)]
+            if "type" not in op_args:
+                op_args["type"] = "short"
             run_p_reports(m, **op_args)
 
         if programme == "top_250_summaries":
@@ -709,7 +710,7 @@ class main():
                 "--koi_fn",
                 type=str,
                 action="store",
-                help="provide name of csc file contain key names",
+                help="provide name of csv file contain key names",
             )
 
         parser_milestones.add_argument(
@@ -739,6 +740,15 @@ class main():
             choices=["schedule"],
             help="Specify how project circles should be ordered: 'schedule' only current"
                  " option.",
+        )
+
+        parser_summaries.add_argument(
+            "--type",
+            type=str,
+            metavar="",
+            action="store",
+            choices=["long", "short"],
+            help="Specify which form of report is required. Options are 'short' or 'long'",
         )
 
         parser_costs_sp.add_argument(

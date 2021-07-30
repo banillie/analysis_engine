@@ -6053,8 +6053,7 @@ def project_report_meta_data(
         doc: Document,
         master: Master,
         costs: CostData,
-        # milestones: MilestoneData,
-        # benefits: BenefitsData,
+        milestones: MilestoneData,
         **kwargs,
 ):
     """Meta data table"""
@@ -6112,14 +6111,14 @@ def project_report_meta_data(
     hdr_cells[0].text = "Type of funding:"
     hdr_cells[1].text = str(master.master_data[0]["data"][kwargs["full_name"]]["Source of Finance"])
     hdr_cells[2].text = "Contingency:"
-    contingency = master.master_data[0]["data"][kwargs["full_name"]]["Overall contingency (£m)"]
+    contingency = convert_none_types(master.master_data[0]["data"][kwargs["full_name"]]["Overall contingency (£m)"])
     if contingency is None:  # can this be refactored?
         hdr_cells[3].text = "None"
     else:
         hdr_cells[3].text = "£" + str(round(contingency)) + "m"
     row_cells = table.add_row().cells
     row_cells[0].text = "Optimism Bias (OB):"
-    ob = master.master_data[0]["data"][kwargs["full_name"]]["Overall figure for Optimism Bias (£m)"]
+    ob = convert_none_types(master.master_data[0]["data"][kwargs["full_name"]]["Overall figure for Optimism Bias (£m)"])
     if ob is None:
         row_cells[1].text = str(ob)
     else:
@@ -6143,7 +6142,7 @@ def project_report_meta_data(
     if ob_included_wlc is None:
         row_cells[1].text = "Not reported"
     else:
-        row_cells[1].text = ob_included_wlc
+        row_cells[1].text = str(ob_included_wlc)
     row_cells[2].text = ""
     row_cells[3].text = ""
 
@@ -6169,7 +6168,7 @@ def project_report_meta_data(
         master.master_data[0]["data"][kwargs["full_name"]]["IPDC approval point"]
     )
     hdr_cells[2].text = "Delivery stage:"
-    delivery_stage = str(master.master_data[0]["data"][kwargs["full_name"]]["Project stage"])
+    delivery_stage = str(convert_none_types(master.master_data[0]["data"][kwargs["full_name"]]["Project stage"]))
     if delivery_stage is None:
         hdr_cells[3].text = "Not reported"
     else:
@@ -6185,56 +6184,52 @@ def project_report_meta_data(
     )
     make_text_red([table.columns[1], table.columns[3]])  # make 'not reported red'
 
-    # """Milestone/Stage meta data"""
-    # abb = milestones.master.abbreviations[project_name]["abb"]
-    # doc.add_paragraph()
-    # run = doc.add_paragraph().add_run("Schedule/Milestones")
-    # font = run.font
-    # font.bold = True
-    # font.underline = True
-    # table = doc.add_table(rows=1, cols=4)
-    # hdr_cells = table.rows[0].cells
-    # hdr_cells[0].text = "Start date:"
-    # try:
-    #     start_project = get_milestone_date(
-    #         abb, milestones.milestone_dict, "current", " Start of Project"
-    #     )
-    #     hdr_cells[1].text = start_project.strftime("%d/%m/%Y")
-    # except KeyError:
-    #     hdr_cells[1].text = "Not reported"
-    # except AttributeError:
-    #     hdr_cells[1].text = "Not reported"
-    # hdr_cells[2].text = "Start of operations:"
-    # try:
-    #     start_ops = get_milestone_date(
-    #         abb, milestones.milestone_dict, "current", " Start of Operation"
-    #     )
-    #     hdr_cells[3].text = start_ops.strftime("%d/%m/%Y")
-    # except KeyError:
-    #     hdr_cells[3].text = "Not reported"
-    # except AttributeError:
-    #     hdr_cells[3].text = "Not reported"
-    # row_cells = table.add_row().cells
-    # row_cells[0].text = "Start of construction:"
-    # try:
-    #     start_con = get_milestone_date(
-    #         abb, milestones.milestone_dict, "current", " Start of Construction/build"
-    #     )
-    #     row_cells[1].text = start_con.strftime("%d/%m/%Y")
-    # except KeyError:
-    #     row_cells[1].text = "Not reported"
-    # except AttributeError:
-    #     row_cells[1].text = "Not reported"
-    # row_cells[2].text = "Full Operations:"  # check
-    # try:
-    #     full_ops = get_milestone_date(
-    #         abb, milestones.milestone_dict, "current", " Full Operations"
-    #     )
-    #     row_cells[3].text = full_ops.strftime("%d/%m/%Y")
-    # except KeyError:
-    #     row_cells[3].text = "Not reported"
-    # except AttributeError:
-    #     row_cells[3].text = "Not reported"
+    """Milestone/Stage meta data"""
+    abb = kwargs["group"][0]
+    doc.add_paragraph()
+    run = doc.add_paragraph().add_run("Schedule - Forecast")
+    font = run.font
+    font.bold = True
+    font.underline = True
+    table = doc.add_table(rows=1, cols=4)
+    hdr_cells = table.rows[0].cells
+    hdr_cells[0].text = "Start date:"
+    try:
+        start_project = get_milestone_date(
+            abb, milestones.milestone_dict, str(master.current_quarter), "Start of Project"
+        )
+        hdr_cells[1].text = start_project.strftime("%d/%m/%Y")
+    except (KeyError, AttributeError):
+        hdr_cells[1].text = "Not reported"
+
+    hdr_cells[2].text = "Start of operations:"
+    try:
+        start_ops = get_milestone_date(
+            abb, milestones.milestone_dict, str(master.current_quarter), "Start of Operation"
+        )
+        hdr_cells[3].text = start_ops.strftime("%d/%m/%Y")
+    except (KeyError, AttributeError):
+        hdr_cells[3].text = "Not reported"
+
+    row_cells = table.add_row().cells
+    row_cells[0].text = "Start of construction:"
+    try:
+        start_con = get_milestone_date(
+            abb, milestones.milestone_dict, str(master.current_quarter), "Start of Construction/build"
+        )
+        row_cells[1].text = start_con.strftime("%d/%m/%Y")
+    except (KeyError, AttributeError):
+        row_cells[1].text = "Not reported"
+
+    row_cells[2].text = "Full Operations:"  # check
+    try:
+        full_ops = get_milestone_date(
+            abb, milestones.milestone_dict, str(master.current_quarter), "Full Operations"
+        )
+        row_cells[3].text = full_ops.strftime("%d/%m/%Y")
+    except (KeyError, AttributeError):
+        row_cells[3].text = "Not reported"
+
 
     # set column width
     column_widths = (Cm(4), Cm(3), Cm(4), Cm(3))
@@ -6255,13 +6250,10 @@ def project_report_meta_data(
     table = doc.add_table(rows=1, cols=4)
     hdr_cells = table.rows[0].cells
     hdr_cells[0].text = "VfM category:"
-    vfm_cat = str(master.master_data[0]["data"][kwargs["full_name"]]["VfM Category single entry"])
-    if vfm_cat is None:
-        hdr_cells[1].text = "Not reported"
-    else:
-        hdr_cells[1].text = vfm_cat
+    vfm_cat = master.master_data[0]["data"][kwargs["full_name"]]["VfM Category single entry"]
+    hdr_cells[1].text = str(vfm_cat)
     hdr_cells[2].text = "BCR:"
-    bcr = str(master.master_data[0]["data"][kwargs["full_name"]]["Adjusted Benefits Cost Ratio (BCR)"])
+    bcr = master.master_data[0]["data"][kwargs["full_name"]]["Adjusted Benefits Cost Ratio (BCR)"]
     hdr_cells[3].text = str(bcr)
 
     # set column width
@@ -6284,28 +6276,28 @@ def project_report_meta_data(
     hdr_cells = table.rows[0].cells
     hdr_cells[0].text = "Total:"
     hdr_cells[1].text = (
-            "£" + str(round(master.master_data[0]["data"][kwargs["full_name"]]["Total BEN Forecast - Total Monetised Benefits"])) + "m"
+            "£" + str(round(convert_none_types(master.master_data[0]["data"][kwargs["full_name"]]["Total BEN Forecast - Total Monetised Benefits"]))) + "m"
     )
     hdr_cells[2].text = "Economic:"
     hdr_cells[3].text = (
-            "£" + str(round(master.master_data[0]["data"][kwargs["full_name"]]["Total BEN Forecast - Economic (inc Private Partner)"])) + "m"
+            "£" + str(round(convert_none_types(master.master_data[0]["data"][kwargs["full_name"]]["Total BEN Forecast - Economic (inc Private Partner)"]))) + "m"
     )
 
     row_cells = table.add_row().cells
     row_cells[0].text = "Cashable:"
     row_cells[1].text = (
-            "£" + str(round(master.master_data[0]["data"][kwargs["full_name"]]["Total BEN Forecast - Gov. Cashable"])) + "m"
+            "£" + str(round(convert_none_types(master.master_data[0]["data"][kwargs["full_name"]]["Total BEN Forecast - Gov. Cashable"]))) + "m"
     )
     row_cells[2].text = "Disbenefits:"
     row_cells[3].text = (
-            "£" + str(round(master.master_data[0]["data"][kwargs["full_name"]]["Total BEN Forecast - Disbenefit UK Economic"])) + "m"
+            "£" + str(round(convert_none_types(master.master_data[0]["data"][kwargs["full_name"]]["Total BEN Forecast - Disbenefit UK Economic"]))) + "m"
     )
 
     row_cells = table.add_row().cells
     row_cells[0].text = "Non-Cashable:"
     row_cells[1].text = (
             "£" + str(
-        round(master.master_data[0]["data"][kwargs["full_name"]]["Total BEN Forecast - Gov. Non-Cashable"])) + "m"
+        round(convert_none_types(master.master_data[0]["data"][kwargs["full_name"]]["Total BEN Forecast - Gov. Non-Cashable"]))) + "m"
     )
 
     # set column width
@@ -6536,7 +6528,7 @@ def compile_p_report_new(
         master: Master,
         **kwargs,
 ) -> Document:
-    kwargs["full_name"] = master.full_names[kwargs["group"][0]]
+    # kwargs["full_name"] = master.full_names[kwargs["group"][0]]
     wd_heading(doc, **kwargs)
     key_contacts(doc, master, **kwargs)
     dca_table(doc, master, **kwargs)
@@ -6547,8 +6539,8 @@ def compile_p_report_new(
     costs.get_baseline_cost_profile()
     # costs.get_cost_profile()
     # benefits = BenefitsData(master, **kwargs)
-    # milestones = MilestoneData(master, **kwargs)
-    project_report_meta_data(doc, master, costs, **kwargs)
+    milestones = MilestoneData(master, **kwargs)
+    project_report_meta_data(doc, master, costs, milestones, **kwargs)
     change_word_doc_landscape(doc)
     cost_profile = cost_profile_graph_new(costs, master, **kwargs)
     put_matplotlib_fig_into_word(doc, cost_profile, **kwargs)
@@ -6575,11 +6567,12 @@ def get_input_doc(file_path: TextIO) -> Union[Workbook, Document, None]:
 def run_p_reports(master: Master, **kwargs) -> None:
     group = get_group(master, str(master.current_quarter), kwargs)
     for p in group:
+        kwargs["full_name"] = p
+        kwargs["group"] = [master.abbreviations[p]["abb"]]
         print("Compiling summary for " + p)
         report_doc = get_input_doc(root_path / "input/summary_temp.docx")
         qrt = make_file_friendly(str(master.current_quarter))
         output = compile_p_report_new(report_doc, master, **kwargs)
-        p = master.abbreviations[p]
         if kwargs["type"] == "long":
             output.save(
                 root_path / "output/{}_long_report_{}.docx".format(p, qrt)
