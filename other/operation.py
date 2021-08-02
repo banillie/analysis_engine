@@ -62,16 +62,22 @@ from analysis_engine.data import (
     ipdc_dashboard,
     JsonMaster,
     get_gmpp_data,
-    print_gmpp_data,
     get_risk_data,
     print_risk_data,
-    get_map, get_project_info_data,
+    get_map,
+    get_project_info_data,
     data_check_print_out,
     get_ipdc_date,
     doughut,
-    dca_changes_into_excel, get_cost_forecast_keys, cost_profile_graph_new, cost_profile_into_wb_new,
-    change_gmpp_keys_order, put_n02_into_master, data_query_into_wb_by_key, amend_project_information,
-    compile_p_report, compile_p_report_new,
+    dca_changes_into_excel,
+    get_cost_forecast_keys,
+    cost_profile_graph_new,
+    cost_profile_into_wb_new,
+    put_n02_into_master,
+    data_query_into_wb_by_key,
+    amend_project_information,
+    compile_p_report,
+    compile_p_report_new,
 )
 
 ## GENERATE CLI OPTIONS
@@ -139,7 +145,7 @@ ipdc_data_dict = {
     "op_args": {
         # "quarter": ["standard"],
         "quarter": ["Q1 21/22"],
-        # "baseline": ["standard"],
+        "baseline": ["current"],
         "group": ["HSRG", "RSS", "RIG", "AMIS", "RPE"],
         # "group": ["GWRM"],
         # "stage": ["pre-SOBC", "SOBC", "OBC", "FBC"],
@@ -216,14 +222,18 @@ data = ipdc_data_dict
 # cost_stackplot_graph(sp_data, m, group=DFT_GROUP)
 
 # COSTS
-# c = CostData(data["master"], **data["op_args"])
-# c.get_baseline_cost_profile()
-# c.get_forecast_cost_profile()
+
+# for x in data["master"].current_projects:
+#     data["op_args"]["group"] = [x]
+c = CostData(data["master"], **data["op_args"])
+c.get_baseline_cost_profile()
+c.get_forecast_cost_profile()
 # g = cost_profile_graph_new(c, data["master"], **data["op_args"])
 # put_matplotlib_fig_into_word(hoz_doc, g, size=7, transparent=False)
 # hoz_doc.save(data["word_save_path"].format("bl_portfolio_no_npr_hs22a2b"))
-# wb = cost_profile_into_wb_new(c)
-# wb.save(data["excel_save_path"].format("bl_portfolio_no_npr_hs22a2b"))
+wb = cost_profile_into_wb_new(c)
+wb.save(data["excel_save_path"].format("costs_q1_2021"))
+# wb.save(data["excel_save_path"].format(str(x) + " costs_q1_2021"))
 
 # SUMMARIES
 # run_p_reports(data["master"], **data["op_args"])
@@ -272,8 +282,8 @@ data = ipdc_data_dict
 
 
 ## DASHBOARD
-wb = ipdc_dashboard(data["master"], data["dashboard"], data["op_args"])
-wb.save(data["excel_save_path"].format("ipdc_dashboard_testing"))
+# wb = ipdc_dashboard(data["master"], data["dashboard"], data["op_args"])
+# wb.save(data["excel_save_path"].format("ipdc_dashboard_testing"))
 # wb = cdg_narrative_dashboard(data["master"], data["narrative_dashboard"])
 # wb.save(data["excel_save_path"].format("q1_2021_narrative_dashboard"))
 # wb = cdg_dashboard(data["master"], data["dashboard"])
@@ -289,8 +299,8 @@ wb.save(data["excel_save_path"].format("ipdc_dashboard_testing"))
 
 # GMPP data
 # get_gmpp_data()
-# gmpp_d = get_project_info_data("/home/will/Downloads/GMPP_DATA_DFT_FORMAT_v2.0.xlsx")
-# ipdc_d = get_project_info_data(root_path / "core_data/master_1_2021_latest.xlsx")
+# gmpp_d = get_project_info_data("/home/will/Downloads/GMPP_DATA_DFT_FORMAT_Q1_FINAL.xlsx")
+# ipdc_d = get_project_info_data(root_path / "core_data/master_1_2021.xlsx")
 # data_check_print_out(gmpp_d, ipdc_d)
 # change_gmpp_keys_order(ipdc_d)
 # put_n02_into_master()
@@ -305,4 +315,3 @@ wb.save(data["excel_save_path"].format("ipdc_dashboard_testing"))
 
 
 # amend_project_information()
-
