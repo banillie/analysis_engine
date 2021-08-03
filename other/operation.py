@@ -145,9 +145,9 @@ ipdc_data_dict = {
     "op_args": {
         # "quarter": ["standard"],
         "quarter": ["Q1 21/22"],
-        "baseline": ["current"],
-        "group": ["HSRG", "RSS", "RIG", "AMIS", "RPE"],
-        # "group": ["GWRM"],
+        # "baseline": ["current"],
+        # "group": ["HSRG", "RSS", "RIG", "AMIS", "RPE"],
+        "group": ["South West Route Capacity"],
         # "stage": ["pre-SOBC", "SOBC", "OBC", "FBC"],
         # "remove": ["HS2 Ph 2b", "HS2 Ph 2a", "NPR"],
         # "dates": ["1/6/2021", "1/7/2021"],
@@ -225,14 +225,14 @@ data = ipdc_data_dict
 
 # for x in data["master"].current_projects:
 #     data["op_args"]["group"] = [x]
-c = CostData(data["master"], **data["op_args"])
-c.get_baseline_cost_profile()
-c.get_forecast_cost_profile()
+# c = CostData(data["master"], **data["op_args"])
+# c.get_baseline_cost_profile()
+# c.get_forecast_cost_profile()
 # g = cost_profile_graph_new(c, data["master"], **data["op_args"])
 # put_matplotlib_fig_into_word(hoz_doc, g, size=7, transparent=False)
 # hoz_doc.save(data["word_save_path"].format("bl_portfolio_no_npr_hs22a2b"))
-wb = cost_profile_into_wb_new(c)
-wb.save(data["excel_save_path"].format("costs_q1_2021"))
+# wb = cost_profile_into_wb_new(c)
+# wb.save(data["excel_save_path"].format("costs_q1_2021"))
 # wb.save(data["excel_save_path"].format(str(x) + " costs_q1_2021"))
 
 # SUMMARIES
@@ -243,8 +243,9 @@ wb.save(data["excel_save_path"].format("costs_q1_2021"))
 # wb = vfm_into_excel(c)
 
 ## RISKS
-# c = RiskData(m, **op_args)
-# wb = risks_into_excel(c)
+c = RiskData(data["master"], **data["op_args"])
+wb = risks_into_excel(c)
+wb.save(data["excel_save_path"].format("risks"))
 
 # SPEED DIALS
 # dca_data = DcaData(data["master"], **data["op_args"])

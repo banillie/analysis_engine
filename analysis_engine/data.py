@@ -5230,6 +5230,7 @@ class RiskData:
         self.iter_list = get_iter_list(self.kwargs, self.master)
         for tp in self.iter_list:
             project_dict = {}
+            # description_key = []
             self.group = get_group(self.master, tp, self.kwargs)
             for p in self.group:
                 p_data = get_correct_p_data(
@@ -5247,7 +5248,6 @@ class RiskData:
                         )
                         risk_list.append(risk)
                         for risk_type in RISK_LIST:
-
                             try:
                                 amended_risk_type = risk_type + str(x)
                                 risk = (
@@ -5299,9 +5299,10 @@ class RiskData:
                                                 + " "
                                                 + risk_type
                                             )
-
+                            # description_key.append()
+                            if risk[1] is None:
+                                break
                             number_dict[x] = dict(risk_list)
-
                     project_dict[self.master.abbreviations[p]["abb"]] = number_dict
                 except KeyError:
                     pass
@@ -5360,38 +5361,39 @@ def risks_into_excel(risk_data: RiskData) -> workbook:
             for x, number in enumerate(
                     list(risk_data.risk_dictionary[q][project_name].keys())
             ):
-                try:
-                    r_description = risk_data.risk_dictionary[q][project_name][number][
-                        "Brief Risk Description "
-                    ]
-                except KeyError:
-                    logger.info(
-                        "Latest risk data set not available for " + str(q) + "."
-                    )
-                    break
-                if r_description is None:
-                    break
-                else:
-                    ws.cell(
-                        row=start_row + 1 + x, column=1
-                    ).value = risk_data.risk_dictionary[q][project_name][number][
-                        "Group"
-                    ]
-                    ws.cell(row=start_row + 1 + x, column=2).value = project_name
-                    ws.cell(row=start_row + 1 + x, column=3).value = str(number)
-                    for i in range(len(RISK_LIST)):
-                        try:
-                            ws.cell(
-                                row=start_row + 1 + x, column=4 + i
-                            ).value = risk_data.risk_dictionary[q][project_name][
-                                number
-                            ][
-                                RISK_LIST[i]
-                            ]
-                        except KeyError:
-                            pass
+                # try:
+                #     r_description = risk_data.risk_dictionary[q][project_name][number][
+                #         "Brief Risk Description "
+                #     ]
+                # except KeyError:
+                #     logger.info(
+                #         "Latest risk data set not available for " + str(q) + "."
+                #     )
+                #     break
+                # if r_description is None:
+                #     number = number - 1
+                #     break
+                # else:
+                ws.cell(
+                    row=start_row + number, column=1
+                ).value = risk_data.risk_dictionary[q][project_name][number][
+                    "Group"
+                ]
+                ws.cell(row=start_row + number, column=2).value = project_name
+                ws.cell(row=start_row + number, column=3).value = str(number)
+                for i in range(len(RISK_LIST)):
+                    try:
+                        ws.cell(
+                            row=start_row + number, column=4 + i
+                        ).value = risk_data.risk_dictionary[q][project_name][
+                            number
+                        ][
+                            RISK_LIST[i]
+                        ]
+                    except KeyError:
+                        print(project_name)
 
-            start_row += x
+            start_row += number
 
         for i in range(len(RISK_LIST)):
             ws.cell(row=1, column=4 + i).value = RISK_LIST[i]
@@ -9154,7 +9156,7 @@ class DandelionData:
                                     next_stage)
                                 p_schedule = (d - datetime.date.today()).days
                             except TypeError:
-                                p_schedule = 0
+                                p_schedule = 10000000000
                                 if "order_by" in self.kwargs:
                                     if self.kwargs["order_by"] == "schedule":
                                         print("can't calculate " + p + "'s schedule")
