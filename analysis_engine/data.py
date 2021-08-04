@@ -992,6 +992,7 @@ class CostData:
         self.group = []
         self.iter_list = []
         self.c_totals = {}
+        self.c_bl_totals = {}
         self.c_profiles = {}
         self.profiles = {}
         # self.forecast_profiles = {}
@@ -999,6 +1000,7 @@ class CostData:
         self.wlc_change = {}
         # self.stack_p = {}
         self.get_cost_totals_new()
+        self.get_cost_totals_new_bl()
         # self.get_forecast_cost_profile()
         # self.get_baseline_cost_profile()
         # self.get_cost_profile()
@@ -1314,6 +1316,96 @@ class CostData:
             }
 
         self.c_totals = lower_dict
+
+    def get_cost_totals_new_bl(self) -> None:
+        """to write"""
+
+        self.iter_list = get_iter_list(self.kwargs, self.master)
+        lower_dict = {}
+        for tp in self.iter_list:
+            self.group = get_group(self.master, tp, self.kwargs)
+            # lists have been hashed out as not currently in use. same applied to code below.
+            # rdel_spent = []
+            # cdel_spent = []
+            # spent = []
+            # rdel_unprofiled = []
+            # cdel_unprofiled = []
+            # unprofiled = []
+            rdel_total = []
+            cdel_total = []
+            ngov_total = []
+            total = []
+            # rdel_profiled = []
+            # cdel_profiled = []
+            # profiled = []
+            for project_name in self.group:
+                p_data = get_correct_p_data(
+                    self.kwargs, self.master, self.baseline_type, project_name, tp
+                )
+                if p_data is None:
+                    continue
+                # try:
+                #     rstd = convert_none_types(p_data["20-21 RDEL STD Total"])
+                # except KeyError:
+                #     rstd = 0
+                # rs = convert_none_types(p_data["Pre-profile RDEL"]) + rstd
+                # rdel_spent.append(rs)
+                # try:
+                #     cstd = convert_none_types(p_data["20-21 CDEL STD Total"])
+                # except KeyError:
+                #     cstd = 0
+                # # print(tp)
+                # cs = convert_none_types(p_data["Pre-profile CDEL"]) + cstd
+                # cdel_spent.append(cs)
+                # s = rs + cs
+                # spent.append(s)
+
+                # ru = convert_none_types(p_data["Unprofiled RDEL Forecast Total"])
+                # rdel_unprofiled.append(ru)
+                # cu = convert_none_types(p_data["Unprofiled CDEL Forecast Total WLC"])
+                # cdel_unprofiled.append(cu)
+                # u = ru + cu
+                # unprofiled.append(u)
+
+                # total_list = ["Total RDEL Forecast Total", "Total CDEL BL WLC"]
+                # for x in total_list:
+                rt = convert_none_types(p_data["Total RDEL BL Total"])
+                rdel_total.append(rt)
+                ct = convert_none_types(p_data["Total CDEL BL WLC"])
+                cdel_total.append(ct)
+                ng = convert_none_types(p_data["Non-Gov Total Budget/BL"])
+                ngov_total.append(ng)
+                t = convert_none_types(p_data["Total BL"])
+                # hard coded due to current use need.
+                if project_name == "HS2 Phase 2b" or project_name == "HS2 Phase2a":
+                    try:
+                        t = t - p_data[
+                            "Total Baseline - Income both Revenue and Capital"
+                        ]
+                    except KeyError:  # some older masters do have key.
+                        pass
+                total.append(t)
+
+
+                # rdel_profiled.append(rt - (rs + ru))
+                # cdel_profiled.append(ct - (cs + cu))
+                # profiled.append(t - (s + u))
+
+
+            lower_dict[tp] = {
+                # "cat_spent": [sum(rdel_spent), sum(cdel_spent)],
+                # "cat_prof": [sum(rdel_profiled), sum(cdel_profiled)],
+                # "cat_unprof": [sum(rdel_unprofiled), sum(cdel_unprofiled)],
+                # "spent": sum(spent),
+                # "prof": sum(profiled),
+                # "unprof": sum(unprofiled),
+                "total": sum(total),
+                "rdel": sum(rdel_total),
+                "cdel": sum(cdel_total) - sum(ngov_total),
+                "ngov": sum(ngov_total),
+            }
+
+        self.c_bl_totals = lower_dict
 
     def get_cost_profile(self) -> None:
         """Returns several lists which contain the sum of different cost profiles for the group of project
@@ -7913,7 +8005,7 @@ def concatenate_dates(date: date):
         return "None"
 
 
-def financial_dashboard(master: Master, wb: Workbook) -> Workbook:
+def financial_dashboard(master: Master, wb: Workbook, **kwargs) -> Workbook:
     ws = wb.worksheets[0]
     # overall_ws = wb.worksheets[3]
 
@@ -7923,6 +8015,8 @@ def financial_dashboard(master: Master, wb: Workbook) -> Workbook:
     for row_num in range(2, ws.max_row + 1):
         project_name = ws.cell(row=row_num, column=3).value
         if project_name in master.current_projects:
+            kwargs["group"] = [project_name]
+            c = CostData(master, **kwargs)
             # bl = master.bl_index["ipdc_costs"][project_name][2]
             # baseline_data = master.master_data[bl]["data"]
             """BC Stage"""
@@ -7958,12 +8052,12 @@ def financial_dashboard(master: Master, wb: Workbook) -> Workbook:
             #     pass
 
             """Total WLC"""
-            wlc_now = current_data[project_name]["Total Forecast"]
+            wlc_now = c.c_totals[str(master.current_quarter)]['total']
             ws.cell(row=row_num, column=6).value = wlc_now
             # overall_ws.cell(row=row_num, column=5).value = wlc_now
             """WLC variance against lst quarter"""
             try:
-                wlc_lst_quarter = last_data[project_name]["Total Forecast"]
+                wlc_lst_quarter = c.c_totals[str(master.quarter_list[1])]['total']
                 diff_lst_qrt = wlc_now - wlc_lst_quarter
                 if float(diff_lst_qrt) > 0.49 or float(diff_lst_qrt) < -0.49:
                     ws.cell(row=row_num, column=7).value = diff_lst_qrt
@@ -7988,7 +8082,7 @@ def financial_dashboard(master: Master, wb: Workbook) -> Workbook:
                 ws.cell(row=row_num, column=7).value = "-"
 
             """WLC variance against baseline quarter"""
-            wlc_baseline = current_data[project_name]["Total BL"]
+            wlc_baseline = c.c_bl_totals[str(master.current_quarter)]['total']
             try:
                 diff_bl = wlc_now - wlc_baseline
                 if float(diff_bl) > 0.49 or float(diff_bl) < -0.49:
@@ -8557,7 +8651,10 @@ def benefits_dashboard(master: Master, wb: Workbook) -> Workbook:
 
 
 def overall_dashboard(
-        master: Master, milestones: MilestoneData, wb: Workbook
+        master: Master,
+        milestones: MilestoneData,
+        wb: Workbook,
+        **kwargs
 ) -> Workbook:
     ws = wb.worksheets[3]
 
@@ -8572,6 +8669,8 @@ def overall_dashboard(
     for row_num in range(2, ws.max_row + 1):
         project_name = ws.cell(row=row_num, column=2).value
         if project_name in master.current_projects:
+            kwargs["group"] = [project_name]
+            c = CostData(master, **kwargs)
             """BC Stage"""
             bc_stage = current_data[project_name]["IPDC approval point"]
             # ws.cell(row=row_num, column=4).value = convert_bc_stage_text(bc_stage)
@@ -8605,12 +8704,12 @@ def overall_dashboard(
             #     pass
 
             """Total WLC"""
-            wlc_now = current_data[project_name]["Total Forecast"]
+            wlc_now = c.c_totals[str(master.current_quarter)]['total']
             # ws.cell(row=row_num, column=6).value = wlc_now
             ws.cell(row=row_num, column=5).value = wlc_now
             """WLC variance against lst quarter"""
             try:
-                wlc_lst_quarter = last_data[project_name]["Total Forecast"]
+                wlc_lst_quarter = c.c_totals[str(master.quarter_list[1])]['total']
                 diff_lst_qrt = wlc_now - wlc_lst_quarter
                 if float(diff_lst_qrt) > 0.49 or float(diff_lst_qrt) < -0.49:
                     # ws.cell(row=row_num, column=7).value = diff_lst_qrt
@@ -8635,7 +8734,7 @@ def overall_dashboard(
                 ws.cell(row=row_num, column=6).value = "-"
 
             """WLC variance against baseline"""
-            wlc_baseline = current_data[project_name]["Total BL"]
+            wlc_baseline = c.c_bl_totals[str(master.current_quarter)]['total']
             # bl = master.bl_index["ipdc_costs"][project_name][2]
             # wlc_baseline = master.master_data[bl]["data"][project_name][
             #     "Total Forecast"
@@ -8849,14 +8948,14 @@ def overall_dashboard(
 
 
 def ipdc_dashboard(master: Master, wb: Workbook, kwargs) -> Workbook:
-    financial_dashboard(master, wb)
+    financial_dashboard(master, wb, **kwargs)
 
     milestones = MilestoneData(master, **kwargs)
     m_filtered = MilestoneData(master, **kwargs)
     m_filtered.filter_chart_info(type=["Approval"])
     schedule_dashboard(master, milestones, m_filtered, wb)
     benefits_dashboard(master, wb)
-    overall_dashboard(master, milestones, wb)
+    overall_dashboard(master, milestones, wb, **kwargs)
 
     return wb
 

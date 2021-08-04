@@ -143,8 +143,8 @@ ipdc_data_dict = {
     "docx_save_path": str(root_path / "output/{}.docx"),
     "master": Master(open_json_file(str(root_path / "core_data/json/master.json"))),
     "op_args": {
-        # "quarter": ["standard"],
-        "quarter": ["Q1 21/22"],
+        "quarter": ["standard"],
+        # "quarter": ["Q1 21/22"],
         # "baseline": ["current"],
         # "group": ["HSRG", "RSS", "RIG", "AMIS", "RPE"],
         "group": ["South West Route Capacity"],
@@ -225,7 +225,7 @@ data = ipdc_data_dict
 
 # for x in data["master"].current_projects:
 #     data["op_args"]["group"] = [x]
-# c = CostData(data["master"], **data["op_args"])
+c = CostData(data["master"], **data["op_args"])
 # c.get_baseline_cost_profile()
 # c.get_forecast_cost_profile()
 # g = cost_profile_graph_new(c, data["master"], **data["op_args"])
@@ -243,9 +243,9 @@ data = ipdc_data_dict
 # wb = vfm_into_excel(c)
 
 ## RISKS
-c = RiskData(data["master"], **data["op_args"])
-wb = risks_into_excel(c)
-wb.save(data["excel_save_path"].format("risks"))
+# c = RiskData(data["master"], **data["op_args"])
+# wb = risks_into_excel(c)
+# wb.save(data["excel_save_path"].format("risks"))
 
 # SPEED DIALS
 # dca_data = DcaData(data["master"], **data["op_args"])
