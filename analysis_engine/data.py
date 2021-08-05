@@ -1251,9 +1251,7 @@ class CostData:
                     self.kwargs, self.master, self.baseline_type, project_name, tp
                 )
                 if p_data is None:
-                    continue
-
-
+                    break
                 # try:
                 #     rstd = convert_none_types(p_data["20-21 RDEL STD Total"])
                 # except KeyError:
@@ -1279,23 +1277,23 @@ class CostData:
 
                 # total_list = ["Total RDEL Forecast Total", "Total CDEL BL WLC"]
                 # for x in total_list:
-                rt = convert_none_types(p_data["Total RDEL Forecast Total"])
-                rdel_total.append(rt)
-                ct = convert_none_types(p_data["Total CDEL Forecast Total WLC"])
-                cdel_total.append(ct)
-                ng = convert_none_types(p_data["Non-Gov Total Forecast"])
-                ngov_total.append(ng)
-                t = convert_none_types(p_data["Total Forecast"])
-                # hard coded due to current use need.
-                if project_name == "HS2 Phase 2b" or project_name == "HS2 Phase2a":
-                    try:
-                        t = t - p_data[
-                            "Total Forecast - Income both Revenue and Capital"
-                        ]
-                    except KeyError:  # some older masters do have key.
-                        pass
-                total.append(t)
-
+                else:
+                    rt = convert_none_types(p_data["Total RDEL Forecast Total"])
+                    rdel_total.append(rt)
+                    ct = convert_none_types(p_data["Total CDEL Forecast Total WLC"])
+                    cdel_total.append(ct)
+                    ng = convert_none_types(p_data["Non-Gov Total Forecast"])
+                    ngov_total.append(ng)
+                    t = convert_none_types(p_data["Total Forecast"])
+                    # hard coded due to current use need.
+                    if project_name == "HS2 Phase 2b" or project_name == "HS2 Phase2a":
+                        try:
+                            t = t - p_data[
+                                "Total Forecast - Income both Revenue and Capital"
+                            ]
+                        except KeyError:  # some older masters do have key.
+                            pass
+                    total.append(t)
 
                 # rdel_profiled.append(rt - (rs + ru))
                 # cdel_profiled.append(ct - (cs + cu))
@@ -1371,11 +1369,17 @@ class CostData:
                 # for x in total_list:
                 rt = convert_none_types(p_data["Total RDEL BL Total"])
                 rdel_total.append(rt)
-                ct = convert_none_types(p_data["Total CDEL BL WLC"])
+                try:
+                    ct = convert_none_types(p_data["Total CDEL BL WLC"])
+                except KeyError:
+                    ct = convert_none_types(p_data["Total CDEL BL Total"])
                 cdel_total.append(ct)
                 ng = convert_none_types(p_data["Non-Gov Total Budget/BL"])
                 ngov_total.append(ng)
-                t = convert_none_types(p_data["Total BL"])
+                try:
+                    t = convert_none_types(p_data["Total BL"])
+                except KeyError:
+                    t = convert_none_types(p_data["Total Budget/BL"])
                 # hard coded due to current use need.
                 if project_name == "HS2 Phase 2b" or project_name == "HS2 Phase2a":
                     try:
@@ -1477,6 +1481,7 @@ class CostData:
             list_rdel_total = []
             list_cdel_total = []
             list_ngov_total = []
+            list_std = []
             for p in self.group:
                 RDEL_FORECAST_COST_KEYS = {
                     "Forecast one off new costs": [],
@@ -1499,6 +1504,9 @@ class CostData:
                 )
                 if p_data is None:
                     continue
+                rdel_std = convert_none_types(p_data["20-21 RDEL STD Total"])
+                cdel_std = convert_none_types(p_data["20-21 CDEL STD Total"])
+                list_std.append(rdel_std + cdel_std)
                 for y in YEAR_LIST:
                     for cat in COST_CAT:
                         if cat == ' RDEL ':
@@ -1534,6 +1542,7 @@ class CostData:
                                             # print(tp + " " + y + k + ' could not be found. Check')
                                             cdel = 0
                                 CDEL_FORECAST_COST_KEYS[k].append(cdel)
+
                     total_adding = [RDEL_FORECAST_COST_KEYS["Forecast Total"],
                                     CDEL_FORECAST_COST_KEYS["Forecast Total WLC"]]
                     year_total = [sum(x) for x in zip(*total_adding)]
@@ -1551,10 +1560,12 @@ class CostData:
                 list_ngov_total.append(ngov_total)
                 list_rdel_total.append(RDEL_FORECAST_COST_KEYS["Forecast Total"])
                 list_cdel_total.append(CDEL_FORECAST_COST_KEYS["Forecast Total WLC"])
+
             project_dict["total"] = [sum(x) for x in zip(*list_total_total)]
             project_dict["rdel_total"] = [sum(x) for x in zip(*list_rdel_total)]
             project_dict["cdel_total"] = [sum(x) for x in zip(*list_cdel_total)]
             project_dict["ngov_total"] = [sum(x) for x in zip(*list_ngov_total)]
+            project_dict["std"] = list_std
 
             self.profiles[tp] = project_dict
 
@@ -8011,11 +8022,18 @@ def financial_dashboard(master: Master, wb: Workbook, **kwargs) -> Workbook:
 
     current_data = master.master_data[0]["data"]
     last_data = master.master_data[1]["data"]
+    last_qrt_group = cal_group(kwargs["group"], master, 1)
 
     for row_num in range(2, ws.max_row + 1):
         project_name = ws.cell(row=row_num, column=3).value
         if project_name in master.current_projects:
-            kwargs["group"] = [project_name]
+            if project_name in last_qrt_group:
+                kwargs["group"] = [project_name]
+                kwargs["quarter"] = ["standard"]
+            else:
+                kwargs["group"] = [project_name]
+                kwargs["quarter"] = [str(master.current_quarter)]
+
             c = CostData(master, **kwargs)
             # bl = master.bl_index["ipdc_costs"][project_name][2]
             # baseline_data = master.master_data[bl]["data"]
@@ -8293,9 +8311,9 @@ def schedule_dashboard(
                 current = get_milestone_date(
                     abb, milestones.milestone_dict, str(master.current_quarter), m
                 )
-                # last_quarter = get_milestone_date(
-                #     abb, milestones.milestone_dict, "last", m
-                # )
+                last_quarter = get_milestone_date(
+                    abb, milestones.milestone_dict, str(master.quarter_list[1]), m
+                )
                 # bl = get_milestone_date(abb, milestones.milestone_dict, "bl_one", m)
                 # if current == None:
                 #     current = "None"
@@ -8306,24 +8324,24 @@ def schedule_dashboard(
                     ws.cell(row=row_num, column=10 + add_column).value = "Completed"
                 if current is None:
                     ws.cell(row=row_num, column=10 + add_column).value = "None"
-                # try:
-                #     last_change = (current - last_quarter).days
-                #     # if m == "Full Operations":
-                #     #     ws.cell(
-                #     #         row=row_num, column=10).value = plus_minus_days(last_change)
-                #     ws.cell(
-                #         row=row_num, column=11 + add_column
-                #     ).value = plus_minus_days(last_change)
-                #     if last_change is not None and last_change > 46:
-                #         # if m == "Full Operations":
-                #         #     overall_ws.cell(row=row_num, column=10).font = Font(
-                #         #         name="Arial", size=10, color="00fc2525"
-                #         #     )
-                #         ws.cell(row=row_num, column=11 + add_column).font = Font(
-                #             name="Arial", size=10, color="00fc2525"
-                #         )
-                # except TypeError:
-                #     pass
+                try:
+                    last_change = (current - last_quarter).days
+                    # if m == "Full Operations":
+                    #     ws.cell(
+                    #         row=row_num, column=10).value = plus_minus_days(last_change)
+                    ws.cell(
+                        row=row_num, column=11 + add_column
+                    ).value = plus_minus_days(last_change)
+                    # if last_change is not None and last_change > 46:
+                    #     # if m == "Full Operations":
+                    #     #     overall_ws.cell(row=row_num, column=10).font = Font(
+                    #     #         name="Arial", size=10, color="00fc2525"
+                    #     #     )
+                    #     ws.cell(row=row_num, column=11 + add_column).font = Font(
+                    #         name="Arial", size=10, color="00fc2525"
+                    #     )
+                except TypeError:
+                    pass
                 # try:
                 #     bl_change = (current - bl).days
                 #     # if m == "Full Operations":
@@ -8660,6 +8678,7 @@ def overall_dashboard(
 
     current_data = master.master_data[0]["data"]
     last_data = master.master_data[1]["data"]
+    last_qrt_group = cal_group(kwargs["group"], master, 1)
 
     IPDC_DATE = parser.parse(
         get_ipdc_date(str(root_path) + "/core_data/ipdc_config.ini", "ipdc_date"),
@@ -8669,7 +8688,12 @@ def overall_dashboard(
     for row_num in range(2, ws.max_row + 1):
         project_name = ws.cell(row=row_num, column=2).value
         if project_name in master.current_projects:
-            kwargs["group"] = [project_name]
+            if project_name in last_qrt_group:
+                kwargs["group"] = [project_name]
+                kwargs["quarter"] = ["standard"]
+            else:
+                kwargs["group"] = [project_name]
+                kwargs["quarter"] = [str(master.current_quarter)]
             c = CostData(master, **kwargs)
             """BC Stage"""
             bc_stage = current_data[project_name]["IPDC approval point"]
@@ -8838,9 +8862,9 @@ def overall_dashboard(
             )
             # if current == None:
             #     current = "None"
-            # last_quarter = get_milestone_date(
-            #     abb, milestones.milestone_dict, "last", " Full Operations"
-            # )
+            last_quarter = get_milestone_date(
+                abb, milestones.milestone_dict, str(master.quarter_list[1]), "Full Operations"
+            )
             # bl = get_milestone_date(
             #     abb, milestones.milestone_dict, "bl_one", " Full Operations"
             # )
@@ -8850,15 +8874,15 @@ def overall_dashboard(
             if current is None:
                 ws.cell(row=row_num, column=9).value = "None"
 
-            # try:
-            #     last_change = (current - last_quarter).days
-            #     ws.cell(row=row_num, column=10).value = plus_minus_days(last_change)
+            try:
+                last_change = (current - last_quarter).days
+                ws.cell(row=row_num, column=10).value = plus_minus_days(last_change)
             #     if last_change is not None and last_change > 46:
             #         ws.cell(row=row_num, column=10).font = Font(
             #             name="Arial", size=10, color="00fc2525"
             #         )
-            # except TypeError:
-            #     pass
+            except TypeError:
+                pass
             # try:
             #     bl_change = (current - bl).days
             #     ws.cell(row=row_num, column=11).value = plus_minus_days(bl_change)
@@ -9069,10 +9093,14 @@ def get_dandelion_type_total(
     if "type" in kwargs:
         if kwargs["type"] == "remaining":
             cost = CostData(master, **kwargs)  # group costs data
-            return cost.c_totals[tp]["prof"] + cost.c_totals[tp]["unprof"]
+            cost.get_forecast_cost_profile()
+            # return sum(cost.profiles[tp]["total"]) - sum(cost.profiles[tp]["std"])
+            return sum(cost.profiles[tp]["total"])
         if kwargs["type"] == "spent":
             cost = CostData(master, **kwargs)
-            return cost.c_totals[tp]["spent"]
+            cost.get_forecast_cost_profile()
+            # return cost.c_totals[tp]['total'] - (sum(cost.profiles[tp]["total"]) - sum(cost.profiles[tp]["std"]))
+            return cost.c_totals[tp]['total'] - sum(cost.profiles[tp]["total"])
         if kwargs["type"] == "income":
             cost = CostData(master, **kwargs)
             return cost.c_totals[tp]["income_total"]
@@ -9236,6 +9264,7 @@ class DandelionData:
                             p_schedule = self.master.pipeline_dict[p]["wlc"]
                         else:
                             NEXT_STAGE_DICT = {
+                                "pre_SOBC": "SOBC - IPDC Approval",
                                 "pre-SOBC": "SOBC - IPDC Approval",
                                 "SOBC": "OBC - IPDC Approval",
                                 "OBC": 'FBC - IPDC Approval',
@@ -10229,7 +10258,7 @@ def get_map(wb):
 
 
 def get_gmpp_data():
-    wb_one = load_workbook("/home/will/Downloads/GMPP_DATA_Q1_FINAL.xlsm")
+    wb_one = load_workbook("/home/will/Downloads/GMPP_DATA_NO2_FINAL.xlsm")
     # wb_two = load_workbook("/home/will/Downloads/GMPP_DATA_Q1.xlsm")
     # wb_three = load_workbook("/home/will/Downloads/GMPP_DATA_Q4.xlsm")
 
@@ -10372,7 +10401,7 @@ def get_gmpp_data():
     ws.cell(row=1, column=1).value = "Project Name (DfT Keys)"
     ws.cell(row=1, column=2).value = "Project Name (IPA Keys)"
 
-    wb.save("/home/will/Downloads/GMPP_DATA_DFT_FORMAT_Q1_FINAL.xlsx")
+    wb.save("/home/will/Downloads/GMPP_DATA_DFT_FORMAT_NO2_FINAL.xlsx")
 
 
 GMPP_M_DICT = {

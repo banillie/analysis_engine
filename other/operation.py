@@ -146,12 +146,12 @@ ipdc_data_dict = {
         "quarter": ["standard"],
         # "quarter": ["Q1 21/22"],
         # "baseline": ["current"],
-        # "group": ["HSRG", "RSS", "RIG", "AMIS", "RPE"],
-        "group": ["South West Route Capacity"],
+        "group": ["HSRG", "RSS", "RIG", "AMIS", "RPE"],
+        # "group": ["HSRG"],
         # "stage": ["pre-SOBC", "SOBC", "OBC", "FBC"],
         # "remove": ["HS2 Ph 2b", "HS2 Ph 2a", "NPR"],
         # "dates": ["1/6/2021", "1/7/2021"],
-        # "type": "short",
+        # "type": "spent",
         # "chart": True,
         # "circle_colour": "No",
         # "key": ["VfM Category single entry"],
@@ -222,10 +222,9 @@ data = ipdc_data_dict
 # cost_stackplot_graph(sp_data, m, group=DFT_GROUP)
 
 # COSTS
-
 # for x in data["master"].current_projects:
 #     data["op_args"]["group"] = [x]
-c = CostData(data["master"], **data["op_args"])
+# c = CostData(data["master"], **data["op_args"])
 # c.get_baseline_cost_profile()
 # c.get_forecast_cost_profile()
 # g = cost_profile_graph_new(c, data["master"], **data["op_args"])
@@ -283,8 +282,8 @@ c = CostData(data["master"], **data["op_args"])
 
 
 ## DASHBOARD
-# wb = ipdc_dashboard(data["master"], data["dashboard"], data["op_args"])
-# wb.save(data["excel_save_path"].format("ipdc_dashboard_testing"))
+wb = ipdc_dashboard(data["master"], data["dashboard"], data["op_args"])
+wb.save(data["excel_save_path"].format("ipdc_dashboard_testing"))
 # wb = cdg_narrative_dashboard(data["master"], data["narrative_dashboard"])
 # wb.save(data["excel_save_path"].format("q1_2021_narrative_dashboard"))
 # wb = cdg_dashboard(data["master"], data["dashboard"])
