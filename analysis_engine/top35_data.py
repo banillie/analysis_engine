@@ -105,15 +105,16 @@ def compile_p_report(
     **kwargs,
 ) -> Document:
     # p_master = master.master_data[0].data[project_name]
+    kwargs["group"] = [project_name]
     r_args = [doc, master, project_name]
-    wd_heading(doc, master, project_name)
+    wd_heading(doc, **kwargs)
     key_contacts(*r_args)
     project_scope_text(*r_args)
     deliverables(*r_args)
     project_report_meta_data(*r_args)
     # doc.add_section(WD_SECTION_START.NEW_PAGE)
     dca_narratives(*r_args)
-    kwargs["group"] = [project_name]
+    # kwargs["group"] = [project_name]
     ms = MilestoneData(master, "ipdc_milestones", **kwargs)  # milestones
     print_out_project_milestones(doc, ms)
     cs = CentralSupportData(master, **kwargs)  # central support

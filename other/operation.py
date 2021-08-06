@@ -86,10 +86,10 @@ from analysis_engine.data import (
 
 from datamaps.api import project_data_from_master_month, project_data_from_master
 
-# from analysis_engine.top35_data import (
-#     top35_root_path,
-#     top35_run_p_reports, CentralSupportData,
-# )
+from analysis_engine.top35_data import (
+    top35_root_path,
+    top35_run_p_reports, CentralSupportData,
+)
 
 # INITIATE
 # master = JsonMaster(
@@ -114,58 +114,58 @@ from datamaps.api import project_data_from_master_month, project_data_from_maste
 hoz_doc = open_word_doc(root_path / "input/summary_temp_landscape.docx")
 # doc = open_word_doc(root_path / "input/summary_temp.docx")
 
-# top35_data_dict = {
-#     "docx_save_path": str(top35_root_path / "output/{}.docx"),
-#     "master": Master(open_json_file(str(top35_root_path / "core_data/json/master.json"))),
-#     "op_args": {
-#         # "quarter": ["Month(June), 2021"],
-#         "quarter": ["standard"],
-#         # "group": ["HSRG", "RSS", "RIG", "RPE"],
-#         "group": ["LIC"],
-#         # "chart": False,
-#         "data_type": "top35",
-#         "circle_colour": "No",
-#         # "dates": ["1/6/2021", "1/7/2021"],
-#         "key": [
-#             "PROJECT DEL TO CURRENT TIMINGS ?",
-#             "GMPP ID: IS THIS PROJECT ON GMPP",
-#             "PROJECT ON BUDGET?",
-#             "WLC TOTAL",
-#             "WLC NON GOV",
-#         ],
-#         # "key": ["Start of Trial Running"],
-#     },
-#     "excel_save_path": str(top35_root_path / "output/{}.xlsx"),
-#     "word_save_path": str(top35_root_path / "output/{}.docx")
-# }
-
-ipdc_data_dict = {
-    "docx_save_path": str(root_path / "output/{}.docx"),
-    "master": Master(open_json_file(str(root_path / "core_data/json/master.json"))),
+top35_data_dict = {
+    "docx_save_path": str(top35_root_path / "output/{}.docx"),
+    "master": Master(open_json_file(str(top35_root_path / "core_data/json/master.json"))),
     "op_args": {
-        "quarter": ["standard"],
-        # "quarter": ["Q1 21/22"],
-        # "baseline": ["current"],
-        "group": ["HSRG", "RSS", "RIG", "AMIS", "RPE"],
-        # "group": ["HSRG"],
-        # "stage": ["pre-SOBC", "SOBC", "OBC", "FBC"],
-        # "remove": ["HS2 Ph 2b", "HS2 Ph 2a", "NPR"],
+        "quarter": ["Month(July), 2021"],
+        # "quarter": ["standard"],
+        "group": ["HSRG", "RSS", "RIG", "RPE"],
+        # "group": ["LIC"],
+        # "chart": False,
+        "data_type": "top35",
+        "circle_colour": "No",
         # "dates": ["1/6/2021", "1/7/2021"],
-        # "type": "spent",
-        # "chart": True,
-        # "circle_colour": "No",
-        # "key": ["VfM Category single entry"],
-        # "conf_type": "sro",
-        # "rag_number": "3",
-        # "order_by": "schedule",
-        # "angles": [240, 290, 22, 120],
-        # "weighting": "count",
-        # "show": "No",
+        "key": [
+            "PROJECT DEL TO CURRENT TIMINGS ?",
+            "GMPP ID: IS THIS PROJECT ON GMPP",
+            "PROJECT ON BUDGET?",
+            "WLC TOTAL",
+            "WLC NON GOV",
+        ],
+        # "key": ["Start of Trial Running"],
     },
-    "dashboard": get_input_doc(root_path / "input/dashboards_master.xlsx"),
-    "excel_save_path": str(root_path / "output/{}.xlsx"),
-    "word_save_path": str(root_path / "output/{}.docx"),
+    "excel_save_path": str(top35_root_path / "output/{}.xlsx"),
+    "word_save_path": str(top35_root_path / "output/{}.docx")
 }
+
+# ipdc_data_dict = {
+#     "docx_save_path": str(root_path / "output/{}.docx"),
+#     "master": Master(open_json_file(str(root_path / "core_data/json/master.json"))),
+#     "op_args": {
+#         "quarter": ["standard"],
+#         # "quarter": ["Q1 21/22"],
+#         # "baseline": ["current"],
+#         "group": ["HSRG", "RSS", "RIG", "AMIS", "RPE"],
+#         # "group": ["HSRG"],
+#         # "stage": ["pre-SOBC", "SOBC", "OBC", "FBC"],
+#         # "remove": ["HS2 Ph 2b", "HS2 Ph 2a", "NPR"],
+#         # "dates": ["1/6/2021", "1/7/2021"],
+#         # "type": "spent",
+#         # "chart": True,
+#         # "circle_colour": "No",
+#         # "key": ["VfM Category single entry"],
+#         # "conf_type": "sro",
+#         # "rag_number": "3",
+#         # "order_by": "schedule",
+#         # "angles": [240, 290, 22, 120],
+#         # "weighting": "count",
+#         # "show": "No",
+#     },
+#     "dashboard": get_input_doc(root_path / "input/dashboards_master.xlsx"),
+#     "excel_save_path": str(root_path / "output/{}.xlsx"),
+#     "word_save_path": str(root_path / "output/{}.docx"),
+# }
 
 # cdg_data_dict = {
 #     "docx_save_path": str(cdg_root_path / "output/{}.docx"),
@@ -192,11 +192,11 @@ ipdc_data_dict = {
 #     "word_save_path": str(cdg_root_path / "output/{}.docx")
 # }
 
-data = ipdc_data_dict
+data = top35_data_dict
 
 ## DANDELION
-# dl_data = DandelionData(data["master"], **data["op_args"])
-# d_lion = make_a_dandelion_auto(dl_data, **data["op_args"])
+dl_data = DandelionData(data["master"], **data["op_args"])
+d_lion = make_a_dandelion_auto(dl_data, **data["op_args"])
 # put_matplotlib_fig_into_word(hoz_doc, d_lion, size=7)
 # hoz_doc.save(data["word_save_path"].format("dandelion_income"))
 
@@ -235,7 +235,7 @@ data = ipdc_data_dict
 # wb.save(data["excel_save_path"].format(str(x) + " costs_q1_2021"))
 
 # SUMMARIES
-# run_p_reports(data["master"], **data["op_args"])
+# top35_run_p_reports(data["master"], **data["op_args"])
 
 ## VFM
 # c = VfMData(m, group=DFm = Master(*data["data"], **data["op_args"] )T_GROUP, quarter=["standard"])  # c is class
@@ -282,8 +282,8 @@ data = ipdc_data_dict
 
 
 ## DASHBOARD
-wb = ipdc_dashboard(data["master"], data["dashboard"], data["op_args"])
-wb.save(data["excel_save_path"].format("ipdc_dashboard_testing"))
+# wb = ipdc_dashboard(data["master"], data["dashboard"], data["op_args"])
+# wb.save(data["excel_save_path"].format("ipdc_dashboard_testing"))
 # wb = cdg_narrative_dashboard(data["master"], data["narrative_dashboard"])
 # wb.save(data["excel_save_path"].format("q1_2021_narrative_dashboard"))
 # wb = cdg_dashboard(data["master"], data["dashboard"])
