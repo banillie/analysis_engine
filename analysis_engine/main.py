@@ -441,7 +441,7 @@ class main():
             formatter_class=RawTextHelpFormatter
         )
 
-        parser.add_argument('--version', action='version', version="1.0.2")
+        parser.add_argument('--version', action='version', version="1.0.3")
 
         parser.add_argument(
             'command',
@@ -671,7 +671,7 @@ class main():
             action="store",
             nargs="+",
             choices=["current"],
-            help="baseline option for costs refactored in Q1 21/22. Choose current to return project "
+            help="baseline option for costs refactored in Q1 21/22. Choose 'current' to return project "
                  "reported bls as well as latest forecast profile")
 
         parser_milestones.add_argument(

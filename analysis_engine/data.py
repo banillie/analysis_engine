@@ -8993,31 +8993,37 @@ def overall_dashboard(
             if ipa_dca == "None":
                 ws.cell(row=row_num, column=15).value = ""
 
+            """SRO three DCA rating"""
+            sro_dca_three = convert_rag_text(current_data[project_name]["GMPP - SRO DCA"])
+            ws.cell(row=row_num, column=16).value = sro_dca_three
+            if sro_dca_three == "None":
+                ws.cell(row=row_num, column=16).value = ""
+
             """DCA rating - this quarter"""
-            ws.cell(row=row_num, column=17).value = convert_rag_text(
+            ws.cell(row=row_num, column=18).value = convert_rag_text(
                 current_data[project_name]["Departmental DCA"]
             )
             """DCA rating - last qrt"""
             try:
-                ws.cell(row=row_num, column=19).value = convert_rag_text(
+                ws.cell(row=row_num, column=20).value = convert_rag_text(
                     last_data[project_name]["Departmental DCA"]
                 )
             except KeyError:
-                ws.cell(row=row_num, column=19).value = ""
+                ws.cell(row=row_num, column=20).value = ""
             """DCA rating - 2 qrts ago"""
             try:
-                ws.cell(row=row_num, column=20).value = convert_rag_text(
+                ws.cell(row=row_num, column=21).value = convert_rag_text(
                     master.master_data[2]["data"][project_name]["Departmental DCA"]
                 )
             except (KeyError, IndexError):
-                ws.cell(row=row_num, column=20).value = ""
+                ws.cell(row=row_num, column=21).value = ""
             """DCA rating - 3 qrts ago"""
             try:
-                ws.cell(row=row_num, column=21).value = convert_rag_text(
+                ws.cell(row=row_num, column=22).value = convert_rag_text(
                     master.master_data[3]["data"][project_name]["Departmental DCA"]
                 )
             except (KeyError, IndexError):
-                ws.cell(row=row_num, column=21).value = ""
+                ws.cell(row=row_num, column=22).value = ""
 
             # """DCA rating - baseline"""
             # bl_i = master.bl_index["ipdc_costs"][project_name][2]
@@ -9026,7 +9032,7 @@ def overall_dashboard(
             # )
 
         """list of columns with conditional formatting"""
-        list_columns = ["o", "q", "s", "t", "u", "w"]
+        list_columns = ["o", "p", "q", "r", "s", "t", "u", "v", "w"]
 
         """same loop but the text is black. In addition these two loops go through the list_columns list above"""
         for column in list_columns:
