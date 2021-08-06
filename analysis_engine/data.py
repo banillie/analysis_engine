@@ -88,6 +88,10 @@ class InputError(Exception):
     pass
 
 
+class DataTypeError(Exception):
+    pass
+
+
 def _platform_docs_dir() -> Path:
     #  Cross plaform file path handling
     if platform.system() == "Linux":
@@ -979,6 +983,9 @@ class Master:
 def convert_none_types(x):
     if x is None:
         return 0
+    # data type handling. to complete.
+    # if isinstance(x, str):
+    #     raise DataTypeError("Correct data type in data")
     else:
         return x
 
