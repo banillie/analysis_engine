@@ -2340,6 +2340,7 @@ class MilestoneData:
                                 ("Milestone", p_data["MM" + str(i)]),
                                 ("Notes", p_data["MM" + str(i) + " NOTES"]),
                                 ("Date", convert_date(p_data["MM" + str(i) + " DATE"])),
+                                ("Status", p_data["MM" + str(i) + " STATUS"]),
                                 ("Report", report),
                                 ("Cat", category),
                             ]
@@ -3744,7 +3745,6 @@ def dca_table(doc: Document, master: Master, **kwargs) -> None:
     hdr_cells[3].text = str(master.master_data[2]["quarter"])
     hdr_cells[4].text = str(master.master_data[3]["quarter"])
 
-
     for x, dca_key in enumerate(list(SRO_CONF_KEY_LIST.keys())):
         row_cells = w_table.add_row().cells
         row_cells[0].text = SRO_CONF_KEY_LIST[dca_key]
@@ -3759,7 +3759,7 @@ def dca_table(doc: Document, master: Master, **kwargs) -> None:
     w_table.style = "Table Grid"
     make_rows_bold([w_table.rows[0]])  # makes top of table bold.
     # make_columns_bold([table.columns[0]]) #right cells in table bold
-    column_widths = (Cm(3.9), Cm(2.9), Cm(2.9), Cm(2.9), Cm(2.9))
+    column_widths = (Cm(4.4), Cm(2.8), Cm(2.8), Cm(2.8), Cm(2.8))
     set_col_widths(w_table, column_widths)
 
 
@@ -6642,6 +6642,46 @@ def print_out_project_milestones(
     return doc
 
 
+def print_out_project_risks(
+        doc: Document, risks: RiskData, **kwargs
+) -> Document:
+    doc.add_section(WD_SECTION_START.NEW_PAGE)
+    # table heading
+    ab = kwargs['group'][0]
+    doc.add_paragraph().add_run(str(ab + " RISKS")).bold = True
+
+    table = doc.add_table(rows=1, cols=5)
+    hdr_cells = table.rows[0].cells
+    hdr_cells[0].text = "Description "
+    hdr_cells[1].text = "Internal Control"
+    hdr_cells[2].text = "Mitigation"
+    hdr_cells[3].text = "Impact"
+    hdr_cells[4].text = "Likelihood"
+
+    p_risks = risks.risk_dictionary[kwargs['quarter'][0]][ab]
+
+    for i in p_risks:
+        row_cells = table.add_row().cells
+        row_cells[0].text = p_risks[i]["Brief Risk Description "]
+        row_cells[1].text = p_risks[i]['BRD Internal Control']
+        row_cells[2].text = p_risks[i]['BRD Mitigation - Actions taken (brief description)']
+        row_cells[3].text = p_risks[i]['BRD Residual Impact']
+        row_cells[4].text = p_risks[i]['BRD Residual Likelihood']
+
+    table.style = "Table Grid"
+    # column widths
+    column_widths = (Cm(5), Cm(1.5), Cm(11), Cm(1.5), Cm(1.5))
+    set_col_widths(table, column_widths)
+    # make_columns_bold([table.columns[0], table.columns[3]])  # make keys bold
+    # make_text_red([table.columns[1], table.columns[4]])  # make 'not reported red'
+
+    make_rows_bold(
+        [table.rows[0]]
+    )  # makes top of table bold. Found function on stack overflow.
+    return doc
+
+
+
 def project_scope_text(doc: Document, master: Master, **kwargs) -> Document:
 
     doc.add_paragraph()
@@ -6736,6 +6776,8 @@ def compile_p_report_new(
     change_word_doc_landscape(doc)
     cost_profile = cost_profile_graph_new(costs, master, **kwargs)
     put_matplotlib_fig_into_word(doc, cost_profile, **kwargs)
+    risks = RiskData(master, **kwargs)
+    print_out_project_risks(doc, risks, **kwargs)
     return doc
 
 

@@ -77,7 +77,7 @@ from analysis_engine.data import (
     data_query_into_wb_by_key,
     amend_project_information,
     compile_p_report,
-    compile_p_report_new,
+    compile_p_report_new, DFT_GROUP,
 )
 
 ## GENERATE CLI OPTIONS
@@ -91,7 +91,7 @@ from analysis_engine.top35_data import (
     top35_run_p_reports, CentralSupportData,
 )
 
-# INITIATE
+# # INITIATE
 # master = JsonMaster(
 #     get_master_data(
 #         str(cdg_root_path) + "/core_data/cdg_config.ini",
@@ -112,16 +112,16 @@ from analysis_engine.top35_data import (
 # DFT_GROUP = ["HSRG", "RSS", "RIG", "AMIS", "RPE"]
 # STAGE_GROUPS = ["pipeline", "pre-SOBC", "SOBC", "OBC", "FBC"]
 hoz_doc = open_word_doc(root_path / "input/summary_temp_landscape.docx")
-# doc = open_word_doc(root_path / "input/summary_temp.docx")
+doc = open_word_doc(root_path / "input/summary_temp.docx")
 
 # top35_data_dict = {
 #     "docx_save_path": str(top35_root_path / "output/{}.docx"),
 #     "master": Master(open_json_file(str(top35_root_path / "core_data/json/master.json"))),
 #     "op_args": {
-#         "quarter": ["Month(July), 2021"],
-#         # "quarter": ["standard"],
-#         "group": ["HSRG", "RSS", "RIG", "RPE"],
-#         # "group": ["LIC"],
+#         # "quarter": ["Month(July), 2021"],
+#         "quarter": ["standard"],
+#         # "group": ["HSRG", "RSS", "RIG", "RPE"],
+#         "group": ["RYR"],
 #         # "chart": False,
 #         "data_type": "top35",
 #         "circle_colour": "No",
@@ -143,15 +143,17 @@ ipdc_data_dict = {
     "docx_save_path": str(root_path / "output/{}.docx"),
     "master": Master(open_json_file(str(root_path / "core_data/json/master.json"))),
     "op_args": {
-        "quarter": ["standard"],
-        # "quarter": ["Q1 21/22"],
+        # "quarter": ["standard"],
+        "quarter": ["Q1 21/22"],
         # "baseline": ["current"],
-        # "group": ["HSRG", "RSS", "RIG", "AMIS", "RPE"],
-        "group": ["Passenger Services Response to COVID-19"],
+        # "group": DFT_GROUP,
+        "group": ["HSRG"],
+        # "group": ["Passenger Services Response to COVID-19"],
         # "stage": ["pre-SOBC", "SOBC", "OBC", "FBC"],
         # "remove": ["HS2 Ph 2b", "HS2 Ph 2a", "NPR"],
         # "dates": ["1/6/2021", "1/7/2021"],
         # "type": "spent",
+        "type": "short",
         # "chart": True,
         # "circle_colour": "No",
         # "key": ["VfM Category single entry"],
@@ -171,7 +173,7 @@ ipdc_data_dict = {
 #     "docx_save_path": str(cdg_root_path / "output/{}.docx"),
 #     "master": Master(open_json_file(str(cdg_root_path / "core_data/json/master.json"))),
 #     "op_args": {
-#         "quarter": ["Q1 21/22"],
+#         "quarter": ["Q2 21/22"],
 #         # "quarter": ["standard"],
 #         "group": ["SCS", "CFPD", "GF"],
 #         # "group": ["SCS", "GF"],
@@ -179,7 +181,7 @@ ipdc_data_dict = {
 #         "data_type": "cdg",
 #         "type": "income",
 #         "blue_line": "CDG",
-#         "dates": ["1/3/2021", "1/6/2022"],
+#         "dates": ["1/9/2021", "1/9/2022"],
 #         "fig_size": "half_horizontal",
 #         "rag_number": "5",
 #         # "order_by": "cost",
@@ -198,17 +200,17 @@ data = ipdc_data_dict
 # dl_data = DandelionData(data["master"], **data["op_args"])
 # d_lion = make_a_dandelion_auto(dl_data, **data["op_args"])
 # put_matplotlib_fig_into_word(hoz_doc, d_lion, size=7)
-# hoz_doc.save(data["word_save_path"].format("dandelion_income"))
+# hoz_doc.save(data["word_save_path"].format("dandelion_income_q2_2021_cdg"))
 
 
-# MILESTONES
+# # MILESTONES
 # ms = MilestoneData(data["master"], **data["op_args"])
 # ms.filter_chart_info(**data["op_args"])
 # wb = put_milestones_into_wb(ms)
-# wb.save(data["excel_save_path"].format("milestones"))
+# wb.save(data["excel_save_path"].format("milestones_q2_2021_cdg"))
 # g = milestone_chart(ms, data["master"], **data["op_args"])
 # put_matplotlib_fig_into_word(hoz_doc, g, size=7, transparent=False)
-# hoz_doc.save(data["word_save_path"].format("milestone_graph"))
+# hoz_doc.save(data["word_save_path"].format("milestone_graph_q2_2021_cdg"))
 
 # b = BenefitsData(m, baseline=["all"])
 # total_costs_benefits_bar_chart(c, b, chart=True)
@@ -235,7 +237,7 @@ data = ipdc_data_dict
 # wb.save(data["excel_save_path"].format(str(x) + " costs_q1_2021"))
 
 # SUMMARIES
-# top35_run_p_reports(data["master"], **data["op_args"])
+run_p_reports(data["master"], **data["op_args"])
 
 ## VFM
 # c = VfMData(m, group=DFm = Master(*data["data"], **data["op_args"] )T_GROUP, quarter=["standard"])  # c is class
@@ -250,9 +252,9 @@ data = ipdc_data_dict
 # dca_data = DcaData(data["master"], **data["op_args"])
 # dca_data.get_changes()
 # build_speedials(dca_data, hoz_doc)
-# hoz_doc.save(data["docx_save_path"].format("speedial_graphs"))
+# hoz_doc.save(data["docx_save_path"].format("speedials_q2_2021_cdg"))
 # doc = dca_changes_into_word(dca_data, doc)
-# doc.save(data["docx_save_path"].format("speedial_dca_changes"))
+# doc.save(data["docx_save_path"].format("speedial_changes_q2_2021_cdg"))
 
 # DCAS
 # wb = dca_changes_into_excel(dca_data)
@@ -282,12 +284,12 @@ data = ipdc_data_dict
 
 
 ## DASHBOARD
-wb = ipdc_dashboard(data["master"], data["dashboard"], data["op_args"])
-wb.save(data["excel_save_path"].format("ipdc_dashboard_testing"))
+# wb = ipdc_dashboard(data["master"], data["dashboard"], data["op_args"])
+# wb.save(data["excel_save_path"].format("ipdc_dashboard_testing"))
 # wb = cdg_narrative_dashboard(data["master"], data["narrative_dashboard"])
-# wb.save(data["excel_save_path"].format("q1_2021_narrative_dashboard"))
+# wb.save(data["excel_save_path"].format("narrative_dashboard_q2_2021_cdg"))
 # wb = cdg_dashboard(data["master"], data["dashboard"])
-# wb.save(data["excel_save_path"].format("q1_2021_dashboard"))
+# wb.save(data["excel_save_path"].format("dashboard_q2_2021_cdg"))
 
 ##CENTRAL SUPPORT
 # cs = CentralSupportData(data["master"], **data["op_args"])
