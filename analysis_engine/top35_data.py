@@ -162,12 +162,12 @@ def project_scope_text(doc: Document, master: Master, project_name: str) -> Docu
     text_one = str(
         master.master_data[0]["data"][project_name]["SHORT PROJECT DESCRIPTION"]
     )
-    # try:
-    text_two = str(
-        master.master_data[1]["data"][project_name]["SHORT PROJECT DESCRIPTION"]
-    )
-    # except IndexError:
-    #     text_two = text_one
+    try:
+        text_two = str(
+            master.master_data[1]["data"][project_name]["SHORT PROJECT DESCRIPTION"]
+        )
+    except KeyError:
+        text_two = text_one
     compare_text_new_and_old(text_one, text_two, doc)
     return doc
 
@@ -182,11 +182,15 @@ def deliverables(doc: Document, master: Dict, project_name: str) -> Document:
     doc.add_paragraph().add_run("Top 3 Deliverables").bold = True
 
     for i, d in enumerate(dels):
-        try:  # this is necessary as string data contains NBSP and this removes them
-            text_one = master.master_data[0]["data"][project_name][d]
+        text_one = master.master_data[0]["data"][project_name][d]
+        try:
             text_two = master.master_data[1]["data"][project_name][d]
+        except KeyError:
+            text_two = text_one
+
+        try:
             compare_text_new_and_old(text_one, text_two, doc)
-        except AttributeError:
+        except AttributeError:  # this is necessary as string data contains NBSP and this removes them
             pass
 
     return doc
@@ -217,7 +221,11 @@ def project_report_meta_data(
     project_name: str,
 ):
     p_master = master.master_data[0]["data"][project_name]
-    p_master_last = master.master_data[1]["data"][project_name]
+    try:
+        p_master_last = master.master_data[1]["data"][project_name]
+    except KeyError:
+        p_master_last = p_master
+
     """Meta data table"""
     # doc.add_section(WD_SECTION_START.NEW_PAGE)
     # paragraph = doc.add_paragraph()
@@ -300,7 +308,10 @@ def dca_narratives(doc: Document, master: Dict, project_name: str) -> None:
 
     for x in range(len(headings_list)):
         text_one = str(master.master_data[0]["data"][project_name][narrative_keys_list[x]])
-        text_two = str(master.master_data[1]["data"][project_name][narrative_keys_list[x]])
+        try:
+            text_two = str(master.master_data[1]["data"][project_name][narrative_keys_list[x]])
+        except KeyError:
+            text_two = text_one
         doc.add_paragraph().add_run(str(headings_list[x])).bold = True
         compare_text_new_and_old(text_one, text_two, doc)
 
@@ -446,17 +457,6 @@ class CentralSupportData:
                         ("Cat", category),
                     ]
                     milestone_info_handling(project_list, t, **self.kwargs)
-                # for i in range(17, 20):
-                #     t = [
-                #         ("Project", p),
-                #         ("Requirement", p_data["R" + str(i) + " name"]),
-                #         ("Escalated", p_data["R" + str(i) + " escalated to"]),
-                #         ("Date", convert_date(p_data["R" + str(i) + " needed by"])),
-                #         ("Type", p_data["R" + str(i) + " type"]),
-                #         ("Report", report),
-                #         ("Cat", category),
-                #     ]
-                #     milestone_info_handling(project_list, t, type="central support")
 
                 # loop to stop keys names being the same. Done at project level.
                 # not particularly concise code.
@@ -472,7 +472,7 @@ class CentralSupportData:
                         new_require_key = (
                             entry[1][1] + " (" + str(lower_count[entry[1][1]]) + ")"
                         )
-                        entry[1] = ("Milestone", new_require_key)
+                        entry[1] = ("Requirement", new_require_key)
                         raw_list.append(entry)
                     else:
                         raw_list.append(entry)
@@ -772,17 +772,16 @@ def print_out_project_milestones(
     # ab = milestones.master.abbreviations[project_name]["abb"]
     doc.add_paragraph().add_run("Milestones").bold = True
 
-    table = doc.add_table(rows=1, cols=4)
-    hdr_cells = table.rows[0].cells
-    hdr_cells[0].text = "Milestone"
-    hdr_cells[1].text = "Date"
-    hdr_cells[2].text = "Status"
-    # hdr_cells[3].text = "Change from baseline"
-    hdr_cells[3].text = "Notes"
-
     if not milestones.sorted_milestone_dict[milestones.iter_list[0]]["names"]:
         doc.add_paragraph().add_run("No milestones reported")
     else:
+        table = doc.add_table(rows=1, cols=4)
+        hdr_cells = table.rows[0].cells
+        hdr_cells[0].text = "Milestone"
+        hdr_cells[1].text = "Date"
+        hdr_cells[2].text = "Status"
+        # hdr_cells[3].text = "Change from baseline"
+        hdr_cells[3].text = "Notes"
         for i, m in enumerate(
             milestones.sorted_milestone_dict[milestones.iter_list[0]]["names"]
         ):
@@ -794,32 +793,6 @@ def print_out_project_milestones(
             row_cells[2].text = milestones.sorted_milestone_dict[
                 milestones.iter_list[0]
             ]["status"][i]
-            # try:
-            #     row_cells[2].text = plus_minus_days(
-            #         (
-            #                 milestones.sorted_milestone_dict[milestones.iter_list[0]][
-            #                     "r_dates"
-            #                 ][i]
-            #                 - milestones.sorted_milestone_dict[milestones.iter_list[1]][
-            #                     "r_dates"
-            #                 ][i]
-            #         ).days
-            #     )
-            # except TypeError:
-            #     row_cells[2].text = "Not reported"
-            # try:
-            #     row_cells[3].text = plus_minus_days(
-            #         (
-            #                 milestones.sorted_milestone_dict[milestones.iter_list[0]][
-            #                     "r_dates"
-            #                 ][i]
-            #                 - milestones.sorted_milestone_dict[milestones.iter_list[2]][
-            #                     "r_dates"
-            #                 ][i]
-            #         ).days
-            #     )
-            # except TypeError:
-            #     row_cells[3].text = "Not reported"
             try:
                 row_cells[3].text = milestones.sorted_milestone_dict[
                     milestones.iter_list[0]

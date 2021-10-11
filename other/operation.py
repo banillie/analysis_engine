@@ -114,74 +114,74 @@ from analysis_engine.top35_data import (
 hoz_doc = open_word_doc(root_path / "input/summary_temp_landscape.docx")
 doc = open_word_doc(root_path / "input/summary_temp.docx")
 
-# top35_data_dict = {
-#     "docx_save_path": str(top35_root_path / "output/{}.docx"),
-#     "master": Master(open_json_file(str(top35_root_path / "core_data/json/master.json"))),
-#     "op_args": {
-#         # "quarter": ["Month(July), 2021"],
-#         "quarter": ["standard"],
-#         # "group": ["HSRG", "RSS", "RIG", "RPE"],
-#         "group": ["RYR"],
-#         # "chart": False,
-#         "data_type": "top35",
-#         "circle_colour": "No",
-#         # "dates": ["1/6/2021", "1/7/2021"],
-#         "key": [
-#             "PROJECT DEL TO CURRENT TIMINGS ?",
-#             "GMPP ID: IS THIS PROJECT ON GMPP",
-#             "PROJECT ON BUDGET?",
-#             "WLC TOTAL",
-#             "WLC NON GOV",
-#         ],
-#         # "key": ["Start of Trial Running"],
-#     },
-#     "excel_save_path": str(top35_root_path / "output/{}.xlsx"),
-#     "word_save_path": str(top35_root_path / "output/{}.docx")
-# }
-
-ipdc_data_dict = {
-    "docx_save_path": str(root_path / "output/{}.docx"),
-    "master": Master(open_json_file(str(root_path / "core_data/json/master.json"))),
+top35_data_dict = {
+    "docx_save_path": str(top35_root_path / "output/{}.docx"),
+    "master": Master(open_json_file(str(top35_root_path / "core_data/json/master.json"))),
     "op_args": {
-        # "quarter": ["standard"],
-        "quarter": ["Q1 21/22"],
-        # "baseline": ["current"],
-        # "group": DFT_GROUP,
-        "group": ["HSRG"],
-        # "group": ["Passenger Services Response to COVID-19"],
-        # "stage": ["pre-SOBC", "SOBC", "OBC", "FBC"],
-        # "remove": ["HS2 Ph 2b", "HS2 Ph 2a", "NPR"],
+        # "quarter": ["Month(July), 2021"],
+        "quarter": ["standard"],
+        # "group": ["HSRG", "RSS", "RIG", "RPE"],
+        "group": ["RYR", "Rail Workforce Reform"],
+        # "chart": False,
+        "data_type": "top35",
+        "circle_colour": "No",
         # "dates": ["1/6/2021", "1/7/2021"],
-        # "type": "spent",
-        "type": "short",
-        # "chart": True,
-        # "circle_colour": "No",
-        # "key": ["VfM Category single entry"],
-        # "conf_type": "sro",
-        # "rag_number": "3",
-        # "order_by": "schedule",
-        # "angles": [240, 290, 22, 120],
-        # "weighting": "count",
-        # "show": "No",
+        "key": [
+            "PROJECT DEL TO CURRENT TIMINGS ?",
+            "GMPP ID: IS THIS PROJECT ON GMPP",
+            "PROJECT ON BUDGET?",
+            "WLC TOTAL",
+            "WLC NON GOV",
+        ],
+        # "key": ["Start of Trial Running"],
     },
-    "dashboard": get_input_doc(root_path / "input/dashboards_master.xlsx"),
-    "excel_save_path": str(root_path / "output/{}.xlsx"),
-    "word_save_path": str(root_path / "output/{}.docx"),
+    "excel_save_path": str(top35_root_path / "output/{}.xlsx"),
+    "word_save_path": str(top35_root_path / "output/{}.docx")
 }
+
+# ipdc_data_dict = {
+#     "docx_save_path": str(root_path / "output/{}.docx"),
+#     "master": Master(open_json_file(str(root_path / "core_data/json/master.json"))),
+#     "op_args": {
+#         # "quarter": ["standard"],
+#         "quarter": ["Q1 21/22"],
+#         # "baseline": ["current"],
+#         # "group": DFT_GROUP,
+#         "group": ["HSRG"],
+#         # "group": ["Passenger Services Response to COVID-19"],
+#         # "stage": ["pre-SOBC", "SOBC", "OBC", "FBC"],
+#         # "remove": ["HS2 Ph 2b", "HS2 Ph 2a", "NPR"],
+#         # "dates": ["1/6/2021", "1/7/2021"],
+#         # "type": "spent",
+#         "type": "short",
+#         # "chart": True,
+#         # "circle_colour": "No",
+#         # "key": ["VfM Category single entry"],
+#         # "conf_type": "sro",
+#         # "rag_number": "3",
+#         # "order_by": "schedule",
+#         # "angles": [240, 290, 22, 120],
+#         # "weighting": "count",
+#         # "show": "No",
+#     },
+#     "dashboard": get_input_doc(root_path / "input/dashboards_master.xlsx"),
+#     "excel_save_path": str(root_path / "output/{}.xlsx"),
+#     "word_save_path": str(root_path / "output/{}.docx"),
+# }
 
 # cdg_data_dict = {
 #     "docx_save_path": str(cdg_root_path / "output/{}.docx"),
 #     "master": Master(open_json_file(str(cdg_root_path / "core_data/json/master.json"))),
 #     "op_args": {
-#         "quarter": ["Q2 21/22"],
-#         # "quarter": ["standard"],
+#         # "quarter": ["Q2 21/22"],
+#         "quarter": ["standard"],
 #         "group": ["SCS", "CFPD", "GF"],
 #         # "group": ["SCS", "GF"],
 #         "chart": True,
 #         "data_type": "cdg",
-#         "type": "income",
+#         # "type": "income",
 #         "blue_line": "CDG",
-#         "dates": ["1/9/2021", "1/9/2022"],
+#         "dates": ["1/9/2021", "1/6/2022"],
 #         "fig_size": "half_horizontal",
 #         "rag_number": "5",
 #         # "order_by": "cost",
@@ -194,7 +194,7 @@ ipdc_data_dict = {
 #     "word_save_path": str(cdg_root_path / "output/{}.docx")
 # }
 
-data = ipdc_data_dict
+data = top35_data_dict
 
 ## DANDELION
 # dl_data = DandelionData(data["master"], **data["op_args"])
@@ -237,7 +237,7 @@ data = ipdc_data_dict
 # wb.save(data["excel_save_path"].format(str(x) + " costs_q1_2021"))
 
 # SUMMARIES
-run_p_reports(data["master"], **data["op_args"])
+top35_run_p_reports(data["master"], **data["op_args"])
 
 ## VFM
 # c = VfMData(m, group=DFm = Master(*data["data"], **data["op_args"] )T_GROUP, quarter=["standard"])  # c is class

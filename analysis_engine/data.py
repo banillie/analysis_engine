@@ -2334,7 +2334,7 @@ class MilestoneData:
                             )
                     if self.kwargs["data_type"] == "cdg":
                         report = "CDG"
-                        for i in range(1, 12):
+                        for i in range(1, 15):
                             entry = [
                                 ("Project", p),
                                 ("Milestone", p_data["MM" + str(i)]),
