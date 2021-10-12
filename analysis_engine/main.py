@@ -292,7 +292,7 @@ def ipdc_run_general(args):
         if programme == "query":
             if "koi" not in op_args and "koi_fn" not in op_args:
                 logger.critical(
-                    "Please enter a key name(s) using either --keys or --file_name"
+                    "Please enter a key name(s) using either --koi or --koi_fn"
                 )
                 sys.exit(1)
             op_args = return_koi_fn_keys(op_args)

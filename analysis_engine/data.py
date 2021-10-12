@@ -3820,6 +3820,55 @@ def dca_narratives(doc: Document,
         compare_text_new_and_old(text_one, text_two, doc)
 
 
+def forward_look(doc: Document,
+                   master: Master,
+                   **kwargs) -> None:
+
+    doc.add_paragraph()
+    p = doc.add_paragraph()
+    text = "*Red text highlights changes in narratives from last quarter"
+    p.add_run(text).font.color.rgb = RGBColor(255, 0, 0)
+
+    fwd_look = str(
+        master.master_data[0]["data"][kwargs["full_name"]]['SRO Forward Look Assessment']
+    )
+
+    doc.add_paragraph().add_run('SRO Forward Look Assessment: ' + str(fwd_look).upper()).bold = True
+
+
+def forward_look_narrative(doc: Document,
+                   master: Master,
+                   **kwargs) -> None:
+
+    headings_list = [
+        "SRO Forward Look Narrative",
+    ]
+
+    narrative_keys_list = [
+        "SRO Forward Look Narrative"
+    ]
+
+    for x in range(len(headings_list)):
+        try:  # overall try statement relates to data_bridge
+            text_one = str(
+                master.master_data[0]["data"][kwargs["full_name"]][narrative_keys_list[x]]
+            )
+            try:
+                text_two = str(
+                    master.master_data[1]["data"][kwargs["full_name"]][narrative_keys_list[x]]
+                )
+            except (KeyError, IndexError):  # index error relates to data_bridge
+                text_two = text_one
+        except KeyError:
+            break
+
+        doc.add_paragraph().add_run(str(headings_list[x])).bold = True
+
+        # There are two options here for comparing text. Have left this for now.
+        # compare_text_showall(dca_a, dca_b, doc)
+        compare_text_new_and_old(text_one, text_two, doc)
+
+
 def change_word_doc_landscape(doc: Document) -> Document:
     new_section = doc.add_section(WD_SECTION_START.NEW_PAGE)  # new page
     new_width, new_height = new_section.page_height, new_section.page_width
@@ -6681,13 +6730,12 @@ def print_out_project_risks(
     return doc
 
 
-
 def project_scope_text(doc: Document, master: Master, **kwargs) -> Document:
 
-    doc.add_paragraph()
-    p = doc.add_paragraph()
-    text = "*Red text highlights changes in narratives from last quarter"
-    p.add_run(text).font.color.rgb = RGBColor(255, 0, 0)
+    # doc.add_paragraph()
+    # p = doc.add_paragraph()
+    # text = "*Red text highlights changes in narratives from last quarter"
+    # p.add_run(text).font.color.rgb = RGBColor(255, 0, 0)
 
     doc.add_paragraph().add_run("Project Scope").bold = True
     text_one = str(master.master_data[0]["data"][kwargs["full_name"]]["Project Scope"])
@@ -6709,6 +6757,7 @@ def compile_p_report(
     wd_heading(doc, master, project_name)
     key_contacts(doc, master, project_name)
     dca_table(doc, master, project_name)
+    # forward_look(doc, master, project_name)
     dca_narratives(doc, master, project_name)
     costs = CostData(master, group=[project_name], baseline=["standard"])
     costs.get_cost_profile()
@@ -6764,8 +6813,10 @@ def compile_p_report_new(
     wd_heading(doc, **kwargs)
     key_contacts(doc, master, **kwargs)
     dca_table(doc, master, **kwargs)
+    forward_look(doc, master, **kwargs)
     project_scope_text(doc, master, **kwargs)
     dca_narratives(doc, master, **kwargs)
+    forward_look_narrative(doc, master, **kwargs)
     costs = CostData(master, **kwargs)
     costs.get_forecast_cost_profile()
     costs.get_baseline_cost_profile()
@@ -7234,7 +7285,7 @@ def data_query_into_wb(master: Master, **kwargs) -> Workbook:
                         except IndexError:
                             pass
                     date = get_milestone_date(
-                        abb, milestones_one.milestone_dict, tp, " " + key
+                        abb, milestones_one.milestone_dict, tp, key
                     )
                     if date is None:
                         ws.cell(row=2 + y, column=5 + x).value = "md"
@@ -7247,7 +7298,7 @@ def data_query_into_wb(master: Master, **kwargs) -> Workbook:
                             abb,
                             milestones_two.milestone_dict,
                             iter_list[z + 1],
-                            " " + key,
+                            key,
                         )
                         if date != lst_date:
                             ws.cell(row=2 + y, column=5 + x).fill = SALMON_FILL
