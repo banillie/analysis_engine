@@ -3737,6 +3737,13 @@ def key_contacts(doc: Document, master: Master, **kwargs) -> None:
 
 def dca_table(doc: Document, master: Master, **kwargs) -> None:
     """Creates SRO confidence table"""
+
+    # doc.add_paragraph()
+    p = doc.add_paragraph()
+    text = "* Note in Q2 2021/22 DCA ratings moved to a three point scale."
+    p.add_run(text)
+        # .font.color.rgb = RGBColor(255, 0, 0)
+
     w_table = doc.add_table(rows=1, cols=5)
     hdr_cells = w_table.rows[0].cells
     hdr_cells[0].text = "Delivery confidence"
