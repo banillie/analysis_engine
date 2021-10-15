@@ -872,7 +872,7 @@ class JsonMaster:
         stage_list = list(set(stage_list))
 
         group_dict = {}
-        for i, quarter in enumerate(raw_dict.keys()):
+        for i, quarter in enumerate(list(raw_dict.keys())[:2]):  # just latest two quarters
             lower_g_dict = {}
             for group_type in group_list:
                 g_list = []
@@ -892,7 +892,7 @@ class JsonMaster:
             group_dict[quarter] = lower_g_dict
 
         stage_dict = {}
-        for quarter in raw_dict.keys():
+        for quarter in list(raw_dict.keys())[:2]:  # just latest two quarters
             lower_s_dict = {}
             for stage_type in stage_list:
                 s_list = []
@@ -10442,8 +10442,8 @@ def get_map(wb):
 
 
 def get_gmpp_data():
-    wb_one = load_workbook("/home/will/Downloads/GMPP_DATA_NO2_FINAL.xlsm")
-    # wb_two = load_workbook("/home/will/Downloads/GMPP_DATA_Q1.xlsm")
+    # wb_one = load_workbook("/home/will/Downloads/GMPP_DATA_NO2_FINAL.xlsm")
+    wb_one = load_workbook("/home/will/Downloads/GMPP_DATA_Q1_FINAL.xlsm")
     # wb_three = load_workbook("/home/will/Downloads/GMPP_DATA_Q4.xlsm")
 
     wb_list = [wb_one]
@@ -10585,7 +10585,7 @@ def get_gmpp_data():
     ws.cell(row=1, column=1).value = "Project Name (DfT Keys)"
     ws.cell(row=1, column=2).value = "Project Name (IPA Keys)"
 
-    wb.save("/home/will/Downloads/GMPP_DATA_DFT_FORMAT_NO2_FINAL.xlsx")
+    wb.save("/home/will/Downloads/GMPP_DATA_DFT_FORMAT_Q1.xlsx")
 
 
 GMPP_M_DICT = {
@@ -10642,94 +10642,96 @@ def data_check_print_out(gmpp_data: Dict, ipdc_data: Dict):
 
     start_row = 2
     project_check_list = []
-    for x, project in enumerate(list(project_map.keys())):
+    for x, project in enumerate(list(project_map.keys())):  # could be project_map.keys()
         project_check_list.append(project)
-        for i, k in enumerate(gmpp_data[project]):
-            if k is None:
-                continue
-            check_key = remove_keys(k)
-            if check_key == "remove":
-                continue
-            ws.cell(row=start_row, column=1).value = project
-            try:
-                dft_project_name = project_map[project]
-                project_check = "PASS"
-            except KeyError:
-                dft_project_name = ""
-                project_check = "FAILED"
-            ws.cell(row=start_row, column=2).value = dft_project_name
-            ws.cell(row=start_row, column=3).value = project_check
-            ws.cell(row=start_row, column=4).value = k
-            try:
-                dft_key_name = key_map[k]
-                if dft_key_name == "None":
+        try:  # exception so only projects in ipdc data compared.
+            for i, k in enumerate(gmpp_data[project]):
+                if k is None:
                     continue
-                key_check = "PASS"
-            except KeyError:
-                print(k)
-                dft_key_name = ""
-                key_check = "FAILED"
-            ws.cell(row=start_row, column=5).value = dft_key_name
-            ws.cell(row=start_row, column=6).value = key_check
+                check_key = remove_keys(k)
+                if check_key == "remove":
+                    continue
+                ws.cell(row=start_row, column=1).value = project
+                try:
+                    dft_project_name = project_map[project]
+                    project_check = "PASS"
+                except KeyError:
+                    dft_project_name = ""
+                    project_check = "FAILED"
+                ws.cell(row=start_row, column=2).value = dft_project_name
+                ws.cell(row=start_row, column=3).value = project_check
+                ws.cell(row=start_row, column=4).value = k
+                try:
+                    dft_key_name = key_map[k]
+                    if dft_key_name == "None":
+                        continue
+                    key_check = "PASS"
+                except KeyError:
+                    print(k)
+                    dft_key_name = ""
+                    key_check = "FAILED"
+                ws.cell(row=start_row, column=5).value = dft_key_name
+                ws.cell(row=start_row, column=6).value = key_check
 
-            gmpp_val = gmpp_data[project][k]
+                gmpp_val = gmpp_data[project][k]
 
-            try:
-                dft_val = ipdc_data[dft_project_name][dft_key_name]
-                if "Ver No" in dft_key_name or "Version No" in dft_key_name:
-                    if dft_val is not None:
-                        dft_val = str(dft_val)
-                    if gmpp_val is not None:
-                        gmpp_val = str(gmpp_val)
-            except KeyError:
-                dft_val = ""
+                try:
+                    dft_val = ipdc_data[dft_project_name][dft_key_name]
+                    if "Ver No" in dft_key_name or "Version No" in dft_key_name:
+                        if dft_val is not None:
+                            dft_val = str(dft_val)
+                        if gmpp_val is not None:
+                            gmpp_val = str(gmpp_val)
+                except KeyError:
+                    dft_val = ""
 
-            ws.cell(row=start_row, column=7).value = gmpp_val
-            if isinstance(gmpp_val, datetime.datetime):
-                gmpp_val = gmpp_val.date()
-                ws.cell(row=start_row, column=7, value=gmpp_val).number_format = "dd/mm/yy"
+                ws.cell(row=start_row, column=7).value = gmpp_val
+                if isinstance(gmpp_val, datetime.datetime):
+                    gmpp_val = gmpp_val.date()
+                    ws.cell(row=start_row, column=7, value=gmpp_val).number_format = "dd/mm/yy"
 
-            ws.cell(row=start_row, column=8).value = dft_val
-            if isinstance(dft_val, datetime.datetime):
-                dft_val = dft_val.date()
-                ws.cell(row=start_row, column=8, value=dft_val).number_format = "dd/mm/yy"
+                ws.cell(row=start_row, column=8).value = dft_val
+                if isinstance(dft_val, datetime.datetime):
+                    dft_val = dft_val.date()
+                    ws.cell(row=start_row, column=8, value=dft_val).number_format = "dd/mm/yy"
 
-            if gmpp_val in list(GMPP_M_DICT.keys()):
-                if GMPP_M_DICT[gmpp_val] == dft_val:
+                if gmpp_val in list(GMPP_M_DICT.keys()):
+                    if GMPP_M_DICT[gmpp_val] == dft_val:
+                        ws.cell(row=start_row, column=9).value = "MATCH"
+                        start_row += 1
+                        continue
+
+                if isinstance(gmpp_val, str) and isinstance(dft_val, str):
+                    if "Ver No" in dft_key_name or "Version No" in k:
+                        try:
+                            gmpp_val = int(float(gmpp_val))
+                            dft_val = int(float(dft_val))
+                        except ValueError:
+                            pass
+                    else:
+                        gmpp_val = gmpp_val.split()
+                        dft_val = dft_val.split()
+
+                # get floats of different lengths to match
+                if isinstance(dft_val, float) and isinstance(gmpp_val, float):
+                    dft_val = float("{:.2f}".format(dft_val))
+                    gmpp_val = float("{:.2f}".format(gmpp_val))
+
+                if gmpp_val == dft_val:
                     ws.cell(row=start_row, column=9).value = "MATCH"
-                    start_row += 1
-                    continue
+                elif gmpp_val is None and dft_val == "":
+                    ws.cell(row=start_row, column=9).value = "MATCH"
+                elif gmpp_val == "" and dft_val is None:
+                    ws.cell(row=start_row, column=9).value = "MATCH"
+                elif gmpp_val is None and dft_val == 0:
+                    ws.cell(row=start_row, column=9).value = "MATCH"
 
-            if isinstance(gmpp_val, str) and isinstance(dft_val, str):
-                if "Ver No" in dft_key_name or "Version No" in k:
-                    try:
-                        gmpp_val = int(float(gmpp_val))
-                        dft_val = int(float(dft_val))
-                    except ValueError:
-                        pass
                 else:
-                    gmpp_val = gmpp_val.split()
-                    dft_val = dft_val.split()
+                    ws.cell(row=start_row, column=9).value = "DIFFERENT"
 
-            # get floats of different lengths to match
-            if isinstance(dft_val, float) and isinstance(gmpp_val, float):
-                dft_val = float("{:.2f}".format(dft_val))
-                gmpp_val = float("{:.2f}".format(gmpp_val))
-
-            if gmpp_val == dft_val:
-                ws.cell(row=start_row, column=9).value = "MATCH"
-            elif gmpp_val is None and dft_val == "":
-                ws.cell(row=start_row, column=9).value = "MATCH"
-            elif gmpp_val == "" and dft_val is None:
-                ws.cell(row=start_row, column=9).value = "MATCH"
-            elif gmpp_val is None and dft_val == 0:
-                ws.cell(row=start_row, column=9).value = "MATCH"
-
-            else:
-                ws.cell(row=start_row, column=9).value = "DIFFERENT"
-
-            start_row += 1
-
+                start_row += 1
+        except KeyError:
+            pass
     ws.cell(row=1, column=1).value = "GMPP PROJECT NAME"
     ws.cell(row=1, column=2).value = "DFT PROJECT NAME"
     ws.cell(row=1, column=3).value = "NAME CHECK"
@@ -10748,7 +10750,7 @@ def data_check_print_out(gmpp_data: Dict, ipdc_data: Dict):
         for x in p_check:
             print(x)
 
-    wb.save("/home/will/Downloads/GMPP_IPDC_DATA_CHECK_Q1_20_21_FINAL.xlsx")
+    wb.save("/home/will/Downloads/GMPP_IPDC_DATA_CHECK_Q2_20_21_v3.xlsx")
 
 
 # def print_gmpp_data(gmpp_dict: Dict):
