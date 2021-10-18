@@ -43,6 +43,7 @@ from matplotlib.patches import Wedge, Rectangle, Circle, ArrowStyle
 from openpyxl import load_workbook, Workbook
 from openpyxl.chart import BubbleChart, Reference, Series
 from openpyxl.formatting import Rule
+from openpyxl.formatting.rule import IconSetRule, FormatObject
 from openpyxl.styles import Font, PatternFill, Border
 from openpyxl.styles.differential import DifferentialStyle
 from openpyxl.workbook import workbook
@@ -640,6 +641,9 @@ COLOUR_DICT = {
     "None": "#FFFFFF",  # white if missing
     None: "#FFFFFF",  # white if missing
     "White": "#ffffff",
+    "Worsening": "#c00000",
+    "No Change Expected": "#ffba00",
+    "Improving": "#007d00",
 }
 
 
@@ -8817,26 +8821,26 @@ def benefits_dashboard(master: Master, wb: Workbook) -> Workbook:
             #     baseline_data[project_name]["SRO Benefits RAG"]
             # )
 
-        """list of columns with conditional formatting"""
-        list_columns = ["p", "q", "r", "s", "t"]
+    """list of columns with conditional formatting"""
+    list_columns = ["p", "q", "r", "s", "t"]
 
-        """loops below place conditional formatting (cf) rules into the wb. There are two as the dashboard currently has
-        two distinct sections/headings, which do not require cf. Therefore, cf starts and ends at the stated rows. this
-        is hard code that will need to be changed should the position of information in the dashboard change. It is an
-        easy change however"""
+    """loops below place conditional formatting (cf) rules into the wb. There are two as the dashboard currently has
+    two distinct sections/headings, which do not require cf. Therefore, cf starts and ends at the stated rows. this
+    is hard code that will need to be changed should the position of information in the dashboard change. It is an
+    easy change however"""
 
-        """same loop but the text is black. In addition these two loops go through the list_columns list above"""
-        for column in list_columns:
-            for i, dca in enumerate(rag_txt_list):
-                text = black_text
-                fill = fill_colour_list[i]
-                dxf = DifferentialStyle(font=text, fill=fill)
-                rule = Rule(
-                    type="containsText", operator="containsText", text=dca, dxf=dxf
-                )
-                for_rule_formula = 'NOT(ISERROR(SEARCH("' + dca + '",' + column + "5)))"
-                rule.formula = [for_rule_formula]
-                ws.conditional_formatting.add("" + column + "5:" + column + "60", rule)
+    """same loop but the text is black. In addition these two loops go through the list_columns list above"""
+    for column in list_columns:
+        for i, dca in enumerate(rag_txt_list):
+            text = black_text
+            fill = fill_colour_list[i]
+            dxf = DifferentialStyle(font=text, fill=fill)
+            rule = Rule(
+                type="containsText", operator="containsText", text=dca, dxf=dxf
+            )
+            for_rule_formula = 'NOT(ISERROR(SEARCH("' + dca + '",' + column + "5)))"
+            rule.formula = [for_rule_formula]
+            ws.conditional_formatting.add("" + column + "5:" + column + "60", rule)
 
     # for row_num in range(2, ws.max_row + 1):
     #     for col_num in range(5, ws.max_column+1):
@@ -9055,10 +9059,6 @@ def overall_dashboard(
             try:
                 last_change = (current - last_quarter).days
                 ws.cell(row=row_num, column=10).value = plus_minus_days(last_change)
-            #     if last_change is not None and last_change > 46:
-            #         ws.cell(row=row_num, column=10).font = Font(
-            #             name="Arial", size=10, color="00fc2525"
-            #         )
             except TypeError:
                 pass
             # try:
@@ -9093,6 +9093,23 @@ def overall_dashboard(
             if ipa_dca == "None":
                 ws.cell(row=row_num, column=15).value = ""
 
+            #SRO forward look
+            try:
+                fwd_look = current_data[project_name]['SRO Forward Look Assessment']
+            except KeyError:
+                raise InputError(
+                    'No SRO Forward Look Assessment key in current quarter master. This key must'
+                    ' be present for dashboard compilation. Stopping.'
+                )
+            if fwd_look == "Worsening":
+                ws.cell(row=row_num, column=18).value = 1
+            if fwd_look == "No Change Expected":
+                ws.cell(row=row_num, column=18).value = 2
+            if fwd_look == "Improving":
+                ws.cell(row=row_num, column=18).value = 3
+            if fwd_look is None:
+                ws.cell(row=row_num, column=18).value = ""
+
             """SRO three DCA rating"""
             sro_dca_three = convert_rag_text(current_data[project_name]["GMPP - SRO DCA"])
             ws.cell(row=row_num, column=16).value = sro_dca_three
@@ -9100,7 +9117,7 @@ def overall_dashboard(
                 ws.cell(row=row_num, column=16).value = ""
 
             """DCA rating - this quarter"""
-            ws.cell(row=row_num, column=18).value = convert_rag_text(
+            ws.cell(row=row_num, column=19).value = convert_rag_text(
                 current_data[project_name]["Departmental DCA"]
             )
             """DCA rating - last qrt"""
@@ -9131,26 +9148,30 @@ def overall_dashboard(
             #     master.master_data[bl_i]["data"][project_name]["Departmental DCA"]
             # )
 
-        """list of columns with conditional formatting"""
-        list_columns = ["o", "p", "q", "r", "s", "t", "u", "v", "w"]
+    # places arrow icons for sro forward look assessment
+    icon_set_rule = IconSetRule("3Arrows", "num", ['1', '2', '3'], showValue=False)
+    ws.conditional_formatting.add("R4:R40", icon_set_rule)
 
-        """same loop but the text is black. In addition these two loops go through the list_columns list above"""
-        for column in list_columns:
-            for i, dca in enumerate(rag_txt_list):
-                text = black_text
-                fill = fill_colour_list[i]
-                dxf = DifferentialStyle(font=text, fill=fill)
-                rule = Rule(
-                    type="containsText", operator="containsText", text=dca, dxf=dxf
-                )
-                for_rule_formula = 'NOT(ISERROR(SEARCH("' + dca + '",' + column + "5)))"
-                rule.formula = [for_rule_formula]
-                ws.conditional_formatting.add(column + "5:" + column + "60", rule)
+    """list of columns with conditional formatting"""
+    list_columns = ["o", "s", "t", "u", "v", "w"]
 
-        for row_num in range(2, ws.max_row + 1):
-            for col_num in range(5, ws.max_column + 1):
-                if ws.cell(row=row_num, column=col_num).value == 0:
-                    ws.cell(row=row_num, column=col_num).value = "-"
+    """same loop but the text is black. In addition these two loops go through the list_columns list above"""
+    for column in list_columns:
+        for i, dca in enumerate(rag_txt_list):
+            text = black_text
+            fill = fill_colour_list[i]
+            dxf = DifferentialStyle(font=text, fill=fill)
+            rule = Rule(
+                type="containsText", operator="containsText", text=dca, dxf=dxf
+            )
+            for_rule_formula = 'NOT(ISERROR(SEARCH("' + dca + '",' + column + "5)))"
+            rule.formula = [for_rule_formula]
+            ws.conditional_formatting.add(column + "5:" + column + "60", rule)
+
+    for row_num in range(2, ws.max_row + 1):
+        for col_num in range(5, ws.max_column + 1):
+            if ws.cell(row=row_num, column=col_num).value == 0:
+                ws.cell(row=row_num, column=col_num).value = "-"
 
     return wb
 
@@ -9537,9 +9558,11 @@ class DandelionData:
                             edge_colour = "grey"
                     else:
                         if p in self.master.dft_groups[tp]["GMPP"]:
-                            edge_colour = "#000000"
+                            # edge_colour = "#000000"
+                            edge_colour = COLOUR_DICT[p_data['SRO Forward Look Assessment']]
                         else:
-                            edge_colour = colour
+                            # edge_colour = colour
+                            edge_colour = COLOUR_DICT[p_data['SRO Forward Look Assessment']]
 
                     try:
                         if len(p_list) >= 16:
@@ -9905,6 +9928,7 @@ def make_a_dandelion_auto(dl: DandelionData, **kwargs):
             radius=dl.d_data[c]["r"],
             fc=dl.d_data[c]["colour"],  # face colour
             ec=dl.d_data[c]["ec"],  # edge colour
+            linewidth=2.0,
             zorder=2,
         )
         ax.add_patch(circle)
@@ -10750,7 +10774,7 @@ def data_check_print_out(gmpp_data: Dict, ipdc_data: Dict):
         for x in p_check:
             print(x)
 
-    wb.save("/home/will/Downloads/GMPP_IPDC_DATA_CHECK_Q2_20_21_v3.xlsx")
+    wb.save("/home/will/Downloads/GMPP_IPDC_DATA_CHECK_Q2_20_21_v4.xlsx")
 
 
 # def print_gmpp_data(gmpp_dict: Dict):
