@@ -797,6 +797,15 @@ class main():
             help="specify whether to colour circles with DCA rating colours",
         )
 
+        parser_dandelion.add_argument(
+            "--circle_edge",
+            type=str,
+            metavar="",
+            action="store",
+            choices=['fwd_look'],
+            help="specify whether to colour circle edge with SRO forward look rating. Option is fwd_look.",
+        )
+
         # chart
         for sub in [parser_dandelion, parser_costs, parser_costs_sp, parser_milestones]:
             sub.add_argument(

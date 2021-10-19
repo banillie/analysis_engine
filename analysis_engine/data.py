@@ -9558,11 +9558,20 @@ class DandelionData:
                             edge_colour = "grey"
                     else:
                         if p in self.master.dft_groups[tp]["GMPP"]:
-                            # edge_colour = "#000000"
-                            edge_colour = COLOUR_DICT[p_data['SRO Forward Look Assessment']]
+                            edge_colour = "#000000"
+                            # edge_colour = COLOUR_DICT[p_data['SRO Forward Look Assessment']]
                         else:
-                            # edge_colour = colour
-                            edge_colour = COLOUR_DICT[p_data['SRO Forward Look Assessment']]
+                            edge_colour = colour
+                            # edge_colour = COLOUR_DICT[p_data['SRO Forward Look Assessment']]
+                    if 'circle_edge' in self.kwargs:
+                        if self.kwargs['circle_edge'] == 'fwd_look':
+                            try:
+                                edge_colour = COLOUR_DICT[p_data['SRO Forward Look Assessment']]
+                            except KeyError:
+                                raise InputError(
+                                    'No SRO Forward Look Assessment key in quarter master. '
+                                    'This key must be present for this dandelion command. Stopping.'
+                                )
 
                     try:
                         if len(p_list) >= 16:
@@ -9922,13 +9931,19 @@ def make_a_dandelion_auto(dl: DandelionData, **kwargs):
     # title = get_chart_title(dl_data, kwargs, "dandelion")
     # plt.suptitle(title, fontweight="bold", fontsize=10)
 
+    if 'circle_edge' in kwargs:
+        if kwargs['circle_edge'] == 'fwd_look':
+            linewidth = 2.0
+    else:
+        linewidth = 1.0
+
     for c in dl.d_data.keys():
         circle = plt.Circle(
             dl.d_data[c]["axis"],  # x, y position
             radius=dl.d_data[c]["r"],
             fc=dl.d_data[c]["colour"],  # face colour
             ec=dl.d_data[c]["ec"],  # edge colour
-            linewidth=2.0,
+            linewidth=linewidth,
             zorder=2,
         )
         ax.add_patch(circle)
