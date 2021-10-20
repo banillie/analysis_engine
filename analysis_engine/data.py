@@ -9088,7 +9088,13 @@ def overall_dashboard(
             #     )
 
             """IPA DCA rating"""
-            ipa_dca = convert_rag_text(current_data[project_name]["GMPP - IPA DCA"])
+            try:
+                ipa_dca = convert_rag_text(current_data[project_name]["GMPP - IPA DCA"])
+            except KeyError:
+                raise InputError(
+                    'No GMPP IPA DCA key in quarter master. This key must'
+                    ' be present for dashboard compilation. Stopping.'
+                )
             ws.cell(row=row_num, column=15).value = ipa_dca
             if ipa_dca == "None":
                 ws.cell(row=row_num, column=15).value = ""
@@ -9111,7 +9117,7 @@ def overall_dashboard(
                 ws.cell(row=row_num, column=18).value = ""
 
             """SRO three DCA rating"""
-            sro_dca_three = convert_rag_text(current_data[project_name]["GMPP - SRO DCA"])
+            sro_dca_three = convert_rag_text(current_data[project_name]["Departmental DCA"])  # "GMPP - SRO DCA"
             ws.cell(row=row_num, column=16).value = sro_dca_three
             if sro_dca_three == "None":
                 ws.cell(row=row_num, column=16).value = ""
@@ -10412,14 +10418,20 @@ def get_strategic_priorities_data(
     return radar_data
 
 
-def get_map(wb):
+def get_map(wb, commas=False, gaps=False):
     ws = wb.active
     output_dict = {}
     for x in range(2, ws.max_row + 1):
         if ws.cell(row=x, column=1).value in output_dict.keys():
             pass
         else:
-            output_dict[ws.cell(row=x, column=1).value] = ws.cell(row=x, column=2).value
+            dft_key = ws.cell(row=x, column=2).value
+            ipa_key = ws.cell(row=x, column=1).value
+            if not commas:
+                ipa_key = ipa_key.replace(',', '')
+            if not gaps:
+                ipa_key = ipa_key.replace('  ', ' ')
+            output_dict[ipa_key] = dft_key
 
     return output_dict
 
@@ -10481,8 +10493,8 @@ def get_map(wb):
 
 
 def get_gmpp_data():
-    # wb_one = load_workbook("/home/will/Downloads/GMPP_DATA_NO2_FINAL.xlsm")
-    wb_one = load_workbook("/home/will/Downloads/GMPP_DATA_Q1_FINAL.xlsm")
+    wb_one = load_workbook("/home/will/Downloads/GMPP_DATA_DFT_Q2_2021.xlsx")
+    # wb_two = load_workbook("/home/will/Downloads/GMPP_DATA_NO2_Q2_2021.xlsx")
     # wb_three = load_workbook("/home/will/Downloads/GMPP_DATA_Q4.xlsm")
 
     wb_list = [wb_one]
@@ -10583,8 +10595,8 @@ def get_gmpp_data():
     wb = Workbook()
     ws = wb.active
 
-    key_map = get_map(load_workbook("/home/will/Downloads/KEY_MAP_v9.xlsx"))
-    ipdc_d = get_project_info_data(root_path / "core_data/master_1_2021.xlsx")
+    key_map = get_map(load_workbook("/home/will/Downloads/KEY_MAP_v10.xlsx"), commas=True)
+    # ipdc_d = get_project_info_data(root_path / "core_data/master_2_2021.xlsx")
 
     # output_dict = {}
     # for key in ipdc_dict['Crossrail Programme']:
@@ -10605,26 +10617,30 @@ def get_gmpp_data():
 
     for x, project in enumerate(list(initial_dict.keys())):
         ws.cell(row=1, column=3 + x).value = project
-        for i, dft_key in enumerate(ipdc_d['Crossrail Programme']):  # k is key
+        # for i, dft_key in enumerate(ipdc_d['Crossrail Programme']):  # k is key
+        #     ws.cell(row=2 + i, column=1).value = dft_key
+        i = 0
+        for ipa_key, dft_key in key_map.items():
             ws.cell(row=2 + i, column=1).value = dft_key
-            for ipa_key, value in key_map.items():
-                if dft_key == value:
-                    if x == 0:
-                        # ws.cell(row=2 + i, column=1).value = dft_key
-                        ws.cell(row=2 + i, column=2).value = ipa_key
-                    try:
-                        ipa_value = initial_dict[project][ipa_key]
-                        # if isinstance(ipa_value, datetime.datetime):
-                        #     ipa_value = ipa_value.date()
-                        #     ws.cell(row=2 + i, column=3 + x, value=ipa_value).number_format = "dd/mm/yy"
-                        ws.cell(row=2 + i, column=3 + x).value = ipa_value
-                    except KeyError:
-                        pass
+            ws.cell(row=2 + i, column=2).value = ipa_key
+            # if dft_key == value:
+            # if x == 0:
+            #     # ws.cell(row=2 + i, column=1).value = dft_key
+            #     ws.cell(row=2 + i, column=2).value = ipa_key
+            try:
+                ipa_value = initial_dict[project][ipa_key]
+                # if isinstance(ipa_value, datetime.datetime):
+                #     ipa_value = ipa_value.date()
+                #     ws.cell(row=2 + i, column=3 + x, value=ipa_value).number_format = "dd/mm/yy"
+                ws.cell(row=2 + i, column=3 + x).value = ipa_value
+            except KeyError:
+                pass
+            i += 1
 
     ws.cell(row=1, column=1).value = "Project Name (DfT Keys)"
     ws.cell(row=1, column=2).value = "Project Name (IPA Keys)"
 
-    wb.save("/home/will/Downloads/GMPP_DATA_DFT_FORMAT_Q1.xlsx")
+    wb.save("/home/will/Downloads/GMPP_DATA_DFT_FORMAT_Q2_2021_v3.xlsx")
 
 
 GMPP_M_DICT = {
@@ -10646,7 +10662,7 @@ GMPP_M_DICT = {
 
 
 def data_check_print_out(gmpp_data: Dict, ipdc_data: Dict):
-    key_map = get_map(load_workbook("/home/will/Downloads/KEY_MAP_v9.xlsx"))
+    key_map = get_map(load_workbook("/home/will/Downloads/KEY_MAP_v10.xlsx"))
     project_map = get_map(load_workbook("/home/will/Downloads/PROJECT_MAP.xlsx"))
 
     wb = Workbook()
@@ -10690,6 +10706,7 @@ def data_check_print_out(gmpp_data: Dict, ipdc_data: Dict):
                 check_key = remove_keys(k)
                 if check_key == "remove":
                     continue
+                # k = k.replace(',', '')  # hack. dealing with commas
                 ws.cell(row=start_row, column=1).value = project
                 try:
                     dft_project_name = project_map[project]
@@ -10789,7 +10806,7 @@ def data_check_print_out(gmpp_data: Dict, ipdc_data: Dict):
         for x in p_check:
             print(x)
 
-    wb.save("/home/will/Downloads/GMPP_IPDC_DATA_CHECK_Q2_20_21_v4.xlsx")
+    wb.save("/home/will/Downloads/GMPP_IPDC_DATA_CHECK_Q2_20_21_v5.xlsx")
 
 
 # def print_gmpp_data(gmpp_dict: Dict):
