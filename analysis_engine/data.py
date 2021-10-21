@@ -163,10 +163,11 @@ def get_master_data(
     config.read(confi_path)
     master_data_list = []
     for key in config["MASTERS"]:
-        year = int(config["MASTERS"][key][-4:])
-        quarter = int(config["MASTERS"][key][-7:-6])
-        m_path = str(pi_path) + config["MASTERS"][key][:-9]
-        m = get_data_function(m_path, quarter, year)
+        text = config["MASTERS"][key].split(", ")
+        year = text[2]
+        quarter = text[1]
+        m_path = str(pi_path) + text[0]
+        m = get_data_function(m_path, int(quarter), int(year))
         master_data_list.append(m)
 
     return list(reversed(master_data_list))
@@ -1377,7 +1378,6 @@ class CostData:
                     # cdel_profiled.append(ct - (cs + cu))
                     # profiled.append(t - (s + u))
 
-
                 lower_dict[tp] = {
                     # "cat_spent": [sum(rdel_spent), sum(cdel_spent)],
                     # "cat_prof": [sum(rdel_profiled), sum(cdel_profiled)],
@@ -1472,11 +1472,9 @@ class CostData:
                             pass
                     total.append(t)
 
-
                     # rdel_profiled.append(rt - (rs + ru))
                     # cdel_profiled.append(ct - (cs + cu))
                     # profiled.append(t - (s + u))
-
 
                 lower_dict[tp] = {
                     # "cat_spent": [sum(rdel_spent), sum(cdel_spent)],
@@ -2042,6 +2040,7 @@ class BenefitsData:
     """
     Note currently in use for ipdc reporting. requires refactor.
     """
+
     def __init__(self, master: Master, **kwargs):
         self.master = master
         self.baseline_type = "ipdc_benefits"
@@ -3746,7 +3745,7 @@ def dca_table(doc: Document, master: Master, **kwargs) -> None:
     p = doc.add_paragraph()
     text = "* Note in Q2 2021/22 DCA ratings moved to a three point scale."
     p.add_run(text)
-        # .font.color.rgb = RGBColor(255, 0, 0)
+    # .font.color.rgb = RGBColor(255, 0, 0)
 
     w_table = doc.add_table(rows=1, cols=5)
     hdr_cells = w_table.rows[0].cells
@@ -3832,9 +3831,8 @@ def dca_narratives(doc: Document,
 
 
 def forward_look(doc: Document,
-                   master: Master,
-                   **kwargs) -> None:
-
+                 master: Master,
+                 **kwargs) -> None:
     doc.add_paragraph()
     p = doc.add_paragraph()
     text = "*Red text highlights changes in narratives from last quarter"
@@ -3848,9 +3846,8 @@ def forward_look(doc: Document,
 
 
 def forward_look_narrative(doc: Document,
-                   master: Master,
-                   **kwargs) -> None:
-
+                           master: Master,
+                           **kwargs) -> None:
     headings_list = [
         "SRO Forward Look Narrative",
     ]
@@ -6344,7 +6341,6 @@ def project_report_meta_data(
             "£" + str(round(costs.c_totals[kwargs["quarter"][0]]["ngov"])) + "m"
     )
 
-
     # set column width
     column_widths = (Cm(4), Cm(3), Cm(4), Cm(3))
     set_col_widths(t, column_widths)
@@ -6482,7 +6478,6 @@ def project_report_meta_data(
     except (KeyError, AttributeError):
         row_cells[3].text = "Not reported"
 
-
     # set column width
     column_widths = (Cm(4), Cm(3), Cm(4), Cm(3))
     set_col_widths(table, column_widths)
@@ -6528,28 +6523,33 @@ def project_report_meta_data(
     hdr_cells = table.rows[0].cells
     hdr_cells[0].text = "Total:"
     hdr_cells[1].text = (
-            "£" + str(round(convert_none_types(master.master_data[0]["data"][kwargs["full_name"]]["Total BEN Forecast - Total Monetised Benefits"]))) + "m"
+            "£" + str(round(convert_none_types(
+        master.master_data[0]["data"][kwargs["full_name"]]["Total BEN Forecast - Total Monetised Benefits"]))) + "m"
     )
     hdr_cells[2].text = "Economic:"
     hdr_cells[3].text = (
-            "£" + str(round(convert_none_types(master.master_data[0]["data"][kwargs["full_name"]]["Total BEN Forecast - Economic (inc Private Partner)"]))) + "m"
+            "£" + str(round(convert_none_types(master.master_data[0]["data"][kwargs["full_name"]][
+                                                   "Total BEN Forecast - Economic (inc Private Partner)"]))) + "m"
     )
 
     row_cells = table.add_row().cells
     row_cells[0].text = "Cashable:"
     row_cells[1].text = (
-            "£" + str(round(convert_none_types(master.master_data[0]["data"][kwargs["full_name"]]["Total BEN Forecast - Gov. Cashable"]))) + "m"
+            "£" + str(round(convert_none_types(
+        master.master_data[0]["data"][kwargs["full_name"]]["Total BEN Forecast - Gov. Cashable"]))) + "m"
     )
     row_cells[2].text = "Disbenefits:"
     row_cells[3].text = (
-            "£" + str(round(convert_none_types(master.master_data[0]["data"][kwargs["full_name"]]["Total BEN Forecast - Disbenefit UK Economic"]))) + "m"
+            "£" + str(round(convert_none_types(
+        master.master_data[0]["data"][kwargs["full_name"]]["Total BEN Forecast - Disbenefit UK Economic"]))) + "m"
     )
 
     row_cells = table.add_row().cells
     row_cells[0].text = "Non-Cashable:"
     row_cells[1].text = (
             "£" + str(
-        round(convert_none_types(master.master_data[0]["data"][kwargs["full_name"]]["Total BEN Forecast - Gov. Non-Cashable"]))) + "m"
+        round(convert_none_types(
+            master.master_data[0]["data"][kwargs["full_name"]]["Total BEN Forecast - Gov. Non-Cashable"]))) + "m"
     )
 
     # set column width
@@ -6742,7 +6742,6 @@ def print_out_project_risks(
 
 
 def project_scope_text(doc: Document, master: Master, **kwargs) -> Document:
-
     # doc.add_paragraph()
     # p = doc.add_paragraph()
     # text = "*Red text highlights changes in narratives from last quarter"
@@ -9099,7 +9098,7 @@ def overall_dashboard(
             if ipa_dca == "None":
                 ws.cell(row=row_num, column=15).value = ""
 
-            #SRO forward look
+            # SRO forward look
             try:
                 fwd_look = current_data[project_name]['SRO Forward Look Assessment']
             except KeyError:
@@ -10418,23 +10417,27 @@ def get_strategic_priorities_data(
     return radar_data
 
 
-def get_map(wb, commas=False, gaps=False):
+def get_map(wb, commas=False, gaps=False, flip=False):
     ws = wb.active
     output_dict = {}
+
     for x in range(2, ws.max_row + 1):
-        ipa_key = ws.cell(row=x, column=1).value
+        ipa_key = ws.cell(row=x, column=2).value
         if ipa_key in output_dict.keys():
             pass
         if ipa_key is None:
             pass
         else:
-            dft_key = ws.cell(row=x, column=2).value
-            ipa_key = ws.cell(row=x, column=1).value
+            dft_key = ws.cell(row=x, column=1).value
+            ipa_key = ws.cell(row=x, column=2).value
             if not commas:
                 ipa_key = ipa_key.replace(',', '')
             if not gaps:
                 ipa_key = ipa_key.replace('  ', ' ')
-            output_dict[ipa_key] = dft_key
+            if flip:
+                output_dict[ipa_key] = dft_key
+            else:
+                output_dict[dft_key] = ipa_key
 
     return output_dict
 
@@ -10571,10 +10574,10 @@ def sort_gmpp_on_key_order(wb) -> List:
 
 
 def get_gmpp_data(file_name: str):
-    # from datetime import datetime
+    from datetime import datetime
     import xlrd
 
-    wb = load_workbook( root_path / "input/{}.xlsx".format(file_name))
+    wb = load_workbook(root_path / "input/{}.xlsx".format(file_name))
     ws = wb.active
 
     initial_dict = {}
@@ -10603,48 +10606,43 @@ def get_gmpp_data(file_name: str):
     return initial_dict
 
 
-def place_gmpp_online_keys_into_dft_master_format(initial_dict):
+def place_gmpp_online_keys_into_dft_master_format(
+        initial_dict: Dict,
+        km_file_name: str,
+        ipdc_d_file_path,
+        project_list=False,
+    ):
     wb = Workbook()
     ws = wb.active
 
-    key_map = get_map(load_workbook("/home/will/Downloads/KEY_MAP_v11.xlsx"), commas=True, gaps=True)
-    # ipdc_d = get_project_info_data(root_path / "core_data/master_2_2021.xlsx")
+    key_map = get_map(load_workbook(
+        root_path / "input/{}.xlsx".format(km_file_name)
+    ), commas=True, gaps=True)
+    ipdc_data = project_data_from_master(root_path / "input/{}.xlsx".format(ipdc_d_file_path), 2, 2021)
 
-    # output_dict = {}
-    # for key in ipdc_dict['Crossrail Programme']:
-    #     for x, value in key_map.items():
-    #         if key == value:
-    #             output_dict[key] = x
+    a_proj_name = ipdc_data.projects[1]
+    if project_list:
+        list_of_projects = project_list
+    else:
+        list_of_projects = list(initial_dict.keys())
 
-    # old
-    # for x, project in enumerate(list(initial_dict.keys())):
-    #     ws.cell(row=1, column=3 + x).value = project
-    #     for i, k in enumerate(ipa_key_list):  # k is key
-    #         if x == 0:
-    #             ws.cell(row=2 + i, column=1).value = k
-    #         try:
-    #             ws.cell(row=2 + i, column=2 + x).value = initial_dict[project][k]
-    #         except KeyError:
-    #             pass
-
-    for x, project in enumerate(list(initial_dict.keys())):
+    for x, project in enumerate(list_of_projects):
         ws.cell(row=1, column=3 + x).value = project
-        # for i, dft_key in enumerate(ipdc_d['Crossrail Programme']):  # k is key
-        #     ws.cell(row=2 + i, column=1).value = dft_key
         i = 0
-        for ipa_key, dft_key in key_map.items():
-            ws.cell(row=2 + i, column=1).value = dft_key
-            ws.cell(row=2 + i, column=2).value = ipa_key
-            # if dft_key == value:
-            # if x == 0:
-            #     # ws.cell(row=2 + i, column=1).value = dft_key
-            #     ws.cell(row=2 + i, column=2).value = ipa_key
+        for v in ipdc_data.data[a_proj_name].keys():
+            # for ipa_key, dft_key in key_map.items():
+            ws.cell(row=2 + i, column=1).value = v
             try:
+                ipa_key = key_map[v]
+                ws.cell(row=2 + i, column=2).value = ipa_key
+                # try:
                 ipa_value = initial_dict[project][ipa_key]
-                # if isinstance(ipa_value, datetime.datetime):
-                #     ipa_value = ipa_value.date()
-                #     ws.cell(row=2 + i, column=3 + x, value=ipa_value).number_format = "dd/mm/yy"
+                if isinstance(ipa_value, datetime.datetime):
+                    ipa_value = ipa_value.date()
+                    ws.cell(row=2 + i, column=3 + x, value=ipa_value).number_format = "dd/mm/yy"
                 ws.cell(row=2 + i, column=3 + x).value = ipa_value
+                # except KeyError:
+                #     pass
             except KeyError:
                 pass
             i += 1
@@ -10652,7 +10650,11 @@ def place_gmpp_online_keys_into_dft_master_format(initial_dict):
     ws.cell(row=1, column=1).value = "Project Name (DfT Keys)"
     ws.cell(row=1, column=2).value = "Project Name (IPA Keys)"
 
-    wb.save("/home/will/Downloads/GMPP_ON_LINE_DATA_NO2_q2_2021.xlsx")
+    wb.save(root_path / "input/gmpp_online_data_full_format.xlsx")
+
+    ws.delete_cols(1, 1)
+
+    wb.save(root_path / "input/gmpp_online_data_temp.xlsx")
 
 
 GMPP_M_DICT = {
@@ -10673,37 +10675,46 @@ GMPP_M_DICT = {
     "DFT": "DfT",
 }
 
+RK_LIST = [
+    "0.1.3: Project Name",
+    "Variance",
+    "Information Technology Name",
+    "Digital Name",
+    "Project Delivery Name",
+    "Change Implementation Name",
+    "Technical Name",
+    "Industry Knowledge Name",
+    "Finance Name",
+    "Analysis Name",
+    "Communications & Stakeholder Engagement Name",
+    "Legal Commercial & Contract Management Name",
+    "Approval Name",
+    "DCA - SRO Narrative",
+    "Project DCA - SRO Assessment Delivery confidence for whole project duration",
+    "2.01.3: Project IQA - IPA Quarterly Assessment for whole project duration",
+    "2.01.4: IQA - IPA Narrative",
+]
 
-def data_check_print_out(gmpp_data: Dict, ipdc_data: Dict):
-    key_map = get_map(load_workbook("/home/will/Downloads/KEY_MAP_v11.xlsx"))
-    project_map = get_map(load_workbook("/home/will/Downloads/PROJECT_MAP.xlsx"))
+
+def data_check_print_out(
+        ipdc_d_file_path: str,
+        km_file_name: str,
+        pn_file_name: str,
+):
+    gmpp_data = project_data_from_master(root_path / "input/gmpp_online_data_temp.xlsx", 2, 2021)
+    os.remove(root_path / "input/gmpp_online_data_temp.xlsx")
+    ipdc_data = project_data_from_master(root_path / "input/{}.xlsx".format(ipdc_d_file_path), 2, 2021)
+    key_map = get_map(load_workbook
+                      (root_path / "input/{}.xlsx".format(km_file_name)), flip=True)
+    project_map = get_map(load_workbook
+                          (root_path / "input/{}.xlsx".format(pn_file_name)))
 
     wb = Workbook()
     ws = wb.active
 
-    rk_list = [
-        "0.1.3: Project Name",
-        "Variance",
-        "Information Technology Name",
-        "Digital Name",
-        "Project Delivery Name",
-        "Change Implementation Name",
-        "Technical Name",
-        "Industry Knowledge Name",
-        "Finance Name",
-        "Analysis Name",
-        "Communications & Stakeholder Engagement Name",
-        "Legal Commercial & Contract Management Name",
-        "Approval Name",
-        "DCA - SRO Narrative",
-        "Project DCA - SRO Assessment Delivery confidence for whole project duration",
-        "2.01.3: Project IQA - IPA Quarterly Assessment for whole project duration",
-        "2.01.4: IQA - IPA Narrative",
-    ]
-
     def remove_keys(key):
         output = key
-        for rk in rk_list:  # remove key
+        for rk in RK_LIST:  # remove key
             if rk in key:
                 output = "remove"
         return output
@@ -10782,19 +10793,14 @@ def data_check_print_out(gmpp_data: Dict, ipdc_data: Dict):
 
                 # get floats of different lengths to match
                 if isinstance(dft_val, float) and isinstance(gmpp_val, float):
-                        print(dft_val)
-                        dft_val = float("{:.2f}".format(dft_val))
-                        gmpp_val = float("{:.2f}".format(gmpp_val))
+                    dft_val = float("{:.2f}".format(dft_val))
+                    gmpp_val = float("{:.2f}".format(gmpp_val))
 
                 if isinstance(dft_val, float) and isinstance(gmpp_val, int):
-                        dft_val = round(dft_val)
-                        # dft_val = float("{:.1f}".format(dft_val))
-                        # gmpp_val = float("{:.1f}".format(gmpp_val))
+                    dft_val = round(dft_val)
 
                 if isinstance(dft_val, int) and isinstance(gmpp_val, float):
-                        gmpp_val = round(gmpp_val)
-                        # dft_val = float("{:.1f}".format(dft_val))
-                        # gmpp_val = float("{:.1f}".format(gmpp_val))
+                    gmpp_val = round(gmpp_val)
 
                 if gmpp_val == dft_val:
                     ws.cell(row=start_row, column=9).value = "MATCH"
@@ -10829,7 +10835,7 @@ def data_check_print_out(gmpp_data: Dict, ipdc_data: Dict):
         for x in p_check:
             print(x)
 
-    wb.save("/home/will/Downloads/GMPP_IPDC_DATA_CHECK_q2_2021_v5.xlsx")
+    wb.save(root_path / "output/GMPP_IPDC_DATA_CHECK.xlsx")
 
 
 # def print_gmpp_data(gmpp_dict: Dict):
@@ -10882,30 +10888,30 @@ def data_check_print_out(gmpp_data: Dict, ipdc_data: Dict):
 #     return output_dict
 #
 
-def put_n02_into_master():
-    # q1 = get_project_info_data("/home/will/Documents/ipdc/core_data/master_1_2021.xlsx")
-    no2 = get_project_info_data("/home/will/Downloads/GMPP_DATA_DFT_FORMAT_NO2_FINAL.xlsx")
-
-    wb = load_workbook("/home/will/Documents/ipdc/core_data/master_1_2021.xlsx")
-    ws = wb.active
-
-    for x in range(2, ws.max_column + 1):
-        if ws.cell(row=1, column=x).value == "NO2 Reduction":
-            for z in range(2, ws.max_row + 1):
-                key = ws.cell(row=z, column=1).value
-                try:
-                    value = no2["NO2 Reduction"][key]
-                    # ws.cell(row=z, column=x).value = value
-                    if isinstance(value, datetime.datetime):
-                        value = value.date()
-                        ws.cell(row=z, column=x, value=value).number_format = "dd/mm/yy"
-                    else:
-                        ws.cell(row=z, column=x).value = value
-                except KeyError:
-                    pass
-
-    wb.save("/home/will/Documents/ipdc/core_data/master_1_2021.xlsx")
-
+# def put_n02_into_master():
+#     # q1 = get_project_info_data("/home/will/Documents/ipdc/core_data/master_1_2021.xlsx")
+#     no2 = get_project_info_data("/home/will/Downloads/GMPP_DATA_DFT_FORMAT_NO2_FINAL.xlsx")
+#
+#     wb = load_workbook("/home/will/Documents/ipdc/core_data/master_1_2021.xlsx")
+#     ws = wb.active
+#
+#     for x in range(2, ws.max_column + 1):
+#         if ws.cell(row=1, column=x).value == "NO2 Reduction":
+#             for z in range(2, ws.max_row + 1):
+#                 key = ws.cell(row=z, column=1).value
+#                 try:
+#                     value = no2["NO2 Reduction"][key]
+#                     # ws.cell(row=z, column=x).value = value
+#                     if isinstance(value, datetime.datetime):
+#                         value = value.date()
+#                         ws.cell(row=z, column=x, value=value).number_format = "dd/mm/yy"
+#                     else:
+#                         ws.cell(row=z, column=x).value = value
+#                 except KeyError:
+#                     pass
+#
+#     wb.save("/home/will/Documents/ipdc/core_data/master_1_2021.xlsx")
+#
 
 def get_risk_data():
     wb = load_workbook("/home/will/Downloads/BasicRiskReport.xlsx")
@@ -11016,7 +11022,6 @@ def doughut(dca_data: DcaData, **kwargs):
 
 
 def amend_project_information():
-
     key_list = [
         "16 - 17 RDEL Baseline - One off new costs - investment in change",
         "16 - 17 RDEL Baseline - Recurring new costs - investment in change",
