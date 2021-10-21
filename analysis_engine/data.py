@@ -10422,7 +10422,10 @@ def get_map(wb, commas=False, gaps=False):
     ws = wb.active
     output_dict = {}
     for x in range(2, ws.max_row + 1):
-        if ws.cell(row=x, column=1).value in output_dict.keys():
+        ipa_key = ws.cell(row=x, column=1).value
+        if ipa_key in output_dict.keys():
+            pass
+        if ipa_key is None:
             pass
         else:
             dft_key = ws.cell(row=x, column=2).value
@@ -10491,61 +10494,62 @@ def get_map(wb, commas=False, gaps=False):
 #
 #     wb.save("/home/will/Downloads/KEY_MAP_v9.xlsx")
 
-
-def get_gmpp_data():
-    wb_one = load_workbook("/home/will/Downloads/GMPP_DATA_DFT_Q2_2021.xlsx")
-    # wb_two = load_workbook("/home/will/Downloads/GMPP_DATA_NO2_Q2_2021.xlsx")
-    # wb_three = load_workbook("/home/will/Downloads/GMPP_DATA_Q4.xlsm")
-
-    wb_list = [wb_one]
+def sort_gmpp_on_key_order(wb) -> List:
+    """
+    This function puts gmpp keys in semantic order. Was used when first
+    working with gmpp_online data and the keys were in random order. Not
+    currently required as order now handled via key_map.
+    @return:
+    """
     pure_key_list = []
     output_list = []
     errant_keys = [
-        "6.03a: Has the project been using an evidenced range of  Project End Dates for planning and approval decisions?",
+        "6.03a: Has the project been using an evidenced range of  Project End Dates for planning and approval "
+        "decisions?",
         "6.03b: Schedule Project End Date Range (FORECAST),  From",
         "6.03c: To",
         "7.02a: Is this the Projects first GMPP data return?"
     ]
-    for wb in wb_list:
-        ws = wb.active
-        for x in range(24, ws.max_row):  # row 24 is where gmpp data starts.
-            key_pure = ws.cell(row=x, column=6).value
-            key = key_pure.split(':')
-            if key_pure not in pure_key_list:
-                if 'a' in key[0] or 'b' in key[0] or 'c' in key[0]:
-                    if key[0] == "6.03a":
-                        key[0] = "6.031"
-                        if key_pure not in pure_key_list:
-                            output_list.append(key)
-                            pure_key_list.append(key_pure)
-                    if key[0] == "6.03b":
-                        key[0] = "6.032"
-                        if key_pure not in pure_key_list:
-                            output_list.append(key)
-                            pure_key_list.append(key_pure)
-                    if key[0] == "6.03c":
-                        key[0] = "6.033"
-                        if key_pure not in pure_key_list:
-                            output_list.append(key)
-                            pure_key_list.append(key_pure)
-                    if key[0] == "7.02a":
-                        key[0] = "7.021"
-                        if key_pure not in pure_key_list:
-                            output_list.append(key)
-                            pure_key_list.append(key_pure)
-                    if key[0] == "7.02b":
-                        key[0] = "7.022"
-                        if key_pure not in pure_key_list:
-                            output_list.append(key)
-                            pure_key_list.append(key_pure)
-                    else:
-                        if key_pure not in errant_keys:
-                            print(key_pure)
-                elif '12' in key[0][:2]:
-                    pass
+    # for wb in wb_list:  # option to pass in list here rather than single wb
+    ws = wb.active
+    for x in range(24, ws.max_row):  # row 24 is where gmpp data starts.
+        key_pure = ws.cell(row=x, column=6).value
+        key = key_pure.split(':')
+        if key_pure not in pure_key_list:
+            if 'a' in key[0] or 'b' in key[0] or 'c' in key[0]:
+                if key[0] == "6.03a":
+                    key[0] = "6.031"
+                    if key_pure not in pure_key_list:
+                        output_list.append(key)
+                        pure_key_list.append(key_pure)
+                if key[0] == "6.03b":
+                    key[0] = "6.032"
+                    if key_pure not in pure_key_list:
+                        output_list.append(key)
+                        pure_key_list.append(key_pure)
+                if key[0] == "6.03c":
+                    key[0] = "6.033"
+                    if key_pure not in pure_key_list:
+                        output_list.append(key)
+                        pure_key_list.append(key_pure)
+                if key[0] == "7.02a":
+                    key[0] = "7.021"
+                    if key_pure not in pure_key_list:
+                        output_list.append(key)
+                        pure_key_list.append(key_pure)
+                if key[0] == "7.02b":
+                    key[0] = "7.022"
+                    if key_pure not in pure_key_list:
+                        output_list.append(key)
+                        pure_key_list.append(key_pure)
                 else:
-                    output_list.append(key)
-                    pure_key_list.append(key_pure)
+                    if key_pure not in errant_keys:
+                        print(key_pure)
+            elif '12' in key[0][:2]:
+                pass
+            else:
+                output_list.append(key)
+                pure_key_list.append(key_pure)
 
     output_list.sort(key=lambda s: list(map(int, s[0].split('.'))))
 
@@ -10563,11 +10567,15 @@ def get_gmpp_data():
             key[0] = "7.02b"
         ipa_key_list.append(key[0] + ":" + key[1])
 
-    from datetime import datetime
+    return ipa_key_list
+
+
+def get_gmpp_data(file_name: str):
+    # from datetime import datetime
     import xlrd
 
-    # wb = load_workbook("/home/will/Downloads/GMPP_DATA_Q1.xlsm")
-    ws = wb_one.active
+    wb = load_workbook( root_path / "input/{}.xlsx".format(file_name))
+    ws = wb.active
 
     initial_dict = {}
     for x in range(24, ws.max_row + 1):
@@ -10592,10 +10600,14 @@ def get_gmpp_data():
         else:
             initial_dict[project_name] = {key: s_value}
 
+    return initial_dict
+
+
+def place_gmpp_online_keys_into_dft_master_format(initial_dict):
     wb = Workbook()
     ws = wb.active
 
-    key_map = get_map(load_workbook("/home/will/Downloads/KEY_MAP_v10.xlsx"), commas=True)
+    key_map = get_map(load_workbook("/home/will/Downloads/KEY_MAP_v11.xlsx"), commas=True, gaps=True)
     # ipdc_d = get_project_info_data(root_path / "core_data/master_2_2021.xlsx")
 
     # output_dict = {}
@@ -10640,7 +10652,7 @@ def get_gmpp_data():
     ws.cell(row=1, column=1).value = "Project Name (DfT Keys)"
     ws.cell(row=1, column=2).value = "Project Name (IPA Keys)"
 
-    wb.save("/home/will/Downloads/GMPP_DATA_DFT_FORMAT_Q2_2021_v3.xlsx")
+    wb.save("/home/will/Downloads/GMPP_ON_LINE_DATA_NO2_q2_2021.xlsx")
 
 
 GMPP_M_DICT = {
@@ -10658,11 +10670,12 @@ GMPP_M_DICT = {
     "Approval - HMT FBC": "FBC - HMT Approval",
     "Approval - HMT PBC": "Latest HMT Approved - Programme Business Case",
     "Yes": "Yes - Permanent",
+    "DFT": "DfT",
 }
 
 
 def data_check_print_out(gmpp_data: Dict, ipdc_data: Dict):
-    key_map = get_map(load_workbook("/home/will/Downloads/KEY_MAP_v10.xlsx"))
+    key_map = get_map(load_workbook("/home/will/Downloads/KEY_MAP_v11.xlsx"))
     project_map = get_map(load_workbook("/home/will/Downloads/PROJECT_MAP.xlsx"))
 
     wb = Workbook()
@@ -10700,13 +10713,12 @@ def data_check_print_out(gmpp_data: Dict, ipdc_data: Dict):
     for x, project in enumerate(list(project_map.keys())):  # could be project_map.keys()
         project_check_list.append(project)
         try:  # exception so only projects in ipdc data compared.
-            for i, k in enumerate(gmpp_data[project]):
+            for i, k in enumerate(gmpp_data.data[project]):
                 if k is None:
                     continue
                 check_key = remove_keys(k)
                 if check_key == "remove":
                     continue
-                # k = k.replace(',', '')  # hack. dealing with commas
                 ws.cell(row=start_row, column=1).value = project
                 try:
                     dft_project_name = project_map[project]
@@ -10770,8 +10782,19 @@ def data_check_print_out(gmpp_data: Dict, ipdc_data: Dict):
 
                 # get floats of different lengths to match
                 if isinstance(dft_val, float) and isinstance(gmpp_val, float):
-                    dft_val = float("{:.2f}".format(dft_val))
-                    gmpp_val = float("{:.2f}".format(gmpp_val))
+                        print(dft_val)
+                        dft_val = float("{:.2f}".format(dft_val))
+                        gmpp_val = float("{:.2f}".format(gmpp_val))
+
+                if isinstance(dft_val, float) and isinstance(gmpp_val, int):
+                        dft_val = round(dft_val)
+                        # dft_val = float("{:.1f}".format(dft_val))
+                        # gmpp_val = float("{:.1f}".format(gmpp_val))
+
+                if isinstance(dft_val, int) and isinstance(gmpp_val, float):
+                        gmpp_val = round(gmpp_val)
+                        # dft_val = float("{:.1f}".format(dft_val))
+                        # gmpp_val = float("{:.1f}".format(gmpp_val))
 
                 if gmpp_val == dft_val:
                     ws.cell(row=start_row, column=9).value = "MATCH"
@@ -10806,7 +10829,7 @@ def data_check_print_out(gmpp_data: Dict, ipdc_data: Dict):
         for x in p_check:
             print(x)
 
-    wb.save("/home/will/Downloads/GMPP_IPDC_DATA_CHECK_Q2_20_21_v5.xlsx")
+    wb.save("/home/will/Downloads/GMPP_IPDC_DATA_CHECK_q2_2021_v5.xlsx")
 
 
 # def print_gmpp_data(gmpp_dict: Dict):

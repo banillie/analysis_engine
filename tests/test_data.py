@@ -574,5 +574,18 @@ def test_top35_summaries(top35_data):
     top35_run_p_reports(top35_data["master"], **top35_data["op_args"])
 
 
+def test_match_data_types():
+    dft_val = 1664.71708896933
+    gmpp_val = 1665
+    if isinstance(dft_val, float) and isinstance(gmpp_val, int):
+        dft_val = round(dft_val)
+        # gmpp_val = int(gmpp_val)
+
+    assert dft_val == 1665
+    assert gmpp_val == 1665
+
+
+
+
 
 
