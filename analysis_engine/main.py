@@ -41,7 +41,8 @@ from analysis_engine.data import (
     get_sp_data,
     DFT_GROUP,
     get_input_doc,
-    InputError, JsonMaster, JsonData, open_json_file, cost_profile_into_wb_new, cost_profile_graph_new,
+    InputError, JsonMaster, JsonData, open_json_file, cost_profile_into_wb_new, cost_profile_graph_new, get_gmpp_data,
+    place_gmpp_online_keys_into_dft_master_format, data_check_print_out,
 )
 
 import logging
@@ -298,6 +299,14 @@ def ipdc_run_general(args):
             op_args = return_koi_fn_keys(op_args)
             wb = data_query_into_wb(m, **op_args)
 
+        if programme == "gmpp_integration":
+            print("Coming soon!")
+            # d = get_gmpp_data("GMPP_DATA_DFT_Q2_2021")  # gmpp_data
+            # # place_gmpp_online_keys_into_dft_master_format(d, "KEY_MAP_v12", "master_2_2021")  # key_map, ipdc_master
+            # p_list = ['East Coast Mainline Programme', 'Rapid Charging Fund', 'NO2 Reduction']  # list
+            # place_gmpp_online_keys_into_dft_master_format(d, "KEY_MAP_v12", "master_2_2021", project_list=p_list)
+            # # data_check_print_out("master_2_2021", "KEY_MAP_v12", "PROJECT_MAP")  # project map
+
         check_remove(op_args)
 
         try:
@@ -530,6 +539,10 @@ class main():
         parser_data_query = subparsers.add_parser(
             "query", help="return data from core data"
         )
+        parser_gmpp_integration = subparsers.add_parser(
+            "gmpp_integration", help="integrates gmpp data"
+        )
+
         # Arguments
         # stage
         for sub in [

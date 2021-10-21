@@ -781,9 +781,13 @@ class JsonMaster:
         if error_cases:
             for p in error_cases:
                 logger.critical(p + " has not been found in the project_info document.")
+            try:
+                m = str(self.master_data[0].month)
+            except KeyError:
+                m = str(self.master_data[0].quarter)
             raise ProjectNameError(
-                "Project names in "
-                + str(self.master_data[0].quarter)
+                "Project names in the "
+                + m
                 + " master and project_info must match. Program stopping. Please amend."
             )
         else:
