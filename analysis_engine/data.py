@@ -5120,16 +5120,16 @@ class DcaData:
         else:
             self.dca_keys = DCA_KEYS
 
-        if "conf_type" in self.kwargs:  # option here to change confidence types
-            if self.kwargs["conf_type"] == "sro_three":
-                # key value to be changed to 'GMPP - SRO DCA' when data available.
-                self.dca_keys = {
-                    "sro_three": "GMPP - SRO DCA",
-                }
-            else:
-                self.dca_keys = {
-                    self.kwargs["conf_type"]: DCA_KEYS[self.kwargs["conf_type"]],
-                }
+        # if "conf_type" in self.kwargs:  # option here to change confidence types
+            # if self.kwargs["conf_type"] == "sro_three":
+            #     # key value to be changed to 'GMPP - SRO DCA' when data available.
+            #     self.dca_keys = {
+            #         "sro_three": "GMPP - SRO DCA",
+            #     }
+            # else:
+        # self.dca_keys = {
+        #     self.kwargs["conf_type"]: DCA_KEYS[self.kwargs["conf_type"]],
+        # }
 
         for tp in self.iter_list:
             self.group = get_group(self.master, tp, self.kwargs)

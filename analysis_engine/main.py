@@ -194,29 +194,29 @@ def ipdc_run_general(args):
         if programme == "speedial":
             doc = get_input_doc(root_path / "input/summary_temp.docx")
             land_doc = get_input_doc(root_path / "input/summary_temp_landscape.docx")
-            if "conf_type" in op_args:
-                if op_args["conf_type"] == "sro_three":
-                    op_args["rag_number"] = "3"
-                    op_args["quarter"] = [str(m.current_quarter)]
-                    data = DcaData(m, **op_args)
-                    build_speedials(data, land_doc)
-                    land_doc.save(root_path / "output/speed_dial_graph.docx")
-                else:  # refactor!!
-                    op_args["rag_number"] = "5"
-                    data = DcaData(m, **op_args)
-                    data.get_changes()
-                    doc = dca_changes_into_word(data, doc)
-                    doc.save(root_path / "output/speed_dials_text.docx")
-                    build_speedials(data, land_doc)
-                    land_doc.save(root_path / "output/speed_dial_graph.docx")
-            else:
-                op_args["rag_number"] = "5"
-                data = DcaData(m, **op_args)
-                data.get_changes()
-                doc = dca_changes_into_word(data, doc)
-                doc.save(root_path / "output/speed_dials_text.docx")
-                build_speedials(data, land_doc)
-                land_doc.save(root_path / "output/speed_dial_graph.docx")
+            # if "conf_type" in op_args:
+            #     if op_args["conf_type"] == "sro_three":
+            #         op_args["rag_number"] = "3"
+            #         op_args["quarter"] = [str(m.current_quarter)]
+            #         data = DcaData(m, **op_args)
+            #         build_speedials(data, land_doc)
+            #         land_doc.save(root_path / "output/speed_dial_graph.docx")
+            #     else:  # refactor!!
+            op_args["rag_number"] = "3"
+            data = DcaData(m, **op_args)
+            data.get_changes()
+            doc = dca_changes_into_word(data, doc)
+            doc.save(root_path / "output/speed_dials_text.docx")
+            build_speedials(data, land_doc)
+            land_doc.save(root_path / "output/speed_dial_graph.docx")
+            # else:
+            #     op_args["rag_number"] = "5"
+            #     data = DcaData(m, **op_args)
+            #     data.get_changes()
+            #     doc = dca_changes_into_word(data, doc)
+            #     doc.save(root_path / "output/speed_dials_text.docx")
+            #     build_speedials(data, land_doc)
+            #     land_doc.save(root_path / "output/speed_dial_graph.docx")
 
         if programme == "milestones":
             ms = MilestoneData(m, **op_args)
@@ -450,7 +450,7 @@ class main():
             formatter_class=RawTextHelpFormatter
         )
 
-        parser.add_argument('--version', action='version', version="1.0.5")
+        parser.add_argument('--version', action='version', version="1.0.6")
 
         parser.add_argument(
             'command',
@@ -471,7 +471,7 @@ class main():
         )
         subparsers = parser.add_subparsers(dest="subparser_name")
         subparsers.metavar = "                      "
-        parser_vfm = subparsers.add_parser("vfm", help="vfm analysis")
+        # parser_vfm = subparsers.add_parser("vfm", help="vfm analysis")
         parser_initiate = subparsers.add_parser(
             "initiate", help="creates a master data file"
         )
@@ -702,11 +702,10 @@ class main():
             type=str,
             metavar="",
             action="store",
-            choices=["sro", "finance", "benefits", "schedule", "resource", "sro_three"],
+            choices=["sro", "finance", "benefits", "schedule", "resource"],
             help="Returns analysis for specified confidence types. options are"
-                 "'sro', 'finance', 'benefits', 'schedule', 'resource', and 'sro_three'."
-                 "The 'sro_three' analysis will return a three rag speed dial. As of Q1 "
-                 "20/21 it only provides a dial for the latest quarter's data.",
+                 "'sro', 'finance', 'benefits', 'schedule', 'resource'."
+                 " As of Q2 20/21 it only provides a three rag dial.",
         )
 
         for sub in [parser_milestones, parser_data_query]:
