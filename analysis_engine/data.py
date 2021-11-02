@@ -8201,8 +8201,97 @@ def concatenate_dates(date: date):
         return "None"
 
 
+def resource_dashboard(master: Master, wb: Workbook, **kwargs) -> Workbook:
+    ws = wb['Resource']
+
+    current_data = master.master_data[0]["data"]
+    last_data = master.master_data[1]["data"]
+    last_qrt_group = cal_group(kwargs["group"], master, 1)
+
+    for row_num in range(2, ws.max_row + 1):
+        project_name = ws.cell(row=row_num, column=3).value
+        if project_name in master.current_projects:
+            if project_name in last_qrt_group:
+                kwargs["group"] = [project_name]
+                kwargs["quarter"] = ["standard"]
+            else:
+                kwargs["group"] = [project_name]
+                kwargs["quarter"] = [str(master.current_quarter)]
+
+            """BC Stage"""
+            bc_stage = current_data[project_name]["IPDC approval point"]
+            ws.cell(row=row_num, column=4).value = convert_bc_stage_text(bc_stage)
+
+            'Resourcing data'
+            resource_keys = [
+                'DfTc Public Sector Employees',
+                'DfTc External Contractors',
+                'DfTc Project Team Total',
+                'DfTc Funded Posts',
+                'DfTc Resource Gap',
+                'DfTc Resource Gap Criticality'
+            ]
+
+            for i, key in enumerate(resource_keys):
+                if key == 'DfTc Resource Gap Criticality':
+                    ws.cell(row=row_num, column=5 + i).value = convert_rag_text(current_data[project_name][key])
+                else:
+                    ws.cell(row=row_num, column=5 + i).value = current_data[project_name][key]
+
+            """DCA rating - this quarter"""
+            ws.cell(row=row_num, column=12).value = convert_rag_text(
+                current_data[project_name]["Overall Resource DCA - Now"]
+            )
+            """DCA rating - last qrt"""
+            try:
+                ws.cell(row=row_num, column=13).value = convert_rag_text(
+                    last_data[project_name]["Overall Resource DCA - Now"]
+                )
+            except KeyError:
+                ws.cell(row=row_num, column=13).value = ""
+            """DCA rating - 2 qrts ago"""
+            try:
+                ws.cell(row=row_num, column=14).value = convert_rag_text(
+                    master.master_data[2]["data"][project_name][
+                        "Overall Resource DCA - Now"
+                    ]
+                )
+            except (KeyError, IndexError):
+                ws.cell(row=row_num, column=14).value = ""
+            """DCA rating - 3 qrts ago"""
+            try:
+                ws.cell(row=row_num, column=15).value = convert_rag_text(
+                    master.master_data[3]["data"][project_name][
+                        "Overall Resource DCA - Now"
+                    ]
+                )
+            except (KeyError, IndexError):
+                ws.cell(row=row_num, column=15).value = ""
+
+    """list of columns with conditional formatting"""
+    list_columns = ["j", "l", "m", "n", "o"]
+
+    """same loop but the text is black. In addition these two loops go through the list_columns list above"""
+    for column in list_columns:
+        for i, dca in enumerate(rag_txt_list):
+            text = black_text
+            fill = fill_colour_list[i]
+            dxf = DifferentialStyle(font=text, fill=fill)
+            rule = Rule(type="containsText", operator="containsText", text=dca, dxf=dxf)
+            for_rule_formula = 'NOT(ISERROR(SEARCH("' + dca + '",' + column + "5)))"
+            rule.formula = [for_rule_formula]
+            ws.conditional_formatting.add("" + column + "5:" + column + "60", rule)
+
+    # for row_num in range(2, ws.max_row + 1):
+    #     for col_num in range(5, ws.max_column+1):
+    #         if ws.cell(row=row_num, column=col_num).value == 0:
+    #             ws.cell(row=row_num, column=col_num).value = '-'
+
+    return wb
+
+
 def financial_dashboard(master: Master, wb: Workbook, **kwargs) -> Workbook:
-    ws = wb.worksheets[0]
+    ws = wb['Finance']
     # overall_ws = wb.worksheets[3]
 
     current_data = master.master_data[0]["data"]
@@ -8399,7 +8488,7 @@ def schedule_dashboard(
         m_filtered,
         wb: Workbook
 ) -> Workbook:
-    ws = wb.worksheets[1]
+    ws = wb['Schedule']
     # overall_ws = wb.worksheets[3]
 
     current_data = master.master_data[0]["data"]
@@ -8611,7 +8700,7 @@ def schedule_dashboard(
 
 
 def benefits_dashboard(master: Master, wb: Workbook) -> Workbook:
-    ws = wb.worksheets[2]
+    ws = wb['Benefits_VfM']
     # overall_ws = wb.worksheets[3]
 
     current_data = master.master_data[0]["data"]
@@ -8859,7 +8948,7 @@ def overall_dashboard(
         wb: Workbook,
         **kwargs
 ) -> Workbook:
-    ws = wb.worksheets[3]
+    ws = wb['Overall']
 
     current_data = master.master_data[0]["data"]
     last_data = master.master_data[1]["data"]
@@ -9187,6 +9276,7 @@ def overall_dashboard(
 
 def ipdc_dashboard(master: Master, wb: Workbook, kwargs) -> Workbook:
     financial_dashboard(master, wb, **kwargs)
+    resource_dashboard(master, wb, **kwargs)
 
     milestones = MilestoneData(master, **kwargs)
     m_filtered = MilestoneData(master, **kwargs)
@@ -10577,35 +10667,40 @@ def sort_gmpp_on_key_order(wb) -> List:
     return ipa_key_list
 
 
-def get_gmpp_data(file_name: str):
+def get_gmpp_data(file_name: str, file_name_two: str):
     from datetime import datetime
     import xlrd
 
     wb = load_workbook(root_path / "input/{}.xlsx".format(file_name))
     ws = wb.active
+    wb_two = load_workbook(root_path / "input/{}.xlsx".format(file_name_two))
+    ws_two = wb.active
+
+    ws_list = [ws, ws_two]
 
     initial_dict = {}
-    for x in range(24, ws.max_row + 1):
-        project_name = ws.cell(row=x, column=2).value
-        key = ws.cell(row=x, column=6).value
-        s_value = ws.cell(row=x, column=7).value
-        n_value = ws.cell(row=x, column=8).value
-        if n_value != 0:
-            s_value = n_value
-        if "Date" in key or "date" in key or "6.03c: To" in key:
-            # s_value = datetime(*xlrd.xldate_as_tuple(n_value, 0))
-            if n_value > 20000:
-                # if "7.02.10" in key:
-                #     pass
-                # else:
-                s_value = datetime(*xlrd.xldate_as_tuple(n_value, 0))
-                # else:
-                #     s_value = n_value
+    for ws in ws_list:
+        for x in range(24, ws.max_row + 1):
+            project_name = ws.cell(row=x, column=2).value
+            key = ws.cell(row=x, column=6).value
+            s_value = ws.cell(row=x, column=7).value
+            n_value = ws.cell(row=x, column=8).value
+            if n_value != 0:
+                s_value = n_value
+            if "Date" in key or "date" in key or "6.03c: To" in key:
+                # s_value = datetime(*xlrd.xldate_as_tuple(n_value, 0))
+                if n_value > 20000:
+                    # if "7.02.10" in key:
+                    #     pass
+                    # else:
+                    s_value = datetime(*xlrd.xldate_as_tuple(n_value, 0))
+                    # else:
+                    #     s_value = n_value
 
-        if project_name in list(initial_dict.keys()):
-            initial_dict[project_name][key] = s_value
-        else:
-            initial_dict[project_name] = {key: s_value}
+            if project_name in list(initial_dict.keys()):
+                initial_dict[project_name][key] = s_value
+            else:
+                initial_dict[project_name] = {key: s_value}
 
     return initial_dict
 
@@ -10839,7 +10934,7 @@ def data_check_print_out(
         for x in p_check:
             print(x)
 
-    wb.save(root_path / "output/GMPP_IPDC_DATA_CHECK.xlsx")
+    wb.save(root_path / "output/GMPP_IPDC_DATA_CHECK_FINAL.xlsx")
 
 
 # def print_gmpp_data(gmpp_dict: Dict):
