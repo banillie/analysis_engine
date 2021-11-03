@@ -8233,10 +8233,17 @@ def resource_dashboard(master: Master, wb: Workbook, **kwargs) -> Workbook:
             ]
 
             for i, key in enumerate(resource_keys):
-                if key == 'DfTc Resource Gap Criticality':
-                    ws.cell(row=row_num, column=5 + i).value = convert_rag_text(current_data[project_name][key])
-                else:
-                    ws.cell(row=row_num, column=5 + i).value = current_data[project_name][key]
+                try:
+                    if key == 'DfTc Resource Gap Criticality':
+                        ws.cell(row=row_num, column=5 + i).value = convert_rag_text(current_data[project_name][key])
+                    else:
+                        ws.cell(row=row_num, column=5 + i).value = current_data[project_name][key]
+                except KeyError:
+                    raise InputError(
+                        key + ' key is not in quarter master. This key must'
+                        ' be present for dashboard compilation. Stopping. '
+                              'Make sure all resource keys are in Master.'
+                    )
 
             """DCA rating - this quarter"""
             ws.cell(row=row_num, column=12).value = convert_rag_text(
