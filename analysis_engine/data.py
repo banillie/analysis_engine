@@ -5496,11 +5496,16 @@ class RiskData:
                     number_dict = {}
                     for x in range(1, 11):  # currently 10 risks
                         risk_list = []
-                        risk = (
+                        group = (
                             "Group",
                             self.master.project_information[p]["Group"],
                         )
-                        risk_list.append(risk)
+                        stage = (
+                            "Stage",
+                            p_data["IPDC approval point"]
+                        )
+                        risk_list.append(group)
+                        risk_list.append(stage)
                         for risk_type in RISK_LIST:
                             try:
                                 amended_risk_type = risk_type + str(x)
@@ -5634,11 +5639,16 @@ def risks_into_excel(risk_data: RiskData) -> workbook:
                     "Group"
                 ]
                 ws.cell(row=start_row + number, column=2).value = project_name
-                ws.cell(row=start_row + number, column=3).value = str(number)
+                ws.cell(
+                    row=start_row + number, column=3
+                ).value = risk_data.risk_dictionary[q][project_name][number][
+                    "Stage"
+                ]
+                ws.cell(row=start_row + number, column=4).value = str(number)
                 for i in range(len(RISK_LIST)):
                     try:
                         ws.cell(
-                            row=start_row + number, column=4 + i
+                            row=start_row + number, column=5 + i
                         ).value = risk_data.risk_dictionary[q][project_name][
                             number
                         ][
@@ -5650,10 +5660,11 @@ def risks_into_excel(risk_data: RiskData) -> workbook:
             start_row += number
 
         for i in range(len(RISK_LIST)):
-            ws.cell(row=1, column=4 + i).value = RISK_LIST[i]
+            ws.cell(row=1, column=5 + i).value = RISK_LIST[i]
         ws.cell(row=1, column=1).value = "DfT Group"
         ws.cell(row=1, column=2).value = "Project Name"
-        ws.cell(row=1, column=3).value = "Risk Number"
+        ws.cell(row=1, column=3).value = "Stage"
+        ws.cell(row=1, column=4).value = "Risk Number"
 
         ws = wb.create_sheet(
             make_file_friendly(q + " Count")
