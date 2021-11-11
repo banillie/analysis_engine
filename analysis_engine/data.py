@@ -647,14 +647,17 @@ COLOUR_DICT = {
     "Improving": "#007d00",
 }
 RAG_RANKING_DICT_NUMBER = {
-    3: 'Green',
-    2: 'Amber',
+    6: 'Green',  # in case combo of green and improving.
+    5: 'Green',
+    4: 'Amber/Green',
+    3: 'Amber',
+    2: 'Amber/Red',
     1: 'Red',
     0: None
 }
 RAG_RANKING_DICT_COLOUR = {
-    'Green': 3,
-    'Amber': 2,
+    'Green': 5,
+    'Amber': 3,
     'Red': 1,
     None: 0,
 }
