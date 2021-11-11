@@ -450,7 +450,7 @@ class main():
             formatter_class=RawTextHelpFormatter
         )
 
-        parser.add_argument('--version', action='version', version="1.0.7")
+        parser.add_argument('--version', action='version', version="1.0.8")
 
         parser.add_argument(
             'command',
