@@ -814,8 +814,9 @@ class main():
             type=str,
             metavar="",
             action="store",
-            choices=['fwd_look'],
-            help="specify whether to colour circle edge with SRO forward look rating. Option is fwd_look.",
+            choices=['forward_look', 'ipa'],
+            help="specify whether to colour circle edge with SRO forward look rating. "
+                 "Options are 'forward_look' or 'ipa'.",
         )
 
         # chart

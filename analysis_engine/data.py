@@ -646,6 +646,18 @@ COLOUR_DICT = {
     "No Change Expected": "#ffba00",
     "Improving": "#007d00",
 }
+RAG_RANKING_DICT_NUMBER = {
+    3: 'Green',
+    2: 'Amber',
+    1: 'Red',
+    0: None
+}
+RAG_RANKING_DICT_COLOUR = {
+    'Green': 3,
+    'Amber': 2,
+    'Red': 1,
+    None: 0,
+}
 
 
 def calculate_profiled(
@@ -9424,6 +9436,16 @@ def get_dandelion_type_total(
         return cost.c_totals[tp]["total"]
 
 
+def calculate_circle_edge(sro_rag, fwd_look):
+    if fwd_look == 'No Change Expected':
+        return sro_rag
+    if fwd_look == 'Improving':
+        now = RAG_RANKING_DICT_COLOUR[sro_rag]
+        return RAG_RANKING_DICT_NUMBER[now + 1]
+    if fwd_look == 'Worsening':
+        now = RAG_RANKING_DICT_COLOUR[sro_rag]
+        return RAG_RANKING_DICT_NUMBER[now - 1]
+
 class DandelionData:
     """
     Data class for dandelion info graphic. Output dictionary to d_data()
@@ -9457,7 +9479,9 @@ class DandelionData:
             if "group" in self.kwargs:
                 self.group = self.kwargs["group"]
             elif "stage" in self.kwargs:
+                # old code here that needs tidy at some point!
                 self.group = self.kwargs["stage"]
+                self.kwargs["group"] = self.kwargs["stage"]
                 del self.kwargs["stage"]  # nolonger need as not captured in group
 
             if "angles" in self.kwargs:
@@ -9670,14 +9694,18 @@ class DandelionData:
                             edge_colour = colour
                             # edge_colour = COLOUR_DICT[p_data['SRO Forward Look Assessment']]
                     if 'circle_edge' in self.kwargs:
-                        if self.kwargs['circle_edge'] == 'fwd_look':
+                        if self.kwargs['circle_edge'] == 'forward_look':
                             try:
-                                edge_colour = COLOUR_DICT[p_data['SRO Forward Look Assessment']]
+                                fwd_look = p_data['SRO Forward Look Assessment']
+                                edge_rag = calculate_circle_edge(rag, fwd_look)
+                                edge_colour = COLOUR_DICT[edge_rag]
                             except KeyError:
                                 raise InputError(
                                     'No SRO Forward Look Assessment key in quarter master. '
                                     'This key must be present for this dandelion command. Stopping.'
                                 )
+                        if self.kwargs['circle_edge'] == 'ipa':
+                            edge_colour = COLOUR_DICT[p_data['GMPP - IPA DCA']]
 
                     try:
                         if len(p_list) >= 16:
@@ -10038,7 +10066,7 @@ def make_a_dandelion_auto(dl: DandelionData, **kwargs):
     # plt.suptitle(title, fontweight="bold", fontsize=10)
 
     if 'circle_edge' in kwargs:
-        if kwargs['circle_edge'] == 'fwd_look':
+        if kwargs['circle_edge'] == 'forward_look' or 'ipa':
             linewidth = 2.0
     else:
         linewidth = 1.0
