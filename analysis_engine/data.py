@@ -9546,6 +9546,17 @@ class DandelionData:
                     g_wlc = self.master.pipeline_dict["pipeline"]["wlc"]
                 else:
                     g_wlc = get_dandelion_type_total(self.master, self.kwargs)
+
+                if 'same_size' in self.kwargs:
+                    if self.kwargs['same_size'] == 'Yes':
+                        g_wlc = 46000
+
+                g_text = g + "\n" + dandelion_number_text(g_wlc)  # group text
+
+                if 'values' in self.kwargs:
+                    if self.kwargs['values'] == 'No':
+                        g_text = g
+
                 if len(self.group) > 1:
                     y_axis = 0 + (
                             (math.sqrt(pf_wlc) * 3.25) * math.sin(math.radians(g_ang_l[i]))
@@ -9553,7 +9564,7 @@ class DandelionData:
                     x_axis = 0 + (math.sqrt(pf_wlc) * 2.75) * math.cos(
                         math.radians(g_ang_l[i])
                     )
-                    g_text = g + "\n" + dandelion_number_text(g_wlc)  # group text
+
                     if g_wlc < pf_wlc / 20:
                         g_wlc = pf_wlc / 20
                     g_d[g] = {
@@ -9571,7 +9582,7 @@ class DandelionData:
                 else:
                     g_d = {}
                     pf_wlc = g_wlc * 3
-                    g_text = g + "\n" + dandelion_number_text(g_wlc)  # group text
+                    # g_text = g + "\n" + dandelion_number_text(g_wlc)  # group text
                     if g_wlc == 0:
                         g_wlc = 20
                     g_d[g] = {
@@ -9669,6 +9680,9 @@ class DandelionData:
 
                 for i, p in enumerate(p_list):
                     p_value = p_values_list[i]
+                    if 'same_size' in self.kwargs:
+                        if self.kwargs['same_size'] == 'Yes':
+                            p_value = 6000
                     p_data = get_correct_p_data(
                         self.kwargs, self.master, self.baseline_type, p, tp
                     )
@@ -9691,6 +9705,11 @@ class DandelionData:
                             + "\n"
                             + dandelion_number_text(p_value, **self.kwargs)
                     )
+                    if 'values' in self.kwargs:
+                        if self.kwargs['values'] == 'No':
+                            project_text = (
+                                    self.master.abbreviations[p]["abb"]
+                            )
                     if (
                             p_value < pf_wlc / 500
                     ):  # achieve some consistency for zero / low values
