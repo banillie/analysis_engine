@@ -1,12 +1,13 @@
 import setuptools
-# with open("README.md", "r", encoding="utf-8") as fh:
+
+from analysis_engine import __version__
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
     name="analysis_engine",
-    version="1.0.9",
+    version=__version__,
     author="Will Grant",
     author_email="will.granty@yahoo.co.uk",
     description="Analysis for the UK Department for Transport's major projects portfolio",

@@ -2,6 +2,7 @@ import argparse
 from argparse import RawTextHelpFormatter
 import sys
 from typing import Dict
+from analysis_engine import __version__
 
 from datamaps.api import project_data_from_master, project_data_from_master_month
 
@@ -317,6 +318,7 @@ def ipdc_run_general(args):
 
         print(programme + " analysis has been compiled. Enjoy!")
 
+
     except (ProjectNameError, FileNotFoundError, InputError) as e:
         logger.critical(e)
         sys.exit(1)
@@ -450,7 +452,7 @@ class main():
             formatter_class=RawTextHelpFormatter
         )
 
-        parser.add_argument('--version', action='version', version="1.0.9")
+        parser.add_argument('--version', action='version', version=__version__)
 
         parser.add_argument(
             'command',

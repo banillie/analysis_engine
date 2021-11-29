@@ -9539,6 +9539,19 @@ class DandelionData:
                 "alignment": ("center", "center"),
             }
 
+            # for colouring group circles
+            # circle_colours = [
+            #     "#263552",
+            #     "#f1ad64",
+            #     "#983d3f",
+            #     "#6b4351"
+            # ]
+            circle_colours = [
+                "#ae4553",
+                "#f28335",
+                "#2b7b62",
+                "#efc15f"
+            ]
             ## first outer circle
             for i, g in enumerate(self.group):
                 self.kwargs["group"] = [g]
@@ -9567,11 +9580,15 @@ class DandelionData:
 
                     if g_wlc < pf_wlc / 20:
                         g_wlc = pf_wlc / 20
+
+                    c_colour = circle_colours[i]
+
                     g_d[g] = {
                         "axis": (y_axis, x_axis),
                         "r": math.sqrt(g_wlc),
                         "wlc": g_wlc,
-                        "colour": "#FFFFFF",
+                        # "colour": "#FFFFFF",
+                        "colour": c_colour,
                         "text": g_text,
                         "fill": "dashed",
                         "ec": "grey",
