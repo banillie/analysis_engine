@@ -585,6 +585,32 @@ def test_match_data_types():
     assert gmpp_val == 1665
 
 
+def test_calculate_group_angles_dandelion():
+    group_five = ["HSRG", "RSS", "SAUSAGE", "BACON", "EGGS"]
+    group_four = ["BEANS", "BACON", "EGGS", "TOAST"]
+    group_three = ["SAUSAGE", "BACON", "EGGS"]
+    group_two = ["BACON", "EGGS"]
+    group = group_four
+ 
+    # Dandelion graph needs an algorithm to calculate the distribution
+    # of group circles. The circles are placed and distributed left
+    # to right around the center circle. 
+    angle_list = []
+    # start_point needs to come down as numbers increase
+    start_point = 290 * ((29 - ((len(group))-2)) / 29)
+    # distribution increase needs to come down as numbers increase
+    distribution_start = 0
+    distribution_increase = 140
+    if len(group) > 2:  # no change in distribution increase if group of two
+        for i in range(len(group)):
+            distribution_increase = distribution_increase*0.82
+    for i in range(len(group)):
+        angle = distribution_start + start_point
+        if angle > 360:
+            angle = angle - 360
+        angle_list.append(int(angle))
+        distribution_start += distribution_increase
+    assert isinstance(angle_list, (list,))
 
 
 

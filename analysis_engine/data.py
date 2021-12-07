@@ -9506,16 +9506,36 @@ class DandelionData:
                         "The number of groups and angles don't match. Stopping."
                     )
             else:
-                if len(self.group) == 5:
-                    g_ang_l = [260, 310, 360, 50, 100]  # group angle list
-                if len(self.group) == 4:
-                    g_ang_l = [260, 326, 32, 100]
-                if len(self.group) == 3:
-                    g_ang_l = [280, 360, 80]
-                if len(self.group) == 2:
-                    g_ang_l = [290, 70]
-                if len(self.group) == 1:
-                    pass
+                # if len(self.group) == 5:
+                #     g_ang_l = [260, 310, 360, 50, 100]  # group angle list
+                # if len(self.group) == 4:
+                #     g_ang_l = [260, 326, 32, 100]
+                # if len(self.group) == 3:
+                #     g_ang_l = [280, 360, 80]
+                # if len(self.group) == 2:
+                #     g_ang_l = [290, 70]
+                # if len(self.group) == 1:
+                #     pass
+
+                # Dandelion graph needs an algorithm to calculate the distribution
+                # of group circles. The circles are placed and distributed left
+                # to right around the center circle.
+                g_ang_l = []
+                # start_point needs to come down as numbers increase
+                start_point = 290 * ((29 - ((len(self.group)) - 2)) / 29)
+                # distribution increase needs to come down as numbers increase
+                distribution_start = 0
+                distribution_increase = 140
+                if len(self.group) > 2:  # no change in distribution increase if group of two
+                    for i in range(len(self.group)):
+                        distribution_increase = distribution_increase * 0.82
+                for i in range(len(self.group)):
+                    angle = distribution_start + start_point
+                    if angle > 360:
+                        angle = angle - 360
+                    g_ang_l.append(int(angle))
+                    distribution_start += distribution_increase
+
             g_d = {}  # group dictionary. first outer circle.
             l_g_d = {}  # lower group dictionary
 
@@ -9546,12 +9566,13 @@ class DandelionData:
             #     "#983d3f",
             #     "#6b4351"
             # ]
-            circle_colours = [
-                "#ae4553",
-                "#f28335",
-                "#2b7b62",
-                "#efc15f"
-            ]
+            # circle_colours = [
+            #     "#ae4553",
+            #     "#f28335",
+            #     "#2b7b62",
+            #     "#efc15f"
+            # ]
+
             ## first outer circle
             for i, g in enumerate(self.group):
                 self.kwargs["group"] = [g]
@@ -9581,14 +9602,14 @@ class DandelionData:
                     if g_wlc < pf_wlc / 20:
                         g_wlc = pf_wlc / 20
 
-                    c_colour = circle_colours[i]
+                    # c_colour = circle_colours[i]
 
                     g_d[g] = {
                         "axis": (y_axis, x_axis),
                         "r": math.sqrt(g_wlc),
                         "wlc": g_wlc,
-                        # "colour": "#FFFFFF",
-                        "colour": c_colour,
+                        "colour": "#FFFFFF",
+                        # "colour": c_colour,
                         "text": g_text,
                         "fill": "dashed",
                         "ec": "grey",
