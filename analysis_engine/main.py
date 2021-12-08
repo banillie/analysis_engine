@@ -46,14 +46,24 @@ from analysis_engine.data import (
     get_sp_data,
     # DFT_GROUP,
     get_input_doc,
-    InputError, JsonMaster, JsonData, open_json_file, cost_profile_into_wb_new, cost_profile_graph_new, get_gmpp_data,
-    place_gmpp_online_keys_into_dft_master_format, data_check_print_out,
+    InputError,
+    JsonMaster,
+    JsonData,
+    open_json_file,
+    cost_profile_into_wb_new,
+    cost_profile_graph_new,
+    get_gmpp_data,
+    place_gmpp_online_keys_into_dft_master_format,
+    data_check_print_out,
 )
 
 import logging
 
-from analysis_engine.top35_data import top35_run_p_reports, \
-    top35_root_path, CentralSupportData
+from analysis_engine.top35_data import (
+    top35_run_p_reports,
+    top35_root_path,
+    CentralSupportData,
+)
 
 logging.basicConfig(
     level=logging.INFO,
@@ -62,15 +72,18 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+
 def get_group_stage_data(
-        confi_path: Path,
+    confi_path: Path,
 ) -> List[str]:
-    #Returns a list of dft groups
+    # Returns a list of dft groups
     config = configparser.ConfigParser()
     config.read(confi_path)
     master_data_list = []
     # for key in config["GROUPS"]:
-    portfolio_group= json.loads(config.get("GROUPS", "portfolio_groups"))  # to return a list
+    portfolio_group = json.loads(
+        config.get("GROUPS", "portfolio_groups")
+    )  # to return a list
     dft_group_all = json.loads(config.get("GROUPS", "all_dft_groups"))
     bc_stages = json.loads(config.get("GROUPS", "bc_stages"))
 
@@ -103,13 +116,13 @@ def ipdc_initiate(args):
             get_master_data(
                 str(root_path) + "/core_data/ipdc_config.ini",
                 str(root_path) + "/core_data/",
-                project_data_from_master
+                project_data_from_master,
             ),
             get_project_information(
                 str(root_path) + "/core_data/ipdc_config.ini",
-                str(root_path) + "/core_data/"
+                str(root_path) + "/core_data/",
             ),
-            all_groups
+            all_groups,
         )
         master.get_baseline_data()
         master.check_baselines()
@@ -128,13 +141,13 @@ def top250_initiate(args):
             get_master_data(
                 str(top35_root_path) + "/core_data/top250_config.ini",
                 str(top35_root_path) + "/core_data/",
-                project_data_from_master_month
+                project_data_from_master_month,
             ),
             get_project_information(
                 str(top35_root_path) + "/core_data/top250_config.ini",
-                str(top35_root_path) + "/core_data/"
+                str(top35_root_path) + "/core_data/",
             ),
-            data_type="top35"
+            data_type="top35",
         )
     except (ProjectNameError, ProjectGroupError, ProjectStageError) as e:
         logger.critical(e)
@@ -164,7 +177,9 @@ def ipdc_run_general(args):
 
     try:
         # print(args.items())
-        op_args = {k: v for k, v in args.items() if v is not None}  # removes None values
+        op_args = {
+            k: v for k, v in args.items() if v is not None
+        }  # removes None values
         # print(op_args)
         if "group" not in op_args:
             if "stage" not in op_args:
@@ -358,7 +373,6 @@ def ipdc_run_general(args):
 
         print(programme + " analysis has been compiled. Enjoy!")
 
-
     except (ProjectNameError, FileNotFoundError, InputError) as e:
         logger.critical(e)
         sys.exit(1)
@@ -409,7 +423,9 @@ def top250_run_general(args):
                 if op_args["chart"] == "save":
                     op_args["chart"] = False
                     ms_graph = milestone_chart(d, m, **op_args)
-                    doc = get_input_doc(top35_root_path / "input/summary_temp_landscape.docx")
+                    doc = get_input_doc(
+                        top35_root_path / "input/summary_temp_landscape.docx"
+                    )
                     put_matplotlib_fig_into_word(
                         doc, ms_graph, size=8, transparent=False
                     )
@@ -431,7 +447,9 @@ def top250_run_general(args):
                 if op_args["chart"] == "save":
                     op_args["chart"] = False
                     d_graph = make_a_dandelion_auto(d_data, **op_args)
-                    doc = get_input_doc(top35_root_path / "input/summary_temp_landscape.docx")
+                    doc = get_input_doc(
+                        top35_root_path / "input/summary_temp_landscape.docx"
+                    )
                     put_matplotlib_fig_into_word(doc, d_graph, size=7)
                     doc.save(top35_root_path / "output/dandelion_graph.docx")
                 if op_args["chart"] == "show":
@@ -467,9 +485,13 @@ def return_koi_fn_keys(oa: Dict):  # op_args
     if "koi_fn" in oa:
         if "data_type" in oa:
             if oa["data_type"] == "top35":
-                keys = get_data_query_key_names(top35_root_path / "input/{}.csv".format(oa["koi_fn"]))
+                keys = get_data_query_key_names(
+                    top35_root_path / "input/{}.csv".format(oa["koi_fn"])
+                )
         else:
-            keys = get_data_query_key_names(root_path / "input/{}.csv".format(oa["koi_fn"]))
+            keys = get_data_query_key_names(
+                root_path / "input/{}.csv".format(oa["koi_fn"])
+            )
         oa["key"] = keys
         return oa
     if "koi" in oa:
@@ -479,7 +501,7 @@ def return_koi_fn_keys(oa: Dict):  # op_args
         return oa
 
 
-class main():
+class main:
     def __init__(self):
         ae_description = (
             "Welcome to the DfT Major Projects Portfolio Office analysis engine.\n\n"
@@ -488,28 +510,27 @@ class main():
             "arguments can be used with each subcommand. e.g. analysis dandelion --help."
         )
         parser = argparse.ArgumentParser(
-            description=ae_description,
-            formatter_class=RawTextHelpFormatter
+            description=ae_description, formatter_class=RawTextHelpFormatter
         )
 
-        parser.add_argument('--version', action='version', version=__version__)
+        parser.add_argument("--version", action="version", version=__version__)
 
         parser.add_argument(
-            'command',
-            help='Initial command to specify whether ipdc, top250, cdg analysis if required'
+            "command",
+            help="Initial command to specify whether ipdc, top250, cdg analysis if required",
         )
         # parse_args defaults to [1:] for args, but you need to
         # exclude the rest of the args too, or validation will fail
         args = parser.parse_args(sys.argv[1:2])
-        if vars(args)["command"] not in ['ipdc', 'top250', 'cdg']:
-            print('Unrecognised command. Options are ipdc top250 or cdg')
+        if vars(args)["command"] not in ["ipdc", "top250", "cdg"]:
+            print("Unrecognised command. Options are ipdc top250 or cdg")
             exit(1)
         # use dispatch pattern to invoke method with same name
         getattr(self, args.command)()
 
     def ipdc(self):
         parser = argparse.ArgumentParser(
-            description='runs all analysis for ipdc reporting'
+            description="runs all analysis for ipdc reporting"
         )
         subparsers = parser.add_subparsers(dest="subparser_name")
         subparsers.metavar = "                      "
@@ -606,8 +627,9 @@ class main():
                 action="store",
                 nargs="*",
                 choices=["FBC", "OBC", "SOBC", "pre-SOBC"],
-                help="Returns analysis for only those projects at the specified planning stage(s). User must enter one "
-                     'or combination of "FBC", "OBC", "SOBC", "pre-SOBC".',
+                help="Returns analysis for only those projects at the specified planning stage(s). By default "
+                "the --stage argument will return the list of bc_stages specified in the config file."
+                'Or user can enter one or combination of "FBC", "OBC", "SOBC", "pre-SOBC".',
             )
         # stage dandelion only
         parser_dandelion.add_argument(
@@ -617,8 +639,9 @@ class main():
             action="store",
             nargs="*",
             choices=["FBC", "OBC", "SOBC", "pre-SOBC", "pipeline"],
-            help="Returns analysis for only those projects at the specified planning stage(s). User must enter one "
-                 'or combination of "FBC", "OBC", "SOBC", "pre-SOBC". For dandelion "pipeline" is also available',
+            help="Returns analysis for only those projects at the specified planning stage(s). By default "
+            "the --stage argument will return the list of bc_stages specified in the config file."
+            'Or user can enter one or combination of "FBC", "OBC", "SOBC", "pre-SOBC".For dandelion "pipeline" is also available',
         )
 
         # group
@@ -643,7 +666,7 @@ class main():
                 action="store",
                 nargs="+",
                 help="Returns analysis for specified project(s), only. User must enter one or a combination of "
-                     'DfT Group names; "HSRG", "RSS", "RIG", "AMIS","RPE", or the project(s) acronym or full name.',
+                'DfT Group names; "HSRG", "RSS", "RIG", "AMIS","RPE", or the project(s) acronym or full name.',
             )
         # remove
         for sub in [
@@ -664,8 +687,8 @@ class main():
                 action="store",
                 nargs="+",
                 help="Removes specified projects from analysis. User must enter one or a combination of either"
-                     " a recognised DfT Group name, a recognised planning stage or the project(s) acronym or full"
-                     " name.",
+                " a recognised DfT Group name, a recognised planning stage or the project(s) acronym or full"
+                " name.",
             )
         # quarter
         for sub in [
@@ -686,7 +709,7 @@ class main():
                 action="store",
                 nargs="+",
                 help="Returns analysis for one or combination of specified quarters. "
-                     'User must use correct format e.g "Q3 19/20"',
+                'User must use correct format e.g "Q3 19/20"',
             )
         # baseline
         for sub in [
@@ -715,8 +738,8 @@ class main():
                     "all",
                 ],
                 help="Returns analysis for specified baselines. User must use correct format"
-                     ' which are "current", "last", "bl_one", "bl_two", "bl_three", "standard", "all".'
-                     ' The "all" option returns all, "standard" returns first three',
+                ' which are "current", "last", "bl_one", "bl_two", "bl_three", "standard", "all".'
+                ' The "all" option returns all, "standard" returns first three',
             )
 
         parser_costs.add_argument(
@@ -727,7 +750,8 @@ class main():
             nargs="+",
             choices=["current"],
             help="baseline option for costs refactored in Q1 21/22. Choose 'current' to return project "
-                 "reported bls as well as latest forecast profile")
+            "reported bls as well as latest forecast profile",
+        )
 
         parser_milestones.add_argument(
             "--type",
@@ -746,8 +770,8 @@ class main():
             action="store",
             choices=["sro", "finance", "benefits", "schedule", "resource"],
             help="Returns analysis for specified confidence types. options are"
-                 "'sro', 'finance', 'benefits', 'schedule', 'resource'."
-                 " As of Q2 20/21 it only provides a three rag dial.",
+            "'sro', 'finance', 'benefits', 'schedule', 'resource'."
+            " As of Q2 20/21 it only provides a three rag dial.",
         )
 
         for sub in [parser_milestones, parser_data_query]:
@@ -783,7 +807,7 @@ class main():
             action="store",
             choices=["spent", "remaining", "benefits"],
             help="Provide the type of value to include in dandelion. Options are"
-                 ' "spent", "remaining", "benefits".',
+            ' "spent", "remaining", "benefits".',
         )
 
         parser_dandelion.add_argument(
@@ -793,7 +817,7 @@ class main():
             action="store",
             choices=["schedule"],
             help="Specify how project circles should be ordered: 'schedule' only current"
-                 " option.",
+            " option.",
         )
 
         parser_summaries.add_argument(
@@ -811,7 +835,8 @@ class main():
             metavar="",
             action="store",
             choices=["cat"],
-            help="Provide the type of value to include in dandelion. Options are" ' "cat".',
+            help="Provide the type of value to include in dandelion. Options are"
+            ' "cat".',
         )
 
         parser_dandelion.add_argument(
@@ -856,9 +881,9 @@ class main():
             type=str,
             metavar="",
             action="store",
-            choices=['forward_look', 'ipa'],
+            choices=["forward_look", "ipa"],
             help="specify whether to colour circle edge with SRO forward look rating. "
-                 "Options are 'forward_look' or 'ipa'.",
+            "Options are 'forward_look' or 'ipa'.",
         )
 
         # chart
@@ -888,7 +913,7 @@ class main():
             metavar="",
             action="store",
             help="Insert blue line into chart to represent a date. "
-                 'Options are "Today" "IPDC" or a date in correct format e.g. "1/1/2021".',
+            'Options are "Today" "IPDC" or a date in correct format e.g. "1/1/2021".',
         )
         # now that we're inside a subcommand, ignore the first
         # TWO argvs, ie the command (git) and subcommand (commit)
@@ -904,14 +929,16 @@ class main():
 
     def top250(self):
         parser = argparse.ArgumentParser(
-            description='runs all analysis for top250 reporting'
+            description="runs all analysis for top250 reporting"
         )
         subparsers = parser.add_subparsers(dest="subparser_name")
         subparsers.metavar = "                      "
         top250_parser_initiate = subparsers.add_parser(
             "initiate", help="creates a master data file"
         )
-        top250_parser_summaries = subparsers.add_parser("summaries", help="summary reports")
+        top250_parser_summaries = subparsers.add_parser(
+            "summaries", help="summary reports"
+        )
         top250_parser_milestones = subparsers.add_parser(
             "milestones",
             help="milestone schedule graphs and data.",
@@ -950,7 +977,7 @@ class main():
                 action="store",
                 nargs="+",
                 help="Returns analysis for specified project(s), only. User must enter one or a combination of "
-                     'DfT Group names; "HSRG", "RSS", "RIG", "RPE", or the project(s) acronym or full name.',
+                'DfT Group names; "HSRG", "RSS", "RIG", "RPE", or the project(s) acronym or full name.',
             )
 
         for sub in [
@@ -960,15 +987,15 @@ class main():
             top250_parser_data_query,
         ]:
             sub.add_argument(
-                    "--remove",
-                    type=str,
-                    metavar="",
-                    action="store",
-                    nargs="+",
-                    help="Removes specified projects from analysis. User must enter one or a combination of either"
-                         " a recognised DfT Group name, a recognised planning stage or the project(s) acronym or full"
-                         " name.",
-                )
+                "--remove",
+                type=str,
+                metavar="",
+                action="store",
+                nargs="+",
+                help="Removes specified projects from analysis. User must enter one or a combination of either"
+                " a recognised DfT Group name, a recognised planning stage or the project(s) acronym or full"
+                " name.",
+            )
 
         for sub in [
             top250_parser_milestones,
@@ -989,13 +1016,13 @@ class main():
             top250_parser_dandelion,
         ]:
             sub.add_argument(
-                    "--chart",
-                    type=str,
-                    metavar="",
-                    action="store",
-                    choices=["show", "save"],
-                    help="options for building and saving graph output. Commands are 'show' or 'save' ",
-                )
+                "--chart",
+                type=str,
+                metavar="",
+                action="store",
+                choices=["show", "save"],
+                help="options for building and saving graph output. Commands are 'show' or 'save' ",
+            )
 
         for sub in [
             top250_parser_milestones,
@@ -1019,7 +1046,7 @@ class main():
                 metavar="",
                 action="store",
                 help="Insert blue line into chart to represent a date. "
-                     'Options are "Today" "CDG" or a date in correct format e.g. "1/1/2021".',
+                'Options are "Today" "CDG" or a date in correct format e.g. "1/1/2021".',
             )
 
         for sub in [
