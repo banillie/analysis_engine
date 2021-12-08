@@ -163,9 +163,9 @@ def ipdc_run_general(args):
     m = Master(open_json_file(str(root_path / "core_data/json/master.json")))
 
     try:
-        print(args.items())
+        # print(args.items())
         op_args = {k: v for k, v in args.items() if v is not None}  # removes None values
-        print(op_args)
+        # print(op_args)
         if "group" not in op_args:
             if "stage" not in op_args:
                 op_args["group"] = dft_group
@@ -176,7 +176,7 @@ def ipdc_run_general(args):
             if "baseline" not in op_args:
                 op_args["quarter"] = ["standard"]
 
-        print(op_args)
+        # print(op_args)
 
         if programme == "vfm":
             c = VfMData(m, **op_args)  # c is class
@@ -604,7 +604,7 @@ class main():
                 type=str,
                 metavar="",
                 action="store",
-                nargs="+",
+                nargs="*",
                 choices=["FBC", "OBC", "SOBC", "pre-SOBC"],
                 help="Returns analysis for only those projects at the specified planning stage(s). User must enter one "
                      'or combination of "FBC", "OBC", "SOBC", "pre-SOBC".',
