@@ -612,6 +612,3 @@ def test_calculate_group_angles_dandelion():
         distribution_start += distribution_increase
     assert isinstance(angle_list, (list,))
 
-
-
-

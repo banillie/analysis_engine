@@ -154,7 +154,6 @@ def calculate_arg_combinations(args_list: List):
 #
 #     return master_data_list
 
-
 def get_master_data(
         confi_path: Path, pi_path: Path, get_data_function
 ) -> List[Dict[str, Union[str, int, datetime.date, float]]]:
@@ -485,34 +484,17 @@ BC_STAGE_DICT = {
     "To be confirmed ": None,
     "Ongoing Board papers": None,
 }
-# DFT_GROUP_DICT_OLD = {
-#     "High Speed Rail Group": "HSMRPG",
-#     "International Security and Environment": "AMIS",
-#     "Transport for London": "Rail",
-#     "DVSA": "RPE",
-#     "Roads Places and Environment Group": "RPE",
-#     "ISG": "AMIS",
-#     "HSMRPG": "HSMRPG",
-#     "DfT": "DfT",
-#     "RPE": "RPE",
-#     "Rail Group": "Rail",
-#     "Highways England": "RPE",
-#     "Rail": "Rail",
-#     "Roads Devolution & Motoring": "RPE",
-#     "AMIS": "AMIS",
-#     None: None,
-#     "RDM": "RPE",
+
+# need both dft_group and dft_group_dictionary in the config
+
+# DFT_GROUP_DICT = {
+#     "AMIS": "Aviation",
+#     "HSRG": "High Speed Rail Group",
+#     "RIG": "Rail Infrastructure Group",
+#     "RSS": "Rail Services",
+#     "CDG": "Corporate Delivery Group",
+#     "RPE": "Roads People and Environment",
 # }
-DFT_GROUP = ["HSRG", "RSS", "RIG", "AMIS", "RPE"]
-DFT_STAGE = ["pre-SOBC", "SOBC", "OBC", "FBC"]
-DFT_GROUP_DICT = {
-    "AMIS": "Aviation",
-    "HSRG": "High Speed Rail Group",
-    "RIG": "Rail Infrastructure Group",
-    "RSS": "Rail Services",
-    "CDG": "Corporate Delivery Group",
-    "RPE": "Roads People and Environment",
-}
 CDG_DIR_DICT = {
     "CFPD": "cfpd",
     "GF": "gf",
@@ -686,10 +668,12 @@ class JsonMaster:
             self,
             master_data: List[Dict[str, Union[str, int, datetime.date, float]]],
             project_information: Dict[str, Union[str, int]],
+            all_dft_groups,
             **kwargs,
     ) -> None:
         self.master_data = master_data
         self.project_information = project_information
+        self.all_dft_groups = all_dft_groups
         self.all_projects = list(project_information.keys())
         self.kwargs = kwargs
         self.current_quarter = str(master_data[0].quarter)
@@ -843,10 +827,10 @@ class JsonMaster:
                 approval = "Last Business Case (BC) achieved"
             if self.kwargs["data_type"] == "top35":
                 group_key = "Group"
-                group_dict = DFT_GROUP_DICT
+                # group_dict = DFT_GROUP_DICT
         else:
             group_key = "Group"
-            group_dict = DFT_GROUP_DICT
+            # group_dict = DFT_GROUP_DICT
             approval = "IPDC approval point"
 
         raw_dict = {}
@@ -867,7 +851,7 @@ class JsonMaster:
                     raise ProjectGroupError(
                         "Program stopping as this could cause a crash. Please check project Group info."
                     )
-                if dft_group not in list(group_dict.keys()):
+                if dft_group not in self.all_dft_groups:
                     logger.critical(
                         str(p)
                         + " Group value is "

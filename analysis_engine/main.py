@@ -1,7 +1,11 @@
 import argparse
 from argparse import RawTextHelpFormatter
 import sys
-from typing import Dict
+from typing import Dict, List
+from pathlib import Path
+import configparser
+import json
+
 from analysis_engine import __version__
 
 from datamaps.api import project_data_from_master, project_data_from_master_month
@@ -40,7 +44,7 @@ from analysis_engine.data import (
     make_a_dandelion_auto,
     build_speedials,
     get_sp_data,
-    DFT_GROUP,
+    # DFT_GROUP,
     get_input_doc,
     InputError, JsonMaster, JsonData, open_json_file, cost_profile_into_wb_new, cost_profile_graph_new, get_gmpp_data,
     place_gmpp_online_keys_into_dft_master_format, data_check_print_out,
@@ -58,6 +62,20 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+def get_group_stage_data(
+        confi_path: Path,
+) -> List[str]:
+    #Returns a list of dft groups
+    config = configparser.ConfigParser()
+    config.read(confi_path)
+    master_data_list = []
+    # for key in config["GROUPS"]:
+    portfolio_group= json.loads(config.get("GROUPS", "portfolio_groups"))  # to return a list
+    dft_group_all = json.loads(config.get("GROUPS", "all_dft_groups"))
+    bc_stages = json.loads(config.get("GROUPS", "bc_stages"))
+
+    return portfolio_group, dft_group_all, bc_stages
+
 
 def check_remove(op_args):  # subcommand arg
     if "remove" in op_args:
@@ -73,6 +91,13 @@ def check_remove(op_args):  # subcommand arg
 
 def ipdc_initiate(args):
     print("creating a master data file for ipdc and gmpp portfolio reporting.")
+
+    # get group information from config. only all_groups used at initiate
+    META = get_group_stage_data(
+        str(root_path) + "/core_data/ipdc_config.ini",
+    )
+    all_groups = META[1]
+
     try:
         master = JsonMaster(
             get_master_data(
@@ -84,6 +109,7 @@ def ipdc_initiate(args):
                 str(root_path) + "/core_data/ipdc_config.ini",
                 str(root_path) + "/core_data/"
             ),
+            all_groups
         )
         master.get_baseline_data()
         master.check_baselines()
@@ -119,6 +145,13 @@ def top250_initiate(args):
 
 
 def ipdc_run_general(args):
+    # get portfolio reporting group information.
+    META = get_group_stage_data(
+        str(root_path) + "/core_data/ipdc_config.ini",
+    )
+    dft_group = META[0]
+    dft_stage = META[2]
+
     programme = args["subparser_name"]
     # wrap this into logging
     try:
@@ -130,13 +163,20 @@ def ipdc_run_general(args):
     m = Master(open_json_file(str(root_path / "core_data/json/master.json")))
 
     try:
-        op_args = {k: v for k, v in args.items() if v}  # removes None values
+        print(args.items())
+        op_args = {k: v for k, v in args.items() if v is not None}  # removes None values
+        print(op_args)
         if "group" not in op_args:
             if "stage" not in op_args:
-                op_args["group"] = DFT_GROUP
+                op_args["group"] = dft_group
+            if "stage" in op_args:
+                if op_args["stage"] == []:
+                    op_args["stage"] = dft_stage
         if "quarter" not in op_args:
             if "baseline" not in op_args:
                 op_args["quarter"] = ["standard"]
+
+        print(op_args)
 
         if programme == "vfm":
             c = VfMData(m, **op_args)  # c is class
@@ -280,7 +320,7 @@ def ipdc_run_general(args):
             run_p_reports(m, **op_args)
 
         if programme == "top_250_summaries":
-            if op_args["group"] == DFT_GROUP:
+            if op_args["group"] == dft_group:
                 op_args["group"] = ["HSRG", "RSS", "RIG", "RPE"]
             top35_run_p_reports(m, **op_args)
 
@@ -575,7 +615,7 @@ class main():
             type=str,
             metavar="",
             action="store",
-            nargs="+",
+            nargs="*",
             choices=["FBC", "OBC", "SOBC", "pre-SOBC", "pipeline"],
             help="Returns analysis for only those projects at the specified planning stage(s). User must enter one "
                  'or combination of "FBC", "OBC", "SOBC", "pre-SOBC". For dandelion "pipeline" is also available',
@@ -852,7 +892,10 @@ class main():
         )
         # now that we're inside a subcommand, ignore the first
         # TWO argvs, ie the command (git) and subcommand (commit)
+        # print(sys.argv)
         args = parser.parse_args(sys.argv[2:])
+        # print(args)
+        # print(vars(args))
         # print(vars(args))
         if vars(args)["subparser_name"] == "initiate":
             ipdc_initiate(vars(args))
