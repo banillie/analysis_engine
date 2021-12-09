@@ -16,6 +16,7 @@ from analysis_engine.data import (
     get_project_information,
     VfMData,
     root_path,
+    cdg_root_path,
     vfm_into_excel,
     MilestoneData,
     put_milestones_into_wb,
@@ -63,6 +64,11 @@ from analysis_engine.top35_data import (
     top35_run_p_reports,
     top35_root_path,
     CentralSupportData,
+)
+
+from analysis_engine.cdg_data import (
+    cdg_dashboard,
+    cdg_narrative_dashboard,
 )
 
 logging.basicConfig(
@@ -170,6 +176,37 @@ def top250_initiate(args):
         sys.exit(1)
 
     master_json_path = str("{0}/core_data/json/master".format(top35_root_path))
+    JsonData(master, master_json_path)
+
+
+def cdg_initiate(args):
+    print("creating a master data file for CDG reporting.")
+
+    # get group information from config. only all_groups used at initiate
+    META = get_group_stage_data(
+        str(cdg_root_path) + "/core_data/cdg_config.ini",
+    )
+    all_groups = META[1]
+
+    try:
+        master = JsonMaster(
+            get_master_data(
+                str(cdg_root_path) + "/core_data/cdg_config.ini",
+                str(cdg_root_path) + "/core_data/",
+                project_data_from_master,
+            ),
+            get_project_information(
+                str(cdg_root_path) + "/core_data/cdg_config.ini",
+                str(cdg_root_path) + "/core_data/",
+            ),
+            all_groups,
+            data_type="cdg",
+        )
+    except (ProjectNameError, ProjectGroupError, ProjectStageError) as e:
+        logger.critical(e)
+        sys.exit(1)
+
+    master_json_path = str("{0}/core_data/json/master".format(cdg_root_path))
     JsonData(master, master_json_path)
 
 
@@ -502,6 +539,142 @@ def top250_run_general(args):
         sys.exit(1)
 
 
+def cdg_run_general(args):
+    # get portfolio reporting group information.
+    META = get_group_stage_data(
+        str(cdg_root_path) + "/core_data/cdg_config.ini",
+    )
+    dft_group = META[0]
+    dft_stage = META[2]
+
+    programme = args["subparser_name"]
+    # wrap this into logging
+    try:
+        print("compiling ipdc " + programme + " analysis")
+    except TypeError:  # NoneType as no programme entered
+        print("Further command required. Use --help flag for guidance")
+        sys.exit(1)
+
+    m = Master(open_json_file(str(cdg_root_path / "core_data/json/master.json")))
+
+
+    try:
+        op_args = {
+            k: v for k, v in args.items() if v is not None
+        }  # removes None values
+
+        op_args["data_type"] = "cdg"
+
+        if "group" not in op_args:
+            if "stage" not in op_args:
+                op_args["group"] = dft_group
+            if "stage" in op_args:
+                if op_args["stage"] == []:
+                    op_args["stage"] = dft_stage
+        if "quarter" not in op_args:
+            if "baseline" not in op_args:
+                op_args["quarter"] = ["standard"]
+
+        if programme == "speedial":
+            doc = get_input_doc(cdg_root_path / "input/summary_temp.docx")
+            land_doc = get_input_doc(cdg_root_path / "input/summary_temp_landscape.docx")
+            # if "conf_type" in op_args:
+            #     if op_args["conf_type"] == "sro_three":
+            #         op_args["rag_number"] = "3"
+            #         op_args["quarter"] = [str(m.current_quarter)]
+            #         data = DcaData(m, **op_args)
+            #         build_speedials(data, land_doc)
+            #         land_doc.save(root_path / "output/speed_dial_graph.docx")
+            #     else:  # refactor!!
+            op_args["rag_number"] = "3"
+            data = DcaData(m, **op_args)
+            data.get_changes()
+            doc = dca_changes_into_word(data, doc)
+            doc.save(root_path / "output/speed_dials_text.docx")
+            build_speedials(data, land_doc)
+            land_doc.save(root_path / "output/speed_dial_graph.docx")
+            # else:
+            #     op_args["rag_number"] = "5"
+            #     data = DcaData(m, **op_args)
+            #     data.get_changes()
+            #     doc = dca_changes_into_word(data, doc)
+            #     doc.save(root_path / "output/speed_dials_text.docx")
+            #     build_speedials(data, land_doc)
+            #     land_doc.save(root_path / "output/speed_dial_graph.docx")
+
+        if programme == "milestones":
+            print(op_args)
+            ms = MilestoneData(m, **op_args)
+
+            if (
+                "type" in op_args
+                or "dates" in op_args
+                or "koi" in op_args
+                or "koi_fn" in op_args
+            ):
+                op_args = return_koi_fn_keys(op_args)
+                ms.filter_chart_info(**op_args)
+
+            if "chart" not in op_args:
+                pass
+            else:
+                if op_args["chart"] == "save":
+                    op_args["chart"] = False
+                    ms_graph = milestone_chart(ms, m, **op_args)
+                    doc = get_input_doc(root_path / "input/summary_temp_landscape.docx")
+                    put_matplotlib_fig_into_word(
+                        doc, ms_graph, size=8, transparent=False
+                    )
+                    doc.save(root_path / "output/milestones_chart.docx")
+                if op_args["chart"] == "show":
+                    milestone_chart(ms, m, **op_args)
+
+            wb = put_milestones_into_wb(ms)
+
+        if programme == "dandelion":
+            if op_args["quarter"] == [
+                "standard"
+            ]:  # converts "standard" default to current quarter
+                op_args["quarter"] = [str(m.current_quarter)]
+            # op_args["order_by"] = "schedule"
+            d_data = DandelionData(m, **op_args)
+            if "chart" not in op_args:
+                op_args["chart"] = True
+                make_a_dandelion_auto(d_data, **op_args)
+            else:
+                if op_args["chart"] == "save":
+                    op_args["chart"] = False
+                    d_graph = make_a_dandelion_auto(d_data, **op_args)
+                    doc = get_input_doc(cdg_root_path / "input/summary_temp_landscape.docx")
+                    put_matplotlib_fig_into_word(doc, d_graph, size=7)
+                    doc.save(cdg_root_path / "output/dandelion_graph.docx")
+                if op_args["chart"] == "show":
+                    make_a_dandelion_auto(d_data, **op_args)
+
+        if programme == "dashboards":
+            # op_args["baseline"] = ["standard"]
+            dashboard_master = get_input_doc(cdg_root_path / "input/dashboard_master.xlsx")
+            narrative_d_master = get_input_doc(cdg_root_path / "input/narrative_dashboard_master.xlsx")
+            wb = cdg_narrative_dashboard(m, narrative_d_master)
+            wb.save(cdg_root_path / "output/{}.xlsx".format("cdg_narrative_dashboard_completed"))
+            wb = cdg_dashboard(m, dashboard_master)
+            wb.save(cdg_root_path / "output/{}.xlsx".format("cdg_dashboard_completed"))
+
+        check_remove(op_args)
+
+        try:
+            if programme != "dashboards":
+                wb.save(cdg_root_path / "output/{}.xlsx".format(programme))
+        except UnboundLocalError:
+            pass
+
+        print(programme + " analysis has been compiled. Enjoy!")
+
+    except (ProjectNameError, FileNotFoundError, InputError) as e:
+        logger.critical(e)
+        sys.exit(1)
+
+
 def return_koi_fn_keys(oa: Dict):  # op_args
     """small helper function to convert key names in file into list of strings
     and place in op_args dictionary"""
@@ -546,7 +719,7 @@ class main:
         # exclude the rest of the args too, or validation will fail
         args = parser.parse_args(sys.argv[1:2])
         if vars(args)["command"] not in ["ipdc", "top250", "cdg"]:
-            print("Unrecognised command. Options are ipdc top250 or cdg")
+            print("Unrecognised command. Options are ipdc, top250 or cdg")
             exit(1)
         # use dispatch pattern to invoke method with same name
         getattr(self, args.command)()
@@ -1099,6 +1272,119 @@ class main:
             top250_initiate(vars(args))
         else:
             top250_run_general(vars(args))
+
+    def cdg(self):
+        parser = argparse.ArgumentParser(
+            description="runs all analysis for cdg reporting"
+        )
+        subparsers = parser.add_subparsers(dest="subparser_name")
+        subparsers.metavar = "                      "
+        cdg_parser_initiate = subparsers.add_parser(
+            "initiate", help="creates a master data file"
+        )
+        cdg_parser_milestones = subparsers.add_parser(
+            "milestones",
+            help="milestone schedule graphs and data.",
+        )
+        dandelion_description = (
+            "Creates the 'dandelion' graph. See below optional arguments for changing the "
+            "dandelion that is compiled. The command analysis dandelion returns the default "
+            'dandelion graph. The user must specify --chart "save" to save the chart, otherwise '
+            "only a temporary matplotlib chart will be generated."
+        )
+        cdg_parser_dandelion = subparsers.add_parser(
+            "dandelion",
+            help="Dandelion graph.",
+            description=dandelion_description,
+        )
+        dashboard_description = (
+            "Creates CDG dashboards. There are no optional arguments for this command.\n\n"
+            "A blank master dashboard titled dashboards_master.xlsx must be in input file.\n\n"
+            "A completed dashboard title completed_cdg_dashboard.xlsx will be placed into\n"
+            "the output file."
+        )
+        cdg_parser_dashboard = subparsers.add_parser(
+            "dashboards",
+            help="CDG dashboard",
+            description=dashboard_description,
+            formatter_class=RawTextHelpFormatter,
+        )
+
+        cdg_parser_speedial = subparsers.add_parser("speedial", help="speed dial analysis")
+
+        cdg_parser_milestones.add_argument(
+                "--dates",
+                type=str,
+                metavar="",
+                action="store",
+                nargs=2,
+                help="dates for analysis. Must provide start date and then end date in format e.g. '1/1/2021' '1/1/2022'.",
+            )
+
+        cdg_parser_milestones.add_argument(
+            "--blue_line",
+            type=str,
+            metavar="",
+            action="store",
+            help="Insert blue line into chart to represent a date. "
+                 'Options are "Today" "CDG" or a date in correct format e.g. "1/1/2021".',
+        )
+
+        for sub in [
+            cdg_parser_milestones,
+            cdg_parser_dandelion,
+        ]:
+            sub.add_argument(
+                "--chart",
+                type=str,
+                metavar="",
+                action="store",
+                choices=["show", "save"],
+                help="options for building and saving graph output. Commands are 'show' or 'save' ",
+            )
+
+        # quarter
+        for sub in [
+            cdg_parser_speedial,
+            cdg_parser_dandelion,
+            cdg_parser_milestones,
+        ]:
+            sub.add_argument(
+                "--quarter",
+                type=str,
+                metavar="",
+                action="store",
+                nargs="+",
+                help="Returns analysis for one or combination of specified quarters. "
+                     'User must use correct format e.g "Q3 19/20"',
+            )
+
+        cdg_parser_dandelion.add_argument(
+            "--angles",
+            type=int,
+            metavar="",
+            action="store",
+            nargs="+",
+            # choices=['sro', 'finance', 'benefits', 'schedule', 'resource'],
+            help="Use can manually enter angles for group bubbles",
+        )
+
+        cdg_parser_dandelion.add_argument(
+            "--type",
+            type=str,
+            metavar="",
+            action="store",
+            choices=["benefits", 'income'],
+            help="Provide the type of value to include in dandelion. Options are"
+                 ' "benefits" or "income".',
+        )
+
+        args = parser.parse_args(sys.argv[2:])
+        # print(vars(args))
+        if vars(args)["subparser_name"] == "initiate":
+            cdg_initiate(vars(args))
+        else:
+            cdg_run_general(vars(args))
 
 
 ## old method for handling argparse commands.

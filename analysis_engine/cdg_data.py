@@ -570,9 +570,9 @@ def add_sterling_symbol(figure: int or float):
 def cdg_dashboard(
         master: Master,
         # milestones: MilestoneData,
-        wb_path: Workbook
+        wb: Workbook,
 ) -> Workbook:
-    wb = load_workbook(wb_path)
+    # wb = load_workbook(wb_path)
     ws = wb.active
 
     for row_num in range(2, ws.max_row + 1):
@@ -888,9 +888,9 @@ def cdg_dashboard(
 def cdg_narrative_dashboard(
         master: Master,
         # milestones: MilestoneData,
-        wb_path: Workbook
+        wb: Workbook,
 ) -> Workbook:
-    wb = load_workbook(wb_path)
+    # wb = load_workbook(wb_path)
     ws = wb.active
 
     for row_num in range(2, ws.max_row + 1):

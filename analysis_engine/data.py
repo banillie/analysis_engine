@@ -490,12 +490,12 @@ BC_STAGE_DICT = {
 #     "CDG": "Corporate Delivery Group",
 #     "RPE": "Roads People and Environment",
 # }
-CDG_DIR_DICT = {
-    "CFPD": "cfpd",
-    "GF": "gf",
-    "Digital": "D",
-    "SCS": "scs",
-}
+# CDG_DIR_DICT = {
+#     "CFPD": "cfpd",
+#     "GF": "gf",
+#     "Digital": "D",
+#     "SCS": "scs",
+# }
 YEAR_LIST = [
     # "16-17",
     # "17-18",
@@ -818,7 +818,7 @@ class JsonMaster:
         if "data_type" in self.kwargs:
             if self.kwargs["data_type"] == "cdg":
                 group_key = "Directorate"
-                group_dict = CDG_DIR_DICT
+                # group_dict = CDG_DIR_DICT
                 approval = "Last Business Case (BC) achieved"
             if self.kwargs["data_type"] == "top35":
                 group_key = "Group"
