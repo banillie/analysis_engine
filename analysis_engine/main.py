@@ -72,22 +72,30 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+class ConfigurationError(Exception):
+    pass
 
 def get_group_stage_data(
     confi_path: Path,
 ) -> List[str]:
     # Returns a list of dft groups
-    config = configparser.ConfigParser()
-    config.read(confi_path)
-    master_data_list = []
-    # for key in config["GROUPS"]:
-    portfolio_group = json.loads(
-        config.get("GROUPS", "portfolio_groups")
-    )  # to return a list
-    dft_group_all = json.loads(config.get("GROUPS", "all_dft_groups"))
-    bc_stages = json.loads(config.get("GROUPS", "bc_stages"))
+    try:
+        config = configparser.ConfigParser()
+        config.read(confi_path)
+        master_data_list = []
+        portfolio_group = json.loads(
+            config.get("GROUPS", "portfolio_groups")
+        )  # to return a list
+        group_all = json.loads(config.get("GROUPS", "all_groups"))
+        try:
+            bc_stages = json.loads(config.get("GROUPS", "bc_stages"))
+        except configparser.NoOptionError:
+            bc_stages = []
+    except:
+        logger.critical("Configuration file issue. Please check and make sure it's correct.")
+        sys.exit(1)
 
-    return portfolio_group, dft_group_all, bc_stages
+    return portfolio_group, group_all, bc_stages
 
 
 def check_remove(op_args):  # subcommand arg
@@ -136,6 +144,13 @@ def ipdc_initiate(args):
 
 def top250_initiate(args):
     print("creating a master data file for top 250 reporting.")
+
+    # get group information from config. only all_groups used at initiate
+    META = get_group_stage_data(
+        str(top35_root_path) + "/core_data/top250_config.ini",
+    )
+    all_groups = META[1]
+
     try:
         master = JsonMaster(
             get_master_data(
@@ -147,6 +162,7 @@ def top250_initiate(args):
                 str(top35_root_path) + "/core_data/top250_config.ini",
                 str(top35_root_path) + "/core_data/",
             ),
+            all_groups,
             data_type="top35",
         )
     except (ProjectNameError, ProjectGroupError, ProjectStageError) as e:
@@ -334,10 +350,10 @@ def ipdc_run_general(args):
                 op_args["type"] = "short"
             run_p_reports(m, **op_args)
 
-        if programme == "top_250_summaries":
-            if op_args["group"] == dft_group:
-                op_args["group"] = ["HSRG", "RSS", "RIG", "RPE"]
-            top35_run_p_reports(m, **op_args)
+        # if programme == "top_250_summaries":
+        #     if op_args["group"] == dft_group:
+        #         op_args["group"] = ["HSRG", "RSS", "RIG", "RPE"]
+        #     top35_run_p_reports(m, **op_args)
 
         if programme == "matrix":
             costs = CostData(m, **op_args)
@@ -388,11 +404,18 @@ def top250_run_general(args):
     print("compiling top250 " + programme + " analysis")
     m = Master(open_json_file(str(top35_root_path / "core_data/json/master.json")))
 
+    # get portfolio reporting group information.
+    META = get_group_stage_data(
+        str(top35_root_path) + "/core_data/top250_config.ini",
+    )
+    dft_group = META[0]
+    dft_stage = META[2]
+
     try:
         op_args = {k: v for k, v in args.items() if v}  # removes None values
         if "group" not in op_args:
             if "stage" not in op_args:
-                op_args["group"] = ["HSRG", "RSS", "RIG", "RPE"]
+                op_args["group"] = dft_group
         if "quarter" not in op_args:
             if "baseline" not in op_args:
                 op_args["quarter"] = ["standard"]

@@ -422,11 +422,6 @@ def get_ipdc_date(confi_path, board_str):
     return config["GLOBALS"][board_str]
 
 
-# Python date format is Year, Month, day
-# IPDC_DATE = parser.parse(
-#     get_ipdc_date(str(root_path) + "/core_data/ipdc_config.ini", "ipdc_date"),
-#     dayfirst=True,
-# ).date()
 LIST_OF_TITLES = [
     "ALL",
     "HE",
@@ -668,12 +663,12 @@ class JsonMaster:
             self,
             master_data: List[Dict[str, Union[str, int, datetime.date, float]]],
             project_information: Dict[str, Union[str, int]],
-            all_dft_groups,
+            all_groups,
             **kwargs,
     ) -> None:
         self.master_data = master_data
         self.project_information = project_information
-        self.all_dft_groups = all_dft_groups
+        self.all_groups = all_groups
         self.all_projects = list(project_information.keys())
         self.kwargs = kwargs
         self.current_quarter = str(master_data[0].quarter)
@@ -851,7 +846,7 @@ class JsonMaster:
                     raise ProjectGroupError(
                         "Program stopping as this could cause a crash. Please check project Group info."
                     )
-                if dft_group not in self.all_dft_groups:
+                if dft_group not in self.all_groups:
                     logger.critical(
                         str(p)
                         + " Group value is "
