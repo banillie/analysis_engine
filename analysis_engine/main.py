@@ -550,13 +550,12 @@ def cdg_run_general(args):
     programme = args["subparser_name"]
     # wrap this into logging
     try:
-        print("compiling ipdc " + programme + " analysis")
+        print("compiling cdg " + programme + " analysis")
     except TypeError:  # NoneType as no programme entered
         print("Further command required. Use --help flag for guidance")
         sys.exit(1)
 
     m = Master(open_json_file(str(cdg_root_path / "core_data/json/master.json")))
-
 
     try:
         op_args = {
@@ -578,29 +577,13 @@ def cdg_run_general(args):
         if programme == "speedial":
             doc = get_input_doc(cdg_root_path / "input/summary_temp.docx")
             land_doc = get_input_doc(cdg_root_path / "input/summary_temp_landscape.docx")
-            # if "conf_type" in op_args:
-            #     if op_args["conf_type"] == "sro_three":
-            #         op_args["rag_number"] = "3"
-            #         op_args["quarter"] = [str(m.current_quarter)]
-            #         data = DcaData(m, **op_args)
-            #         build_speedials(data, land_doc)
-            #         land_doc.save(root_path / "output/speed_dial_graph.docx")
-            #     else:  # refactor!!
-            op_args["rag_number"] = "3"
+            op_args["rag_number"] = "5"
             data = DcaData(m, **op_args)
             data.get_changes()
             doc = dca_changes_into_word(data, doc)
-            doc.save(root_path / "output/speed_dials_text.docx")
+            doc.save(cdg_root_path / "output/speed_dials_text.docx")
             build_speedials(data, land_doc)
-            land_doc.save(root_path / "output/speed_dial_graph.docx")
-            # else:
-            #     op_args["rag_number"] = "5"
-            #     data = DcaData(m, **op_args)
-            #     data.get_changes()
-            #     doc = dca_changes_into_word(data, doc)
-            #     doc.save(root_path / "output/speed_dials_text.docx")
-            #     build_speedials(data, land_doc)
-            #     land_doc.save(root_path / "output/speed_dial_graph.docx")
+            land_doc.save(cdg_root_path / "output/speed_dial_graph.docx")
 
         if programme == "milestones":
             print(op_args)
@@ -652,7 +635,6 @@ def cdg_run_general(args):
                     make_a_dandelion_auto(d_data, **op_args)
 
         if programme == "dashboards":
-            # op_args["baseline"] = ["standard"]
             dashboard_master = get_input_doc(cdg_root_path / "input/dashboard_master.xlsx")
             narrative_d_master = get_input_doc(cdg_root_path / "input/narrative_dashboard_master.xlsx")
             wb = cdg_narrative_dashboard(m, narrative_d_master)
