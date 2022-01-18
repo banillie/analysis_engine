@@ -10884,6 +10884,26 @@ RK_LIST = [
     "2.01.4: IQA - IPA Narrative",
 ]
 
+IGNORE_LIST = [
+    "Reporting period (GMPP - Snapshot Date)",
+    "Pre 19-20 BL Income both Revenue and Capital",
+    "Pre 19-20 BL Non-Gov",
+    "Pre 19-20 CDEL BL one off new costs",
+    "Pre 19-20 RDEL BL one off new costs",
+    "Pre-profile Forecast Non-Gov",
+    "Pre-profile CDEL Forecast one off new costs",
+    "Pre-profile RDEL Forecast one off new costs",
+    "Pre 19-20 Actual Income both Revenue and Capital",
+    "Unprofiled Remainder BEN Baseline - Gov. Cashable",
+    "Unprofiled Remainder BEN Baseline - Gov. Non-Cashable",
+    "Unprofiled Remainder BEN Baseline - Economic (inc Private Partner)",
+    "Unprofiled Remainder BEN Baseline - Disbenefit UK Economic",
+    "Unprofiled Remainder BEN Forecast - Gov. Cashable",
+    "Unprofiled Remainder BEN Forecast - Gov. Non-Cashable",
+    "Unprofiled Remainder BEN Forecast - Economic (inc Private Partner)",
+    "Unprofiled Remainder BEN Forecast - Disbenefit UK Economic",
+]
+
 
 def data_check_print_out(
         ipdc_d_file_path: str,
@@ -10999,7 +11019,9 @@ def data_check_print_out(
                     ws.cell(row=start_row, column=9).value = "MATCH"
                 elif gmpp_val is None and dft_val == 0:
                     ws.cell(row=start_row, column=9).value = "MATCH"
-
+                elif dft_key_name in IGNORE_LIST:
+                    print(dft_key_name)
+                    ws.cell(row=start_row, column=9).value = "IGNORE"
                 else:
                     ws.cell(row=start_row, column=9).value = "DIFFERENT"
 
