@@ -10808,7 +10808,8 @@ def place_gmpp_online_keys_into_dft_master_format(
     ), commas=True, gaps=True)
     ipdc_data = project_data_from_master(root_path / "input/{}.xlsx".format(ipdc_d_file_path), 2, 2021)
 
-    a_proj_name = ipdc_data.projects[1]
+    # a_proj_name = ipdc_data.projects[1]
+    a_proj_name = 'East Coast Mainline Programme'
     if project_list:
         list_of_projects = project_list
     else:
@@ -11023,7 +11024,7 @@ def data_check_print_out(
         for x in p_check:
             print(x)
 
-    wb.save(root_path / "output/GMPP_IPDC_DATA_CHECK_FINAL.xlsx")
+    wb.save(root_path / "output/GMPP_IPDC_DATA_CHECK_Q3_21.xlsx")
 
 
 # def print_gmpp_data(gmpp_dict: Dict):
