@@ -10752,16 +10752,20 @@ def sort_gmpp_on_key_order(wb) -> List:
     return ipa_key_list
 
 
-def get_gmpp_data(file_name: str, file_name_two: str):
+def get_gmpp_data(
+        file_name: str,
+        # file_name_two: str
+):
     from datetime import datetime
     import xlrd
 
     wb = load_workbook(root_path / "input/{}.xlsx".format(file_name))
     ws = wb.active
-    wb_two = load_workbook(root_path / "input/{}.xlsx".format(file_name_two))
-    ws_two = wb.active
+    # wb_two = load_workbook(root_path / "input/{}.xlsx".format(file_name_two))
+    # ws_two = wb.active
 
-    ws_list = [ws, ws_two]
+    ws_list = [ws]
+    # ws_list = [ws, ws_two]
 
     initial_dict = {}
     for ws in ws_list:

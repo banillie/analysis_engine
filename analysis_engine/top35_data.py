@@ -271,6 +271,15 @@ def project_report_meta_data(
         total_last = dandelion_number_text(p_master_last["WLC TOTAL"] + p_master_last["WLC NON GOV"])
     row_cells[3].text = total
     make_text_red(row_cells[3], total, total_last)
+    row_cells = t.add_row().cells
+    row_cells[0].text = "COVID IMPACT:"
+    c_impact = str(p_master["COVID IMPACT"])
+    try:
+        c_impact_last = str(p_master_last["COVID IMPACT"])
+    except KeyError:
+        c_impact_last = c_impact
+    row_cells[1].text = c_impact
+    make_text_red(row_cells[1], c_impact, c_impact_last)
     # row_cells = t.add_row().cells
     # row_cells[0].text = "SRO CLEARANCE DATE:"
     # row_cells[1].text = str(p_master["DATE CLEARED BY SRO"])
@@ -290,28 +299,40 @@ def project_report_meta_data(
 
 def dca_narratives(doc: Document, master: Dict, project_name: str) -> None:
     doc.add_paragraph()
-    # p = doc.add_paragraph()
-    # text = "*Red text highlights changes in narratives from last quarter"
-    # p.add_run(text).font.color.rgb = RGBColor(255, 0, 0)
 
     narrative_keys_list = [
         "SRO YOUR ON OFF TRACK ASSESSMENT:",
         "PRIMARY CONCERN & MITIGATING ACTIONS",
         "SHORT UPDATE FOR PM NOTE",
+        ["IMPACT ON MILESTONES", "COVID CONTINGENCY PLANS"],
+        ["CONTRIBUTION TO LEVELLING UP", "CHALLENGES TO LEVELLING UP"]
     ]
 
     headings_list = [
         "SRO assessment narrative",
         "SRO single biggest concern",
         "Short update for PM",
+        "Impact and Mitigation to COVID19",
+        "Leveling-up aims and challenges"
     ]
 
-    for x in range(len(headings_list)):
-        text_one = str(master.master_data[0]["data"][project_name][narrative_keys_list[x]])
-        try:
-            text_two = str(master.master_data[1]["data"][project_name][narrative_keys_list[x]])
-        except KeyError:
-            text_two = text_one
+    for x, heading in enumerate(narrative_keys_list):
+        if type(heading) == list:
+            li_one_text_one = str(master.master_data[0]["data"][project_name][narrative_keys_list[x][0]])
+            li_two_text_one = str(master.master_data[0]["data"][project_name][narrative_keys_list[x][1]])
+            text_one = li_one_text_one + li_two_text_one
+            try:
+                li_one_text_two = str(master.master_data[1]["data"][project_name][narrative_keys_list[x][0]])
+                li_two_text_two = str(master.master_data[1]["data"][project_name][narrative_keys_list[x][1]])
+                text_two = li_one_text_two + li_two_text_two
+            except KeyError:
+                text_two = text_one
+        else:
+            text_one = str(master.master_data[0]["data"][project_name][narrative_keys_list[x]])
+            try:
+                text_two = str(master.master_data[1]["data"][project_name][narrative_keys_list[x]])
+            except KeyError:
+                text_two = text_one
         doc.add_paragraph().add_run(str(headings_list[x])).bold = True
         compare_text_new_and_old(text_one, text_two, doc)
 
