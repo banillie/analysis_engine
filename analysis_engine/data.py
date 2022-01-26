@@ -9768,7 +9768,7 @@ class DandelionData:
                             multi = 2.2
                         else:
                             if g_wlc / pf_wlc >= 0.33:
-                                multi = (pf_wlc / g_wlc) ** (1.0 / 1.25)
+                                multi = (pf_wlc / g_wlc) ** (1.0 / 2)
                             else:
                                 multi = (pf_wlc / g_wlc) ** (1.0 / 3.0)  # cube root
 
