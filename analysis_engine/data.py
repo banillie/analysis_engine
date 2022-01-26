@@ -875,7 +875,8 @@ class JsonMaster:
         stage_list = list(set(stage_list))
 
         group_dict = {}
-        for i, quarter in enumerate(list(raw_dict.keys())[:2]):  # just latest two quarters
+        # for i, quarter in enumerate(list(raw_dict.keys())[:2]):  # just latest two quarters
+        for i, quarter in enumerate(list(raw_dict.keys())):
             lower_g_dict = {}
             for group_type in group_list:
                 g_list = []
@@ -9767,7 +9768,7 @@ class DandelionData:
                             multi = 2.2
                         else:
                             if g_wlc / pf_wlc >= 0.33:
-                                multi = (pf_wlc / g_wlc) ** (1.0 / 2.0)
+                                multi = (pf_wlc / g_wlc) ** (1.0 / 1.25)
                             else:
                                 multi = (pf_wlc / g_wlc) ** (1.0 / 3.0)  # cube root
 
@@ -10759,7 +10760,7 @@ def get_gmpp_data(
     from datetime import datetime
     import xlrd
 
-    wb = load_workbook(root_path / "input/{}.xlsx".format(file_name))
+    wb = load_workbook(root_path / "input/{}.xlsx".format(file_name), data_only=True)
     ws = wb.active
     # wb_two = load_workbook(root_path / "input/{}.xlsx".format(file_name_two))
     # ws_two = wb.active
@@ -10778,6 +10779,7 @@ def get_gmpp_data(
                 s_value = n_value
             if "Date" in key or "date" in key or "6.03c: To" in key:
                 # s_value = datetime(*xlrd.xldate_as_tuple(n_value, 0))
+                # print(project_name, key, n_value)
                 if n_value > 20000:
                     # if "7.02.10" in key:
                     #     pass
@@ -10808,8 +10810,8 @@ def place_gmpp_online_keys_into_dft_master_format(
     ), commas=True, gaps=True)
     ipdc_data = project_data_from_master(root_path / "input/{}.xlsx".format(ipdc_d_file_path), 2, 2021)
 
-    # a_proj_name = ipdc_data.projects[1]
-    a_proj_name = 'East Coast Mainline Programme'
+    a_proj_name = ipdc_data.projects[1]
+    # a_proj_name = 'East Coast Mainline Programme'
     if project_list:
         list_of_projects = project_list
     else:
@@ -11046,7 +11048,7 @@ def data_check_print_out(
         for x in p_check:
             print(x)
 
-    wb.save(root_path / "output/GMPP_IPDC_DATA_CHECK_Q3_21.xlsx")
+    wb.save(root_path / "output/GMPP_IPDC_DATA_CHECK_Q3_21_v4.xlsx")
 
 
 # def print_gmpp_data(gmpp_dict: Dict):

@@ -608,7 +608,7 @@ def cdg_run_general(args):
                     put_matplotlib_fig_into_word(
                         doc, ms_graph, size=8, transparent=False
                     )
-                    doc.save(root_path / "output/milestones_chart.docx")
+                    doc.save(cdg_root_path / "output/milestones_chart.docx")
                 if op_args["chart"] == "show":
                     milestone_chart(ms, m, **op_args)
 
