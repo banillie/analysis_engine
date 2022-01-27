@@ -5437,7 +5437,8 @@ RISK_SCORES = {"Very Low": 0,
                "Medium": 2,
                "High": 3,
                "Very High": 4,
-               "N/A": None}
+               "N/A": None,
+               None: None}
 
 PORTFOLIO_RISK_SCORES = {
     "N/A": None,
@@ -5491,6 +5492,7 @@ class RiskData:
         self.portfolio_risk_count = {}
         self.risk_impact_count = {}
         self.portfolio_risk_impact_count = {}
+        self.portfolio_type_impact_count = {}
         self.get_project_dictionary()
         self.get_portfolio_dictionary()
         self.get_count()
@@ -5599,7 +5601,7 @@ class RiskData:
                 if p_data is None:
                     continue
                 portfolio_number_dict = {}
-                for x in range(1, 7):  # currently 10 risks
+                for x in range(1, 6):  # currently 5 risks. Will change to 6 in Q4 2021
                     portfolio_risk_list = []
                     group = (
                         "Group",
@@ -5639,8 +5641,6 @@ class RiskData:
                                 if msg not in missing_key_list:
                                     missing_key_list.append(msg)
                                 pass
-                        if risk_type == 'Portfolio Risk Impact Description' and risk[1] is None:
-                            break
                         portfolio_number_dict[x] = dict(portfolio_risk_list)
 
                     portfolio_dict[self.master.abbreviations[p]["abb"]] = portfolio_number_dict
@@ -5692,9 +5692,11 @@ class RiskData:
     def get_portfolio_count(self):
         count_output_dict = {}
         impact_output_dict = {}
+        type_output_dict = {}
         for quarter in self.portfolio_risk_dictionary.keys():
             count_lower_dict = {}
             impact_lower_dict = {}
+            type_lower_dict = {}
             for i in range(len(PORTFOLIO_RISK_LIST)):
                 count_list = []
                 impact_list = []
@@ -5713,19 +5715,33 @@ class RiskData:
                                 number
                             ]["Severity Score Risk Category"]
                             count_list.append(risk_value)
+                            # impact_list.append((number, impact))
                             impact_list.append((risk_value, impact))
                         except KeyError:
-                            print(project_name)
                             pass
 
                 count_lower_dict[PORTFOLIO_RISK_LIST[i]] = Counter(count_list)
                 impact_lower_dict[PORTFOLIO_RISK_LIST[i]] = Counter(impact_list)
 
+            for i in range(1, 6):
+                type_list = []
+                for project_name in list(self.portfolio_risk_dictionary[quarter].keys()):
+                    try:
+                        risk_type = i
+                        impact = self.portfolio_risk_dictionary[quarter][project_name][i]["Severity Score Risk Category"]
+                        type_list.append(impact)
+                    except KeyError:
+                        pass
+                type_lower_dict[i] = Counter(type_list)
+
+
             count_output_dict[quarter] = count_lower_dict
             impact_output_dict[quarter] = impact_lower_dict
+            type_output_dict[quarter] = type_lower_dict
 
         self.portfolio_risk_count = count_output_dict
         self.portfolio_risk_impact_count = impact_output_dict
+        self.portfolio_type_impact_count = type_output_dict
 
 
 def risks_into_excel(risk_data: RiskData) -> workbook:
@@ -5764,7 +5780,8 @@ def risks_into_excel(risk_data: RiskData) -> workbook:
                             RISK_LIST[i]
                         ]
                     except KeyError:
-                        print(project_name)
+                        # print(project_name)
+                        pass
 
             start_row += number
 
@@ -5841,7 +5858,7 @@ def portfolio_risks_into_excel(risk_data: RiskData) -> workbook:
                     "Stage"
                 ]
                 ws.cell(row=start_row + number, column=4).value = str(number)
-                print(project_name)
+                # print(project_name)
                 for i in range(len(PORTFOLIO_RISK_LIST)):
                     try:
                         ws.cell(
@@ -5897,6 +5914,30 @@ def portfolio_risks_into_excel(risk_data: RiskData) -> workbook:
                     ).value = risk_data.portfolio_risk_count[q][risk_cat][cat]
 
                 start_row += b + 4
+
+        ws.cell(row=start_row, column=2).value = "Risk Type"
+        ws.cell(row=start_row, column=3).value = "Low"
+        ws.cell(row=start_row, column=4).value = "Medium"
+        ws.cell(row=start_row, column=5).value = "High"
+        ws.cell(row=start_row, column=6).value = "None"
+        ws.cell(row=start_row, column=7).value = "Total"
+        for i, no in enumerate(risk_data.portfolio_type_impact_count[q].keys()):
+            ws.cell(row=start_row + i + 1, column=2).value = str(no)
+            ws.cell(
+                row=start_row + i + 1, column=3
+            ).value = risk_data.portfolio_type_impact_count[q][no][("Low")]
+            ws.cell(
+                row=start_row + i + 1, column=4
+            ).value = risk_data.portfolio_type_impact_count[q][no][("Medium")]
+            ws.cell(
+                row=start_row + i + 1, column=5
+            ).value = risk_data.portfolio_type_impact_count[q][no][("High")]
+            ws.cell(
+                row=start_row + i + 1, column=6
+            ).value = risk_data.portfolio_type_impact_count[q][no][(None)]
+            ws.cell(
+                row=start_row + i + 1, column=7
+            ).value = sum(risk_data.portfolio_type_impact_count[q][no].values())
 
     wb.remove(wb["Sheet"])
 
