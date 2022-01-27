@@ -5857,7 +5857,7 @@ def portfolio_risks_into_excel(risk_data: RiskData) -> workbook:
                 ).value = risk_data.portfolio_risk_dictionary[q][project_name][number][
                     "Stage"
                 ]
-                ws.cell(row=start_row + number, column=4).value = str(number)
+                ws.cell(row=start_row + number, column=4).value = number
                 # print(project_name)
                 for i in range(len(PORTFOLIO_RISK_LIST)):
                     try:

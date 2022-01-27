@@ -56,6 +56,7 @@ from analysis_engine.data import (
     get_gmpp_data,
     place_gmpp_online_keys_into_dft_master_format,
     data_check_print_out,
+    portfolio_risks_into_excel,
 )
 
 import logging
@@ -253,6 +254,10 @@ def ipdc_run_general(args):
         if programme == "risks":
             c = RiskData(m, **op_args)
             wb = risks_into_excel(c)
+
+        if programme == "portfolio_risks":
+            c = RiskData(m, **op_args)
+            wb = portfolio_risks_into_excel(c)
 
         if programme == "dcas":
             c = DcaData(m, **op_args)
@@ -771,7 +776,8 @@ class main:
         )
         parser_vfm = subparsers.add_parser("vfm", help="vfm analysis")
         parser_summaries = subparsers.add_parser("summaries", help="summary reports")
-        parser_risks = subparsers.add_parser("risks", help="risk analysis")
+        parser_risks = subparsers.add_parser("risks", help="project risk analysis")
+        parser_port_risks = subparsers.add_parser("portfolio_risks", help="portfolio risk analysis")
         parser_dca = subparsers.add_parser("dcas", help="dca analysis")
         parser_speedial = subparsers.add_parser("speedial", help="speed dial analysis")
         parser_matrix = subparsers.add_parser(
@@ -790,6 +796,7 @@ class main:
             parser_dca,
             parser_vfm,
             parser_risks,
+            parser_port_risks,
             parser_speedial,
             # parser_dandelion,
             parser_costs,
@@ -827,6 +834,7 @@ class main:
             parser_dca,
             parser_vfm,
             parser_risks,
+            parser_port_risks,
             parser_speedial,
             parser_dandelion,
             parser_costs,
@@ -851,6 +859,7 @@ class main:
             parser_dca,
             parser_vfm,
             parser_risks,
+            parser_port_risks,
             parser_speedial,
             parser_dandelion,
             parser_costs,
@@ -873,6 +882,7 @@ class main:
             parser_dca,
             parser_vfm,
             parser_risks,
+            parser_port_risks,
             parser_speedial,
             parser_dandelion,
             parser_costs,
@@ -894,6 +904,7 @@ class main:
             parser_dca,
             parser_vfm,
             parser_risks,
+            parser_port_risks,
             parser_speedial,
             # parser_dandelion,
             # parser_costs,
