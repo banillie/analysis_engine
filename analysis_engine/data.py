@@ -5424,13 +5424,42 @@ RISK_LIST = [
     "BRD Has this Risk turned into an Issue?",
 ]
 
-RISK_SCORES = {"Very Low": 0, "Low": 1, "Medium": 2, "High": 3, "Very High": 4}
+PORTFOLIO_RISK_LIST = [
+    'Portfolio Risk Impact Description',
+    'Portfolio Risk Mitigation',
+    'Portfolio Risk Likelihood',
+    'Portfolio Risk Impact Assessment',
+    "Severity Score Risk Category"
+]
+
+RISK_SCORES = {"Very Low": 0,
+               "Low": 1,
+               "Medium": 2,
+               "High": 3,
+               "Very High": 4,
+               "N/A": None}
+
+PORTFOLIO_RISK_SCORES = {
+    "N/A": None,
+    "Unlikely": 1,
+    None: None,
+    "Very Unlikely": 0,
+    "Likely": 2,
+    "Possible": 3,
+    "Very Likely": 4,
+}
 
 
 def risk_score(risk_impact: str, risk_likelihood: str) -> str:
     impact_score = RISK_SCORES[risk_impact]
-    likelihood_score = RISK_SCORES[risk_likelihood]
-    score = impact_score + likelihood_score
+    try:
+        likelihood_score = RISK_SCORES[risk_likelihood]
+    except KeyError:
+        likelihood_score = PORTFOLIO_RISK_SCORES[risk_likelihood]
+    try:
+        score = impact_score + likelihood_score
+    except TypeError:
+        return None
     if score <= 4:
         if risk_impact == "Medium" and risk_likelihood == "Medium":
             return "Medium"
@@ -5457,17 +5486,21 @@ class RiskData:
         self.baseline_type = "ipdc_costs"
         self.group = []
         self.risk_dictionary = {}
+        self.portfolio_risk_dictionary = {}
         self.risk_count = {}
+        self.portfolio_risk_count = {}
         self.risk_impact_count = {}
-        self.get_dictionary()
+        self.portfolio_risk_impact_count = {}
+        self.get_project_dictionary()
+        self.get_portfolio_dictionary()
         self.get_count()
+        self.get_portfolio_count()
 
-    def get_dictionary(self):
+    def get_project_dictionary(self):
         quarter_dict = {}
         self.iter_list = get_iter_list(self.kwargs, self.master)
         for tp in self.iter_list:
             project_dict = {}
-            # description_key = []
             self.group = get_group(self.master, tp, self.kwargs)
             for p in self.group:
                 p_data = get_correct_p_data(
@@ -5476,9 +5509,9 @@ class RiskData:
                 if p_data is None:
                     continue
                 try:
-                    number_dict = {}
+                    project_number_dict = {}
                     for x in range(1, 11):  # currently 10 risks
-                        risk_list = []
+                        project_risk_list = []
                         group = (
                             "Group",
                             self.master.project_information[p]["Group"],
@@ -5487,8 +5520,8 @@ class RiskData:
                             "Stage",
                             p_data["IPDC approval point"]
                         )
-                        risk_list.append(group)
-                        risk_list.append(stage)
+                        project_risk_list.append(group)
+                        project_risk_list.append(stage)
                         for risk_type in RISK_LIST:
                             try:
                                 amended_risk_type = risk_type + str(x)
@@ -5496,7 +5529,7 @@ class RiskData:
                                     risk_type,
                                     p_data[amended_risk_type],
                                 )
-                                risk_list.append(risk)
+                                project_risk_list.append(risk)
                             except KeyError:
                                 try:
                                     amended_risk_type = (
@@ -5506,7 +5539,7 @@ class RiskData:
                                         risk_type,
                                         p_data[amended_risk_type],
                                     )
-                                    risk_list.append(risk)
+                                    project_risk_list.append(risk)
                                 except KeyError:
                                     try:
                                         if risk_type == "Severity Score Risk Category":
@@ -5528,7 +5561,7 @@ class RiskData:
                                                 "Severity Score Risk Category",
                                                 score,
                                             )
-                                            risk_list.append(risk)
+                                            project_risk_list.append(risk)
                                     except KeyError:
                                         if risk_type == "Severity Score Risk Category":
                                             pass
@@ -5544,13 +5577,81 @@ class RiskData:
                             # description_key.append()
                             if risk[1] is None:
                                 break
-                            number_dict[x] = dict(risk_list)
-                    project_dict[self.master.abbreviations[p]["abb"]] = number_dict
+                            project_number_dict[x] = dict(project_risk_list)
+                    project_dict[self.master.abbreviations[p]["abb"]] = project_number_dict
                 except KeyError:
                     pass
                 quarter_dict[tp] = project_dict
 
         self.risk_dictionary = quarter_dict
+
+    def get_portfolio_dictionary(self):
+        quarter_dict = {}
+        missing_key_list = []
+        self.iter_list = get_iter_list(self.kwargs, self.master)
+        for tp in self.iter_list:
+            portfolio_dict = {}
+            self.group = get_group(self.master, tp, self.kwargs)
+            for p in self.group:
+                p_data = get_correct_p_data(
+                    self.kwargs, self.master, self.baseline_type, p, tp
+                )
+                if p_data is None:
+                    continue
+                portfolio_number_dict = {}
+                for x in range(1, 7):  # currently 10 risks
+                    portfolio_risk_list = []
+                    group = (
+                        "Group",
+                        self.master.project_information[p]["Group"],
+                    )
+                    stage = (
+                        "Stage",
+                        p_data["IPDC approval point"]
+                    )
+                    portfolio_risk_list.append(group)
+                    portfolio_risk_list.append(stage)
+                    for risk_type in PORTFOLIO_RISK_LIST:
+                        try:
+                            amended_risk_type = risk_type + ' ' + str(x)
+                            risk = (
+                                risk_type,
+                                p_data[amended_risk_type],
+                            )
+                            portfolio_risk_list.append(risk)
+                        except KeyError:
+                            if risk_type == "Severity Score Risk Category":
+                                try:
+                                    score = risk_score(
+                                        p_data['Portfolio Risk Impact Assessment ' + str(x)],
+                                        p_data['Portfolio Risk Likelihood ' + str(x)]
+                                    )
+                                    risk = (
+                                        "Severity Score Risk Category",
+                                        score,
+                                    )
+                                    # print(risk)
+                                    portfolio_risk_list.append(risk)
+                                except KeyError:
+                                    pass
+                            else:
+                                msg = str(tp) + ' master does not have key: ' + amended_risk_type
+                                if msg not in missing_key_list:
+                                    missing_key_list.append(msg)
+                                pass
+                        if risk_type == 'Portfolio Risk Impact Description' and risk[1] is None:
+                            break
+                        portfolio_number_dict[x] = dict(portfolio_risk_list)
+
+                    portfolio_dict[self.master.abbreviations[p]["abb"]] = portfolio_number_dict
+
+                quarter_dict[tp] = portfolio_dict
+
+        if missing_key_list:
+            for p in missing_key_list:
+                logger.info(p)
+
+        self.portfolio_risk_dictionary = quarter_dict
 
     def get_count(self):
         count_output_dict = {}
@@ -5588,6 +5689,44 @@ class RiskData:
         self.risk_count = count_output_dict
         self.risk_impact_count = impact_output_dict
 
+    def get_portfolio_count(self):
+        count_output_dict = {}
+        impact_output_dict = {}
+        for quarter in self.portfolio_risk_dictionary.keys():
+            count_lower_dict = {}
+            impact_lower_dict = {}
+            for i in range(len(PORTFOLIO_RISK_LIST)):
+                count_list = []
+                impact_list = []
+                for y, project_name in enumerate(
+                        list(self.portfolio_risk_dictionary[quarter].keys())
+                ):
+                    for number in (
+                            list(self.portfolio_risk_dictionary[quarter][project_name].keys())
+                    ):
+                        try:
+                            risk_value = self.portfolio_risk_dictionary[quarter][project_name][
+                                number
+                            ][PORTFOLIO_RISK_LIST[i]]
+                            # impact = 'High'
+                            impact = self.portfolio_risk_dictionary[quarter][project_name][
+                                number
+                            ]["Severity Score Risk Category"]
+                            count_list.append(risk_value)
+                            impact_list.append((risk_value, impact))
+                        except KeyError:
+                            print(project_name)
+                            pass
+
+                count_lower_dict[PORTFOLIO_RISK_LIST[i]] = Counter(count_list)
+                impact_lower_dict[PORTFOLIO_RISK_LIST[i]] = Counter(impact_list)
+
+            count_output_dict[quarter] = count_lower_dict
+            impact_output_dict[quarter] = impact_lower_dict
+
+        self.portfolio_risk_count = count_output_dict
+        self.portfolio_risk_impact_count = impact_output_dict
+
 
 def risks_into_excel(risk_data: RiskData) -> workbook:
     wb = Workbook()
@@ -5603,19 +5742,6 @@ def risks_into_excel(risk_data: RiskData) -> workbook:
             for x, number in enumerate(
                     list(risk_data.risk_dictionary[q][project_name].keys())
             ):
-                # try:
-                #     r_description = risk_data.risk_dictionary[q][project_name][number][
-                #         "Brief Risk Description "
-                #     ]
-                # except KeyError:
-                #     logger.info(
-                #         "Latest risk data set not available for " + str(q) + "."
-                #     )
-                #     break
-                # if r_description is None:
-                #     number = number - 1
-                #     break
-                # else:
                 ws.cell(
                     row=start_row + number, column=1
                 ).value = risk_data.risk_dictionary[q][project_name][number][
@@ -5681,6 +5807,94 @@ def risks_into_excel(risk_data: RiskData) -> workbook:
                     ws.cell(
                         row=start_row + b + 1, column=6
                     ).value = risk_data.risk_count[q][risk_cat][cat]
+
+                start_row += b + 4
+
+    wb.remove(wb["Sheet"])
+
+    return wb
+
+
+def portfolio_risks_into_excel(risk_data: RiskData) -> workbook:
+    wb = Workbook()
+
+    for q in risk_data.portfolio_risk_dictionary.keys():
+        start_row = 1
+        ws = wb.create_sheet(
+            make_file_friendly(str(q) + " all data")
+        )  # creating worksheets. names restricted to 30 characters.
+        ws.title = make_file_friendly(q + " all data")  # title of worksheet
+
+        for y, project_name in enumerate(list(risk_data.portfolio_risk_dictionary[q].keys())):
+            for x, number in enumerate(
+                    list(risk_data.portfolio_risk_dictionary[q][project_name].keys())
+            ):
+                ws.cell(
+                    row=start_row + number, column=1
+                ).value = risk_data.portfolio_risk_dictionary[q][project_name][number][
+                    "Group"
+                ]
+                ws.cell(row=start_row + number, column=2).value = project_name
+                ws.cell(
+                    row=start_row + number, column=3
+                ).value = risk_data.portfolio_risk_dictionary[q][project_name][number][
+                    "Stage"
+                ]
+                ws.cell(row=start_row + number, column=4).value = str(number)
+                print(project_name)
+                for i in range(len(PORTFOLIO_RISK_LIST)):
+                    try:
+                        ws.cell(
+                            row=start_row + number, column=5 + i
+                        ).value = risk_data.portfolio_risk_dictionary[q][project_name][
+                            number
+                        ][
+                            PORTFOLIO_RISK_LIST[i]
+                        ]
+                    except KeyError:
+                        pass
+
+            start_row += number
+
+        for i in range(len(PORTFOLIO_RISK_LIST)):
+            ws.cell(row=1, column=5 + i).value = PORTFOLIO_RISK_LIST[i]
+        ws.cell(row=1, column=1).value = "DfT Group"
+        ws.cell(row=1, column=2).value = "Project Name"
+        ws.cell(row=1, column=3).value = "Stage"
+        ws.cell(row=1, column=4).value = "Risk Number"
+
+        ws = wb.create_sheet(
+            make_file_friendly(q + " Count")
+        )  # creating worksheets. names restricted to 30 characters.
+        ws.title = make_file_friendly(q + " Count")  # title of worksheet
+
+        start_row = 3
+        for v, risk_cat in enumerate(list(risk_data.portfolio_risk_count[q].keys())):
+            if (
+                    risk_cat == "Portfolio Risk Impact Description"
+                    or risk_cat == "Portfolio Risk Mitigation"
+            ):
+                pass
+            else:
+                ws.cell(row=start_row, column=2).value = risk_cat
+                ws.cell(row=start_row, column=3).value = "Low"
+                ws.cell(row=start_row, column=4).value = "Medium"
+                ws.cell(row=start_row, column=5).value = "High"
+                ws.cell(row=start_row, column=6).value = "Total"
+                for b, cat in enumerate(list(risk_data.portfolio_risk_count[q][risk_cat].keys())):
+                    ws.cell(row=start_row + b + 1, column=2).value = str(cat)
+                    ws.cell(
+                        row=start_row + b + 1, column=3
+                    ).value = risk_data.portfolio_risk_impact_count[q][risk_cat][(cat, "Low")]
+                    ws.cell(
+                        row=start_row + b + 1, column=4
+                    ).value = risk_data.portfolio_risk_impact_count[q][risk_cat][(cat, "Medium")]
+                    ws.cell(
+                        row=start_row + b + 1, column=5
+                    ).value = risk_data.portfolio_risk_impact_count[q][risk_cat][(cat, "High")]
+                    ws.cell(
+                        row=start_row + b + 1, column=6
+                    ).value = risk_data.portfolio_risk_count[q][risk_cat][cat]
 
                 start_row += b + 4
 
@@ -11048,7 +11262,7 @@ def data_check_print_out(
         for x in p_check:
             print(x)
 
-    wb.save(root_path / "output/GMPP_IPDC_DATA_CHECK_Q3_21_v4.xlsx")
+    wb.save(root_path / "output/GMPP_IPDC_DATA_CHECK_Q3_21_v6.xlsx")
 
 
 # def print_gmpp_data(gmpp_dict: Dict):
