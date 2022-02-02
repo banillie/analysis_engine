@@ -1186,7 +1186,7 @@ class CostData:
                             unprofiled += total
 
                     # hard coded due to current use need.
-                    if project_name == "HS2 Phase 2b" or project_name == "HS2 Phase2a":
+                    if project_name == "HS2 Phase 2b" or project_name == "HS2 Phase2a" or project_name == "HS2 Phase1":
                         try:
                             profiled = (
                                     profiled
@@ -1364,7 +1364,7 @@ class CostData:
                         ngov_total.append(ng)
                         t = convert_none_types(p_data["Total Forecast"])
                         # hard coded due to current use need.
-                        if project_name == "HS2 Phase 2b" or project_name == "HS2 Phase2a":
+                        if project_name == "HS2 Phase 2b" or project_name == "HS2 Phase2a" or project_name == "HS2 Phase1":
                             try:
                                 t = t - p_data[
                                     "Total Forecast - Income both Revenue and Capital"
@@ -1462,7 +1462,7 @@ class CostData:
                     except KeyError:
                         t = convert_none_types(p_data["Total Budget/BL"])
                     # hard coded due to current use need.
-                    if project_name == "HS2 Phase 2b" or project_name == "HS2 Phase2a":
+                    if project_name == "HS2 Phase 2b" or project_name == "HS2 Phase2a" or project_name == "HS2 Phase1":
                         try:
                             t = t - p_data[
                                 "Total Baseline - Income both Revenue and Capital"
