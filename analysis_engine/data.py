@@ -5445,8 +5445,8 @@ PORTFOLIO_RISK_SCORES = {
     "Unlikely": 1,
     None: None,
     "Very Unlikely": 0,
-    "Likely": 2,
-    "Possible": 3,
+    "Likely": 3,
+    "Possible": 2,
     "Very Likely": 4,
 }
 
@@ -5462,17 +5462,21 @@ def risk_score(risk_impact: str, risk_likelihood: str) -> str:
     except TypeError:
         return None
     if score <= 4:
-        if risk_impact == "Medium" and risk_likelihood == "Medium":
-            return "Medium"
+        if risk_impact == "Medium":
+            if risk_likelihood == "Medium" or risk_likelihood == "Possible":
+                return "Medium"
         else:
             return "Low"
     if 5 <= score <= 6:
-        if risk_impact == "High" and risk_likelihood == "High":
-            return "High"
-        if risk_impact == "Low" and risk_likelihood == "Very High":
-            return "Low"
-        if risk_impact == "Very High" and risk_likelihood == "Low":
-            return "Low"
+        if risk_impact == "High":
+            if risk_likelihood == "High" or risk_likelihood == "Likely":
+                return "High"
+        if risk_impact == "Low":
+            if risk_likelihood == "Very High" and risk_likelihood == "Very Likely":
+                return "Low"
+        if risk_impact == "Very High":
+            if risk_likelihood == "Low" and risk_likelihood == "Unlikely":
+                return "Low"
         else:
             return "Medium"
     if score > 6:
