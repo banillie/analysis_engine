@@ -122,7 +122,7 @@ def ipdc_initiate(args):
 
     # get group information from config. only all_groups used at initiate
     META = get_group_stage_data(
-        str(root_path) + "/core_data/ipdc_config.ini",
+            str(root_path) + "/core_data/ipdc_config.ini",
     )
     all_groups = META[1]
 

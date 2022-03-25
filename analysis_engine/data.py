@@ -155,7 +155,9 @@ def calculate_arg_combinations(args_list: List):
 #     return master_data_list
 
 def get_master_data(
-        confi_path: Path, pi_path: Path, get_data_function
+        confi_path: Path,
+        pi_path: Path,
+        get_data_function,
 ) -> List[Dict[str, Union[str, int, datetime.date, float]]]:
     """Returns a list of dictionaries each containing quarter data"""
     config = configparser.ConfigParser()
@@ -11307,7 +11309,7 @@ def data_check_print_out(
         for x in p_check:
             print(x)
 
-    wb.save(root_path / "output/GMPP_IPDC_DATA_CHECK_Q3_21_v6.xlsx")
+    wb.save(root_path / "output/GMPP_IPDC_DATA_CHECK_Q3_21_v7.xlsx")
 
 
 # def print_gmpp_data(gmpp_dict: Dict):
