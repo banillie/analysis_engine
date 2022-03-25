@@ -1,5 +1,7 @@
 # code used to analysis outcomes from data review in march 2020.
 # using https://realpython.com/python-counter/ along the way to better understand counter
+# https://towardsdatascience.com/stacked-bar-charts-with-pythons-matplotlib-f4020e4eb4a7
+# above was helpful for stacked bar charts, although difficult to follow as using pandas.
 
 from collections import Counter, OrderedDict, defaultdict
 from typing import Dict
