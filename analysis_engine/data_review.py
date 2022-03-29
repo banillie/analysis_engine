@@ -10,6 +10,9 @@ import numpy as np
 from datamaps.process import Cleanser
 from analysis_engine.data import (
     root_path,
+    put_matplotlib_fig_into_word,
+    get_input_doc,
+
 )
 from openpyxl import load_workbook
 
@@ -82,11 +85,11 @@ def numbers(dictionary, review_category):
 def result(data):
     dicct = {}
     themes = [
-        'Ease of Completion for Projects/PMOs',
-        'Insightfulness Of Data',
-        'Use of Analysis',
+        'Ease of Completion',
+        'Use of Data',
         # 'Data Score',
-        'MoSCoW'
+        'MoSCoW',
+        'Insightfulness',
     ]
     for t in themes:
         c = numbers(data, t)
@@ -113,27 +116,34 @@ def place_in_matplotlib_order(data, type):
     return l
 
 
-def bar_chart(data):
-    fig, ax = plt.subplots(1, figsize=(16, 6))
+def bar_chart(data, title):
+    fig, ax = plt.subplots(1, figsize=(12, 8))
+    # fig, ax = plt.subplots()
     # labels = ['LOW', 'MEDIUM', 'HIGH']
     labels = list(data.keys())
     x = np.arange(0, len(labels))
-    plt.bar(x - 0.3, place_in_matplotlib_order(data, 'LOW'), width=0.2)  # colour also an option
+    plt.bar(x - 0.3, place_in_matplotlib_order(data, 'HIGH'), width=0.2)  # colour also an option
     plt.bar(x - 0.1, place_in_matplotlib_order(data, 'MEDIUM'), width=0.2)
-    plt.bar(x + 0.1, place_in_matplotlib_order(data, 'HIGH'), width=0.2)
+    plt.bar(x + 0.1, place_in_matplotlib_order(data, 'LOW'), width=0.2)
     # plt.bar(x + 0.3, list(data['MoSCoW'].values()), width=0.2)
     # plt.bar(x + 0.6, list(data['Data Score'].values()), width=0.2)  # need to do data score also.
 
     ax.spines['right'].set_visible(False)
     ax.spines['top'].set_visible(False)
 
-    plt.ylabel('Ratings count')
-    plt.xticks(x, data.keys())
+    plt.ylabel('Ratings count', fontweight='bold', fontsize=14)
+    plt.xlabel('Themes', fontweight='bold', fontsize=14)
+    plt.xticks(x, data.keys(), fontsize=14)
+    plt.yticks(fontsize=14)
     # plt.xlim(-0.5, 31)
 
     # x, y = zip(*data)
     # plt.bar(x, y)
-    plt.show()
+    plt.title(title, fontweight='bold', fontsize=16)
+    plt.legend(['HIGH', 'MEDIUM', 'LOW'])
+    # plt.show()
+
+    return plt
 
 
 def stacked_chart(data, title):
@@ -141,7 +151,9 @@ def stacked_chart(data, title):
     # labels = ['LOW', 'MEDIUM', 'HIGH']
     labels = ['HIGH', 'MEDIUM', 'LOW']
 
-    fig, ax = plt.subplots(1, figsize=(12, 10))
+    fig, ax = plt.subplots(1, figsize=(12, 8))
+    # fig, ax = plt.subplots()
+
 
     left = len(data) * [0]
     for i, name in enumerate(labels):
@@ -156,19 +168,22 @@ def stacked_chart(data, title):
     # xticks = np.arange(0, 1.1, 0.1)
     # xlabels = ['{}%'.format(i) for i in np.arange(0, 101, 10)]
 
-    ax.set_xticklabels(['0%', '20%', '40%', '60%', '80%', '100%'])
+    ax.set_xticklabels(['0%', '20%', '40%', '60%', '80%', '100%'], fontsize=14)
     ax.xaxis.grid(color='grey', linestyle='dashed')
 
-    plt.ylabel('Ratings count')
-    plt.xlabel('Proportion of ratings')
-    plt.title(title)
+    # plt.ylabel('Ratings count', fontweight='bold')
+    plt.xlabel('Percentage', fontweight='bold', fontsize=14)
+    plt.yticks(fontsize=14)
+    plt.title(title, fontweight='bold', fontsize=16)
     plt.legend(labels)
+    plt.tight_layout()
 
-    plt.show()
+    # plt.show()
+    return plt
 
-
-def sort_data_for_stacked_chart(data, fields):
+def sort_data_for_stacked_chart(data):
     percent_data = {}
+    fields = ['LOW', 'MEDIUM', 'HIGH']
     for d in data.keys():
         lower = {}
         for f in fields:
@@ -179,10 +194,13 @@ def sort_data_for_stacked_chart(data, fields):
 
 
 review_data = get_review_info_data(str(root_path) + "/data_review/DATA_REVIEW.xlsx")
-# uoa = numbers(review_data, 'Use of Analysis')
 all = result(review_data)
 # print_ascii_bar_chart(uoa)
-bar_chart(all)
-# stacked_chart(all)
-p = sort_data_for_stacked_chart(all, ['LOW', 'MEDIUM', 'HIGH'])
-stacked_chart(p, 'Rankings against each theme')
+bar = bar_chart(all, 'Rankings for each theme')
+p = sort_data_for_stacked_chart(all)
+stacked = stacked_chart(p, 'Rankings as a percentage of total')
+
+doc = get_input_doc(root_path / "input/summary_temp.docx")
+put_matplotlib_fig_into_word(doc, bar, size=5.5)
+put_matplotlib_fig_into_word(doc, stacked, size=5.5)
+doc.save(root_path / "data_review/review_charts.docx")
