@@ -11021,7 +11021,7 @@ def get_gmpp_data(
     from datetime import datetime
     import xlrd
 
-    wb = load_workbook(root_path / "input/{}.xlsx".format(file_name), data_only=True)
+    wb = load_workbook(root_path / 'input/{}.xlsx'.format(file_name), data_only=True)
     ws = wb.active
     # wb_two = load_workbook(root_path / "input/{}.xlsx".format(file_name_two))
     # ws_two = wb.active
@@ -11102,9 +11102,9 @@ def place_gmpp_online_keys_into_dft_master_format(
     ws.cell(row=1, column=1).value = "Project Name (DfT Keys)"
     ws.cell(row=1, column=2).value = "Project Name (IPA Keys)"
 
-    wb.save(root_path / "input/gmpp_online_data_full_format.xlsx")
+    ws.delete_cols(1, 1) # removing gmpp_keys from the user for now.
 
-    ws.delete_cols(1, 1)
+    wb.save(root_path / "output/gmpp_online_data_dft_master_format.xlsx")
 
     wb.save(root_path / "input/gmpp_online_data_temp.xlsx")
 
@@ -11218,7 +11218,7 @@ def data_check_print_out(
                         continue
                     key_check = "PASS"
                 except KeyError:
-                    print(k)
+                    # print(k)
                     dft_key_name = ""
                     key_check = "FAILED"
                 ws.cell(row=start_row, column=5).value = dft_key_name
@@ -11283,7 +11283,7 @@ def data_check_print_out(
                 elif gmpp_val is None and dft_val == 0:
                     ws.cell(row=start_row, column=9).value = "MATCH"
                 elif dft_key_name in IGNORE_LIST:
-                    print(dft_key_name)
+                    # print(dft_key_name)
                     ws.cell(row=start_row, column=9).value = "IGNORE"
                 else:
                     ws.cell(row=start_row, column=9).value = "DIFFERENT"
@@ -11309,7 +11309,7 @@ def data_check_print_out(
         for x in p_check:
             print(x)
 
-    wb.save(root_path / "output/GMPP_IPDC_DATA_CHECK_Q3_21_v7.xlsx")
+    wb.save(root_path / f"output/GMPP_IPDC_DATA_CHECK_USING_{ipdc_d_file_path}.xlsx")
 
 
 # def print_gmpp_data(gmpp_dict: Dict):

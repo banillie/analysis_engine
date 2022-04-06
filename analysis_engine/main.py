@@ -105,6 +105,26 @@ def get_group_stage_data(
     return portfolio_group, group_all, bc_stages
 
 
+def get_integration_data(
+    confi_path: Path,
+) -> Dict:
+    # Returns a list of dft groups
+    try:
+        config = configparser.ConfigParser()
+        config.read(confi_path)
+        path_dict = {
+            'project_map_path': config["GMPP INTEGRATION"]["project_map"],
+            'gmpp_data_path': config["GMPP INTEGRATION"]["gmpp_data"],
+            'key_map_path': config["GMPP INTEGRATION"]["key_map"],
+            'master_comp_path': config["GMPP INTEGRATION"]["master_for_comparison"],
+        }
+    except:
+        logger.critical("Configuration file issue. Please check and make sure it's correct.")
+        sys.exit(1)
+
+    return path_dict
+
+
 def check_remove(op_args):  # subcommand arg
     if "remove" in op_args:
         from analysis_engine.data import CURRENT_LOG
@@ -414,12 +434,22 @@ def ipdc_run_general(args):
             wb = data_query_into_wb(m, **op_args)
 
         if programme == "gmpp_integration":
-            print("Coming soon!")
-            # d = get_gmpp_data("GMPP_DATA_DFT_Q2_2021")  # gmpp_data
-            # # place_gmpp_online_keys_into_dft_master_format(d, "KEY_MAP_v12", "master_2_2021")  # key_map, ipdc_master
-            # p_list = ['East Coast Mainline Programme', 'Rapid Charging Fund', 'NO2 Reduction']  # list
-            # place_gmpp_online_keys_into_dft_master_format(d, "KEY_MAP_v12", "master_2_2021", project_list=p_list)
-            # # data_check_print_out("master_2_2021", "KEY_MAP_v12", "PROJECT_MAP")  # project map
+            integration_meta = get_integration_data(
+                str(root_path) + "/core_data/ipdc_config.ini",
+            )
+            gmpp_data = get_gmpp_data(integration_meta['gmpp_data_path'])
+            # p_list = ['East Coast Mainline Programme']   # p-list is optional
+            ## p_list = ['East Coast Mainline Programme', 'Rapid Charging Fund', 'NO2 Reduction']
+            place_gmpp_online_keys_into_dft_master_format(
+                gmpp_data,
+                integration_meta['key_map_path'],
+                integration_meta['master_comp_path']
+            )
+            data_check_print_out(
+                integration_meta['master_comp_path'],
+                integration_meta['key_map_path'],
+                integration_meta['project_map_path']
+            )
 
         check_remove(op_args)
 
