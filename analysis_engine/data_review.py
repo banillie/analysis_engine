@@ -196,9 +196,9 @@ def sort_data_for_stacked_chart(data):
 review_data = get_review_info_data(str(root_path) + "/data_review/DATA_REVIEW.xlsx")
 all = result(review_data)
 # print_ascii_bar_chart(uoa)
-bar = bar_chart(all, 'Rankings for each theme')
+bar = bar_chart(all, 'Ratings for each theme')
 p = sort_data_for_stacked_chart(all)
-stacked = stacked_chart(p, 'Rankings as a percentage of total')
+stacked = stacked_chart(p, 'Ratings as a percentage of total')
 
 doc = get_input_doc(root_path / "input/summary_temp.docx")
 put_matplotlib_fig_into_word(doc, bar, size=5.5)
