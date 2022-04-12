@@ -11021,13 +11021,12 @@ def get_gmpp_data(
     from datetime import datetime
     import xlrd
 
-    wb = load_workbook(root_path / 'input/{}.xlsx'.format(file_name), data_only=True)
+    try:
+        wb = load_workbook(root_path / 'input/{}.xlsx'.format(file_name), data_only=True)
+    except: # bit of flexibility to help user with different file types
+        wb = load_workbook(root_path / 'input/{}.xlsm'.format(file_name), data_only=True)
     ws = wb.active
-    # wb_two = load_workbook(root_path / "input/{}.xlsx".format(file_name_two))
-    # ws_two = wb.active
-
     ws_list = [ws]
-    # ws_list = [ws, ws_two]
 
     initial_dict = {}
     for ws in ws_list:
@@ -11048,6 +11047,11 @@ def get_gmpp_data(
                     s_value = datetime(*xlrd.xldate_as_tuple(n_value, 0))
                     # else:
                     #     s_value = n_value
+            if "Grade" in key:  # to make grade 6 consistent with dft data
+                try:
+                    s_value = int(s_value)
+                except ValueError:
+                    pass
 
             if project_name in list(initial_dict.keys()):
                 initial_dict[project_name][key] = s_value
@@ -11165,6 +11169,42 @@ IGNORE_LIST = [
     "Unprofiled Remainder BEN Forecast - Gov. Non-Cashable",
     "Unprofiled Remainder BEN Forecast - Economic (inc Private Partner)",
     "Unprofiled Remainder BEN Forecast - Disbenefit UK Economic",
+    "Assurance MM1",
+    "Assurance MM1 LoD",
+    "Assurance MM1 Version No",
+    "Assurance MM2",
+    "Assurance MM2 LoD",
+    "Assurance MM2 Version No",
+    "Assurance MM3",
+    "Assurance MM3 LoD",
+    "Assurance MM3 Version No",
+    "Assurance MM4",
+    "Assurance MM4 LoD",
+    "Assurance MM4 Version No",
+    "Assurance MM5",
+    "Assurance MM5 LoD",
+    "Assurance MM5 Version No",
+    "Assurance MM6",
+    "Assurance MM6 LoD",
+    "Assurance MM6 Version No",
+    "Assurance MM7",
+    "Assurance MM7 LoD",
+    "Assurance MM7 Version No",
+    "Project MM18",
+    "Project MM18 DMC",
+    "Project MM18 CP",
+    "Project MM19",
+    "Project MM19 DMC",
+    "Project MM19 CP",
+    "Project MM20",
+    "Project MM20 DMC",
+    "Project MM20 CP",
+    "Classification",
+    "GMPP - Main reason for joining GMPP",
+    "If yes please select SRO from this list:",
+    "GMPP - SRO ID",
+    "If yes please select PD from this list:",
+    "GMPP - PD ID",
 ]
 
 
@@ -11233,6 +11273,9 @@ def data_check_print_out(
                             dft_val = str(dft_val)
                         if gmpp_val is not None:
                             gmpp_val = str(gmpp_val)
+                    # if 'Phone No' in dft_key_name:  # started to think about tele nos but leaving for now.
+                    #     print(gmpp_val)
+                    #     print(dft_val)
                 except KeyError:
                     dft_val = ""
 
