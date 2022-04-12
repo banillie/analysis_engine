@@ -220,13 +220,6 @@ def get_triage(
     else:
         return 'DEBATE'
 
-    # if result == []:
-    #     if triage_method == ["HIGH", "EASY", "MUST"]:
-    #         return 'KEEP'
-    #     if triage_method == ["NONE", "HARD", "LOW", "COULD"]:
-    #         return 'DELETE'
-    #     else:
-    #         return 'DEBATE'
 
 def put_triage_data_into_excel(
     workb: Workbook,
@@ -284,16 +277,8 @@ def data_triage(data: Dict) -> None:
             # high_triage)
         if rating == 'KEEP':
             keep[k] = data[k]
-        # rating = get_triage(
-        #     data[k],
-        #     themes,
-        #     medium_triage)
         if rating == 'DEBATE':
             debate[k] = data[k]
-        # rating = get_triage(
-        #     data[k],
-        #     themes,
-        #     low_triage)
         if rating == 'DELETE':
             delete[k] = data[k]
 
