@@ -6,3 +6,4 @@ pdbpp==0.10.2
 pytest==5.4.1
 pdf2image
 wheel
+xlrd
