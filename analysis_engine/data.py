@@ -11069,7 +11069,7 @@ def place_gmpp_online_keys_into_dft_master_format(
     key_map = get_map(load_workbook(
         root_path / "input/{}.xlsx".format(km_file_name)
     ), commas=True, gaps=True)
-    ipdc_data = project_data_from_master(root_path / "input/{}.xlsx".format(ipdc_d_file_path), 2, 2021)
+    ipdc_data = project_data_from_master(root_path / "core_data/{}.xlsx".format(ipdc_d_file_path), 2, 2021)
 
     a_proj_name = ipdc_data.projects[1]
     # a_proj_name = 'East Coast Mainline Programme'
@@ -11175,7 +11175,7 @@ def data_check_print_out(
 ):
     gmpp_data = project_data_from_master(root_path / "input/gmpp_online_data_temp.xlsx", 2, 2021)
     os.remove(root_path / "input/gmpp_online_data_temp.xlsx")
-    ipdc_data = project_data_from_master(root_path / "input/{}.xlsx".format(ipdc_d_file_path), 2, 2021)
+    ipdc_data = project_data_from_master(root_path / "core_data/{}.xlsx".format(ipdc_d_file_path), 2, 2021)
     key_map = get_map(load_workbook
                       (root_path / "input/{}.xlsx".format(km_file_name)), flip=True)
     project_map = get_map(load_workbook
