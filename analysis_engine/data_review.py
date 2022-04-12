@@ -213,6 +213,9 @@ def get_triage(
     high = [x for x in scores_list if x not in ["HIGH", "EASY", "MUST"]]
     low = [x for x in scores_list if x not in ["NONE", "HARD", "LOW", "COULD"]]
 
+    if scores_list == [None, None, None, None]:
+        return 'NONES'
+
     if high == []:
         return 'KEEP'
     elif low == []:
