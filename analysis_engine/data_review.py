@@ -243,6 +243,11 @@ def put_triage_data_into_excel(
             rating = result_dict[k][t]
             ws.cell(row=x+2, column=i + 2).value = result_dict[k][t]
 
+    for i, t in enumerate(themes):
+        ws.cell(row=1, column=i + 2).value = t
+
+    ws.cell(row=1, column=1).value = 'Key Name'
+
 
 def data_triage(data: Dict) -> None:
     """
