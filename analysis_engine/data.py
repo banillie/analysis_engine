@@ -5607,7 +5607,7 @@ class RiskData:
                 if p_data is None:
                     continue
                 portfolio_number_dict = {}
-                for x in range(1, 6):  # currently 5 risks. Will change to 6 in Q4 2021
+                for x in range(1, 7):  # currently 6 risks. Changed from 5 to 6 in Q4 2021
                     portfolio_risk_list = []
                     group = (
                         "Group",
