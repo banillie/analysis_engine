@@ -23,6 +23,7 @@ setuptools.setup(
         "openpyxl",
         "matplotlib==3.4.1",
         "pdf2image",
+        "xlrd",
     ],
     classifiers=[
         "Programming Language :: Python :: 3",
