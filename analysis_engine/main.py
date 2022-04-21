@@ -159,8 +159,8 @@ def ipdc_initiate(args):
             ),
             all_groups,
         )
-        master.get_baseline_data()
-        master.check_baselines()
+        # master.get_baseline_data()
+        # master.check_baselines()
     except (ProjectNameError, ProjectGroupError, ProjectStageError) as e:
         logger.critical(e)
         sys.exit(1)
@@ -929,37 +929,38 @@ class main:
                 help="Returns analysis for one or combination of specified quarters. "
                 'User must use correct format e.g "Q3 19/20"',
             )
-        # baseline
-        for sub in [
-            parser_dca,
-            parser_vfm,
-            parser_risks,
-            parser_port_risks,
-            parser_speedial,
-            # parser_dandelion,
-            # parser_costs,
-            parser_data_query,
-            parser_milestones,
-        ]:
-            sub.add_argument(
-                "--baseline",
-                type=str,
-                metavar="",
-                action="store",
-                nargs="+",
-                choices=[
-                    "current",
-                    "last",
-                    "bl_one",
-                    "bl_two",
-                    "bl_three",
-                    "standard",
-                    "all",
-                ],
-                help="Returns analysis for specified baselines. User must use correct format"
-                ' which are "current", "last", "bl_one", "bl_two", "bl_three", "standard", "all".'
-                ' The "all" option returns all, "standard" returns first three',
-            )
+
+        # ## baseline
+        # for sub in [
+        #     parser_dca,
+        #     parser_vfm,
+        #     parser_risks,
+        #     parser_port_risks,
+        #     parser_speedial,
+        #     # parser_dandelion,
+        #     # parser_costs,
+        #     parser_data_query,
+        #     parser_milestones,
+        # ]:
+        #     sub.add_argument(
+        #         "--baseline",
+        #         type=str,
+        #         metavar="",
+        #         action="store",
+        #         nargs="+",
+        #         choices=[
+        #             "current",
+        #             "last",
+        #             "bl_one",
+        #             "bl_two",
+        #             "bl_three",
+        #             "standard",
+        #             "all",
+        #         ],
+        #         help="Returns analysis for specified baselines. User must use correct format"
+        #         ' which are "current", "last", "bl_one", "bl_two", "bl_three", "standard", "all".'
+        #         ' The "all" option returns all, "standard" returns first three',
+        #     )
 
         parser_costs.add_argument(
             "--baseline",
