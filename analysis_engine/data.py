@@ -789,7 +789,7 @@ class JsonMaster:
         else:
             logger.info("The latest master and project information match")
 
-    def check_baselines(self) -> None:
+    def check_baselines(self) -> None:  # check with team is required for IPDC.
         """checks that projects have the correct baseline information. stops the
         programme if baselines are missing"""
 
@@ -799,19 +799,30 @@ class JsonMaster:
         else:
             baseline_dict = IPDC_BASELINE_TYPES
 
+        b_e_cases = []  # baseline error cases
+        b_v_e_cases = []  # baseline value error cases
         for v in baseline_dict.values():
             for p in self.current_projects:
                 baselines = self.bl_index[v][p]
                 if len(baselines) <= 2:
-                    logger.critical(
-                        p
-                        + " does not have a baseline point for "
-                        + v
-                        + " this could cause the programme to "
-                          "crash. Therefore the programme is stopping. "
-                          "Please amend the data for " + p + " so that "
-                                                             " it has at least one baseline point for " + v
-                    )
+                    b_e_cases.append(p)
+                    if v not in b_v_e_cases:
+                        b_v_e_cases.append(v)
+
+        if b_e_cases:
+            for i, b in enumerate(b_e_cases):
+                logger.critical(
+                    b_e_cases[i]
+                    + " does not have a baseline point for "
+                    + b_v_e_cases[i]
+                    + " this could cause the programme to "
+                      "crash. Therefore the programme is stopping. "
+                      "Please amend the data for " + b_e_cases[i] + " so "
+                        " it has at least one baseline point for " + b_v_e_cases[i]
+                )
+            raise ProjectNameError(  # should be Baselining Error or Initiation Error
+                'Above issue(s) could cause a crash and require resolution. Program stopping'
+            )
 
     def get_project_groups(self) -> None:
         """gets the groups that projects are part of e.g. business case
@@ -834,30 +845,23 @@ class JsonMaster:
         raw_list = []
         group_list = []
         stage_list = []
+        pn_e_cases = []  # project name error_cases
+        p_m_e_cases = []  # project master error cases
+        g_e_cases = []  # group error cases
         for i, master in enumerate(self.master_data):
             lower_dict = {}
             for p in master.projects:
-                dft_group = self.project_information[p][
-                    group_key
-                ]  # different groups cleaned here
-                if dft_group is None:
-                    logger.critical(
-                        str(p)
-                        + " does not have a Group value in the project information document."
-                    )
-                    raise ProjectGroupError(
-                        "Program stopping as this could cause a crash. Please check project Group info."
-                    )
-                if dft_group not in self.all_groups:
-                    logger.critical(
-                        str(p)
-                        + " Group value is "
-                        + str(dft_group)
-                        + " . This is not a recognised group"
-                    )
-                    raise ProjectGroupError(
-                        "Program stopping as this could cause a crash. Please check project Group info."
-                    )
+                try:
+                    dft_group = self.project_information[p][
+                        group_key
+                    ]
+                except KeyError:
+                    pn_e_cases.append(p)
+                    p_m_e_cases.append(str(master.quarter))
+
+                if dft_group is None or dft_group not in self.all_groups:
+                    g_e_cases.append(p)
+
                 try:
                     stage = BC_STAGE_DICT[master[p][approval]]
                 except UnboundLocalError:  # top35 does not collect stage
@@ -867,6 +871,27 @@ class JsonMaster:
                 lower_dict[p] = dict(raw_list)
                 group_list.append(dft_group)
                 stage_list.append(stage)
+
+            if pn_e_cases:
+                for i, e in enumerate(pn_e_cases):
+                    logger.critical(
+                        f'Project name {pn_e_cases[i]} in master {p_m_e_cases[i]} not in project information '
+                        f'document. Make sure project names are consistent.'
+                    )
+                raise ProjectNameError(
+                    'Above issue(s) could cause a crash and require resolution. Program stopping'
+                )
+
+            if g_e_cases:
+                for i in g_e_cases:
+                    logger.critical(
+                        str(i)
+                        + " does not have a recognised Group value in the project information document."
+                    )
+                raise ProjectGroupError(
+                    'Above issue(s) could cause a crash and require resolution. Program stopping'
+                )
+
 
             try:
                 raw_dict[str(master.month) + ", " + str(master.year)] = lower_dict
@@ -890,7 +915,10 @@ class JsonMaster:
 
             gmpp_list = []
             for p in self.master_data[i].projects:
-                gmpp = self.project_information[p]["GMPP"]
+                try:
+                    gmpp = self.project_information[p]["GMPP"]
+                except KeyError:  # project name check happening in other places.
+                    gmpp = None
                 if gmpp is not None:
                     gmpp_list.append(p)
                 lower_g_dict["GMPP"] = gmpp_list
