@@ -13,6 +13,7 @@ from analysis_engine.data import (
     root_path,
     put_matplotlib_fig_into_word,
     get_input_doc,
+    get_map
 )
 from openpyxl import load_workbook
 
@@ -235,13 +236,21 @@ def put_triage_data_into_excel(
     ws = workb.create_sheet(sheet_name)  # creating worksheets.
     # ws.title = sheet_name
 
+    # dict for which keys are GMPP
+    key_map = get_map(load_workbook(root_path / "input/GMPP_INTEGRATION_KEY_MAP.xlsx"), commas=True, gaps=True)
+
     for x, k in enumerate(result_dict.keys()):
         ws.cell(row=x+2, column=1).value = k
         for i, t in enumerate(themes):
             if t == "GMPP Key":
-                continue
-            rating = result_dict[k][t]
-            ws.cell(row=x+2, column=i + 2).value = result_dict[k][t]
+                try:
+                    if k in key_map.keys():
+                        ws.cell(row=x + 2, column=i + 2).value = 'YES'
+                except KeyError:
+                    pass
+            else:
+                rating = result_dict[k][t]
+                ws.cell(row=x+2, column=i + 2).value = result_dict[k][t]
 
     for i, t in enumerate(themes):
         ws.cell(row=1, column=i + 2).value = t
