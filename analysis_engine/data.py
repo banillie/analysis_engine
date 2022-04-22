@@ -11056,11 +11056,17 @@ def get_gmpp_data(
     ws = wb.active
     ws_list = [ws]
 
+    key_map = get_map(load_workbook(root_path / "input/GMPP_INTEGRATION_KEY_MAP.xlsx"), commas=True, gaps=True)
+
     initial_dict = {}
+    missing_keys = []
     for ws in ws_list:
         for x in range(24, ws.max_row + 1):
             project_name = ws.cell(row=x, column=2).value
             key = ws.cell(row=x, column=6).value
+            if key not in key_map.values():
+                if key not in missing_keys:
+                        missing_keys.append(key)
             s_value = ws.cell(row=x, column=7).value
             n_value = ws.cell(row=x, column=8).value
             if n_value != 0:
@@ -11085,6 +11091,10 @@ def get_gmpp_data(
                 initial_dict[project_name][key] = s_value
             else:
                 initial_dict[project_name] = {key: s_value}
+
+    ## Use for checking to see if key map missing keys.
+    # for x in missing_keys:
+    #     print(x)
 
     return initial_dict
 
