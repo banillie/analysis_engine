@@ -11108,6 +11108,8 @@ def place_gmpp_online_keys_into_dft_master_format(
     wb = Workbook()
     ws = wb.active
 
+    # get non-gmpp keys from team
+
     key_map = get_map(load_workbook(
         root_path / "input/{}.xlsx".format(km_file_name)
     ), commas=True, gaps=True)
