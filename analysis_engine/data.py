@@ -5757,7 +5757,7 @@ class RiskData:
                 count_lower_dict[PORTFOLIO_RISK_LIST[i]] = Counter(count_list)
                 impact_lower_dict[PORTFOLIO_RISK_LIST[i]] = Counter(impact_list)
 
-            for i in range(1, 6):
+            for i in range(1, 7): # currently 6 risks. Changed from 5 to 6 in Q4 2021
                 type_list = []
                 for project_name in list(self.portfolio_risk_dictionary[quarter].keys()):
                     try:
