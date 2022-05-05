@@ -288,7 +288,7 @@ def ipdc_run_general(args):
         remove_income = get_remove_income_totals(str(root_path) + "/core_data/ipdc_config.ini")
         op_args['remove income from totals'] = remove_income['remove income from totals']
 
-        # print(op_args)
+        print(op_args)
 
         if programme == "vfm":
             c = VfMData(m, **op_args)  # c is class
@@ -1048,9 +1048,9 @@ class main:
             type=str,
             metavar="",
             action="store",
-            choices=["spent", "remaining", "benefits"],
+            choices=["spent", "remaining", "benefits", "ps resource", "contract resource", "total resource"],
             help="Provide the type of value to include in dandelion. Options are"
-            ' "spent", "remaining", "benefits".',
+            ' "spent", "remaining", "benefits", "ps resource", "contract resource", "total resource".',
         )
 
         parser_dandelion.add_argument(

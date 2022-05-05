@@ -1268,7 +1268,6 @@ class CostData:
     #     self.c_totals = lower_dict
 
     def get_cost_totals_new(self) -> None:
-        """to write"""
 
         self.iter_list = get_iter_list(self.kwargs, self.master)
         lower_dict = {}
@@ -9625,6 +9624,9 @@ def dandelion_project_text(number: int, project: str) -> str:
 
 def dandelion_number_text(number: int, **kwargs) -> str:
     total_len = len(str(int(number)))
+    if 'type' in kwargs:
+        if kwargs['type'] in ['ps resource', 'contract resource', 'total resource']:
+            return str(round(number, 1))
     try:
         if number == 0:
             if "none_handle" in kwargs:
@@ -9697,6 +9699,45 @@ def cal_group_angle(dist_no: int, group: List[str], **kwargs):
     return output_list
 
 
+class ResourceData:
+    def __init__(self, master: Master, **kwargs):
+        self.master = master
+        self.baseline_type = "ipdc_costs"
+        self.kwargs = kwargs
+        self.start_group = []
+        self.group = []
+        self.iter_list = []
+        self.get_resource_totals()
+        # self.ps_resource = 0
+        # self.contractor_resource = 0
+        # self.total_resource = 0
+
+    def get_resource_totals(self) -> None:
+        self.iter_list = get_iter_list(self.kwargs, self.master)
+        for tp in self.iter_list:
+            self.group = get_group(self.master, tp, self.kwargs)
+            public_sector_resource = []
+            c_resource = []
+            t_resource = []
+            for project_name in self.group:
+                p_data = get_correct_p_data(
+                    self.kwargs, self.master, self.baseline_type, project_name, tp
+                )
+                if p_data is None:
+                    break
+                else:
+                    ps = convert_none_types(p_data['DfTc Public Sector Employees'])
+                    public_sector_resource.append(ps)
+                    c = convert_none_types(p_data['DfTc External Contractors'])
+                    c_resource.append(c)
+                    t = convert_none_types(p_data['DfTc Project Team Total'])
+                    t_resource.append(t)
+
+        self.ps_resource = sum(public_sector_resource)
+        self.contractor_resource = sum(c_resource)
+        self.total_resource = sum(t_resource)
+
+
 def get_dandelion_type_total(
         master: Master, kwargs
 ) -> int or str:  # Note no **kwargs as existing kwargs dict passed in
@@ -9718,6 +9759,15 @@ def get_dandelion_type_total(
         if kwargs["type"] == "benefits":
             benefits = BenefitsData(master, **kwargs)
             return benefits.b_totals[tp]["total"]
+        if kwargs["type"] == "ps resource":
+            resource = ResourceData(master, **kwargs)
+            return resource.ps_resource
+        if kwargs["type"] == "contract resource":
+            resource = ResourceData(master, **kwargs)
+            return resource.contractor_resource
+        if kwargs["type"] == "total resource":
+            resource = ResourceData(master, **kwargs)
+            return resource.total_resource
 
     else:
         cost = CostData(master, **kwargs)  # group costs data
@@ -9814,13 +9864,14 @@ class DandelionData:
             l_g_d = {}  # lower group dictionary
 
             pf_wlc = get_dandelion_type_total(self.master, self.kwargs)  # portfolio wlc
+            print(pf_wlc)
             if "pc" in self.kwargs:  # pc portfolio colour
                 pf_colour = COLOUR_DICT[self.kwargs["pc"]]
                 pf_colour_edge = COLOUR_DICT[self.kwargs["pc"]]
             else:
                 pf_colour = "#FFFFFF"
                 pf_colour_edge = "grey"
-            pf_text = "Portfolio\n" + dandelion_number_text(pf_wlc)
+            pf_text = "Portfolio\n" + dandelion_number_text(pf_wlc, **self.kwargs)
 
             ## center circle
             g_d["portfolio"] = {
@@ -9859,7 +9910,7 @@ class DandelionData:
                     if self.kwargs['same_size'] == 'Yes':
                         g_wlc = 46000
 
-                g_text = g + "\n" + dandelion_number_text(g_wlc)  # group text
+                g_text = g + "\n" + dandelion_number_text(g_wlc, **self.kwargs)  # group text
 
                 if 'values' in self.kwargs:
                     if self.kwargs['values'] == 'No':
@@ -10012,11 +10063,18 @@ class DandelionData:
                     if "circle_colour" in self.kwargs:
                         if self.kwargs["circle_colour"] == "No":
                             colour = FACE_COLOUR
+
                     project_text = (
                             self.master.abbreviations[p]["abb"]
                             + "\n"
                             + dandelion_number_text(p_value, **self.kwargs)
                     )
+                    if 'type' in self.kwargs:
+                        if self.kwargs['type'] in ['ps resource', 'contract resource', 'total resource']:
+                            project_text = (
+                                    self.master.abbreviations[p]["abb"]
+                                    + ", " + dandelion_number_text(p_value, **self.kwargs)
+                            )
                     if 'values' in self.kwargs:
                         if self.kwargs['values'] == 'No':
                             project_text = (
