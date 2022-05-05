@@ -125,6 +125,25 @@ def get_integration_data(
     return path_dict
 
 
+# As more and more meta data going into config could use a refactor to collect it all in
+# one go?
+def get_remove_income_totals(
+    confi_path: Path,
+) -> Dict:
+    # Returns a list of dft groups
+    try:
+        config = configparser.ConfigParser()
+        config.read(confi_path)
+        dict = {
+            'remove income from totals': config["COSTS"]["remove_income"],
+        }
+    except:
+        logger.critical("Configuration file issue. Please check remove_income list in the COST section")
+        sys.exit(1)
+
+    return dict
+
+
 def check_remove(op_args):  # subcommand arg
     if "remove" in op_args:
         from analysis_engine.data import CURRENT_LOG
@@ -264,6 +283,10 @@ def ipdc_run_general(args):
         if "quarter" not in op_args:
             if "baseline" not in op_args:
                 op_args["quarter"] = ["standard"]
+
+        # projects to have income removed added
+        remove_income = get_remove_income_totals(str(root_path) + "/core_data/ipdc_config.ini")
+        op_args['remove income from totals'] = remove_income['remove income from totals']
 
         # print(op_args)
 
