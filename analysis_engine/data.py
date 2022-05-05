@@ -5490,6 +5490,8 @@ def risk_score(risk_impact: str, risk_likelihood: str) -> str:
     try:
         score = impact_score + likelihood_score
     except TypeError:
+        if risk_impact == 'N/A' and risk_likelihood == 'N/A':
+            return 'N/A'
         return None
     if score <= 4:
         if risk_impact == "Medium":
