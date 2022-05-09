@@ -5499,6 +5499,8 @@ def risk_score(risk_impact: str, risk_likelihood: str) -> str:
         if risk_impact == "Medium":
             if risk_likelihood == "Medium" or risk_likelihood == "Possible":
                 return "Medium"
+            else:
+                return "Low"
         else:
             return "Low"
     if 5 <= score <= 6:
@@ -5957,8 +5959,9 @@ def portfolio_risks_into_excel(risk_data: RiskData) -> workbook:
         ws.cell(row=start_row, column=3).value = "Low"
         ws.cell(row=start_row, column=4).value = "Medium"
         ws.cell(row=start_row, column=5).value = "High"
-        ws.cell(row=start_row, column=6).value = "None"
-        ws.cell(row=start_row, column=7).value = "Total"
+        ws.cell(row=start_row, column=6).value = "N/A"
+        ws.cell(row=start_row, column=7).value = "None"
+        ws.cell(row=start_row, column=8).value = "Total"
         for i, no in enumerate(risk_data.portfolio_type_impact_count[q].keys()):
             ws.cell(row=start_row + i + 1, column=2).value = str(no)
             ws.cell(
@@ -5972,9 +5975,12 @@ def portfolio_risks_into_excel(risk_data: RiskData) -> workbook:
             ).value = risk_data.portfolio_type_impact_count[q][no][("High")]
             ws.cell(
                 row=start_row + i + 1, column=6
-            ).value = risk_data.portfolio_type_impact_count[q][no][(None)]
+            ).value = risk_data.portfolio_type_impact_count[q][no][("N/A")]
             ws.cell(
                 row=start_row + i + 1, column=7
+            ).value = risk_data.portfolio_type_impact_count[q][no][(None)]
+            ws.cell(
+                row=start_row + i + 1, column=8
             ).value = sum(risk_data.portfolio_type_impact_count[q][no].values())
 
     wb.remove(wb["Sheet"])
@@ -9864,7 +9870,7 @@ class DandelionData:
             l_g_d = {}  # lower group dictionary
 
             pf_wlc = get_dandelion_type_total(self.master, self.kwargs)  # portfolio wlc
-            print(pf_wlc)
+            # print(pf_wlc)
             if "pc" in self.kwargs:  # pc portfolio colour
                 pf_colour = COLOUR_DICT[self.kwargs["pc"]]
                 pf_colour_edge = COLOUR_DICT[self.kwargs["pc"]]
