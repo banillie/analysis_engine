@@ -3705,7 +3705,8 @@ def wd_heading(
         p.getparent().remove(p)
         p._p = p._element = None
 
-    delete_paragraph(doc.paragraphs[0])
+    # if 'delete' in kwargs:
+    #     delete_paragraph(doc.paragraphs[0])
     heading = str(kwargs['group'][0])
     intro = doc.add_heading(heading, 0)
     intro.alignment = 1
