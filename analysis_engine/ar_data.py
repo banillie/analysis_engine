@@ -16,42 +16,41 @@ from analysis_engine.data import (
 from docx import Document
 
 
-def get_ar_data():
+def get_ar_data(file_name):
     return project_data_from_master(
-        root_path / "core_data/other/2122_ar_master.xlsx", 4, 2021
+        root_path / 'core_data/{}.xlsx'.format(file_name), 4, 2021
     )
 
-
-def ar_run_p_reports(data: dict) -> None:
+def ar_run_p_reports(
+        data: dict,
+        # project_list: list,
+) -> None:
     report_doc = open_word_doc(root_path / "input/summary_temp.docx")
 
     for i, p in enumerate(data.projects):
         if i != 0:
             report_doc.add_section(WD_SECTION_START.NEW_PAGE)  # new page
-        # print("Compiling summary for " + p)
+        print("Compiling " + p)
         # qrt = make_file_friendly(str(master.ma.quarter))
         output = ar_compile_p_report(
             data,
             report_doc,
-            get_project_information(
-                str(root_path) + "/core_data/ipdc_config.ini",
-                str(root_path) + "/core_data/",
-            ),
+            # project_list,
             p,
             i,
         )
         # abb = project_info[p]["Abbreviations"]
-    output.save(root_path / "output/annual_report_summaries_2122.docx")
+    output.save(root_path / "output/annual_report_summaries.docx")
 
 
 def ar_compile_p_report(
     data: dict,
     doc: Document,
-    project_info: Dict[str, Union[str, int, date, float]],
+    # project_info: Dict[str, Union[str, int, date, float]],
     project_name: str,
     no: int,
 ) -> Document:
-    print(project_name)
+    # print(project_name)
     # if no != 0:
     #     wd_heading(doc, group=[project_name], delete=True)
     wd_heading(doc, group=[project_name])
@@ -108,5 +107,5 @@ def ar_narratives(
         compare_text_new_and_old(text_one, text_two, doc)
 
 
-data = get_ar_data()
-ar_run_p_reports(data)
+# data = get_ar_data("core_data/2122_ar_master.xlsx")
+# ar_run_p_reports(data)
