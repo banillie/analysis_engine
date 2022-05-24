@@ -9632,7 +9632,12 @@ def dandelion_project_text(number: int, project: str) -> str:
 def dandelion_number_text(number: int, **kwargs) -> str:
     total_len = len(str(int(number)))
     if 'type' in kwargs:
-        if kwargs['type'] in ['ps resource', 'contract resource', 'total resource']:
+        if kwargs['type'] in [
+            'ps resource',
+            'contract resource',
+            'total resource',
+            'funded resource',
+        ]:
             return str(round(number, 1))
     try:
         if number == 0:
@@ -9726,6 +9731,7 @@ class ResourceData:
             public_sector_resource = []
             c_resource = []
             t_resource = []
+            fp_resource = []
             for project_name in self.group:
                 p_data = get_correct_p_data(
                     self.kwargs, self.master, self.baseline_type, project_name, tp
@@ -9739,10 +9745,14 @@ class ResourceData:
                     c_resource.append(c)
                     t = convert_none_types(p_data['DfTc Project Team Total'])
                     t_resource.append(t)
+                    fp = convert_none_types(p_data['DfTc Funded Posts'])
+                    fp_resource.append(fp)
+
 
         self.ps_resource = sum(public_sector_resource)
         self.contractor_resource = sum(c_resource)
         self.total_resource = sum(t_resource)
+        self.funded = sum(fp_resource)
 
 
 def get_dandelion_type_total(
@@ -9775,6 +9785,9 @@ def get_dandelion_type_total(
         if kwargs["type"] == "total resource":
             resource = ResourceData(master, **kwargs)
             return resource.total_resource
+        if kwargs["type"] == "funded resource":
+            resource = ResourceData(master, **kwargs)
+            return resource.funded
 
     else:
         cost = CostData(master, **kwargs)  # group costs data
@@ -10077,7 +10090,12 @@ class DandelionData:
                             + dandelion_number_text(p_value, **self.kwargs)
                     )
                     if 'type' in self.kwargs:
-                        if self.kwargs['type'] in ['ps resource', 'contract resource', 'total resource']:
+                        if self.kwargs['type'] in [
+                            'ps resource',
+                            'contract resource',
+                            'total resource',
+                            'funded resource',
+                        ]:
                             project_text = (
                                     self.master.abbreviations[p]["abb"]
                                     + ", " + dandelion_number_text(p_value, **self.kwargs)

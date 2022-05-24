@@ -1076,9 +1076,17 @@ class main:
             type=str,
             metavar="",
             action="store",
-            choices=["spent", "remaining", "benefits", "ps resource", "contract resource", "total resource"],
+            choices=[
+                "spent",
+                "remaining",
+                "benefits",
+                "ps resource",
+                "contract resource",
+                "total resource",
+                "funded resource",
+            ],
             help="Provide the type of value to include in dandelion. Options are"
-            ' "spent", "remaining", "benefits", "ps resource", "contract resource", "total resource".',
+            ' "spent", "remaining", "benefits", "ps resource", "contract resource", "total resource", "funded resource".',
         )
 
         parser_dandelion.add_argument(
