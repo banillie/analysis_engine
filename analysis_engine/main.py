@@ -53,13 +53,14 @@ from analysis_engine.data import (
     open_json_file,
     cost_profile_into_wb_new,
     cost_profile_graph_new,
-    get_gmpp_data,
-    place_gmpp_online_keys_into_dft_master_format,
+    # get_gmpp_data,
+    # place_gmpp_online_keys_into_dft_master_format,
     data_check_print_out,
     portfolio_risks_into_excel,
 )
 
 from analysis_engine.ar_data import get_ar_data, ar_run_p_reports
+from analysis_engine.gmpp_integration import get_integration_data, get_gmpp_data, place_gmpp_online_keys_into_dft_master_format
 
 import logging
 
@@ -107,24 +108,24 @@ def get_group_stage_data(
     return portfolio_group, group_all, bc_stages
 
 
-def get_integration_data(
-    confi_path: Path,
-) -> Dict:
-    # Returns a list of dft groups
-    try:
-        config = configparser.ConfigParser()
-        config.read(confi_path)
-        path_dict = {
-            'project_map_path': config["GMPP INTEGRATION"]["project_map"],
-            'gmpp_data_path': config["GMPP INTEGRATION"]["gmpp_data"],
-            'key_map_path': config["GMPP INTEGRATION"]["key_map"],
-            'master_comp_path': config["GMPP INTEGRATION"]["master_for_comparison"],
-        }
-    except:
-        logger.critical("Configuration file issue. Please check and make sure it's correct.")
-        sys.exit(1)
-
-    return path_dict
+# def get_integration_data(
+#     confi_path: Path,
+# ) -> Dict:
+#     # Returns a list of dft groups
+#     try:
+#         config = configparser.ConfigParser()
+#         config.read(confi_path)
+#         path_dict = {
+#             'project_map_path': config["GMPP INTEGRATION"]["project_map"],
+#             'gmpp_data_path': config["GMPP INTEGRATION"]["gmpp_data"],
+#             'key_map_path': config["GMPP INTEGRATION"]["key_map"],
+#             'master_comp_path': config["GMPP INTEGRATION"]["master_for_comparison"],
+#         }
+#     except:
+#         logger.critical("Configuration file issue. Please check and make sure it's correct.")
+#         sys.exit(1)
+#
+#     return path_dict
 
 def get_gmpp_ar_data(
     confi_path: Path,
@@ -486,11 +487,11 @@ def ipdc_run_general(args):
                 integration_meta['key_map_path'],
                 integration_meta['master_comp_path']
             )
-            data_check_print_out(
-                integration_meta['master_comp_path'],
-                integration_meta['key_map_path'],
-                integration_meta['project_map_path']
-            )
+            # data_check_print_out(
+            #     integration_meta['master_comp_path'],
+            #     integration_meta['key_map_path'],
+            #     integration_meta['project_map_path']
+            # )
 
         if programme == "gmpp_ar":
             ar_meta = get_gmpp_ar_data(
