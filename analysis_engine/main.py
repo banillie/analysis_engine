@@ -26,15 +26,11 @@ from analysis_engine.data import (
     DcaData,
     dca_changes_into_excel,
     dca_changes_into_word,
-    Pickle,
-    open_pickle_file,
     ipdc_dashboard,
     CostData,
     cost_v_schedule_chart_into_wb,
     DandelionData,
     put_matplotlib_fig_into_word,
-    cost_profile_into_wb,
-    cost_profile_graph,
     data_query_into_wb,
     get_data_query_key_names,
     ProjectNameError,
@@ -55,12 +51,15 @@ from analysis_engine.data import (
     cost_profile_graph_new,
     # get_gmpp_data,
     # place_gmpp_online_keys_into_dft_master_format,
-    data_check_print_out,
     portfolio_risks_into_excel,
 )
 
 from analysis_engine.ar_data import get_ar_data, ar_run_p_reports
-from analysis_engine.gmpp_integration import get_integration_data, get_gmpp_data, place_gmpp_online_keys_into_dft_master_format
+from analysis_engine.ipdc.gmpp_integration import (
+    get_integration_data,
+    get_gmpp_data,
+    place_gmpp_online_keys_into_dft_master_format,
+)
 
 import logging
 
@@ -82,8 +81,10 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+
 class ConfigurationError(Exception):
     pass
+
 
 def get_group_stage_data(
     confi_path: Path,
@@ -102,7 +103,9 @@ def get_group_stage_data(
         except configparser.NoOptionError:
             bc_stages = []
     except:
-        logger.critical("Configuration file issue. Please check and make sure it's correct.")
+        logger.critical(
+            "Configuration file issue. Please check and make sure it's correct."
+        )
         sys.exit(1)
 
     return portfolio_group, group_all, bc_stages
@@ -127,6 +130,7 @@ def get_group_stage_data(
 #
 #     return path_dict
 
+
 def get_gmpp_ar_data(
     confi_path: Path,
 ) -> Dict:
@@ -135,10 +139,12 @@ def get_gmpp_ar_data(
         config = configparser.ConfigParser()
         config.read(confi_path)
         path_dict = {
-            'gmpp_ar_master': config["GMPP ANNUAL REPORT"]["ar_master_data"],
+            "gmpp_ar_master": config["GMPP ANNUAL REPORT"]["ar_master_data"],
         }
     except:
-        logger.critical("Configuration file issue. Please check and make sure it's correct.")
+        logger.critical(
+            "Configuration file issue. Please check and make sure it's correct."
+        )
         sys.exit(1)
 
     return path_dict
@@ -154,10 +160,12 @@ def get_remove_income_totals(
         config = configparser.ConfigParser()
         config.read(confi_path)
         dict = {
-            'remove income from totals': config["COSTS"]["remove_income"],
+            "remove income from totals": config["COSTS"]["remove_income"],
         }
     except:
-        logger.critical("Configuration file issue. Please check remove_income list in the COST section")
+        logger.critical(
+            "Configuration file issue. Please check remove_income list in the COST section"
+        )
         sys.exit(1)
 
     return dict
@@ -180,7 +188,7 @@ def ipdc_initiate(args):
 
     # get group information from config. only all_groups used at initiate
     META = get_group_stage_data(
-            str(root_path) + "/core_data/ipdc_config.ini",
+        str(root_path) + "/core_data/ipdc_config.ini",
     )
     all_groups = META[1]
 
@@ -304,8 +312,12 @@ def ipdc_run_general(args):
                 op_args["quarter"] = ["standard"]
 
         # projects to have income removed added
-        remove_income = get_remove_income_totals(str(root_path) + "/core_data/ipdc_config.ini")
-        op_args['remove income from totals'] = remove_income['remove income from totals']
+        remove_income = get_remove_income_totals(
+            str(root_path) + "/core_data/ipdc_config.ini"
+        )
+        op_args["remove income from totals"] = remove_income[
+            "remove income from totals"
+        ]
 
         # print(op_args)
 
@@ -479,13 +491,13 @@ def ipdc_run_general(args):
             integration_meta = get_integration_data(
                 str(root_path) + "/core_data/ipdc_config.ini",
             )
-            gmpp_data = get_gmpp_data(integration_meta['gmpp_data_path'])
+            gmpp_data = get_gmpp_data(integration_meta["gmpp_data_path"])
             # p_list = ['East Coast Mainline Programme']   # p-list is optional
             ## p_list = ['East Coast Mainline Programme', 'Rapid Charging Fund', 'NO2 Reduction']
             place_gmpp_online_keys_into_dft_master_format(
                 gmpp_data,
-                integration_meta['key_map_path'],
-                integration_meta['master_comp_path']
+                integration_meta["key_map_path"],
+                integration_meta["master_comp_path"],
             )
             # data_check_print_out(
             #     integration_meta['master_comp_path'],
@@ -497,7 +509,7 @@ def ipdc_run_general(args):
             ar_meta = get_gmpp_ar_data(
                 str(root_path) + "/core_data/ipdc_config.ini",
             )
-            ar_data = get_ar_data(ar_meta['gmpp_ar_master'])
+            ar_data = get_ar_data(ar_meta["gmpp_ar_master"])
             ar_run_p_reports(ar_data)
 
         check_remove(op_args)
@@ -660,7 +672,9 @@ def cdg_run_general(args):
 
         if programme == "speedial":
             doc = get_input_doc(cdg_root_path / "input/summary_temp.docx")
-            land_doc = get_input_doc(cdg_root_path / "input/summary_temp_landscape.docx")
+            land_doc = get_input_doc(
+                cdg_root_path / "input/summary_temp_landscape.docx"
+            )
             op_args["rag_number"] = "5"
             data = DcaData(m, **op_args)
             data.get_changes()
@@ -712,17 +726,26 @@ def cdg_run_general(args):
                 if op_args["chart"] == "save":
                     op_args["chart"] = False
                     d_graph = make_a_dandelion_auto(d_data, **op_args)
-                    doc = get_input_doc(cdg_root_path / "input/summary_temp_landscape.docx")
+                    doc = get_input_doc(
+                        cdg_root_path / "input/summary_temp_landscape.docx"
+                    )
                     put_matplotlib_fig_into_word(doc, d_graph, size=7)
                     doc.save(cdg_root_path / "output/dandelion_graph.docx")
                 if op_args["chart"] == "show":
                     make_a_dandelion_auto(d_data, **op_args)
 
         if programme == "dashboards":
-            dashboard_master = get_input_doc(cdg_root_path / "input/dashboard_master.xlsx")
-            narrative_d_master = get_input_doc(cdg_root_path / "input/narrative_dashboard_master.xlsx")
+            dashboard_master = get_input_doc(
+                cdg_root_path / "input/dashboard_master.xlsx"
+            )
+            narrative_d_master = get_input_doc(
+                cdg_root_path / "input/narrative_dashboard_master.xlsx"
+            )
             wb = cdg_narrative_dashboard(m, narrative_d_master)
-            wb.save(cdg_root_path / "output/{}.xlsx".format("cdg_narrative_dashboard_completed"))
+            wb.save(
+                cdg_root_path
+                / "output/{}.xlsx".format("cdg_narrative_dashboard_completed")
+            )
             wb = cdg_dashboard(m, dashboard_master)
             wb.save(cdg_root_path / "output/{}.xlsx".format("cdg_dashboard_completed"))
 
@@ -856,7 +879,9 @@ class main:
         parser_vfm = subparsers.add_parser("vfm", help="vfm analysis")
         parser_summaries = subparsers.add_parser("summaries", help="summary reports")
         parser_risks = subparsers.add_parser("risks", help="project risk analysis")
-        parser_port_risks = subparsers.add_parser("portfolio_risks", help="portfolio risk analysis")
+        parser_port_risks = subparsers.add_parser(
+            "portfolio_risks", help="portfolio risk analysis"
+        )
         parser_dca = subparsers.add_parser("dcas", help="dca analysis")
         parser_speedial = subparsers.add_parser("speedial", help="speed dial analysis")
         parser_matrix = subparsers.add_parser(
@@ -1394,16 +1419,18 @@ class main:
             formatter_class=RawTextHelpFormatter,
         )
 
-        cdg_parser_speedial = subparsers.add_parser("speedial", help="speed dial analysis")
+        cdg_parser_speedial = subparsers.add_parser(
+            "speedial", help="speed dial analysis"
+        )
 
         cdg_parser_milestones.add_argument(
-                "--dates",
-                type=str,
-                metavar="",
-                action="store",
-                nargs=2,
-                help="dates for analysis. Must provide start date and then end date in format e.g. '1/1/2021' '1/1/2022'.",
-            )
+            "--dates",
+            type=str,
+            metavar="",
+            action="store",
+            nargs=2,
+            help="dates for analysis. Must provide start date and then end date in format e.g. '1/1/2021' '1/1/2022'.",
+        )
 
         cdg_parser_milestones.add_argument(
             "--blue_line",
@@ -1411,7 +1438,7 @@ class main:
             metavar="",
             action="store",
             help="Insert blue line into chart to represent a date. "
-                 'Options are "Today" "CDG" or a date in correct format e.g. "1/1/2021".',
+            'Options are "Today" "CDG" or a date in correct format e.g. "1/1/2021".',
         )
 
         for sub in [
@@ -1440,7 +1467,7 @@ class main:
                 action="store",
                 nargs="+",
                 help="Returns analysis for one or combination of specified quarters. "
-                     'User must use correct format e.g "Q3 19/20"',
+                'User must use correct format e.g "Q3 19/20"',
             )
 
         cdg_parser_dandelion.add_argument(
@@ -1458,9 +1485,9 @@ class main:
             type=str,
             metavar="",
             action="store",
-            choices=["benefits", 'income'],
+            choices=["benefits", "income"],
             help="Provide the type of value to include in dandelion. Options are"
-                 ' "benefits" or "income".',
+            ' "benefits" or "income".',
         )
 
         args = parser.parse_args(sys.argv[2:])
