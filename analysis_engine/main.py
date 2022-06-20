@@ -55,7 +55,7 @@ from analysis_engine.data import (
 )
 
 from analysis_engine.ar_data import get_ar_data, ar_run_p_reports
-from analysis_engine.ipdc.gmpp_integration import (
+from analysis_engine.gmpp_int import (
     get_integration_data,
     get_gmpp_data,
     place_gmpp_online_keys_into_dft_master_format,
