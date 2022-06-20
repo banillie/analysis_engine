@@ -1,9 +1,9 @@
-../.idea/
+#../.idea/
 .venv/
 __pycache__
 tests/__pycache__
 live.db
-.idea/
+#.idea/
 **/.__pycache__/*
 *.~lock*
 .vscode/*
@@ -13,8 +13,8 @@ pip-wheel-metadata/*
 prof/*
 tags
 skip-covered/
-.idea/
-.idea
+#.idea/
+#.idea
 dist/
 **/.mypy_cache/*
 **/__pycache__/*
