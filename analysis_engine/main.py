@@ -134,7 +134,6 @@ def get_group_stage_data(
 def get_gmpp_ar_data(
     confi_path: Path,
 ) -> Dict:
-    # Returns a list of dft groups
     try:
         config = configparser.ConfigParser()
         config.read(confi_path)
@@ -499,6 +498,7 @@ def ipdc_run_general(args):
                 integration_meta["key_map_path"],
                 integration_meta["master_comp_path"],
             )
+            ## Code was previously required when portfolio team had to enter data.
             # data_check_print_out(
             #     integration_meta['master_comp_path'],
             #     integration_meta['key_map_path'],
