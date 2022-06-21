@@ -51,6 +51,12 @@ def get_master_data(
     return list(reversed(master_data_list))
 
 
+def convert_none_types(x):
+    if x is None:
+        return 0
+    else:
+        return x
+
 class JsonMaster:
     def __init__(
             self,
@@ -215,6 +221,7 @@ class JsonMaster:
                 'Above issue(s) could cause a crash and require resolution. Program stopping'
             )
 
+    ## Refactor required. Is this even used now?
     def get_project_groups(self) -> None:
         """gets the groups that projects are part of e.g. business case
         stage or dft group"""
@@ -227,10 +234,10 @@ class JsonMaster:
             if self.kwargs["data_type"] == "top35":
                 group_key = "Group"
                 # group_dict = DFT_GROUP_DICT
-        else:
-            group_key = "Group"
-            # group_dict = DFT_GROUP_DICT
-            approval = "IPDC approval point"
+            if self.kwargs["data_type"] == 'ipdc':
+                group_key = "Group"
+                # group_dict = DFT_GROUP_DICT
+                approval = "IPDC approval point"
 
         raw_dict = {}
         raw_list = []
@@ -247,6 +254,7 @@ class JsonMaster:
                         group_key
                     ]
                 except KeyError:
+                    dft_group = None
                     pn_e_cases.append(p)
                     p_m_e_cases.append(str(master.quarter))
 
@@ -440,6 +448,7 @@ def get_group_stage_data(
 ) -> List[str]:
     # Returns a list of dft groups
     try:
+        print(confi_path)
         config = configparser.ConfigParser()
         config.read(confi_path)
         # master_data_list = []
@@ -512,8 +521,8 @@ def get_core(
         func: Callable, #  project_data_from_master
     ) -> None:
     root_path = _platform_docs_dir(reporting_type)
+    print(root_path)
     config_path = str(root_path) + config_file
-    print(config_path)
     META = get_group_stage_data(config_path)
     all_groups = META[1]   # only all_groups used at initiate
 

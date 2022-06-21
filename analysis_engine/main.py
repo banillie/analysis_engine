@@ -85,7 +85,6 @@ class ConfigurationError(Exception):
 
 
 
-
 def get_gmpp_ar_data(
     confi_path: Path,
 ) -> Dict:
@@ -137,12 +136,28 @@ def check_remove(op_args):  # subcommand arg
                 )
 
 
-def ipdc_initiate(*args):
-    print("creating a master data file for ipdc and gmpp portfolio reporting.")
-    get_core(
-        config_file='/core_data/ipdc_config.ini',
-        func=project_data_from_master,
-    )
+def initiate(args):
+    print("creating a master data file.")
+    if args == 'cdg':
+        get_core(
+            reporting_type=args,
+            config_file='/core_data/cdg_config.ini',
+            func=project_data_from_master_month,
+        )
+    if args == 'ipdc':
+        get_core(
+            reporting_type=args,
+            config_file='/core_data/ipdc_config.ini',
+            func=project_data_from_master,
+        )
+
+
+# def ipdc_initiate(*args):
+#     print("creating a master data file for ipdc and gmpp portfolio reporting.")
+#     get_core(
+#         config_file='/core_data/ipdc_config.ini',
+#         func=project_data_from_master,
+#     )
 
 
 def top250_initiate(args):
@@ -176,13 +191,6 @@ def top250_initiate(args):
     JsonData(master, master_json_path)
 
 
-def initiate(args):
-    print("creating a master data file.")
-    get_core(
-        reporting_type=args,
-        config_file='/core_data/cdg_config.ini',
-        func=project_data_from_master_month,
-    )
 
 
 def ipdc_run_general(args):
@@ -1119,11 +1127,8 @@ class main:
         # TWO argvs, ie the command (git) and subcommand (commit)
         # print(sys.argv)
         args = parser.parse_args(sys.argv[2:])
-        # print(args)
-        # print(vars(args))
-        # print(vars(args))
         if vars(args)["subparser_name"] == "initiate":
-            ipdc_initiate(vars(args))
+            initiate('ipdc')
         else:
             ipdc_run_general(vars(args))
 
