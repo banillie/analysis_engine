@@ -55,11 +55,7 @@ from analysis_engine.data import (
 )
 
 from analysis_engine.ar_data import get_ar_data, ar_run_p_reports
-from analysis_engine.gmpp_int import (
-    get_integration_data,
-    get_gmpp_data,
-    place_gmpp_online_keys_into_dft_master_format,
-)
+from analysis_engine.gmpp_int import get_gmpp_data
 
 import logging
 
@@ -486,24 +482,8 @@ def ipdc_run_general(args):
             op_args = return_koi_fn_keys(op_args)
             wb = data_query_into_wb(m, **op_args)
 
-        if programme == "gmpp_integration":
-            integration_meta = get_integration_data(
-                str(root_path) + "/core_data/ipdc_config.ini",
-            )
-            gmpp_data = get_gmpp_data(integration_meta["gmpp_data_path"])
-            # p_list = ['East Coast Mainline Programme']   # p-list is optional
-            ## p_list = ['East Coast Mainline Programme', 'Rapid Charging Fund', 'NO2 Reduction']
-            place_gmpp_online_keys_into_dft_master_format(
-                gmpp_data,
-                integration_meta["key_map_path"],
-                integration_meta["master_comp_path"],
-            )
-            ## Code was previously required when portfolio team had to enter data.
-            # data_check_print_out(
-            #     integration_meta['master_comp_path'],
-            #     integration_meta['key_map_path'],
-            #     integration_meta['project_map_path']
-            # )
+        if programme == "gmpp_data":
+            get_gmpp_data()
 
         if programme == "gmpp_ar":
             ar_meta = get_gmpp_ar_data(
@@ -890,8 +870,8 @@ class main:
         parser_data_query = subparsers.add_parser(
             "query", help="return data from core data"
         )
-        parser_gmpp_integration = subparsers.add_parser(
-            "gmpp_integration", help="integrates gmpp data"
+        parser_gmpp_data = subparsers.add_parser(
+            "gmpp_data", help="converts gmpp online data into the dft master format"
         )
         parser_gmpp_ar = subparsers.add_parser(
             "gmpp_ar", help="compiled summaries for the IPA GMPP annual report"

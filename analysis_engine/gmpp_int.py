@@ -54,9 +54,8 @@ def get_map(wb, commas=False, gaps=False, flip=False):
     return output_dict
 
 
-def get_gmpp_data(
+def get_gmpp_online_data(
         file_name: str,
-        # file_name_two: str
 ):
     from datetime import datetime
     import xlrd
@@ -160,3 +159,21 @@ def place_gmpp_online_keys_into_dft_master_format(
 
     wb.save(root_path / "output/gmpp_online_data_dft_master_format.xlsx")
 
+
+def get_gmpp_data(*arg, **kwargs):
+    integration_meta = get_integration_data(
+        str(root_path) + "/core_data/ipdc_config.ini",
+    )
+    gmpp_data = get_gmpp_online_data(integration_meta["gmpp_data_path"])
+    place_gmpp_online_keys_into_dft_master_format(
+        gmpp_data,
+        integration_meta["key_map_path"],
+        integration_meta["master_comp_path"],
+    )
+    
+    ## Code was previously required when portfolio team had to enter data.
+    # data_check_print_out(
+    #     integration_meta['master_comp_path'],
+    #     integration_meta['key_map_path'],
+    #     integration_meta['project_map_path']
+    # )
