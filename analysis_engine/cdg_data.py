@@ -21,6 +21,8 @@ from openpyxl.styles.differential import DifferentialStyle
 
 # from analysis_engine.top35_data import wd_heading
 
+from analysis_engine.core_data import cdg_root_path
+
 from analysis_engine.data import (
     convert_bc_stage_text,
     plus_minus_days,
@@ -38,7 +40,7 @@ from analysis_engine.data import (
     set_col_widths,
     make_columns_bold,
     change_text_size,
-    Master,
+    # Master,
     get_group,
     compare_text_new_and_old,
     get_ipdc_date, dandelion_number_text,
@@ -115,7 +117,7 @@ DCG_DATE = datetime.date(
 )  # ipdc date. Python date format is Year, Month, day
 
 
-def cdg_overall_dashboard(master: Master, wb: Workbook) -> Workbook:
+def cdg_overall_dashboard(master, wb: Workbook) -> Workbook:
     wb = load_workbook(wb)
     ws = wb.worksheets[0]
 
@@ -438,7 +440,7 @@ def cdg_overall_dashboard(master: Master, wb: Workbook) -> Workbook:
 def cdg_compile_p_report(
     doc: Document,
     project_info: Dict[str, Union[str, int, date, float]],
-    master: Master,
+    master,
     project_name: str,
 ) -> Document:
     wd_heading(doc, project_info, project_name)
@@ -487,26 +489,27 @@ def cdg_compile_p_report(
     return doc
 
 
-def cdg_run_p_reports(master: Master, **kwargs) -> None:
-    group = master.current_projects
-    # group = get_group(master, str(master.current_quarter), kwargs)
-
-    for p in group:
-        print("Compiling summary for " + p)
-        report_doc = open_word_doc(cdg_root_path / "input/summary_temp.docx")
-        qrt = make_file_friendly(str(master.master_data[0].quarter))
-        output = cdg_compile_p_report(
-            report_doc, cdg_get_project_information(), master, p
-        )
-        abb = master.abbreviations[p]["abb"]
-        output.save(
-            cdg_root_path / "output/{}_report_{}.docx".format(abb, qrt)
-        )  # add quarter here
+## Not being used.
+# def cdg_run_p_reports(master, **kwargs) -> None:
+#     group = master.current_projects
+#     # group = get_group(master, str(master.current_quarter), kwargs)
+#
+#     for p in group:
+#         print("Compiling summary for " + p)
+#         report_doc = open_word_doc(cdg_root_path / "input/summary_temp.docx")
+#         qrt = make_file_friendly(str(master.master_data[0].quarter))
+#         output = cdg_compile_p_report(
+#             report_doc, cdg_get_project_information(), master, p
+#         )
+#         abb = master.abbreviations[p]["abb"]
+#         output.save(
+#             cdg_root_path / "output/{}_report_{}.docx".format(abb, qrt)
+#         )  # add quarter here
 
 
 def cdg_project_report_meta_data(
     doc: Document,
-    master: Master,
+    master,
     project_name: str,
 ):
     """Meta data table"""
@@ -568,7 +571,7 @@ def add_sterling_symbol(figure: int or float):
 
 
 def cdg_dashboard(
-        master: Master,
+        master,
         # milestones: MilestoneData,
         wb: Workbook,
 ) -> Workbook:
@@ -886,7 +889,7 @@ def cdg_dashboard(
 
 
 def cdg_narrative_dashboard(
-        master: Master,
+        master,
         # milestones: MilestoneData,
         wb: Workbook,
 ) -> Workbook:
@@ -941,7 +944,7 @@ def cdg_narrative_dashboard(
     return wb
 
 
-def cdg_run_p_reports(master: Master, **kwargs) -> None:
+def cdg_run_p_reports(master, **kwargs) -> None:
     group = get_group(master, str(master.current_quarter), kwargs)
     for p in group:
         p_name = master.project_information.data[p]["Abbreviations"]
@@ -955,7 +958,7 @@ def cdg_run_p_reports(master: Master, **kwargs) -> None:
 
 def cdg_compile_p_report(
     doc: Document,
-    master: Master,
+    master,
     project_name: str,
     **kwargs,
 ) -> Document:
@@ -967,7 +970,7 @@ def cdg_compile_p_report(
     return doc
 
 
-def project_scope_text(doc: Document, master: Master, project_name: str) -> Document:
+def project_scope_text(doc: Document, master, project_name: str) -> Document:
     doc.add_paragraph().add_run("Short project description").bold = True
     text_one = str(master.master_data[0].data[project_name]["Brief Description"])
     # try:

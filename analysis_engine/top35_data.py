@@ -23,12 +23,16 @@ from analysis_engine.data import (
     dandelion_number_text,
     cal_group_angle,
     convert_rag_text,
-    Master,
+    # Master,
     logger,
     MilestoneData,
     milestone_info_handling,
-    wd_heading, convert_date, get_project_info_data,
+    wd_heading,
+    convert_date,
 )
+
+from analysis_engine.core_data import get_project_information
+
 import platform
 from pathlib import Path
 from docx import Document, table
@@ -52,7 +56,7 @@ def _top_35_platform_docs_dir() -> Path:
 top35_root_path = _top_35_platform_docs_dir()
 
 
-def top35_run_p_reports(master: Master, **kwargs) -> None:
+def top35_run_p_reports(master, **kwargs) -> None:
     group = get_group(master, str(master.current_quarter), kwargs)
     for p in group:
         p_name = master.project_information[p]["Abbreviations"]
@@ -100,7 +104,7 @@ def top35_run_p_reports(master: Master, **kwargs) -> None:
 
 def compile_p_report(
     doc: Document,
-    master: Master,
+    master,
     project_name: str,
     **kwargs,
 ) -> Document:
@@ -157,7 +161,7 @@ def key_contacts(doc: Document, master: Dict, project_name: str) -> None:
     doc.add_paragraph("SRO: " + str(sro_name) + ", " + str(sro_email))
 
 
-def project_scope_text(doc: Document, master: Master, project_name: str) -> Document:
+def project_scope_text(doc: Document, master, project_name: str) -> Document:
     doc.add_paragraph().add_run("Short project description").bold = True
     text_one = str(
         master.master_data[0]["data"][project_name]["SHORT PROJECT DESCRIPTION"]
@@ -405,7 +409,7 @@ def cs_info_handling(output_list: list, t_list: list) -> list:
 class CentralSupportData:
     def __init__(
         self,
-        master: Master,
+        master,
         # baseline_type: str = "ipdc_milestones",
         **kwargs,
     ):

@@ -160,6 +160,153 @@ def place_gmpp_online_keys_into_dft_master_format(
     wb.save(root_path / "output/gmpp_online_data_dft_master_format.xlsx")
 
 
+## Code not currently in use.
+# def data_check_print_out(
+#         ipdc_d_file_path: str,
+#         km_file_name: str,
+#         pn_file_name: str,
+# ):
+#     gmpp_data = project_data_from_master(root_path / "input/gmpp_online_data_temp.xlsx", 2, 2021)
+#     os.remove(root_path / "input/gmpp_online_data_temp.xlsx")
+#     ipdc_data = project_data_from_master(root_path / "core_data/{}.xlsx".format(ipdc_d_file_path), 2, 2021)
+#     key_map = get_map(load_workbook
+#                       (root_path / "input/{}.xlsx".format(km_file_name)), flip=True)
+#     project_map = get_map(load_workbook
+#                           (root_path / "input/{}.xlsx".format(pn_file_name)))
+#
+#     wb = Workbook()
+#     ws = wb.active
+#
+#     def remove_keys(key):
+#         output = key
+#         for rk in RK_LIST:  # remove key
+#             if rk in key:
+#                 output = "remove"
+#         return output
+#
+#     start_row = 2
+#     project_check_list = []
+#     for x, project in enumerate(list(project_map.keys())):  # could be project_map.keys()
+#         project_check_list.append(project)
+#         try:  # exception so only projects in ipdc data compared.
+#             for i, k in enumerate(gmpp_data.data[project]):
+#                 if k is None:
+#                     continue
+#                 check_key = remove_keys(k)
+#                 if check_key == "remove":
+#                     continue
+#                 ws.cell(row=start_row, column=1).value = project
+#                 try:
+#                     dft_project_name = project_map[project]
+#                     project_check = "PASS"
+#                 except KeyError:
+#                     dft_project_name = ""
+#                     project_check = "FAILED"
+#                 ws.cell(row=start_row, column=2).value = dft_project_name
+#                 ws.cell(row=start_row, column=3).value = project_check
+#                 ws.cell(row=start_row, column=4).value = k
+#                 try:
+#                     dft_key_name = key_map[k]
+#                     if dft_key_name == "None":
+#                         continue
+#                     key_check = "PASS"
+#                 except KeyError:
+#                     # print(k)
+#                     dft_key_name = ""
+#                     key_check = "FAILED"
+#                 ws.cell(row=start_row, column=5).value = dft_key_name
+#                 ws.cell(row=start_row, column=6).value = key_check
+#
+#                 gmpp_val = gmpp_data[project][k]
+#
+#                 try:
+#                     dft_val = ipdc_data[dft_project_name][dft_key_name]
+#                     if "Ver No" in dft_key_name or "Version No" in dft_key_name:
+#                         if dft_val is not None:
+#                             dft_val = str(dft_val)
+#                         if gmpp_val is not None:
+#                             gmpp_val = str(gmpp_val)
+#                     # if 'Phone No' in dft_key_name:  # started to think about tele nos but leaving for now.
+#                     #     print(gmpp_val)
+#                     #     print(dft_val)
+#                 except KeyError:
+#                     dft_val = ""
+#
+#                 ws.cell(row=start_row, column=7).value = gmpp_val
+#                 if isinstance(gmpp_val, datetime.datetime):
+#                     gmpp_val = gmpp_val.date()
+#                     ws.cell(row=start_row, column=7, value=gmpp_val).number_format = "dd/mm/yy"
+#
+#                 ws.cell(row=start_row, column=8).value = dft_val
+#                 if isinstance(dft_val, datetime.datetime):
+#                     dft_val = dft_val.date()
+#                     ws.cell(row=start_row, column=8, value=dft_val).number_format = "dd/mm/yy"
+#
+#                 if gmpp_val in list(GMPP_M_DICT.keys()):
+#                     if GMPP_M_DICT[gmpp_val] == dft_val:
+#                         ws.cell(row=start_row, column=9).value = "MATCH"
+#                         start_row += 1
+#                         continue
+#
+#                 if isinstance(gmpp_val, str) and isinstance(dft_val, str):
+#                     if "Ver No" in dft_key_name or "Version No" in k:
+#                         try:
+#                             gmpp_val = int(float(gmpp_val))
+#                             dft_val = int(float(dft_val))
+#                         except ValueError:
+#                             pass
+#                     else:
+#                         gmpp_val = gmpp_val.split()
+#                         dft_val = dft_val.split()
+#
+#                 # get floats of different lengths to match
+#                 if isinstance(dft_val, float) and isinstance(gmpp_val, float):
+#                     dft_val = float("{:.2f}".format(dft_val))
+#                     gmpp_val = float("{:.2f}".format(gmpp_val))
+#
+#                 if isinstance(dft_val, float) and isinstance(gmpp_val, int):
+#                     dft_val = round(dft_val)
+#
+#                 if isinstance(dft_val, int) and isinstance(gmpp_val, float):
+#                     gmpp_val = round(gmpp_val)
+#
+#                 if gmpp_val == dft_val:
+#                     ws.cell(row=start_row, column=9).value = "MATCH"
+#                 elif gmpp_val is None and dft_val == "":
+#                     ws.cell(row=start_row, column=9).value = "MATCH"
+#                 elif gmpp_val == "" and dft_val is None:
+#                     ws.cell(row=start_row, column=9).value = "MATCH"
+#                 elif gmpp_val is None and dft_val == 0:
+#                     ws.cell(row=start_row, column=9).value = "MATCH"
+#                 elif dft_key_name in IGNORE_LIST:
+#                     # print(dft_key_name)
+#                     ws.cell(row=start_row, column=9).value = "IGNORE"
+#                 else:
+#                     ws.cell(row=start_row, column=9).value = "DIFFERENT"
+#
+#                 start_row += 1
+#         except KeyError:
+#             pass
+#     ws.cell(row=1, column=1).value = "GMPP PROJECT NAME"
+#     ws.cell(row=1, column=2).value = "DFT PROJECT NAME"
+#     ws.cell(row=1, column=3).value = "NAME CHECK"
+#     ws.cell(row=1, column=4).value = "GMPP KEY"
+#     ws.cell(row=1, column=5).value = "DFT KEY"
+#     ws.cell(row=1, column=6).value = "KEY CHECK"
+#     ws.cell(row=1, column=7).value = "GMPP VALUE"
+#     ws.cell(row=1, column=8).value = "DFT VALUE"
+#     ws.cell(row=1, column=9).value = "VALUE CHECK"
+#
+#     p_check = [x for x in list(project_map.keys()) if x not in project_check_list]
+#     if not p_check:
+#         pass
+#     else:
+#         print("note following projects missing:")
+#         for x in p_check:
+#             print(x)
+#
+#     wb.save(root_path / f"output/GMPP_IPDC_DATA_CHECK_USING_{ipdc_d_file_path}.xlsx")
+
 def get_gmpp_data(*arg, **kwargs):
     integration_meta = get_integration_data(
         str(root_path) + "/core_data/ipdc_config.ini",

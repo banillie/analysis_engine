@@ -10,12 +10,14 @@ from analysis_engine import __version__
 
 from datamaps.api import project_data_from_master, project_data_from_master_month
 
+from analysis_engine.core_data import get_core
+
 from analysis_engine.data import (
-    get_master_data,
-    Master,
-    get_project_information,
+    # get_master_data,
+    # Master,
+    # get_project_information,
     VfMData,
-    root_path,
+    # root_path,
     cdg_root_path,
     vfm_into_excel,
     MilestoneData,
@@ -44,8 +46,8 @@ from analysis_engine.data import (
     # DFT_GROUP,
     get_input_doc,
     InputError,
-    JsonMaster,
-    JsonData,
+    # JsonMaster,
+    # JsonData,
     open_json_file,
     cost_profile_into_wb_new,
     cost_profile_graph_new,
@@ -82,49 +84,6 @@ class ConfigurationError(Exception):
     pass
 
 
-def get_group_stage_data(
-    confi_path: Path,
-) -> List[str]:
-    # Returns a list of dft groups
-    try:
-        config = configparser.ConfigParser()
-        config.read(confi_path)
-        master_data_list = []
-        portfolio_group = json.loads(
-            config.get("GROUPS", "portfolio_groups")
-        )  # to return a list
-        group_all = json.loads(config.get("GROUPS", "all_groups"))
-        try:
-            bc_stages = json.loads(config.get("GROUPS", "bc_stages"))
-        except configparser.NoOptionError:
-            bc_stages = []
-    except:
-        logger.critical(
-            "Configuration file issue. Please check and make sure it's correct."
-        )
-        sys.exit(1)
-
-    return portfolio_group, group_all, bc_stages
-
-
-# def get_integration_data(
-#     confi_path: Path,
-# ) -> Dict:
-#     # Returns a list of dft groups
-#     try:
-#         config = configparser.ConfigParser()
-#         config.read(confi_path)
-#         path_dict = {
-#             'project_map_path': config["GMPP INTEGRATION"]["project_map"],
-#             'gmpp_data_path': config["GMPP INTEGRATION"]["gmpp_data"],
-#             'key_map_path': config["GMPP INTEGRATION"]["key_map"],
-#             'master_comp_path': config["GMPP INTEGRATION"]["master_for_comparison"],
-#         }
-#     except:
-#         logger.critical("Configuration file issue. Please check and make sure it's correct.")
-#         sys.exit(1)
-#
-#     return path_dict
 
 
 def get_gmpp_ar_data(
@@ -178,36 +137,12 @@ def check_remove(op_args):  # subcommand arg
                 )
 
 
-def ipdc_initiate(args):
+def ipdc_initiate(*args):
     print("creating a master data file for ipdc and gmpp portfolio reporting.")
-
-    # get group information from config. only all_groups used at initiate
-    META = get_group_stage_data(
-        str(root_path) + "/core_data/ipdc_config.ini",
+    get_core(
+        config_file='/core_data/ipdc_config.ini',
+        func=project_data_from_master,
     )
-    all_groups = META[1]
-
-    try:
-        master = JsonMaster(
-            get_master_data(
-                str(root_path) + "/core_data/ipdc_config.ini",
-                str(root_path) + "/core_data/",
-                project_data_from_master,
-            ),
-            get_project_information(
-                str(root_path) + "/core_data/ipdc_config.ini",
-                str(root_path) + "/core_data/",
-            ),
-            all_groups,
-        )
-        # master.get_baseline_data()
-        # master.check_baselines()
-    except (ProjectNameError, ProjectGroupError, ProjectStageError) as e:
-        logger.critical(e)
-        sys.exit(1)
-
-    master_json_path = str("{0}/core_data/json/master".format(root_path))
-    JsonData(master, master_json_path)
 
 
 def top250_initiate(args):
@@ -241,35 +176,13 @@ def top250_initiate(args):
     JsonData(master, master_json_path)
 
 
-def cdg_initiate(args):
-    print("creating a master data file for CDG reporting.")
-
-    # get group information from config. only all_groups used at initiate
-    META = get_group_stage_data(
-        str(cdg_root_path) + "/core_data/cdg_config.ini",
+def initiate(args):
+    print("creating a master data file.")
+    get_core(
+        reporting_type=args,
+        config_file='/core_data/cdg_config.ini',
+        func=project_data_from_master_month,
     )
-    all_groups = META[1]
-
-    try:
-        master = JsonMaster(
-            get_master_data(
-                str(cdg_root_path) + "/core_data/cdg_config.ini",
-                str(cdg_root_path) + "/core_data/",
-                project_data_from_master,
-            ),
-            get_project_information(
-                str(cdg_root_path) + "/core_data/cdg_config.ini",
-                str(cdg_root_path) + "/core_data/",
-            ),
-            all_groups,
-            data_type="cdg",
-        )
-    except (ProjectNameError, ProjectGroupError, ProjectStageError) as e:
-        logger.critical(e)
-        sys.exit(1)
-
-    master_json_path = str("{0}/core_data/json/master".format(cdg_root_path))
-    JsonData(master, master_json_path)
 
 
 def ipdc_run_general(args):
@@ -790,8 +703,10 @@ class main:
         if vars(args)["command"] not in ["ipdc", "top250", "cdg"]:
             print("Unrecognised command. Options are ipdc, top250 or cdg")
             exit(1)
+
         # use dispatch pattern to invoke method with same name
         getattr(self, args.command)()
+
 
     def ipdc(self):
         parser = argparse.ArgumentParser(
@@ -1470,12 +1385,11 @@ class main:
             ' "benefits" or "income".',
         )
 
-        args = parser.parse_args(sys.argv[2:])
-        # print(vars(args))
-        if vars(args)["subparser_name"] == "initiate":
-            cdg_initiate(vars(args))
+        flag_args = parser.parse_args(sys.argv[2:])
+        if vars(flag_args)["subparser_name"] == "initiate":
+            initiate('cdg')
         else:
-            cdg_run_general(vars(args))
+            cdg_run_general(vars(flag_args))
 
 
 ## old method for handling argparse commands.

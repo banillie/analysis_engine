@@ -6,12 +6,14 @@ from datamaps.api import project_data_from_master
 from docx.enum.section import WD_SECTION_START
 
 from analysis_engine.data import (
-    root_path,
+    # root_path,
     open_word_doc,
-    get_project_information,
+    # get_project_information,
     wd_heading,
     compare_text_new_and_old,
 )
+
+from analysis_engine.core_data import get_project_information, root_path
 
 from docx import Document
 
