@@ -84,9 +84,8 @@ class ConfigurationError(Exception):
     pass
 
 
-
 def get_gmpp_ar_data(
-    confi_path: Path,
+        confi_path: Path,
 ) -> Dict:
     try:
         config = configparser.ConfigParser()
@@ -106,7 +105,7 @@ def get_gmpp_ar_data(
 # As more and more meta data going into config could use a refactor to collect it all in
 # one go?
 def get_remove_income_totals(
-    confi_path: Path,
+        confi_path: Path,
 ) -> Dict:
     # Returns a list of dft groups
     try:
@@ -132,65 +131,33 @@ def check_remove(op_args):  # subcommand arg
             if p + " successfully removed from analysis." not in CURRENT_LOG:
                 logger.warning(
                     p + " not recognised and therefore not removed from analysis."
-                    ' Please make sure "remove" entry is correct.'
+                        ' Please make sure "remove" entry is correct.'
                 )
+
+
+initiate_dict = {
+    'cdg': {
+        'config': '/core_data/cdg_config.ini',
+        'callable': project_data_from_master
+    },
+    'ipdc': {
+        'config': '/core_data/ipdc_config.ini',
+        'callable': project_data_from_master,
+    },
+    'top_250': {
+        'config': '/core_data/top_250_config.ini',
+        'callable': project_data_from_master_month,
+    }
+}  #  controls the documents pointed to for reporting process via cli positional arguments.
 
 
 def initiate(args):
     print("creating a master data file.")
-    if args == 'cdg':
-        get_core(
-            reporting_type=args,
-            config_file='/core_data/cdg_config.ini',
-            func=project_data_from_master_month,
-        )
-    if args == 'ipdc':
-        get_core(
-            reporting_type=args,
-            config_file='/core_data/ipdc_config.ini',
-            func=project_data_from_master,
-        )
-
-
-# def ipdc_initiate(*args):
-#     print("creating a master data file for ipdc and gmpp portfolio reporting.")
-#     get_core(
-#         config_file='/core_data/ipdc_config.ini',
-#         func=project_data_from_master,
-#     )
-
-
-def top250_initiate(args):
-    print("creating a master data file for top 250 reporting.")
-
-    # get group information from config. only all_groups used at initiate
-    META = get_group_stage_data(
-        str(top35_root_path) + "/core_data/top250_config.ini",
+    get_core(
+        reporting_type=args,
+        config_file=initiate_dict[args]['config'],
+        func=initiate_dict[args]['callable'],
     )
-    all_groups = META[1]
-
-    try:
-        master = JsonMaster(
-            get_master_data(
-                str(top35_root_path) + "/core_data/top250_config.ini",
-                str(top35_root_path) + "/core_data/",
-                project_data_from_master_month,
-            ),
-            get_project_information(
-                str(top35_root_path) + "/core_data/top250_config.ini",
-                str(top35_root_path) + "/core_data/",
-            ),
-            all_groups,
-            data_type="top35",
-        )
-    except (ProjectNameError, ProjectGroupError, ProjectStageError) as e:
-        logger.critical(e)
-        sys.exit(1)
-
-    master_json_path = str("{0}/core_data/json/master".format(top35_root_path))
-    JsonData(master, master_json_path)
-
-
 
 
 def ipdc_run_general(args):
@@ -326,10 +293,10 @@ def ipdc_run_general(args):
             ms = MilestoneData(m, **op_args)
 
             if (
-                "type" in op_args
-                or "dates" in op_args
-                or "koi" in op_args
-                or "koi_fn" in op_args
+                    "type" in op_args
+                    or "dates" in op_args
+                    or "koi" in op_args
+                    or "koi_fn" in op_args
             ):
                 op_args = return_koi_fn_keys(op_args)
                 ms.filter_chart_info(**op_args)
@@ -466,10 +433,10 @@ def top250_run_general(args):
                 d = CentralSupportData(m, **op_args)
 
             if (
-                "type" in op_args
-                or "dates" in op_args
-                or "koi" in op_args
-                or "koi_fn" in op_args
+                    "type" in op_args
+                    or "dates" in op_args
+                    or "koi" in op_args
+                    or "koi_fn" in op_args
             ):
                 op_args = return_koi_fn_keys(op_args)
                 d.filter_chart_info(**op_args)
@@ -589,10 +556,10 @@ def cdg_run_general(args):
             ms = MilestoneData(m, **op_args)
 
             if (
-                "type" in op_args
-                or "dates" in op_args
-                or "koi" in op_args
-                or "koi_fn" in op_args
+                    "type" in op_args
+                    or "dates" in op_args
+                    or "koi" in op_args
+                    or "koi_fn" in op_args
             ):
                 op_args = return_koi_fn_keys(op_args)
                 ms.filter_chart_info(**op_args)
@@ -703,18 +670,17 @@ class main:
 
         parser.add_argument(
             "command",
-            help="Initial command to specify whether ipdc, top250, cdg analysis if required",
+            help="Initial command to specify whether ipdc, top2_50, cdg analysis if required",
         )
         # parse_args defaults to [1:] for args, but you need to
         # exclude the rest of the args too, or validation will fail
         args = parser.parse_args(sys.argv[1:2])
-        if vars(args)["command"] not in ["ipdc", "top250", "cdg"]:
+        if vars(args)["command"] not in ["ipdc", "top_250", "cdg"]:
             print("Unrecognised command. Options are ipdc, top250 or cdg")
             exit(1)
 
         # use dispatch pattern to invoke method with same name
         getattr(self, args.command)()
-
 
     def ipdc(self):
         parser = argparse.ArgumentParser(
@@ -823,8 +789,8 @@ class main:
                 nargs="*",
                 choices=["FBC", "OBC", "SOBC", "pre-SOBC"],
                 help="Returns analysis for only those projects at the specified planning stage(s). By default "
-                "the --stage argument will return the list of bc_stages specified in the config file."
-                'Or user can enter one or combination of "FBC", "OBC", "SOBC", "pre-SOBC".',
+                     "the --stage argument will return the list of bc_stages specified in the config file."
+                     'Or user can enter one or combination of "FBC", "OBC", "SOBC", "pre-SOBC".',
             )
         # stage dandelion only
         parser_dandelion.add_argument(
@@ -835,8 +801,8 @@ class main:
             nargs="*",
             choices=["FBC", "OBC", "SOBC", "pre-SOBC", "pipeline"],
             help="Returns analysis for only those projects at the specified planning stage(s). By default "
-            "the --stage argument will return the list of bc_stages specified in the config file."
-            'Or user can enter one or combination of "FBC", "OBC", "SOBC", "pre-SOBC".For dandelion "pipeline" is also available',
+                 "the --stage argument will return the list of bc_stages specified in the config file."
+                 'Or user can enter one or combination of "FBC", "OBC", "SOBC", "pre-SOBC".For dandelion "pipeline" is also available',
         )
 
         # group
@@ -862,7 +828,7 @@ class main:
                 action="store",
                 nargs="+",
                 help="Returns analysis for specified project(s), only. User must enter one or a combination of "
-                'DfT Group names; "HSRG", "RSS", "RIG", "AMIS","RPE", or the project(s) acronym or full name.',
+                     'DfT Group names; "HSRG", "RSS", "RIG", "AMIS","RPE", or the project(s) acronym or full name.',
             )
         # remove
         for sub in [
@@ -884,8 +850,8 @@ class main:
                 action="store",
                 nargs="+",
                 help="Removes specified projects from analysis. User must enter one or a combination of either"
-                " a recognised DfT Group name, a recognised planning stage or the project(s) acronym or full"
-                " name.",
+                     " a recognised DfT Group name, a recognised planning stage or the project(s) acronym or full"
+                     " name.",
             )
         # quarter
         for sub in [
@@ -907,7 +873,7 @@ class main:
                 action="store",
                 nargs="+",
                 help="Returns analysis for one or combination of specified quarters. "
-                'User must use correct format e.g "Q3 19/20"',
+                     'User must use correct format e.g "Q3 19/20"',
             )
 
         # ## baseline
@@ -950,7 +916,7 @@ class main:
             nargs="+",
             choices=["current"],
             help="baseline option for costs refactored in Q1 21/22. Choose 'current' to return project "
-            "reported bls as well as latest forecast profile",
+                 "reported bls as well as latest forecast profile",
         )
 
         parser_milestones.add_argument(
@@ -970,8 +936,8 @@ class main:
             action="store",
             choices=["sro", "finance", "benefits", "schedule", "resource"],
             help="Returns analysis for specified confidence types. options are"
-            "'sro', 'finance', 'benefits', 'schedule', 'resource'."
-            " As of Q2 20/21 it only provides a three rag dial.",
+                 "'sro', 'finance', 'benefits', 'schedule', 'resource'."
+                 " As of Q2 20/21 it only provides a three rag dial.",
         )
 
         for sub in [parser_milestones, parser_data_query]:
@@ -1015,7 +981,7 @@ class main:
                 "funded resource",
             ],
             help="Provide the type of value to include in dandelion. Options are"
-            ' "spent", "remaining", "benefits", "ps resource", "contract resource", "total resource", "funded resource".',
+                 ' "spent", "remaining", "benefits", "ps resource", "contract resource", "total resource", "funded resource".',
         )
 
         parser_dandelion.add_argument(
@@ -1025,7 +991,7 @@ class main:
             action="store",
             choices=["schedule"],
             help="Specify how project circles should be ordered: 'schedule' only current"
-            " option.",
+                 " option.",
         )
 
         parser_summaries.add_argument(
@@ -1044,7 +1010,7 @@ class main:
             action="store",
             choices=["cat"],
             help="Provide the type of value to include in dandelion. Options are"
-            ' "cat".',
+                 ' "cat".',
         )
 
         parser_dandelion.add_argument(
@@ -1091,7 +1057,7 @@ class main:
             action="store",
             choices=["forward_look", "ipa"],
             help="specify whether to colour circle edge with SRO forward look rating. "
-            "Options are 'forward_look' or 'ipa'.",
+                 "Options are 'forward_look' or 'ipa'.",
         )
 
         # chart
@@ -1121,7 +1087,7 @@ class main:
             metavar="",
             action="store",
             help="Insert blue line into chart to represent a date. "
-            'Options are "Today" "IPDC" or a date in correct format e.g. "1/1/2021".',
+                 'Options are "Today" "IPDC" or a date in correct format e.g. "1/1/2021".',
         )
         # now that we're inside a subcommand, ignore the first
         # TWO argvs, ie the command (git) and subcommand (commit)
@@ -1132,7 +1098,7 @@ class main:
         else:
             ipdc_run_general(vars(args))
 
-    def top250(self):
+    def top_250(self):
         parser = argparse.ArgumentParser(
             description="runs all analysis for top250 reporting"
         )
@@ -1182,7 +1148,7 @@ class main:
                 action="store",
                 nargs="+",
                 help="Returns analysis for specified project(s), only. User must enter one or a combination of "
-                'DfT Group names; "HSRG", "RSS", "RIG", "RPE", or the project(s) acronym or full name.',
+                     'DfT Group names; "HSRG", "RSS", "RIG", "RPE", or the project(s) acronym or full name.',
             )
 
         for sub in [
@@ -1198,8 +1164,8 @@ class main:
                 action="store",
                 nargs="+",
                 help="Removes specified projects from analysis. User must enter one or a combination of either"
-                " a recognised DfT Group name, a recognised planning stage or the project(s) acronym or full"
-                " name.",
+                     " a recognised DfT Group name, a recognised planning stage or the project(s) acronym or full"
+                     " name.",
             )
 
         for sub in [
@@ -1251,7 +1217,7 @@ class main:
                 metavar="",
                 action="store",
                 help="Insert blue line into chart to represent a date. "
-                'Options are "Today" "CDG" or a date in correct format e.g. "1/1/2021".',
+                     'Options are "Today" "CDG" or a date in correct format e.g. "1/1/2021".',
             )
 
         for sub in [
@@ -1276,9 +1242,8 @@ class main:
         )
 
         args = parser.parse_args(sys.argv[2:])
-        # print(vars(args))
         if vars(args)["subparser_name"] == "initiate":
-            top250_initiate(vars(args))
+            initiate('top_250')
         else:
             top250_run_general(vars(args))
 
@@ -1338,7 +1303,7 @@ class main:
             metavar="",
             action="store",
             help="Insert blue line into chart to represent a date. "
-            'Options are "Today" "CDG" or a date in correct format e.g. "1/1/2021".',
+                 'Options are "Today" "CDG" or a date in correct format e.g. "1/1/2021".',
         )
 
         for sub in [
@@ -1367,7 +1332,7 @@ class main:
                 action="store",
                 nargs="+",
                 help="Returns analysis for one or combination of specified quarters. "
-                'User must use correct format e.g "Q3 19/20"',
+                     'User must use correct format e.g "Q3 19/20"',
             )
 
         cdg_parser_dandelion.add_argument(
@@ -1387,7 +1352,7 @@ class main:
             action="store",
             choices=["benefits", "income"],
             help="Provide the type of value to include in dandelion. Options are"
-            ' "benefits" or "income".',
+                 ' "benefits" or "income".',
         )
 
         flag_args = parser.parse_args(sys.argv[2:])

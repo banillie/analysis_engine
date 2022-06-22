@@ -231,7 +231,7 @@ class JsonMaster:
                 group_key = "Directorate"
                 # group_dict = CDG_DIR_DICT
                 approval = "Last Business Case (BC) achieved"
-            if self.kwargs["data_type"] == "top35":
+            if self.kwargs["data_type"] == "top_250":
                 group_key = "Group"
                 # group_dict = DFT_GROUP_DICT
             if self.kwargs["data_type"] == 'ipdc':
