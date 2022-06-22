@@ -24,6 +24,11 @@
   <component name="ChangeListManager">
     <list default="true" id="205bd717-e7d2-47dc-82c7-88a8dae3593c" name="Default Changelist" comment="change portfolio_financial_profile.py to include old bl profile data">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/analysis_engine/ar_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/analysis_engine/ar_data.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/analysis_engine/cdg_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/analysis_engine/cdg_data.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/analysis_engine/core_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/analysis_engine/core_data.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/analysis_engine/data.py" beforeDir="false" afterPath="$PROJECT_DIR$/analysis_engine/data.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/analysis_engine/gmpp_int.py" beforeDir="false" afterPath="$PROJECT_DIR$/analysis_engine/gmpp_int.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/analysis_engine/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/analysis_engine/main.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -99,7 +104,7 @@
       <recent name="$PROJECT_DIR$/" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.ar_data">
+  <component name="RunManager" selected="Python.operation">
     <configuration name="ar_data" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="analysis_engine" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -148,9 +153,6 @@
       <module name="analysis_engine" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
       <option name="SDK_HOME" value="" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/other" />
       <option name="IS_MODULE_SDK" value="true" />
@@ -339,8 +341,8 @@
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.ar_data" />
         <item itemvalue="Python.operation" />
+        <item itemvalue="Python.ar_data" />
         <item itemvalue="Python.data_review" />
         <item itemvalue="Python tests.pytest for test_data.test_speedial_graph" />
         <item itemvalue="Python tests.pytest for test_data.test_match_data_types" />
@@ -459,7 +461,7 @@
       <workItem from="1655721839541" duration="1162000" />
       <workItem from="1655725715177" duration="2882000" />
       <workItem from="1655802234345" duration="11744000" />
-      <workItem from="1655889831653" duration="1302000" />
+      <workItem from="1655889831653" duration="2753000" />
     </task>
     <task id="LOCAL-00001" summary="comment">
       <created>1578327909392</created>
@@ -716,7 +718,7 @@
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/analysis_engine/data.py</url>
-          <line>4699</line>
+          <line>4698</line>
           <option name="timeStamp" value="359" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -726,12 +728,12 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/analysis_engine/data.py</url>
-          <line>7034</line>
+          <line>7033</line>
           <option name="timeStamp" value="432" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/analysis_engine/data.py</url>
-          <line>10732</line>
+          <line>10731</line>
           <option name="timeStamp" value="465" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -741,33 +743,38 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/analysis_engine/data.py</url>
-          <line>4963</line>
+          <line>4962</line>
           <option name="timeStamp" value="479" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/analysis_engine/data.py</url>
-          <line>684</line>
+          <line>683</line>
           <option name="timeStamp" value="484" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/analysis_engine/data.py</url>
-          <line>5659</line>
+          <line>5658</line>
           <option name="timeStamp" value="498" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/analysis_engine/data.py</url>
-          <line>662</line>
+          <line>661</line>
           <option name="timeStamp" value="499" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/analysis_engine/data.py</url>
-          <line>163</line>
+          <line>162</line>
           <option name="timeStamp" value="500" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/analysis_engine/data.py</url>
-          <line>5933</line>
+          <line>5932</line>
           <option name="timeStamp" value="502" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/other/operation.py</url>
+          <line>98</line>
+          <option name="timeStamp" value="503" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
@@ -789,7 +796,7 @@
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/analysis_engine$data_review.coverage" NAME="data_review Coverage Results" MODIFIED="1650555335306" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/analysis_engine" />
-    <SUITE FILE_PATH="coverage/analysis_engine$operation.coverage" NAME="operation Coverage Results" MODIFIED="1651761382513" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/other" />
+    <SUITE FILE_PATH="coverage/analysis_engine$operation.coverage" NAME="operation Coverage Results" MODIFIED="1655892142444" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/other" />
     <SUITE FILE_PATH="coverage/analysis_engine$ar_data.coverage" NAME="ar_data Coverage Results" MODIFIED="1652186875735" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/analysis_engine" />
   </component>
 </project>

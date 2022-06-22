@@ -21,8 +21,6 @@ from openpyxl.styles.differential import DifferentialStyle
 
 # from analysis_engine.top35_data import wd_heading
 
-from analysis_engine.core_data import cdg_root_path
-
 from analysis_engine.data import (
     convert_bc_stage_text,
     plus_minus_days,

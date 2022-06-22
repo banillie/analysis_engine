@@ -13,9 +13,26 @@ from analysis_engine.data import (
     compare_text_new_and_old,
 )
 
-from analysis_engine.core_data import get_project_information, root_path
+from analysis_engine.core_data import get_project_information
 
 from docx import Document
+
+def get_gmpp_ar_data(
+        confi_path: Path,
+) -> Dict:
+    try:
+        config = configparser.ConfigParser()
+        config.read(confi_path)
+        path_dict = {
+            "gmpp_ar_master": config["GMPP ANNUAL REPORT"]["ar_master_data"],
+        }
+    except:
+        logger.critical(
+            "Configuration file issue. Please check and make sure it's correct."
+        )
+        sys.exit(1)
+
+    return path_dict
 
 
 def get_ar_data(file_name):

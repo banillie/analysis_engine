@@ -11,6 +11,7 @@ from analysis_engine import __version__
 from datamaps.api import project_data_from_master, project_data_from_master_month
 
 from analysis_engine.core_data import get_core
+# from analysis_engine.ar_data import get_gmpp_ar_data
 
 from analysis_engine.data import (
     # get_master_data,
@@ -18,7 +19,7 @@ from analysis_engine.data import (
     # get_project_information,
     VfMData,
     # root_path,
-    cdg_root_path,
+    # cdg_root_path,
     vfm_into_excel,
     MilestoneData,
     put_milestones_into_wb,
@@ -56,7 +57,7 @@ from analysis_engine.data import (
     portfolio_risks_into_excel,
 )
 
-from analysis_engine.ar_data import get_ar_data, ar_run_p_reports
+# from analysis_engine.ar_data import get_ar_data, ar_run_p_reports
 from analysis_engine.gmpp_int import get_gmpp_data
 
 import logging
@@ -84,22 +85,6 @@ class ConfigurationError(Exception):
     pass
 
 
-def get_gmpp_ar_data(
-        confi_path: Path,
-) -> Dict:
-    try:
-        config = configparser.ConfigParser()
-        config.read(confi_path)
-        path_dict = {
-            "gmpp_ar_master": config["GMPP ANNUAL REPORT"]["ar_master_data"],
-        }
-    except:
-        logger.critical(
-            "Configuration file issue. Please check and make sure it's correct."
-        )
-        sys.exit(1)
-
-    return path_dict
 
 
 # As more and more meta data going into config could use a refactor to collect it all in
@@ -373,12 +358,12 @@ def ipdc_run_general(args):
         if programme == "gmpp_data":
             get_gmpp_data()
 
-        if programme == "gmpp_ar":
-            ar_meta = get_gmpp_ar_data(
-                str(root_path) + "/core_data/ipdc_config.ini",
-            )
-            ar_data = get_ar_data(ar_meta["gmpp_ar_master"])
-            ar_run_p_reports(ar_data)
+        # if programme == "gmpp_ar":
+        #     ar_meta = get_gmpp_ar_data(
+        #         str(root_path) + "/core_data/ipdc_config.ini",
+        #     )
+        #     ar_data = get_ar_data(ar_meta["gmpp_ar_master"])
+        #     ar_run_p_reports(ar_data)
 
         check_remove(op_args)
 

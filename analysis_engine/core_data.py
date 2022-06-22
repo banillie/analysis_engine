@@ -5,6 +5,7 @@ import sys
 import datetime
 from pathlib import Path
 from typing import List, Dict, Union, Optional, Tuple, TextIO, Callable
+
 # from datetime import timedelta, date
 from collections import OrderedDict
 
@@ -13,7 +14,10 @@ from openpyxl import load_workbook
 from datamaps.process import Cleanser
 
 from analysis_engine.error_msgs import (
-    ProjectNameError, ProjectGroupError, ProjectStageError, logger
+    ProjectNameError,
+    ProjectGroupError,
+    ProjectStageError,
+    logger,
 )
 
 
@@ -27,14 +31,14 @@ def _platform_docs_dir(dir: str) -> Path:
         return Path.home() / "Documents" / dir
 
 
-root_path = _platform_docs_dir('ipdc')
-cdg_root_path = _platform_docs_dir('cdg')
+# root_path = _platform_docs_dir('ipdc')
+# cdg_root_path = _platform_docs_dir('cdg')
 
 
 def get_master_data(
-        confi_path: Path,
-        pi_path: Path,
-        func: Callable,
+    confi_path: Path,
+    pi_path: Path,
+    func: Callable,
 ) -> List[Dict[str, Union[str, int, datetime.date, float]]]:
     """Returns a list of dictionaries each containing quarter data"""
     config = configparser.ConfigParser()
@@ -57,13 +61,14 @@ def convert_none_types(x):
     else:
         return x
 
+
 class JsonMaster:
     def __init__(
-            self,
-            master_data: List[Dict[str, Union[str, int, datetime.date, float]]],
-            project_information: Dict[str, Union[str, int]],
-            all_groups,
-            **kwargs,
+        self,
+        master_data: List[Dict[str, Union[str, int, datetime.date, float]]],
+        project_information: Dict[str, Union[str, int]],
+        all_groups,
+        **kwargs,
     ) -> None:
         self.master_data = master_data
         self.project_information = project_information
@@ -213,12 +218,12 @@ class JsonMaster:
                     + " does not have a baseline point for "
                     + b_v_e_cases[i]
                     + " this could cause the programme to "
-                      "crash. Therefore the programme is stopping. "
-                      "Please amend the data for " + b_e_cases[i] + " so "
-                        " it has at least one baseline point for " + b_v_e_cases[i]
+                    "crash. Therefore the programme is stopping. "
+                    "Please amend the data for " + b_e_cases[i] + " so "
+                    " it has at least one baseline point for " + b_v_e_cases[i]
                 )
             raise ProjectNameError(  # should be Baselining Error or Initiation Error
-                'Above issue(s) could cause a crash and require resolution. Program stopping'
+                "Above issue(s) could cause a crash and require resolution. Program stopping"
             )
 
     ## Refactor required. Is this even used now?
@@ -234,7 +239,7 @@ class JsonMaster:
             if self.kwargs["data_type"] == "top_250":
                 group_key = "Group"
                 # group_dict = DFT_GROUP_DICT
-            if self.kwargs["data_type"] == 'ipdc':
+            if self.kwargs["data_type"] == "ipdc":
                 group_key = "Group"
                 # group_dict = DFT_GROUP_DICT
                 approval = "IPDC approval point"
@@ -250,9 +255,7 @@ class JsonMaster:
             lower_dict = {}
             for p in master.projects:
                 try:
-                    dft_group = self.project_information[p][
-                        group_key
-                    ]
+                    dft_group = self.project_information[p][group_key]
                 except KeyError:
                     dft_group = None
                     pn_e_cases.append(p)
@@ -274,11 +277,11 @@ class JsonMaster:
             if pn_e_cases:
                 for i, e in enumerate(pn_e_cases):
                     logger.critical(
-                        f'Project name {pn_e_cases[i]} in master {p_m_e_cases[i]} not in project information '
-                        f'document. Make sure project names are consistent.'
+                        f"Project name {pn_e_cases[i]} in master {p_m_e_cases[i]} not in project information "
+                        f"document. Make sure project names are consistent."
                     )
                 raise ProjectNameError(
-                    'Above issue(s) could cause a crash and require resolution. Program stopping'
+                    "Above issue(s) could cause a crash and require resolution. Program stopping"
                 )
 
             if g_e_cases:
@@ -288,9 +291,8 @@ class JsonMaster:
                         + " does not have a recognised Group value in the project information document."
                     )
                 raise ProjectGroupError(
-                    'Above issue(s) could cause a crash and require resolution. Program stopping'
+                    "Above issue(s) could cause a crash and require resolution. Program stopping"
                 )
-
 
             try:
                 raw_dict[str(master.month) + ", " + str(master.year)] = lower_dict
@@ -388,7 +390,7 @@ class JsonMaster:
     def get_current_tp(self):
         try:
             self.current_quarter = (
-                    str(self.master_data[0].month) + ", " + str(self.master_data[0].year)
+                str(self.master_data[0].month) + ", " + str(self.master_data[0].year)
             )
         except KeyError:
             self.current_quarter = self.master_data[0].quarter
@@ -401,10 +403,10 @@ def json_date_converter(o):
 
 class JsonData:
     def __init__(
-            self,
-            master: List[Dict[str, Union[str, int, datetime.date, float]]],
-            save_path: str
-        ):
+        self,
+        master: List[Dict[str, Union[str, int, datetime.date, float]]],
+        save_path: str,
+    ):
         self.master = master
         self.path = save_path
         self.put_into_json()
@@ -443,30 +445,35 @@ class JsonData:
             json.dump(json_dict, write_file, default=json_date_converter)
 
 
-def get_group_stage_data(
+def get_group_meta_data(
     confi_path: Path,
-) -> List[str]:
-    # Returns a list of dft groups
+) -> Dict:
+    '''
+    Gets group stage meta data. This is necessary as termonolgy set in the config file
+    and must correspond to terms used in project information document.
+    '''
     try:
-        print(confi_path)
         config = configparser.ConfigParser()
         config.read(confi_path)
-        # master_data_list = []
-        portfolio_group = json.loads(
-            config.get("GROUPS", "portfolio_groups")
-        )  # to return a list
+        portfolio_group = json.loads(config.get("GROUPS", "portfolio_groups"))  # to return a list
         group_all = json.loads(config.get("GROUPS", "all_groups"))
-        try:
-            bc_stages = json.loads(config.get("GROUPS", "bc_stages"))
-        except configparser.NoOptionError:
-            bc_stages = []
+        ## to be used be in seperate function
+        # try:  # Only being used for ipdc reporting
+        #     bc_stages = json.loads(config.get("GROUPS", "bc_stages"))
+        # except configparser.NoOptionError:
+        #     bc_stages = []
     except:
         logger.critical(
             "Configuration file issue. Please check and make sure it's correct."
         )
         sys.exit(1)
 
-    return portfolio_group, group_all, bc_stages
+    group_meta_dict = {
+        'port_group': portfolio_group,
+        'all_groups': group_all
+    }
+
+    return group_meta_dict
 
 
 def get_project_info_data(master_file: str) -> Dict:
@@ -490,7 +497,9 @@ def get_project_info_data(master_file: str) -> Dict:
             else:
                 val = ws.cell(row=cell.row, column=1).value
                 if type(cell.value) == datetime:
-                    d_value = datetime.date(cell.value.year, cell.value.month, cell.value.day)
+                    d_value = datetime.date(
+                        cell.value.year, cell.value.month, cell.value.day
+                    )
                     p_dict[project_name][val] = d_value
                 else:
                     p_dict[project_name][val] = cell.value
@@ -503,8 +512,8 @@ def get_project_info_data(master_file: str) -> Dict:
 
 
 def get_project_information(
-        confi_path: Path,
-        pi_path: Path,
+    confi_path: Path,
+    pi_path: Path,
 ) -> Dict[str, Union[str, int]]:
     """Returns dictionary containing all project meta data.
     confi_path is ini file path.
@@ -516,15 +525,14 @@ def get_project_information(
 
 
 def get_core(
-        reporting_type: str,
-        config_file: str,
-        func: Callable, #  project_data_from_master
-    ) -> None:
+    reporting_type: str,
+    config_file: str,
+    func: Callable,  #  project_data_from_master
+) -> None:
     root_path = _platform_docs_dir(reporting_type)
     print(root_path)
     config_path = str(root_path) + config_file
-    META = get_group_stage_data(config_path)
-    all_groups = META[1]   # only all_groups used at initiate
+    GROUP_META = get_group_meta_data(config_path)
 
     try:
         master = JsonMaster(
@@ -537,8 +545,8 @@ def get_core(
                 config_path,
                 str(root_path) + "/core_data/",
             ),
-            all_groups,
-            data_type=reporting_type
+            GROUP_META['all_groups'],
+            data_type=reporting_type,
         )
 
     except (ProjectNameError, ProjectGroupError, ProjectStageError) as e:

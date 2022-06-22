@@ -6,8 +6,6 @@ from openpyxl import load_workbook, Workbook
 
 from datamaps.api import project_data_from_master
 
-from analysis_engine.data import root_path
-
 
 def get_integration_data(
     confi_path: Path,

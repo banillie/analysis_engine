@@ -51,7 +51,6 @@ from textwrap import wrap
 import logging
 from pdf2image import convert_from_path
 
-from analysis_engine.core_data import root_path, cdg_root_path
 
 logging.basicConfig(
     level=logging.INFO,
