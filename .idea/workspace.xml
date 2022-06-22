@@ -24,12 +24,8 @@
   <component name="ChangeListManager">
     <list default="true" id="205bd717-e7d2-47dc-82c7-88a8dae3593c" name="Default Changelist" comment="change portfolio_financial_profile.py to include old bl profile data">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/analysis_engine/ar_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/analysis_engine/ar_data.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/analysis_engine/cdg_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/analysis_engine/cdg_data.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/analysis_engine/core_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/analysis_engine/core_data.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/analysis_engine/data.py" beforeDir="false" afterPath="$PROJECT_DIR$/analysis_engine/data.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/analysis_engine/gmpp_int.py" beforeDir="false" afterPath="$PROJECT_DIR$/analysis_engine/gmpp_int.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/analysis_engine/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/analysis_engine/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/analysis_engine/error_msgs.py" beforeDir="false" afterPath="$PROJECT_DIR$/analysis_engine/error_msgs.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -461,7 +457,7 @@
       <workItem from="1655721839541" duration="1162000" />
       <workItem from="1655725715177" duration="2882000" />
       <workItem from="1655802234345" duration="11744000" />
-      <workItem from="1655889831653" duration="2753000" />
+      <workItem from="1655889831653" duration="9820000" />
     </task>
     <task id="LOCAL-00001" summary="comment">
       <created>1578327909392</created>
@@ -772,9 +768,9 @@
           <option name="timeStamp" value="502" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/other/operation.py</url>
-          <line>98</line>
-          <option name="timeStamp" value="503" />
+          <url>file://$PROJECT_DIR$/analysis_engine/core_data.py</url>
+          <line>426</line>
+          <option name="timeStamp" value="507" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
@@ -796,7 +792,7 @@
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/analysis_engine$data_review.coverage" NAME="data_review Coverage Results" MODIFIED="1650555335306" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/analysis_engine" />
-    <SUITE FILE_PATH="coverage/analysis_engine$operation.coverage" NAME="operation Coverage Results" MODIFIED="1655892142444" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/other" />
+    <SUITE FILE_PATH="coverage/analysis_engine$operation.coverage" NAME="operation Coverage Results" MODIFIED="1655906775421" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/other" />
     <SUITE FILE_PATH="coverage/analysis_engine$ar_data.coverage" NAME="ar_data Coverage Results" MODIFIED="1652186875735" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/analysis_engine" />
   </component>
 </project>

@@ -18,6 +18,10 @@ from analysis_engine.error_msgs import (
     ProjectGroupError,
     ProjectStageError,
     logger,
+    historic_project_names_error,
+    latest_project_names_error,
+    historic_group_names_error,
+    latest_group_names_error,
 )
 
 
@@ -62,7 +66,19 @@ def convert_none_types(x):
         return x
 
 
-class JsonMaster:
+META_STAGE_DICT = {
+            "cdg": 'Directorate',
+            'ipdc': 'Group',
+            'top_250': 'Group',
+        }
+
+
+class PythonMasterData:
+    '''
+    Key part of the data building process. Takes master_data and project_info dicts and
+    performs a number of high-level checks to stop any later bugs or crashes, as well as
+    create some useful meta data information.
+    '''
     def __init__(
         self,
         master_data: List[Dict[str, Union[str, int, datetime.date, float]]],
@@ -87,25 +103,23 @@ class JsonMaster:
         self.pipeline_dict = {}
         self.pipeline_list = []
         self.quarter_list = []
+        self.check_project_abbreviations()
         self.get_quarter_list()
-        # self.get_baseline_data()
-        self.check_project_information()
-        self.get_project_abbreviations()
-        # self.check_baselines()
-        self.get_project_groups()
+        self.check_project_names()
+        self.check_group_names()
         self.pipeline_projects_information()
         self.get_current_tp()
 
-    def get_project_abbreviations(self) -> None:
+    def check_project_abbreviations(self) -> None:
         """gets the abbreviations for all current projects.
         held in the project info document"""
         abb_dict = {}
-        fn_dict = {}
+        # fn_dict = {}
         error_case = []
         for p in self.all_projects:
             abb = self.project_information[p]["Abbreviations"]
             abb_dict[p] = {"abb": abb, "full name": p}
-            fn_dict[abb] = p
+            # fn_dict[abb] = p
             if abb is None:
                 error_case.append(p)
 
@@ -117,249 +131,109 @@ class JsonMaster:
             )
 
         self.abbreviations = abb_dict
-        self.full_names = fn_dict
+        # self.full_names = fn_dict
 
-    def get_baseline_data(self) -> None:
-        """
-        Returns two dictionaries used to calculate baselines.
-        The current method is that each projects baseline list
-        is prefixed with current and last quarter index (including None
-        if necessary), as these need to be present at later stage
-        calculations. structure of output dict is
-        {bl_index: {bl_type: {proj_name: [baseline index list]}}}
-        """
-
-        # handles baselines across different datasets.
-        if "data_type" in self.kwargs:
-            if self.kwargs["data_type"] == "cdg":
-                baseline_dict = CDG_BASELINE_TYPES
-        else:
-            baseline_dict = BASELINE_TYPES
-
-        baseline_info = {}
-        baseline_index = {}
-        for b_type in list(baseline_dict.keys()):
-            project_baseline_info = {}
-            project_baseline_index = {}
-            for name in self.current_projects:
-                lower_list = []
-                for i, master in list(enumerate(self.master_data)):
-                    quarter = str(master.quarter)
-                    if name in master.projects:
-                        approved_bc = master.data[name][b_type]
-                        if approved_bc == "Yes":
-                            lower_list.append((approved_bc, quarter, i))
-                    else:
-                        pass
-
-                if name in self.master_data[1].projects:  # prefix for other bl data
-                    index_list = [0, 1]
-                else:  # project not present last quarter so none
-                    index_list = [0, None]
-                for x in lower_list:
-                    index_list.append(x[2])
-
-                project_baseline_info[name] = list(lower_list)
-                project_baseline_index[name] = list(index_list)
-
-            baseline_info[baseline_dict[b_type]] = project_baseline_info
-            baseline_index[baseline_dict[b_type]] = project_baseline_index
-
-        self.bl_info = baseline_info
-        self.bl_index = baseline_index
-
-    def check_project_information(self) -> None:
-        """Checks that project names in master are present/the same as in project info.
+    def check_project_names(self) -> None:
+        """Checks that project names in all master are present/the same as in project info.
         Stops the programme if not"""
-        error_cases = []
-        for p in self.current_projects:
-            if p not in self.all_projects:
-                error_cases.append(p)
-
-        if error_cases:
-            for p in error_cases:
-                logger.critical(p + " has not been found in the project_info document.")
-            try:
-                m = str(self.master_data[0].month)
-            except KeyError:
-                m = str(self.master_data[0].quarter)
-            raise ProjectNameError(
-                "Project names in the "
-                + m
-                + " master and project_info must match. Program stopping. Please amend."
-            )
-        else:
-            logger.info("The latest master and project information match")
-
-    def check_baselines(self) -> None:  # check with team is required for IPDC.
-        """checks that projects have the correct baseline information. stops the
-        programme if baselines are missing"""
-
-        if "data_type" in self.kwargs:
-            if self.kwargs["data_type"] == "cdg":
-                baseline_dict = CDG_BASELINE_TYPES
-        else:
-            baseline_dict = IPDC_BASELINE_TYPES
-
-        b_e_cases = []  # baseline error cases
-        b_v_e_cases = []  # baseline value error cases
-        for v in baseline_dict.values():
+        critical_error_cases = []
+        info_error_cases = {}
+        for i, master in enumerate(self.master_data):
             for p in self.current_projects:
-                baselines = self.bl_index[v][p]
-                if len(baselines) <= 2:
-                    b_e_cases.append(p)
-                    if v not in b_v_e_cases:
-                        b_v_e_cases.append(v)
+                if p not in self.all_projects:
+                    if i == 0:  # latest master
+                        critical_error_cases.append(p)
+                    else:
+                        # try:
+                        info_error_cases[p] = master.quarter
+                        # except find the error
+                        
+        latest_project_names_error(critical_error_cases)
+        historic_project_names_error(info_error_cases)
 
-        if b_e_cases:
-            for i, b in enumerate(b_e_cases):
-                logger.critical(
-                    b_e_cases[i]
-                    + " does not have a baseline point for "
-                    + b_v_e_cases[i]
-                    + " this could cause the programme to "
-                    "crash. Therefore the programme is stopping. "
-                    "Please amend the data for " + b_e_cases[i] + " so "
-                    " it has at least one baseline point for " + b_v_e_cases[i]
-                )
-            raise ProjectNameError(  # should be Baselining Error or Initiation Error
-                "Above issue(s) could cause a crash and require resolution. Program stopping"
-            )
+        logger.info("The latest master and project information match")
 
-    ## Refactor required. Is this even used now?
-    def get_project_groups(self) -> None:
+    def check_group_names(self) -> None:
         """gets the groups that projects are part of e.g. business case
         stage or dft group"""
 
-        if "data_type" in self.kwargs:
-            if self.kwargs["data_type"] == "cdg":
-                group_key = "Directorate"
-                # group_dict = CDG_DIR_DICT
-                approval = "Last Business Case (BC) achieved"
-            if self.kwargs["data_type"] == "top_250":
-                group_key = "Group"
-                # group_dict = DFT_GROUP_DICT
-            if self.kwargs["data_type"] == "ipdc":
-                group_key = "Group"
-                # group_dict = DFT_GROUP_DICT
-                approval = "IPDC approval point"
-
-        raw_dict = {}
-        raw_list = []
-        group_list = []
-        stage_list = []
-        pn_e_cases = []  # project name error_cases
-        p_m_e_cases = []  # project master error cases
-        g_e_cases = []  # group error cases
-        for i, master in enumerate(self.master_data):
-            lower_dict = {}
-            for p in master.projects:
-                try:
-                    dft_group = self.project_information[p][group_key]
-                except KeyError:
-                    dft_group = None
-                    pn_e_cases.append(p)
-                    p_m_e_cases.append(str(master.quarter))
-
-                if dft_group is None or dft_group not in self.all_groups:
-                    g_e_cases.append(p)
-
-                try:
-                    stage = BC_STAGE_DICT[master[p][approval]]
-                except (UnboundLocalError, NameError):  # top35 does not collect stage
-                    stage = "None"
-                raw_list.append(("group", dft_group))
-                raw_list.append(("stage", stage))
-                lower_dict[p] = dict(raw_list)
-                group_list.append(dft_group)
-                stage_list.append(stage)
-
-            if pn_e_cases:
-                for i, e in enumerate(pn_e_cases):
-                    logger.critical(
-                        f"Project name {pn_e_cases[i]} in master {p_m_e_cases[i]} not in project information "
-                        f"document. Make sure project names are consistent."
-                    )
-                raise ProjectNameError(
-                    "Above issue(s) could cause a crash and require resolution. Program stopping"
-                )
-
-            if g_e_cases:
-                for i in g_e_cases:
-                    logger.critical(
-                        str(i)
-                        + " does not have a recognised Group value in the project information document."
-                    )
-                raise ProjectGroupError(
-                    "Above issue(s) could cause a crash and require resolution. Program stopping"
-                )
-
-            try:
-                raw_dict[str(master.month) + ", " + str(master.year)] = lower_dict
-            except KeyError:
-                raw_dict[str(master.quarter)] = lower_dict
-
-        group_list = list(set(group_list))
-        stage_list = list(set(stage_list))
-
-        group_dict = {}
-        # for i, quarter in enumerate(list(raw_dict.keys())[:2]):  # just latest two quarters
-        for i, quarter in enumerate(list(raw_dict.keys())):
-            lower_g_dict = {}
-            for group_type in group_list:
-                g_list = []
-                for p in raw_dict[quarter].keys():
-                    p_group = raw_dict[quarter][p]["group"]
-                    if p_group == group_type:
-                        g_list.append(p)
-                lower_g_dict[group_type] = g_list
-
-            gmpp_list = []
-            for p in self.master_data[i].projects:
-                try:
-                    gmpp = self.project_information[p]["GMPP"]
-                except KeyError:  # project name check happening in other places.
-                    gmpp = None
-                if gmpp is not None:
-                    gmpp_list.append(p)
-                lower_g_dict["GMPP"] = gmpp_list
-
-            group_dict[quarter] = lower_g_dict
-
-        stage_dict = {}
-        for quarter in list(raw_dict.keys())[:2]:  # just latest two quarters
-            lower_s_dict = {}
-            for stage_type in stage_list:
-                s_list = []
-                for p in raw_dict[quarter].keys():
-                    p_stage = raw_dict[quarter][p]["stage"]
-                    if p_stage == stage_type:
-                        s_list.append(p)
-                if stage_type is None:
-                    if s_list:
-                        if "data_type" in self.kwargs:
-                            if self.kwargs["data_type"] == "cdg":
-                                continue  # not actively using stages for cdg data yet so can pass
-                        if quarter == self.current_quarter:
-                            for x in s_list:
-                                logger.critical(str(x) + " has no IPDC stage date")
-                                raise ProjectStageError(
-                                    "Programme stopping as this could cause incomplete analysis"
-                                )
+        critical_group_errors = [] 
+        info_group_errors = {}
+        quarter_dict = {}
+        for group in self.all_groups:
+            group_list = []
+            for i, master in enumerate(self.master_data):
+                for p in master.projects:
+                    projects_group = self.project_information[p][META_STAGE_DICT[self.kwargs["data_type"]]]
+                    if projects_group is None or projects_group not in self.all_groups:
+                        if i == 0:
+                            critical_group_errors.append(p)
                         else:
-                            for x in s_list:
-                                logger.warning(
-                                    "In "
-                                    + str(quarter)
-                                    + " master "
-                                    + str(x)
-                                    + " IPDC stage data is currently None. Please amend."
-                                )
-                lower_s_dict[stage_type] = s_list
-            stage_dict[quarter] = lower_s_dict
+                            info_group_errors.append(p)
+                    if projects_group == group:
+                        group_list.append(p)
 
-        self.dft_groups = group_dict
-        self.project_stage = stage_dict
+                quarter_dict[group] = group_list
+
+        latest_group_names_error(critical_group_errors)
+        historic_group_names_error(info_group_errors)
+
+                # 
+                # try:
+                #     stage = BC_STAGE_DICT[master[p][approval]]
+                # except (UnboundLocalError, NameError):  # top35 does not collect stage
+                #     stage = "None"
+               
+        # group_list = list(set(group_list))
+        # stage_list = list(set(stage_list))
+
+
+            # gmpp_list = []
+            # for p in self.master_data[i].projects:
+            #     try:
+            #         gmpp = self.project_information[p]["GMPP"]
+            #     except KeyError:  # project name check happening in other places.
+            #         gmpp = None
+            #     if gmpp is not None:
+            #         gmpp_list.append(p)
+            #     lower_g_dict["GMPP"] = gmpp_list
+
+            # group_dict[quarter] = lower_g_dict
+
+        # stage_dict = {}
+        # for quarter in list(raw_dict.keys())[:2]:  # just latest two quarters
+        #     lower_s_dict = {}
+        #     for stage_type in stage_list:
+        #         s_list = []
+        #         for p in raw_dict[quarter].keys():
+        #             p_stage = raw_dict[quarter][p]["stage"]
+        #             if p_stage == stage_type:
+        #                 s_list.append(p)
+        #         if stage_type is None:
+        #             if s_list:
+        #                 if "data_type" in self.kwargs:
+        #                     if self.kwargs["data_type"] == "cdg":
+        #                         continue  # not actively using stages for cdg data yet so can pass
+        #                 if quarter == self.current_quarter:
+        #                     for x in s_list:
+        #                         logger.critical(str(x) + " has no IPDC stage date")
+        #                         raise ProjectStageError(
+        #                             "Programme stopping as this could cause incomplete analysis"
+        #                         )
+        #                 else:
+        #                     for x in s_list:
+        #                         logger.warning(
+        #                             "In "
+        #                             + str(quarter)
+        #                             + " master "
+        #                             + str(x)
+        #                             + " IPDC stage data is currently None. Please amend."
+        #                         )
+        #         lower_s_dict[stage_type] = s_list
+        #     stage_dict[quarter] = lower_s_dict
+
+        self.dft_groups = quarter_dict
+        # self.project_stage = stage_dict
 
     def get_quarter_list(self) -> None:
         output_list = []
@@ -477,11 +351,12 @@ def get_group_meta_data(
 
 
 def get_project_info_data(master_file: str) -> Dict:
-    # taken from datamaps project_data_from_master
+    '''
+    Converts project_info document into a python dictionary. adapted from datamaps.api project_data_from_master
+    '''
     wb = load_workbook(master_file)
     ws = wb.active
     for cell in ws["A"]:
-        # we don't want to clean None...
         if cell.value is None:
             continue
         c = Cleanser(cell.value)
@@ -503,8 +378,7 @@ def get_project_info_data(master_file: str) -> Dict:
                     p_dict[project_name][val] = d_value
                 else:
                     p_dict[project_name][val] = cell.value
-    # remove any "None" projects that were pulled from the master
-    try:
+    try:  # remove any "None" projects that were pulled from the master
         del p_dict[None]
     except KeyError:
         pass
@@ -513,14 +387,13 @@ def get_project_info_data(master_file: str) -> Dict:
 
 def get_project_information(
     confi_path: Path,
-    pi_path: Path,
+    root_path: Path,
 ) -> Dict[str, Union[str, int]]:
-    """Returns dictionary containing all project meta data.
-    confi_path is ini file path.
-    pi_path is project_info path."""
+    """Returns dictionary containing all project meta data. confi_path is the config.ini file path.
+    root_path is the core data root_path."""
     config = configparser.ConfigParser()
     config.read(confi_path)
-    path = str(pi_path) + config["PROJECT INFO"]["projects"]
+    path = str(root_path) + config["PROJECT INFO"]["projects"]
     return get_project_info_data(path)
 
 
@@ -535,7 +408,7 @@ def get_core(
     GROUP_META = get_group_meta_data(config_path)
 
     try:
-        master = JsonMaster(
+        master = PythonMasterData(
             get_master_data(
                 config_path,
                 str(root_path) + "/core_data/",
@@ -555,3 +428,8 @@ def get_core(
 
     master_json_path = str("{0}/core_data/json/master".format(root_path))
     JsonData(master, master_json_path)
+
+
+def open_json_file(path: str):
+    with open(path, "r") as handle:
+        return json.load(handle)
