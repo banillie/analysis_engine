@@ -1,91 +1,18 @@
-"""
-Tests for analysis_engine
-"""
-import configparser
-import csv
-import os
-import datetime
-import pickle
-
-import numpy as np
-from matplotlib import pyplot as plt
 import pytest
+
 from datamaps.api import project_data_from_master
 
-from analysis_engine.ar_data import get_ar_data, ar_run_p_reports
-from analysis_engine.data import (
-    Master,
-    CostData,
-    spent_calculation,
-    wd_heading,
-    key_contacts,
-    dca_table,
-    dca_narratives,
-    put_matplotlib_fig_into_word,
-    cost_profile_graph,
-    total_costs_benefits_bar_chart,
-    run_get_old_fy_data,
-    run_place_old_fy_data_into_masters,
-    put_key_change_master_into_dict,
-    run_change_keys,
-    BenefitsData,
-    compare_masters,
-    get_gmpp_projects,
-    standard_profile,
-    totals_chart,
-    change_word_doc_landscape,
-    FIGURE_STYLE,
-    MilestoneData,
-    milestone_chart,
-    save_graph,
-    DCA_KEYS,
-    dca_changes_into_word,
-    dca_changes_into_excel,
-    DcaData,
-    RiskData,
-    risks_into_excel,
-    VfMData,
-    vfm_into_excel,
-    sort_projects_by_dca,
-    project_report_meta_data,
-    print_out_project_milestones,
-    put_milestones_into_wb,
-    Pickle,
-    open_pickle_file,
-    financial_dashboard,
-    schedule_dashboard,
-    benefits_dashboard,
-    overall_dashboard,
-    DandelionData,
-    dandelion_data_into_wb,
-    # run_dandelion_matplotlib_chart,
-    cost_v_schedule_chart_into_wb,
-    cost_profile_into_wb,
-    data_query_into_wb,
-    get_data_query_key_names,
-    # remove_project_name_from_milestone_key,
-    get_sp_data,
-    cost_stackplot_graph,
-    get_group,
-    make_a_dandelion_auto,
-    get_horizontal_bar_chart_data,
-    simple_horz_bar_chart,
-    so_matplotlib,
-    radar_chart,
-    get_strategic_priorities_data,
-    JsonData,
-    open_json_file,
-    get_project_information, run_p_reports, JsonMaster, build_speedials,
-)
-from analysis_engine.top35_data import top35_run_p_reports
+from analysis_engine.core_data import PythonMasterData, get_master_data, get_group_meta_data, get_stage_meta_data, \
+    get_project_information, JsonData
 
-SOT = "Sea of Tranquility"
-A11 = "Apollo 11"
-A13 = "Apollo 13"
-F9 = "Falcon 9"
-COLUMBIA = "Columbia"
-MARS = "Mars"
-TEST_GROUP = [SOT, A13, F9, COLUMBIA, MARS]
+REPORTING_TYPE = 'cdg'
+
+TEST_INITIATE_DICT = {
+    'cdg': {
+        'config': '/core_data/cdg_config.ini',
+        'callable': project_data_from_master
+    }
+}
 
 
 @pytest.mark.skip(reason="old. Pickle not in use.")
@@ -96,17 +23,43 @@ def test_master_in_a_pickle(full_test_masters_dict, project_info):
     assert str(mickle.master.master_data[0].quarter) == "Q1 20/21"
 
 
-@pytest.mark.slow(reason="lengthy. Only required to inspect JsonData Class.")
-def test_json_master_save(full_test_masters_dict, project_info, master_json_path):
-    master = JsonMaster(full_test_masters_dict, project_info)
-    master.get_baseline_data()
+def test_json_master_save(
+        root_path,
+        func,
+        master_json_path,
+):
+    config_path = str(root_path) + TEST_INITIATE_DICT['cdg']['config']
+    GROUP_META = get_group_meta_data(config_path)
+    STAGE_META = get_stage_meta_data(config_path)
+
+    META = {**GROUP_META, **STAGE_META}
+
+    # try:
+    master = PythonMasterData(
+        get_master_data(
+            config_path,
+            str(root_path) + "/core_data/",
+            func,
+        ),
+        get_project_information(
+            config_path,
+            str(root_path) + "/core_data/",
+        ),
+        META,
+        data_type=REPORTING_TYPE,
+    )
+
+    # except (ProjectNameError, ProjectGroupError, ProjectStageError) as e:
+    #     logger.critical(e)
+    #     sys.exit(1)
+
+    master_json_path = str("{0}/core_data/json/master".format(root_path))
     JsonData(master, master_json_path)
 
 
-def test_json_master_open(master_json_path):
-    jm = open_json_file(master_json_path + ".json")  # jm is json_master
-    m = Master(jm)
-    assert isinstance(m.master_data, (list,))
+def test_json_master_open(open_json_file):
+    data = open_json_file(f'/home/will/Documents/{REPORTING_TYPE}/core_data/json/master.json')
+    assert isinstance(data.master_data, (list,))
 
 
 @pytest.mark.skip(reason="Old. Pickle not used")
@@ -150,7 +103,7 @@ def test_get_current_project_names(basic_masters_dicts, project_info):
 def test_getting_project_groups(project_info, basic_masters_dicts):
     m = JsonMaster(basic_masters_dicts, project_info)
     assert isinstance(m.project_stage, (dict,))
-    assert isinstance(m.dft_groups, (dict,))
+    assert isinstance(m.meta_groupings, (dict,))
 
 
 def test_get_project_abbreviations(basic_masters_dicts, project_info):

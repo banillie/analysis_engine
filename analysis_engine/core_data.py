@@ -22,6 +22,10 @@ from analysis_engine.error_msgs import (
     latest_project_names_error,
     historic_group_names_error,
     latest_group_names_error,
+    abbreviation_error,
+    latest_stage_names_error,
+    historic_stage_names_error,
+    config_issue,
 )
 
 
@@ -66,10 +70,15 @@ def convert_none_types(x):
         return x
 
 
-META_STAGE_DICT = {
+META_GROUP_DICT = {
             "cdg": 'Directorate',
             'ipdc': 'Group',
             'top_250': 'Group',
+        }
+
+META_STAGE_DICT = {
+            "cdg": 'Last Business Case (BC) achieved',
+            'ipdc': 'IPDC approval point',
         }
 
 
@@ -83,12 +92,13 @@ class PythonMasterData:
         self,
         master_data: List[Dict[str, Union[str, int, datetime.date, float]]],
         project_information: Dict[str, Union[str, int]],
-        all_groups,
+        meta,
         **kwargs,
     ) -> None:
         self.master_data = master_data
         self.project_information = project_information
-        self.all_groups = all_groups
+        self.all_groups = meta['all_groups']
+        self.stages = meta['stages']
         self.all_projects = list(project_information.keys())
         self.kwargs = kwargs
         self.current_quarter = str(master_data[0].quarter)
@@ -97,38 +107,35 @@ class PythonMasterData:
         self.full_names = {}
         self.bl_info = {}
         self.bl_index = {}
-        self.dft_groups = {}
+        self.meta_groupings = {}
         self.project_group = {}
         self.project_stage = {}
         self.pipeline_dict = {}
         self.pipeline_list = []
         self.quarter_list = []
         self.check_project_abbreviations()
-        self.get_quarter_list()
         self.check_project_names()
-        self.check_group_names()
+        self.get_and_check_groupings()
+
+
+        self.get_quarter_list()
         self.pipeline_projects_information()
         self.get_current_tp()
 
+    # why is this collecting full names also?
     def check_project_abbreviations(self) -> None:
         """gets the abbreviations for all current projects.
         held in the project info document"""
         abb_dict = {}
-        # fn_dict = {}
-        error_case = []
+        abbreviation_errors = []
         for p in self.all_projects:
             abb = self.project_information[p]["Abbreviations"]
             abb_dict[p] = {"abb": abb, "full name": p}
             # fn_dict[abb] = p
             if abb is None:
-                error_case.append(p)
+                abbreviation_errors.append(p)
 
-        if error_case:
-            for p in error_case:
-                logger.critical("No abbreviation provided for " + p + ".")
-            raise ProjectNameError(
-                "Abbreviations must be provided for all projects in project_info. Program stopping. Please amend"
-            )
+        abbreviation_error(abbreviation_errors)
 
         self.abbreviations = abb_dict
         # self.full_names = fn_dict
@@ -151,23 +158,25 @@ class PythonMasterData:
         latest_project_names_error(critical_error_cases)
         historic_project_names_error(info_error_cases)
 
-        logger.info("The latest master and project information match")
+    def get_and_check_groupings(self) -> None:
+        """gets the groups that projects are part of"""
 
-    def check_group_names(self) -> None:
-        """gets the groups that projects are part of e.g. business case
-        stage or dft group"""
-
-        critical_group_errors = [] 
-        info_group_errors = {}
-        quarter_dict = {}
-        for group in self.all_groups:
-            group_list = []
-            for i, master in enumerate(self.master_data):
+        critical_group_errors = []
+        info_group_errors = []
+        critical_stage_errors = []
+        info_stage_errors = {}
+        group_dict = {}
+        for i, master in enumerate(self.master_data):
+            quarter_dict = {}
+            for group in self.all_groups:
+                group_list = []
                 for p in master.projects:
-                    projects_group = self.project_information[p][META_STAGE_DICT[self.kwargs["data_type"]]]
+                    #  This data comes from the project information document. Not master.
+                    projects_group = self.project_information[p][META_GROUP_DICT[self.kwargs["data_type"]]]
                     if projects_group is None or projects_group not in self.all_groups:
                         if i == 0:
-                            critical_group_errors.append(p)
+                            if p not in critical_group_errors:
+                                critical_group_errors.append(p)
                         else:
                             info_group_errors.append(p)
                     if projects_group == group:
@@ -175,8 +184,27 @@ class PythonMasterData:
 
                 quarter_dict[group] = group_list
 
+            for stage in self.stages:
+                stage_list = []
+                for p in master.projects:
+                    project_stage = master.data[p][META_STAGE_DICT[self.kwargs["data_type"]]]
+                    if project_stage is None or project_stage not in self.stages:
+                        if i == 0:
+                            if p not in critical_stage_errors:
+                                critical_stage_errors.append(p)
+                        else:
+                            info_stage_errors[p] = master.quarter
+                    if project_stage == stage:
+                        stage_list.append(p)
+
+                quarter_dict[stage] = stage_list
+
+            group_dict[str(master.quarter)] = quarter_dict
+
         latest_group_names_error(critical_group_errors)
         historic_group_names_error(info_group_errors)
+        latest_stage_names_error(critical_stage_errors)
+        historic_stage_names_error(info_stage_errors)
 
                 # 
                 # try:
@@ -232,7 +260,7 @@ class PythonMasterData:
         #         lower_s_dict[stage_type] = s_list
         #     stage_dict[quarter] = lower_s_dict
 
-        self.dft_groups = quarter_dict
+        self.meta_groupings = group_dict
         # self.project_stage = stage_dict
 
     def get_quarter_list(self) -> None:
@@ -304,7 +332,7 @@ class JsonData:
             "bl_info": self.master.bl_info,
             "current_projects": self.master.current_projects,
             "current_quarter": str(self.master.current_quarter),
-            "dft_groups": self.master.dft_groups,
+            "dft_groups": self.master.meta_groupings,  # change to meta_groupings
             "full_names": self.master.full_names,
             "kwargs": self.master.kwargs,
             "master_data": master_list,
@@ -322,25 +350,17 @@ class JsonData:
 def get_group_meta_data(
     confi_path: Path,
 ) -> Dict:
-    '''
-    Gets group stage meta data. This is necessary as termonolgy set in the config file
+    """
+    Gets group metadata types from config file. This is necessary as terminology is set in the config file
     and must correspond to terms used in project information document.
-    '''
+    """
     try:
         config = configparser.ConfigParser()
         config.read(confi_path)
         portfolio_group = json.loads(config.get("GROUPS", "portfolio_groups"))  # to return a list
         group_all = json.loads(config.get("GROUPS", "all_groups"))
-        ## to be used be in seperate function
-        # try:  # Only being used for ipdc reporting
-        #     bc_stages = json.loads(config.get("GROUPS", "bc_stages"))
-        # except configparser.NoOptionError:
-        #     bc_stages = []
     except:
-        logger.critical(
-            "Configuration file issue. Please check and make sure it's correct."
-        )
-        sys.exit(1)
+        config_issue()
 
     group_meta_dict = {
         'port_group': portfolio_group,
@@ -348,6 +368,27 @@ def get_group_meta_data(
     }
 
     return group_meta_dict
+
+
+def get_stage_meta_data(
+    confi_path: Path,
+) -> Dict:
+    """
+    Gets stage metadata types from config file. This is necessary as terminology is set in the config file
+    and must correspond to terms used in project information document.
+    """
+    try:
+        config = configparser.ConfigParser()
+        config.read(confi_path)
+        bc_stages = json.loads(config.get("GROUPS", "bc_stages"))
+    except:
+        config_issue()
+
+    stage_meta_dict = {
+        'stages': bc_stages,
+    }
+
+    return stage_meta_dict
 
 
 def get_project_info_data(master_file: str) -> Dict:
@@ -403,9 +444,11 @@ def get_core(
     func: Callable,  #  project_data_from_master
 ) -> None:
     root_path = _platform_docs_dir(reporting_type)
-    print(root_path)
     config_path = str(root_path) + config_file
     GROUP_META = get_group_meta_data(config_path)
+    STAGE_META = get_stage_meta_data(config_path)
+
+    META = {**GROUP_META, **STAGE_META}
 
     try:
         master = PythonMasterData(
@@ -418,7 +461,7 @@ def get_core(
                 config_path,
                 str(root_path) + "/core_data/",
             ),
-            GROUP_META['all_groups'],
+            META,
             data_type=reporting_type,
         )
 

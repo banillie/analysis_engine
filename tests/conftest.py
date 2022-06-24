@@ -1,11 +1,10 @@
-import configparser
-import os
 import pytest
-from datamaps.api import project_data_from_master, project_data_from_master_month
-from openpyxl import load_workbook
 
-from analysis_engine.data import open_word_doc, open_pickle_file, root_path, Master, open_json_file, JsonMaster, \
-    get_master_data, get_project_information, JsonData
+from datamaps.api import project_data_from_master
+
+from analysis_engine.core_data import get_core, get_project_information, _platform_docs_dir
+
+from tests.test_data import TEST_INITIATE_DICT, REPORTING_TYPE
 
 
 def pytest_addoption(parser):
@@ -28,6 +27,16 @@ def pytest_collection_modifyitems(config, items):
             item.add_marker(skip_slow)
 
 
+@pytest.fixture()
+def root_path():
+    return _platform_docs_dir(list(TEST_INITIATE_DICT.keys())[0])
+
+
+@pytest.fixture()
+def func():
+    return TEST_INITIATE_DICT[REPORTING_TYPE]['callable']
+
+
 @pytest.fixture
 def word_doc():
     wd_path = os.path.join(os.getcwd(), "resources/summary_temp.docx")
@@ -42,13 +51,13 @@ def word_doc_landscape():
     return doc
 
 
-@pytest.fixture
-def project_info():
-    return get_project_information(
-        "resources/basic_m_confi.ini",
-        "resources/"
-    )
-
+# @pytest.fixture
+# def project_info():
+#     root_path = _platform_docs_dir('cdg')
+#     config_path = str(root_path) + test_initiate_dict['cdg']['config']
+#     return get_project_information(config_path,
+#                 str(root_path) + "/core_data/",
+#             )
 
 # def cdg_project_info():
 #     return project_data_from_master(
@@ -67,12 +76,15 @@ def basic_masters_dicts():
     )
 
 
+
+
+
 @pytest.fixture()
 def full_test_masters_dict():
-    return get_master_data(
-        "resources/full_m_confi.ini",
-        "resources/",
-        project_data_from_master
+    get_core(
+        reporting_type='cdg',
+        config_file=TEST_INITIATE_DICT['cdg']['config'],
+        func=TEST_INITIATE_DICT['cdg']['callable'],
     )
 
 
@@ -97,7 +109,7 @@ def cdg_masters():
 
 @pytest.fixture()
 def master_json_path():
-    return os.path.join(os.getcwd(), "resources/" "json_master")
+    return str("{0}/core_data/json/master".format(root_path))
 
 
 @pytest.fixture()

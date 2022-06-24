@@ -4994,7 +4994,7 @@ def cal_group(
             output += local_g
         except KeyError:
             try:
-                local_g = master.dft_groups[q_str][pg]
+                local_g = master.meta_groupings[q_str][pg]
                 output += local_g
             except KeyError:
                 try:
@@ -5035,7 +5035,7 @@ def remove_from_group(
             removed_case.append(pg)
         except KeyError:
             try:
-                local_g = master.dft_groups[q_str][pg]
+                local_g = master.meta_groupings[q_str][pg]
                 pg_list = [x for x in pg_list if x not in local_g]
                 removed_case.append(pg)
             except KeyError:
@@ -10101,12 +10101,12 @@ class DandelionData:
                     ):  # achieve some consistency for zero / low values
                         p_value = pf_wlc / 500
                     if colour == "#FFFFFF" or colour == FACE_COLOUR:
-                        if p in self.master.dft_groups[tp]["GMPP"]:
+                        if p in self.master.meta_groupings[tp]["GMPP"]:
                             edge_colour = "#000000"
                         else:
                             edge_colour = "grey"
                     else:
-                        if p in self.master.dft_groups[tp]["GMPP"]:
+                        if p in self.master.meta_groupings[tp]["GMPP"]:
                             edge_colour = "#000000"
                             # edge_colour = COLOUR_DICT[p_data['SRO Forward Look Assessment']]
                         else:

@@ -60,7 +60,7 @@ from analysis_engine.data import (
 # from analysis_engine.ar_data import get_ar_data, ar_run_p_reports
 from analysis_engine.gmpp_int import get_gmpp_data
 
-import logging
+from analysis_engine.error_msgs import logger, ConfigurationError
 
 from analysis_engine.top35_data import (
     top35_run_p_reports,
@@ -72,17 +72,6 @@ from analysis_engine.cdg_data import (
     cdg_dashboard,
     cdg_narrative_dashboard,
 )
-
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s: %(levelname)s - %(message)s",
-    datefmt="%d-%b-%y %H:%M:%S",
-)
-logger = logging.getLogger(__name__)
-
-
-class ConfigurationError(Exception):
-    pass
 
 
 
@@ -138,11 +127,14 @@ initiate_dict = {
 
 def initiate(args):
     print("creating a master data file.")
+
     get_core(
         reporting_type=args,
         config_file=initiate_dict[args]['config'],
         func=initiate_dict[args]['callable'],
     )
+
+    logger.info("The latest master and project information match. Data has been loaded into memory.")
 
 
 def ipdc_run_general(args):

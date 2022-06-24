@@ -25,7 +25,11 @@
     <list default="true" id="205bd717-e7d2-47dc-82c7-88a8dae3593c" name="Default Changelist" comment="change portfolio_financial_profile.py to include old bl profile data">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/analysis_engine/core_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/analysis_engine/core_data.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/analysis_engine/data.py" beforeDir="false" afterPath="$PROJECT_DIR$/analysis_engine/data.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/analysis_engine/error_msgs.py" beforeDir="false" afterPath="$PROJECT_DIR$/analysis_engine/error_msgs.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/analysis_engine/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/analysis_engine/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/conftest.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/conftest.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/test_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test_data.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -100,7 +104,7 @@
       <recent name="$PROJECT_DIR$/" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.operation">
+  <component name="RunManager" selected="Python tests.pytest for test_data.test_json_master_save">
     <configuration name="ar_data" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="analysis_engine" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -149,6 +153,9 @@
       <module name="analysis_engine" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
       <option name="SDK_HOME" value="" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/other" />
       <option name="IS_MODULE_SDK" value="true" />
@@ -237,11 +244,11 @@
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
-    <configuration name="pytest for test_data.test_match_data_types" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
+    <configuration name="pytest for test_data.test_json_master_save" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
       <module name="analysis_engine" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
-      <option name="SDK_HOME" value="" />
+      <option name="SDK_HOME" value="$USER_HOME$/.virtualenvs/a_engine/bin/python" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
@@ -250,7 +257,7 @@
       <option name="_new_keywords" value="&quot;&quot;" />
       <option name="_new_parameters" value="&quot;&quot;" />
       <option name="_new_additionalArguments" value="&quot;--tb\u003dshort&quot;" />
-      <option name="_new_target" value="&quot;test_data.test_match_data_types&quot;" />
+      <option name="_new_target" value="&quot;test_data.test_json_master_save&quot;" />
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
@@ -332,16 +339,16 @@
       <item itemvalue="Python tests.temp_tests" />
       <item itemvalue="Python tests.test_all" />
       <item itemvalue="Python tests.test_data_all" />
-      <item itemvalue="Python tests.pytest for test_data.test_match_data_types" />
+      <item itemvalue="Python tests.pytest for test_data.test_json_master_save" />
       <item itemvalue="Python tests.pytest for test_data.test_speedial_graph" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Python tests.pytest for test_data.test_json_master_save" />
         <item itemvalue="Python.operation" />
         <item itemvalue="Python.ar_data" />
         <item itemvalue="Python.data_review" />
         <item itemvalue="Python tests.pytest for test_data.test_speedial_graph" />
-        <item itemvalue="Python tests.pytest for test_data.test_match_data_types" />
       </list>
     </recent_temporary>
   </component>
@@ -457,7 +464,10 @@
       <workItem from="1655721839541" duration="1162000" />
       <workItem from="1655725715177" duration="2882000" />
       <workItem from="1655802234345" duration="11744000" />
-      <workItem from="1655889831653" duration="9820000" />
+      <workItem from="1655889831653" duration="10989000" />
+      <workItem from="1655993296699" duration="4319000" />
+      <workItem from="1656056402913" duration="2240000" />
+      <workItem from="1656062434318" duration="2180000" />
     </task>
     <task id="LOCAL-00001" summary="comment">
       <created>1578327909392</created>
@@ -769,8 +779,28 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/analysis_engine/core_data.py</url>
-          <line>426</line>
-          <option name="timeStamp" value="507" />
+          <line>186</line>
+          <option name="timeStamp" value="511" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/analysis_engine/core_data.py</url>
+          <line>204</line>
+          <option name="timeStamp" value="516" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/analysis_engine/core_data.py</url>
+          <line>468</line>
+          <option name="timeStamp" value="517" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/analysis_engine/core_data.py</url>
+          <line>448</line>
+          <option name="timeStamp" value="520" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/analysis_engine/core_data.py</url>
+          <line>359</line>
+          <option name="timeStamp" value="523" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
@@ -792,7 +822,8 @@
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/analysis_engine$data_review.coverage" NAME="data_review Coverage Results" MODIFIED="1650555335306" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/analysis_engine" />
-    <SUITE FILE_PATH="coverage/analysis_engine$operation.coverage" NAME="operation Coverage Results" MODIFIED="1655906775421" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/other" />
+    <SUITE FILE_PATH="coverage/analysis_engine$pytest_for_test_data_test_json_master_save.coverage" NAME="pytest for test_data.test_json_master_save Coverage Results" MODIFIED="1656064754802" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/analysis_engine$operation.coverage" NAME="operation Coverage Results" MODIFIED="1656058095748" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/other" />
     <SUITE FILE_PATH="coverage/analysis_engine$ar_data.coverage" NAME="ar_data Coverage Results" MODIFIED="1652186875735" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/analysis_engine" />
   </component>
 </project>
