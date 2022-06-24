@@ -44,9 +44,9 @@ def _platform_docs_dir(dir: str) -> Path:
 
 
 def get_master_data(
-    confi_path: Path,
-    pi_path: Path,
-    func: Callable,
+        confi_path: Path,
+        pi_path: Path,
+        func: Callable,
 ) -> List[Dict[str, Union[str, int, datetime.date, float]]]:
     """Returns a list of dictionaries each containing quarter data"""
     config = configparser.ConfigParser()
@@ -71,15 +71,15 @@ def convert_none_types(x):
 
 
 META_GROUP_DICT = {
-            "cdg": 'Directorate',
-            'ipdc': 'Group',
-            'top_250': 'Group',
-        }
+    "cdg": 'Directorate',
+    'ipdc': 'Group',
+    'top_250': 'Group',
+}
 
 META_STAGE_DICT = {
-            "cdg": 'Last Business Case (BC) achieved',
-            'ipdc': 'IPDC approval point',
-        }
+    "cdg": 'Last Business Case (BC) achieved',
+    'ipdc': 'IPDC approval point',
+}
 
 
 class PythonMasterData:
@@ -88,12 +88,13 @@ class PythonMasterData:
     performs a number of high-level checks to stop any later bugs or crashes, as well as
     create some useful meta data information.
     '''
+
     def __init__(
-        self,
-        master_data: List[Dict[str, Union[str, int, datetime.date, float]]],
-        project_information: Dict[str, Union[str, int]],
-        meta,
-        **kwargs,
+            self,
+            master_data: List[Dict[str, Union[str, int, datetime.date, float]]],
+            project_information: Dict[str, Union[str, int]],
+            meta,
+            **kwargs,
     ) -> None:
         self.master_data = master_data
         self.project_information = project_information
@@ -116,7 +117,6 @@ class PythonMasterData:
         self.check_project_abbreviations()
         self.check_project_names()
         self.get_and_check_groupings()
-
 
         self.get_quarter_list()
         self.pipeline_projects_information()
@@ -154,7 +154,7 @@ class PythonMasterData:
                         # try:
                         info_error_cases[p] = master.quarter
                         # except find the error
-                        
+
         latest_project_names_error(critical_error_cases)
         historic_project_names_error(info_error_cases)
 
@@ -206,27 +206,26 @@ class PythonMasterData:
         latest_stage_names_error(critical_stage_errors)
         historic_stage_names_error(info_stage_errors)
 
-                # 
-                # try:
-                #     stage = BC_STAGE_DICT[master[p][approval]]
-                # except (UnboundLocalError, NameError):  # top35 does not collect stage
-                #     stage = "None"
-               
+        #
+        # try:
+        #     stage = BC_STAGE_DICT[master[p][approval]]
+        # except (UnboundLocalError, NameError):  # top35 does not collect stage
+        #     stage = "None"
+
         # group_list = list(set(group_list))
         # stage_list = list(set(stage_list))
 
+        # gmpp_list = []
+        # for p in self.master_data[i].projects:
+        #     try:
+        #         gmpp = self.project_information[p]["GMPP"]
+        #     except KeyError:  # project name check happening in other places.
+        #         gmpp = None
+        #     if gmpp is not None:
+        #         gmpp_list.append(p)
+        #     lower_g_dict["GMPP"] = gmpp_list
 
-            # gmpp_list = []
-            # for p in self.master_data[i].projects:
-            #     try:
-            #         gmpp = self.project_information[p]["GMPP"]
-            #     except KeyError:  # project name check happening in other places.
-            #         gmpp = None
-            #     if gmpp is not None:
-            #         gmpp_list.append(p)
-            #     lower_g_dict["GMPP"] = gmpp_list
-
-            # group_dict[quarter] = lower_g_dict
+        # group_dict[quarter] = lower_g_dict
 
         # stage_dict = {}
         # for quarter in list(raw_dict.keys())[:2]:  # just latest two quarters
@@ -292,7 +291,7 @@ class PythonMasterData:
     def get_current_tp(self):
         try:
             self.current_quarter = (
-                str(self.master_data[0].month) + ", " + str(self.master_data[0].year)
+                    str(self.master_data[0].month) + ", " + str(self.master_data[0].year)
             )
         except KeyError:
             self.current_quarter = self.master_data[0].quarter
@@ -305,9 +304,9 @@ def json_date_converter(o):
 
 class JsonData:
     def __init__(
-        self,
-        master: List[Dict[str, Union[str, int, datetime.date, float]]],
-        save_path: str,
+            self,
+            master: List[Dict[str, Union[str, int, datetime.date, float]]],
+            save_path: str,
     ):
         self.master = master
         self.path = save_path
@@ -348,7 +347,7 @@ class JsonData:
 
 
 def get_group_meta_data(
-    confi_path: Path,
+        confi_path: Path,
 ) -> Dict:
     """
     Gets group metadata types from config file. This is necessary as terminology is set in the config file
@@ -371,7 +370,7 @@ def get_group_meta_data(
 
 
 def get_stage_meta_data(
-    confi_path: Path,
+        confi_path: Path,
 ) -> Dict:
     """
     Gets stage metadata types from config file. This is necessary as terminology is set in the config file
@@ -427,8 +426,8 @@ def get_project_info_data(master_file: str) -> Dict:
 
 
 def get_project_information(
-    confi_path: Path,
-    root_path: Path,
+        confi_path: Path,
+        root_path: Path,
 ) -> Dict[str, Union[str, int]]:
     """Returns dictionary containing all project meta data. confi_path is the config.ini file path.
     root_path is the core data root_path."""
@@ -439,9 +438,9 @@ def get_project_information(
 
 
 def get_core(
-    reporting_type: str,
-    config_file: str,
-    func: Callable,  #  project_data_from_master
+        reporting_type: str,
+        config_file: str,
+        func: Callable,  # e.g. project_data_from_master
 ) -> None:
     root_path = _platform_docs_dir(reporting_type)
     config_path = str(root_path) + config_file

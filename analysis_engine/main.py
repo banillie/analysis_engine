@@ -76,6 +76,7 @@ from analysis_engine.cdg_data import (
 
 
 
+
 # As more and more meta data going into config could use a refactor to collect it all in
 # one go?
 def get_remove_income_totals(

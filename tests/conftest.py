@@ -1,10 +1,12 @@
 import pytest
+import os
 
 from datamaps.api import project_data_from_master
 
 from analysis_engine.core_data import get_core, get_project_information, _platform_docs_dir
+from analysis_engine.data import open_word_doc
 
-from tests.test_data import TEST_INITIATE_DICT, REPORTING_TYPE
+from tests.test_data import INITIATE_DICT, REPORTING_TYPE
 
 
 def pytest_addoption(parser):
@@ -27,14 +29,14 @@ def pytest_collection_modifyitems(config, items):
             item.add_marker(skip_slow)
 
 
-@pytest.fixture()
-def root_path():
-    return _platform_docs_dir(list(TEST_INITIATE_DICT.keys())[0])
+# @pytest.fixture()
+# def root_path():
+#     return _platform_docs_dir(list(INITIATE_DICT.keys())[0])
+#
 
-
-@pytest.fixture()
-def func():
-    return TEST_INITIATE_DICT[REPORTING_TYPE]['callable']
+# @pytest.fixture()
+# def func():
+#     return INITIATE_DICT[REPORTING_TYPE]['callable']
 
 
 @pytest.fixture
@@ -46,9 +48,7 @@ def word_doc():
 
 @pytest.fixture
 def word_doc_landscape():
-    wd_path = os.path.join(os.getcwd(), "resources/summary_temp_landscape.docx")
-    doc = open_word_doc(wd_path)
-    return doc
+    return open_word_doc(os.path.join(os.getcwd(), "resources/summary_temp_landscape.docx"))
 
 
 # @pytest.fixture
@@ -83,8 +83,8 @@ def basic_masters_dicts():
 def full_test_masters_dict():
     get_core(
         reporting_type='cdg',
-        config_file=TEST_INITIATE_DICT['cdg']['config'],
-        func=TEST_INITIATE_DICT['cdg']['callable'],
+        config_file=INITIATE_DICT['cdg']['config'],
+        func=INITIATE_DICT['cdg']['callable'],
     )
 
 
@@ -186,17 +186,17 @@ def sp_data():
 #     }
 
 
-@pytest.fixture()
-def ipdc_data():
-    return {
-        "docx_save_path": "resources/{}.docx",
-        "master": open_pickle_file(os.path.join(os.getcwd(), "resources/test_master.pickle")),
-        "op_args": {
-            "quarter": ["Q1 20/21"],
-            "group": ["HSRG", "RSS", "RIG", "AMIS", "RPE"],
-            "chart": False,
-        },
-    }
+# @pytest.fixture()
+# def ipdc_data():
+#     return {
+#         "docx_save_path": "resources/{}.docx",
+#         "master": open_pickle_file(os.path.join(os.getcwd(), "resources/test_master.pickle")),
+#         "op_args": {
+#             "quarter": ["Q1 20/21"],
+#             "group": ["HSRG", "RSS", "RIG", "AMIS", "RPE"],
+#             "chart": False,
+#         },
+#     }
 
 
 @pytest.fixture()

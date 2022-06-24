@@ -24,6 +24,10 @@ class ConfigurationError(Exception):
     pass
 
 
+class InputError(Exception):
+    pass
+
+
 def config_issue():
     logger.critical(
         "Configuration file issue. Please check and make sure it's correct."
@@ -95,4 +99,13 @@ def abbreviation_error(error_cases):
             logger.critical("No abbreviation provided for " + p + ".")
         raise ProjectNameError(
             "Abbreviations must be provided for all projects in project_info. Program stopping. Please amend"
+        )
+
+
+def not_recognised_project_or_group(error_case):
+    if error_case:
+        for p in error_case:
+            logger.critical(p + " not a recognised project or group")
+        raise ProjectNameError(
+            "Program stopping. Please check project or group name and re-enter."
         )
