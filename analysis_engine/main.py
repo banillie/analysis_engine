@@ -11,6 +11,7 @@ from analysis_engine import __version__
 from datamaps.api import project_data_from_master, project_data_from_master_month
 
 from analysis_engine.core_data import get_core
+from analysis_engine.config import report_config
 # from analysis_engine.ar_data import get_gmpp_ar_data
 
 from analysis_engine.data import (
@@ -32,21 +33,21 @@ from analysis_engine.data import (
     ipdc_dashboard,
     CostData,
     cost_v_schedule_chart_into_wb,
-    DandelionData,
-    put_matplotlib_fig_into_word,
+    # DandelionData,
+    # put_matplotlib_fig_into_word,
     data_query_into_wb,
     get_data_query_key_names,
-    ProjectNameError,
-    ProjectGroupError,
-    ProjectStageError,
-    milestone_chart,
+    # ProjectNameError,
+    # ProjectGroupError,
+    # ProjectStageError,
+    # milestone_chart,
     cost_stackplot_graph,
-    make_a_dandelion_auto,
+    # make_a_dandelion_auto,
     build_speedials,
     get_sp_data,
     # DFT_GROUP,
     get_input_doc,
-    InputError,
+    # InputError,
     # JsonMaster,
     # JsonData,
     open_json_file,
@@ -62,19 +63,16 @@ from analysis_engine.gmpp_int import get_gmpp_data
 
 from analysis_engine.error_msgs import logger, ConfigurationError
 
-from analysis_engine.top35_data import (
-    top35_run_p_reports,
-    top35_root_path,
-    CentralSupportData,
-)
+# from analysis_engine.top35_data import (
+#     top35_run_p_reports,
+#     top35_root_path,
+#     CentralSupportData,
+# )
 
-from analysis_engine.cdg_data import (
-    cdg_dashboard,
-    cdg_narrative_dashboard,
-)
-
-
-
+# from analysis_engine.cdg_data import (
+#     cdg_dashboard,
+#     cdg_narrative_dashboard,
+# )
 
 
 # As more and more meta data going into config could use a refactor to collect it all in
@@ -110,32 +108,24 @@ def check_remove(op_args):  # subcommand arg
                 )
 
 
-initiate_dict = {
-    'cdg': {
-        'config': '/core_data/cdg_config.ini',
-        'callable': project_data_from_master
-    },
-    'ipdc': {
-        'config': '/core_data/ipdc_config.ini',
-        'callable': project_data_from_master,
-    },
-    'top_250': {
-        'config': '/core_data/top_250_config.ini',
-        'callable': project_data_from_master_month,
-    }
-}  #  controls the documents pointed to for reporting process via cli positional arguments.
+def command_sorting(flag_args, ae_config):
+    if vars(flag_args)["subparser_name"] == "initiate":
+        initiate(ae_config)
+    else:
+        run_outputs(vars(flag_args))
 
 
-def initiate(args):
+def initiate(conf_dict):
     print("creating a master data file.")
-
     get_core(
-        reporting_type=args,
-        config_file=initiate_dict[args]['config'],
-        func=initiate_dict[args]['callable'],
+        reporting_type=conf_dict['report'],
+        config_file=conf_dict['config'],
+        func=conf_dict['callable'],
     )
-
     logger.info("The latest master and project information match. Data has been loaded into memory.")
+
+
+def run_outputs(args):
 
 
 def ipdc_run_general(args):
@@ -1070,6 +1060,7 @@ class main:
         # now that we're inside a subcommand, ignore the first
         # TWO argvs, ie the command (git) and subcommand (commit)
         # print(sys.argv)
+
         args = parser.parse_args(sys.argv[2:])
         if vars(args)["subparser_name"] == "initiate":
             initiate('ipdc')
@@ -1334,10 +1325,8 @@ class main:
         )
 
         flag_args = parser.parse_args(sys.argv[2:])
-        if vars(flag_args)["subparser_name"] == "initiate":
-            initiate('cdg')
-        else:
-            cdg_run_general(vars(flag_args))
+        ae_config = report_config('cdg')
+        command_sorting(flag_args, ae_config)
 
 
 ## old method for handling argparse commands.

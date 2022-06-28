@@ -29,11 +29,8 @@ def get_iter_list(class_kwargs, master) -> List[str]:
     return iter_list
 
 
-def cal_group(
-        input_list: List[str] or List[List[str]],
-        md,
-        tp_indx: int,
-        input_list_indx=None,
+def cal_group(input_list: List[str] or List[List[str]], md, tp_indx: int,
+        # input_list_indx=None,
 ) -> List[str]:
     """
     What does this do?
@@ -41,31 +38,31 @@ def cal_group(
 
     error_case = []
     output = []
-    if input_list_indx or input_list_indx == 0:
-        input_list = [input_list[input_list_indx]]
-    if any(isinstance(x, list) for x in input_list):
-        inner_list = [item for sublist in input_list for item in sublist]
-    else:
-        inner_list = input_list
+    # if input_list_indx or input_list_indx == 0:
+    #     input_list = [input_list[input_list_indx]]
+    # if any(isinstance(x, list) for x in input_list):
+    #     inner_list = [item for sublist in input_list for item in sublist]
+    # else:
+    #     inner_list = input_list
     q_str = md['quarter_list'][tp_indx]  # quarter string
-    for pg in inner_list:  # pg is project/group
-        if pg == "pipeline":
+    for g in input_list:  # pg is project/group
+        if g == "pipeline":
             continue
         try:
-            local_g = md['dft_group'][q_str][pg]
+            local_g = md['dft_group'][q_str][g]
             output += local_g
+        # except KeyError:
+        #     try:
+        #         local_g = md['dft_group'][q_str][g]
+        #         output += local_g
         except KeyError:
             try:
-                local_g = md['dft_group'][q_str][pg]
-                output += local_g
+                output.append(md['abbreviations'][g]["full name"])
             except KeyError:
                 try:
-                    output.append(md['abbreviations'][pg]["full name"])
+                    output.append(md['full_names'][g])
                 except KeyError:
-                    try:
-                        output.append(md['full_names'][pg])
-                    except KeyError:
-                        error_case.append(pg)
+                    error_case.append(g)
 
     not_recognised_project_or_group(error_case)
 
@@ -81,15 +78,15 @@ def get_group(md, tp: str, class_kwargs, group_indx=None) -> List[str]:
     tp_indx = md['quarter_list'].index(tp)
 
     if "stage" in class_kwargs:
-        if group_indx or group_indx == 0:
-            group = cal_group(class_kwargs["stage"], md, tp_indx, group_indx)
-        else:
-            group = cal_group(class_kwargs["stage"], md, tp_indx)
+        # if group_indx or group_indx == 0:
+        #     group = cal_group(class_kwargs["stage"], md, tp_indx, group_indx)
+        # else:
+        group = cal_group(class_kwargs["stage"], md, tp_indx)
     elif "group" in class_kwargs:
-        if group_indx or group_indx == 0:
-            group = cal_group(class_kwargs["group"], md, tp_indx, group_indx)
-        else:
-            group = cal_group(class_kwargs["group"], md, tp_indx)
+        # if group_indx or group_indx == 0:
+        #     group = cal_group(class_kwargs["group"], md, tp_indx, group_indx)
+        # else:
+        group = cal_group(class_kwargs["group"], md, tp_indx)
     else:
         group = cal_group(md.current_projects, md, tp_indx)
 
@@ -97,7 +94,6 @@ def get_group(md, tp: str, class_kwargs, group_indx=None) -> List[str]:
         group = remove_from_group(
             group, class_kwargs["remove"], md, tp_indx, class_kwargs
         )
-
     return group
 
 

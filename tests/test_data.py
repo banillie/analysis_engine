@@ -14,7 +14,7 @@ from analysis_engine.core_data import (
 
 from analysis_engine.dandelion_graph import DandelionData, make_a_dandelion_auto
 
-from analysis_engine.render_utils import put_matplotlib_fig_into_word
+from analysis_engine.render_utils import put_matplotlib_fig_into_word, get_input_doc
 
 
 def test_get_project_information():
@@ -81,14 +81,16 @@ def test_get_project_abbreviations():
     )  # to take 'full name' out as silly!
 
 
-def test_build_dandelion_graph(word_doc_landscape):
+def test_build_dandelion_graph():
     md = open_json_file(
         f"/home/will/Documents/{REPORTING_TYPE}/core_data/json/master.json"
     )
     dmd = DandelionData(md, **OP_ARGS_DICT)
     d_lion = make_a_dandelion_auto(dmd, **OP_ARGS_DICT)
-    put_matplotlib_fig_into_word(word_doc_landscape, d_lion, size=7)
-    # word_doc_landscape.save(ipdc_data["docx_save_path"].format("ipdc_d_graph"))  # do via another test.
+    doc = get_input_doc(OP_ARGS_DICT["word_landscape"])
+    put_matplotlib_fig_into_word(doc, d_lion)
+    doc.save(OP_ARGS_DICT["word_save_path"].format('dandelion'))
+
 
 
 @pytest.mark.skip(reason="refactor required")

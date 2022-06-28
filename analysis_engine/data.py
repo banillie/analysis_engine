@@ -966,230 +966,6 @@ class CostData:
         # self.stack_p = {}
         self.get_cost_totals_new()
         self.get_cost_totals_new_bl()
-        # self.get_forecast_cost_profile()
-        # self.get_baseline_cost_profile()
-        # self.get_cost_profile()
-        # self.get_wlc_data()
-        # self.get_stackplot_data()
-
-    # def get_cost_totals(self) -> None:
-    #     """Returns lists containing the sum total of group (of projects) costs,
-    #     sliced in different ways. Cumbersome for loop used at the moment, but
-    #     is the least cumbersome loop I could design!"""
-    #
-    #     self.iter_list = get_iter_list(self.kwargs, self.master)
-    #     lower_dict = {}
-    #     # self.start_group = get_group(self.master, self.iter_list[0], self.kwargs)
-    #
-    #     if "data_type" in self.kwargs:
-    #         if self.kwargs["data_type"] == "cdg":
-    #             for tp in self.iter_list:
-    #                 c_spent = 0
-    #                 c_remaining = 0
-    #                 c_total = 0
-    #                 in_achieved = 0
-    #                 in_remaining = 0
-    #                 in_total = 0
-    #                 self.group = get_group(self.master, tp, self.kwargs)
-    #                 for project_name in self.group:
-    #                     p_data = get_correct_p_data(
-    #                         self.kwargs,
-    #                         self.master,
-    #                         self.baseline_type,
-    #                         project_name,
-    #                         tp,
-    #                     )
-    #                     c_spent += convert_none_types(p_data["Total Costs Spent"])
-    #                     c_remaining += convert_none_types(
-    #                         p_data["Total Costs Remaining"]
-    #                     )
-    #                     c_total += convert_none_types(p_data["Total Costs"])
-    #                     in_achieved += convert_none_types(
-    #                         p_data["Total Income Achieved"]
-    #                     )
-    #                     in_remaining += convert_none_types(
-    #                         p_data["Total Income Remaining"]
-    #                     )
-    #                     in_total += convert_none_types(p_data["Total Income"])
-    #
-    #                 lower_dict[tp] = {
-    #                     "costs_spent": c_spent,
-    #                     "costs_remaining": c_remaining,
-    #                     "total": c_total,
-    #                     "income_achieved": in_achieved,
-    #                     "income_remaining": in_remaining,
-    #                     "income_total": in_total,
-    #                 }
-    #
-    #         if self.kwargs["data_type"] == "top35":
-    #             for tp in self.iter_list:
-    #                 rdel = 0
-    #                 cdel = 0
-    #                 c_total = 0
-    #                 non_gov = 0
-    #                 self.group = get_group(self.master, tp, self.kwargs)
-    #                 for project_name in self.group:
-    #                     p_data = get_correct_p_data(
-    #                         self.kwargs,
-    #                         self.master,
-    #                         self.baseline_type,
-    #                         project_name,
-    #                         tp,
-    #                     )
-    #                     rdel += convert_none_types(p_data["WLC GOV RDEL"])
-    #                     cdel += convert_none_types(p_data["WLC GOV CDEL"])
-    #                     c_total += convert_none_types(p_data["WLC TOTAL"])
-    #                     non_gov += convert_none_types(p_data["WLC NON GOV"])
-    #
-    #                 lower_dict[tp] = {
-    #                     "costs_rdel": rdel,
-    #                     "costs_cdel": cdel,
-    #                     "total": c_total + non_gov,
-    #                     "non_gov": non_gov,
-    #                 }
-    #
-    #     else:
-    #         for tp in self.iter_list:
-    #             spent = 0
-    #             profiled = 0
-    #             unprofiled = 0
-    #             # overall_total = 0
-    #             spent_rdel = 0
-    #             spent_cdel = 0
-    #             spent_ngov = 0
-    #             prof_rdel = 0
-    #             prof_cdel = 0
-    #             prof_ngov = 0
-    #             unprof_rdel = 0
-    #             unprof_cdel = 0
-    #             unprof_ngov = 0
-    #             self.group = get_group(self.master, tp, self.kwargs)
-    #             for project_name in self.group:
-    #                 p_data = get_correct_p_data(
-    #                     self.kwargs, self.master, self.baseline_type, project_name, tp
-    #                 )
-    #                 if p_data is None:
-    #                     continue
-    #                 for x, key in enumerate(COST_TYPE_KEY_LIST):
-    #                     try:
-    #                         rdel = p_data[key[0]]
-    #                         if rdel is None:
-    #                             rdel = 0
-    #                         cdel = p_data[key[1]]
-    #                         if cdel is None:
-    #                             cdel = 0
-    #                         ngov = p_data[key[2]]
-    #                         if ngov is None:
-    #                             ngov = 0
-    #                         total = round(rdel + cdel + ngov)
-    #                     except TypeError:  # handle None types, which are present if project not reporting last quarter.
-    #                         total = 0
-    #
-    #                     if self.iter_list.index(tp) == 0:  # current quarter
-    #                         if x == 0:  # spent
-    #                             try:  # handling for spend to date figures which are not present in all masters
-    #                                 rdel_std = p_data[
-    #                                     "20-21 RDEL STD one off new costs"
-    #                                 ]
-    #                                 if rdel_std is None:
-    #                                     rdel_std = 0
-    #                                 cdel_std = p_data[
-    #                                     "20-21 CDEL STD one off new costs"
-    #                                 ]
-    #                                 if cdel_std is None:
-    #                                     cdel_std = 0
-    #                                 ngov_std = p_data["20-21 CDEL STD Non Gov costs"]
-    #                                 if ngov_std is None:
-    #                                     ngov_std = 0
-    #                                 spent_rdel += round(rdel + rdel_std)
-    #                                 spent_cdel += round(cdel + cdel_std)
-    #                                 spent_ngov += round(ngov + ngov_std)
-    #                             except KeyError:
-    #                                 spent_rdel += rdel
-    #                                 spent_cdel += cdel
-    #                                 spent_ngov += ngov
-    #                         if x == 1:  # profiled
-    #                             prof_rdel += rdel
-    #                             prof_cdel += cdel
-    #                             prof_ngov += ngov
-    #                         if x == 2:  # unprofiled
-    #                             unprof_rdel += rdel
-    #                             unprof_cdel += cdel
-    #                             unprof_ngov += ngov
-    #
-    #                     if x == 0:  # spent
-    #                         try:  # handling for spend to date figures which are not present in all masters
-    #                             rdel_std = p_data["20-21 RDEL STD one off new costs"]
-    #                             cdel_std = p_data["20-21 CDEL STD one off new costs"]
-    #                             ngov_std = p_data["20-21 CDEL STD Non Gov costs"]
-    #                             std_list = [
-    #                                 rdel_std,
-    #                                 cdel_std,
-    #                                 ngov_std,
-    #                             ]  # converts none types to zero
-    #                             std_list = filter(None, std_list)
-    #                             spent += round(total + sum(std_list))
-    #                         except (
-    #                                 KeyError,
-    #                                 TypeError,
-    #                         ):  # Note. TypeError here as projects may have no baseline
-    #                             spent += total
-    #                     if x == 1:  # profiled
-    #                         profiled += total
-    #                     if x == 2:  # unprofiled
-    #                         unprofiled += total
-    #
-    #                 # hard coded due to current use need.
-    #
-    #                 if project_name == "HS2 Phase 2b" or project_name == "HS2 Phase 2a" or project_name == "HS2 Phase 1":
-    #                     try:
-    #                         profiled = (
-    #                                 profiled
-    #                                 - p_data[
-    #                                     "Total Forecast - Income both Revenue and Capital"
-    #                                 ]
-    #                         )
-    #                         total = (
-    #                                 total
-    #                                 - p_data[
-    #                                     "Total Forecast - Income both Revenue and Capital"
-    #                                 ]
-    #                         )
-    #                     except KeyError:  # some older masters do have key.
-    #                         pass
-    #
-    #                 if (
-    #                         project_name == "Northern Powerhouse Rail"
-    #                 ):  # hacked fix for now.
-    #                     profiled = (
-    #                             profiled + p_data["Total CDEL Forecast recurring new costs"]
-    #                     )
-    #
-    #             cat_spent = [spent_rdel, spent_cdel, spent_ngov]
-    #             cat_profiled = [prof_rdel, prof_cdel, prof_ngov]
-    #             cat_unprofiled = [
-    #                 unprof_rdel,
-    #                 unprof_cdel,
-    #                 unprof_ngov,
-    #             ]
-    #             cat_profiled = calculate_profiled(
-    #                 cat_profiled, cat_spent, cat_unprofiled
-    #             )
-    #
-    #             adj_profiled = calculate_profiled(
-    #                 profiled, spent, unprofiled
-    #             )  # adjusted profiled
-    #             lower_dict[tp] = {
-    #                 "cat_spent": cat_spent,
-    #                 "cat_prof": cat_profiled,
-    #                 "cat_unprof": cat_unprofiled,
-    #                 "spent": spent,
-    #                 "prof": adj_profiled,
-    #                 "unprof": unprofiled,
-    #                 "total": profiled,
-    #             }
-    #
-    #     self.c_totals = lower_dict
 
     def get_cost_totals_new(self) -> None:
 
@@ -1207,9 +983,9 @@ class CostData:
                     self.group = get_group(self.master, tp, self.kwargs)
                     for project_name in self.group:
                         p_data = get_correct_p_data(
-                            self.kwargs,
+                            # self.kwargs,
                             self.master,
-                            self.baseline_type,
+                            # self.baseline_type,
                             project_name,
                             tp,
                         )
@@ -4829,34 +4605,33 @@ def get_tp_index(master, tp: str, class_kwargs):
 
 
 def get_correct_p_data(
-        class_kwargs,
+        # class_kwargs,
         master,
-        baseline_type: str,
+        # baseline_type: str,
         project_name: str,
         time_period: str,
 ) -> Dict[str, Union[str, int, datetime.date, float]]:
-    if "baseline" in class_kwargs:
-        bl_index = master.bl_index[baseline_type][project_name]
-        tp_idx = bl_iter_list.index(time_period)
-        try:
-            return master.master_data[bl_index[tp_idx]]["data"][project_name]
-        # TypeError handles project not reporting in last quarter.
-        # IndexError handles len of project bl index.
-        # cost baselines return bl data available, not None, due to how
-        # cost trend chart is composed
-        except (TypeError, IndexError):
-            if "costs" in baseline_type:
-                return master.master_data[bl_index[-1]]["data"][project_name]
-            else:
-                return None
+    # if "baseline" in class_kwargs:
+    #     bl_index = master.bl_index[baseline_type][project_name]
+    #     tp_idx = bl_iter_list.index(time_period)
+    #     try:
+    #         return master.master_data[bl_index[tp_idx]]["data"][project_name]
+    #     # TypeError handles project not reporting in last quarter.
+    #     # IndexError handles len of project bl index.
+    #     # cost baselines return bl data available, not None, due to how
+    #     # cost trend chart is composed
+    #     except (TypeError, IndexError):
+    #         if "costs" in baseline_type:
+    #             return master.master_data[bl_index[-1]]["data"][project_name]
+    #         else:
+    #             return None
 
-    elif "quarter" in class_kwargs:
-        tp_idx = master.quarter_list.index(time_period)
-        try:
-            return master.master_data[tp_idx]["data"][project_name]
-        # KeyError handles project not reporting in quarter.
-        except KeyError:
-            return None
+    # elif "quarter" in class_kwargs:
+    tp_idx = master['quarter_list'].index(time_period)
+    try:
+        return master['master_data'][tp_idx]['data'][project_name]
+    except KeyError: # KeyError handles project not reporting in quarter.
+        return None
 
 
 bl_iter_list = ["current", "last", "bl_one", "bl_two", "bl_three"]
@@ -6899,22 +6674,6 @@ def compile_p_report_new(
     print_out_project_risks(doc, risks, **kwargs)
     return doc
 
-
-def get_input_doc(file_path: TextIO) -> Union[Workbook, Document, None]:
-    """
-    Returns blank documents in analysis_engine/input file used for saving outputs.
-    Raises error and user message if files are not present
-    """
-    try:
-        if str(file_path).endswith(".docx"):
-            return open_word_doc(file_path)
-        if str(file_path).endswith(".xlsx"):
-            return load_workbook(file_path)
-    except FileNotFoundError:
-        base = os.path.basename(file_path)
-        raise FileNotFoundError(
-            str(base) + " document not present in input file. Stopping."
-        )
 
 
 def run_p_reports(master, **kwargs) -> None:

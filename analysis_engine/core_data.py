@@ -124,8 +124,7 @@ class PythonMasterData:
 
     # why is this collecting full names also?
     def check_project_abbreviations(self) -> None:
-        """gets the abbreviations for all current projects.
-        held in the project info document"""
+        """gets the abbreviations for all current projects. held in the project info document"""
         abb_dict = {}
         abbreviation_errors = []
         for p in self.all_projects:
@@ -165,7 +164,7 @@ class PythonMasterData:
         info_group_errors = []
         critical_stage_errors = []
         info_stage_errors = {}
-        group_dict = {}
+        meta_groupings_meta = {}
         for i, master in enumerate(self.master_data):
             quarter_dict = {}
             for group in self.all_groups:
@@ -199,68 +198,21 @@ class PythonMasterData:
 
                 quarter_dict[stage] = stage_list
 
-            group_dict[str(master.quarter)] = quarter_dict
+            gmpp_list = []
+            for p in master.projects:
+                if self.project_information[p]["GMPP"] == 'YES':
+                    gmpp_list.append(p)
+                quarter_dict["GMPP"] = gmpp_list
+
+            meta_groupings_meta[str(master.quarter)] = quarter_dict
 
         latest_group_names_error(critical_group_errors)
         historic_group_names_error(info_group_errors)
         latest_stage_names_error(critical_stage_errors)
         historic_stage_names_error(info_stage_errors)
 
-        #
-        # try:
-        #     stage = BC_STAGE_DICT[master[p][approval]]
-        # except (UnboundLocalError, NameError):  # top35 does not collect stage
-        #     stage = "None"
+        self.meta_groupings = meta_groupings_meta
 
-        # group_list = list(set(group_list))
-        # stage_list = list(set(stage_list))
-
-        # gmpp_list = []
-        # for p in self.master_data[i].projects:
-        #     try:
-        #         gmpp = self.project_information[p]["GMPP"]
-        #     except KeyError:  # project name check happening in other places.
-        #         gmpp = None
-        #     if gmpp is not None:
-        #         gmpp_list.append(p)
-        #     lower_g_dict["GMPP"] = gmpp_list
-
-        # group_dict[quarter] = lower_g_dict
-
-        # stage_dict = {}
-        # for quarter in list(raw_dict.keys())[:2]:  # just latest two quarters
-        #     lower_s_dict = {}
-        #     for stage_type in stage_list:
-        #         s_list = []
-        #         for p in raw_dict[quarter].keys():
-        #             p_stage = raw_dict[quarter][p]["stage"]
-        #             if p_stage == stage_type:
-        #                 s_list.append(p)
-        #         if stage_type is None:
-        #             if s_list:
-        #                 if "data_type" in self.kwargs:
-        #                     if self.kwargs["data_type"] == "cdg":
-        #                         continue  # not actively using stages for cdg data yet so can pass
-        #                 if quarter == self.current_quarter:
-        #                     for x in s_list:
-        #                         logger.critical(str(x) + " has no IPDC stage date")
-        #                         raise ProjectStageError(
-        #                             "Programme stopping as this could cause incomplete analysis"
-        #                         )
-        #                 else:
-        #                     for x in s_list:
-        #                         logger.warning(
-        #                             "In "
-        #                             + str(quarter)
-        #                             + " master "
-        #                             + str(x)
-        #                             + " IPDC stage data is currently None. Please amend."
-        #                         )
-        #         lower_s_dict[stage_type] = s_list
-        #     stage_dict[quarter] = lower_s_dict
-
-        self.meta_groupings = group_dict
-        # self.project_stage = stage_dict
 
     def get_quarter_list(self) -> None:
         output_list = []
@@ -331,7 +283,7 @@ class JsonData:
             "bl_info": self.master.bl_info,
             "current_projects": self.master.current_projects,
             "current_quarter": str(self.master.current_quarter),
-            "dft_groups": self.master.meta_groupings,  # change to meta_groupings
+            "dft_group": self.master.meta_groupings,  # change to meta_groupings
             "full_names": self.master.full_names,
             "kwargs": self.master.kwargs,
             "master_data": master_list,

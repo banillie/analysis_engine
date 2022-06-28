@@ -31,9 +31,9 @@ OP_ARGS_DICT = {
         # "order_by": "cost",
         "angles": [300, 360, 60],
         "none_handle": "none",
-    # },
-    #     "dashboard": str(cdg_root_path / "input/dashboard_master.xlsx"),
-    #     "narrative_dashboard": str(cdg_root_path / "input/narrative_dashboard_master.xlsx"),
-    #     "excel_save_path": str(cdg_root_path / "output/{}.xlsx"),
-    #     "word_save_path": str(cdg_root_path / "output/{}.docx")
+        "dashboard": str(ROOT_PATH / "input/dashboard_master.xlsx"),
+        "narrative_dashboard": str(ROOT_PATH / "input/narrative_dashboard_master.xlsx"),
+        "excel_save_path": str(ROOT_PATH / "output/{}.xlsx"),
+        "word_save_path": str(ROOT_PATH / "output/{}.docx"),
+        "word_landscape": str(ROOT_PATH / "input/summary_temp_landscape.docx")
 }

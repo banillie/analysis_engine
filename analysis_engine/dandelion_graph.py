@@ -464,9 +464,7 @@ class DandelionData:
                     if "same_size" in self.kwargs:
                         if self.kwargs["same_size"] == "Yes":
                             p_value = 6000
-                    p_data = get_correct_p_data(
-                        self.kwargs, self.master, self.baseline_type, p, tp
-                    )
+                    p_data = get_correct_p_data(self.master, p, tp)
                     try:  # this is for pipeline projects
                         if "confidence" in self.kwargs:  # change confidence type here
                             rag = p_data[DCA_KEYS[self.kwargs["confidence"]]]
@@ -483,7 +481,7 @@ class DandelionData:
                             colour = FACE_COLOUR
 
                     project_text = (
-                        self.master.abbreviations[p]["abb"]
+                        self.master['abbreviations'][p]["abb"]
                         + "\n"
                         + dandelion_number_text(p_value, **self.kwargs)
                     )
@@ -512,7 +510,7 @@ class DandelionData:
                         else:
                             edge_colour = "grey"
                     else:
-                        if p in self.master.meta_groupings[tp]["GMPP"]:
+                        if p in self.master['dft_group'][tp]["GMPP"]:
                             edge_colour = "#000000"
                             # edge_colour = COLOUR_DICT[p_data['SRO Forward Look Assessment']]
                         else:

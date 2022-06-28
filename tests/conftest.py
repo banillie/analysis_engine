@@ -46,9 +46,9 @@ def word_doc():
     return doc
 
 
-@pytest.fixture
-def word_doc_landscape():
-    return open_word_doc(os.path.join(os.getcwd(), "resources/summary_temp_landscape.docx"))
+# @pytest.fixture
+# def word_doc_landscape():
+#     return open_word_doc(os.path.join(os.getcwd(), "resources/summary_temp_landscape.docx"))
 
 
 # @pytest.fixture
