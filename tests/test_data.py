@@ -1,7 +1,8 @@
 import pytest
 
-from tests.test_op_args import REPORTING_TYPE, INITIATE_DICT, OP_ARGS_DICT, ROOT_PATH, CONFIG_PATH
+# from tests.test_op_args import REPORTING_TYPE, INITIATE_DICT, OP_ARGS_DICT, ROOT_PATH, CONFIG_PATH
 
+from analysis_engine.settings import INITIATE_DICT
 from analysis_engine.core_data import (
     PythonMasterData,
     get_master_data,
@@ -16,57 +17,48 @@ from analysis_engine.dandelion_graph import DandelionData, make_a_dandelion_auto
 
 from analysis_engine.render_utils import put_matplotlib_fig_into_word, get_input_doc
 
+SETTINGS_DICT = INITIATE_DICT['cdg']
+
 
 def test_get_project_information():
-    project_info = get_project_information(
-        CONFIG_PATH,
-        str(ROOT_PATH) + "/core_data/",
-    )
+    project_info = get_project_information(SETTINGS_DICT)
     assert isinstance(project_info, dict)
 
 
 def test_get_group_metadata_from_config():
-    GROUP_META = get_group_meta_data(CONFIG_PATH)
-    STAGE_META = get_stage_meta_data(CONFIG_PATH)
+    GROUP_META = get_group_meta_data(SETTINGS_DICT)
+    STAGE_META = get_stage_meta_data(SETTINGS_DICT)
 
     META = {**GROUP_META, **STAGE_META}
 
     assert isinstance(META, dict)
-    assert isinstance(META, dict)
+
+
+def test_get_master_data_paths():
+    md = get_master_data(SETTINGS_DICT)
+    assert isinstance(md, list)
 
 
 def test_saving_creating_json_master():
-    GROUP_META = get_group_meta_data(CONFIG_PATH)
-    STAGE_META = get_stage_meta_data(CONFIG_PATH)
+    GROUP_META = get_group_meta_data(SETTINGS_DICT)
+    STAGE_META = get_stage_meta_data(SETTINGS_DICT)
 
     META = {**GROUP_META, **STAGE_META}
 
-    # try:
     master = PythonMasterData(
-        get_master_data(
-            CONFIG_PATH,
-            str(ROOT_PATH) + "/core_data/",
-            INITIATE_DICT[REPORTING_TYPE]['callable'],
-        ),
-        get_project_information(
-            CONFIG_PATH,
-            str(ROOT_PATH) + "/core_data/",
-        ),
+        get_master_data(SETTINGS_DICT),
+        get_project_information(SETTINGS_DICT),
         META,
-        data_type=REPORTING_TYPE,
+        data_type=SETTINGS_DICT['report'],
     )
 
-    # except (ProjectNameError, ProjectGroupError, ProjectStageError) as e:
-    #     logger.critical(e)
-    #     sys.exit(1)
-
-    master_json_path = str("{0}/core_data/json/master".format(ROOT_PATH))
+    master_json_path = str("{0}/core_data/json/master".format(SETTINGS_DICT['root_path']))
     JsonData(master, master_json_path)
 
 
 def test_json_master():
     data = open_json_file(
-        f"/home/will/Documents/{REPORTING_TYPE}/core_data/json/master.json"
+        f"/home/will/Documents/{SETTINGS_DICT['report']}/core_data/json/master.json"
     )
     assert isinstance(data["master_data"], (list,))
 

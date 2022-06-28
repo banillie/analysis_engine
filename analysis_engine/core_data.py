@@ -1,9 +1,7 @@
 import configparser
 import json
-import platform
 import sys
 import datetime
-from pathlib import Path
 from typing import List, Dict, Union, Optional, Tuple, TextIO, Callable
 
 # from datetime import timedelta, date
@@ -13,6 +11,7 @@ from openpyxl import load_workbook
 
 from datamaps.process import Cleanser
 
+from analysis_engine.settings import report_config
 from analysis_engine.error_msgs import (
     ProjectNameError,
     ProjectGroupError,
@@ -28,36 +27,22 @@ from analysis_engine.error_msgs import (
     config_issue,
 )
 
-
-def _platform_docs_dir(dir: str) -> Path:
-    #  Cross plaform file path handling. The dir (directorary) controls the report type.
-    if platform.system() == "Linux":
-        return Path.home() / "Documents" / dir
-    if platform.system() == "Darwin":
-        return Path.home() / "Documents" / dir
-    else:
-        return Path.home() / "Documents" / dir
+## figure out way to set reporting type here
+# CONFIG_DICT = report_config()
 
 
-# root_path = _platform_docs_dir('ipdc')
-# cdg_root_path = _platform_docs_dir('cdg')
-
-
-def get_master_data(
-        confi_path: Path,
-        pi_path: Path,
-        func: Callable,
-) -> List[Dict[str, Union[str, int, datetime.date, float]]]:
+def get_master_data(config_dict) -> List[Dict[str, Union[str, int, datetime.date, float]]]:
     """Returns a list of dictionaries each containing quarter data"""
+    config_path = config_dict['root_path'] + config_dict['config']
     config = configparser.ConfigParser()
-    config.read(confi_path)
+    config.read(config_path)
     master_data_list = []
     for key in config["MASTERS"]:
         text = config["MASTERS"][key].split(", ")
         year = text[2]
         quarter = text[1]
-        m_path = str(pi_path) + text[0]
-        m = func(m_path, int(quarter), int(year))
+        m_path = config_dict['root_path'] + '/core_data/' + text[0]
+        m = config_dict['callable'](m_path, int(quarter), int(year))
         master_data_list.append(m)
 
     return list(reversed(master_data_list))
@@ -213,7 +198,6 @@ class PythonMasterData:
 
         self.meta_groupings = meta_groupings_meta
 
-
     def get_quarter_list(self) -> None:
         output_list = []
         for master in self.master_data:
@@ -298,16 +282,16 @@ class JsonData:
             json.dump(json_dict, write_file, default=json_date_converter)
 
 
-def get_group_meta_data(
-        confi_path: Path,
-) -> Dict:
+def get_group_meta_data(settings_dict) -> Dict:
     """
     Gets group metadata types from config file. This is necessary as terminology is set in the config file
     and must correspond to terms used in project information document.
     """
+
     try:
+        config_path = settings_dict['root_path'] + settings_dict['config']
         config = configparser.ConfigParser()
-        config.read(confi_path)
+        config.read(config_path)
         portfolio_group = json.loads(config.get("GROUPS", "portfolio_groups"))  # to return a list
         group_all = json.loads(config.get("GROUPS", "all_groups"))
     except:
@@ -321,16 +305,15 @@ def get_group_meta_data(
     return group_meta_dict
 
 
-def get_stage_meta_data(
-        confi_path: Path,
-) -> Dict:
+def get_stage_meta_data(settings_dict) -> Dict:
     """
     Gets stage metadata types from config file. This is necessary as terminology is set in the config file
     and must correspond to terms used in project information document.
     """
     try:
+        config_path = settings_dict['root_path'] + settings_dict['config']
         config = configparser.ConfigParser()
-        config.read(confi_path)
+        config.read(config_path)
         bc_stages = json.loads(config.get("GROUPS", "bc_stages"))
     except:
         config_issue()
@@ -377,50 +360,34 @@ def get_project_info_data(master_file: str) -> Dict:
     return p_dict
 
 
-def get_project_information(
-        confi_path: Path,
-        root_path: Path,
-) -> Dict[str, Union[str, int]]:
+def get_project_information(settings_dict) -> Dict[str, Union[str, int]]:
     """Returns dictionary containing all project meta data. confi_path is the config.ini file path.
     root_path is the core data root_path."""
+    config_path = settings_dict['root_path'] + settings_dict['config']
     config = configparser.ConfigParser()
-    config.read(confi_path)
-    path = str(root_path) + config["PROJECT INFO"]["projects"]
+    config.read(config_path)
+    path = str(settings_dict['root_path']) + '/core_data/' + config["PROJECT INFO"]["projects"]
     return get_project_info_data(path)
 
 
-def get_core(
-        reporting_type: str,
-        config_file: str,
-        func: Callable,  # e.g. project_data_from_master
-) -> None:
-    root_path = _platform_docs_dir(reporting_type)
-    config_path = str(root_path) + config_file
-    GROUP_META = get_group_meta_data(config_path)
-    STAGE_META = get_stage_meta_data(config_path)
-
+def get_core(settings_dict) -> None:
+    GROUP_META = get_group_meta_data(settings_dict)
+    STAGE_META = get_stage_meta_data(settings_dict)
     META = {**GROUP_META, **STAGE_META}
 
     try:
         master = PythonMasterData(
-            get_master_data(
-                config_path,
-                str(root_path) + "/core_data/",
-                func,
-            ),
-            get_project_information(
-                config_path,
-                str(root_path) + "/core_data/",
-            ),
+            get_master_data(settings_dict),
+            get_project_information(settings_dict),
             META,
-            data_type=reporting_type,
+            data_type=settings_dict['report'],
         )
 
     except (ProjectNameError, ProjectGroupError, ProjectStageError) as e:
         logger.critical(e)
         sys.exit(1)
 
-    master_json_path = str("{0}/core_data/json/master".format(root_path))
+    master_json_path = str("{0}/core_data/json/master".format(settings_dict['root_path']))
     JsonData(master, master_json_path)
 
 

@@ -11,7 +11,7 @@ from analysis_engine import __version__
 from datamaps.api import project_data_from_master, project_data_from_master_month
 
 from analysis_engine.core_data import get_core
-from analysis_engine.config import report_config
+from analysis_engine.settings import report_config
 # from analysis_engine.ar_data import get_gmpp_ar_data
 
 from analysis_engine.data import (
@@ -46,7 +46,7 @@ from analysis_engine.data import (
     build_speedials,
     get_sp_data,
     # DFT_GROUP,
-    get_input_doc,
+    # get_input_doc,
     # InputError,
     # JsonMaster,
     # JsonData,
@@ -115,17 +115,14 @@ def command_sorting(flag_args, ae_config):
         run_outputs(vars(flag_args))
 
 
-def initiate(conf_dict):
+def initiate(settings_dict):
     print("creating a master data file.")
-    get_core(
-        reporting_type=conf_dict['report'],
-        config_file=conf_dict['config'],
-        func=conf_dict['callable'],
-    )
+    get_core(settings_dict)
     logger.info("The latest master and project information match. Data has been loaded into memory.")
 
 
 def run_outputs(args):
+    pass
 
 
 def ipdc_run_general(args):

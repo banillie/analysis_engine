@@ -1,6 +1,6 @@
 from datamaps.api import project_data_from_master
 
-from analysis_engine.core_data import _platform_docs_dir
+# from analysis_engine.core_data import _platform_docs_dir
 
 
 REPORTING_TYPE = "cdg"
@@ -22,7 +22,7 @@ OP_ARGS_DICT = {
         "group": ["SCS", "CFPD", "GF"],
         # "group": ["SCS", "GF"],
         "chart": "show",
-        "data_type": "cdg",
+        # "data_type": "cdg",
         # "type": "income",
         "blue_line": "CDG",
         "dates": ["1/10/2021", "1/10/2022"],
