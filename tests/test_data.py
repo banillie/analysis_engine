@@ -1,8 +1,8 @@
 import pytest
 
-# from tests.test_op_args import REPORTING_TYPE, INITIATE_DICT, OP_ARGS_DICT, ROOT_PATH, CONFIG_PATH
+from tests.test_op_args import REPORTING_TYPE, OP_ARGS_DICT
 
-from analysis_engine.settings import INITIATE_DICT
+from analysis_engine.settings import report_config
 from analysis_engine.core_data import (
     PythonMasterData,
     get_master_data,
@@ -17,7 +17,7 @@ from analysis_engine.dandelion_graph import DandelionData, make_a_dandelion_auto
 
 from analysis_engine.render_utils import put_matplotlib_fig_into_word, get_input_doc
 
-SETTINGS_DICT = INITIATE_DICT['cdg']
+SETTINGS_DICT = report_config(REPORTING_TYPE)
 
 
 def test_get_project_information():
@@ -67,6 +67,7 @@ def test_get_project_abbreviations():
     data = open_json_file(
         f"/home/will/Documents/{REPORTING_TYPE}/core_data/json/master.json"
     )
+    ## THESE ARE REPORTING SPECIFIC. NEED TO GENRALISE
     assert data["abbreviations"]["Elizabeth House"]["abb"] == "EH"
     assert (
             data["abbreviations"]["Elizabeth House"]["full name"] == "Elizabeth House"
@@ -77,12 +78,14 @@ def test_build_dandelion_graph():
     md = open_json_file(
         f"/home/will/Documents/{REPORTING_TYPE}/core_data/json/master.json"
     )
-    dmd = DandelionData(md, **OP_ARGS_DICT)
-    d_lion = make_a_dandelion_auto(dmd, **OP_ARGS_DICT)
-    doc = get_input_doc(OP_ARGS_DICT["word_landscape"])
+    combined_args = {**OP_ARGS_DICT, **SETTINGS_DICT}
+    dmd = DandelionData(md, **combined_args)
+    d_lion = make_a_dandelion_auto(dmd, **combined_args)
+    doc_path = str(SETTINGS_DICT['root_path']) + SETTINGS_DICT['word_landscape']
+    doc = get_input_doc(doc_path)
     put_matplotlib_fig_into_word(doc, d_lion)
-    doc.save(OP_ARGS_DICT["word_save_path"].format('dandelion'))
-
+    doc_output_path = str(SETTINGS_DICT['root_path']) + SETTINGS_DICT["word_save_path"]
+    doc.save(doc_output_path.format('dandelion'))
 
 
 @pytest.mark.skip(reason="refactor required")

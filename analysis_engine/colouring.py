@@ -22,3 +22,17 @@ COLOUR_DICT = {
 }
 
 FACE_COLOUR = "#a0c1d5"
+
+# for colouring group circles
+# circle_colours = [
+#     "#263552",
+#     "#f1ad64",
+#     "#983d3f",
+#     "#6b4351"
+# ]
+# circle_colours = [
+#     "#ae4553",
+#     "#f28335",
+#     "#2b7b62",
+#     "#efc15f"
+# ]

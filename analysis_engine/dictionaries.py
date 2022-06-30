@@ -37,13 +37,18 @@ BC_STAGE_DICT = {
     "Ongoing Board papers": None,
 }
 
-
 DCA_KEYS = {
     "sro": "Departmental DCA",
     "finance": "SRO Finance confidence",
     "benefits": "SRO Benefits RAG",
     "schedule": "SRO Schedule Confidence",
     "resource": "Overall Resource DCA - Now",
+}
+
+STANDARDISE_DCA_KEYS = {
+    'cdg': 'Overall Delivery Confidence',
+    'top_250': None,
+    'ipdc': 'Departmental DCA',
 }
 
 

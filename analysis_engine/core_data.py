@@ -84,6 +84,7 @@ class PythonMasterData:
         self.master_data = master_data
         self.project_information = project_information
         self.all_groups = meta['all_groups']
+        self.portfolio_groups = meta["port_group"]
         self.stages = meta['stages']
         self.all_projects = list(project_information.keys())
         self.kwargs = kwargs
@@ -102,12 +103,11 @@ class PythonMasterData:
         self.check_project_abbreviations()
         self.check_project_names()
         self.get_and_check_groupings()
-
         self.get_quarter_list()
         self.pipeline_projects_information()
         self.get_current_tp()
 
-    # why is this collecting full names also?
+    # why is this collecting full names also? Seems silly.
     def check_project_abbreviations(self) -> None:
         """gets the abbreviations for all current projects. held in the project info document"""
         abb_dict = {}
@@ -267,6 +267,8 @@ class JsonData:
             "bl_info": self.master.bl_info,
             "current_projects": self.master.current_projects,
             "current_quarter": str(self.master.current_quarter),
+            "groups": self.master.portfolio_groups,
+            "stages": self.master.stages,
             "dft_group": self.master.meta_groupings,  # change to meta_groupings
             "full_names": self.master.full_names,
             "kwargs": self.master.kwargs,

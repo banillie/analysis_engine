@@ -1,41 +1,27 @@
-from typing import List
+import datetime
+from typing import List, Union, Dict
 
 from analysis_engine.error_msgs import logger, ProjectNameError, not_recognised_project_or_group
 
 
 def get_iter_list(class_kwargs, master) -> List[str]:
     iter_list = []
-    if "baseline" in class_kwargs:
-        if class_kwargs["baseline"] == ["standard"]:
-            iter_list = ["current", "last", "bl_one"]
-        elif class_kwargs["baseline"] == ["all"]:
-            iter_list = ["current", "last", "bl_one", "bl_two", "bl_three"]
-        elif class_kwargs["baseline"] == ["standard"]:
-            iter_list = ["current", "last", "bl_one"]
-        else:
-            iter_list = class_kwargs["baseline"]
-
-    elif "quarter" in class_kwargs:
-        if class_kwargs["quarter"] == ["standard"]:
-            iter_list = [
-                master.quarter_list[0],
-                master.quarter_list[1],
-            ]
-        elif class_kwargs["quarter"] == ["all"]:
-            iter_list = master.quarter_list
-        else:
-            iter_list = class_kwargs["quarter"]
+    if class_kwargs["quarter"] == ["standard"]:
+        iter_list = [
+            master['quarter_list'][0],
+            master['quarter_list'][1],
+        ]
+    elif class_kwargs["quarter"] == ["all"]:
+        iter_list = master['quarter_list']
+    else:
+        iter_list = class_kwargs["quarter"]
 
     return iter_list
 
 
-def cal_group(input_list: List[str] or List[List[str]], md, tp_indx: int,
-        # input_list_indx=None,
-) -> List[str]:
-    """
-    What does this do?
-    """
-
+def cal_group(group: List[str] or List[List[str]], md, tp_indx: int,
+              # input_list_indx=None,
+              ) -> List[str]:
     error_case = []
     output = []
     # if input_list_indx or input_list_indx == 0:
@@ -45,7 +31,7 @@ def cal_group(input_list: List[str] or List[List[str]], md, tp_indx: int,
     # else:
     #     inner_list = input_list
     q_str = md['quarter_list'][tp_indx]  # quarter string
-    for g in input_list:  # pg is project/group
+    for g in group:  # pg is project/group
         if g == "pipeline":
             continue
         try:
@@ -70,25 +56,15 @@ def cal_group(input_list: List[str] or List[List[str]], md, tp_indx: int,
 
 
 def get_group(md, tp: str, class_kwargs, group_indx=None) -> List[str]:
-    ##  baselines not in use
-    # if "baseline" in class_kwargs:
-    #     tp_indx = 0  # baseline uses latest project group only
-    # elif "quarter" in class_kwargs:
-
     tp_indx = md['quarter_list'].index(tp)
 
     if "stage" in class_kwargs:
-        # if group_indx or group_indx == 0:
-        #     group = cal_group(class_kwargs["stage"], md, tp_indx, group_indx)
-        # else:
         group = cal_group(class_kwargs["stage"], md, tp_indx)
     elif "group" in class_kwargs:
-        # if group_indx or group_indx == 0:
-        #     group = cal_group(class_kwargs["group"], md, tp_indx, group_indx)
-        # else:
         group = cal_group(class_kwargs["group"], md, tp_indx)
     else:
-        group = cal_group(md.current_projects, md, tp_indx)
+        # group = cal_group(md['current_projects'], md, tp_indx)  # why is this current_projects
+        group = cal_group(md['groups'], md, tp_indx)  # why is this current_projects
 
     if "remove" in class_kwargs:
         group = remove_from_group(
@@ -97,13 +73,11 @@ def get_group(md, tp: str, class_kwargs, group_indx=None) -> List[str]:
     return group
 
 
-
 def remove_from_group(
         pg_list: List[str],
         remove_list: List[str] or List[list[str]],
         master,
         tp_index: int,
-        c_kwargs,  # class_kwargs
 ) -> List[str]:
     if any(isinstance(x, list) for x in remove_list):
         remove_list = [item for sublist in remove_list for item in sublist]
@@ -136,19 +110,20 @@ def remove_from_group(
         for p in removed_case:
             logger.info(p + " successfully removed from analysis.")
 
-        ## not sure why quarter / baseline is important hashing for now.
-        # if "baseline" in c_kwargs:
-        #     for p in removed_case:
-        #         logger.critical(p + " not a recognised.")
-        #     raise ProjectNameError(
-        #         'Program stopping. Please check the "remove" entry and re-enter.'
-        #     )
-        # if "quarter" in c_kwargs:
-        #     for p in removed_case:
-        #         logger.info(
-        #             p + " not a recognised or not present in " + q_str + "."
-        #             '"So not removed from the data for that quarter. Make sure the '
-        #             '"remove" entry is correct.'
-        #         )
-
     return pg_list
+
+
+def get_correct_p_data(
+        master,
+        project_name: str,
+        time_period: str,
+) -> Dict[str, Union[str, int, datetime.date, float]]:
+    tp_idx = master['quarter_list'].index(time_period)
+    try:
+        return master['master_data'][tp_idx]['data'][project_name]
+    except KeyError: # KeyError handles project not reporting in quarter.
+        return None
+
+
+def get_quarter_index(md, tp):
+    return md['quarter_list'].index(tp)
