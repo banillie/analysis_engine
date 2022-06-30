@@ -4,7 +4,7 @@ import os
 from datamaps.api import project_data_from_master
 
 from analysis_engine.core_data import get_core, get_project_information
-from analysis_engine.data import open_word_doc
+# from analysis_engine.data import open_word_doc
 # from analysis_engine.config import _platform_docs_dir
 
 

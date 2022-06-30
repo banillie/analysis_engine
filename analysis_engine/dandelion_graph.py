@@ -210,19 +210,13 @@ class DandelionData:
 
     def get_data(self):
         dca_confidence = STANDARDISE_DCA_KEYS[self.kwargs['report']]
+        tp = self.iter_list[0]  ## needs refactor
 
-        # self.iter_list = get_iter_list(self.kwargs, self.master)[0]
-        tp = get_iter_list(self.kwargs, self.master)[0]
-
-        #  for dandelion need groups of groups.
-        # if "group" in self.kwargs:
-        #     self.group = self.kwargs["group"]
-        # elif "stage" in self.kwargs:
-        #     # old code here that needs tidy at some point!
-        #     self.group = self.kwargs["stage"]
-        #     self.kwargs["group"] = self.kwargs["stage"]
-
-        self.group = self.kwargs['group']
+        try:
+            self.group = self.kwargs['group']
+        except KeyError:
+            self.group = self.kwargs['stage']
+            del self.kwargs['stage']
 
         if "angles" in self.kwargs:
             if len(self.kwargs["angles"]) == len(self.group):

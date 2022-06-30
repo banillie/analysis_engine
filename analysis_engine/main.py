@@ -63,8 +63,7 @@ from analysis_engine.data import (
 # from analysis_engine.ar_data import get_ar_data, ar_run_p_reports
 from analysis_engine.gmpp_int import get_gmpp_data
 
-from analysis_engine.error_msgs import logger, ConfigurationError
-
+from analysis_engine.error_msgs import logger, ConfigurationError, ProjectNameError, InputError
 
 
 # As more and more meta data going into config could use a refactor to collect it all in
@@ -129,22 +128,26 @@ def run_analysis(args, settings):
     op_args = {
         k: v for k, v in args.items() if v is not None
     }
-    # print(op_args)
     set_default_args(op_args, md['groups'], md['current_quarter'])
     combined_args = {**op_args, **settings}
 
-    if programme == "dandelion":
-        d_data = DandelionData(md, **combined_args)
-        if "chart" not in combined_args:
-            op_args["chart"] = False
-            d_graph = make_a_dandelion_auto(d_data, **combined_args)
-            doc_path = str(combined_args['root_path']) + combined_args['word_landscape']
-            doc = get_input_doc(doc_path)
-            put_matplotlib_fig_into_word(doc, d_graph)
-            doc_output_path = str(combined_args['root_path']) + combined_args["word_save_path"]
-            doc.save(doc_output_path.format('dandelion'))
-        if op_args["chart"] == "show":
-            make_a_dandelion_auto(d_data, **op_args)
+    try:
+        if programme == "dandelion":
+            d_data = DandelionData(md, **combined_args)
+            if "chart" not in combined_args:
+                op_args["chart"] = False
+                d_graph = make_a_dandelion_auto(d_data, **combined_args)
+                doc_path = str(combined_args['root_path']) + combined_args['word_landscape']
+                doc = get_input_doc(doc_path)
+                put_matplotlib_fig_into_word(doc, d_graph)
+                doc_output_path = str(combined_args['root_path']) + combined_args["word_save_path"]
+                doc.save(doc_output_path.format('dandelion'))
+            if op_args["chart"] == "show":
+                make_a_dandelion_auto(d_data, **op_args)
+
+    except (ProjectNameError, FileNotFoundError, InputError) as e:
+        logger.critical(e)
+        sys.exit(1)
 
 
 def ipdc_run_general(args):
@@ -620,6 +623,120 @@ def return_koi_fn_keys(oa: Dict):  # op_args
         return oa
 
 
+def run_parsers():
+    report_type = sys.argv[1]
+
+    parser = argparse.ArgumentParser(
+        description=f'runs all analysis for {report_type} reporting'
+    )
+    subparsers = parser.add_subparsers(dest="subparser_name")
+    subparsers.metavar = "                      "
+    parser_initiate = subparsers.add_parser(
+        "initiate", help="creates a master data file"
+    )
+    # cdg_parser_milestones = subparsers.add_parser(
+    #     "milestones",
+    #     help="milestone schedule graphs and data.",
+    # )
+    dandelion_description = (
+        "Creates the 'dandelion' graph. See below optional arguments for changing the "
+        "dandelion that is compiled. The command analysis dandelion returns the default "
+        'dandelion graph. The user must specify --chart "save" to save the chart, otherwise '
+        "only a temporary chart will be generated."
+    )
+    parser_dandelion = subparsers.add_parser(
+        "dandelion",
+        help="Dandelion graph.",
+        description=dandelion_description,
+    )
+    # dashboard_description = (
+    #     "Creates CDG dashboards. There are no optional arguments for this command.\n\n"
+    #     "A blank master dashboard titled dashboards_master.xlsx must be in input file.\n\n"
+    #     "A completed dashboard title completed_cdg_dashboard.xlsx will be placed into\n"
+    #     "the output file."
+    # )
+    # cdg_parser_dashboard = subparsers.add_parser(
+    #     "dashboards",
+    #     help="CDG dashboard",
+    #     description=dashboard_description,
+    #     formatter_class=RawTextHelpFormatter,
+    # )
+
+    # cdg_parser_speedial = subparsers.add_parser(
+    #     "speedial", help="speed dial analysis"
+    # )
+
+    # cdg_parser_milestones.add_argument(
+    #     "--dates",
+    #     type=str,
+    #     metavar="",
+    #     action="store",
+    #     nargs=2,
+    #     help="dates for analysis. Must provide start date and then end date in format e.g. '1/1/2021' '1/1/2022'.",
+    # )
+
+    # cdg_parser_milestones.add_argument(
+    #     "--blue_line",
+    #     type=str,
+    #     metavar="",
+    #     action="store",
+    #     help="Insert blue line into chart to represent a date. "
+    #          'Options are "Today" "CDG" or a date in correct format e.g. "1/1/2021".',
+    # )
+
+    for sub in [
+        # cdg_parser_milestones,
+        parser_dandelion,
+    ]:
+        sub.add_argument(
+            "--chart",
+            type=str,
+            metavar="",
+            action="store",
+            choices=["show", "save"],
+            help="options for building and saving graph output. Commands are 'show' or 'save' ",
+        )
+
+    # quarter
+    for sub in [
+        # cdg_parser_speedial,
+        parser_dandelion,
+        # cdg_parser_milestones,
+    ]:
+        sub.add_argument(
+            "--quarter",
+            type=str,
+            metavar="",
+            action="store",
+            nargs="+",
+            help="Returns analysis for one or combination of specified quarters. "
+                 'User must use correct format e.g "Q3 19/20"',
+        )
+
+    parser_dandelion.add_argument(
+        "--angles",
+        type=int,
+        metavar="",
+        action="store",
+        nargs="+",
+        # choices=['sro', 'finance', 'benefits', 'schedule', 'resource'],
+        help="Use can manually enter angles for group bubbles",
+    )
+
+    parser_dandelion.add_argument(
+        "--type",
+        type=str,
+        metavar="",
+        action="store",
+        choices=["benefits", "income"],
+        help="Provide the type of value to include in dandelion. Options are"
+             ' "benefits" or "income".',
+    )
+
+    cli_args = parser.parse_args(sys.argv[2:])
+    settings_switch(cli_args, report_type)
+
+
 class main:
     def __init__(self):
         ae_description = (
@@ -638,8 +755,7 @@ class main:
             "command",
             help="Initial command to specify whether ipdc, top2_50, cdg analysis if required",
         )
-        # parse_args defaults to [1:] for args, but you need to
-        # exclude the rest of the args too, or validation will fail
+
         args = parser.parse_args(sys.argv[1:2])
         if vars(args)["command"] not in ["ipdc", "top_250", "cdg"]:
             print("Unrecognised command. Options are ipdc, top250 or cdg")
@@ -1175,115 +1291,7 @@ class main:
             top250_run_general(vars(args))
 
     def cdg(self):
-        parser = argparse.ArgumentParser(
-            description="runs all analysis for cdg reporting"
-        )
-        subparsers = parser.add_subparsers(dest="subparser_name")
-        subparsers.metavar = "                      "
-        cdg_parser_initiate = subparsers.add_parser(
-            "initiate", help="creates a master data file"
-        )
-        cdg_parser_milestones = subparsers.add_parser(
-            "milestones",
-            help="milestone schedule graphs and data.",
-        )
-        dandelion_description = (
-            "Creates the 'dandelion' graph. See below optional arguments for changing the "
-            "dandelion that is compiled. The command analysis dandelion returns the default "
-            'dandelion graph. The user must specify --chart "save" to save the chart, otherwise '
-            "only a temporary matplotlib chart will be generated."
-        )
-        cdg_parser_dandelion = subparsers.add_parser(
-            "dandelion",
-            help="Dandelion graph.",
-            description=dandelion_description,
-        )
-        dashboard_description = (
-            "Creates CDG dashboards. There are no optional arguments for this command.\n\n"
-            "A blank master dashboard titled dashboards_master.xlsx must be in input file.\n\n"
-            "A completed dashboard title completed_cdg_dashboard.xlsx will be placed into\n"
-            "the output file."
-        )
-        cdg_parser_dashboard = subparsers.add_parser(
-            "dashboards",
-            help="CDG dashboard",
-            description=dashboard_description,
-            formatter_class=RawTextHelpFormatter,
-        )
-
-        cdg_parser_speedial = subparsers.add_parser(
-            "speedial", help="speed dial analysis"
-        )
-
-        cdg_parser_milestones.add_argument(
-            "--dates",
-            type=str,
-            metavar="",
-            action="store",
-            nargs=2,
-            help="dates for analysis. Must provide start date and then end date in format e.g. '1/1/2021' '1/1/2022'.",
-        )
-
-        cdg_parser_milestones.add_argument(
-            "--blue_line",
-            type=str,
-            metavar="",
-            action="store",
-            help="Insert blue line into chart to represent a date. "
-                 'Options are "Today" "CDG" or a date in correct format e.g. "1/1/2021".',
-        )
-
-        for sub in [
-            cdg_parser_milestones,
-            cdg_parser_dandelion,
-        ]:
-            sub.add_argument(
-                "--chart",
-                type=str,
-                metavar="",
-                action="store",
-                choices=["show", "save"],
-                help="options for building and saving graph output. Commands are 'show' or 'save' ",
-            )
-
-        # quarter
-        for sub in [
-            cdg_parser_speedial,
-            cdg_parser_dandelion,
-            cdg_parser_milestones,
-        ]:
-            sub.add_argument(
-                "--quarter",
-                type=str,
-                metavar="",
-                action="store",
-                nargs="+",
-                help="Returns analysis for one or combination of specified quarters. "
-                     'User must use correct format e.g "Q3 19/20"',
-            )
-
-        cdg_parser_dandelion.add_argument(
-            "--angles",
-            type=int,
-            metavar="",
-            action="store",
-            nargs="+",
-            # choices=['sro', 'finance', 'benefits', 'schedule', 'resource'],
-            help="Use can manually enter angles for group bubbles",
-        )
-
-        cdg_parser_dandelion.add_argument(
-            "--type",
-            type=str,
-            metavar="",
-            action="store",
-            choices=["benefits", "income"],
-            help="Provide the type of value to include in dandelion. Options are"
-                 ' "benefits" or "income".',
-        )
-
-        cli_args = parser.parse_args(sys.argv[2:])
-        settings_switch(cli_args, 'cdg')
+        run_parsers()
 
 
 if __name__ == "__main__":

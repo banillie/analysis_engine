@@ -1,7 +1,8 @@
 import datetime
 from typing import List, Union, Dict
 
-from analysis_engine.error_msgs import logger, ProjectNameError, not_recognised_project_or_group
+from analysis_engine.error_msgs import logger, ProjectNameError, not_recognised_project_group_or_stage, \
+    not_recognised_quarter
 
 
 def get_iter_list(class_kwargs, master) -> List[str]:
@@ -24,12 +25,6 @@ def cal_group(group: List[str] or List[List[str]], md, tp_indx: int,
               ) -> List[str]:
     error_case = []
     output = []
-    # if input_list_indx or input_list_indx == 0:
-    #     input_list = [input_list[input_list_indx]]
-    # if any(isinstance(x, list) for x in input_list):
-    #     inner_list = [item for sublist in input_list for item in sublist]
-    # else:
-    #     inner_list = input_list
     q_str = md['quarter_list'][tp_indx]  # quarter string
     for g in group:  # pg is project/group
         if g == "pipeline":
@@ -37,10 +32,6 @@ def cal_group(group: List[str] or List[List[str]], md, tp_indx: int,
         try:
             local_g = md['dft_group'][q_str][g]
             output += local_g
-        # except KeyError:
-        #     try:
-        #         local_g = md['dft_group'][q_str][g]
-        #         output += local_g
         except KeyError:
             try:
                 output.append(md['abbreviations'][g]["full name"])
@@ -50,13 +41,16 @@ def cal_group(group: List[str] or List[List[str]], md, tp_indx: int,
                 except KeyError:
                     error_case.append(g)
 
-    not_recognised_project_or_group(error_case)
+    not_recognised_project_group_or_stage(error_case)
 
     return output
 
 
 def get_group(md, tp: str, class_kwargs, group_indx=None) -> List[str]:
-    tp_indx = md['quarter_list'].index(tp)
+    try:
+        tp_indx = md['quarter_list'].index(tp)
+    except ValueError:
+        not_recognised_quarter(tp)
 
     if "stage" in class_kwargs:
         group = cal_group(class_kwargs["stage"], md, tp_indx)

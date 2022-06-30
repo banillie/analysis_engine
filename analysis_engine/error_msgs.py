@@ -102,10 +102,14 @@ def abbreviation_error(error_cases):
         )
 
 
-def not_recognised_project_or_group(error_case):
+def not_recognised_project_group_or_stage(error_case):
     if error_case:
         for p in error_case:
-            logger.critical(p + " not a recognised project or group")
+            logger.critical(p + " not a recognised project or group or stage name")
         raise ProjectNameError(
-            "Program stopping. Please check project or group name and re-enter."
+            "Program stopping. Please check project, group or stage names being entered."
         )
+
+
+def not_recognised_quarter(error):
+    raise InputError(error + ' not a recognised quarter. Program stopped. Please re-enter.')

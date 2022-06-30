@@ -74,18 +74,20 @@ def test_get_project_abbreviations():
     )  # to take 'full name' out as silly!
 
 
+# There are a large number of different combinations that need to be tested.
 def test_build_dandelion_graph():
     md = open_json_file(
         f"/home/will/Documents/{REPORTING_TYPE}/core_data/json/master.json"
     )
-    combined_args = {**OP_ARGS_DICT, **SETTINGS_DICT}
-    dmd = DandelionData(md, **combined_args)
-    d_lion = make_a_dandelion_auto(dmd, **combined_args)
-    doc_path = str(SETTINGS_DICT['root_path']) + SETTINGS_DICT['word_landscape']
-    doc = get_input_doc(doc_path)
-    put_matplotlib_fig_into_word(doc, d_lion)
-    doc_output_path = str(SETTINGS_DICT['root_path']) + SETTINGS_DICT["word_save_path"]
-    doc.save(doc_output_path.format('dandelion'))
+    for x in OP_ARGS_DICT:
+        combined_args = {**x, **SETTINGS_DICT}
+        dmd = DandelionData(md, **combined_args)
+        d_lion = make_a_dandelion_auto(dmd, **combined_args)
+        doc_path = str(SETTINGS_DICT['root_path']) + SETTINGS_DICT['word_landscape']
+        doc = get_input_doc(doc_path)
+        put_matplotlib_fig_into_word(doc, d_lion)
+        doc_output_path = str(SETTINGS_DICT['root_path']) + SETTINGS_DICT["word_save_path"]
+        doc.save(doc_output_path.format('dandelion'))
 
 
 @pytest.mark.skip(reason="refactor required")
