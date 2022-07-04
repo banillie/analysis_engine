@@ -53,7 +53,6 @@ STANDARDISE_DCA_KEYS = {
 
 FONT_TYPE = ["sans serif", "Ariel"]
 
-
 BEN_TYPE_KEY_LIST = [
     (
         "Pre-profile BEN Forecast Gov Cashable",
@@ -117,6 +116,11 @@ STANDARDISE_COST_KEYS = {
     'income_total': {'cdg': 'Total Income'}
 }
 
+STANDARDISE_BEN_KEYS = {
+    'delivered': {'cdg': 'Benefits delivered'},
+    'remaining': {'cdg': 'Benefits to be delivered'},
+    'total': {'cdg': 'Total Benefits'},
+}
 
 def convert_rag_text(dca_rating: str) -> str:
     """Converts RAG name into a acronym"""

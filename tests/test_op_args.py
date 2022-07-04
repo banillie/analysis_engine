@@ -1,16 +1,16 @@
+# should include some settings that are wrong to test error messaging
+
 REPORTING_TYPE = "cdg"
 
-chart = True
+dlion_chart = False
 
-## should include some settings that are wrong to test error messaging
-
-standard = {
-    "chart": chart,
+dlion_standard = {
+    "chart": dlion_chart,
 }
 
-two_groups = {"group": ["SCS", "CFPD"], "chart": chart}
+dlion_groups = {"group": ["SCS", "CFPD"], "chart": dlion_chart}
 
-stages = {
+dlion_stages = {
     "stage": [
         "pre-Strategic Outline Case",
         "Strategic Outline Case",
@@ -18,32 +18,38 @@ stages = {
         "Full Business Case",
         "Ongoing Board papers",
     ],
-    "chart": chart,
+    "chart": dlion_chart,
 }
 
-change_quarter = {
+dlion_quarter = {
     "quarter": ["Q2 21/22"],
     "group": ["SCS", "CFPD", "GF"],
-    "chart": chart,
+    "chart": dlion_chart,
 }
 
-change_angles = {
+dlion_angles = {
     'angles': [300, 360, 60],
-    'chart': chart
+    'chart': dlion_chart
 }
 
-benefits = {
+dlion_benefits = {
     'type': 'benefits',
-    'chart': chart,
+    'chart': dlion_chart,
 }
 
-OP_ARGS_DICT = [
-    benefits,
-    # change_angles,
-    # change_quarter,
-    # stages,
-    # two_groups,
-    # standard,
+dlion_income = {
+    'type': 'income',
+    'chart': dlion_chart,
+}
+
+DANDELION_OP_ARGS_DICT = [
+    dlion_income,
+    dlion_benefits,
+    dlion_angles,
+    dlion_quarter,
+    dlion_stages,
+    dlion_groups,
+    dlion_standard,
 ]
 
 # "group": ["SCS", "GF"],

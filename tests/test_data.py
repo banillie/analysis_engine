@@ -1,6 +1,6 @@
 import pytest
 
-from tests.test_op_args import REPORTING_TYPE, OP_ARGS_DICT
+from tests.test_op_args import REPORTING_TYPE, DANDELION_OP_ARGS_DICT
 
 from analysis_engine.settings import report_config, set_default_args
 from analysis_engine.core_data import (
@@ -13,7 +13,7 @@ from analysis_engine.core_data import (
     open_json_file,
 )
 
-from analysis_engine.dandelion_graph import DandelionData, make_a_dandelion_auto
+from analysis_engine.dandelion import DandelionData, make_a_dandelion_auto
 
 from analysis_engine.render_utils import put_matplotlib_fig_into_word, get_input_doc
 
@@ -79,7 +79,7 @@ def test_build_dandelion_graph():
     md = open_json_file(
         f"/home/will/Documents/{REPORTING_TYPE}/core_data/json/master.json"
     )
-    for x in OP_ARGS_DICT:
+    for x in DANDELION_OP_ARGS_DICT:
         set_default_args(x, md['groups'], md['current_quarter'])
         combined_args = {**x, **SETTINGS_DICT}
         dmd = DandelionData(md, **combined_args)

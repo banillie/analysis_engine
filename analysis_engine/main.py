@@ -7,7 +7,7 @@ import configparser
 
 from analysis_engine import __version__
 from analysis_engine.core_data import get_core, open_json_file
-from analysis_engine.dandelion_graph import DandelionData, make_a_dandelion_auto
+from analysis_engine.dandelion import DandelionData, make_a_dandelion_auto
 from analysis_engine.render_utils import get_input_doc, put_matplotlib_fig_into_word
 from analysis_engine.settings import report_config, set_default_args
 
