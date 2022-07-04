@@ -4276,12 +4276,6 @@
 # #     pass
 #
 #
-# CPG_DCA_KEYS = {
-#     "sro": "Overall Delivery Confidence",
-#     "finance": "Costs Confidence",
-#     "benefits": "Benefits Confidence",
-#     "schedule": "Schedule Confidence",
-# }
 #
 # DCA_RATING_SCORES = {
 #     "Green": 5,

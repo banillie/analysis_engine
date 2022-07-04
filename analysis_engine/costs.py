@@ -7,8 +7,7 @@ from analysis_engine.error_msgs import logger
 class CostData:
     def __init__(self, master, **kwargs):
         self.master = master
-        self.baseline_type = "ipdc_costs"
-        self.kwargs = kwargs   # If this needed?
+        self.kwargs = kwargs
         self.report = kwargs['report']
         self.iter_list = get_iter_list(self.kwargs['quarter'], self.master['quarter_list'])
         # self.start_group = []

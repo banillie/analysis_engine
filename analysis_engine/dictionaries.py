@@ -1,19 +1,16 @@
-
-
-
 RAG_RANKING_DICT_NUMBER = {
-    6: 'Green',  # in case combo of green and improving.
-    5: 'Green',
-    4: 'Amber/Green',
-    3: 'Amber',
-    2: 'Amber/Red',
-    1: 'Red',
-    0: None
+    6: "Green",  # in case combo of green and improving.
+    5: "Green",
+    4: "Amber/Green",
+    3: "Amber",
+    2: "Amber/Red",
+    1: "Red",
+    0: None,
 }
 RAG_RANKING_DICT_COLOUR = {
-    'Green': 5,
-    'Amber': 3,
-    'Red': 1,
+    "Green": 5,
+    "Amber": 3,
+    "Red": 1,
     None: 0,
 }
 
@@ -38,17 +35,27 @@ BC_STAGE_DICT = {
 }
 
 DCA_KEYS = {
-    "sro": "Departmental DCA",
-    "finance": "SRO Finance confidence",
-    "benefits": "SRO Benefits RAG",
-    "schedule": "SRO Schedule Confidence",
-    "resource": "Overall Resource DCA - Now",
+    "sro": {"ipdc": "Departmental DCA", "cdg": "Overall Delivery Confidence"},
+    "finance": {'ipdc': "SRO Finance confidence", 'cdg': 'Costs Confidence'},
+    "benefits": {'ipdc': "SRO Benefits RAG", 'cdg': 'Benefits Confidence'},
+    "schedule": {'ipdc': "SRO Schedule Confidence", 'cdg': 'Schedule Confidence'},
+    "resource": {'ipdc': "Overall Resource DCA - Now", 'cdg': None},
+}
+
+# rationalise with RAG_RANKING_DICT_COLOUR
+DCA_RATING_SCORES = {
+    "Green": 5,
+    "Amber/Green": 4,
+    "Amber": 3,
+    "Amber/Red": 2,
+    "Red": 1,
+    # None: None,
 }
 
 STANDARDISE_DCA_KEYS = {
-    'cdg': 'Overall Delivery Confidence',
-    'top_250': None,
-    'ipdc': 'Departmental DCA',
+    "cdg": "Overall Delivery Confidence",
+    "top_250": None,
+    "ipdc": "Departmental DCA",
 }
 
 FONT_TYPE = ["sans serif", "Ariel"]
@@ -108,23 +115,23 @@ COST_KEY_LIST = [
 ]
 
 STANDARDISE_COST_KEYS = {
-    'spent': {'cdg': 'Total Costs Spent'},
-    'remaining': {'cdg': 'Total Costs Remaining'},
-    'total': {'cdg': 'Total Costs'},
-    'income_achieved': {'cdg': 'Total Income Achieved'},
-    'income_remaining': {'cdg': 'Total Income Remaining'},
-    'income_total': {'cdg': 'Total Income'}
+    "spent": {"cdg": "Total Costs Spent"},
+    "remaining": {"cdg": "Total Costs Remaining"},
+    "total": {"cdg": "Total Costs"},
+    "income_achieved": {"cdg": "Total Income Achieved"},
+    "income_remaining": {"cdg": "Total Income Remaining"},
+    "income_total": {"cdg": "Total Income"},
 }
 
 STANDARDISE_BEN_KEYS = {
-    'delivered': {'cdg': 'Benefits delivered'},
-    'remaining': {'cdg': 'Benefits to be delivered'},
-    'total': {'cdg': 'Total Benefits'},
+    "delivered": {"cdg": "Benefits delivered"},
+    "remaining": {"cdg": "Benefits to be delivered"},
+    "total": {"cdg": "Total Benefits"},
 }
+
 
 def convert_rag_text(dca_rating: str) -> str:
     """Converts RAG name into a acronym"""
-
     if dca_rating == "Green":
         return "G"
     elif dca_rating == "Amber/Green":

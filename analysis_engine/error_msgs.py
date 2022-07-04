@@ -113,3 +113,9 @@ def not_recognised_project_group_or_stage(error_case):
 
 def not_recognised_quarter(error):
     raise InputError(error + ' not a recognised quarter. Program stopped. Please re-enter.')
+
+
+def get_error_list(seq: list):
+    seen = set()
+    seen_add = seen.add
+    return [x for x in seq if not (x in seen or seen_add(x))]

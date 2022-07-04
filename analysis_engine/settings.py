@@ -52,15 +52,16 @@ def report_config(report_type: str):
         "excel_save_path": "/output/{}.xlsx",
         "word_save_path": "/output/{}.docx",
         "word_landscape": "/input/summary_temp_landscape.docx",
+        "word_portrait": '/input/summary_temp.docx',
     }
     # return INITIATE_DICT[report_type]
 
 
 def set_default_args(op_args, port_group, default_quarter):
-    if "group" not in op_args and "stage" not in op_args:
-        op_args["group"] = port_group
-    if "quarter" not in op_args:
-        op_args["quarter"] = [default_quarter]
+    if 'group' not in op_args and 'stage' not in op_args:
+        op_args['group'] = port_group
+    if 'quarter' not in op_args:
+        op_args['quarter'] = [default_quarter]
     if 'chart' not in op_args:
         op_args['chart'] = False
 

@@ -1,6 +1,6 @@
 import pytest
 
-from tests.test_op_args import REPORTING_TYPE, DANDELION_OP_ARGS_DICT
+from tests.test_op_args import REPORTING_TYPE, DANDELION_OP_ARGS_DICT, SPEED_DIAL_OP_ARGS
 
 from analysis_engine.settings import report_config, set_default_args
 from analysis_engine.core_data import (
@@ -14,6 +14,8 @@ from analysis_engine.core_data import (
 )
 
 from analysis_engine.dandelion import DandelionData, make_a_dandelion_auto
+from analysis_engine.dca import DcaData, dca_changes_into_word
+from analysis_engine.speed_dials import build_speed_dials
 
 from analysis_engine.render_utils import put_matplotlib_fig_into_word, get_input_doc
 
@@ -89,6 +91,23 @@ def test_build_dandelion_graph():
         put_matplotlib_fig_into_word(doc, d_lion)
         doc_output_path = str(SETTINGS_DICT['root_path']) + SETTINGS_DICT["word_save_path"]
         doc.save(doc_output_path.format('dandelion'))
+
+
+# produce two outputs. dca changes and speedials
+def test_dca_analysis():
+    md = open_json_file(
+        f"/home/will/Documents/{REPORTING_TYPE}/core_data/json/master.json"
+    )
+    set_default_args(SPEED_DIAL_OP_ARGS, md['groups'], md['current_quarter'])
+    combined_args = {**SPEED_DIAL_OP_ARGS, **SETTINGS_DICT}
+    sdmd = DcaData(md, **combined_args)
+    sdmd.get_changes()
+    changes_doc = dca_changes_into_word(sdmd, str(SETTINGS_DICT['root_path']) + SETTINGS_DICT['word_portrait'])
+    changes_doc.save(str(SETTINGS_DICT['root_path']) + SETTINGS_DICT["word_save_path"].format('dca_changes'))
+    sd_doc = get_input_doc(str(SETTINGS_DICT['root_path']) + SETTINGS_DICT['word_portrait'])
+    build_speed_dials(sdmd, sd_doc)
+    sd_doc.save(str(SETTINGS_DICT['root_path']) + SETTINGS_DICT["word_save_path"].format('speed_dials'))
+
 
 
 @pytest.mark.skip(reason="refactor required")
@@ -309,11 +328,11 @@ def test_putting_milestones_into_wb(master):
     wb.save("resources/milestone_data_output_test.xlsx")
 
 
-@pytest.mark.skip(reason="refactor required")
-def test_dca_analysis(master):
-    dca = DcaData(master, quarter=["standard"])
-    wb = dca_changes_into_excel(dca)
-    wb.save("resources/dca_print.xlsx")
+# @pytest.mark.skip(reason="refactor required")
+# def test_dca_analysis(master):
+#     dca = DcaData(master, quarter=["standard"])
+#     wb = dca_changes_into_excel(dca)
+#     wb.save("resources/dca_print.xlsx")
 
 
 @pytest.mark.skip(reason="refactor required")
@@ -323,13 +342,6 @@ def test_speedial_print_out(master, word_doc):
     dca_changes_into_word(dca, word_doc)
     word_doc.save("resources/dca_checks.docx")
 
-
-@pytest.mark.skip(reason="refactor required")
-def test_speedial_graph(master, word_doc):
-    dca_data = DcaData(master, quarter=["standard"], conf_type="sro", rag_number="3")
-    dca_data.get_changes()
-    build_speedials(dca_data, word_doc)
-    word_doc.save("resources/speedial_graph.docx")
 
 
 @pytest.mark.skip(reason="refactor required")

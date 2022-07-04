@@ -309,7 +309,7 @@ def data_triage(data: Dict) -> None:
 
 
 review_data = get_review_info_data(str(root_path) + "/data_review/DATA_REVIEW.xlsx")
-# all = result(review_data)
+all = result(review_data)
 # print_ascii_bar_chart(uoa)
 # bar = bar_chart(all, 'Ratings for each theme')
 # p = sort_data_for_stacked_chart(all)
@@ -319,4 +319,4 @@ review_data = get_review_info_data(str(root_path) + "/data_review/DATA_REVIEW.xl
 # put_matplotlib_fig_into_word(doc, bar, size=5.5)
 # put_matplotlib_fig_into_word(doc, stacked, size=5.5)
 # doc.save(root_path / "data_review/review_charts.docx")
-data_triage(review_data)
+# data_triage(review_data)

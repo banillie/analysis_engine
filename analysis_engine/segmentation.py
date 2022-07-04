@@ -15,7 +15,7 @@ def get_iter_list(
         md_q_list: List
 ) -> List[str]:
     ## report_quarter should never be None.
-    if report_quarter == ["standard"]:
+    if report_quarter == 'standard':
         iter_list = [
             md_q_list[0],
             md_q_list[1],

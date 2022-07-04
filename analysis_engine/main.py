@@ -141,6 +141,19 @@ def run_analysis(args, settings):
                 doc_output_path = str(combined_args['root_path']) + combined_args["word_save_path"]
                 doc.save(doc_output_path.format('dandelion'))
 
+        # if programme == "speedial":
+        #     doc = get_input_doc(cdg_root_path / "input/summary_temp.docx")
+        #     land_doc = get_input_doc(
+        #         cdg_root_path / "input/summary_temp_landscape.docx"
+        #     )
+        #     op_args["rag_number"] = "5"
+        #     data = DcaData(m, **op_args)
+        #     data.get_changes()
+        #     doc = dca_changes_into_word(data, doc)
+        #     doc.save(cdg_root_path / "output/speed_dials_text.docx")
+        #     build_speedials(data, land_doc)
+        #     land_doc.save(cdg_root_path / "output/speed_dial_graph.docx")
+
     except (ProjectNameError, FileNotFoundError, InputError) as e:
         logger.critical(e)
         sys.exit(1)
@@ -385,110 +398,6 @@ def run_analysis(args, settings):
 #     # wb.save(root_path / "output/{}_{}.xlsx".format(programme, optional_args))
 #     # print(programme + " analysis has been compiled. Enjoy!")
 #
-
-# def top250_run_general(args):
-#     programme = args["subparser_name"]
-#     print("compiling top250 " + programme + " analysis")
-#     m = Master(open_json_file(str(top35_root_path / "core_data/json/master.json")))
-#
-#     # get portfolio reporting group information.
-#     META = get_group_stage_data(
-#         str(top35_root_path) + "/core_data/top250_config.ini",
-#     )
-#     dft_group = META[0]
-#     dft_stage = META[2]
-#
-#     try:
-#         op_args = {k: v for k, v in args.items() if v}  # removes None values
-#         if "group" not in op_args:
-#             if "stage" not in op_args:
-#                 op_args["group"] = dft_group
-#         if "quarter" not in op_args:
-#             if "baseline" not in op_args:
-#                 op_args["quarter"] = ["standard"]
-#
-#         op_args["data_type"] = "top35"
-#
-#         if programme == "summaries":
-#             top35_run_p_reports(m, **op_args)
-#
-#         if programme == "milestones" or programme == "central_support":
-#             if programme == "milestones":
-#                 d = MilestoneData(m, **op_args)  # data
-#             if programme == "central_support":
-#                 d = CentralSupportData(m, **op_args)
-#
-#             if (
-#                     "type" in op_args
-#                     or "dates" in op_args
-#                     or "koi" in op_args
-#                     or "koi_fn" in op_args
-#             ):
-#                 op_args = return_koi_fn_keys(op_args)
-#                 d.filter_chart_info(**op_args)
-#
-#             if "chart" not in op_args:
-#                 pass
-#             else:
-#                 if op_args["chart"] == "save":
-#                     op_args["chart"] = False
-#                     ms_graph = milestone_chart(d, m, **op_args)
-#                     doc = get_input_doc(
-#                         top35_root_path / "input/summary_temp_landscape.docx"
-#                     )
-#                     put_matplotlib_fig_into_word(
-#                         doc, ms_graph, size=8, transparent=False
-#                     )
-#                     doc.save(top35_root_path / "output/milestones_chart.docx")
-#                 if op_args["chart"] == "show":
-#                     milestone_chart(d, m, **op_args)
-#
-#             wb = put_milestones_into_wb(d)
-#
-#         if programme == "dandelion":
-#             if op_args["quarter"] == ["standard"]:
-#                 # converts "standard" default to current quarter
-#                 op_args["quarter"] = [str(m.current_quarter)]
-#             d_data = DandelionData(m, **op_args)
-#             if "chart" not in op_args:
-#                 op_args["chart"] = True
-#                 make_a_dandelion_auto(d_data, **op_args)
-#             else:
-#                 if op_args["chart"] == "save":
-#                     op_args["chart"] = False
-#                     d_graph = make_a_dandelion_auto(d_data, **op_args)
-#                     doc = get_input_doc(
-#                         top35_root_path / "input/summary_temp_landscape.docx"
-#                     )
-#                     put_matplotlib_fig_into_word(doc, d_graph, size=7)
-#                     doc.save(top35_root_path / "output/dandelion_graph.docx")
-#                 if op_args["chart"] == "show":
-#                     make_a_dandelion_auto(d_data, **op_args)
-#
-#         if programme == "query":
-#             if "koi" not in op_args and "koi_fn" not in op_args:
-#                 logger.critical(
-#                     "Please enter a key name(s) using either --keys or --file_name"
-#                 )
-#                 sys.exit(1)
-#             op_args = return_koi_fn_keys(op_args)
-#             wb = data_query_into_wb(m, **op_args)
-#
-#         check_remove(op_args)
-#
-#         try:
-#             if programme != "dashboards":
-#                 wb.save(top35_root_path / "output/{}.xlsx".format(programme))
-#         except UnboundLocalError:
-#             pass
-#
-#         print(programme + " analysis has been compiled. Enjoy!")
-#
-#     except (ProjectNameError, FileNotFoundError, InputError) as e:
-#         logger.critical(e)
-#         sys.exit(1)
-#
-
 # def cdg_run_general(args):
 #     # get portfolio reporting group information.
 #     META = get_group_stage_data(

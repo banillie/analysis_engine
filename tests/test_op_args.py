@@ -52,6 +52,11 @@ DANDELION_OP_ARGS_DICT = [
     dlion_standard,
 ]
 
+SPEED_DIAL_OP_ARGS = {
+    'rag_number': '5',
+    'quarter': 'standard',
+}
+
 # "group": ["SCS", "GF"],
 # "chart": True,
 # "type": "income",
