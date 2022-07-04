@@ -47,3 +47,9 @@ def put_matplotlib_fig_into_word(doc, fig: plt.figure or plt) -> None:
     os.remove("fig.pdf")
     plt.close()  # automatically closes figure so don't need to do manually.
 
+
+def make_file_friendly(quarter_str: str) -> str:
+    """Converts datamaps.api project_data_from_master quarter data into a string to use when
+    saving output files. Courtesy of M Lemon."""
+    regex = r"Q(\d) (\d+)\/(\d+)"
+    return re.sub(regex, r"Q\1_\2_\3", quarter_str)

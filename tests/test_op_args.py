@@ -1,39 +1,49 @@
 REPORTING_TYPE = "cdg"
 
-chart = False
+chart = True
+
+## should include some settings that are wrong to test error messaging
 
 standard = {
-    "quarter": ["Q4 21/22"],
-    "group": ["SCS", "CFPD", "GF"],
-    'chart': chart,
+    "chart": chart,
 }
 
-two_groups = {"quarter": ["Q4 21/22"], "group": ["SCS", "CFPD"], 'chart': chart}
+two_groups = {"group": ["SCS", "CFPD"], "chart": chart}
 
 stages = {
-    "quarter": ["Q4 21/22"],
     "stage": [
         "pre-Strategic Outline Case",
         "Strategic Outline Case",
         "Outline Business Case",
         "Full Business Case",
         "Ongoing Board papers",
-        ],
-    'chart': chart
+    ],
+    "chart": chart,
 }
 
 change_quarter = {
-    "quarter": ["Q2 19/22"],
+    "quarter": ["Q2 21/22"],
     "group": ["SCS", "CFPD", "GF"],
-    'chart': True,
+    "chart": chart,
 }
 
+change_angles = {
+    'angles': [300, 360, 60],
+    'chart': chart
+}
+
+benefits = {
+    'type': 'benefits',
+    'chart': chart,
+}
 
 OP_ARGS_DICT = [
-    change_quarter,
-    stages,
-    standard,
-    two_groups,
+    benefits,
+    # change_angles,
+    # change_quarter,
+    # stages,
+    # two_groups,
+    # standard,
 ]
 
 # "group": ["SCS", "GF"],

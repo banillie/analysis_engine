@@ -1,43 +1,54 @@
 import datetime
 from typing import List, Union, Dict
+import numpy as np
 
-from analysis_engine.error_msgs import logger, ProjectNameError, not_recognised_project_group_or_stage, \
-    not_recognised_quarter
+from analysis_engine.error_msgs import (
+    logger,
+    ProjectNameError,
+    not_recognised_project_group_or_stage,
+    not_recognised_quarter,
+)
 
 
-def get_iter_list(class_kwargs, master) -> List[str]:
-    iter_list = []
-    if class_kwargs["quarter"] == ["standard"]:
+def get_iter_list(
+        report_quarter: List,
+        md_q_list: List
+) -> List[str]:
+    ## report_quarter should never be None.
+    if report_quarter == ["standard"]:
         iter_list = [
-            master['quarter_list'][0],
-            master['quarter_list'][1],
+            md_q_list[0],
+            md_q_list[1],
         ]
-    elif class_kwargs["quarter"] == ["all"]:
-        iter_list = master['quarter_list']
+    elif report_quarter == ["all"]:
+        iter_list = md_q_list
     else:
-        iter_list = class_kwargs["quarter"]
+        iter_list = report_quarter
 
     return iter_list
 
 
-def cal_group(group: List[str] or List[List[str]], md, tp_indx: int,
-              # input_list_indx=None,
-              ) -> List[str]:
+def cal_group(
+        group: List[str] or List[List[str]],
+        md,
+        tp_indx: int,
+        # input_list_indx=None,
+) -> List[str]:
     error_case = []
     output = []
-    q_str = md['quarter_list'][tp_indx]  # quarter string
+    q_str = md["quarter_list"][tp_indx]  # quarter string
     for g in group:  # pg is project/group
         if g == "pipeline":
             continue
         try:
-            local_g = md['dft_group'][q_str][g]
+            local_g = md["dft_group"][q_str][g]
             output += local_g
         except KeyError:
             try:
-                output.append(md['abbreviations'][g]["full name"])
+                output.append(md["abbreviations"][g]["full name"])
             except KeyError:
                 try:
-                    output.append(md['full_names'][g])
+                    output.append(md["full_names"][g])
                 except KeyError:
                     error_case.append(g)
 
@@ -46,9 +57,9 @@ def cal_group(group: List[str] or List[List[str]], md, tp_indx: int,
     return output
 
 
-def get_group(md, tp: str, class_kwargs, group_indx=None) -> List[str]:
+def get_group(md, tp: str, class_kwargs) -> List[str]:
     try:
-        tp_indx = md['quarter_list'].index(tp)
+        tp_indx = md["quarter_list"].index(tp)
     except ValueError:
         not_recognised_quarter(tp)
 
@@ -58,7 +69,7 @@ def get_group(md, tp: str, class_kwargs, group_indx=None) -> List[str]:
         group = cal_group(class_kwargs["group"], md, tp_indx)
     else:
         # group = cal_group(md['current_projects'], md, tp_indx)  # why is this current_projects
-        group = cal_group(md['groups'], md, tp_indx)  # why is this current_projects
+        group = cal_group(md["groups"], md, tp_indx)  # why is this current_projects
 
     if "remove" in class_kwargs:
         group = remove_from_group(
@@ -112,12 +123,34 @@ def get_correct_p_data(
         project_name: str,
         time_period: str,
 ) -> Dict[str, Union[str, int, datetime.date, float]]:
-    tp_idx = master['quarter_list'].index(time_period)
+    tp_idx = master["quarter_list"].index(time_period)
     try:
-        return master['master_data'][tp_idx]['data'][project_name]
-    except KeyError: # KeyError handles project not reporting in quarter.
+        return master["master_data"][tp_idx]["data"][project_name]
+    except KeyError:  # KeyError handles project not reporting in quarter.
         return None
 
 
 def get_quarter_index(md, tp):
-    return md['quarter_list'].index(tp)
+    return md["quarter_list"].index(tp)
+
+
+def calculate_profiled(
+        p: int or List[int], s: int or List[int], unpro: int or List[int]
+) -> list:
+    """small helper function to calculate the proper profiled amount. This is necessary as
+    other wise 'profiled' would actually be the total figure.
+    p = profiled list
+    s = spent list
+    unpro = unprofiled list"""
+    if isinstance(p, list):
+        f_profiled = []
+        for y, amount in enumerate(p):
+            t = amount - (s[y] + unpro[y])
+            f_profiled.append(t)
+        return f_profiled
+    else:
+        return p - (s + unpro)
+
+
+def moving_average(x, w):
+    return np.convolve(x, np.ones(w), "valid") / w

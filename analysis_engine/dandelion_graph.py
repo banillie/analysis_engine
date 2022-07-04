@@ -7,22 +7,19 @@ from openpyxl.workbook import workbook
 
 from matplotlib import pyplot as plt
 
-from analysis_engine.data import (
-    CostData,
-    BenefitsData,
-    ResourceData,
-    MilestoneData,
-    get_milestone_date,
+from analysis_engine.costs import CostData
+from analysis_engine.benefits import BenefitsData
+from analysis_engine.resourcing import ResourceData
+from analysis_engine.milestones import MilestoneData, get_milestone_date
+from analysis_engine.segmentation import (
+    get_iter_list,
+    get_group,
+    get_quarter_index,
     get_correct_p_data,
-    convert_rag_text,
-    make_file_friendly,
 )
-
-from analysis_engine.segmentation import get_iter_list, get_group, get_quarter_index
-
 from analysis_engine.error_msgs import InputError, logger
-
 from analysis_engine.colouring import COLOUR_DICT, FACE_COLOUR
+from analysis_engine.render_utils import make_file_friendly
 
 from analysis_engine.dictionaries import (
     RAG_RANKING_DICT_NUMBER,
@@ -31,6 +28,7 @@ from analysis_engine.dictionaries import (
     DCA_KEYS,
     FONT_TYPE,
     STANDARDISE_DCA_KEYS,
+    convert_rag_text,
 )
 
 
@@ -144,9 +142,9 @@ def cal_group_angle(dist_no: int, group: List[str], **kwargs):
     return output_list
 
 
-def get_dandelion_type_total(
-    master, kwargs
-) -> int or str:  # Note no **kwargs as existing kwargs dict passed in
+#  switches the type of data displayed in dandelion graph output
+## change type to dandelion_type
+def get_dandelion_type_total(master, kwargs) -> int or str:
     tp = kwargs["quarter"][0]  # only one quarter for dandelion
     if "type" in kwargs:
         if kwargs["type"] == "remaining":
@@ -158,10 +156,10 @@ def get_dandelion_type_total(
             cost = CostData(master, **kwargs)
             cost.get_forecast_cost_profile()
             # return cost.c_totals[tp]['total'] - (sum(cost.profiles[tp]["total"]) - sum(cost.profiles[tp]["std"]))
-            return cost.c_totals[tp]["total"] - sum(cost.profiles[tp]["total"])
+            return cost.totals[tp]["total"] - sum(cost.profiles[tp]["total"])
         if kwargs["type"] == "income":
             cost = CostData(master, **kwargs)
-            return cost.c_totals[tp]["income_total"]
+            return cost.totals[tp]["income_total"]
         if kwargs["type"] == "benefits":
             benefits = BenefitsData(master, **kwargs)
             return benefits.b_totals[tp]["total"]
@@ -180,7 +178,7 @@ def get_dandelion_type_total(
 
     else:
         cost = CostData(master, **kwargs)  # group costs data
-        return cost.c_totals[tp]["total"]
+        return cost.totals[tp]["total"]
 
 
 def calculate_circle_edge(sro_rag, fwd_look):
@@ -204,19 +202,19 @@ class DandelionData:
         self.kwargs = kwargs
         self.baseline_type = "ipdc_costs"
         self.group = []
-        self.iter_list = get_iter_list(self.kwargs, self.master)  # needs refactor
+        self.iter_list = get_iter_list(self.kwargs['quarter'], self.master['quarter_list'])  # needs refactor
         self.d_data = {}
         self.get_data()
 
     def get_data(self):
-        dca_confidence = STANDARDISE_DCA_KEYS[self.kwargs['report']]
+        dca_confidence = STANDARDISE_DCA_KEYS[self.kwargs["report"]]
         tp = self.iter_list[0]  ## needs refactor
 
         try:
-            self.group = self.kwargs['group']
+            self.group = self.kwargs["group"]
         except KeyError:
-            self.group = self.kwargs['stage']
-            del self.kwargs['stage']
+            self.group = self.kwargs["stage"]
+            del self.kwargs["stage"]
 
         if "angles" in self.kwargs:
             if len(self.kwargs["angles"]) == len(self.group):
@@ -443,7 +441,7 @@ class DandelionData:
                         colour = FACE_COLOUR
 
                 project_text = (
-                    self.master['abbreviations'][p]["abb"]
+                    self.master["abbreviations"][p]["abb"]
                     + "\n"
                     + dandelion_number_text(p_value, **self.kwargs)
                 )
@@ -467,12 +465,12 @@ class DandelionData:
                 ):  # achieve some consistency for zero / low values
                     p_value = pf_wlc / 500
                 if colour == "#FFFFFF" or colour == FACE_COLOUR:
-                    if p in self.master['dft_group'][tp]["GMPP"]:
+                    if p in self.master["dft_group"][tp]["GMPP"]:
                         edge_colour = "#000000"
                     else:
                         edge_colour = "grey"
                 else:
-                    if p in self.master['dft_group'][tp]["GMPP"]:
+                    if p in self.master["dft_group"][tp]["GMPP"]:
                         edge_colour = "#000000"
                         # edge_colour = COLOUR_DICT[p_data['SRO Forward Look Assessment']]
                     else:
@@ -538,11 +536,9 @@ class DandelionData:
                     t_multi = 1
                 yx_text_position = (
                     p_y_axis
-                    + (math.sqrt(p_value) * t_multi)
-                    * math.sin(math.radians(ang_l[i])),
+                    + (math.sqrt(p_value) * t_multi) * math.sin(math.radians(ang_l[i])),
                     p_x_axis
-                    + (math.sqrt(p_value) * t_multi)
-                    * math.cos(math.radians(ang_l[i])),
+                    + (math.sqrt(p_value) * t_multi) * math.cos(math.radians(ang_l[i])),
                 )
 
                 g_d[p] = {

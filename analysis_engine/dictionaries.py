@@ -51,5 +51,85 @@ STANDARDISE_DCA_KEYS = {
     'ipdc': 'Departmental DCA',
 }
 
-
 FONT_TYPE = ["sans serif", "Ariel"]
+
+
+BEN_TYPE_KEY_LIST = [
+    (
+        "Pre-profile BEN Forecast Gov Cashable",
+        "Pre-profile BEN Forecast Gov Non-Cashable",
+        "Pre-profile BEN Forecast - Economic (inc Private Partner)",
+        "Pre-profile BEN Forecast - Disbenefit UK Economic",
+    ),
+    (
+        "Total BEN Forecast - Gov. Cashable",
+        "Total BEN Forecast - Gov. Non-Cashable",
+        "Total BEN Forecast - Economic (inc Private Partner)",
+        "Total BEN Forecast - Disbenefit UK Economic",
+    ),
+    (
+        "Unprofiled Remainder BEN Forecast - Gov. Cashable",
+        "Unprofiled Remainder BEN Forecast - Gov. Non-Cashable",
+        "Unprofiled Remainder BEN Forecast - Economic (inc Private Partner)",
+        "Unprofiled Remainder BEN Forecast - Disbenefit UK Economic",
+    ),
+]
+
+YEAR_LIST = [
+    # "16-17",
+    # "17-18",
+    # "18-19",
+    # "19-20",
+    # "20-21",
+    "21-22",
+    "22-23",
+    "23-24",
+    "24-25",
+    "25-26",
+    "26-27",
+    "27-28",
+    "28-29",
+    "29-30",
+    "30-31",
+    "31-32",
+    "32-33",
+    "33-34",
+    "34-35",
+    "35-36",
+    "36-37",
+    "37-38",
+    "38-39",
+    "39-40",
+]
+
+COST_KEY_LIST = [
+    " RDEL Forecast Total",
+    " CDEL Forecast one off new costs",
+    " Forecast Non-Gov",
+]
+
+STANDARDISE_COST_KEYS = {
+    'spent': {'cdg': 'Total Costs Spent'},
+    'remaining': {'cdg': 'Total Costs Remaining'},
+    'total': {'cdg': 'Total Costs'},
+    'income_achieved': {'cdg': 'Total Income Achieved'},
+    'income_remaining': {'cdg': 'Total Income Remaining'},
+    'income_total': {'cdg': 'Total Income'}
+}
+
+
+def convert_rag_text(dca_rating: str) -> str:
+    """Converts RAG name into a acronym"""
+
+    if dca_rating == "Green":
+        return "G"
+    elif dca_rating == "Amber/Green":
+        return "A/G"
+    elif dca_rating == "Amber":
+        return "A"
+    elif dca_rating == "Amber/Red":
+        return "A/R"
+    elif dca_rating == "Red":
+        return "R"
+    else:
+        return ""

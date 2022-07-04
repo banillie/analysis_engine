@@ -2,7 +2,7 @@ import pytest
 
 from tests.test_op_args import REPORTING_TYPE, OP_ARGS_DICT
 
-from analysis_engine.settings import report_config
+from analysis_engine.settings import report_config, set_default_args
 from analysis_engine.core_data import (
     PythonMasterData,
     get_master_data,
@@ -80,6 +80,7 @@ def test_build_dandelion_graph():
         f"/home/will/Documents/{REPORTING_TYPE}/core_data/json/master.json"
     )
     for x in OP_ARGS_DICT:
+        set_default_args(x, md['groups'], md['current_quarter'])
         combined_args = {**x, **SETTINGS_DICT}
         dmd = DandelionData(md, **combined_args)
         d_lion = make_a_dandelion_auto(dmd, **combined_args)
@@ -190,16 +191,16 @@ def test_get_stackplot_costs_chart(master):
 @pytest.mark.skip(reason="refactor required")
 def test_get_project_total_cost_calculations_for_project(master):
     costs = CostData(master, group=[F9], baseline=["standard"])
-    assert costs.c_totals["current"]["spent"] == 471
-    assert costs.c_totals["current"]["prof"] == 6281
-    assert costs.c_totals["current"]["unprof"] == 0
+    assert costs.totals["current"]["spent"] == 471
+    assert costs.totals["current"]["prof"] == 6281
+    assert costs.totals["current"]["unprof"] == 0
 
 
 @pytest.mark.skip(reason="refactor required")
 def test_get_group_total_cost_calculations(master):
     costs = CostData(master, group=master.current_projects, quarter=["standard"])
-    assert costs.c_totals["Q1 20/21"]["spent"] == 3926
-    assert costs.c_totals["Q4 19/20"]["spent"] == 2610
+    assert costs.totals["Q1 20/21"]["spent"] == 3926
+    assert costs.totals["Q4 19/20"]["spent"] == 2610
 
 
 @pytest.mark.skip(reason="refactor required")
