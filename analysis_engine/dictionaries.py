@@ -34,12 +34,21 @@ BC_STAGE_DICT = {
     "Ongoing Board papers": None,
 }
 
+# DCA_KEYS = {
+#     "sro": {"ipdc": "Departmental DCA", "cdg": "Overall Delivery Confidence"},
+#     "finance": {'ipdc': "SRO Finance confidence", 'cdg': 'Costs Confidence'},
+#     "benefits": {'ipdc': "SRO Benefits RAG", 'cdg': 'Benefits Confidence'},
+#     "schedule": {'ipdc': "SRO Schedule Confidence", 'cdg': 'Schedule Confidence'},
+#     "resource": {'ipdc': "Overall Resource DCA - Now", 'cdg': None},
+# }
+
 DCA_KEYS = {
-    "sro": {"ipdc": "Departmental DCA", "cdg": "Overall Delivery Confidence"},
-    "finance": {'ipdc': "SRO Finance confidence", 'cdg': 'Costs Confidence'},
-    "benefits": {'ipdc': "SRO Benefits RAG", 'cdg': 'Benefits Confidence'},
-    "schedule": {'ipdc': "SRO Schedule Confidence", 'cdg': 'Schedule Confidence'},
-    "resource": {'ipdc': "Overall Resource DCA - Now", 'cdg': None},
+    'cdg': {
+        'sro': 'Overall Delivery Confidence',
+        "finance": 'Costs Confidence',
+        "benefits": 'Benefits Confidence',
+        "schedule": 'Schedule Confidence',
+    }
 }
 
 # rationalise with RAG_RANKING_DICT_COLOUR

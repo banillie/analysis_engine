@@ -24,13 +24,13 @@ class DcaData:
         for tp in self.iter_list:
             group = get_group(self.master, tp, self.kwargs)
             type_dict = {}
-            for conf_type in list(DCA_KEYS.keys()):  # confidence type
+            for conf_type in list(DCA_KEYS[self.report].keys()):  # confidence type
                 dca_dict = {}
                 for project_name in group:
                     p_data = get_correct_p_data(self.master, project_name, tp)
                     if p_data is None:
                         continue
-                    dca_type = DCA_KEYS[conf_type][self.report]
+                    dca_type = DCA_KEYS[self.report][conf_type]
                     if dca_type is None:
                         continue
                     colour = p_data[dca_type]
@@ -52,7 +52,7 @@ class DcaData:
     def get_changes(self) -> None:
         """compiles dictionary of changes in dca ratings when provided with two quarter arguments"""
         c_dict = {}
-        for conf_type in list(DCA_KEYS.keys()):  # confidence type
+        for conf_type in list(DCA_KEYS[self.report].keys()):  # confidence type
             lower_dict = {}
             for project_name in list(
                     self.dca_dictionary[self.iter_list[0]][conf_type].keys()

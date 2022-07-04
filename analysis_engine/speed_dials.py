@@ -177,6 +177,7 @@ def gauge(
 
 def build_speed_dials(dca_data, doc):
     for conf_type in dca_data.dca_count[dca_data.iter_list[0]]:
+        print(conf_type)
         c_count = []
         l_count = []
         # if dca_data.kwargs["rag_number"] == "3":
