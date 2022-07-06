@@ -52,10 +52,37 @@ DANDELION_OP_ARGS_DICT = [
     dlion_standard,
 ]
 
-SPEED_DIAL_OP_ARGS = {
-    'rag_number': '5',
+sd_standard = {
+    'rag_number': '5',  # NOT REQUIRED FOR DCA ANALYSIS
     'quarter': 'standard',
 }
+
+sd_quarters = {
+    'rag_number': '5',
+    'quarter': ['Q2 21/22', 'Q4 21/22'],
+}
+
+sd_stage = {
+    'rag_number': '5',
+    'quarter': 'standard',
+    "stage": [
+        "OBC",
+        "FBC",
+    ]
+}
+
+sd_groups = {
+    'rag_number': '5',
+    'quarter': 'standard',
+    "group": ["SCS", "CFPD"],
+}
+
+SPEED_DIAL_AND_DCA_OP_ARGS = [
+    sd_groups,
+    sd_stage,
+    sd_quarters,
+    sd_standard
+]
 
 # "group": ["SCS", "GF"],
 # "chart": True,

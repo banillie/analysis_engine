@@ -1,6 +1,10 @@
 import pytest
 
-from tests.test_op_args import REPORTING_TYPE, DANDELION_OP_ARGS_DICT, SPEED_DIAL_OP_ARGS
+from tests.test_op_args import (
+    REPORTING_TYPE,
+    DANDELION_OP_ARGS_DICT,
+    SPEED_DIAL_AND_DCA_OP_ARGS,
+)
 
 from analysis_engine.settings import report_config, set_default_args
 from analysis_engine.core_data import (
@@ -51,10 +55,12 @@ def test_saving_creating_json_master():
         get_master_data(SETTINGS_DICT),
         get_project_information(SETTINGS_DICT),
         META,
-        data_type=SETTINGS_DICT['report'],
+        data_type=SETTINGS_DICT["report"],
     )
 
-    master_json_path = str("{0}/core_data/json/master".format(SETTINGS_DICT['root_path']))
+    master_json_path = str(
+        "{0}/core_data/json/master".format(SETTINGS_DICT["root_path"])
+    )
     JsonData(master, master_json_path)
 
 
@@ -72,7 +78,7 @@ def test_get_project_abbreviations():
     ## THESE ARE REPORTING SPECIFIC. NEED TO GENRALISE
     assert data["abbreviations"]["Elizabeth House"]["abb"] == "EH"
     assert (
-            data["abbreviations"]["Elizabeth House"]["full name"] == "Elizabeth House"
+        data["abbreviations"]["Elizabeth House"]["full name"] == "Elizabeth House"
     )  # to take 'full name' out as silly!
 
 
@@ -82,15 +88,17 @@ def test_build_dandelion_graph():
         f"/home/will/Documents/{REPORTING_TYPE}/core_data/json/master.json"
     )
     for x in DANDELION_OP_ARGS_DICT:
-        set_default_args(x, md['groups'], md['current_quarter'])
+        set_default_args(x, md["groups"], md["current_quarter"])
         combined_args = {**x, **SETTINGS_DICT}
         dmd = DandelionData(md, **combined_args)
         d_lion = make_a_dandelion_auto(dmd, **combined_args)
-        doc_path = str(SETTINGS_DICT['root_path']) + SETTINGS_DICT['word_landscape']
+        doc_path = str(SETTINGS_DICT["root_path"]) + SETTINGS_DICT["word_landscape"]
         doc = get_input_doc(doc_path)
         put_matplotlib_fig_into_word(doc, d_lion)
-        doc_output_path = str(SETTINGS_DICT['root_path']) + SETTINGS_DICT["word_save_path"]
-        doc.save(doc_output_path.format('dandelion'))
+        doc_output_path = (
+            str(SETTINGS_DICT["root_path"]) + SETTINGS_DICT["word_save_path"]
+        )
+        doc.save(doc_output_path.format("dandelion"))
 
 
 # produce two outputs. dca changes and speedials
@@ -98,16 +106,40 @@ def test_dca_analysis():
     md = open_json_file(
         f"/home/will/Documents/{REPORTING_TYPE}/core_data/json/master.json"
     )
-    set_default_args(SPEED_DIAL_OP_ARGS, md['groups'], md['current_quarter'])
-    combined_args = {**SPEED_DIAL_OP_ARGS, **SETTINGS_DICT}
-    sdmd = DcaData(md, **combined_args)
-    sdmd.get_changes()
-    changes_doc = dca_changes_into_word(sdmd, str(SETTINGS_DICT['root_path']) + SETTINGS_DICT['word_portrait'])
-    changes_doc.save(str(SETTINGS_DICT['root_path']) + SETTINGS_DICT["word_save_path"].format('dca_changes'))
-    sd_doc = get_input_doc(str(SETTINGS_DICT['root_path']) + SETTINGS_DICT['word_portrait'])
-    build_speed_dials(sdmd, sd_doc)
-    sd_doc.save(str(SETTINGS_DICT['root_path']) + SETTINGS_DICT["word_save_path"].format('speed_dials'))
+    for x in SPEED_DIAL_AND_DCA_OP_ARGS:
+        set_default_args(x, md["groups"], md["current_quarter"])
+        combined_args = {**x, **SETTINGS_DICT}
+        sdmd = DcaData(md, **combined_args)
+        sdmd.get_changes()
+        changes_doc = dca_changes_into_word(
+            sdmd, str(SETTINGS_DICT["root_path"]) + SETTINGS_DICT["word_portrait"]
+        )
+        changes_doc.save(
+            str(SETTINGS_DICT["root_path"])
+            + SETTINGS_DICT["word_save_path"].format("dca_changes")
+        )
 
+
+def test_speed_dials():
+    md = open_json_file(
+        f"/home/will/Documents/{REPORTING_TYPE}/core_data/json/master.json"
+    )
+    for x in SPEED_DIAL_AND_DCA_OP_ARGS:
+        set_default_args(x, md["groups"], md["current_quarter"])
+        combined_args = {**x, **SETTINGS_DICT}
+        sdmd = DcaData(md, **combined_args)
+        sd_doc = get_input_doc(
+            str(SETTINGS_DICT["root_path"]) + SETTINGS_DICT["word_portrait"]
+        )
+        build_speed_dials(sdmd, sd_doc)
+        sd_doc.save(
+            str(SETTINGS_DICT["root_path"])
+            + SETTINGS_DICT["word_save_path"].format("speed_dials")
+        )
+
+
+def test_dashboards():
+    pass
 
 
 @pytest.mark.skip(reason="refactor required")
@@ -125,8 +157,8 @@ def test_open_word_doc(word_doc):
     word_doc.save("resources/summary_temp_altered.docx")
     var = word_doc.paragraphs[1].text
     assert (
-            "Because i'm still in love with you I want to see you dance again, "
-            "because i'm still in love with you on this harvest moon" == var
+        "Because i'm still in love with you I want to see you dance again, "
+        "because i'm still in love with you on this harvest moon" == var
     )
 
 
@@ -275,13 +307,13 @@ def test_get_milestone_data_all(master):
 def test_get_milestone_chart_data(master):
     milestones = MilestoneData(master, group=[SOT, A13], baseline=["standard"])
     assert (
-            len(milestones.sorted_milestone_dict[milestones.iter_list[0]]["g_dates"]) == 76
+        len(milestones.sorted_milestone_dict[milestones.iter_list[0]]["g_dates"]) == 76
     )
     assert (
-            len(milestones.sorted_milestone_dict[milestones.iter_list[1]]["g_dates"]) == 76
+        len(milestones.sorted_milestone_dict[milestones.iter_list[1]]["g_dates"]) == 76
     )
     assert (
-            len(milestones.sorted_milestone_dict[milestones.iter_list[2]]["g_dates"]) == 76
+        len(milestones.sorted_milestone_dict[milestones.iter_list[2]]["g_dates"]) == 76
     )
 
 
@@ -341,7 +373,6 @@ def test_speedial_print_out(master, word_doc):
     dca.get_changes()
     dca_changes_into_word(dca, word_doc)
     word_doc.save("resources/dca_checks.docx")
-
 
 
 @pytest.mark.skip(reason="refactor required")
@@ -483,7 +514,7 @@ def test_build_dandelion_graph_manual(build_dandelion, word_doc_landscape):
 
 @pytest.mark.skip(reason="wp")
 def test_build_horizontal_bar_chart_manually(
-        horizontal_bar_chart_data, word_doc_landscape
+    horizontal_bar_chart_data, word_doc_landscape
 ):
     # graph = get_horizontal_bar_chart_data(horizontal_bar_chart_data)
     simple_horz_bar_chart(horizontal_bar_chart_data)

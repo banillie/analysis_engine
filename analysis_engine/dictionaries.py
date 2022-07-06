@@ -15,24 +15,31 @@ RAG_RANKING_DICT_COLOUR = {
 }
 
 BC_STAGE_DICT = {
-    "Strategic Outline Case": "SOBC",
-    "SOBC": "SOBC",
-    "pre-Strategic Outline Case": "pre-SOBC",
-    "pre-SOBC": "pre-SOBC",
-    "Outline Business Case": "OBC",
-    "OBC": "OBC",
-    "Full Business Case": "FBC",
-    "FBC": "FBC",
-    # older returns that require cleaning
-    "Pre - SOBC": "pre-SOBC",
-    "Pre Strategic Outline Business Case": "pre_SOBC",
-    None: None,
-    "Other": "Other",
-    "Other ": "Other",
-    "To be confirmed": None,
-    "To be confirmed ": None,
-    "Ongoing Board papers": None,
+    "cdg": {
+        "SOBC": "Strategic Outline Case",
+        "pre-SOBC": "pre-Strategic Outline Case",
+        "OBC": "Outline Business Case",
+        "FBC": "Full Business Case",
+        "Ongoing Board papers": "Ongoing Board papers",
+    },
+    "ipdc": {
+        "SOBC": "SOBC",
+        "pre-SOBC": "pre-SOBC",
+        "OBC": "OBC",
+        "FBC": "FBC",
+    },
 }
+
+# # older returns that require cleaning
+# "Pre - SOBC": "pre-SOBC",
+# "Pre Strategic Outline Business Case": "pre_SOBC",
+# None: None,
+# "Other": "Other",
+# "Other ": "Other",
+# "To be confirmed": None,
+# "To be confirmed ": None,
+# "Ongoing Board papers": None,
+
 
 # DCA_KEYS = {
 #     "sro": {"ipdc": "Departmental DCA", "cdg": "Overall Delivery Confidence"},
@@ -43,11 +50,11 @@ BC_STAGE_DICT = {
 # }
 
 DCA_KEYS = {
-    'cdg': {
-        'sro': 'Overall Delivery Confidence',
-        "finance": 'Costs Confidence',
-        "benefits": 'Benefits Confidence',
-        "schedule": 'Schedule Confidence',
+    "cdg": {
+        "sro": "Overall Delivery Confidence",
+        "finance": "Costs Confidence",
+        "benefits": "Benefits Confidence",
+        "schedule": "Schedule Confidence",
     }
 }
 

@@ -8,6 +8,7 @@ import configparser
 from analysis_engine import __version__
 from analysis_engine.core_data import get_core, open_json_file
 from analysis_engine.dandelion import DandelionData, make_a_dandelion_auto
+from analysis_engine.dca import DcaData, dca_changes_into_word
 from analysis_engine.render_utils import get_input_doc, put_matplotlib_fig_into_word
 from analysis_engine.settings import report_config, set_default_args
 
@@ -65,6 +66,9 @@ from analysis_engine.error_msgs import logger, ConfigurationError, ProjectNameEr
 
 # As more and more meta data going into config could use a refactor to collect it all in
 # one go?
+from analysis_engine.speed_dials import build_speed_dials
+
+
 def get_remove_income_totals(
         confi_path: Path,
 ) -> Dict:
@@ -141,18 +145,21 @@ def run_analysis(args, settings):
                 doc_output_path = str(combined_args['root_path']) + combined_args["word_save_path"]
                 doc.save(doc_output_path.format('dandelion'))
 
-        # if programme == "speedial":
-        #     doc = get_input_doc(cdg_root_path / "input/summary_temp.docx")
-        #     land_doc = get_input_doc(
-        #         cdg_root_path / "input/summary_temp_landscape.docx"
-        #     )
-        #     op_args["rag_number"] = "5"
-        #     data = DcaData(m, **op_args)
-        #     data.get_changes()
-        #     doc = dca_changes_into_word(data, doc)
-        #     doc.save(cdg_root_path / "output/speed_dials_text.docx")
-        #     build_speedials(data, land_doc)
-        #     land_doc.save(cdg_root_path / "output/speed_dial_graph.docx")
+        if programme == "speed_dials":
+            combined_args['rag_number'] = '5'
+            combined_args['quarter'] = 'standard'
+            sdmd = DcaData(md, **combined_args)
+            sd_doc = get_input_doc(str(settings['root_path']) + settings['word_portrait'])
+            build_speed_dials(sdmd, sd_doc)
+            sd_doc.save(str(settings['root_path']) + settings["word_save_path"].format('speed_dials'))
+
+        if programme == "dcas":
+            combined_args['rag_number'] = '5'
+            combined_args['quarter'] = 'standard'
+            sdmd = DcaData(md, **combined_args)
+            sdmd.get_changes()
+            changes_doc = dca_changes_into_word(sdmd, str(settings['root_path']) + settings['word_portrait'])
+            changes_doc.save(str(settings['root_path']) + settings["word_save_path"].format('dca_changes'))
 
     except (ProjectNameError, FileNotFoundError, InputError) as e:
         logger.critical(e)
@@ -507,7 +514,6 @@ def run_analysis(args, settings):
 #
 
 
-
 def run_parsers():
     report_type = sys.argv[1]
 
@@ -547,9 +553,10 @@ def run_parsers():
     #     formatter_class=RawTextHelpFormatter,
     # )
 
-    # cdg_parser_speedial = subparsers.add_parser(
-    #     "speedial", help="speed dial analysis"
-    # )
+    parser_speed_dial = subparsers.add_parser(
+        "speed_dials", help="speed dial analysis"
+    )
+    parser_dca = subparsers.add_parser("dcas", help="dca analysis")
 
     # cdg_parser_milestones.add_argument(
     #     "--dates",
@@ -584,8 +591,9 @@ def run_parsers():
 
     # quarter
     for sub in [
-        # cdg_parser_speedial,
+        parser_speed_dial,
         parser_dandelion,
+        parser_dca,
         # cdg_parser_milestones,
     ]:
         sub.add_argument(
@@ -597,6 +605,57 @@ def run_parsers():
             help="Returns analysis for one or combination of specified quarters. "
                  'User must use correct format e.g "Q3 19/20"',
         )
+
+    # stage
+    for sub in [
+        parser_dca,
+        parser_speed_dial,
+        # parser_vfm,
+        # parser_risks,
+        # parser_port_risks,
+        parser_dandelion,  # ipdc also has pipeline option. Not tested yet.
+        # parser_costs,
+        # parser_costs_sp,
+        # parser_data_query,
+        # parser_milestones,
+        # parser_data_query,
+    ]:
+        sub.add_argument(
+            "--stage",
+            type=str,
+            metavar="",
+            action="store",
+            nargs="*",
+            choices=["FBC", "OBC", "SOBC", "pre-SOBC", 'pipeline'],
+            help="Returns analysis for only those projects at the specified planning stage(s). By default "
+                 "the --stage argument will return the list of bc_stages specified in the config file."
+                 'Or user can enter one or combination of "FBC", "OBC", "SOBC", "pre-SOBC".',
+        )
+    # group
+    for sub in [
+        parser_dca,
+        # parser_vfm,
+        # parser_risks,
+        # parser_port_risks,
+        parser_speed_dial,
+        parser_dandelion,
+        # parser_costs,
+        # parser_milestones,
+        # parser_summaries,
+        # parser_costs_sp,
+        # parser_data_query,
+    ]:
+        sub.add_argument(
+            "--group",
+            type=str,
+            metavar="",
+            action="store",
+            nargs="+",
+            help="Returns analysis for specified project(s), only. User must enter one or a combination of "
+                 'DfT Group names; "HSRG", "RSS", "RIG", "AMIS","RPE", or the project(s) acronym or full name.',
+        )
+
+
 
     parser_dandelion.add_argument(
         "--angles",

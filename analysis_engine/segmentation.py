@@ -9,6 +9,8 @@ from analysis_engine.error_msgs import (
     not_recognised_quarter,
 )
 
+from analysis_engine.dictionaries import BC_STAGE_DICT
+
 
 def get_iter_list(
         report_quarter: List,
@@ -28,11 +30,40 @@ def get_iter_list(
     return iter_list
 
 
+def cal_stage(
+        group: List[str] or List[List[str]],
+        report_type: str,
+        md,
+        tp_indx: int,
+        # input_list_indx=None,
+) -> List[str]:
+    error_case = []
+    output = []
+    q_str = md["quarter_list"][tp_indx]  # quarter string
+    for g in group:  # pg is project/group
+        if g == "pipeline":
+            continue
+        try:
+            local_g = md["dft_group"][q_str][BC_STAGE_DICT[report_type][g]]
+            output += local_g
+        except KeyError:
+            try:
+                output.append(md["abbreviations"][BC_STAGE_DICT[report_type][g]]["full name"])
+            except KeyError:
+                try:
+                    output.append(md["full_names"][BC_STAGE_DICT[report_type][g]])
+                except KeyError:
+                    error_case.append(g)
+
+    not_recognised_project_group_or_stage(error_case)
+
+    return output
+
+
 def cal_group(
         group: List[str] or List[List[str]],
         md,
         tp_indx: int,
-        # input_list_indx=None,
 ) -> List[str]:
     error_case = []
     output = []
@@ -64,7 +95,7 @@ def get_group(md, tp: str, class_kwargs) -> List[str]:
         not_recognised_quarter(tp)
 
     if "stage" in class_kwargs:
-        group = cal_group(class_kwargs["stage"], md, tp_indx)
+        group = cal_stage(class_kwargs["stage"], class_kwargs['report'], md, tp_indx)
     elif "group" in class_kwargs:
         group = cal_group(class_kwargs["group"], md, tp_indx)
     else:
