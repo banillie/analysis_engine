@@ -2,9 +2,14 @@ from typing import List, Dict, Union
 from dateutil import parser
 from collections import Counter
 from datetime import datetime
+from matplotlib import pyplot as plt
+import matplotlib.dates as mdates
+from openpyxl import Workbook
 
+from analysis_engine.render_utils import set_fig_size, get_chart_title, handle_long_keys
 from analysis_engine.segmentation import get_iter_list, get_group, get_correct_p_data
 from analysis_engine.error_msgs import logger
+from analysis_engine.settings import get_board_date
 
 
 def convert_date(date_str: str):
@@ -44,7 +49,7 @@ def milestone_info_handling(output_list: list, t_list: list, **kwargs) -> list:
                             + ": incorrect date format for entry '"
                             + t_list[1][1]
                             + ""
-                              "', requires amending or will not be included. "
+                            "', requires amending or will not be included. "
                             + str(kwargs["tp"])
                             + " data."
                         )
@@ -56,17 +61,17 @@ def milestone_info_handling(output_list: list, t_list: list, **kwargs) -> list:
                     + ": incorrect date format for entry '"
                     + t_list[1][1]
                     + ""
-                      "', requires amending or will not be included. "
+                    "', requires amending or will not be included. "
                     + str(kwargs["tp"])
                     + " data."
                 )
 
 
 def get_milestone_date(
-        project_name: str,
-        milestone_dictionary: Dict[str, Union[datetime.date, str]],
-        quarter_bl: str,
-        milestone_name: str,
+    project_name: str,
+    milestone_dictionary: Dict[str, Union[datetime.date, str]],
+    quarter_bl: str,
+    milestone_name: str,
 ) -> datetime:
     m_dict = milestone_dictionary[quarter_bl]
     for k in m_dict.keys():
@@ -77,84 +82,57 @@ def get_milestone_date(
 
 
 class MilestoneData:
-    def __init__(
-            self,
-            master,
-            baseline_type: str = "ipdc_milestones",
-            **kwargs,
-    ):
+    def __init__(self, master, **kwargs):
         self.master = master
-        self.group = []
-        self.iter_list = []  # iteration list
         self.kwargs = kwargs
-        self.baseline_type = baseline_type
+        self.report = kwargs['report']
+        self.iter_list = get_iter_list(self.kwargs['quarter'], self.master['quarter_list'])
         self.milestone_dict = {}
         self.sorted_milestone_dict = {}
         self.max_date = None
         self.min_date = None
-        self.schedule_change = {}
-        self.schedule_key_last = None
-        self.schedule_key_baseline = None
+        # self.schedule_change = {}
+        # self.schedule_key_last = None
+        # self.schedule_key_baseline = None
         self.get_milestones()
         self.get_chart_info()
-        # self.calculate_schedule_changes()
+        # # self.calculate_schedule_changes()
 
     def get_milestones(self) -> None:
         """
-        Creates project milestone dictionaries for current, last_quarter, and
-        baselines when provided with group and baseline type.
+        Creates project milestone dictionaries
         """
         m_dict = {}
-        self.iter_list = get_iter_list(self.kwargs, self.master)
         for tp in self.iter_list:  # tp time period
             self.kwargs["tp"] = tp
             lower_dict = {}
             raw_list = []
-            self.group = get_group(self.master, tp, self.kwargs)
-            for project_name in self.group:
+            group = get_group(self.master, tp, self.kwargs)
+            for project_name in group:
                 project_milestones = []
-                p_data = get_correct_p_data(
-                    self.kwargs, self.master, self.baseline_type, project_name, tp
-                )
+                p_data = get_correct_p_data(self.master, project_name, tp)
                 if p_data is None:
                     continue
                 # i loops below removes None Milestone names and rejects non-datetime date values.
-                p = self.master.abbreviations[project_name]["abb"]
+                p = self.master['abbreviations'][project_name]["abb"]
                 category = "Milestone"
-                if "data_type" in self.kwargs:
-                    if self.kwargs["data_type"] == "top35":
-                        report = "Top 250"
-                        for i in range(1, 30):
-                            entry = [
-                                ("Project", p),
-                                ("Milestone", p_data["MM" + str(i) + " name"]),
-                                ("Notes", p_data["MM" + str(i) + " Comment"]),
-                                ("Date", convert_date(p_data["MM" + str(i) + " date"])),
-                                ("Status", p_data["MM" + str(i) + " status"]),
-                                ("Report", report),
-                                ("Cat", category),
-                            ]
-                            milestone_info_handling(
-                                project_milestones, entry, **self.kwargs
-                            )
-                    if self.kwargs["data_type"] == "cdg":
-                        report = "CDG"
-                        for i in range(1, 15):
-                            entry = [
-                                ("Project", p),
-                                ("Milestone", p_data["MM" + str(i)]),
-                                ("Notes", p_data["MM" + str(i) + " NOTES"]),
-                                ("Date", convert_date(p_data["MM" + str(i) + " DATE"])),
-                                ("Status", p_data["MM" + str(i) + " STATUS"]),
-                                ("Report", report),
-                                ("Cat", category),
-                            ]
-                            milestone_info_handling(
-                                project_milestones, entry, **self.kwargs
-                            )
+                if self.kwargs["report"] == "cdg":
+                    # report = "CDG"
+                    for i in range(1, 15):
+                        entry = [
+                            ("Project", p),
+                            ("Milestone", p_data["MM" + str(i)]),
+                            ("Notes", p_data["MM" + str(i) + " NOTES"]),
+                            ("Date", convert_date(p_data["MM" + str(i) + " DATE"])),
+                            ("Status", p_data["MM" + str(i) + " STATUS"]),
+                            ("Report", self.kwargs['report']),
+                            ("Cat", category),
+                        ]
+                        milestone_info_handling(
+                            project_milestones, entry, **self.kwargs
+                        )
 
-                else:
-                    report = "IPDC/GMPP"
+                if self.kwargs['report'] == 'ipdc':
                     for i in range(1, 50):
                         try:
                             entry = [
@@ -168,11 +146,11 @@ class MilestoneData:
                                             "Approval MM"
                                             + str(i)
                                             + " Forecast / Actual"
-                                            ]
+                                        ]
                                     ),
                                 ),
                                 ("Notes", p_data["Approval MM" + str(i) + " Notes"]),
-                                ("Report", report),
+                                ("Report", self.kwargs['report']),
                                 ("Cat", category),
                             ]
                             milestone_info_handling(
@@ -189,11 +167,11 @@ class MilestoneData:
                                             "Assurance MM"
                                             + str(i)
                                             + " Forecast - Actual"
-                                            ]
+                                        ]
                                     ),
                                 ),
                                 ("Notes", p_data["Assurance MM" + str(i) + " Notes"]),
-                                ("Report", report),
+                                ("Report", self.kwargs['report']),
                                 ("Cat", category),
                             ]
                             milestone_info_handling(
@@ -212,14 +190,14 @@ class MilestoneData:
                                                 "Approval MM"
                                                 + str(i)
                                                 + " Forecast - Actual"
-                                                ]
+                                            ]
                                         ),
                                     ),
                                     (
                                         "Notes",
                                         p_data["Approval MM" + str(i) + " Notes"],
                                     ),
-                                    ("Report", report),
+                                    ("Report", self.kwargs['report']),
                                     ("Cat", category),
                                 ]
                                 milestone_info_handling(
@@ -240,11 +218,11 @@ class MilestoneData:
                                     convert_date(
                                         p_data[
                                             "Project MM" + str(i) + " Forecast - Actual"
-                                            ]
+                                        ]
                                     ),
                                 ),
                                 ("Notes", p_data["Project MM" + str(i) + " Notes"]),
-                                ("Report", report),
+                                ("Report", self.kwargs['report']),
                                 ("Cat", category),
                             ]
                             milestone_info_handling(
@@ -268,11 +246,11 @@ class MilestoneData:
                                             "HMT Approval "
                                             + str(i)
                                             + " Forecast / Actual"
-                                            ]
+                                        ]
                                     ),
                                 ),
                                 ("Notes", p_data["HMT Approval " + str(i) + " Notes"]),
-                                ("Report", report),
+                                ("Report", self.kwargs['report']),
                                 ("Cat", category),
                             ]
                             milestone_info_handling(
@@ -293,7 +271,7 @@ class MilestoneData:
                         lower_counter_list.append(entry[1][1])
                         lower_count = Counter(lower_counter_list)
                         new_milestone_key = (
-                                entry[1][1] + " (" + str(lower_count[entry[1][1]]) + ")"
+                            entry[1][1] + " (" + str(lower_count[entry[1][1]]) + ")"
                         )
                         entry[1] = ("Milestone", new_milestone_key)
                         raw_list.append(entry)
@@ -332,8 +310,8 @@ class MilestoneData:
                 d = None  # date
                 for x in self.milestone_dict[i].values():
                     if (
-                            x["Project"] == v["Project"]
-                            and x["Milestone"] == v["Milestone"]
+                        x["Project"] == v["Project"]
+                        and x["Milestone"] == v["Milestone"]
                     ):
                         p = x["Project"]
                         mn = x["Milestone"]
@@ -480,9 +458,9 @@ class MilestoneData:
         # i.e. the filter returns no milestones.
         filtered_dict = {}
         if (
-                "type" in filter_kwargs
-                and "key" in filter_kwargs
-                and "dates" in filter_kwargs
+            "type" in filter_kwargs
+            and "key" in filter_kwargs
+            and "dates" in filter_kwargs
         ):
             start_date, end_date = zip(*filter_kwargs["dates"])
             start = parser.parse(start_date, dayfirst=True)
@@ -560,12 +538,12 @@ class MilestoneData:
         m_dict_keys = list(self.milestone_dict.keys())
 
         def schedule_info(
-                project_name: str,
-                other_key_list: List[str],
-                c_key_list: List[str],
-                miles_dict: dict,
-                dict_l_current: str,
-                dict_l_other: str,
+            project_name: str,
+            other_key_list: List[str],
+            c_key_list: List[str],
+            miles_dict: dict,
+            dict_l_current: str,
+            dict_l_other: str,
         ):
             output_dict = {}
             schedule_info = []
@@ -632,9 +610,9 @@ class MilestoneData:
                 milestone_key_baseline = baseline_key.split(",")[1]
                 if project_name == p:
                     if (
-                            milestone_key_baseline
-                            != " Project - Business Case End Date"
-                            # and milestone_key_baseline != " Project End Date"
+                        milestone_key_baseline
+                        != " Project - Business Case End Date"
+                        # and milestone_key_baseline != " Project End Date"
                     ):
                         baseline_key_list.append(milestone_key_baseline)
 
@@ -659,3 +637,254 @@ class MilestoneData:
             output_dict[project_name] = lower_dict
 
         self.schedule_change = output_dict
+
+
+def merge_project_milestone_name(project, ms_names, no):
+    return project[no] + ", " + ms_names[no]
+
+
+def calculate_max_min_date(milestones: MilestoneData, **kwargs) -> int:
+    m_list = []
+    for i in milestones.sorted_milestone_dict.keys():
+        m_list += milestones.sorted_milestone_dict[i]["g_dates"]
+    # This step required for central support milestone dates which can be None.
+    final_m_list = [x for x in m_list if x is not None]
+    if kwargs["value"] == "max":
+        return max(final_m_list)
+    if kwargs["value"] == "min":
+        return min(final_m_list)
+
+
+def milestone_chart(
+    milestones: MilestoneData,
+    master,
+    **kwargs,
+) -> plt.figure:
+    fig, ax1 = plt.subplots()
+    fig = set_fig_size(kwargs, fig)
+    title = get_chart_title(**kwargs)
+    plt.suptitle(title, fontweight="bold", fontsize=20)
+    project = milestones.sorted_milestone_dict[milestones.iter_list[0]]["project"]
+    ms_names = milestones.sorted_milestone_dict[milestones.iter_list[0]]["names"]
+    combined = [
+        merge_project_milestone_name(project, ms_names, i)
+        for i, p in enumerate(project)
+    ]
+    ms_names = handle_long_keys(combined)
+
+    for i, tp in enumerate(milestones.iter_list):
+        m = [
+            x for x in milestones.sorted_milestone_dict[tp]["g_dates"] if x is not None
+        ]
+        ax1.scatter(
+            m,
+            ms_names[0 : len(m)],
+            label=tp,
+            s=200,
+            zorder=20 - i,
+        )
+
+    ax1.legend(prop={"size": 14})  # insert legend
+    plt.yticks(size=10)
+    # reverse series_two axis so order is earliest to oldest
+    ax1 = plt.gca()
+    ax1.set_ylim(ax1.get_ylim()[::-1])
+    ax1.yaxis.grid()  # horizontal lines
+    ax1.set_axisbelow(True)
+
+    years = mdates.YearLocator()  # every year
+    months = mdates.MonthLocator()  # every month
+    weeks = mdates.WeekdayLocator()
+    years_fmt = mdates.DateFormatter("%Y")
+    months_fmt = mdates.DateFormatter("%b")
+    weeks_fmt = mdates.DateFormatter("%d")
+
+    max_date = calculate_max_min_date(milestones, value="max")
+    min_date = calculate_max_min_date(milestones, value="min")
+    td = (max_date - min_date).days
+    if td >= 365 * 3:
+        ax1.xaxis.set_major_locator(years)
+        ax1.xaxis.set_minor_locator(months)
+        ax1.xaxis.set_major_formatter(years_fmt)
+        plt.setp(ax1.xaxis.get_minorticklabels(), rotation=45, size=12)
+        plt.setp(ax1.xaxis.get_majorticklabels(), rotation=45, weight="bold", size=14)
+    elif 365 * 3 >= td >= 90:
+        ax1.xaxis.set_major_locator(years)
+        ax1.xaxis.set_minor_locator(months)
+        ax1.xaxis.set_major_formatter(years_fmt)
+        ax1.xaxis.set_minor_formatter(months_fmt)
+        plt.setp(ax1.xaxis.get_minorticklabels(), rotation=45, size=12)
+        plt.setp(ax1.xaxis.get_majorticklabels(), rotation=45, weight="bold", size=14)
+    else:
+        ax1.xaxis.set_major_locator(months)
+        ax1.xaxis.set_minor_locator(weeks)
+        ax1.xaxis.set_major_formatter(months_fmt)
+        ax1.xaxis.set_minor_formatter(weeks_fmt)
+        plt.setp(ax1.xaxis.get_minorticklabels(), rotation=45, size=12)
+        plt.setp(ax1.xaxis.get_majorticklabels(), rotation=45, weight="bold", size=14)
+
+    if "show_keys" in kwargs:
+        if kwargs["show_keys"] == "no":
+            ax1.get_yaxis().set_visible(False)
+
+    # Add line of analysis_engine date, but only if in the time period
+    if "blue_line" in kwargs:
+        blue_line = kwargs["blue_line"]
+        if blue_line == "Today":
+            if min_date <= datetime.date.today() <= max_date:
+                plt.axvline(datetime.date.today())
+                plt.figtext(
+                    0.98,
+                    0.01,
+                    "Line represents date chart compiled",
+                    horizontalalignment="right",
+                    fontsize=10,
+                    fontweight="bold",
+                )
+        elif blue_line == "IPDC":
+            IPDC_DATE = parser.parse(
+                get_board_date(kwargs),  # this will fail. to be tested.
+                dayfirst=True,
+            ).date()
+            if min_date <= IPDC_DATE <= max_date:
+                plt.axvline(IPDC_DATE)
+                plt.figtext(
+                    0.98,
+                    0.01,
+                    "Line represents IPDC date",
+                    horizontalalignment="right",
+                    fontsize=10,
+                    fontweight="bold",
+                )
+        elif blue_line == "CDG":
+            CDG_DATE = parser.parse(
+                get_board_date(kwargs), # this will fail. to be tested.
+                dayfirst=True,
+            ).date()
+            if min_date <= CDG_DATE <= max_date:
+                plt.axvline(CDG_DATE)
+                plt.figtext(
+                    0.98,
+                    0.01,
+                    "Line represents CDG Board date",
+                    horizontalalignment="right",
+                    fontsize=10,
+                    fontweight="bold",
+                )
+        elif isinstance(blue_line, str):
+            line_date = parser.parse(blue_line, dayfirst=True)
+            if min_date <= line_date.date() <= max_date:
+                plt.axvline(line_date.date())
+                plt.figtext(
+                    0.98,
+                    0.01,
+                    "Line represents " + blue_line,
+                    horizontalalignment="right",
+                    fontsize=10,
+                    fontweight="bold",
+                )
+
+    # size of chart and fit
+    fig.tight_layout(rect=[0, 0.03, 1, 0.95])  # for title
+
+    if "chart" in kwargs:
+        if kwargs["chart"]:
+            plt.show()
+
+    return fig
+
+
+def put_milestones_into_wb(milestones: MilestoneData) -> Workbook:
+    wb = Workbook()
+    ws = wb.active
+
+    row_num = 2
+    ms_names = milestones.sorted_milestone_dict[milestones.iter_list[0]]["names"]
+
+    for i, m in enumerate(ms_names):
+        for x, tp in enumerate(milestones.iter_list):
+            ms_date = milestones.sorted_milestone_dict[tp]["r_dates"][i]
+            ws.cell(row=row_num + i, column=5 + x).value = ms_date
+            ws.cell(row=row_num + i, column=5 + x).number_format = "dd/mm/yy"
+
+    for i, m in enumerate(ms_names):  # want the latest notes.
+        ws.cell(row=row_num + i, column=1).value = milestones.sorted_milestone_dict[
+            milestones.iter_list[0]
+        ]["project"][
+            i
+        ]  # project name
+        ws.cell(row=row_num + i, column=2).value = milestones.sorted_milestone_dict[
+            milestones.iter_list[0]
+        ]["report"][
+            i
+        ]  # milestone
+        ws.cell(row=row_num + i, column=3).value = milestones.sorted_milestone_dict[
+            milestones.iter_list[0]
+        ]["cat"][
+            i
+        ]  # milestone
+        ws.cell(row=row_num + i, column=4).value = milestones.sorted_milestone_dict[
+            milestones.iter_list[0]
+        ]["names"][
+            i
+        ]  # milestone
+        try:
+            notes = milestones.sorted_milestone_dict[milestones.iter_list[0]]["notes"][
+                i
+            ]
+            ws.cell(row=row_num + i, column=len(milestones.iter_list) + 9).value = notes
+        except KeyError:  # "notes" not in central support dict
+            pass
+        try:  # only present in top250 milestones
+            status = milestones.sorted_milestone_dict[milestones.iter_list[0]][
+                "status"
+            ][i]
+            ws.cell(
+                row=row_num + i, column=len(milestones.iter_list) + 5
+            ).value = status
+        except (IndexError, KeyError):
+            # IndexError for ipdc rpting. "status" is in dict, but list is empty.
+            # KeyError for top250 central support, which does not have "status" in dict.
+            pass
+        try:  # only present in top250 central support
+            escalated = milestones.sorted_milestone_dict[milestones.iter_list[0]][
+                "escalated"
+            ][i]
+            cs_type = milestones.sorted_milestone_dict[milestones.iter_list[0]]["type"][
+                i
+            ]
+            cs_response = milestones.sorted_milestone_dict[milestones.iter_list[0]][
+                "cs_response"
+            ][i]
+            secured = milestones.sorted_milestone_dict[milestones.iter_list[0]][
+                "secured"
+            ][i]
+            ws.cell(
+                row=row_num + i, column=len(milestones.iter_list) + 6
+            ).value = escalated
+            ws.cell(
+                row=row_num + i, column=len(milestones.iter_list) + 7
+            ).value = cs_type
+            ws.cell(
+                row=row_num + i, column=len(milestones.iter_list) + 8
+            ).value = secured
+        except KeyError:  # all above not in ipdc or top250 milestones
+            pass
+
+    ws.cell(row=1, column=1).value = "Project"
+    ws.cell(row=1, column=2).value = "Report"
+    ws.cell(row=1, column=3).value = "Type"
+    ws.cell(row=1, column=4).value = "Milestone"
+    for x, tp in enumerate(milestones.iter_list):
+        ws.cell(row=1, column=5 + x).value = tp
+    ws.cell(row=1, column=len(milestones.iter_list) + 5).value = "Status (top 250 ms)"
+    ws.cell(
+        row=1, column=len(milestones.iter_list) + 6
+    ).value = "Escalated (top 250 cs)"
+    ws.cell(row=1, column=len(milestones.iter_list) + 7).value = "Type (top 250 cs)"
+    ws.cell(row=1, column=len(milestones.iter_list) + 8).value = "Secured (top 250 cs)"
+    ws.cell(
+        row=1, column=len(milestones.iter_list) + 9
+    ).value = "Notes / Central Response (top 250 cs)"
+
+    return wb

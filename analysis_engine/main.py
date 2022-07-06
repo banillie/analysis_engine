@@ -5,6 +5,8 @@ from typing import Dict, List
 from pathlib import Path
 import configparser
 
+from docx.shared import Inches
+
 from analysis_engine import __version__
 from analysis_engine.core_data import get_core, open_json_file
 from analysis_engine.dandelion import DandelionData, make_a_dandelion_auto
@@ -141,7 +143,7 @@ def run_analysis(args, settings):
     try:
         if programme == "dandelion":
             d_data = DandelionData(md, **combined_args)
-            if op_args["chart"] == "show":
+            if op_args['chart'] != 'save':
                 make_a_dandelion_auto(d_data, **op_args)
             else:
                 d_graph = make_a_dandelion_auto(d_data, **combined_args)
@@ -149,7 +151,7 @@ def run_analysis(args, settings):
                     str(combined_args["root_path"]) + combined_args["word_landscape"]
                 )
                 doc = get_input_doc(doc_path)
-                put_matplotlib_fig_into_word(doc, d_graph)
+                put_matplotlib_fig_into_word(doc, d_graph, width=Inches(8))
                 doc_output_path = (
                     str(combined_args["root_path"]) + combined_args["word_save_path"]
                 )
@@ -160,7 +162,7 @@ def run_analysis(args, settings):
             combined_args["quarter"] = "standard"
             sdmd = DcaData(md, **combined_args)
             sd_doc = get_input_doc(
-                str(settings["root_path"]) + settings["word_portrait"]
+                str(settings["root_path"]) + settings["word_landscape"]
             )
             build_speed_dials(sdmd, sd_doc)
             sd_doc.save(
@@ -169,7 +171,7 @@ def run_analysis(args, settings):
             )
 
         if programme == "dcas":
-            combined_args["rag_number"] = "5"
+            # combined_args["rag_number"] = "5"
             combined_args["quarter"] = "standard"
             sdmd = DcaData(md, **combined_args)
             sdmd.get_changes()
@@ -198,6 +200,33 @@ def run_analysis(args, settings):
                 str(settings["root_path"])
                 + settings["excel_save_path"].format("dashboard_completed")
             )
+
+        if programme == "milestones":
+            ms = MilestoneData(m, **op_args)
+            if (
+                    "type" in op_args
+                    or "dates" in op_args
+                    or "koi" in op_args
+                    or "koi_fn" in op_args
+            ):
+                op_args = return_koi_fn_keys(op_args)
+                ms.filter_chart_info(**op_args)
+
+            if "chart" not in op_args:
+                pass
+            else:
+                if op_args["chart"] == "save":
+                    op_args["chart"] = False
+                    ms_graph = milestone_chart(ms, m, **op_args)
+                    doc = get_input_doc(root_path / "input/summary_temp_landscape.docx")
+                    put_matplotlib_fig_into_word(
+                        doc, ms_graph, size=8, transparent=False
+                    )
+                    doc.save(cdg_root_path / "output/milestones_chart.docx")
+                if op_args["chart"] == "show":
+                    milestone_chart(ms, m, **op_args)
+
+            wb = put_milestones_into_wb(ms)
 
     except (ProjectNameError, FileNotFoundError, InputError) as e:
         logger.critical(e)
@@ -444,81 +473,9 @@ def run_analysis(args, settings):
 #     # print(programme + " analysis has been compiled. Enjoy!")
 #
 # def cdg_run_general(args):
-#     # get portfolio reporting group information.
-#     META = get_group_stage_data(
-#         str(cdg_root_path) + "/core_data/cdg_config.ini",
-#     )
-#     dft_group = META[0]
-#     dft_stage = META[2]
+
 #
-#     programme = args["subparser_name"]
-#     # wrap this into logging
-#     try:
-#         print("compiling cdg " + programme + " analysis")
-#     except TypeError:  # NoneType as no programme entered
-#         print("Further command required. Use --help flag for guidance")
-#         sys.exit(1)
-#
-#     m = Master(open_json_file(str(cdg_root_path / "core_data/json/master.json")))
-#
-#     try:
-#         op_args = {
-#             k: v for k, v in args.items() if v is not None
-#         }  # removes None values
-#
-#         op_args["data_type"] = "cdg"
-#
-#         if "group" not in op_args:
-#             if "stage" not in op_args:
-#                 op_args["group"] = dft_group
-#             if "stage" in op_args:
-#                 if op_args["stage"] == []:
-#                     op_args["stage"] = dft_stage
-#         if "quarter" not in op_args:
-#             if "baseline" not in op_args:
-#                 op_args["quarter"] = ["standard"]
-#
-#         if programme == "speedial":
-#             doc = get_input_doc(cdg_root_path / "input/summary_temp.docx")
-#             land_doc = get_input_doc(
-#                 cdg_root_path / "input/summary_temp_landscape.docx"
-#             )
-#             op_args["rag_number"] = "5"
-#             data = DcaData(m, **op_args)
-#             data.get_changes()
-#             doc = dca_changes_into_word(data, doc)
-#             doc.save(cdg_root_path / "output/speed_dials_text.docx")
-#             build_speedials(data, land_doc)
-#             land_doc.save(cdg_root_path / "output/speed_dial_graph.docx")
-#
-#         if programme == "milestones":
-#             print(op_args)
-#             ms = MilestoneData(m, **op_args)
-#
-#             if (
-#                     "type" in op_args
-#                     or "dates" in op_args
-#                     or "koi" in op_args
-#                     or "koi_fn" in op_args
-#             ):
-#                 op_args = return_koi_fn_keys(op_args)
-#                 ms.filter_chart_info(**op_args)
-#
-#             if "chart" not in op_args:
-#                 pass
-#             else:
-#                 if op_args["chart"] == "save":
-#                     op_args["chart"] = False
-#                     ms_graph = milestone_chart(ms, m, **op_args)
-#                     doc = get_input_doc(root_path / "input/summary_temp_landscape.docx")
-#                     put_matplotlib_fig_into_word(
-#                         doc, ms_graph, size=8, transparent=False
-#                     )
-#                     doc.save(cdg_root_path / "output/milestones_chart.docx")
-#                 if op_args["chart"] == "show":
-#                     milestone_chart(ms, m, **op_args)
-#
-#             wb = put_milestones_into_wb(ms)
+
 #
 #
 #         if programme == "dashboards":
@@ -584,12 +541,12 @@ def run_parsers():
         "A completed dashboard named completed_dashboard.xlsx will be placed into\n"
         "the output file."
     )
-    cdg_parser_dashboard = subparsers.add_parser(
+    subparsers.add_parser(
         "dashboards",
         help="dashboard",
         description=dashboard_description,
         formatter_class=RawTextHelpFormatter,
-    )
+    )  # no associated op args.
 
     parser_speed_dial = subparsers.add_parser("speed_dials", help="speed dial analysis")
     parser_dca = subparsers.add_parser("dcas", help="dca analysis")

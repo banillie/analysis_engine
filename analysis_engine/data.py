@@ -3989,18 +3989,7 @@
 #     return np.array(x)[mask], np.array(y)[mask]
 #
 #
-# def calculate_max_min_date(milestones: MilestoneData, **kwargs) -> int:
-#     m_list = []
-#     for i in milestones.sorted_milestone_dict.keys():
-#         m_list += milestones.sorted_milestone_dict[i]["g_dates"]
-#
-#     # This step required for central support milestone dates which can be None.
-#     final_m_list = [x for x in m_list if x is not None]
-#
-#     if kwargs["value"] == "max":
-#         return max(final_m_list)
-#     if kwargs["value"] == "min":
-#         return min(final_m_list)
+
 #
 #
 # def handle_long_keys(key_names: List[str]) -> List[str]:

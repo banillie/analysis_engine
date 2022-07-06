@@ -588,11 +588,6 @@ def make_a_dandelion_auto(dl: DandelionData, **kwargs):
     DandelionData class."""
 
     fig, ax = plt.subplots(figsize=(10, 8), facecolor=FACE_COLOUR)
-    # fig, ax = plt.subplots(figsize=(10, 8))
-    # ax.set_facecolor(FACE_COLOUR)
-    ## title not currently in use
-    # title = get_chart_title(dl_data, kwargs, "dandelion")
-    # plt.suptitle(title, fontweight="bold", fontsize=10)
 
     if "circle_edge" in kwargs:
         if kwargs["circle_edge"] == "forward_look" or "ipa":
@@ -669,9 +664,7 @@ def make_a_dandelion_auto(dl: DandelionData, **kwargs):
 
     plt.axis("scaled")
     plt.axis("off")
-
-    if "chart" in kwargs:
-        if kwargs["chart"]:
-            plt.show()
+    if kwargs["chart"] != 'save':
+        plt.show()
 
     return fig

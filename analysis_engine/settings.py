@@ -1,6 +1,7 @@
-from pathlib import Path
+import configparser
 import platform
 import csv
+from pathlib import Path
 from typing import List, Dict
 
 from datamaps.api import project_data_from_master, project_data_from_master_month
@@ -77,17 +78,21 @@ def get_data_query_key_names(key_file: csv) -> List[str]:
     return key_list[1:]
 
 
-def return_koi_fn_keys(oa: Dict, settings_dict):  # op_args
+def return_koi_fn_keys(op_args: Dict):  # op_args
     """small helper function to convert key names in file into list of strings
     and place in op_args dictionary"""
-    if "koi_fn" in oa:
-        keys = get_data_query_key_names(
-            settings_dict["root_path"] / "input/{}.csv".format(oa["koi_fn"])
-        )
-        oa["key"] = keys
-        return oa
-    if "koi" in oa:
-        oa["key"] = oa["koi"]
-        return oa
+    if "koi_fn" in op_args:
+        keys = get_data_query_key_names(op_args["root_path"] / "input/{}.csv".format(op_args["koi_fn"]))
+        op_args["key"] = keys
+        return op_args
+    if "koi" in op_args:
+        op_args["key"] = op_args["koi"]
+        return op_args
     else:
-        return oa
+        return op_args
+
+
+def get_board_date(confi_path, board_str):
+    config = configparser.ConfigParser()
+    config.read(confi_path)
+    return config["GLOBALS"][board_str]

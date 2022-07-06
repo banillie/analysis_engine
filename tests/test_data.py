@@ -1,12 +1,14 @@
 import pytest
+from docx.shared import Inches
 
 from tests.test_op_args import (
     REPORTING_TYPE,
     DANDELION_OP_ARGS_DICT,
     SPEED_DIAL_AND_DCA_OP_ARGS,
+    MILESTONES_OP_ARGS,
 )
 
-from analysis_engine.settings import report_config, set_default_args
+from analysis_engine.settings import report_config, set_default_args, return_koi_fn_keys
 from analysis_engine.core_data import (
     PythonMasterData,
     get_master_data,
@@ -22,6 +24,7 @@ from analysis_engine.dca import DcaData, dca_changes_into_word
 from analysis_engine.speed_dials import build_speed_dials
 from analysis_engine.render_utils import put_matplotlib_fig_into_word, get_input_doc
 from analysis_engine.dashboards import narrative_dashboard, cdg_dashboard
+from analysis_engine.milestones import MilestoneData, milestone_chart, put_milestones_into_wb
 
 SETTINGS_DICT = report_config(REPORTING_TYPE)
 
@@ -94,7 +97,7 @@ def test_build_dandelion_graph():
         d_lion = make_a_dandelion_auto(dmd, **combined_args)
         doc_path = str(SETTINGS_DICT["root_path"]) + SETTINGS_DICT["word_landscape"]
         doc = get_input_doc(doc_path)
-        put_matplotlib_fig_into_word(doc, d_lion)
+        put_matplotlib_fig_into_word(doc, d_lion, width=Inches(8))
         doc_output_path = (
             str(SETTINGS_DICT["root_path"]) + SETTINGS_DICT["word_save_path"]
         )
@@ -129,7 +132,7 @@ def test_speed_dials():
         combined_args = {**x, **SETTINGS_DICT}
         sdmd = DcaData(md, **combined_args)
         sd_doc = get_input_doc(
-            str(SETTINGS_DICT["root_path"]) + SETTINGS_DICT["word_portrait"]
+            str(SETTINGS_DICT["root_path"]) + SETTINGS_DICT["word_landscape"]
         )
         build_speed_dials(sdmd, sd_doc)
         sd_doc.save(
@@ -158,6 +161,41 @@ def test_dashboards():
         str(SETTINGS_DICT["root_path"])
         + SETTINGS_DICT["excel_save_path"].format("dashboard_completed")
     )
+
+
+def test_milestones():
+    md = open_json_file(
+        f"/home/will/Documents/{REPORTING_TYPE}/core_data/json/master.json"
+    )
+    for x in MILESTONES_OP_ARGS:
+        set_default_args(x, md["groups"], md["current_quarter"])
+        combined_args = {**x, **SETTINGS_DICT}
+        ms = MilestoneData(md, **combined_args)
+        if (
+                "type" in combined_args
+                or "dates" in combined_args
+                or "koi" in combined_args
+                or "koi_fn" in combined_args
+        ):
+            return_koi_fn_keys(combined_args)
+            ms.filter_chart_info(**combined_args)
+        ms_graph = milestone_chart(ms, md, **combined_args)
+        doc = get_input_doc(
+            str(SETTINGS_DICT["root_path"]) + SETTINGS_DICT["word_landscape"]
+        )
+        put_matplotlib_fig_into_word(doc, ms_graph, width=Inches(8))
+        doc.save(
+            str(SETTINGS_DICT["root_path"])
+            + SETTINGS_DICT["word_save_path"].format("milestones")
+        )
+        # if combined_args["chart"] == "show":
+        #     combined_args['chart'] = True
+        #     milestone_chart(ms, md, **op_args)
+        wb = put_milestones_into_wb(ms)
+        wb.save(
+            str(SETTINGS_DICT["root_path"])
+            + SETTINGS_DICT["excel_save_path"].format("milestone_data")
+        )
 
 
 @pytest.mark.skip(reason="refactor required")
