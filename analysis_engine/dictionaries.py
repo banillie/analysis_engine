@@ -30,6 +30,32 @@ BC_STAGE_DICT = {
     },
 }
 
+DASHBOARD_BC_STAGE_ABBREVIATION = {
+    "Strategic Outline Case": "SOBC",
+    "Outline Business Case": "OBC",
+    "Full Business Case": "FBC",
+    "pre-Strategic Outline Case": "pre-SOBC",
+    "Ongoing Board papers": "Ongoing Board papers",
+}
+
+# def convert_bc_stage_text(bc_stage: str) -> str:
+#     """
+#     function that converts bc stage.
+#     :param bc_stage: the string name for business cases that it kept in the master
+#     :return: standard/shorter string name
+#     """
+#
+#     if bc_stage == "Strategic Outline Case":
+#         return "SOBC"
+#     elif bc_stage == "Outline Business Case":
+#         return "OBC"
+#     elif bc_stage == "Full Business Case":
+#         return "FBC"
+#     elif bc_stage == "pre-Strategic Outline Case":
+#         return "pre-SOBC"
+#     else:
+#         return bc_stage
+
 # # older returns that require cleaning
 # "Pre - SOBC": "pre-SOBC",
 # "Pre Strategic Outline Business Case": "pre_SOBC",
@@ -143,6 +169,31 @@ STANDARDISE_BEN_KEYS = {
     "delivered": {"cdg": "Benefits delivered"},
     "remaining": {"cdg": "Benefits to be delivered"},
     "total": {"cdg": "Total Benefits"},
+}
+
+rag_txt_list = ["A/G", "A/R", "R", "G", "A"]  # cdg dashboards
+conf_list = [
+    "Costs Confidence",
+    "Schedule Confidence",
+    "Benefits Confidence",
+]  # cdg dashboards
+risk_list = [
+    "Benefits",
+    "Capability",
+    "Cost",
+    "Objectives",
+    "Purpose",
+    "Schedule",
+    "Sponsorship",
+    "Stakeholders",
+]  # cdg dashboard
+
+
+# ONLY USED FOR CDG DASHBOARDS AT MOMENT
+DATA_KEY_DICT = {
+    "IPDC approval point": "Last Business Case (BC) achieved",
+    "Total Forecast": "Total Costs",
+    "Departmental DCA": "Overall Delivery Confidence",
 }
 
 

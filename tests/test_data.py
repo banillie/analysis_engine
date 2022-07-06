@@ -20,8 +20,8 @@ from analysis_engine.core_data import (
 from analysis_engine.dandelion import DandelionData, make_a_dandelion_auto
 from analysis_engine.dca import DcaData, dca_changes_into_word
 from analysis_engine.speed_dials import build_speed_dials
-
 from analysis_engine.render_utils import put_matplotlib_fig_into_word, get_input_doc
+from analysis_engine.dashboards import narrative_dashboard, cdg_dashboard
 
 SETTINGS_DICT = report_config(REPORTING_TYPE)
 
@@ -139,7 +139,25 @@ def test_speed_dials():
 
 
 def test_dashboards():
-    pass
+    md = open_json_file(
+        f"/home/will/Documents/{REPORTING_TYPE}/core_data/json/master.json"
+    )
+    narrative_d_master = get_input_doc(
+            str(SETTINGS_DICT['root_path']) + SETTINGS_DICT['narrative_dashboard']
+        )
+    narrative_dashboard(md, narrative_d_master)  #
+    narrative_d_master.save(
+        str(SETTINGS_DICT["root_path"])
+        + SETTINGS_DICT["excel_save_path"].format("narrative_dashboard_completed")
+    )
+    cdg_d_master = get_input_doc(
+        str(SETTINGS_DICT['root_path']) + SETTINGS_DICT['dashboard']
+    )
+    cdg_dashboard(md, cdg_d_master)
+    cdg_d_master.save(
+        str(SETTINGS_DICT["root_path"])
+        + SETTINGS_DICT["excel_save_path"].format("dashboard_completed")
+    )
 
 
 @pytest.mark.skip(reason="refactor required")

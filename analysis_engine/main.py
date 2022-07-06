@@ -8,6 +8,7 @@ import configparser
 from analysis_engine import __version__
 from analysis_engine.core_data import get_core, open_json_file
 from analysis_engine.dandelion import DandelionData, make_a_dandelion_auto
+from analysis_engine.dashboards import narrative_dashboard, cdg_dashboard
 from analysis_engine.dca import DcaData, dca_changes_into_word
 from analysis_engine.render_utils import get_input_doc, put_matplotlib_fig_into_word
 from analysis_engine.settings import report_config, set_default_args
@@ -61,7 +62,12 @@ from analysis_engine.settings import report_config, set_default_args
 # from analysis_engine.ar_data import get_ar_data, ar_run_p_reports
 from analysis_engine.gmpp_int import get_gmpp_data
 
-from analysis_engine.error_msgs import logger, ConfigurationError, ProjectNameError, InputError
+from analysis_engine.error_msgs import (
+    logger,
+    ConfigurationError,
+    ProjectNameError,
+    InputError,
+)
 
 
 # As more and more meta data going into config could use a refactor to collect it all in
@@ -70,7 +76,7 @@ from analysis_engine.speed_dials import build_speed_dials
 
 
 def get_remove_income_totals(
-        confi_path: Path,
+    confi_path: Path,
 ) -> Dict:
     # Returns a list of dft groups
     try:
@@ -96,12 +102,12 @@ def check_remove(op_args):  # subcommand arg
             if p + " successfully removed from analysis." not in CURRENT_LOG:
                 logger.warning(
                     p + " not recognised and therefore not removed from analysis."
-                        ' Please make sure "remove" entry is correct.'
+                    ' Please make sure "remove" entry is correct.'
                 )
 
 
 def settings_switch(parse_args, report_type):
-    """"
+    """ "
     This function either runs the initiate function which saves core_data into a json file,
     or runs the run_analysis function which produces analytical analysis.
     """
@@ -119,17 +125,17 @@ def initiate(settings_dict):
     """
     logger.info("Initiating process to create master data for reporting.")
     get_core(settings_dict)
-    logger.info("The latest master and project information match. "
-                "Master data file has been successfully created.")
+    logger.info(
+        "The latest master and project information match. "
+        "Master data file has been successfully created."
+    )
 
 
 def run_analysis(args, settings):
     programme = args["subparser_name"]
-    md = open_json_file(str(settings['root_path']) + settings['master_path'])
-    op_args = {
-        k: v for k, v in args.items() if v is not None
-    }
-    set_default_args(op_args, md['groups'], md['current_quarter'])
+    md = open_json_file(str(settings["root_path"]) + settings["master_path"])
+    op_args = {k: v for k, v in args.items() if v is not None}
+    set_default_args(op_args, md["groups"], md["current_quarter"])
     combined_args = {**op_args, **settings}
 
     try:
@@ -139,27 +145,59 @@ def run_analysis(args, settings):
                 make_a_dandelion_auto(d_data, **op_args)
             else:
                 d_graph = make_a_dandelion_auto(d_data, **combined_args)
-                doc_path = str(combined_args['root_path']) + combined_args['word_landscape']
+                doc_path = (
+                    str(combined_args["root_path"]) + combined_args["word_landscape"]
+                )
                 doc = get_input_doc(doc_path)
                 put_matplotlib_fig_into_word(doc, d_graph)
-                doc_output_path = str(combined_args['root_path']) + combined_args["word_save_path"]
-                doc.save(doc_output_path.format('dandelion'))
+                doc_output_path = (
+                    str(combined_args["root_path"]) + combined_args["word_save_path"]
+                )
+                doc.save(doc_output_path.format("dandelion"))
 
         if programme == "speed_dials":
-            combined_args['rag_number'] = '5'
-            combined_args['quarter'] = 'standard'
+            combined_args["rag_number"] = "5"
+            combined_args["quarter"] = "standard"
             sdmd = DcaData(md, **combined_args)
-            sd_doc = get_input_doc(str(settings['root_path']) + settings['word_portrait'])
+            sd_doc = get_input_doc(
+                str(settings["root_path"]) + settings["word_portrait"]
+            )
             build_speed_dials(sdmd, sd_doc)
-            sd_doc.save(str(settings['root_path']) + settings["word_save_path"].format('speed_dials'))
+            sd_doc.save(
+                str(settings["root_path"])
+                + settings["word_save_path"].format("speed_dials")
+            )
 
         if programme == "dcas":
-            combined_args['rag_number'] = '5'
-            combined_args['quarter'] = 'standard'
+            combined_args["rag_number"] = "5"
+            combined_args["quarter"] = "standard"
             sdmd = DcaData(md, **combined_args)
             sdmd.get_changes()
-            changes_doc = dca_changes_into_word(sdmd, str(settings['root_path']) + settings['word_portrait'])
-            changes_doc.save(str(settings['root_path']) + settings["word_save_path"].format('dca_changes'))
+            changes_doc = dca_changes_into_word(
+                sdmd, str(settings["root_path"]) + settings["word_portrait"]
+            )
+            changes_doc.save(
+                str(settings["root_path"])
+                + settings["word_save_path"].format("dca_changes")
+            )
+
+        if programme == "dashboards":
+            narrative_d_master = get_input_doc(
+                str(settings["root_path"]) + settings["narrative_dashboard"]
+            )
+            narrative_dashboard(md, narrative_d_master)  #
+            narrative_d_master.save(
+                str(settings["root_path"])
+                + settings["excel_save_path"].format("narrative_dashboard_completed")
+            )
+            cdg_d_master = get_input_doc(
+                str(settings["root_path"]) + settings["dashboard"]
+            )
+            cdg_dashboard(md, cdg_d_master)
+            cdg_d_master.save(
+                str(settings["root_path"])
+                + settings["excel_save_path"].format("dashboard_completed")
+            )
 
     except (ProjectNameError, FileNotFoundError, InputError) as e:
         logger.critical(e)
@@ -518,7 +556,7 @@ def run_parsers():
     report_type = sys.argv[1]
 
     parser = argparse.ArgumentParser(
-        description=f'runs all analysis for {report_type} reporting'
+        description=f"runs all analysis for {report_type} reporting"
     )
     subparsers = parser.add_subparsers(dest="subparser_name")
     subparsers.metavar = "                      "
@@ -540,22 +578,20 @@ def run_parsers():
         help="Dandelion graph.",
         description=dandelion_description,
     )
-    # dashboard_description = (
-    #     "Creates CDG dashboards. There are no optional arguments for this command.\n\n"
-    #     "A blank master dashboard titled dashboards_master.xlsx must be in input file.\n\n"
-    #     "A completed dashboard title completed_cdg_dashboard.xlsx will be placed into\n"
-    #     "the output file."
-    # )
-    # cdg_parser_dashboard = subparsers.add_parser(
-    #     "dashboards",
-    #     help="CDG dashboard",
-    #     description=dashboard_description,
-    #     formatter_class=RawTextHelpFormatter,
-    # )
-
-    parser_speed_dial = subparsers.add_parser(
-        "speed_dials", help="speed dial analysis"
+    dashboard_description = (
+        "Creates dashboards. There are no optional arguments for this command.\n\n"
+        "A blank master dashboard titled dashboards_master.xlsx must be in input file.\n\n"
+        "A completed dashboard named completed_dashboard.xlsx will be placed into\n"
+        "the output file."
     )
+    cdg_parser_dashboard = subparsers.add_parser(
+        "dashboards",
+        help="dashboard",
+        description=dashboard_description,
+        formatter_class=RawTextHelpFormatter,
+    )
+
+    parser_speed_dial = subparsers.add_parser("speed_dials", help="speed dial analysis")
     parser_dca = subparsers.add_parser("dcas", help="dca analysis")
 
     # cdg_parser_milestones.add_argument(
@@ -603,7 +639,7 @@ def run_parsers():
             action="store",
             nargs="+",
             help="Returns analysis for one or combination of specified quarters. "
-                 'User must use correct format e.g "Q3 19/20"',
+            'User must use correct format e.g "Q3 19/20"',
         )
 
     # stage
@@ -626,10 +662,10 @@ def run_parsers():
             metavar="",
             action="store",
             nargs="*",
-            choices=["FBC", "OBC", "SOBC", "pre-SOBC", 'pipeline'],
+            choices=["FBC", "OBC", "SOBC", "pre-SOBC", "pipeline"],
             help="Returns analysis for only those projects at the specified planning stage(s). By default "
-                 "the --stage argument will return the list of bc_stages specified in the config file."
-                 'Or user can enter one or combination of "FBC", "OBC", "SOBC", "pre-SOBC".',
+            "the --stage argument will return the list of bc_stages specified in the config file."
+            'Or user can enter one or combination of "FBC", "OBC", "SOBC", "pre-SOBC".',
         )
     # group
     for sub in [
@@ -652,10 +688,8 @@ def run_parsers():
             action="store",
             nargs="+",
             help="Returns analysis for specified project(s), only. User must enter one or a combination of "
-                 'DfT Group names; "HSRG", "RSS", "RIG", "AMIS","RPE", or the project(s) acronym or full name.',
+            'DfT Group names; "HSRG", "RSS", "RIG", "AMIS","RPE", or the project(s) acronym or full name.',
         )
-
-
 
     parser_dandelion.add_argument(
         "--angles",
@@ -674,7 +708,7 @@ def run_parsers():
         action="store",
         choices=["benefits", "income"],
         help="Provide the type of value to include in dandelion. Options are"
-             ' "benefits" or "income".',
+        ' "benefits" or "income".',
     )
 
     cli_args = parser.parse_args(sys.argv[2:])
@@ -815,8 +849,8 @@ class main:
                 nargs="*",
                 choices=["FBC", "OBC", "SOBC", "pre-SOBC"],
                 help="Returns analysis for only those projects at the specified planning stage(s). By default "
-                     "the --stage argument will return the list of bc_stages specified in the config file."
-                     'Or user can enter one or combination of "FBC", "OBC", "SOBC", "pre-SOBC".',
+                "the --stage argument will return the list of bc_stages specified in the config file."
+                'Or user can enter one or combination of "FBC", "OBC", "SOBC", "pre-SOBC".',
             )
         # stage dandelion only
         parser_dandelion.add_argument(
@@ -827,8 +861,8 @@ class main:
             nargs="*",
             choices=["FBC", "OBC", "SOBC", "pre-SOBC", "pipeline"],
             help="Returns analysis for only those projects at the specified planning stage(s). By default "
-                 "the --stage argument will return the list of bc_stages specified in the config file."
-                 'Or user can enter one or combination of "FBC", "OBC", "SOBC", "pre-SOBC".For dandelion "pipeline" is also available',
+            "the --stage argument will return the list of bc_stages specified in the config file."
+            'Or user can enter one or combination of "FBC", "OBC", "SOBC", "pre-SOBC".For dandelion "pipeline" is also available',
         )
 
         # group
@@ -852,7 +886,7 @@ class main:
                 action="store",
                 nargs="+",
                 help="Returns analysis for specified project(s), only. User must enter one or a combination of "
-                     'DfT Group names; "HSRG", "RSS", "RIG", "AMIS","RPE", or the project(s) acronym or full name.',
+                'DfT Group names; "HSRG", "RSS", "RIG", "AMIS","RPE", or the project(s) acronym or full name.',
             )
         # remove
         for sub in [
@@ -874,8 +908,8 @@ class main:
                 action="store",
                 nargs="+",
                 help="Removes specified projects from analysis. User must enter one or a combination of either"
-                     " a recognised DfT Group name, a recognised planning stage or the project(s) acronym or full"
-                     " name.",
+                " a recognised DfT Group name, a recognised planning stage or the project(s) acronym or full"
+                " name.",
             )
         # quarter
         for sub in [
@@ -897,7 +931,7 @@ class main:
                 action="store",
                 nargs="+",
                 help="Returns analysis for one or combination of specified quarters. "
-                     'User must use correct format e.g "Q3 19/20"',
+                'User must use correct format e.g "Q3 19/20"',
             )
 
         parser_costs.add_argument(
@@ -908,7 +942,7 @@ class main:
             nargs="+",
             choices=["current"],
             help="baseline option for costs refactored in Q1 21/22. Choose 'current' to return project "
-                 "reported bls as well as latest forecast profile",
+            "reported bls as well as latest forecast profile",
         )
 
         parser_milestones.add_argument(
@@ -928,8 +962,8 @@ class main:
             action="store",
             choices=["sro", "finance", "benefits", "schedule", "resource"],
             help="Returns analysis for specified confidence types. options are"
-                 "'sro', 'finance', 'benefits', 'schedule', 'resource'."
-                 " As of Q2 20/21 it only provides a three rag dial.",
+            "'sro', 'finance', 'benefits', 'schedule', 'resource'."
+            " As of Q2 20/21 it only provides a three rag dial.",
         )
 
         for sub in [parser_milestones, parser_data_query]:
@@ -973,7 +1007,7 @@ class main:
                 "funded resource",
             ],
             help="Provide the type of value to include in dandelion. Options are"
-                 ' "spent", "remaining", "benefits", "ps resource", "contract resource", "total resource", "funded resource".',
+            ' "spent", "remaining", "benefits", "ps resource", "contract resource", "total resource", "funded resource".',
         )
 
         parser_dandelion.add_argument(
@@ -983,7 +1017,7 @@ class main:
             action="store",
             choices=["schedule"],
             help="Specify how project circles should be ordered: 'schedule' only current"
-                 " option.",
+            " option.",
         )
 
         parser_summaries.add_argument(
@@ -1002,7 +1036,7 @@ class main:
             action="store",
             choices=["cat"],
             help="Provide the type of value to include in dandelion. Options are"
-                 ' "cat".',
+            ' "cat".',
         )
 
         parser_dandelion.add_argument(
@@ -1049,7 +1083,7 @@ class main:
             action="store",
             choices=["forward_look", "ipa"],
             help="specify whether to colour circle edge with SRO forward look rating. "
-                 "Options are 'forward_look' or 'ipa'.",
+            "Options are 'forward_look' or 'ipa'.",
         )
 
         # chart
@@ -1079,11 +1113,11 @@ class main:
             metavar="",
             action="store",
             help="Insert blue line into chart to represent a date. "
-                 'Options are "Today" "IPDC" or a date in correct format e.g. "1/1/2021".',
+            'Options are "Today" "IPDC" or a date in correct format e.g. "1/1/2021".',
         )
 
         cli_args = parser.parse_args(sys.argv[2:])
-        settings_switch(cli_args, 'ipdc')
+        settings_switch(cli_args, "ipdc")
 
     def cdg(self):
         run_parsers()

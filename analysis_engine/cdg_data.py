@@ -556,11 +556,7 @@ def cdg_project_report_meta_data(
     return doc
 
 
-DATA_KEY_DICT = {
-        "IPDC approval point": "Last Business Case (BC) achieved",
-        "Total Forecast": "Total Costs",
-        "Departmental DCA": "Overall Delivery Confidence",
-    }
+
 
 
 def add_sterling_symbol(figure: int or float):
@@ -886,60 +882,6 @@ def cdg_dashboard(
     return wb
 
 
-def cdg_narrative_dashboard(
-        master,
-        # milestones: MilestoneData,
-        wb: Workbook,
-) -> Workbook:
-    # wb = load_workbook(wb_path)
-    ws = wb.active
-
-    for row_num in range(2, ws.max_row + 1):
-        project_name = ws.cell(row=row_num, column=3).value
-        if project_name in master.current_projects:
-            # Group
-            ws.cell(row=row_num, column=2).value = master.project_information[project_name]["Directorate"]
-            # Abbreviation
-            ws.cell(row=row_num, column=4).value = master.project_information[project_name]["Abbreviations"]
-            # Stage
-            bc_stage = master.master_data[0]["data"][project_name][DATA_KEY_DICT["IPDC approval point"]]
-            ws.cell(row=row_num, column=5).value = convert_bc_stage_text(bc_stage)
-            costs = master.master_data[0]["data"][project_name][DATA_KEY_DICT["Total Forecast"]]
-            ws.cell(row=row_num, column=6).value = dandelion_number_text(costs)
-
-            overall_dca = convert_rag_text(
-                master.master_data[0]["data"][project_name][DATA_KEY_DICT["Departmental DCA"]]
-            )
-            ws.cell(row=row_num, column=7).value = overall_dca
-            if overall_dca == "None":
-                ws.cell(row=row_num, column=7).value = ""
-
-            sro_n = master.master_data[0]["data"][project_name]["SRO Narrative"]
-            ws.cell(row=row_num, column=8).value = sro_n
-
-
-        """list of columns with conditional formatting"""
-        list_columns = ["g"]
-
-        """same loop but the text is black. In addition these two loops go through the list_columns list above"""
-        for column in list_columns:
-            for i, dca in enumerate(rag_txt_list):
-                text = black_text
-                fill = fill_colour_list[i]
-                dxf = DifferentialStyle(font=text, fill=fill)
-                rule = Rule(
-                    type="containsText", operator="containsText", text=dca, dxf=dxf
-                )
-                for_rule_formula = 'NOT(ISERROR(SEARCH("' + dca + '",' + column + "5)))"
-                rule.formula = [for_rule_formula]
-                ws.conditional_formatting.add(column + "5:" + column + "60", rule)
-
-        for row_num in range(2, ws.max_row + 1):
-            for col_num in range(5, ws.max_column + 1):
-                if ws.cell(row=row_num, column=col_num).value == 0:
-                    ws.cell(row=row_num, column=col_num).value = "-"
-
-    return wb
 
 
 def cdg_run_p_reports(master, **kwargs) -> None:

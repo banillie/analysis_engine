@@ -5777,23 +5777,7 @@
 #                     font.size = Pt(size)
 #
 #
-# def convert_bc_stage_text(bc_stage: str) -> str:
-#     """
-#     function that converts bc stage.
-#     :param bc_stage: the string name for business cases that it kept in the master
-#     :return: standard/shorter string name
-#     """
-#
-#     if bc_stage == "Strategic Outline Case":
-#         return "SOBC"
-#     elif bc_stage == "Outline Business Case":
-#         return "OBC"
-#     elif bc_stage == "Full Business Case":
-#         return "FBC"
-#     elif bc_stage == "pre-Strategic Outline Case":
-#         return "pre-SOBC"
-#     else:
-#         return bc_stage
+
 #
 #
 # def make_text_red(columns: list) -> None:

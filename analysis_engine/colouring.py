@@ -1,4 +1,4 @@
-
+from openpyxl.styles import Font, PatternFill
 
 COLOUR_DICT = {
     "A": "#ffba00",
@@ -22,6 +22,21 @@ COLOUR_DICT = {
 }
 
 FACE_COLOUR = "#a0c1d5"
+
+black_text = Font(color="00000000")
+
+ag_text = Font(color="00a5b700")  # text same colour as background
+ag_fill = PatternFill(bgColor="00a5b700")
+ar_text = Font(color="00f97b31")  # text same colour as background
+ar_fill = PatternFill(bgColor="00f97b31")
+red_text = Font(color="00fc2525")  # text same colour as background
+red_fill = PatternFill(bgColor="00fc2525")
+green_text = Font(color="0017960c")  # text same colour as background
+green_fill = PatternFill(bgColor="0017960c")
+amber_text = Font(color="00fce553")  # text same colour as background
+amber_fill = PatternFill(bgColor="00fce553")
+
+fill_colour_list = [ag_fill, ar_fill, red_fill, green_fill, amber_fill]
 
 # for colouring group circles
 # circle_colours = [
