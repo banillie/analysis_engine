@@ -3,8 +3,11 @@ import platform
 import csv
 from pathlib import Path
 from typing import List, Dict
+from dateutil import parser
 
 from datamaps.api import project_data_from_master, project_data_from_master_month
+
+from analysis_engine.error_msgs import config_issue
 
 
 def _platform_docs_dir(dir: str) -> Path:
@@ -92,7 +95,14 @@ def return_koi_fn_keys(op_args: Dict):  # op_args
         return op_args
 
 
-def get_board_date(confi_path, board_str):
-    config = configparser.ConfigParser()
-    config.read(confi_path)
-    return config["GLOBALS"][board_str]
+def get_board_date(op_args):
+    try:
+        config_path = op_args['root_path'] + op_args['config']
+        config = configparser.ConfigParser()
+        config.read(config_path)
+        date_str = config["GLOBALS"]['milestones_blue_line_date']
+        return parser.parse(date_str).date()
+    except:
+        config_issue()
+
+

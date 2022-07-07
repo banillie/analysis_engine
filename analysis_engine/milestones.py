@@ -1,10 +1,10 @@
 from typing import List, Dict, Union
-from dateutil import parser
 from collections import Counter
 from datetime import datetime
 from matplotlib import pyplot as plt
 import matplotlib.dates as mdates
 from openpyxl import Workbook
+from dateutil import parser
 
 from analysis_engine.render_utils import set_fig_size, get_chart_title, handle_long_keys
 from analysis_engine.segmentation import get_iter_list, get_group, get_correct_p_data
@@ -730,60 +730,13 @@ def milestone_chart(
     # Add line of analysis_engine date, but only if in the time period
     if "blue_line" in kwargs:
         blue_line = kwargs["blue_line"]
-        if blue_line == "Today":
-            if min_date <= datetime.date.today() <= max_date:
-                plt.axvline(datetime.date.today())
-                plt.figtext(
-                    0.98,
-                    0.01,
-                    "Line represents date chart compiled",
-                    horizontalalignment="right",
-                    fontsize=10,
-                    fontweight="bold",
-                )
-        elif blue_line == "IPDC":
-            IPDC_DATE = parser.parse(
-                get_board_date(kwargs),  # this will fail. to be tested.
-                dayfirst=True,
-            ).date()
-            if min_date <= IPDC_DATE <= max_date:
-                plt.axvline(IPDC_DATE)
-                plt.figtext(
-                    0.98,
-                    0.01,
-                    "Line represents IPDC date",
-                    horizontalalignment="right",
-                    fontsize=10,
-                    fontweight="bold",
-                )
-        elif blue_line == "CDG":
-            CDG_DATE = parser.parse(
-                get_board_date(kwargs), # this will fail. to be tested.
-                dayfirst=True,
-            ).date()
-            if min_date <= CDG_DATE <= max_date:
-                plt.axvline(CDG_DATE)
-                plt.figtext(
-                    0.98,
-                    0.01,
-                    "Line represents CDG Board date",
-                    horizontalalignment="right",
-                    fontsize=10,
-                    fontweight="bold",
-                )
-        elif isinstance(blue_line, str):
-            line_date = parser.parse(blue_line, dayfirst=True)
-            if min_date <= line_date.date() <= max_date:
-                plt.axvline(line_date.date())
-                plt.figtext(
-                    0.98,
-                    0.01,
-                    "Line represents " + blue_line,
-                    horizontalalignment="right",
-                    fontsize=10,
-                    fontweight="bold",
-                )
-
+        if blue_line == "today":
+            if min_date <= datetime.today().date() <= max_date:
+                plt.axvline(datetime.today().date())
+        if blue_line == 'config_date':
+            board_date = get_board_date(kwargs)
+            if min_date <= board_date <= max_date:
+                plt.axvline(board_date)
     # size of chart and fit
     fig.tight_layout(rect=[0, 0.03, 1, 0.95])  # for title
 

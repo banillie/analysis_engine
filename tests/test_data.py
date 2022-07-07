@@ -172,8 +172,8 @@ def test_milestones():
         combined_args = {**x, **SETTINGS_DICT}
         ms = MilestoneData(md, **combined_args)
         if (
-                "type" in combined_args
-                or "dates" in combined_args
+                # "type" in combined_args  # NOT IN USE.
+                "dates" in combined_args
                 or "koi" in combined_args
                 or "koi_fn" in combined_args
         ):
@@ -188,9 +188,6 @@ def test_milestones():
             str(SETTINGS_DICT["root_path"])
             + SETTINGS_DICT["word_save_path"].format("milestones")
         )
-        # if combined_args["chart"] == "show":
-        #     combined_args['chart'] = True
-        #     milestone_chart(ms, md, **op_args)
         wb = put_milestones_into_wb(ms)
         wb.save(
             str(SETTINGS_DICT["root_path"])

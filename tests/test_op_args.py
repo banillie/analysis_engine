@@ -5,11 +5,16 @@ ms_chart = 'show'
 
 ms_standard = {'chart': ms_chart}
 ms_groups = {"group": ["SCS"], "chart": ms_chart}
+ms_dates = {'chart': ms_chart, "dates": ["1/2/2022", "1/2/2023"]}
+ms_blue_line_config = {"blue_line": "config_date", 'chart': ms_chart}
+ms_blue_line_today = {"blue_line": "today", 'chart': ms_chart}
 MILESTONES_OP_ARGS = [
+    ms_blue_line_today,
+    ms_blue_line_config,
+    ms_dates,
     ms_groups,
     ms_standard,
 ]
-
 
 dlion_chart = 'save'
 dlion_standard = {
@@ -81,14 +86,7 @@ SPEED_DIAL_AND_DCA_OP_ARGS = [
     sd_standard
 ]
 
-# "group": ["SCS", "GF"],
-# "chart": True,
-# "type": "income",
-# "blue_line": "CDG",
-# "dates": ["1/10/2021", "1/10/2022"],
-# "fig_size": "half_horizontal",
+
 # "rag_number": "5",
 # "order_by": "cost",
-# "angles": [300, 360, 60],
 # "none_handle": "none",
-# "quarter": ["standard"],
