@@ -28,7 +28,7 @@ from analysis_engine.dictionaries import (
     DCA_KEYS,
     FONT_TYPE,
     STANDARDISE_DCA_KEYS,
-    convert_rag_text,
+    convert_rag_text, NEXT_STAGE_DICT,
 )
 
 
@@ -202,22 +202,27 @@ class DandelionData:
         self.kwargs = kwargs
         self.baseline_type = "ipdc_costs"
         self.group = []
+        self.group_stage_switch = ''
+        self.handle_group()
         self.iter_list = get_iter_list(self.kwargs['quarter'], self.master['quarter_list'])  # needs refactor
         self.d_data = {}
         self.get_data()
+
+    def handle_group(self):
+        if 'group' in self.kwargs:
+            group_stage_switch = 'group'
+        if 'stage' in self.kwargs:
+            group_stage_switch = 'stage'
+
+        self.group_stage_switch = group_stage_switch
+        self.group = self.kwargs[group_stage_switch]
 
     def get_data(self):
         dca_confidence = STANDARDISE_DCA_KEYS[self.kwargs["report"]]
         tp = self.iter_list[0]  ## needs refactor
 
-        try:
-            self.group = self.kwargs["group"]
-        except KeyError:
-            self.group = self.kwargs["stage"]
-            del self.kwargs["stage"]
-
         if "angles" in self.kwargs:
-            if len(self.kwargs["angles"]) == len(self.group):
+            if len(self.kwargs["angles"]) == len(self.kwargs[self.group_stage_switch]):
                 g_ang_l = self.kwargs["angles"]
             else:
                 raise InputError(
@@ -229,16 +234,16 @@ class DandelionData:
             # to right around the center circle.
             g_ang_l = []
             # start_point needs to come down as numbers increase
-            start_point = 290 * ((29 - ((len(self.group)) - 2)) / 29)
+            start_point = 290 * ((29 - ((len(self.kwargs[self.group_stage_switch])) - 2)) / 29)
             # distribution increase needs to come down as numbers increase
             distribution_start = 0
             distribution_increase = 140
             if (
-                len(self.group) > 2
+                len(self.kwargs[self.group_stage_switch]) > 2
             ):  # no change in distribution increase if group of two
-                for i in range(len(self.group)):
+                for i in range(len(self.kwargs[self.group_stage_switch])):
                     distribution_increase = distribution_increase * 0.82
-            for i in range(len(self.group)):
+            for i in range(len(self.kwargs[self.group_stage_switch])):
                 angle = distribution_start + start_point
                 if angle > 360:
                     angle = angle - 360
@@ -270,7 +275,7 @@ class DandelionData:
 
         ## first outer circle
         for i, g in enumerate(self.group):
-            self.kwargs["group"] = [g]
+            self.kwargs[self.group_stage_switch] = [g]
             if g == "pipeline":
                 g_wlc = self.master.pipeline_dict["pipeline"]["wlc"]
             else:
@@ -331,22 +336,22 @@ class DandelionData:
                     "alignment": ("center", "center"),
                 }
 
-        if len(self.group) > 1:
+        if len(self.kwargs[self.group_stage_switch]) > 1:
             group_angles = []
-            for g in self.group:
+            for g in self.kwargs[self.group_stage_switch]:
                 group_angles.append((g, g_d[g]["angle"]))
             logger.info("The group circle angles are " + str(group_angles))
 
         ## second outer circle
         for i, g in enumerate(self.group):
-            self.kwargs["group"] = [g]
+            self.kwargs[self.group_stage_switch] = [g]
             if g == "pipeline":
-                group = self.master.pipeline_list
+                project_group = self.master.pipeline_list
             else:
-                group = get_group(self.master, tp, self.kwargs)  # lower group
+                project_group = get_group(self.master, tp, self.kwargs)  # lower group
             p_list = []
-            for p in group:
-                self.kwargs["group"] = [p]
+            for p in project_group:
+                self.kwargs[self.group_stage_switch] = [p]  # project level is in group not stage.
                 if g == "pipeline":
                     p_value = self.master.pipeline_dict[p]["wlc"]
                 else:
@@ -354,20 +359,11 @@ class DandelionData:
                         self.master, self.kwargs
                     )  # project wlc
 
-                if "report" not in self.kwargs:  # DON'T UNDERSTAND THIS IF STATEMENT
+                # if "report" not in self.kwargs:  # DON'T UNDERSTAND THIS IF STATEMENT
+                if 'something' in self.kwargs:  # SOMETHING TO DO WITH SCHEDULE?
                     if g == "pipeline":
                         p_schedule = self.master.pipeline_dict[p]["wlc"]
                     else:
-                        NEXT_STAGE_DICT = {
-                            "pre_SOBC": "SOBC - IPDC Approval",
-                            "pre-SOBC": "SOBC - IPDC Approval",
-                            "SOBC": "OBC - IPDC Approval",
-                            "OBC": "FBC - IPDC Approval",
-                            # 'FBC - IPDC Approval'
-                            "FBC": "Project End Date",
-                            "Other": None,
-                        }
-
                         quarter_index = get_quarter_index(self.master, tp)
                         bc = BC_STAGE_DICT[
                             self.master.master_data[quarter_index]["data"][p][
@@ -411,7 +407,8 @@ class DandelionData:
                 p_values_list, p_schedule_list, p_list = zip(*l_g_d[g])
             except ValueError:  # handles no projects in l_g_d list
                 continue
-            if len(p_list) > 2 or len(self.group) == 1:
+            if len(p_list) > 2:
+            # if len(p_list) > 2 or len(self.kwargs[self.group_stage_switch]) == 1:
                 ang_l = cal_group_angle(360, p_list, all=True)
             else:
                 if len(p_list) == 1:
@@ -634,7 +631,7 @@ def make_a_dandelion_auto(dl: DandelionData, **kwargs):
     line_clr = "#ececec"
     line_style = "dashed"
     for i, g in enumerate(dl.group):
-        dl.kwargs["group"] = [g]
+        dl.kwargs[dl.group_stage_switch] = [g]
         ax.arrow(
             0,
             0,

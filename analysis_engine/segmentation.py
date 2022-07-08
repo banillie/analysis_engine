@@ -30,38 +30,9 @@ def get_iter_list(
     return iter_list
 
 
-def cal_stage(
-        group: List[str] or List[List[str]],
-        report_type: str,
-        md,
-        tp_indx: int,
-        # input_list_indx=None,
-) -> List[str]:
-    error_case = []
-    output = []
-    q_str = md["quarter_list"][tp_indx]  # quarter string
-    for g in group:  # pg is project/group
-        if g == "pipeline":
-            continue
-        try:
-            local_g = md["dft_group"][q_str][BC_STAGE_DICT[report_type][g]]
-            output += local_g
-        except KeyError:
-            try:
-                output.append(md["abbreviations"][BC_STAGE_DICT[report_type][g]]["full name"])
-            except KeyError:
-                try:
-                    output.append(md["full_names"][BC_STAGE_DICT[report_type][g]])
-                except KeyError:
-                    error_case.append(g)
-
-    not_recognised_project_group_or_stage(error_case)
-
-    return output
-
-
 def cal_group(
         group: List[str] or List[List[str]],
+        report_type,
         md,
         tp_indx: int,
 ) -> List[str]:
@@ -78,10 +49,18 @@ def cal_group(
             try:
                 output.append(md["abbreviations"][g]["full name"])
             except KeyError:
+                # try:
+                #     output.append(md["full_names"][g])
+                # except KeyError:
                 try:
-                    output.append(md["full_names"][g])
+                    local_g = md["dft_group"][q_str][BC_STAGE_DICT[report_type][g]]
+                    output += local_g
                 except KeyError:
-                    error_case.append(g)
+                    try:
+                        local_g = md["dft_group"][q_str][g]
+                        output += local_g
+                    except KeyError:
+                        error_case.append(g)
 
     not_recognised_project_group_or_stage(error_case)
 
@@ -95,12 +74,14 @@ def get_group(md, tp: str, class_kwargs) -> List[str]:
         not_recognised_quarter(tp)
 
     if "stage" in class_kwargs:
-        group = cal_stage(class_kwargs["stage"], class_kwargs['report'], md, tp_indx)
+        group_list = class_kwargs['stage']
     elif "group" in class_kwargs:
-        group = cal_group(class_kwargs["group"], md, tp_indx)
+        group_list = class_kwargs['group']
     else:
-        # group = cal_group(md['current_projects'], md, tp_indx)  # why is this current_projects
-        group = cal_group(md["groups"], md, tp_indx)  # why is this current_projects
+        group_list = md['groups']
+
+    group = cal_group(group_list, class_kwargs['report'], md, tp_indx)
+
 
     if "remove" in class_kwargs:
         group = remove_from_group(

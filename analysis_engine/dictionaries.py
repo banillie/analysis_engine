@@ -211,3 +211,14 @@ def convert_rag_text(dca_rating: str) -> str:
         return "R"
     else:
         return ""
+
+
+NEXT_STAGE_DICT = {
+    "pre_SOBC": "SOBC - IPDC Approval",
+    "pre-SOBC": "SOBC - IPDC Approval",
+    "SOBC": "OBC - IPDC Approval",
+    "OBC": "FBC - IPDC Approval",
+    # 'FBC - IPDC Approval'
+    "FBC": "Project End Date",
+    "Other": None,
+}

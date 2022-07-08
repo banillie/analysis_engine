@@ -740,9 +740,8 @@ def milestone_chart(
     # size of chart and fit
     fig.tight_layout(rect=[0, 0.03, 1, 0.95])  # for title
 
-    if "chart" in kwargs:
-        if kwargs["chart"]:
-            plt.show()
+    if kwargs["chart"] != 'save':
+        plt.show()
 
     return fig
 

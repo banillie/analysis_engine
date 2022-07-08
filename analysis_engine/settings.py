@@ -85,7 +85,7 @@ def return_koi_fn_keys(op_args: Dict):  # op_args
     """small helper function to convert key names in file into list of strings
     and place in op_args dictionary"""
     if "koi_fn" in op_args:
-        keys = get_data_query_key_names(op_args["root_path"] / "input/{}.csv".format(op_args["koi_fn"]))
+        keys = get_data_query_key_names(op_args["root_path"] + "/input/{}.csv".format(op_args["koi_fn"]))
         op_args["key"] = keys
         return op_args
     if "koi" in op_args:
