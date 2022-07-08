@@ -14,9 +14,6 @@ class CostData:
         self.master = master
         self.kwargs = kwargs
         self.report = kwargs["report"]
-        self.iter_list = get_iter_list(
-            self.kwargs["quarter"], self.master["quarter_list"]
-        )
         # self.start_group = []
         # self.group = []
         # self.iter_list = []
@@ -32,7 +29,7 @@ class CostData:
 
     def get_totals(self) -> None:
         lower_dict = {}
-        for tp in self.iter_list:
+        for tp in self.kwargs['quarter']:
             spent = 0
             remaining = 0
             total = 0

@@ -12,17 +12,20 @@ from analysis_engine.error_msgs import (
 from analysis_engine.dictionaries import BC_STAGE_DICT
 
 
-def get_iter_list(report_quarter: List, md_q_list: List) -> List[str]:
+def get_iter_list(md, **kwargs) -> List[str]:
     ## report_quarter should never be None.
-    if report_quarter == "standard":
-        iter_list = [
-            md_q_list[0],
-            md_q_list[1],
-        ]
-    elif report_quarter == ["all"]:
-        iter_list = md_q_list
+    if 'quarter' in kwargs:
+        if kwargs['quarter'] == "standard":
+            iter_list = [
+                md['quarter_list'][0],
+                md['quarter_list'][1],
+            ]
+        elif kwargs['quarter'] == ["all"]:
+            iter_list = md['quarter_list']
+        else:
+            iter_list = kwargs['quarter']
     else:
-        iter_list = report_quarter
+        iter_list = [md['current_quarter']]
 
     return iter_list
 
@@ -129,13 +132,11 @@ def remove_from_group(
 def get_correct_p_data(
     master,
     project_name: str,
-    time_period: str,
+    quarter: str,
 ) -> Dict[str, Union[str, int, datetime.date, float]]:
-    tp_idx = master["quarter_list"].index(time_period)
-    try:
-        return master["master_data"][tp_idx]["data"][project_name]
-    except KeyError:  # KeyError handles project not reporting in quarter.
-        return None
+    for md in master['master_data']:
+        if md['quarter'] == quarter:
+            return md["data"][project_name]
 
 
 def get_quarter_index(md, tp):

@@ -91,10 +91,11 @@ def test_get_project_abbreviations():
 
 # There are a large number of different combinations that need to be tested.
 def test_build_dandelion_graph():
-    md = open_json_file(
-        f"/home/will/Documents/{REPORTING_TYPE}/core_data/json/master.json"
-    )
     for x in DANDELION_OP_ARGS_DICT:
+        md = open_json_file(
+            f"/home/will/Documents/{REPORTING_TYPE}/core_data/json/master.json",
+            **x,
+        )
         set_default_args(x, md["groups"], md["current_quarter"])
         combined_args = {**x, **SETTINGS_DICT}
         dmd = DandelionData(md, **combined_args)
@@ -110,10 +111,11 @@ def test_build_dandelion_graph():
 
 # produce two outputs. dca changes and speedials
 def test_dca_analysis():
-    md = open_json_file(
-        f"/home/will/Documents/{REPORTING_TYPE}/core_data/json/master.json"
-    )
     for x in SPEED_DIAL_AND_DCA_OP_ARGS:
+        md = open_json_file(
+            f"/home/will/Documents/{REPORTING_TYPE}/core_data/json/master.json",
+            **x,
+        )
         set_default_args(x, md["groups"], md["current_quarter"])
         combined_args = {**x, **SETTINGS_DICT}
         sdmd = DcaData(md, **combined_args)
@@ -128,10 +130,11 @@ def test_dca_analysis():
 
 
 def test_speed_dials():
-    md = open_json_file(
-        f"/home/will/Documents/{REPORTING_TYPE}/core_data/json/master.json"
-    )
     for x in SPEED_DIAL_AND_DCA_OP_ARGS:
+        md = open_json_file(
+            f"/home/will/Documents/{REPORTING_TYPE}/core_data/json/master.json",
+            **x,
+        )
         set_default_args(x, md["groups"], md["current_quarter"])
         combined_args = {**x, **SETTINGS_DICT}
         sdmd = DcaData(md, **combined_args)
@@ -147,7 +150,8 @@ def test_speed_dials():
 
 def test_dashboards():
     md = open_json_file(
-        f"/home/will/Documents/{REPORTING_TYPE}/core_data/json/master.json"
+        f"/home/will/Documents/{REPORTING_TYPE}/core_data/json/master.json",
+        quarter='standard'
     )
     narrative_d_master = get_input_doc(
         str(SETTINGS_DICT["root_path"]) + SETTINGS_DICT["narrative_dashboard"]
@@ -168,10 +172,11 @@ def test_dashboards():
 
 
 def test_milestones():
-    md = open_json_file(
-        f"/home/will/Documents/{REPORTING_TYPE}/core_data/json/master.json"
-    )
     for x in MILESTONES_OP_ARGS:
+        md = open_json_file(
+            f"/home/will/Documents/{REPORTING_TYPE}/core_data/json/master.json",
+            **x,
+        )
         set_default_args(x, md["groups"], md["current_quarter"])
         combined_args = {**x, **SETTINGS_DICT}
         ms = MilestoneData(md, **combined_args)

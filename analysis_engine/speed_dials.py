@@ -176,7 +176,7 @@ def gauge(
 
 
 def build_speed_dials(dca_data, doc):
-    for conf_type in dca_data.dca_count[dca_data.iter_list[0]]:
+    for conf_type in dca_data.dca_count[dca_data.quarters[0]]:
         print(conf_type)
         c_count = []
         l_count = []
@@ -191,10 +191,10 @@ def build_speed_dials(dca_data, doc):
         #         "Red": 1,
         #     }
         for colour in DCA_RATING_SCORES.keys():
-            c_no = dca_data.dca_count[dca_data.iter_list[0]][conf_type][colour]["count"]
+            c_no = dca_data.dca_count[dca_data.quarters[0]][conf_type][colour]["count"]
             c_count.append(c_no)
             try:  # to capture reporting process with only one quarters data
-                l_no = dca_data.dca_count[dca_data.iter_list[1]][conf_type][colour][
+                l_no = dca_data.dca_count[dca_data.quarters[1]][conf_type][colour][
                     "count"
                 ]
                 l_count.append(l_no)
@@ -202,7 +202,7 @@ def build_speed_dials(dca_data, doc):
                 l_count.append(c_no)
             except IndexError:
                 pass
-        c_total = dca_data.dca_count[dca_data.iter_list[0]][conf_type]["Total"]["count"]
+        c_total = dca_data.dca_count[dca_data.quarters[0]][conf_type]["Total"]["count"]
 
         up = 0
         down = 0

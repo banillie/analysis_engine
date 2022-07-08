@@ -93,7 +93,12 @@ sd_groups = {
     "quarter": "standard",
     "group": ["SCS", "CFPD"],
 }
-SPEED_DIAL_AND_DCA_OP_ARGS = [sd_groups, sd_stage, sd_quarters, sd_standard]
+SPEED_DIAL_AND_DCA_OP_ARGS = [
+    sd_groups,
+    sd_stage,
+    sd_quarters,
+    sd_standard
+]
 
 
 # 'rag_number': '5',

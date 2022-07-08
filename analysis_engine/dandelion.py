@@ -201,13 +201,10 @@ class DandelionData:
     def __init__(self, master, **kwargs):
         self.master = master
         self.kwargs = kwargs
-        self.baseline_type = "ipdc_costs"
         self.group = []
         self.group_stage_switch = ""
         self.handle_group()
-        self.iter_list = get_iter_list(
-            self.kwargs["quarter"], self.master["quarter_list"]
-        )  # needs refactor
+        self.quarter = self.kwargs['quarter'][0]
         self.d_data = {}
         self.get_data()
 
@@ -222,7 +219,6 @@ class DandelionData:
 
     def get_data(self):
         dca_confidence = STANDARDISE_DCA_KEYS[self.kwargs["report"]]
-        tp = self.iter_list[0]  ## needs refactor
 
         if "angles" in self.kwargs:
             if len(self.kwargs["angles"]) == len(self.kwargs[self.group_stage_switch]):
@@ -353,7 +349,7 @@ class DandelionData:
             if g == "pipeline":
                 project_group = self.master.pipeline_list
             else:
-                project_group = get_group(self.master, tp, self.kwargs)  # lower group
+                project_group = get_group(self.master, self.quarter, self.kwargs)  # lower group
             p_list = []
             for p in project_group:
                 self.kwargs[self.group_stage_switch] = [
@@ -371,7 +367,7 @@ class DandelionData:
                     if g == "pipeline":
                         p_schedule = self.master.pipeline_dict[p]["wlc"]
                     else:
-                        quarter_index = get_quarter_index(self.master, tp)
+                        quarter_index = get_quarter_index(self.master, self.quarter)
                         bc = BC_STAGE_DICT[
                             self.master.master_data[quarter_index]["data"][p][
                                 "IPDC approval point"
@@ -383,7 +379,7 @@ class DandelionData:
                             d = get_milestone_date(
                                 self.master.abbreviations[p]["abb"],
                                 ms.milestone_dict,
-                                tp,
+                                self.quarter,
                                 next_stage,
                             )
                             p_schedule = (d - datetime.date.today()).days
@@ -428,7 +424,7 @@ class DandelionData:
                 if "same_size" in self.kwargs:
                     if self.kwargs["same_size"] == "Yes":
                         p_value = 6000
-                p_data = get_correct_p_data(self.master, p, tp)
+                p_data = get_correct_p_data(self.master, p, self.quarter)
                 try:  # this is for pipeline projects
                     if "confidence" in self.kwargs:  # change confidence type here
                         rag = p_data[DCA_KEYS[self.kwargs["confidence"]]]
@@ -469,12 +465,12 @@ class DandelionData:
                 ):  # achieve some consistency for zero / low values
                     p_value = pf_wlc / 500
                 if colour == "#FFFFFF" or colour == FACE_COLOUR:
-                    if p in self.master["dft_group"][tp]["GMPP"]:
+                    if p in self.master["dft_group"][self.quarter]["GMPP"]:
                         edge_colour = "#000000"
                     else:
                         edge_colour = "grey"
                 else:
-                    if p in self.master["dft_group"][tp]["GMPP"]:
+                    if p in self.master["dft_group"][self.quarter]["GMPP"]:
                         edge_colour = "#000000"
                         # edge_colour = COLOUR_DICT[p_data['SRO Forward Look Assessment']]
                     else:
@@ -653,7 +649,7 @@ def make_a_dandelion_auto(dl: DandelionData, **kwargs):
         if g == "pipeline":
             lower_g = dl.master.pipeline_list
         else:
-            lower_g = get_group(dl.master, dl.iter_list[0], dl.kwargs)
+            lower_g = get_group(dl.master, dl.quarter, dl.kwargs)
         for p in lower_g:
             ax.arrow(
                 dl.d_data[g]["axis"][0],

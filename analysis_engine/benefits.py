@@ -17,9 +17,6 @@ class BenefitsData:
         self.master = master
         self.baseline_type = "ipdc_benefits"
         self.kwargs = kwargs
-        self.iter_list = get_iter_list(
-            self.kwargs["quarter"], self.master["quarter_list"]
-        )  # needs refactor
         self.report = kwargs["report"]
         self.b_totals = {}
         self.get_ben_totals()
@@ -29,7 +26,7 @@ class BenefitsData:
         Returns lists containing benefit totals
         """
         lower_dict = {}
-        for tp in self.iter_list:
+        for tp in self.kwargs['quarter']:
             delivered = 0
             remaining = 0
             total = 0

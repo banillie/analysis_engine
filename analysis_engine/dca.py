@@ -16,9 +16,7 @@ class DcaData:
         self.master = master
         self.kwargs = kwargs
         self.report = kwargs["report"]
-        self.iter_list = get_iter_list(
-            self.kwargs["quarter"], self.master["quarter_list"]
-        )
+        self.quarters = self.master['quarter_list']
         self.dca_dictionary = {}
         self.dca_changes = {}
         self.dca_count = {}
@@ -27,7 +25,7 @@ class DcaData:
 
     def get_dictionary(self) -> None:
         quarter_dict = {}
-        for tp in self.iter_list:
+        for tp in self.quarters:
             group = get_group(self.master, tp, self.kwargs)
             type_dict = {}
             for conf_type in list(DCA_KEYS[self.report].keys()):  # confidence type
@@ -59,24 +57,26 @@ class DcaData:
 
     def get_changes(self) -> None:
         """compiles dictionary of changes in dca ratings when provided with two quarter arguments"""
+        current_quarter = self.master['quarter_list'][0]
+        last_quarter = self.master['quarter_list'][1]
         c_dict = {}
         for conf_type in list(DCA_KEYS[self.report].keys()):  # confidence type
             lower_dict = {}
             for project_name in list(
-                self.dca_dictionary[self.iter_list[0]][conf_type].keys()
+                self.dca_dictionary[current_quarter][conf_type].keys()
             ):
                 t = [("Type", conf_type)]
                 try:
-                    dca_one_colour = self.dca_dictionary[self.iter_list[0]][conf_type][
+                    dca_one_colour = self.dca_dictionary[current_quarter][conf_type][
                         project_name
                     ]["DCA"]
-                    dca_two_colour = self.dca_dictionary[self.iter_list[1]][conf_type][
+                    dca_two_colour = self.dca_dictionary[last_quarter][conf_type][
                         project_name
                     ]["DCA"]
-                    dca_one_score = self.dca_dictionary[self.iter_list[0]][conf_type][
+                    dca_one_score = self.dca_dictionary[current_quarter][conf_type][
                         project_name
                     ]["DCA score"]
-                    dca_two_score = self.dca_dictionary[self.iter_list[1]][conf_type][
+                    dca_two_score = self.dca_dictionary[last_quarter][conf_type][
                         project_name
                     ]["DCA score"]
                     if dca_one_score == dca_two_score:
@@ -184,9 +184,9 @@ def dca_changes_into_word(dca_data: DcaData, document_path) -> Document:
     doc = Document(document_path)
     header = (
         "Showing changes between "
-        + str(dca_data.iter_list[0])
+        + str(dca_data.quarters[0])
         + " and "
-        + str(dca_data.iter_list[1])
+        + str(dca_data.quarters[1])
         + "."
     )
     top = doc.add_paragraph()
