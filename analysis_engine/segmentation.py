@@ -12,12 +12,9 @@ from analysis_engine.error_msgs import (
 from analysis_engine.dictionaries import BC_STAGE_DICT
 
 
-def get_iter_list(
-        report_quarter: List,
-        md_q_list: List
-) -> List[str]:
+def get_iter_list(report_quarter: List, md_q_list: List) -> List[str]:
     ## report_quarter should never be None.
-    if report_quarter == 'standard':
+    if report_quarter == "standard":
         iter_list = [
             md_q_list[0],
             md_q_list[1],
@@ -31,10 +28,10 @@ def get_iter_list(
 
 
 def cal_group(
-        group: List[str] or List[List[str]],
-        report_type,
-        md,
-        tp_indx: int,
+    group: List[str] or List[List[str]],
+    report_type,
+    md,
+    tp_indx: int,
 ) -> List[str]:
     error_case = []
     output = []
@@ -74,14 +71,13 @@ def get_group(md, tp: str, class_kwargs) -> List[str]:
         not_recognised_quarter(tp)
 
     if "stage" in class_kwargs:
-        group_list = class_kwargs['stage']
+        group_list = class_kwargs["stage"]
     elif "group" in class_kwargs:
-        group_list = class_kwargs['group']
+        group_list = class_kwargs["group"]
     else:
-        group_list = md['groups']
+        group_list = md["groups"]
 
-    group = cal_group(group_list, class_kwargs['report'], md, tp_indx)
-
+    group = cal_group(group_list, class_kwargs["report"], md, tp_indx)
 
     if "remove" in class_kwargs:
         group = remove_from_group(
@@ -91,10 +87,10 @@ def get_group(md, tp: str, class_kwargs) -> List[str]:
 
 
 def remove_from_group(
-        pg_list: List[str],
-        remove_list: List[str] or List[list[str]],
-        master,
-        tp_index: int,
+    pg_list: List[str],
+    remove_list: List[str] or List[list[str]],
+    master,
+    tp_index: int,
 ) -> List[str]:
     if any(isinstance(x, list) for x in remove_list):
         remove_list = [item for sublist in remove_list for item in sublist]
@@ -131,9 +127,9 @@ def remove_from_group(
 
 
 def get_correct_p_data(
-        master,
-        project_name: str,
-        time_period: str,
+    master,
+    project_name: str,
+    time_period: str,
 ) -> Dict[str, Union[str, int, datetime.date, float]]:
     tp_idx = master["quarter_list"].index(time_period)
     try:
@@ -147,7 +143,7 @@ def get_quarter_index(md, tp):
 
 
 def calculate_profiled(
-        p: int or List[int], s: int or List[int], unpro: int or List[int]
+    p: int or List[int], s: int or List[int], unpro: int or List[int]
 ) -> list:
     """small helper function to calculate the proper profiled amount. This is necessary as
     other wise 'profiled' would actually be the total figure.

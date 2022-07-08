@@ -17,8 +17,9 @@ from analysis_engine.core_data import get_project_information
 
 from docx import Document
 
+
 def get_gmpp_ar_data(
-        confi_path: Path,
+    confi_path: Path,
 ) -> Dict:
     try:
         config = configparser.ConfigParser()
@@ -37,12 +38,13 @@ def get_gmpp_ar_data(
 
 def get_ar_data(file_name):
     return project_data_from_master(
-        root_path / 'core_data/{}.xlsx'.format(file_name), 4, 2021
+        root_path / "core_data/{}.xlsx".format(file_name), 4, 2021
     )
 
+
 def ar_run_p_reports(
-        data: dict,
-        # project_list: list,
+    data: dict,
+    # project_list: list,
 ) -> None:
     report_doc = open_word_doc(root_path / "input/summary_temp.docx")
 
@@ -109,16 +111,23 @@ def ar_narratives(
         v = data[project_name][headings_list[x]]
 
         if isinstance(v, date):
-            text_one = v.strftime('%d/%m/%Y')
+            text_one = v.strftime("%d/%m/%Y")
         else:
             text_one = str(v)
-        # try:
-        #     text_two = str(data[project_name][headings_list[x]])
-        # except (KeyError, IndexError):  # index error relates to data_bridge
+            # try:
+            #     text_two = str(data[project_name][headings_list[x]])
+            # except (KeyError, IndexError):  # index error relates to data_bridge
             text_two = text_one
 
-        if headings_list[x] == "Date of the latest approved HMT Treasury Approval point (sent to PAC)":
-            text_one = str(data[project_name]["Type of the latest-approved HMT TAP"]) + ": " + text_one
+        if (
+            headings_list[x]
+            == "Date of the latest approved HMT Treasury Approval point (sent to PAC)"
+        ):
+            text_one = (
+                str(data[project_name]["Type of the latest-approved HMT TAP"])
+                + ": "
+                + text_one
+            )
             text_two = text_one
 
         doc.add_paragraph().add_run(str(headings_list[x])).bold = True

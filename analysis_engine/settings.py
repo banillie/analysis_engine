@@ -56,18 +56,18 @@ def report_config(report_type: str):
         "excel_save_path": "/output/{}.xlsx",
         "word_save_path": "/output/{}.docx",
         "word_landscape": "/input/summary_temp_landscape.docx",
-        "word_portrait": '/input/summary_temp.docx',
+        "word_portrait": "/input/summary_temp.docx",
     }
     # return INITIATE_DICT[report_type]
 
 
 def set_default_args(op_args, port_group, default_quarter):
-    if 'group' not in op_args and 'stage' not in op_args:
-        op_args['group'] = port_group
-    if 'quarter' not in op_args:
-        op_args['quarter'] = [default_quarter]
-    if 'chart' not in op_args:
-        op_args['chart'] = False
+    if "group" not in op_args and "stage" not in op_args:
+        op_args["group"] = port_group
+    if "quarter" not in op_args:
+        op_args["quarter"] = [default_quarter]
+    if "chart" not in op_args:
+        op_args["chart"] = False
 
     return op_args
 
@@ -85,7 +85,9 @@ def return_koi_fn_keys(op_args: Dict):  # op_args
     """small helper function to convert key names in file into list of strings
     and place in op_args dictionary"""
     if "koi_fn" in op_args:
-        keys = get_data_query_key_names(op_args["root_path"] + "/input/{}.csv".format(op_args["koi_fn"]))
+        keys = get_data_query_key_names(
+            op_args["root_path"] + "/input/{}.csv".format(op_args["koi_fn"])
+        )
         op_args["key"] = keys
         return op_args
     if "koi" in op_args:
@@ -97,12 +99,10 @@ def return_koi_fn_keys(op_args: Dict):  # op_args
 
 def get_board_date(op_args):
     try:
-        config_path = op_args['root_path'] + op_args['config']
+        config_path = op_args["root_path"] + op_args["config"]
         config = configparser.ConfigParser()
         config.read(config_path)
-        date_str = config["GLOBALS"]['milestones_blue_line_date']
+        date_str = config["GLOBALS"]["milestones_blue_line_date"]
         return parser.parse(date_str).date()
     except:
         config_issue()
-
-

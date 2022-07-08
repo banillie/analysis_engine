@@ -82,21 +82,39 @@ def cdg_dashboard(master, wb: Workbook) -> None:
 
     for row_num in range(2, ws.max_row + 1):
         project_name = ws.cell(row=row_num, column=3).value
-        if project_name in master['current_projects']:
-            ws.cell(row=row_num, column=2).value = master['project_information'][project_name]["Directorate"]
-            ws.cell(row=row_num, column=4).value = master['project_information'][project_name]["Abbreviations"]
-            bc_stage = master['master_data'][0]["data"][project_name][DATA_KEY_DICT["IPDC approval point"]]
-            ws.cell(row=row_num, column=5).value = DASHBOARD_BC_STAGE_ABBREVIATION[bc_stage]
-            costs = master['master_data'][0]["data"][project_name][DATA_KEY_DICT["Total Forecast"]]
-            ws.cell(row=row_num, column=6).value = dandelion_number_text(costs, none_handle="none")
-            income = master['master_data'][0]["data"][project_name]["Total Income"]
-            ws.cell(row=row_num, column=7).value = dandelion_number_text(income, none_handle="none")
-            benefits = master['master_data'][0]["data"][project_name]["Total Benefits"]
-            ws.cell(row=row_num, column=8).value = dandelion_number_text(benefits, none_handle="none")
-            vfm = master['master_data'][0]["data"][project_name]["VfM Category"]
+        if project_name in master["current_projects"]:
+            ws.cell(row=row_num, column=2).value = master["project_information"][
+                project_name
+            ]["Directorate"]
+            ws.cell(row=row_num, column=4).value = master["project_information"][
+                project_name
+            ]["Abbreviations"]
+            bc_stage = master["master_data"][0]["data"][project_name][
+                DATA_KEY_DICT["IPDC approval point"]
+            ]
+            ws.cell(row=row_num, column=5).value = DASHBOARD_BC_STAGE_ABBREVIATION[
+                bc_stage
+            ]
+            costs = master["master_data"][0]["data"][project_name][
+                DATA_KEY_DICT["Total Forecast"]
+            ]
+            ws.cell(row=row_num, column=6).value = dandelion_number_text(
+                costs, none_handle="none"
+            )
+            income = master["master_data"][0]["data"][project_name]["Total Income"]
+            ws.cell(row=row_num, column=7).value = dandelion_number_text(
+                income, none_handle="none"
+            )
+            benefits = master["master_data"][0]["data"][project_name]["Total Benefits"]
+            ws.cell(row=row_num, column=8).value = dandelion_number_text(
+                benefits, none_handle="none"
+            )
+            vfm = master["master_data"][0]["data"][project_name]["VfM Category"]
             ws.cell(row=row_num, column=9).value = vfm
             overall_dca = convert_rag_text(
-                master['master_data'][0]["data"][project_name][DATA_KEY_DICT["Departmental DCA"]]
+                master["master_data"][0]["data"][project_name][
+                    DATA_KEY_DICT["Departmental DCA"]
+                ]
             )
             ws.cell(row=row_num, column=10).value = overall_dca
             if overall_dca == "None":
@@ -104,14 +122,14 @@ def cdg_dashboard(master, wb: Workbook) -> None:
 
             for i, key in enumerate(conf_list):
                 dca = convert_rag_text(
-                    master['master_data'][0]["data"][project_name][key]
+                    master["master_data"][0]["data"][project_name][key]
                 )
-                ws.cell(row=row_num, column=11+i).value = dca
+                ws.cell(row=row_num, column=11 + i).value = dca
 
             for i, key in enumerate(risk_list):
-                risk = master['master_data'][0]["data"][project_name][key]
+                risk = master["master_data"][0]["data"][project_name][key]
                 if risk == "YES":
-                    ws.cell(row=row_num, column=14+i).value = risk
+                    ws.cell(row=row_num, column=14 + i).value = risk
 
         """list of columns with conditional formatting"""
         list_columns = ["j", "k", "l", "m"]

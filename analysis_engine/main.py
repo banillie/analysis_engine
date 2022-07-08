@@ -143,7 +143,7 @@ def run_analysis(args, settings):
     try:
         if programme == "dandelion":
             d_data = DandelionData(md, **combined_args)
-            if op_args['chart'] != 'save':
+            if op_args["chart"] != "save":
                 make_a_dandelion_auto(d_data, **op_args)
             else:
                 d_graph = make_a_dandelion_auto(d_data, **combined_args)
@@ -204,10 +204,10 @@ def run_analysis(args, settings):
         if programme == "milestones":
             ms = MilestoneData(m, **op_args)
             if (
-                    "type" in op_args
-                    or "dates" in op_args
-                    or "koi" in op_args
-                    or "koi_fn" in op_args
+                "type" in op_args
+                or "dates" in op_args
+                or "koi" in op_args
+                or "koi_fn" in op_args
             ):
                 op_args = return_koi_fn_keys(op_args)
                 ms.filter_chart_info(**op_args)

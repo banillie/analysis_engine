@@ -77,7 +77,7 @@ def set_fig_size(kwargs, fig: plt.figure) -> plt.figure:
 
 
 def get_chart_title(
-        **c_kwargs,  # chart kwargs
+    **c_kwargs,  # chart kwargs
 ) -> str:
     if "title" in c_kwargs:
         return c_kwargs["title"]

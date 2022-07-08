@@ -28,7 +28,8 @@ from analysis_engine.dictionaries import (
     DCA_KEYS,
     FONT_TYPE,
     STANDARDISE_DCA_KEYS,
-    convert_rag_text, NEXT_STAGE_DICT,
+    convert_rag_text,
+    NEXT_STAGE_DICT,
 )
 
 
@@ -202,17 +203,19 @@ class DandelionData:
         self.kwargs = kwargs
         self.baseline_type = "ipdc_costs"
         self.group = []
-        self.group_stage_switch = ''
+        self.group_stage_switch = ""
         self.handle_group()
-        self.iter_list = get_iter_list(self.kwargs['quarter'], self.master['quarter_list'])  # needs refactor
+        self.iter_list = get_iter_list(
+            self.kwargs["quarter"], self.master["quarter_list"]
+        )  # needs refactor
         self.d_data = {}
         self.get_data()
 
     def handle_group(self):
-        if 'group' in self.kwargs:
-            group_stage_switch = 'group'
-        if 'stage' in self.kwargs:
-            group_stage_switch = 'stage'
+        if "group" in self.kwargs:
+            group_stage_switch = "group"
+        if "stage" in self.kwargs:
+            group_stage_switch = "stage"
 
         self.group_stage_switch = group_stage_switch
         self.group = self.kwargs[group_stage_switch]
@@ -234,7 +237,9 @@ class DandelionData:
             # to right around the center circle.
             g_ang_l = []
             # start_point needs to come down as numbers increase
-            start_point = 290 * ((29 - ((len(self.kwargs[self.group_stage_switch])) - 2)) / 29)
+            start_point = 290 * (
+                (29 - ((len(self.kwargs[self.group_stage_switch])) - 2)) / 29
+            )
             # distribution increase needs to come down as numbers increase
             distribution_start = 0
             distribution_increase = 140
@@ -351,7 +356,9 @@ class DandelionData:
                 project_group = get_group(self.master, tp, self.kwargs)  # lower group
             p_list = []
             for p in project_group:
-                self.kwargs[self.group_stage_switch] = [p]  # project level is in group not stage.
+                self.kwargs[self.group_stage_switch] = [
+                    p
+                ]  # project level is in group not stage.
                 if g == "pipeline":
                     p_value = self.master.pipeline_dict[p]["wlc"]
                 else:
@@ -360,7 +367,7 @@ class DandelionData:
                     )  # project wlc
 
                 # if "report" not in self.kwargs:  # DON'T UNDERSTAND THIS IF STATEMENT
-                if 'something' in self.kwargs:  # SOMETHING TO DO WITH SCHEDULE?
+                if "something" in self.kwargs:  # SOMETHING TO DO WITH SCHEDULE?
                     if g == "pipeline":
                         p_schedule = self.master.pipeline_dict[p]["wlc"]
                     else:
@@ -408,7 +415,7 @@ class DandelionData:
             except ValueError:  # handles no projects in l_g_d list
                 continue
             if len(p_list) > 2:
-            # if len(p_list) > 2 or len(self.kwargs[self.group_stage_switch]) == 1:
+                # if len(p_list) > 2 or len(self.kwargs[self.group_stage_switch]) == 1:
                 ang_l = cal_group_angle(360, p_list, all=True)
             else:
                 if len(p_list) == 1:
@@ -661,7 +668,7 @@ def make_a_dandelion_auto(dl: DandelionData, **kwargs):
 
     plt.axis("scaled")
     plt.axis("off")
-    if kwargs["chart"] != 'save':
+    if kwargs["chart"] != "save":
         plt.show()
 
     return fig

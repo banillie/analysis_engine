@@ -1,4 +1,9 @@
-from analysis_engine.segmentation import get_iter_list, get_group, get_correct_p_data, moving_average
+from analysis_engine.segmentation import (
+    get_iter_list,
+    get_group,
+    get_correct_p_data,
+    moving_average,
+)
 from analysis_engine.cleaning import convert_none_types
 from analysis_engine.dictionaries import YEAR_LIST, COST_KEY_LIST, STANDARDISE_COST_KEYS
 from analysis_engine.error_msgs import logger
@@ -8,8 +13,10 @@ class CostData:
     def __init__(self, master, **kwargs):
         self.master = master
         self.kwargs = kwargs
-        self.report = kwargs['report']
-        self.iter_list = get_iter_list(self.kwargs['quarter'], self.master['quarter_list'])
+        self.report = kwargs["report"]
+        self.iter_list = get_iter_list(
+            self.kwargs["quarter"], self.master["quarter_list"]
+        )
         # self.start_group = []
         # self.group = []
         # self.iter_list = []
@@ -35,12 +42,24 @@ class CostData:
             group = get_group(self.master, tp, self.kwargs)
             for project_name in group:
                 p_data = get_correct_p_data(self.master, project_name, tp)
-                spent += convert_none_types(p_data[STANDARDISE_COST_KEYS['spent'][self.report]])
-                remaining += convert_none_types(p_data[STANDARDISE_COST_KEYS['remaining'][self.report]])
-                total += convert_none_types(p_data[STANDARDISE_COST_KEYS['total'][self.report]])
-                income_achieved += convert_none_types(p_data[STANDARDISE_COST_KEYS['income_achieved'][self.report]])
-                income_remaining += convert_none_types(p_data[STANDARDISE_COST_KEYS['income_remaining'][self.report]])
-                income_total += convert_none_types(p_data[STANDARDISE_COST_KEYS['income_total'][self.report]])
+                spent += convert_none_types(
+                    p_data[STANDARDISE_COST_KEYS["spent"][self.report]]
+                )
+                remaining += convert_none_types(
+                    p_data[STANDARDISE_COST_KEYS["remaining"][self.report]]
+                )
+                total += convert_none_types(
+                    p_data[STANDARDISE_COST_KEYS["total"][self.report]]
+                )
+                income_achieved += convert_none_types(
+                    p_data[STANDARDISE_COST_KEYS["income_achieved"][self.report]]
+                )
+                income_remaining += convert_none_types(
+                    p_data[STANDARDISE_COST_KEYS["income_remaining"][self.report]]
+                )
+                income_total += convert_none_types(
+                    p_data[STANDARDISE_COST_KEYS["income_total"][self.report]]
+                )
 
             lower_dict[tp] = {
                 "costs_spent": spent,

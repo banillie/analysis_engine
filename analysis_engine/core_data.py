@@ -31,9 +31,11 @@ from analysis_engine.error_msgs import (
 # CONFIG_DICT = report_config()
 
 
-def get_master_data(config_dict) -> List[Dict[str, Union[str, int, datetime.date, float]]]:
+def get_master_data(
+    config_dict,
+) -> List[Dict[str, Union[str, int, datetime.date, float]]]:
     """Returns a list of dictionaries each containing quarter data"""
-    config_path = config_dict['root_path'] + config_dict['config']
+    config_path = config_dict["root_path"] + config_dict["config"]
     config = configparser.ConfigParser()
     config.read(config_path)
     master_data_list = []
@@ -41,8 +43,8 @@ def get_master_data(config_dict) -> List[Dict[str, Union[str, int, datetime.date
         text = config["MASTERS"][key].split(", ")
         year = text[2]
         quarter = text[1]
-        m_path = config_dict['root_path'] + '/core_data/' + text[0]
-        m = config_dict['callable'](m_path, int(quarter), int(year))
+        m_path = config_dict["root_path"] + "/core_data/" + text[0]
+        m = config_dict["callable"](m_path, int(quarter), int(year))
         master_data_list.append(m)
 
     return list(reversed(master_data_list))
@@ -56,36 +58,36 @@ def convert_none_types(x):
 
 
 META_GROUP_DICT = {
-    "cdg": 'Directorate',
-    'ipdc': 'Group',
-    'top_250': 'Group',
+    "cdg": "Directorate",
+    "ipdc": "Group",
+    "top_250": "Group",
 }
 
 META_STAGE_DICT = {
-    "cdg": 'Last Business Case (BC) achieved',
-    'ipdc': 'IPDC approval point',
+    "cdg": "Last Business Case (BC) achieved",
+    "ipdc": "IPDC approval point",
 }
 
 
 class PythonMasterData:
-    '''
+    """
     Key part of the data building process. Takes master_data and project_info dicts and
     performs a number of high-level checks to stop any later bugs or crashes, as well as
     create some useful meta data information.
-    '''
+    """
 
     def __init__(
-            self,
-            master_data: List[Dict[str, Union[str, int, datetime.date, float]]],
-            project_information: Dict[str, Union[str, int]],
-            meta,
-            **kwargs,
+        self,
+        master_data: List[Dict[str, Union[str, int, datetime.date, float]]],
+        project_information: Dict[str, Union[str, int]],
+        meta,
+        **kwargs,
     ) -> None:
         self.master_data = master_data
         self.project_information = project_information
-        self.all_groups = meta['all_groups']
+        self.all_groups = meta["all_groups"]
         self.portfolio_groups = meta["port_group"]
-        self.stages = meta['stages']
+        self.stages = meta["stages"]
         self.all_projects = list(project_information.keys())
         self.kwargs = kwargs
         self.current_quarter = str(master_data[0].quarter)
@@ -156,7 +158,9 @@ class PythonMasterData:
                 group_list = []
                 for p in master.projects:
                     #  This data comes from the project information document. Not master.
-                    projects_group = self.project_information[p][META_GROUP_DICT[self.kwargs["data_type"]]]
+                    projects_group = self.project_information[p][
+                        META_GROUP_DICT[self.kwargs["data_type"]]
+                    ]
                     if projects_group is None or projects_group not in self.all_groups:
                         if i == 0:
                             if p not in critical_group_errors:
@@ -171,7 +175,9 @@ class PythonMasterData:
             for stage in self.stages:
                 stage_list = []
                 for p in master.projects:
-                    project_stage = master.data[p][META_STAGE_DICT[self.kwargs["data_type"]]]
+                    project_stage = master.data[p][
+                        META_STAGE_DICT[self.kwargs["data_type"]]
+                    ]
                     if project_stage is None or project_stage not in self.stages:
                         if i == 0:
                             if p not in critical_stage_errors:
@@ -185,7 +191,7 @@ class PythonMasterData:
 
             gmpp_list = []
             for p in master.projects:
-                if self.project_information[p]["GMPP"] == 'YES':
+                if self.project_information[p]["GMPP"] == "YES":
                     gmpp_list.append(p)
                 quarter_dict["GMPP"] = gmpp_list
 
@@ -227,7 +233,7 @@ class PythonMasterData:
     def get_current_tp(self):
         try:
             self.current_quarter = (
-                    str(self.master_data[0].month) + ", " + str(self.master_data[0].year)
+                str(self.master_data[0].month) + ", " + str(self.master_data[0].year)
             )
         except KeyError:
             self.current_quarter = self.master_data[0].quarter
@@ -240,9 +246,9 @@ def json_date_converter(o):
 
 class JsonData:
     def __init__(
-            self,
-            master: List[Dict[str, Union[str, int, datetime.date, float]]],
-            save_path: str,
+        self,
+        master: List[Dict[str, Union[str, int, datetime.date, float]]],
+        save_path: str,
     ):
         self.master = master
         self.path = save_path
@@ -291,18 +297,17 @@ def get_group_meta_data(settings_dict) -> Dict:
     """
 
     try:
-        config_path = settings_dict['root_path'] + settings_dict['config']
+        config_path = settings_dict["root_path"] + settings_dict["config"]
         config = configparser.ConfigParser()
         config.read(config_path)
-        portfolio_group = json.loads(config.get("GROUPS", "portfolio_groups"))  # to return a list
+        portfolio_group = json.loads(
+            config.get("GROUPS", "portfolio_groups")
+        )  # to return a list
         group_all = json.loads(config.get("GROUPS", "all_groups"))
     except:
         config_issue()
 
-    group_meta_dict = {
-        'port_group': portfolio_group,
-        'all_groups': group_all
-    }
+    group_meta_dict = {"port_group": portfolio_group, "all_groups": group_all}
 
     return group_meta_dict
 
@@ -313,7 +318,7 @@ def get_stage_meta_data(settings_dict) -> Dict:
     and must correspond to terms used in project information document.
     """
     try:
-        config_path = settings_dict['root_path'] + settings_dict['config']
+        config_path = settings_dict["root_path"] + settings_dict["config"]
         config = configparser.ConfigParser()
         config.read(config_path)
         bc_stages = json.loads(config.get("GROUPS", "bc_stages"))
@@ -321,16 +326,16 @@ def get_stage_meta_data(settings_dict) -> Dict:
         config_issue()
 
     stage_meta_dict = {
-        'stages': bc_stages,
+        "stages": bc_stages,
     }
 
     return stage_meta_dict
 
 
 def get_project_info_data(master_file: str) -> Dict:
-    '''
+    """
     Converts project_info document into a python dictionary. adapted from datamaps.api project_data_from_master
-    '''
+    """
     wb = load_workbook(master_file)
     ws = wb.active
     for cell in ws["A"]:
@@ -365,10 +370,14 @@ def get_project_info_data(master_file: str) -> Dict:
 def get_project_information(settings_dict) -> Dict[str, Union[str, int]]:
     """Returns dictionary containing all project meta data. confi_path is the config.ini file path.
     root_path is the core data root_path."""
-    config_path = settings_dict['root_path'] + settings_dict['config']
+    config_path = settings_dict["root_path"] + settings_dict["config"]
     config = configparser.ConfigParser()
     config.read(config_path)
-    path = str(settings_dict['root_path']) + '/core_data/' + config["PROJECT INFO"]["projects"]
+    path = (
+        str(settings_dict["root_path"])
+        + "/core_data/"
+        + config["PROJECT INFO"]["projects"]
+    )
     return get_project_info_data(path)
 
 
@@ -382,14 +391,16 @@ def get_core(settings_dict) -> None:
             get_master_data(settings_dict),
             get_project_information(settings_dict),
             META,
-            data_type=settings_dict['report'],
+            data_type=settings_dict["report"],
         )
 
     except (ProjectNameError, ProjectGroupError, ProjectStageError) as e:
         logger.critical(e)
         sys.exit(1)
 
-    master_json_path = str("{0}/core_data/json/master".format(settings_dict['root_path']))
+    master_json_path = str(
+        "{0}/core_data/json/master".format(settings_dict["root_path"])
+    )
     JsonData(master, master_json_path)
 
 

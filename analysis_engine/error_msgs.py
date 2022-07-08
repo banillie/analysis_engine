@@ -48,49 +48,50 @@ def historic_project_names_error(error_cases):
     if error_cases:
         for e in error_cases:
             logger.info(
-            f"Project name {e} in master {error_cases[e]} not in project information "
-            f"document. Please make sure project names are consistent or it could cause "
-            f"analysis engine to crash or inaccurate analysis."
-        )
+                f"Project name {e} in master {error_cases[e]} not in project information "
+                f"document. Please make sure project names are consistent or it could cause "
+                f"analysis engine to crash or inaccurate analysis."
+            )
 
 
 def historic_stage_names_error(error_cases):
     if error_cases:
         for e in error_cases:
             logger.info(
-            f"Project name {e} in master {error_cases[e]} does not have a recognised stage name "
-            f". Please make sure stage data is consistent with terminology in config file or it could cause "
-            f"analysis engine to crash or inaccurate analysis."
-        )
+                f"Project name {e} in master {error_cases[e]} does not have a recognised stage name "
+                f". Please make sure stage data is consistent with terminology in config file or it could cause "
+                f"analysis engine to crash or inaccurate analysis."
+            )
 
 
 def latest_group_names_error(error_cases):
     if error_cases:
         for e in error_cases:
             logger.critical(
-                e + " does not have a recognised group value in the project information document.")
-        raise ProjectGroupError(
-            "Program stopping. Please amend."
-        )
+                e
+                + " does not have a recognised group value in the project information document."
+            )
+        raise ProjectGroupError("Program stopping. Please amend.")
 
 
 def latest_stage_names_error(error_cases):
     if error_cases:
         for e in error_cases:
             logger.critical(
-                e + " does not have a recognised stage value in the latest master.")
-        raise ProjectGroupError(
-            "Program stopping. Please amend."
-        )
+                e + " does not have a recognised stage value in the latest master."
+            )
+        raise ProjectGroupError("Program stopping. Please amend.")
 
 
 def historic_group_names_error(error_cases):
     if error_cases:
         for e in error_cases:
             logger.info(
-                e + " does not have a recognised Group value in the project information document. "
-                    "As not in current master, analysis_engine not stopping. But please this could "
-                    "cause a crash or inaccurate analysis and should be corrected.")
+                e
+                + " does not have a recognised Group value in the project information document. "
+                "As not in current master, analysis_engine not stopping. But please this could "
+                "cause a crash or inaccurate analysis and should be corrected."
+            )
 
 
 def abbreviation_error(error_cases):
@@ -112,7 +113,9 @@ def not_recognised_project_group_or_stage(error_case):
 
 
 def not_recognised_quarter(error):
-    raise InputError(error + ' not a recognised quarter. Program stopped. Please re-enter.')
+    raise InputError(
+        error + " not a recognised quarter. Program stopped. Please re-enter."
+    )
 
 
 def get_error_list(seq: list):

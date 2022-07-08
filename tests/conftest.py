@@ -4,9 +4,9 @@ import os
 from datamaps.api import project_data_from_master
 
 from analysis_engine.core_data import get_core, get_project_information
+
 # from analysis_engine.data import open_word_doc
 # from analysis_engine.config import _platform_docs_dir
-
 
 
 def pytest_addoption(parser):
@@ -70,21 +70,16 @@ def word_doc():
 @pytest.fixture()
 def basic_masters_dicts():
     return get_master_data(
-        "resources/basic_m_confi.ini",
-        "resources/",
-        project_data_from_master
+        "resources/basic_m_confi.ini", "resources/", project_data_from_master
     )
-
-
-
 
 
 @pytest.fixture()
 def full_test_masters_dict():
     get_core(
-        reporting_type='cdg',
-        config_file=INITIATE_DICT['cdg']['config'],
-        func=INITIATE_DICT['cdg']['callable'],
+        reporting_type="cdg",
+        config_file=INITIATE_DICT["cdg"]["config"],
+        func=INITIATE_DICT["cdg"]["callable"],
     )
 
 
@@ -202,18 +197,13 @@ def sp_data():
 @pytest.fixture()
 def top35_master():
     return get_master_data(
-            "resources/top250_confi.ini",
-            "resources/",
-            project_data_from_master_month
-        )
+        "resources/top250_confi.ini", "resources/", project_data_from_master_month
+    )
 
 
 @pytest.fixture()
 def top35_project_info():
-    return get_project_information(
-            "resources/top250_confi.ini",
-            "resources/"
-        )
+    return get_project_information("resources/top250_confi.ini", "resources/")
 
 
 @pytest.fixture()
@@ -228,7 +218,6 @@ def top35_data():
             "group": ["RIG"],
             "chart": True,
             "data_type": "top35",
-            "circle_colour": 'No',
+            "circle_colour": "No",
         },
     }
-

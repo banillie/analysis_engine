@@ -13,7 +13,7 @@ from analysis_engine.data import (
     root_path,
     put_matplotlib_fig_into_word,
     get_input_doc,
-    get_map
+    get_map,
 )
 from openpyxl import load_workbook
 
@@ -196,10 +196,10 @@ def sort_data_for_stacked_chart(data):
 
 
 def get_triage(
-        data_slice: Dict,
-        themes: list,
-        # triage_method: list,
-    ) -> Dict:
+    data_slice: Dict,
+    themes: list,
+    # triage_method: list,
+) -> Dict:
 
     # Helper funciton for data triage. Calculates triage for key ratings across all themes.
     # Retuns dict or nothing.
@@ -215,21 +215,19 @@ def get_triage(
     low = [x for x in scores_list if x not in ["NONE", "HARD", "LOW", "COULD"]]
 
     if scores_list == [None, None, None, None]:
-        return 'NONES'
+        return "NONES"
 
     if high == []:
-        return 'KEEP'
+        return "KEEP"
     elif low == []:
-        return 'DELETE'
+        return "DELETE"
     else:
-        return 'DEBATE'
+        return "DEBATE"
 
 
 def put_triage_data_into_excel(
-    workb: Workbook,
-    result_dict: Dict,
-    sheet_name: str,
-    themes: list) -> None:
+    workb: Workbook, result_dict: Dict, sheet_name: str, themes: list
+) -> None:
 
     # Helper function to place each triage dictionary into excel across different tab.
 
@@ -237,25 +235,29 @@ def put_triage_data_into_excel(
     # ws.title = sheet_name
 
     # dict for which keys are GMPP
-    key_map = get_map(load_workbook(root_path / "input/GMPP_INTEGRATION_KEY_MAP.xlsx"), commas=True, gaps=True)
+    key_map = get_map(
+        load_workbook(root_path / "input/GMPP_INTEGRATION_KEY_MAP.xlsx"),
+        commas=True,
+        gaps=True,
+    )
 
     for x, k in enumerate(result_dict.keys()):
-        ws.cell(row=x+2, column=1).value = k
+        ws.cell(row=x + 2, column=1).value = k
         for i, t in enumerate(themes):
             if t == "GMPP Key":
                 try:
                     if k in key_map.keys():
-                        ws.cell(row=x + 2, column=i + 2).value = 'YES'
+                        ws.cell(row=x + 2, column=i + 2).value = "YES"
                 except KeyError:
                     pass
             else:
                 rating = result_dict[k][t]
-                ws.cell(row=x+2, column=i + 2).value = result_dict[k][t]
+                ws.cell(row=x + 2, column=i + 2).value = result_dict[k][t]
 
     for i, t in enumerate(themes):
         ws.cell(row=1, column=i + 2).value = t
 
-    ws.cell(row=1, column=1).value = 'Key Name'
+    ws.cell(row=1, column=1).value = "Key Name"
 
 
 def data_triage(data: Dict) -> None:
@@ -288,20 +290,18 @@ def data_triage(data: Dict) -> None:
 
     x = 2
     for k in data.keys():
-        rating = get_triage(
-            data[k],
-            themes)
-            # high_triage)
-        if rating == 'KEEP':
+        rating = get_triage(data[k], themes)
+        # high_triage)
+        if rating == "KEEP":
             keep[k] = data[k]
-        if rating == 'DEBATE':
+        if rating == "DEBATE":
             debate[k] = data[k]
-        if rating == 'DELETE':
+        if rating == "DELETE":
             delete[k] = data[k]
 
-    put_triage_data_into_excel(wb, keep, 'KEEP', themes)
-    put_triage_data_into_excel(wb, debate, 'DEBATE', themes)
-    put_triage_data_into_excel(wb, delete, 'DELETE', themes)
+    put_triage_data_into_excel(wb, keep, "KEEP", themes)
+    put_triage_data_into_excel(wb, debate, "DEBATE", themes)
+    put_triage_data_into_excel(wb, delete, "DELETE", themes)
 
     wb.save(root_path / "output/data_review_triage.xlsx")
 

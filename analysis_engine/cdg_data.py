@@ -41,7 +41,8 @@ from analysis_engine.data import (
     # Master,
     get_group,
     compare_text_new_and_old,
-    get_ipdc_date, dandelion_number_text,
+    get_ipdc_date,
+    dandelion_number_text,
 )
 
 
@@ -69,6 +70,7 @@ from analysis_engine.data import (
 #         cdg_root_path / "core_data/cdg_project_info.xlsx", 2, 2020
 #     )
 #
+
 
 def place_data_into_new_master_format(master_data: Dict):  # throw away
     wb = load_workbook(cdg_root_path / "core_data/CDG_portfolio_report.xlsx")
@@ -556,18 +558,15 @@ def cdg_project_report_meta_data(
     return doc
 
 
-
-
-
 def add_sterling_symbol(figure: int or float):
     if figure != 0:
         return "£" + str(figure) + "m"
 
 
 def cdg_dashboard(
-        master,
-        # milestones: MilestoneData,
-        wb: Workbook,
+    master,
+    # milestones: MilestoneData,
+    wb: Workbook,
 ) -> Workbook:
     # wb = load_workbook(wb_path)
     ws = wb.active
@@ -576,11 +575,17 @@ def cdg_dashboard(
         project_name = ws.cell(row=row_num, column=3).value
         if project_name in master.current_projects:
             # Group
-            ws.cell(row=row_num, column=2).value = master.project_information[project_name]["Directorate"]
+            ws.cell(row=row_num, column=2).value = master.project_information[
+                project_name
+            ]["Directorate"]
             # Abbreviation
-            ws.cell(row=row_num, column=4).value = master.project_information[project_name]["Abbreviations"]
+            ws.cell(row=row_num, column=4).value = master.project_information[
+                project_name
+            ]["Abbreviations"]
             # Stage
-            bc_stage = master.master_data[0]["data"][project_name][DATA_KEY_DICT["IPDC approval point"]]
+            bc_stage = master.master_data[0]["data"][project_name][
+                DATA_KEY_DICT["IPDC approval point"]
+            ]
             ws.cell(row=row_num, column=5).value = convert_bc_stage_text(bc_stage)
             # try:
             #     bc_stage_lst_qrt = master.master_data[1].data[project_name][
@@ -597,8 +602,12 @@ def cdg_dashboard(
             #     pass
 
             # Total Costs
-            costs = master.master_data[0]["data"][project_name][DATA_KEY_DICT["Total Forecast"]]
-            ws.cell(row=row_num, column=6).value = dandelion_number_text(costs, none_handle="none")
+            costs = master.master_data[0]["data"][project_name][
+                DATA_KEY_DICT["Total Forecast"]
+            ]
+            ws.cell(row=row_num, column=6).value = dandelion_number_text(
+                costs, none_handle="none"
+            )
             # try:
             #     wlc_lst_quarter = master.master_data[1].data[project_name][
             #         "Total Forecast"
@@ -627,14 +636,17 @@ def cdg_dashboard(
 
             # Total Income
             income = master.master_data[0]["data"][project_name]["Total Income"]
-            ws.cell(row=row_num, column=7).value = dandelion_number_text(income, none_handle="none")
+            ws.cell(row=row_num, column=7).value = dandelion_number_text(
+                income, none_handle="none"
+            )
             # Total Benefits
             benefits = master.master_data[0]["data"][project_name]["Total Benefits"]
-            ws.cell(row=row_num, column=8).value = dandelion_number_text(benefits, none_handle="none")
+            ws.cell(row=row_num, column=8).value = dandelion_number_text(
+                benefits, none_handle="none"
+            )
             # VfM Category
             vfm = master.master_data[0]["data"][project_name]["VfM Category"]
             ws.cell(row=row_num, column=9).value = vfm
-
 
             # """WLC variance against baseline quarter"""
             # bl = master.bl_index["ipdc_costs"][project_name][2]
@@ -792,18 +804,22 @@ def cdg_dashboard(
 
             # DCA ratings
             overall_dca = convert_rag_text(
-                master.master_data[0]["data"][project_name][DATA_KEY_DICT["Departmental DCA"]]
+                master.master_data[0]["data"][project_name][
+                    DATA_KEY_DICT["Departmental DCA"]
+                ]
             )
             ws.cell(row=row_num, column=10).value = overall_dca
             if overall_dca == "None":
                 ws.cell(row=row_num, column=10).value = ""
 
-            conf_list = ["Costs Confidence", "Schedule Confidence", "Benefits Confidence"]
+            conf_list = [
+                "Costs Confidence",
+                "Schedule Confidence",
+                "Benefits Confidence",
+            ]
             for i, key in enumerate(conf_list):
-                dca = convert_rag_text(
-                    master.master_data[0]["data"][project_name][key]
-                )
-                ws.cell(row=row_num, column=11+i).value = dca
+                dca = convert_rag_text(master.master_data[0]["data"][project_name][key])
+                ws.cell(row=row_num, column=11 + i).value = dca
 
             risk_list = [
                 "Benefits",
@@ -814,12 +830,12 @@ def cdg_dashboard(
                 "Schedule",
                 "Sponsorship",
                 "Stakeholders",
-                ]
+            ]
 
             for i, key in enumerate(risk_list):
                 risk = master.master_data[0]["data"][project_name][key]
                 if risk == "YES":
-                    ws.cell(row=row_num, column=14+i).value = risk
+                    ws.cell(row=row_num, column=14 + i).value = risk
 
             # """DCA rating - this quarter"""
             # ws.cell(row=row_num, column=17).value = convert_rag_text(
@@ -882,8 +898,6 @@ def cdg_dashboard(
     return wb
 
 
-
-
 def cdg_run_p_reports(master, **kwargs) -> None:
     group = get_group(master, str(master.current_quarter), kwargs)
     for p in group:
@@ -941,9 +955,7 @@ def dca_narratives(doc: Document, master: Dict, project_name: str) -> None:
     ]
 
     for x in range(len(narrative_keys_list)):
-        text_one = str(
-            master.master_data[0].data[project_name][narrative_keys_list[x]]
-        )
+        text_one = str(master.master_data[0].data[project_name][narrative_keys_list[x]])
         # text_two = str(
         #     master.master_data[1].data[project_name][narrative_keys_list[x]]
         # )

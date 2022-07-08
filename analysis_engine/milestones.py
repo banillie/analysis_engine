@@ -85,8 +85,10 @@ class MilestoneData:
     def __init__(self, master, **kwargs):
         self.master = master
         self.kwargs = kwargs
-        self.report = kwargs['report']
-        self.iter_list = get_iter_list(self.kwargs['quarter'], self.master['quarter_list'])
+        self.report = kwargs["report"]
+        self.iter_list = get_iter_list(
+            self.kwargs["quarter"], self.master["quarter_list"]
+        )
         self.milestone_dict = {}
         self.sorted_milestone_dict = {}
         self.max_date = None
@@ -114,7 +116,7 @@ class MilestoneData:
                 if p_data is None:
                     continue
                 # i loops below removes None Milestone names and rejects non-datetime date values.
-                p = self.master['abbreviations'][project_name]["abb"]
+                p = self.master["abbreviations"][project_name]["abb"]
                 category = "Milestone"
                 if self.kwargs["report"] == "cdg":
                     # report = "CDG"
@@ -125,14 +127,14 @@ class MilestoneData:
                             ("Notes", p_data["MM" + str(i) + " NOTES"]),
                             ("Date", convert_date(p_data["MM" + str(i) + " DATE"])),
                             ("Status", p_data["MM" + str(i) + " STATUS"]),
-                            ("Report", self.kwargs['report']),
+                            ("Report", self.kwargs["report"]),
                             ("Cat", category),
                         ]
                         milestone_info_handling(
                             project_milestones, entry, **self.kwargs
                         )
 
-                if self.kwargs['report'] == 'ipdc':
+                if self.kwargs["report"] == "ipdc":
                     for i in range(1, 50):
                         try:
                             entry = [
@@ -150,7 +152,7 @@ class MilestoneData:
                                     ),
                                 ),
                                 ("Notes", p_data["Approval MM" + str(i) + " Notes"]),
-                                ("Report", self.kwargs['report']),
+                                ("Report", self.kwargs["report"]),
                                 ("Cat", category),
                             ]
                             milestone_info_handling(
@@ -171,7 +173,7 @@ class MilestoneData:
                                     ),
                                 ),
                                 ("Notes", p_data["Assurance MM" + str(i) + " Notes"]),
-                                ("Report", self.kwargs['report']),
+                                ("Report", self.kwargs["report"]),
                                 ("Cat", category),
                             ]
                             milestone_info_handling(
@@ -197,7 +199,7 @@ class MilestoneData:
                                         "Notes",
                                         p_data["Approval MM" + str(i) + " Notes"],
                                     ),
-                                    ("Report", self.kwargs['report']),
+                                    ("Report", self.kwargs["report"]),
                                     ("Cat", category),
                                 ]
                                 milestone_info_handling(
@@ -222,7 +224,7 @@ class MilestoneData:
                                     ),
                                 ),
                                 ("Notes", p_data["Project MM" + str(i) + " Notes"]),
-                                ("Report", self.kwargs['report']),
+                                ("Report", self.kwargs["report"]),
                                 ("Cat", category),
                             ]
                             milestone_info_handling(
@@ -250,7 +252,7 @@ class MilestoneData:
                                     ),
                                 ),
                                 ("Notes", p_data["HMT Approval " + str(i) + " Notes"]),
-                                ("Report", self.kwargs['report']),
+                                ("Report", self.kwargs["report"]),
                                 ("Cat", category),
                             ]
                             milestone_info_handling(
@@ -733,14 +735,14 @@ def milestone_chart(
         if blue_line == "today":
             if min_date <= datetime.today().date() <= max_date:
                 plt.axvline(datetime.today().date())
-        if blue_line == 'config_date':
+        if blue_line == "config_date":
             board_date = get_board_date(kwargs)
             if min_date <= board_date <= max_date:
                 plt.axvline(board_date)
     # size of chart and fit
     fig.tight_layout(rect=[0, 0.03, 1, 0.95])  # for title
 
-    if kwargs["chart"] != 'save':
+    if kwargs["chart"] != "save":
         plt.show()
 
     return fig

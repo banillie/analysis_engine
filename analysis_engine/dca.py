@@ -3,7 +3,11 @@ from docx.enum.section import WD_SECTION_START
 
 from analysis_engine.segmentation import get_iter_list, get_group, get_correct_p_data
 from analysis_engine.cleaning import convert_none_types
-from analysis_engine.dictionaries import DCA_KEYS, DCA_RATING_SCORES, STANDARDISE_COST_KEYS
+from analysis_engine.dictionaries import (
+    DCA_KEYS,
+    DCA_RATING_SCORES,
+    STANDARDISE_COST_KEYS,
+)
 from analysis_engine.error_msgs import get_error_list
 
 
@@ -11,8 +15,10 @@ class DcaData:
     def __init__(self, master, **kwargs):
         self.master = master
         self.kwargs = kwargs
-        self.report = kwargs['report']
-        self.iter_list = get_iter_list(self.kwargs['quarter'], self.master['quarter_list'])
+        self.report = kwargs["report"]
+        self.iter_list = get_iter_list(
+            self.kwargs["quarter"], self.master["quarter_list"]
+        )
         self.dca_dictionary = {}
         self.dca_changes = {}
         self.dca_count = {}
@@ -35,13 +41,15 @@ class DcaData:
                         continue
                     colour = p_data[dca_type]
                     score = DCA_RATING_SCORES[p_data[dca_type]]
-                    costs = convert_none_types(p_data[STANDARDISE_COST_KEYS['total'][self.report]])
+                    costs = convert_none_types(
+                        p_data[STANDARDISE_COST_KEYS["total"][self.report]]
+                    )
                     dca_colour = [("DCA", colour)]
                     dca_score = [("DCA score", score)]
                     t = [("Type", dca_type)]
                     cost_amount = [("Costs", costs)]
                     quarter = [("Quarter", tp)]
-                    dca_dict[self.master['abbreviations'][project_name]["abb"]] = dict(
+                    dca_dict[self.master["abbreviations"][project_name]["abb"]] = dict(
                         dca_colour + t + cost_amount + quarter + dca_score
                     )
                 type_dict[conf_type] = dca_dict
@@ -55,7 +63,7 @@ class DcaData:
         for conf_type in list(DCA_KEYS[self.report].keys()):  # confidence type
             lower_dict = {}
             for project_name in list(
-                    self.dca_dictionary[self.iter_list[0]][conf_type].keys()
+                self.dca_dictionary[self.iter_list[0]][conf_type].keys()
             ):
                 t = [("Type", conf_type)]
                 try:
@@ -125,7 +133,7 @@ class DcaData:
                     total = 0
                     cost_total = 0
                     for y, project in enumerate(
-                            list(self.dca_dictionary[quarter][dca_type].keys())
+                        list(self.dca_dictionary[quarter][dca_type].keys())
                     ):
                         total += 1
                         try:
@@ -141,8 +149,8 @@ class DcaData:
                             )
                             pass
                         if (
-                                self.dca_dictionary[quarter][dca_type][project]["DCA"]
-                                == colour
+                            self.dca_dictionary[quarter][dca_type][project]["DCA"]
+                            == colour
                         ):
                             count += 1
                             try:
@@ -175,11 +183,11 @@ class DcaData:
 def dca_changes_into_word(dca_data: DcaData, document_path) -> Document:
     doc = Document(document_path)
     header = (
-            "Showing changes between "
-            + str(dca_data.iter_list[0])
-            + " and "
-            + str(dca_data.iter_list[1])
-            + "."
+        "Showing changes between "
+        + str(dca_data.iter_list[0])
+        + " and "
+        + str(dca_data.iter_list[1])
+        + "."
     )
     top = doc.add_paragraph()
     top.add_run(header).bold = True
@@ -258,4 +266,3 @@ def dca_changes_into_word(dca_data: DcaData, document_path) -> Document:
         doc.add_paragraph(total_line)
 
     return doc
-

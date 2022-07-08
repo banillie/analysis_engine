@@ -17,8 +17,10 @@ class BenefitsData:
         self.master = master
         self.baseline_type = "ipdc_benefits"
         self.kwargs = kwargs
-        self.iter_list = get_iter_list(self.kwargs['quarter'], self.master['quarter_list'])  # needs refactor
-        self.report = kwargs['report']
+        self.iter_list = get_iter_list(
+            self.kwargs["quarter"], self.master["quarter_list"]
+        )  # needs refactor
+        self.report = kwargs["report"]
         self.b_totals = {}
         self.get_ben_totals()
 
@@ -34,9 +36,15 @@ class BenefitsData:
             group = get_group(self.master, tp, self.kwargs)
             for project_name in group:
                 p_data = get_correct_p_data(self.master, project_name, tp)
-                delivered += convert_none_types(p_data[STANDARDISE_BEN_KEYS['delivered'][self.report]])
-                remaining += convert_none_types(p_data[STANDARDISE_BEN_KEYS['remaining'][self.report]])
-                total += convert_none_types(p_data[STANDARDISE_BEN_KEYS['total'][self.report]])
+                delivered += convert_none_types(
+                    p_data[STANDARDISE_BEN_KEYS["delivered"][self.report]]
+                )
+                remaining += convert_none_types(
+                    p_data[STANDARDISE_BEN_KEYS["remaining"][self.report]]
+                )
+                total += convert_none_types(
+                    p_data[STANDARDISE_BEN_KEYS["total"][self.report]]
+                )
 
             lower_dict[tp] = {
                 "delivered": delivered,

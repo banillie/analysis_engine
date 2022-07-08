@@ -24,7 +24,11 @@ from analysis_engine.dca import DcaData, dca_changes_into_word
 from analysis_engine.speed_dials import build_speed_dials
 from analysis_engine.render_utils import put_matplotlib_fig_into_word, get_input_doc
 from analysis_engine.dashboards import narrative_dashboard, cdg_dashboard
-from analysis_engine.milestones import MilestoneData, milestone_chart, put_milestones_into_wb
+from analysis_engine.milestones import (
+    MilestoneData,
+    milestone_chart,
+    put_milestones_into_wb,
+)
 
 SETTINGS_DICT = report_config(REPORTING_TYPE)
 
@@ -146,15 +150,15 @@ def test_dashboards():
         f"/home/will/Documents/{REPORTING_TYPE}/core_data/json/master.json"
     )
     narrative_d_master = get_input_doc(
-            str(SETTINGS_DICT['root_path']) + SETTINGS_DICT['narrative_dashboard']
-        )
+        str(SETTINGS_DICT["root_path"]) + SETTINGS_DICT["narrative_dashboard"]
+    )
     narrative_dashboard(md, narrative_d_master)  #
     narrative_d_master.save(
         str(SETTINGS_DICT["root_path"])
         + SETTINGS_DICT["excel_save_path"].format("narrative_dashboard_completed")
     )
     cdg_d_master = get_input_doc(
-        str(SETTINGS_DICT['root_path']) + SETTINGS_DICT['dashboard']
+        str(SETTINGS_DICT["root_path"]) + SETTINGS_DICT["dashboard"]
     )
     cdg_dashboard(md, cdg_d_master)
     cdg_d_master.save(
@@ -172,10 +176,10 @@ def test_milestones():
         combined_args = {**x, **SETTINGS_DICT}
         ms = MilestoneData(md, **combined_args)
         if (
-                # "type" in combined_args  # NOT IN USE.
-                "dates" in combined_args
-                or "koi" in combined_args
-                or "koi_fn" in combined_args
+            # "type" in combined_args  # NOT IN USE.
+            "dates" in combined_args
+            or "koi" in combined_args
+            or "koi_fn" in combined_args
         ):
             return_koi_fn_keys(combined_args)
             ms.filter_chart_info(**combined_args)
