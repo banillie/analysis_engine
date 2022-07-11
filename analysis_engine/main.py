@@ -13,7 +13,8 @@ from analysis_engine.dandelion import DandelionData, make_a_dandelion_auto
 from analysis_engine.dashboards import narrative_dashboard, cdg_dashboard
 from analysis_engine.dca import DcaData, dca_changes_into_word
 from analysis_engine.render_utils import get_input_doc, put_matplotlib_fig_into_word
-from analysis_engine.settings import report_config, set_default_args
+from analysis_engine.settings import report_config, set_default_args, return_koi_fn_keys
+from analysis_engine.milestones import MilestoneData, milestone_chart, put_milestones_into_wb
 
 # from analysis_engine.ar_data import get_gmpp_ar_data
 
@@ -205,31 +206,34 @@ def run_analysis(args, settings):
             )
 
         if programme == "milestones":
-            ms = MilestoneData(m, **op_args)
+            ms = MilestoneData(md, **combined_args)
             if (
-                "type" in op_args
-                or "dates" in op_args
-                or "koi" in op_args
-                or "koi_fn" in op_args
+                    # "type" in combined_args  # NOT IN USE.
+                    "dates" in combined_args
+                    or "koi" in combined_args
+                    or "koi_fn" in combined_args
             ):
-                op_args = return_koi_fn_keys(op_args)
-                ms.filter_chart_info(**op_args)
+                return_koi_fn_keys(combined_args)
+                ms.filter_chart_info(**combined_args)
 
-            if "chart" not in op_args:
-                pass
+            if op_args["chart"] != "save":
+                ms_graph = milestone_chart(ms, md, **combined_args)
+                doc = get_input_doc(
+                    str(combined_args["root_path"]) + combined_args["word_landscape"]
+                )
+                put_matplotlib_fig_into_word(doc, ms_graph, width=Inches(8))
+                doc.save(
+                    str(combined_args["root_path"])
+                    + combined_args["word_save_path"].format("milestones")
+                )
             else:
-                if op_args["chart"] == "save":
-                    op_args["chart"] = False
-                    ms_graph = milestone_chart(ms, m, **op_args)
-                    doc = get_input_doc(root_path / "input/summary_temp_landscape.docx")
-                    put_matplotlib_fig_into_word(
-                        doc, ms_graph, size=8, transparent=False
-                    )
-                    doc.save(cdg_root_path / "output/milestones_chart.docx")
-                if op_args["chart"] == "show":
-                    milestone_chart(ms, m, **op_args)
+                milestone_chart(ms, md, **combined_args)
 
             wb = put_milestones_into_wb(ms)
+
+        if wb:
+            if programme != "dashboards":
+                wb.save(combined_args["root_path"] + "/output/{}.xlsx".format(programme))
 
     except (ProjectNameError, FileNotFoundError, InputError) as e:
         logger.critical(e)
@@ -523,10 +527,10 @@ def run_parsers():
     parser_initiate = subparsers.add_parser(
         "initiate", help="creates a master data file"
     )
-    # cdg_parser_milestones = subparsers.add_parser(
-    #     "milestones",
-    #     help="milestone schedule graphs and data.",
-    # )
+    parser_milestones = subparsers.add_parser(
+        "milestones",
+        help="milestone schedule graphs and data.",
+    )
     dandelion_description = (
         "Creates the 'dandelion' graph. See below optional arguments for changing the "
         "dandelion that is compiled. The command analysis dandelion returns the default "
@@ -554,26 +558,8 @@ def run_parsers():
     parser_speed_dial = subparsers.add_parser("speed_dials", help="speed dial analysis")
     parser_dca = subparsers.add_parser("dcas", help="dca analysis")
 
-    # cdg_parser_milestones.add_argument(
-    #     "--dates",
-    #     type=str,
-    #     metavar="",
-    #     action="store",
-    #     nargs=2,
-    #     help="dates for analysis. Must provide start date and then end date in format e.g. '1/1/2021' '1/1/2022'.",
-    # )
-
-    # cdg_parser_milestones.add_argument(
-    #     "--blue_line",
-    #     type=str,
-    #     metavar="",
-    #     action="store",
-    #     help="Insert blue line into chart to represent a date. "
-    #          'Options are "Today" "CDG" or a date in correct format e.g. "1/1/2021".',
-    # )
-
     for sub in [
-        # cdg_parser_milestones,
+        parser_milestones,
         parser_dandelion,
     ]:
         sub.add_argument(
@@ -590,7 +576,7 @@ def run_parsers():
         parser_speed_dial,
         parser_dandelion,
         parser_dca,
-        # cdg_parser_milestones,
+        parser_milestones,
     ]:
         sub.add_argument(
             "--quarter",
@@ -613,7 +599,7 @@ def run_parsers():
         # parser_costs,
         # parser_costs_sp,
         # parser_data_query,
-        # parser_milestones,
+        parser_milestones,
         # parser_data_query,
     ]:
         sub.add_argument(
@@ -636,7 +622,7 @@ def run_parsers():
         parser_speed_dial,
         parser_dandelion,
         # parser_costs,
-        # parser_milestones,
+        parser_milestones,
         # parser_summaries,
         # parser_costs_sp,
         # parser_data_query,
@@ -669,6 +655,24 @@ def run_parsers():
         choices=["benefits", "income"],
         help="Provide the type of value to include in dandelion. Options are"
         ' "benefits" or "income".',
+    )
+
+    parser_milestones.add_argument(
+        "--dates",
+        type=str,
+        metavar="",
+        action="store",
+        nargs=2,
+        help="dates for analysis. Must provide start date and then end date in format e.g. '1/1/2021' '1/1/2022'.",
+    )
+
+    parser_milestones.add_argument(
+        "--blue_line",
+        type=str,
+        metavar="",
+        action="store",
+        help="Insert blue line into chart to represent a date. "
+             'Options are "Today" "CDG" or a date in correct format e.g. "1/1/2021".',
     )
 
     cli_args = parser.parse_args(sys.argv[2:])
