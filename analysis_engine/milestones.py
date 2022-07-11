@@ -7,7 +7,7 @@ from openpyxl import Workbook
 from dateutil import parser
 
 from analysis_engine.render_utils import set_fig_size, get_chart_title, handle_long_keys
-from analysis_engine.segmentation import get_iter_list, get_group, get_correct_p_data
+from analysis_engine.segmentation import get_group, get_correct_p_data
 from analysis_engine.error_msgs import logger
 from analysis_engine.settings import get_board_date
 
@@ -86,9 +86,7 @@ class MilestoneData:
         self.master = master
         self.kwargs = kwargs
         self.report = kwargs["report"]
-        self.iter_list = get_iter_list(
-            self.kwargs["quarter"], self.master["quarter_list"]
-        )
+        self.quarters = self.master['quarter_list']
         self.milestone_dict = {}
         self.sorted_milestone_dict = {}
         self.max_date = None
@@ -105,7 +103,7 @@ class MilestoneData:
         Creates project milestone dictionaries
         """
         m_dict = {}
-        for tp in self.iter_list:  # tp time period
+        for tp in self.quarters:  # tp time period
             self.kwargs["tp"] = tp
             lower_dict = {}
             raw_list = []
@@ -306,7 +304,7 @@ class MilestoneData:
             r_dates = []  # raw dates
             notes = []
             status = []
-            for v in self.milestone_dict[self.iter_list[0]].values():
+            for v in self.milestone_dict[self.quarters[0]].values():
                 p = None  # project
                 mn = None  # milestone name
                 d = None  # date
@@ -475,7 +473,7 @@ class MilestoneData:
                             continue
 
         elif "type" in filter_kwargs and "key" in filter_kwargs:
-            for i, v in enumerate(self.milestone_dict[self.iter_list[0]].values()):
+            for i, v in enumerate(self.milestone_dict[self.quarters[0]].values()):
                 if v["Type"] in filter_kwargs["type"]:
                     if v["Milestone"] in filter_kwargs["keys"]:
                         filtered_dict["Milestone " + str(i)] = v
@@ -485,7 +483,7 @@ class MilestoneData:
             start_date, end_date = zip(filter_kwargs["dates"])
             start = parser.parse(start_date[0], dayfirst=True)
             end = parser.parse(end_date[0], dayfirst=True)
-            for i, v in enumerate(self.milestone_dict[self.iter_list[0]].values()):
+            for i, v in enumerate(self.milestone_dict[self.quarters[0]].values()):
                 if v["Type"] in filter_kwargs["type"]:
                     if start.date() <= v["Date"] <= end.date():
                         filtered_dict["Milestone " + str(i)] = v
@@ -495,20 +493,20 @@ class MilestoneData:
             start_date, end_date = zip(filter_kwargs["dates"])
             start = parser.parse(start_date[0], dayfirst=True)
             end = parser.parse(end_date[0], dayfirst=True)
-            for i, v in enumerate(self.milestone_dict[self.iter_list[0]].values()):
+            for i, v in enumerate(self.milestone_dict[self.quarters[0]].values()):
                 if v["Milestone"] in filter_kwargs["key"]:
                     if start.date() <= v["Date"] <= end.date():
                         filtered_dict["Milestone " + str(i)] = v
                         continue
 
         elif "type" in filter_kwargs:
-            for i, v in enumerate(self.milestone_dict[self.iter_list[0]].values()):
+            for i, v in enumerate(self.milestone_dict[self.quarters[0]].values()):
                 if v["Type"] in filter_kwargs["type"]:
                     filtered_dict["Milestone " + str(i)] = v
                     continue
 
         elif "key" in filter_kwargs:
-            for i, v in enumerate(self.milestone_dict[self.iter_list[0]].values()):
+            for i, v in enumerate(self.milestone_dict[self.quarters[0]].values()):
                 if v["Milestone"] in filter_kwargs["key"]:
                     filtered_dict["Milestone " + str(i)] = v
                     continue
@@ -517,14 +515,14 @@ class MilestoneData:
             start_date, end_date = zip(filter_kwargs["dates"])
             start = parser.parse(start_date[0], dayfirst=True)
             end = parser.parse(end_date[0], dayfirst=True)
-            for i, v in enumerate(self.milestone_dict[self.iter_list[0]].values()):
+            for i, v in enumerate(self.milestone_dict[self.quarters[0]].values()):
                 if start.date() <= v["Date"] <= end.date():
                     filtered_dict["Milestone " + str(i)] = v
                     continue
 
         output_dict = {}
         for dict in self.milestone_dict.keys():
-            if dict == self.iter_list[0]:
+            if dict == self.quarters[0]:
                 output_dict[dict] = filtered_dict
             else:
                 output_dict[dict] = self.milestone_dict[dict]
@@ -666,15 +664,15 @@ def milestone_chart(
     fig = set_fig_size(kwargs, fig)
     title = get_chart_title(**kwargs)
     plt.suptitle(title, fontweight="bold", fontsize=20)
-    project = milestones.sorted_milestone_dict[milestones.iter_list[0]]["project"]
-    ms_names = milestones.sorted_milestone_dict[milestones.iter_list[0]]["names"]
+    project = milestones.sorted_milestone_dict[milestones.quarters[0]]["project"]
+    ms_names = milestones.sorted_milestone_dict[milestones.quarters[0]]["names"]
     combined = [
         merge_project_milestone_name(project, ms_names, i)
         for i, p in enumerate(project)
     ]
     ms_names = handle_long_keys(combined)
 
-    for i, tp in enumerate(milestones.iter_list):
+    for i, tp in enumerate(milestones.quarters):
         m = [
             x for x in milestones.sorted_milestone_dict[tp]["g_dates"] if x is not None
         ]
@@ -753,74 +751,74 @@ def put_milestones_into_wb(milestones: MilestoneData) -> Workbook:
     ws = wb.active
 
     row_num = 2
-    ms_names = milestones.sorted_milestone_dict[milestones.iter_list[0]]["names"]
+    ms_names = milestones.sorted_milestone_dict[milestones.quarters[0]]["names"]
 
     for i, m in enumerate(ms_names):
-        for x, tp in enumerate(milestones.iter_list):
+        for x, tp in enumerate(milestones.quarters):
             ms_date = milestones.sorted_milestone_dict[tp]["r_dates"][i]
             ws.cell(row=row_num + i, column=5 + x).value = ms_date
             ws.cell(row=row_num + i, column=5 + x).number_format = "dd/mm/yy"
 
     for i, m in enumerate(ms_names):  # want the latest notes.
         ws.cell(row=row_num + i, column=1).value = milestones.sorted_milestone_dict[
-            milestones.iter_list[0]
+            milestones.quarters[0]
         ]["project"][
             i
         ]  # project name
         ws.cell(row=row_num + i, column=2).value = milestones.sorted_milestone_dict[
-            milestones.iter_list[0]
+            milestones.quarters[0]
         ]["report"][
             i
         ]  # milestone
         ws.cell(row=row_num + i, column=3).value = milestones.sorted_milestone_dict[
-            milestones.iter_list[0]
+            milestones.quarters[0]
         ]["cat"][
             i
         ]  # milestone
         ws.cell(row=row_num + i, column=4).value = milestones.sorted_milestone_dict[
-            milestones.iter_list[0]
+            milestones.quarters[0]
         ]["names"][
             i
         ]  # milestone
         try:
-            notes = milestones.sorted_milestone_dict[milestones.iter_list[0]]["notes"][
+            notes = milestones.sorted_milestone_dict[milestones.quarters[0]]["notes"][
                 i
             ]
-            ws.cell(row=row_num + i, column=len(milestones.iter_list) + 9).value = notes
+            ws.cell(row=row_num + i, column=len(milestones.quarters) + 9).value = notes
         except KeyError:  # "notes" not in central support dict
             pass
         try:  # only present in top250 milestones
-            status = milestones.sorted_milestone_dict[milestones.iter_list[0]][
+            status = milestones.sorted_milestone_dict[milestones.quarters[0]][
                 "status"
             ][i]
             ws.cell(
-                row=row_num + i, column=len(milestones.iter_list) + 5
+                row=row_num + i, column=len(milestones.quarters) + 5
             ).value = status
         except (IndexError, KeyError):
             # IndexError for ipdc rpting. "status" is in dict, but list is empty.
             # KeyError for top250 central support, which does not have "status" in dict.
             pass
         try:  # only present in top250 central support
-            escalated = milestones.sorted_milestone_dict[milestones.iter_list[0]][
+            escalated = milestones.sorted_milestone_dict[milestones.quarters[0]][
                 "escalated"
             ][i]
-            cs_type = milestones.sorted_milestone_dict[milestones.iter_list[0]]["type"][
+            cs_type = milestones.sorted_milestone_dict[milestones.quarters[0]]["type"][
                 i
             ]
-            cs_response = milestones.sorted_milestone_dict[milestones.iter_list[0]][
+            cs_response = milestones.sorted_milestone_dict[milestones.quarters[0]][
                 "cs_response"
             ][i]
-            secured = milestones.sorted_milestone_dict[milestones.iter_list[0]][
+            secured = milestones.sorted_milestone_dict[milestones.quarters[0]][
                 "secured"
             ][i]
             ws.cell(
-                row=row_num + i, column=len(milestones.iter_list) + 6
+                row=row_num + i, column=len(milestones.quarters) + 6
             ).value = escalated
             ws.cell(
-                row=row_num + i, column=len(milestones.iter_list) + 7
+                row=row_num + i, column=len(milestones.quarters) + 7
             ).value = cs_type
             ws.cell(
-                row=row_num + i, column=len(milestones.iter_list) + 8
+                row=row_num + i, column=len(milestones.quarters) + 8
             ).value = secured
         except KeyError:  # all above not in ipdc or top250 milestones
             pass
@@ -829,16 +827,16 @@ def put_milestones_into_wb(milestones: MilestoneData) -> Workbook:
     ws.cell(row=1, column=2).value = "Report"
     ws.cell(row=1, column=3).value = "Type"
     ws.cell(row=1, column=4).value = "Milestone"
-    for x, tp in enumerate(milestones.iter_list):
+    for x, tp in enumerate(milestones.quarters):
         ws.cell(row=1, column=5 + x).value = tp
-    ws.cell(row=1, column=len(milestones.iter_list) + 5).value = "Status (top 250 ms)"
+    ws.cell(row=1, column=len(milestones.quarters) + 5).value = "Status (top 250 ms)"
     ws.cell(
-        row=1, column=len(milestones.iter_list) + 6
+        row=1, column=len(milestones.quarters) + 6
     ).value = "Escalated (top 250 cs)"
-    ws.cell(row=1, column=len(milestones.iter_list) + 7).value = "Type (top 250 cs)"
-    ws.cell(row=1, column=len(milestones.iter_list) + 8).value = "Secured (top 250 cs)"
+    ws.cell(row=1, column=len(milestones.quarters) + 7).value = "Type (top 250 cs)"
+    ws.cell(row=1, column=len(milestones.quarters) + 8).value = "Secured (top 250 cs)"
     ws.cell(
-        row=1, column=len(milestones.iter_list) + 9
+        row=1, column=len(milestones.quarters) + 9
     ).value = "Notes / Central Response (top 250 cs)"
 
     return wb

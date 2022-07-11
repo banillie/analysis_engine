@@ -13,7 +13,7 @@ from analysis_engine.dictionaries import BC_STAGE_DICT
 
 
 def get_iter_list(md, **kwargs) -> List[str]:
-    ## report_quarter should never be None.
+    # If quarter arg not passed in latest qrt return as default.
     if 'quarter' in kwargs:
         if kwargs['quarter'] == "standard":
             iter_list = [

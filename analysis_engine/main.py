@@ -135,8 +135,11 @@ def initiate(settings_dict):
 
 def run_analysis(args, settings):
     programme = args["subparser_name"]
-    md = open_json_file(str(settings["root_path"]) + settings["master_path"])
     op_args = {k: v for k, v in args.items() if v is not None}
+    md = open_json_file(
+        str(settings["root_path"]) + settings["master_path"],
+        **op_args,
+    )
     set_default_args(op_args, md["groups"], md["current_quarter"])
     combined_args = {**op_args, **settings}
 

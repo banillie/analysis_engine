@@ -89,7 +89,6 @@ def test_get_project_abbreviations():
     )  # to take 'full name' out as silly!
 
 
-# There are a large number of different combinations that need to be tested.
 def test_build_dandelion_graph():
     for x in DANDELION_OP_ARGS_DICT:
         md = open_json_file(
@@ -109,7 +108,6 @@ def test_build_dandelion_graph():
         doc.save(doc_output_path.format("dandelion"))
 
 
-# produce two outputs. dca changes and speedials
 def test_dca_analysis():
     for x in SPEED_DIAL_AND_DCA_OP_ARGS:
         md = open_json_file(
@@ -151,7 +149,7 @@ def test_speed_dials():
 def test_dashboards():
     md = open_json_file(
         f"/home/will/Documents/{REPORTING_TYPE}/core_data/json/master.json",
-        quarter='standard'
+        # quarter='standard'
     )
     narrative_d_master = get_input_doc(
         str(SETTINGS_DICT["root_path"]) + SETTINGS_DICT["narrative_dashboard"]
