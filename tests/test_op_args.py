@@ -1,6 +1,6 @@
 # should include some settings that are wrong to test error messaging
 REPORTING_TYPE = "cdg"
-chart = "save"
+chart = "show"
 
 ms_standard = {"chart": chart}
 ms_groups = {"group": ["SCS"], "chart": chart}
@@ -21,16 +21,16 @@ ms_stages = {
 }
 
 MILESTONES_OP_ARGS = [
-    ms_stages,
-    ms_groups,
+    # ms_stages,
+    # ms_groups,
     ms_quarters,
-    ms_koi_fn,
-    ms_koi,
-    ms_blue_line_today,
-    ms_blue_line_config,
-    ms_dates,
-    ms_groups,
-    ms_standard,
+    # ms_koi_fn,
+    # ms_koi,
+    # ms_blue_line_today,
+    # ms_blue_line_config,
+    # ms_dates,
+    # ms_groups,
+    # ms_standard,
 ]
 
 dlion_standard = {
@@ -94,9 +94,9 @@ sd_groups = {
     "group": ["SCS", "CFPD"],
 }
 SPEED_DIAL_AND_DCA_OP_ARGS = [
-    sd_groups,
-    sd_stage,
-    sd_quarters,
+    # sd_groups,
+    # sd_stage,
+    # sd_quarters,
     sd_standard
 ]
 

@@ -1,4 +1,5 @@
 import numpy as np
+from docx.shared import Inches
 from matplotlib import pyplot as plt
 from matplotlib.patches import Wedge, Circle
 from typing import List
@@ -177,7 +178,6 @@ def gauge(
 
 def build_speed_dials(dca_data, doc):
     for conf_type in dca_data.dca_count[dca_data.quarters[0]]:
-        print(conf_type)
         c_count = []
         l_count = []
         # if dca_data.kwargs["rag_number"] == "3":
@@ -235,4 +235,4 @@ def build_speed_dials(dca_data, doc):
             title=conf_type,
         )
 
-        put_matplotlib_fig_into_word(doc, graph)
+        put_matplotlib_fig_into_word(doc, graph, width=Inches(8))

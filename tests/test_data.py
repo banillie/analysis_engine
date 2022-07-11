@@ -114,7 +114,7 @@ def test_dca_analysis():
             f"/home/will/Documents/{REPORTING_TYPE}/core_data/json/master.json",
             **x,
         )
-        set_default_args(x, md["groups"], md["current_quarter"])
+        set_default_args(x, group=md["groups"])
         combined_args = {**x, **SETTINGS_DICT}
         sdmd = DcaData(md, **combined_args)
         sdmd.get_changes()
@@ -133,9 +133,10 @@ def test_speed_dials():
             f"/home/will/Documents/{REPORTING_TYPE}/core_data/json/master.json",
             **x,
         )
-        set_default_args(x, md["groups"], md["current_quarter"])
+        set_default_args(x, group=md["groups"])
         combined_args = {**x, **SETTINGS_DICT}
         sdmd = DcaData(md, **combined_args)
+        sdmd.get_changes()
         sd_doc = get_input_doc(
             str(SETTINGS_DICT["root_path"]) + SETTINGS_DICT["word_landscape"]
         )
@@ -175,7 +176,7 @@ def test_milestones():
             f"/home/will/Documents/{REPORTING_TYPE}/core_data/json/master.json",
             **x,
         )
-        set_default_args(x, md["groups"], md["current_quarter"])
+        set_default_args(x, group=md["groups"])
         combined_args = {**x, **SETTINGS_DICT}
         ms = MilestoneData(md, **combined_args)
         if (

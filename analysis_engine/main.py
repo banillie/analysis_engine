@@ -137,12 +137,17 @@ def initiate(settings_dict):
 def run_analysis(args, settings):
     programme = args["subparser_name"]
     op_args = {k: v for k, v in args.items() if v is not None}
+
+    if ('dca', 'speed_dials', 'dashboards') == programme:
+        op_args['quarter'] = "standard"
+
     md = open_json_file(
         str(settings["root_path"]) + settings["master_path"],
         **op_args,
     )
-    set_default_args(op_args, md["groups"], md["current_quarter"])
+    set_default_args(op_args, group=md["groups"], quarter=md["current_quarter"])
     combined_args = {**op_args, **settings}
+    wb_save = False
 
     try:
         if programme == "dandelion":
@@ -163,8 +168,9 @@ def run_analysis(args, settings):
 
         if programme == "speed_dials":
             combined_args["rag_number"] = "5"
-            combined_args["quarter"] = "standard"
+            # combined_args["quarter"] = "standard"
             sdmd = DcaData(md, **combined_args)
+            sdmd.get_changes()
             sd_doc = get_input_doc(
                 str(settings["root_path"]) + settings["word_landscape"]
             )
@@ -175,8 +181,7 @@ def run_analysis(args, settings):
             )
 
         if programme == "dcas":
-            # combined_args["rag_number"] = "5"
-            combined_args["quarter"] = "standard"
+            # combined_args["quarter"] = "standard"
             sdmd = DcaData(md, **combined_args)
             sdmd.get_changes()
             changes_doc = dca_changes_into_word(
@@ -230,8 +235,9 @@ def run_analysis(args, settings):
                 milestone_chart(ms, md, **combined_args)
 
             wb = put_milestones_into_wb(ms)
+            wb_save = True
 
-        if wb:
+        if wb_save:
             if programme != "dashboards":
                 wb.save(combined_args["root_path"] + "/output/{}.xlsx".format(programme))
 
@@ -1077,7 +1083,7 @@ class main:
             metavar="",
             action="store",
             help="Insert blue line into chart to represent a date. "
-            'Options are "Today" "IPDC" or a date in correct format e.g. "1/1/2021".',
+            'Options are "today" "config_date" or a date in correct format e.g. "1/1/2021".',
         )
 
         cli_args = parser.parse_args(sys.argv[2:])
