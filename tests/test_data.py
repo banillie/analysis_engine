@@ -33,6 +33,37 @@ from analysis_engine.milestones import (
 SETTINGS_DICT = report_config(REPORTING_TYPE)
 
 
+class CliOpArgs:
+    # replicates how arguments are pass into the cli.
+    def __init__(self, args):
+        self.args = args
+        self.combined_args = {}
+        self.md = {}
+        self.wb_save = False
+        self.programme = ''
+        self.replicate_cli_op_args()
+
+    def replicate_cli_op_args(self):
+        self.programme = self.args['subparser_name']
+        op_args = {k: v for k, v in self.args.items() if v is not None}
+
+        # these programs have the latest two quarters as default.
+        # other program defaults are setting very get_iter_list()
+        if ('dca', 'speed_dials', 'dashboards') == self.programme:
+            if 'quarter' not in list(op_args.keys()):
+                op_args['quarter'] = 'standard'
+
+        md = open_json_file(
+            str(SETTINGS_DICT["root_path"]) + SETTINGS_DICT["master_path"],
+            **op_args,
+        )
+        set_default_args(op_args, group=md["groups"], quarters=md["current_quarter"])
+        combined_args = {**op_args, **SETTINGS_DICT}
+        self.combined_args = combined_args
+        self.md = md
+        self.wb_save = False
+
+
 def test_get_project_information():
     project_info = get_project_information(SETTINGS_DICT)
     assert isinstance(project_info, dict)
@@ -91,21 +122,17 @@ def test_get_project_abbreviations():
 
 def test_build_dandelion_graph():
     for x in DANDELION_OP_ARGS_DICT:
-        md = open_json_file(
-            f"/home/will/Documents/{REPORTING_TYPE}/core_data/json/master.json",
-            **x,
-        )
-        set_default_args(x, md["groups"], md["current_quarter"])
-        combined_args = {**x, **SETTINGS_DICT}
-        dmd = DandelionData(md, **combined_args)
-        d_lion = make_a_dandelion_auto(dmd, **combined_args)
+        print(x['test_name'])
+        cli = CliOpArgs(x)
+        dmd = DandelionData(cli.md, **cli.combined_args)
+        d_lion = make_a_dandelion_auto(dmd, **cli.combined_args)
         doc_path = str(SETTINGS_DICT["root_path"]) + SETTINGS_DICT["word_landscape"]
         doc = get_input_doc(doc_path)
         put_matplotlib_fig_into_word(doc, d_lion, width=Inches(8))
         doc_output_path = (
             str(SETTINGS_DICT["root_path"]) + SETTINGS_DICT["word_save_path"]
         )
-        doc.save(doc_output_path.format("dandelion"))
+        doc.save(doc_output_path.format(f"dandelion{x['test_name']}"))
 
 
 def test_dca_analysis():

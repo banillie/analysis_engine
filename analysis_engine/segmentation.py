@@ -14,79 +14,93 @@ from analysis_engine.dictionaries import BC_STAGE_DICT
 
 def get_iter_list(md, **kwargs) -> List[str]:
     # If quarter arg not passed in latest qrt return as default.
-    if 'quarter' in kwargs:
-        if kwargs['quarter'] == "standard":
+    if "quarter" in kwargs:
+        if kwargs["quarter"] == "standard":
             iter_list = [
-                md['quarter_list'][0],
-                md['quarter_list'][1],
+                md["quarter_list"][0],
+                md["quarter_list"][1],
             ]
-        elif kwargs['quarter'] == ["all"]:
-            iter_list = md['quarter_list']
+        elif kwargs["quarter"] == "all":
+            iter_list = md["quarter_list"]
         else:
-            iter_list = kwargs['quarter']
+            iter_list = kwargs["quarter"]
+    # this is the main default. one quarter. used for dandelion, milestones.
     else:
-        iter_list = [md['current_quarter']]
+        iter_list = [md["current_quarter"]]
 
     return iter_list
 
 
-def cal_group(
-    group: List[str] or List[List[str]],
-    report_type,
-    md,
-    tp_indx: int,
-) -> List[str]:
-    error_case = []
-    output = []
-    q_str = md["quarter_list"][tp_indx]  # quarter string
-    for g in group:  # pg is project/group
-        if g == "pipeline":
-            continue
-        try:
-            local_g = md["dft_group"][q_str][g]
-            output += local_g
-        except KeyError:
+def get_group(md, tp, **kwargs) -> List[str]:
+    """
+    A integral function for much of sorting of data. It groups projects in lists. These lists
+    are then used to compile analysis. A project is grouped according to either its departmental
+    group, or its business case stage.
+
+    A complicating factor is that the group or stage a project is in/at could change between quarters
+    and it is useful to preserve the status at each quarter. This is done via the meta_groupings
+    which is calculated at the data initiate stage in PythonData.
+    """
+    initial_error_case = []
+    final_error_case = []
+    output_list = []
+    meta_groupings = md["meta_groupings"]
+
+    # need to standardise so always full name used.
+    if "group" in kwargs:
+        for g in kwargs["group"]:
+            if g == "pipeline":
+                continue
             try:
-                output.append(md["abbreviations"][g]["full name"])
+                loop_list = meta_groupings[tp][g]
+                output_list += loop_list
             except KeyError:
-                # try:
-                #     output.append(md["full_names"][g])
-                # except KeyError:
-                try:
-                    local_g = md["dft_group"][q_str][BC_STAGE_DICT[report_type][g]]
-                    output += local_g
+                initial_error_case.append(g)
+
+    if "stage" in kwargs:
+        rpt = kwargs['report']  # only needed for stage
+        # inelegant loop there are two try statements to handle abbrevations
+        # of stage terms e.g. Full Business Case and FBC. But must be a better
+        # way to handle.
+        for s in kwargs['stage']:
+            try:  # full term
+                loop_list = meta_groupings[tp][s]
+                output_list += loop_list
+            except KeyError:
+                try: # abbreviated term
+                    loop_list = meta_groupings[tp][BC_STAGE_DICT[rpt][s]]
+                    output_list += loop_list
                 except KeyError:
-                    try:
-                        local_g = md["dft_group"][q_str][g]
-                        output += local_g
-                    except KeyError:
-                        error_case.append(g)
+                    initial_error_case.append(s)
 
-    not_recognised_project_group_or_stage(error_case)
+    if initial_error_case:
+        project_names = md['project_information'].keys()  # is this needed if just single project?
+        abbreviations = md['abbreviations']
+        for p in initial_error_case:
+            try:
+                if p in project_names:
+                    output_list.append(p)
+                elif p in list(abbreviations.keys()):
+                    output_list.append(abbreviations[p])  # coverts abbreviations back to full names
+            except KeyError:
+                final_error_case.append(p)
 
-    return output
+    not_recognised_project_group_or_stage(final_error_case)
+
+    return output_list
 
 
-def get_group(md, tp: str, class_kwargs) -> List[str]:
-    try:
-        tp_indx = md["quarter_list"].index(tp)
-    except ValueError:
-        not_recognised_quarter(tp)
-
-    if "stage" in class_kwargs:
-        group_list = class_kwargs["stage"]
-    elif "group" in class_kwargs:
-        group_list = class_kwargs["group"]
-    else:
-        group_list = md["groups"]
-
-    group = cal_group(group_list, class_kwargs["report"], md, tp_indx)
-
-    if "remove" in class_kwargs:
-        group = remove_from_group(
-            group, class_kwargs["remove"], md, tp_indx, class_kwargs
-        )
-    return group
+# def get_group(md, **group_kwargs) -> List[str]:
+#     group = cal_group(
+#         md,
+#         **group_kwargs,
+#     )
+#     if "remove" in group_kwargs:
+#         print('refactor needed')
+#         # group = remove_from_group(
+#         #     group, group_kwargs["remove"], md, tp_indx, group_kwargs
+#         # )
+#     return group
 
 
 def remove_from_group(
@@ -134,8 +148,8 @@ def get_correct_p_data(
     project_name: str,
     quarter: str,
 ) -> Dict[str, Union[str, int, datetime.date, float]]:
-    for md in master['master_data']:
-        if md['quarter'] == quarter:
+    for md in master["master_data"]:
+        if md["quarter"] == quarter:
             return md["data"][project_name]
 
 

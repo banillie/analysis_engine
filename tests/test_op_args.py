@@ -34,10 +34,19 @@ MILESTONES_OP_ARGS = [
 ]
 
 dlion_standard = {
+    "test_name": "dlion_standard",
+    "subparser_name": "dandelion",
     "chart": chart,
 }
-dlion_groups = {"group": ["SCS", "CFPD"], "chart": chart}
+dlion_groups = {
+    "test_name": "dlion_groups",
+    "subparser_name": "dandelion",
+    "group": ["SCS", "CFPD"],
+    "chart": chart,
+}
 dlion_stages = {
+    "test_name": "dlio_stages",
+    "subparser_name": "dandelion",
     "stage": [
         # 'pre-Strategic Outline Case',
         # 'Strategic Outline Case',
@@ -48,21 +57,39 @@ dlion_stages = {
     "chart": chart,
 }
 dlion_quarter = {
+    "test_name": "dlion_quarter",
+    "subparser_name": "dandelion",
     "quarter": ["Q2 21/22"],
     "group": ["SCS", "CFPD", "GF"],
     "chart": chart,
 }
-dlion_angles = {"angles": [300, 360, 60], "chart": chart}
+dlion_angles = {
+    "test_name": "dlion_angles",
+    "subparser_name": "dandelion",
+    "angles": [300, 360, 60],
+    "chart": chart,
+}
 dlion_benefits = {
+    "test_name": "dlion_benefits",
+    "subparser_name": "dandelion",
     "type": "benefits",
     "chart": chart,
 }
 dlion_income = {
+    "test_name": "dlion_income",
+    "subparser_name": "dandelion",
     "type": "income",
     "chart": chart,
 }
-
+# this will crash if project not in quarter data master
+dlion_cli_group = {
+    "test_name": "dlion_groups",
+    "subparser_name": "dandelion",
+    "group": ['WIT retail project', 'Mayfield', 'MSG'],
+    "chart": chart,
+}
 DANDELION_OP_ARGS_DICT = [
+    dlion_cli_group,
     dlion_income,
     dlion_benefits,
     dlion_angles,

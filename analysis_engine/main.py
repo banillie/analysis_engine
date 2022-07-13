@@ -145,7 +145,7 @@ def run_analysis(args, settings):
         str(settings["root_path"]) + settings["master_path"],
         **op_args,
     )
-    set_default_args(op_args, group=md["groups"], quarter=md["current_quarter"])
+    set_default_args(op_args, group=md["groups"], quarters=md["current_quarter"])
     combined_args = {**op_args, **settings}
     wb_save = False
 

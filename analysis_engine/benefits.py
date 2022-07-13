@@ -30,7 +30,7 @@ class BenefitsData:
             delivered = 0
             remaining = 0
             total = 0
-            group = get_group(self.master, tp, self.kwargs)
+            group = get_group(self.master, tp, **self.kwargs)
             for project_name in group:
                 p_data = get_correct_p_data(self.master, project_name, tp)
                 delivered += convert_none_types(

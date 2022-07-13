@@ -144,7 +144,7 @@ def cal_group_angle(dist_no: int, group: List[str], **kwargs):
 
 
 #  switches the type of data displayed in dandelion graph output
-## change type to dandelion_type
+#  change type to dandelion_type
 def get_dandelion_type_total(master, kwargs) -> int or str:
     tp = kwargs["quarter"][0]  # only one quarter for dandelion
     if "type" in kwargs:
@@ -349,7 +349,7 @@ class DandelionData:
             if g == "pipeline":
                 project_group = self.master.pipeline_list
             else:
-                project_group = get_group(self.master, self.quarter, self.kwargs)  # lower group
+                project_group = get_group(self.master, self.quarter, **self.kwargs)  # lower group
             p_list = []
             for p in project_group:
                 self.kwargs[self.group_stage_switch] = [
@@ -441,7 +441,7 @@ class DandelionData:
                         colour = FACE_COLOUR
 
                 project_text = (
-                    self.master["abbreviations"][p]["abb"]
+                    self.master['project_information'][p]["Abbreviations"]
                     + "\n"
                     + dandelion_number_text(p_value, **self.kwargs)
                 )
@@ -465,13 +465,13 @@ class DandelionData:
                 ):  # achieve some consistency for zero / low values
                     p_value = pf_wlc / 500
                 if colour == "#FFFFFF" or colour == FACE_COLOUR:
-                    if p in self.master["dft_group"][self.quarter]["GMPP"]:
+                    if p in self.master['meta_groupings'][self.quarter]['GMPP']:
                         edge_colour = "#000000"
                     else:
                         edge_colour = "grey"
                 else:
-                    if p in self.master["dft_group"][self.quarter]["GMPP"]:
-                        edge_colour = "#000000"
+                    if p in self.master['meta_groupings'][self.quarter]['GMPP']:
+                        edge_colour = '#000000'
                         # edge_colour = COLOUR_DICT[p_data['SRO Forward Look Assessment']]
                     else:
                         edge_colour = colour
@@ -649,7 +649,7 @@ def make_a_dandelion_auto(dl: DandelionData, **kwargs):
         if g == "pipeline":
             lower_g = dl.master.pipeline_list
         else:
-            lower_g = get_group(dl.master, dl.quarter, dl.kwargs)
+            lower_g = get_group(dl.master, dl.kwargs['quarter'][0], **dl.kwargs)
         for p in lower_g:
             ax.arrow(
                 dl.d_data[g]["axis"][0],

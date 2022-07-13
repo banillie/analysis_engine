@@ -14,17 +14,7 @@ class CostData:
         self.master = master
         self.kwargs = kwargs
         self.report = kwargs["report"]
-        # self.start_group = []
-        # self.group = []
-        # self.iter_list = []
         self.totals = {}
-        # self.c_bl_totals = {}
-        # self.c_profiles = {}
-        # self.profiles = {}
-        # # self.forecast_profiles = {}
-        # self.wlc_dict = {}
-        # self.wlc_change = {}
-        # # self.stack_p = {}
         self.get_totals()
 
     def get_totals(self) -> None:
@@ -36,7 +26,7 @@ class CostData:
             income_achieved = 0
             income_remaining = 0
             income_total = 0
-            group = get_group(self.master, tp, self.kwargs)
+            group = get_group(self.master, tp, **self.kwargs)
             for project_name in group:
                 p_data = get_correct_p_data(self.master, project_name, tp)
                 spent += convert_none_types(

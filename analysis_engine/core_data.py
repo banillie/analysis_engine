@@ -94,12 +94,7 @@ class PythonMasterData:
         self.current_quarter = str(master_data[0].quarter)
         self.current_projects = master_data[0].projects
         self.abbreviations = {}
-        self.full_names = {}
-        self.bl_info = {}
-        self.bl_index = {}
         self.meta_groupings = {}
-        self.project_group = {}
-        self.project_stage = {}
         self.pipeline_dict = {}
         self.pipeline_list = []
         self.quarter_list = []
@@ -117,8 +112,7 @@ class PythonMasterData:
         abbreviation_errors = []
         for p in self.all_projects:
             abb = self.project_information[p]['Abbreviations']
-            abb_dict[p] = {'abb': abb, 'full name': p}
-            # fn_dict[abb] = p
+            abb_dict[abb] = p
             if abb is None:
                 abbreviation_errors.append(p)
 
@@ -270,21 +264,16 @@ class JsonData:
 
         json_dict = {
             'abbreviations': self.master.abbreviations,
-            'bl_index': self.master.bl_index,
-            'bl_info': self.master.bl_info,
             'current_projects': self.master.current_projects,
             'current_quarter': str(self.master.current_quarter),
             'groups': self.master.portfolio_groups,
             'stages': self.master.stages,
-            'dft_group': self.master.meta_groupings,  # change to meta_groupings
-            'full_names': self.master.full_names,
+            'meta_groupings': self.master.meta_groupings,  # change to meta_groupings
             'kwargs': self.master.kwargs,
             'json_master_data': master_list,
             'pipeline_dict': self.master.pipeline_dict,
             'pipeline_list': self.master.pipeline_list,
-            'project_group': self.master.project_group,
             'project_information': self.master.project_information,
-            'project_stage': self.master.project_stage,
             'quarter_list': self.master.quarter_list,
         }
         with open(self.path + '.json', 'w') as write_file:
