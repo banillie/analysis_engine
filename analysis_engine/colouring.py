@@ -20,6 +20,7 @@ COLOUR_DICT = {
     'No Change Expected': '#ffba00',
     'Improving': '#007d00',
     'GREY': '#808080',
+    'BLACK': '#000000',
 }
 
 FACE_COLOUR = '#a0c1d5'

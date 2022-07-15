@@ -66,7 +66,7 @@ dlion_quarter = {
 dlion_angles = {
     "test_name": "dlion_angles",
     "subparser_name": "dandelion",
-    "angles": [300, 360, 60],
+    "angles": [280, 360, 80],
     "chart": chart,
 }
 dlion_benefits = {
@@ -77,6 +77,7 @@ dlion_benefits = {
 }
 dlion_income = {
     "test_name": "dlion_income",
+    "angles": [280, 360, 80],
     "subparser_name": "dandelion",
     "type": "income",
     "chart": chart,
@@ -89,13 +90,13 @@ dlion_cli_group = {
     "chart": chart,
 }
 DANDELION_OP_ARGS_DICT = [
-    # dlion_cli_group,
-    # dlion_income,
-    # dlion_benefits,
-    # dlion_angles,
-    # dlion_quarter,
-    # dlion_stages,
-    # dlion_groups,
+    # dlion_cli_group,  # Failing.
+    dlion_income,
+    dlion_benefits,
+    dlion_angles,
+    dlion_quarter,
+    dlion_stages,
+    dlion_groups,
     dlion_standard,
 ]
 
