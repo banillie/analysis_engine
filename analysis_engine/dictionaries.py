@@ -197,21 +197,13 @@ DATA_KEY_DICT = {
 }
 
 
-def convert_rag_text(dca_rating: str) -> str:
-    """Converts RAG name into a acronym"""
-    if dca_rating == "Green":
-        return "G"
-    elif dca_rating == "Amber/Green":
-        return "A/G"
-    elif dca_rating == "Amber":
-        return "A"
-    elif dca_rating == "Amber/Red":
-        return "A/R"
-    elif dca_rating == "Red":
-        return "R"
-    else:
-        return ""
-
+CONVERT_RAG = {
+    "Green": "G",
+    "Amber/Green": "A/G",
+    "Amber": "A",
+    "Amber/Red": "A/R",
+    "Red": "R"
+}
 
 NEXT_STAGE_DICT = {
     "pre_SOBC": "SOBC - IPDC Approval",

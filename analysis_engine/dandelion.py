@@ -28,7 +28,7 @@ from analysis_engine.dictionaries import (
     DCA_KEYS,
     FONT_TYPE,
     STANDARDISE_DCA_KEYS,
-    convert_rag_text,
+    CONVERT_RAG,
     NEXT_STAGE_DICT,
 )
 
@@ -133,7 +133,7 @@ def dandelion_number_text(number: int, **kwargs) -> str:
 def cal_group_angle(dist_no: int, group: List[str], **kwargs):
     """helper function for dandelion data class.
     Calculates distribution of first circle around center."""
-    g_ang = dist_no / len(group)  # group_ang and distribution number
+    g_ang = dist_no / len(group) - 1  # group_ang and distribution number
     output_list = []
     for i in range(len(group)):
         output_list.append(g_ang * i)
@@ -227,40 +227,39 @@ class DandelionData:
                 raise InputError(
                     "The number of groups and angles don't match. Stopping."
                 )
-        else:
-            # Dandelion graph needs an algorithm to calculate the distribution
-            # of group circles. The circles are placed and distributed left
-            # to right around the center circle.
-            g_ang_l = []
-            # start_point needs to come down as numbers increase
-            start_point = 290 * (
-                (29 - ((len(self.kwargs[self.group_stage_switch])) - 2)) / 29
-            )
-            # distribution increase needs to come down as numbers increase
-            distribution_start = 0
-            distribution_increase = 140
-            if (
-                len(self.kwargs[self.group_stage_switch]) > 2
-            ):  # no change in distribution increase if group of two
-                for i in range(len(self.kwargs[self.group_stage_switch])):
-                    distribution_increase = distribution_increase * 0.82
-            for i in range(len(self.kwargs[self.group_stage_switch])):
-                angle = distribution_start + start_point
-                if angle > 360:
-                    angle = angle - 360
-                g_ang_l.append(int(angle))
-                distribution_start += distribution_increase
+        # else:
+            # # Dandelion graph needs an algorithm to calculate the distribution
+            # # of group circles. The circles are placed and distributed left
+            # # to right around the center circle.
+            # g_ang_l = []
+            # # start_point needs to come down as numbers increase
+            # start_point = 290 * (
+            #     (29 - ((len(self.kwargs[self.group_stage_switch])) - 2)) / 29
+            # )
+            # # distribution increase needs to come down as numbers increase
+            # distribution_start = 0
+            # distribution_increase = 140
+            # if (
+            #     len(self.kwargs[self.group_stage_switch]) > 2
+            # ):  # no change in distribution increase if group of two
+            #     for i in range(len(self.kwargs[self.group_stage_switch])):
+            #         distribution_increase = distribution_increase * 0.82
+            # for i in range(len(self.kwargs[self.group_stage_switch])):
+            #     angle = distribution_start + start_point
+            #     if angle > 360:
+            #         angle = angle - 360
+            #     g_ang_l.append(int(angle))
+            #     distribution_start += distribution_increase
 
         g_d = {}  # group dictionary. first outer circle.
         l_g_d = {}  # lower group dictionary
-
         pf_wlc = get_dandelion_type_total(self.master, self.kwargs)  # portfolio wlc
         if "pc" in self.kwargs:  # pc portfolio colour
-            pf_colour = COLOUR_DICT[self.kwargs["pc"]]
-            pf_colour_edge = COLOUR_DICT[self.kwargs["pc"]]
+            pf_colour = COLOUR_DICT[self.kwargs['pc']]
+            pf_colour_edge = COLOUR_DICT[self.kwargs['pc']]
         else:
-            pf_colour = "#FFFFFF"
-            pf_colour_edge = "grey"
+            pf_colour = COLOUR_DICT['WHITE']
+            pf_colour_edge = COLOUR_DICT['GREY']
         pf_text = "Portfolio\n" + dandelion_number_text(pf_wlc, **self.kwargs)
 
         ## center circle
@@ -275,6 +274,7 @@ class DandelionData:
         }
 
         ## first outer circle
+        g_radius_list = []
         for i, g in enumerate(self.group):
             self.kwargs[self.group_stage_switch] = [g]
             if g == "pipeline":
@@ -285,7 +285,7 @@ class DandelionData:
             if "same_size" in self.kwargs:
                 if self.kwargs["same_size"] == "Yes":
                     g_wlc = 46000
-
+            group_radius = math.sqrt(g_wlc)
             g_text = (
                 g + "\n" + dandelion_number_text(g_wlc, **self.kwargs)
             )  # group text
@@ -294,48 +294,53 @@ class DandelionData:
                 if self.kwargs["values"] == "No":
                     g_text = g
 
-            if len(self.group) > 1:
-                y_axis = 0 + (
-                    (math.sqrt(pf_wlc) * 3.25) * math.sin(math.radians(g_ang_l[i]))
-                )
-                x_axis = 0 + (math.sqrt(pf_wlc) * 2.75) * math.cos(
-                    math.radians(g_ang_l[i])
-                )
+            g_d[g] = {
+                "r": group_radius,
+                "wlc": g_wlc,
+                "text": g_text,
+                "colour": "#FFFFFF",
+                "fill": "dashed",
+                "ec": COLOUR_DICT['GREY'],
+                "alignment": ("center", "center"),
+            }
 
-                if g_wlc < pf_wlc / 20:
-                    g_wlc = pf_wlc / 20
+            g_radius_list.append(group_radius)
 
-                # c_colour = circle_colours[i]
+        largest_g_radius = max(g_radius_list) * 2
+        g_ang_l = cal_group_angle(180, g_radius_list, all=True)
+        for i, g in enumerate(self.group):
+            # if len(self.group) > 1:
+            y_axis = 0 + (
+                (math.sqrt(pf_wlc) + largest_g_radius) * math.sin(math.radians(g_ang_l[i]))
+            )
+            x_axis = 0 + (math.sqrt(pf_wlc) + largest_g_radius) * math.cos(
+                math.radians(g_ang_l[i])
+            )
 
-                g_d[g] = {
-                    "axis": (y_axis, x_axis),
-                    "r": math.sqrt(g_wlc),
-                    "wlc": g_wlc,
-                    "colour": "#FFFFFF",
-                    # "colour": c_colour,
-                    "text": g_text,
-                    "fill": "dashed",
-                    "ec": "grey",
-                    "alignment": ("center", "center"),
-                    "angle": g_ang_l[i],
-                }
+            # if g_wlc < pf_wlc / 20:
+            #     g_wlc = pf_wlc / 20
 
-            else:
-                g_d = {}
-                pf_wlc = g_wlc * 3
-                # g_text = g + "\n" + dandelion_number_text(g_wlc)  # group text
-                if g_wlc == 0:
-                    g_wlc = 20
-                g_d[g] = {
-                    "axis": (0, 0),
-                    "r": math.sqrt(g_wlc),
-                    "wlc": g_wlc,
-                    "colour": "#FFFFFF",
-                    "text": g_text,
-                    "fill": "dashed",
-                    "ec": "grey",
-                    "alignment": ("center", "center"),
-                }
+            # c_colour = circle_colours[i]
+
+            g_d[g]['axis'] = (y_axis, x_axis)
+            g_d[g]['angle'] = g_ang_l[i]
+
+            # else:
+            #     g_d = {}
+            #     pf_wlc = g_wlc * 3
+            #     # g_text = g + "\n" + dandelion_number_text(g_wlc)  # group text
+            #     if g_wlc == 0:
+            #         g_wlc = 20
+            #     g_d[g] = {
+            #         "axis": (0, 0),
+            #         "r": math.sqrt(g_wlc),
+            #         "wlc": g_wlc,
+            #         "colour": "#FFFFFF",
+            #         "text": g_text,
+            #         "fill": "dashed",
+            #         "ec": "grey",
+            #         "alignment": ("center", "center"),
+            #     }
 
         if len(self.kwargs[self.group_stage_switch]) > 1:
             group_angles = []
@@ -419,8 +424,10 @@ class DandelionData:
                 if len(p_list) == 2:
                     ang_l = [g_d[g]["angle"], g_d[g]["angle"] + 70]
 
+            largest_p_radius = math.sqrt(p_values_list[0])  # value used for distance from inner circle.
             for i, p in enumerate(p_list):
                 p_value = p_values_list[i]
+                p_radius = math.sqrt(p_value)
                 if "same_size" in self.kwargs:
                     if self.kwargs["same_size"] == "Yes":
                         p_value = 6000
@@ -429,11 +436,8 @@ class DandelionData:
                     if "confidence" in self.kwargs:  # change confidence type here
                         rag = p_data[DCA_KEYS[self.kwargs["confidence"]]]
                     else:
-                        try:
-                            rag = p_data[dca_confidence]
-                        except KeyError:  # top35 has no rag data
-                            rag = None
-                    colour = COLOUR_DICT[convert_rag_text(rag)]  # bubble colour
+                        rag = p_data[dca_confidence]
+                    colour = COLOUR_DICT[CONVERT_RAG(rag)]  # bubble colour
                 except TypeError:  # p_data is None for pipeline projects
                     colour = "#FFFFFF"
                 if "circle_colour" in self.kwargs:
@@ -490,29 +494,29 @@ class DandelionData:
                     if self.kwargs["circle_edge"] == "ipa":
                         edge_colour = COLOUR_DICT[p_data["GMPP - IPA DCA"]]
 
-                try:
-                    if len(p_list) >= 16:
-                        multi = (pf_wlc / g_wlc) ** 1.1
-                    elif 15 >= len(p_list) >= 11:
-                        multi = (pf_wlc / g_wlc) ** (1.0 / 2.0)  # square root
-                    #  only one/two bubbles don't distribute well
-                    elif len(p_list) == 1 or len(p_list) == 2:
-                        multi = 2.2
-                    else:
-                        if g_wlc / pf_wlc >= 0.33:
-                            multi = (pf_wlc / g_wlc) ** (1.0 / 2)
-                        else:
-                            multi = (pf_wlc / g_wlc) ** (1.0 / 3.0)  # cube root
+                # try:
+                    # if len(p_list) >= 16:
+                    #     multi = (pf_wlc / g_wlc) ** 1.1
+                    # elif 15 >= len(p_list) >= 11:
+                    #     multi = (pf_wlc / g_wlc) ** (1.0 / 2.0)  # square root
+                    # #  only one/two bubbles don't distribute well
+                    # elif len(p_list) == 1 or len(p_list) == 2:
+                    #     multi = 2.2
+                    # else:
+                    #     if g_wlc / pf_wlc >= 0.33:
+                    #         multi = (pf_wlc / g_wlc) ** (1.0 / 2)
+                    #     else:
+                    #         multi = (pf_wlc / g_wlc) ** (1.0 / 3.0)  # cube root
 
-                    p_y_axis = g_y_axis + (g_radius * multi) * math.sin(
-                        math.radians(ang_l[i])
-                    )
-                    p_x_axis = g_x_axis + (g_radius * multi) * math.cos(
-                        math.radians(ang_l[i])
-                    )
-                except ZeroDivisionError:
-                    p_y_axis = g_y_axis + 100 * math.sin(math.radians(ang_l[i]))
-                    p_x_axis = g_x_axis + 100 * math.cos(math.radians(ang_l[i]))
+                p_y_axis = g_y_axis + (g_radius + largest_p_radius ) * math.sin(
+                    math.radians(ang_l[i])
+                )
+                p_x_axis = g_x_axis + (g_radius + largest_p_radius) * math.cos(
+                    math.radians(ang_l[i])
+                )
+                # except ZeroDivisionError:
+                #     p_y_axis = g_y_axis + 100 * math.sin(math.radians(ang_l[i]))
+                #     p_x_axis = g_x_axis + 100 * math.cos(math.radians(ang_l[i]))
 
                 if 179 >= ang_l[i] >= 165:
                     text_angle = ("left", "top")
@@ -536,14 +540,14 @@ class DandelionData:
                     t_multi = 1
                 yx_text_position = (
                     p_y_axis
-                    + (math.sqrt(p_value) * t_multi) * math.sin(math.radians(ang_l[i])),
+                    + (p_radius * t_multi) * math.sin(math.radians(ang_l[i])),
                     p_x_axis
-                    + (math.sqrt(p_value) * t_multi) * math.cos(math.radians(ang_l[i])),
+                    + (p_radius * t_multi) * math.cos(math.radians(ang_l[i])),
                 )
 
                 g_d[p] = {
                     "axis": (p_y_axis, p_x_axis),
-                    "r": math.sqrt(p_value),
+                    "r": p_radius,
                     "wlc": p_value,
                     "colour": colour,
                     "text": project_text,

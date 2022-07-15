@@ -5,7 +5,7 @@ from openpyxl.formatting import Rule
 from analysis_engine.dictionaries import (
     DATA_KEY_DICT,
     DASHBOARD_BC_STAGE_ABBREVIATION,
-    convert_rag_text,
+    CONVERT_RAG,
     rag_txt_list,
     conf_list,
     risk_list,
@@ -40,7 +40,7 @@ def narrative_dashboard(master, wb: Workbook) -> None:
             ]
             ws.cell(row=row_num, column=6).value = dandelion_number_text(costs)
 
-            overall_dca = convert_rag_text(
+            overall_dca = CONVERT_RAG(
                 master["master_data"][0]["data"][project_name][
                     DATA_KEY_DICT["Departmental DCA"]
                 ]
@@ -111,7 +111,7 @@ def cdg_dashboard(master, wb: Workbook) -> None:
             )
             vfm = master["master_data"][0]["data"][project_name]["VfM Category"]
             ws.cell(row=row_num, column=9).value = vfm
-            overall_dca = convert_rag_text(
+            overall_dca = CONVERT_RAG(
                 master["master_data"][0]["data"][project_name][
                     DATA_KEY_DICT["Departmental DCA"]
                 ]
@@ -121,7 +121,7 @@ def cdg_dashboard(master, wb: Workbook) -> None:
                 ws.cell(row=row_num, column=10).value = ""
 
             for i, key in enumerate(conf_list):
-                dca = convert_rag_text(
+                dca = CONVERT_RAG(
                     master["master_data"][0]["data"][project_name][key]
                 )
                 ws.cell(row=row_num, column=11 + i).value = dca
