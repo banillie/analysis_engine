@@ -95,12 +95,17 @@ def handle_long_keys(project_name: str) -> str:
             return project_name
         if word_count == 2:
             l.insert(1, '\n')
-        if word_count == 3:
-            l.insert(2, '\n')
-        if word_count >= 4:   # to improve.
-            l.insert(2, '\n')
-            l.insert(5, '\n')
-            l.insert(8, '\n')
+        if word_count >= 3:
+            # if len(" ".join(l[3])) <= 10:
+            #     l.insert(3, '\n')
+            #     l.insert(6, '\n')
+            #     l.insert(9, '\n')
+            # else:
+            # l.insert(2, '\n')
+        # if word_count >= 4:   # to improve.
+                l.insert(2, '\n')
+                l.insert(5, '\n')
+                l.insert(8, '\n')
         new_str = " ".join(l)
         return re.sub('\s\\n\s', '\n', new_str)
     else:

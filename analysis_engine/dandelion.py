@@ -513,38 +513,38 @@ class DandelionData:
                 )
 
                 p_ang = ang_l[i]
-                # needs braking down into small segments
-                if 30 >= p_ang >= 0:
-                    text_angle = ("center", "center")
-                if 120 >= p_ang >= 31:
-                    text_angle = ("left", "center")
-                if 160 >= p_ang >= 121:
-                    text_angle = ("center", "top")
-                if 200 >= p_ang >= 161:
-                    text_angle = ("center", "top")
-                if 290 >= p_ang >= 201:
-                    text_angle = ("right", "center")
-                if 360 >= p_ang >= 291:
-                    text_angle = ("center", "center")
-
-                # if 135 >= p_ang >= 91:
-                #     text_angle = ("", "center")
-                # if 179 >= ang_l[i] >= 165:
+                # # needs braking down into small segments
+                # if 30 >= p_ang >= 0:
+                #     text_angle = ("center", "center")
+                # if 120 >= p_ang >= 31:
                 #     text_angle = ("left", "center")
-                # if 195 >= ang_l[i] >= 181:
+                # if 160 >= p_ang >= 121:
+                #     text_angle = ("center", "top")
+                # if 200 >= p_ang >= 161:
+                #     text_angle = ("center", "top")
+                # if 290 >= p_ang >= 201:
                 #     text_angle = ("right", "center")
-                # if ang_l[i] == 180:
+                # if 360 >= p_ang >= 291:
                 #     text_angle = ("center", "center")
-                # if 5 >= ang_l[i] or 355 <= ang_l[i]:
-                #     text_angle = ("center", "center")
-                # if 164 >= ang_l[i] >= 6:
-                #     text_angle = ("left", "top")
-                # if 354 >= ang_l[i] >= 196:
-                #     text_angle = ("right", "top")
+
+                if 135 >= p_ang >= 91:
+                    text_angle = ("", "center")
+                if 179 >= ang_l[i] >= 165:
+                    text_angle = ("left", "center")
+                if 195 >= ang_l[i] >= 181:
+                    text_angle = ("right", "center")
+                if ang_l[i] == 180:
+                    text_angle = ("center", "center")
+                if 5 >= ang_l[i] or 355 <= ang_l[i]:
+                    text_angle = ("center", "center")
+                if 164 >= ang_l[i] >= 6:
+                    text_angle = ("left", "top")
+                if 354 >= ang_l[i] >= 196:
+                    text_angle = ("right", "top")
 
                 yx_text_position = (
-                    p_y_axis + (g_d[p]["r"]*1.3) * math.sin(math.radians(p_ang)),
-                    p_x_axis + (g_d[p]["r"]*1.3) * math.cos(math.radians(p_ang)),
+                    p_y_axis + (g_d[p]["r"]+2) * math.sin(math.radians(p_ang)),
+                    p_x_axis + (g_d[p]["r"]+2) * math.cos(math.radians(p_ang)),
                 )
 
                 # p_y_axis = g_y_axis + (g_radius + largest_p_radius) * math.sin(
