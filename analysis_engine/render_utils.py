@@ -88,14 +88,14 @@ def get_chart_title(
 
 # helper function for milestone chart
 def handle_long_keys(project_name: str) -> str:
-    if len(project_name) >= 20:
+    if len(project_name) >= 25:
         l = project_name.split()
         word_count = len(l)
         if word_count == 1:
             return project_name
         if word_count == 2:
             l.insert(1, '\n')
-        if word_count >= 3:
+        if word_count >= 4:
             # if len(" ".join(l[3])) <= 10:
             #     l.insert(3, '\n')
             #     l.insert(6, '\n')
@@ -103,9 +103,9 @@ def handle_long_keys(project_name: str) -> str:
             # else:
             # l.insert(2, '\n')
         # if word_count >= 4:   # to improve.
-                l.insert(2, '\n')
-                l.insert(5, '\n')
-                l.insert(8, '\n')
+                l.insert(3, '\n')
+                # l.insert(5, '\n')
+                # l.insert(8, '\n')
         new_str = " ".join(l)
         return re.sub('\s\\n\s', '\n', new_str)
     else:

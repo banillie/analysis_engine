@@ -6,6 +6,7 @@ from openpyxl import Workbook
 from openpyxl.workbook import workbook
 
 from matplotlib import pyplot as plt
+from adjustText import adjust_text
 
 from analysis_engine.costs import CostData
 from analysis_engine.benefits import BenefitsData
@@ -236,6 +237,7 @@ class DandelionData:
         ## center circle
         g_d["portfolio"] = {
             "axis": (0, 0),
+            "tp": (0, 0),
             "r": math.sqrt(pf_wlc),
             "colour": pf_colour,
             "text": pf_text,
@@ -307,6 +309,7 @@ class DandelionData:
             )
 
             g_d[g]["axis"] = (y_axis, x_axis)
+            g_d[g]["tp"] = (y_axis, x_axis)
             g_d[g]["angle"] = g_ang_l[i]
 
             # else:
@@ -399,8 +402,8 @@ class DandelionData:
                 p_schedule = []
                 p_list.append((p_radius, p_schedule, p))
 
-                if 'abbreviations' in self.kwargs:
-                    abb = self.master['project_information'][p]['abbreviations']
+                if "abbreviations" in self.kwargs:
+                    abb = self.master["project_information"][p]["abbreviations"]
                     project_text = handle_long_keys(
                         f"{abb}, {dandelion_number_text(p_value, **self.kwargs)}"
                     )
@@ -505,46 +508,16 @@ class DandelionData:
                 p_values_list[0] * 1.1
             )  # value used for distance from inner circle.
             for i, p in enumerate(p_list):
+                angle = ang_l[i]
                 p_y_axis = g_y_axis + (g_radius + largest_p_radius) * math.sin(
                     math.radians(ang_l[i])
                 )
                 p_x_axis = g_x_axis + (g_radius + largest_p_radius) * math.cos(
                     math.radians(ang_l[i])
                 )
-
-                p_ang = ang_l[i]
-                # # needs braking down into small segments
-                # if 30 >= p_ang >= 0:
-                #     text_angle = ("center", "center")
-                # if 120 >= p_ang >= 31:
-                #     text_angle = ("left", "center")
-                # if 160 >= p_ang >= 121:
-                #     text_angle = ("center", "top")
-                # if 200 >= p_ang >= 161:
-                #     text_angle = ("center", "top")
-                # if 290 >= p_ang >= 201:
-                #     text_angle = ("right", "center")
-                # if 360 >= p_ang >= 291:
-                #     text_angle = ("center", "center")
-
-                if 135 >= p_ang >= 91:
-                    text_angle = ("", "center")
-                if 179 >= ang_l[i] >= 165:
-                    text_angle = ("left", "center")
-                if 195 >= ang_l[i] >= 181:
-                    text_angle = ("right", "center")
-                if ang_l[i] == 180:
-                    text_angle = ("center", "center")
-                if 5 >= ang_l[i] or 355 <= ang_l[i]:
-                    text_angle = ("center", "center")
-                if 164 >= ang_l[i] >= 6:
-                    text_angle = ("left", "top")
-                if 354 >= ang_l[i] >= 196:
-                    text_angle = ("right", "top")
-
                 yx_text_position = (
-                    p_y_axis + (g_d[p]["r"]+2) * math.sin(math.radians(p_ang)),
-                    p_x_axis + (g_d[p]["r"]+2) * math.cos(math.radians(p_ang)),
+                    p_y_axis + (g_d[p]["r"] + g_d[p]["r"]*1/2) * math.sin(math.radians(angle)),
+                    p_x_axis + (g_d[p]["r"] + g_d[p]["r"]*1/2) * math.cos(math.radians(angle)),
                 )
 
                 # p_y_axis = g_y_axis + (g_radius + largest_p_radius) * math.sin(
@@ -552,8 +525,9 @@ class DandelionData:
                 # )
 
                 g_d[p]["axis"] = (p_y_axis, p_x_axis)
-                g_d[p]["alignment"] = text_angle
+                # g_d[p]["alignment"] = text_angle
                 g_d[p]["tp"] = yx_text_position
+                g_d[p]['angle'] = angle
 
         self.d_data = g_d
 
@@ -597,6 +571,10 @@ def make_a_dandelion_auto(dl: DandelionData, **kwargs):
     else:
         linewidth = 1.0
 
+    ts = []
+    x_list = []
+    y_list = []
+    obj = []
     for c in dl.d_data.keys():
         circle = plt.Circle(
             dl.d_data[c]["axis"],  # x, y position
@@ -606,35 +584,76 @@ def make_a_dandelion_auto(dl: DandelionData, **kwargs):
             linewidth=linewidth,
             zorder=2,
         )
+        obj.append(circle)
         ax.add_patch(circle)
-        try:
-            ax.annotate(
-                dl.d_data[c]["text"],  # text
-                xy=dl.d_data[c]["tp"],  # x, y position
-                xycoords="data",
-                # xytext=dl.d_data[c]["tp"],  # text position
-                fontsize=9,
-                fontname=FONT_TYPE,
-                horizontalalignment=dl.d_data[c]["alignment"][0],
-                verticalalignment=dl.d_data[c]["alignment"][1],
-                zorder=3,
-            )
-        except KeyError:
-            # key error will occur for first and second outer circles as different text
+        x = dl.d_data[c]["tp"][0]
+        y = dl.d_data[c]["tp"][1]
+        text = dl.d_data[c]["text"].strip()
+        if c in dl.group or c == "portfolio":
+            # ax.text(x, y, text.strip())
             ax.annotate(
                 dl.d_data[c]["text"],  # text
                 xy=dl.d_data[c]["axis"],  # x, y position
+                xycoords="data",
+                # xytext=dl.d_data[c]["tp"],  # text position
                 fontsize=10,
                 fontname=FONT_TYPE,
                 horizontalalignment=dl.d_data[c]["alignment"][0],
                 verticalalignment=dl.d_data[c]["alignment"][1],
-                weight="bold",  # bold here as will be group text
+                weight="bold",
                 zorder=3,
             )
+        else:
+            angle = dl.d_data[c]['angle']
+            ha = 'center'
+            va = 'center'
+            # needs braking down into small segments
+            if 270 <= angle <= 340:
+                ha = 'right'
+            if 340 <= angle <= 350:
+                va = 'top'
+            if 10 <= angle <= 20:
+                va = 'top'
+            if 370 <= angle <= 390:
+                va = 'bottom'
+            if 20 <= angle <= 170:
+                ha = 'left'
+                va = 'top'
+            if 190 <= angle <=269:
+                ha = 'right'
+                va = 'top'
+
+
+            ts.append(ax.text(
+                x, y,
+                text,
+                ha=ha,
+                va=va,
+            ))
+            x_list.append(x)
+            y_list.append(y)
+            # ax.annotate(
+            #     dl.d_data[c]["text"],  # text
+            #     xy=dl.d_data[c]["axis"],  # x, y position
+            #     # xycoords="data",
+            #     xytext=dl.d_data[c]['tp'],
+            #     fontsize=8,
+            #     fontname=FONT_TYPE,
+            #     horizontalalignment=dl.d_data[c]["alignment"][0],
+            #     verticalalignment=dl.d_data[c]["alignment"][1],
+            #     # ha='center',
+            #     # va='center',
+            #     zorder=3,
+            #     textcoords='offset points',
+            #     # bbox=dict(boxstyle='round,pad=0.2', fc='yellow', alpha=0.3),
+            #     # arrowprops=dict(arrowstyle='->', color='blue')
+            #
+            # )
+
 
     # place lines
     line_clr = "#ececec"
-    line_style = "dashed"
+    # line_style = "dashed"
     for i, g in enumerate(dl.group):
         dl.kwargs[dl.group_stage_switch] = [g]
         ax.arrow(
@@ -666,6 +685,13 @@ def make_a_dandelion_auto(dl: DandelionData, **kwargs):
 
     plt.axis("scaled")
     plt.axis("off")
+    # adjust_text(
+    #     ts,
+    #     x=x_list,
+    #     y=y_list,
+    #     add_objects=obj,
+    #     # arrowprops=dict(arrowstyle="->", color="red"),
+    # )
     if kwargs["chart"] != "save":
         plt.show()
 

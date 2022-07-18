@@ -25,6 +25,8 @@
     <list default="true" id="205bd717-e7d2-47dc-82c7-88a8dae3593c" name="Default Changelist" comment="change portfolio_financial_profile.py to include old bl profile data">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/analysis_engine/dandelion.py" beforeDir="false" afterPath="$PROJECT_DIR$/analysis_engine/dandelion.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/analysis_engine/render_utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/analysis_engine/render_utils.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/test_op_args.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test_op_args.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -100,6 +102,28 @@
     </key>
   </component>
   <component name="RunManager" selected="Python tests.pytest for test_data.test_build_dandelion_graph">
+    <configuration name="annotation" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="analysis_engine" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/analysis_engine" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/analysis_engine/annotation.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="circles" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="analysis_engine" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -212,23 +236,6 @@
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
-    <configuration name="pytest for test_data.test_get_master_data_paths" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
-      <module name="analysis_engine" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <option name="SDK_HOME" value="$USER_HOME$/.virtualenvs/a_engine/bin/python" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="_new_keywords" value="&quot;&quot;" />
-      <option name="_new_parameters" value="&quot;&quot;" />
-      <option name="_new_additionalArguments" value="&quot;--tb\u003dshort&quot;" />
-      <option name="_new_target" value="&quot;test_data.test_get_master_data_paths&quot;" />
-      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
-      <method v="2" />
-    </configuration>
     <configuration name="pytest for test_data.test_json_master" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
       <module name="analysis_engine" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -316,6 +323,7 @@
     </configuration>
     <list>
       <item itemvalue="Python.vfm" />
+      <item itemvalue="Python.annotation" />
       <item itemvalue="Python.circles" />
       <item itemvalue="Python tests.all_dB_tests" />
       <item itemvalue="Python tests.cal_group_angles" />
@@ -323,17 +331,16 @@
       <item itemvalue="Python tests.test_all" />
       <item itemvalue="Python tests.test_data_all" />
       <item itemvalue="Python tests.pytest for test_data.test_build_dandelion_graph" />
-      <item itemvalue="Python tests.pytest for test_data.test_get_master_data_paths" />
       <item itemvalue="Python tests.pytest for test_data.test_json_master" />
       <item itemvalue="Python tests.pytest for test_data.test_saving_creating_json_master" />
     </list>
     <recent_temporary>
       <list>
         <item itemvalue="Python tests.pytest for test_data.test_build_dandelion_graph" />
+        <item itemvalue="Python.annotation" />
         <item itemvalue="Python.circles" />
         <item itemvalue="Python tests.pytest for test_data.test_json_master" />
         <item itemvalue="Python tests.pytest for test_data.test_saving_creating_json_master" />
-        <item itemvalue="Python tests.pytest for test_data.test_get_master_data_paths" />
       </list>
     </recent_temporary>
   </component>
@@ -473,7 +480,9 @@
       <workItem from="1657902830012" duration="2266000" />
       <workItem from="1657909839457" duration="55000" />
       <workItem from="1657909917367" duration="132000" />
-      <workItem from="1658001307057" duration="728000" />
+      <workItem from="1658001307057" duration="2712000" />
+      <workItem from="1658040003888" duration="1816000" />
+      <workItem from="1658132932734" duration="12514000" />
     </task>
     <task id="LOCAL-00001" summary="comment">
       <created>1578327909392</created>
@@ -789,11 +798,6 @@
           <option name="timeStamp" value="538" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/analysis_engine/dandelion.py</url>
-          <line>653</line>
-          <option name="timeStamp" value="547" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/analysis_engine/core_data.py</url>
           <line>196</line>
           <option name="timeStamp" value="562" />
@@ -809,14 +813,19 @@
           <option name="timeStamp" value="585" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/analysis_engine/dandelion.py</url>
-          <line>599</line>
-          <option name="timeStamp" value="609" />
+          <url>file://$PROJECT_DIR$/analysis_engine/annotation.py</url>
+          <line>19</line>
+          <option name="timeStamp" value="623" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/analysis_engine/annotation.py</url>
+          <line>152</line>
+          <option name="timeStamp" value="629" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/analysis_engine/dandelion.py</url>
-          <line>544</line>
-          <option name="timeStamp" value="617" />
+          <line>606</line>
+          <option name="timeStamp" value="631" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
@@ -828,17 +837,13 @@
       </default-breakpoints>
     </breakpoint-manager>
     <watches-manager>
-      <configuration name="tests">
-        <watch expression="p" />
-        <watch expression="ang_l" />
-      </configuration>
       <configuration name="PythonConfigurationType">
         <watch expression="portfolio_dict" />
       </configuration>
     </watches-manager>
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/analysis_engine$pytest_for_test_data_test_build_dandelion_graph.coverage" NAME="pytest for test_data.test_build_dandelion_graph Coverage Results" MODIFIED="1658001523070" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/analysis_engine$pytest_for_test_data_test_build_dandelion_graph.coverage" NAME="pytest for test_data.test_build_dandelion_graph Coverage Results" MODIFIED="1658149643404" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
     <SUITE FILE_PATH="coverage/analysis_engine$test_all.coverage" NAME="test_all Coverage Results" MODIFIED="1657097211429" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
     <SUITE FILE_PATH="coverage/analysis_engine$pytest_for_test_data_test_get_project_information.coverage" NAME="pytest for test_data.test_get_project_information Coverage Results" MODIFIED="1657620443660" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
     <SUITE FILE_PATH="coverage/analysis_engine$pytest_for_test_data_test_speed_dials.coverage" NAME="pytest for test_data.test_speed_dials Coverage Results" MODIFIED="1657550748170" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
@@ -850,6 +855,7 @@
     <SUITE FILE_PATH="coverage/analysis_engine$pytest_for_test_data_test_get_groupings.coverage" NAME="pytest for test_data.test_get_groupings Coverage Results" MODIFIED="1656072210207" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
     <SUITE FILE_PATH="coverage/analysis_engine$test_data_all.coverage" NAME="test_data_all Coverage Results" MODIFIED="1657290964660" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
     <SUITE FILE_PATH="coverage/analysis_engine$pytest_for_test_data_test_dashboards.coverage" NAME="pytest for test_data.test_dashboards Coverage Results" MODIFIED="1657544415162" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/analysis_engine$annotation.coverage" NAME="annotation Coverage Results" MODIFIED="1658146248648" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/analysis_engine" />
     <SUITE FILE_PATH="coverage/analysis_engine$pytest_for_test_data_test_get_master_data.coverage" NAME="pytest for test_data.test_get_master_data Coverage Results" MODIFIED="1656428609247" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
     <SUITE FILE_PATH="coverage/analysis_engine$data_review.coverage" NAME="data_review Coverage Results" MODIFIED="1656949515148" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/analysis_engine" />
     <SUITE FILE_PATH="coverage/analysis_engine$pytest_for_test_data_test_get_project_abbreviations.coverage" NAME="pytest for test_data.test_get_project_abbreviations Coverage Results" MODIFIED="1657544230547" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
