@@ -24,8 +24,11 @@
   <component name="ChangeListManager">
     <list default="true" id="205bd717-e7d2-47dc-82c7-88a8dae3593c" name="Default Changelist" comment="change portfolio_financial_profile.py to include old bl profile data">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/analysis_engine/dandelion.py" beforeDir="false" afterPath="$PROJECT_DIR$/analysis_engine/dandelion.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/analysis_engine/colouring.py" beforeDir="false" afterPath="$PROJECT_DIR$/analysis_engine/colouring.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/analysis_engine/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/analysis_engine/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/analysis_engine/milestones.py" beforeDir="false" afterPath="$PROJECT_DIR$/analysis_engine/milestones.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/analysis_engine/render_utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/analysis_engine/render_utils.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/test_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test_data.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tests/test_op_args.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test_op_args.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -101,7 +104,7 @@
       <recent name="$PROJECT_DIR$/" />
     </key>
   </component>
-  <component name="RunManager" selected="Python tests.pytest for test_data.test_build_dandelion_graph">
+  <component name="RunManager" selected="Python tests.pytest for test_data.test_milestones">
     <configuration name="annotation" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="analysis_engine" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -253,7 +256,7 @@
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
-    <configuration name="pytest for test_data.test_saving_creating_json_master" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
+    <configuration name="pytest for test_data.test_milestones" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
       <module name="analysis_engine" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -266,7 +269,7 @@
       <option name="_new_keywords" value="&quot;&quot;" />
       <option name="_new_parameters" value="&quot;&quot;" />
       <option name="_new_additionalArguments" value="&quot;--tb\u003dshort&quot;" />
-      <option name="_new_target" value="&quot;test_data.test_saving_creating_json_master&quot;" />
+      <option name="_new_target" value="&quot;test_data.test_milestones&quot;" />
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
@@ -330,17 +333,17 @@
       <item itemvalue="Python tests.temp_tests" />
       <item itemvalue="Python tests.test_all" />
       <item itemvalue="Python tests.test_data_all" />
+      <item itemvalue="Python tests.pytest for test_data.test_milestones" />
       <item itemvalue="Python tests.pytest for test_data.test_build_dandelion_graph" />
       <item itemvalue="Python tests.pytest for test_data.test_json_master" />
-      <item itemvalue="Python tests.pytest for test_data.test_saving_creating_json_master" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Python tests.pytest for test_data.test_milestones" />
         <item itemvalue="Python tests.pytest for test_data.test_build_dandelion_graph" />
         <item itemvalue="Python.annotation" />
         <item itemvalue="Python.circles" />
         <item itemvalue="Python tests.pytest for test_data.test_json_master" />
-        <item itemvalue="Python tests.pytest for test_data.test_saving_creating_json_master" />
       </list>
     </recent_temporary>
   </component>
@@ -482,7 +485,8 @@
       <workItem from="1657909917367" duration="132000" />
       <workItem from="1658001307057" duration="2712000" />
       <workItem from="1658040003888" duration="1816000" />
-      <workItem from="1658132932734" duration="12514000" />
+      <workItem from="1658132932734" duration="12864000" />
+      <workItem from="1658152821057" duration="3795000" />
     </task>
     <task id="LOCAL-00001" summary="comment">
       <created>1578327909392</created>
@@ -793,11 +797,6 @@
           <option name="timeStamp" value="511" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/analysis_engine/milestones.py</url>
-          <line>109</line>
-          <option name="timeStamp" value="538" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/analysis_engine/core_data.py</url>
           <line>196</line>
           <option name="timeStamp" value="562" />
@@ -827,6 +826,16 @@
           <line>606</line>
           <option name="timeStamp" value="631" />
         </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/analysis_engine/milestones.py</url>
+          <line>682</line>
+          <option name="timeStamp" value="638" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/analysis_engine/render_utils.py</url>
+          <line>93</line>
+          <option name="timeStamp" value="640" />
+        </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
         <breakpoint type="python-exception">
@@ -843,13 +852,13 @@
     </watches-manager>
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/analysis_engine$pytest_for_test_data_test_build_dandelion_graph.coverage" NAME="pytest for test_data.test_build_dandelion_graph Coverage Results" MODIFIED="1658149643404" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/analysis_engine$pytest_for_test_data_test_build_dandelion_graph.coverage" NAME="pytest for test_data.test_build_dandelion_graph Coverage Results" MODIFIED="1658149774334" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
     <SUITE FILE_PATH="coverage/analysis_engine$test_all.coverage" NAME="test_all Coverage Results" MODIFIED="1657097211429" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
     <SUITE FILE_PATH="coverage/analysis_engine$pytest_for_test_data_test_get_project_information.coverage" NAME="pytest for test_data.test_get_project_information Coverage Results" MODIFIED="1657620443660" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
     <SUITE FILE_PATH="coverage/analysis_engine$pytest_for_test_data_test_speed_dials.coverage" NAME="pytest for test_data.test_speed_dials Coverage Results" MODIFIED="1657550748170" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
     <SUITE FILE_PATH="coverage/analysis_engine$pytest_for_test_data_test_open_word_doc.coverage" NAME="pytest for test_data.test_open_word_doc Coverage Results" MODIFIED="1656073155470" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
     <SUITE FILE_PATH="coverage/analysis_engine$pytest_for_test_data_test_speedial_graph.coverage" NAME="pytest for test_data.test_speedial_graph Coverage Results" MODIFIED="1656946835782" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
-    <SUITE FILE_PATH="coverage/analysis_engine$pytest_for_test_data_test_milestones.coverage" NAME="pytest for test_data.test_milestones Coverage Results" MODIFIED="1657551468679" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/analysis_engine$pytest_for_test_data_test_milestones.coverage" NAME="pytest for test_data.test_milestones Coverage Results" MODIFIED="1658159164371" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
     <SUITE FILE_PATH="coverage/analysis_engine$pytest_for_test_data_test_json_master_open.coverage" NAME="pytest for test_data.test_json_master_open Coverage Results" MODIFIED="1656067420456" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
     <SUITE FILE_PATH="coverage/analysis_engine$pytest_for_test_data_test_dca_analysis.coverage" NAME="pytest for test_data.test_dca_analysis Coverage Results" MODIFIED="1657548954427" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
     <SUITE FILE_PATH="coverage/analysis_engine$pytest_for_test_data_test_get_groupings.coverage" NAME="pytest for test_data.test_get_groupings Coverage Results" MODIFIED="1656072210207" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />

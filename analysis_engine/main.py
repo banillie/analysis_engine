@@ -139,7 +139,7 @@ def run_analysis(args, settings):
     op_args = {k: v for k, v in args.items() if v is not None}
 
     if ('dca', 'speed_dials', 'dashboards') == programme:
-        op_args['quarter'] = "standard"
+        op_args['quarter'] = 'standard'
 
     md = open_json_file(
         str(settings["root_path"]) + settings["master_path"],

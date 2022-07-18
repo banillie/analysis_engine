@@ -87,27 +87,33 @@ def get_chart_title(
 
 
 # helper function for milestone chart
-def handle_long_keys(project_name: str) -> str:
-    if len(project_name) >= 25:
-        l = project_name.split()
-        word_count = len(l)
-        if word_count == 1:
-            return project_name
-        if word_count == 2:
-            l.insert(1, '\n')
-        if word_count >= 4:
-            # if len(" ".join(l[3])) <= 10:
-            #     l.insert(3, '\n')
-            #     l.insert(6, '\n')
-            #     l.insert(9, '\n')
-            # else:
-            # l.insert(2, '\n')
-        # if word_count >= 4:   # to improve.
-                l.insert(3, '\n')
-                # l.insert(5, '\n')
-                # l.insert(8, '\n')
-        new_str = " ".join(l)
-        return re.sub('\s\\n\s', '\n', new_str)
-    else:
-        return project_name
+def handle_long_keys(key_name: str, **kwargs) -> str:
+    if 'output_type' in kwargs:
+        if kwargs['output_type'] == 'milestones':
+            output_list = []
+            for name in key_name:
+                if len(name) >= 30:
+                    l = name.split()
+                    l.insert(6, '\n')
+                    new_str = " ".join(l)
+                    output_list.append(re.sub('\s\\n\s', '\n', new_str))
+                else:
+                    output_list.append(name)
+
+            return output_list
+
+    else:  # this is for dandelion
+        if len(key_name) >= 25:
+            l = key_name.split()
+            word_count = len(l)
+            if word_count == 1:
+                return key_name
+            if word_count == 2:
+                l.insert(1, '\n')
+            if word_count >= 4:
+                    l.insert(3, '\n')
+            new_str = " ".join(l)
+            return re.sub('\s\\n\s', '\n', new_str)
+        else:
+            return key_name
 

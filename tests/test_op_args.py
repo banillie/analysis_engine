@@ -2,15 +2,27 @@
 REPORTING_TYPE = "cdg"
 chart = "show"
 
-ms_standard = {"chart": chart}
+ms_standard = {"subparser_name": "milestones", "chart": chart}
 ms_groups = {"group": ["SCS"], "chart": chart}
-ms_dates = {"chart": chart, "dates": ["1/2/2022", "1/2/2023"]}
+ms_dates = {
+    "subparser_name": "milestones",
+    "chart": chart,
+    "dates": ["1/2/2022", "1/2/2023"],
+}
 ms_blue_line_config = {"blue_line": "config_date", "chart": chart}
 ms_blue_line_today = {"blue_line": "today", "chart": chart}
 ms_koi = {"chart": chart, "koi": "FBC CDG Approval"}
 ms_koi_fn = {"chart": chart, "koi_fn": "milestone_keys"}
 ms_quarters = {"chart": chart, "quarter": ["Q4 21/22", "Q3 21/22", "Q2 21/22"]}
 ms_groups = {"group": ["SCS"], "chart": chart}
+for_now = {
+    "quarter": ["Q1 22/23", "Q4 21/22", "Q1 21/22"],
+    "subparser_name": "milestones",
+    "chart": chart,
+    "dates": ["1/2/2023", "1/2/2025"],
+    # "dates": ["1/2/2022", "1/2/2023"],
+    "blue_line": "config_date",
+}
 ms_stages = {
     "stage": [
         # 'Outline Business Case',
@@ -23,7 +35,7 @@ ms_stages = {
 MILESTONES_OP_ARGS = [
     # ms_stages,
     # ms_groups,
-    ms_quarters,
+    # ms_quarters,
     # ms_koi_fn,
     # ms_koi,
     # ms_blue_line_today,
@@ -31,6 +43,7 @@ MILESTONES_OP_ARGS = [
     # ms_dates,
     # ms_groups,
     # ms_standard,
+    for_now
 ]
 
 dlion_standard = {
@@ -86,7 +99,7 @@ dlion_income = {
 dlion_cli_group = {
     "test_name": "dlion_groups",
     "subparser_name": "dandelion",
-    "group": ['WIT retail project', 'Mayfield', 'MSG'],
+    "group": ["WIT retail project", "Mayfield", "MSG"],
     "chart": chart,
 }
 DANDELION_OP_ARGS_DICT = [

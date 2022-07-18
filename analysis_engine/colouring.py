@@ -21,6 +21,7 @@ COLOUR_DICT = {
     'Improving': '#007d00',
     'GREY': '#808080',
     'BLACK': '#000000',
+    'BLUE': '#1434A4',
 }
 
 FACE_COLOUR = '#a0c1d5'

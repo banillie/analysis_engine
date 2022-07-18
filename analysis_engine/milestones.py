@@ -6,6 +6,7 @@ import matplotlib.dates as mdates
 from openpyxl import Workbook
 from dateutil import parser
 
+from analysis_engine.colouring import COLOUR_DICT
 from analysis_engine.render_utils import set_fig_size, get_chart_title, handle_long_keys
 from analysis_engine.segmentation import get_group, get_correct_p_data
 from analysis_engine.error_msgs import logger
@@ -104,17 +105,17 @@ class MilestoneData:
         """
         m_dict = {}
         for tp in self.quarters:  # tp time period
-            self.kwargs["tp"] = tp
+            # self.kwargs["tp"] = tp
             lower_dict = {}
             raw_list = []
-            group = get_group(self.master, tp, self.kwargs)
+            group = get_group(self.master, tp, **self.kwargs)
             for project_name in group:
                 project_milestones = []
                 p_data = get_correct_p_data(self.master, project_name, tp)
                 if p_data is None:
                     continue
                 # i loops below removes None Milestone names and rejects non-datetime date values.
-                p = self.master["abbreviations"][project_name]["abb"]
+                p = self.master['project_information'][project_name]['Abbreviations']
                 category = "Milestone"
                 if self.kwargs["report"] == "cdg":
                     # report = "CDG"
@@ -654,6 +655,12 @@ def calculate_max_min_date(milestones: MilestoneData, **kwargs) -> int:
     if kwargs["value"] == "min":
         return min(final_m_list)
 
+LEGEND_DICT = {
+    "Q1 22/23": "THIS QUARTER",
+    "Q4 21/22": "LAST QUARTER",
+    "Q1 21/22": "ONE YEAR AG0",
+}
+
 
 def milestone_chart(
     milestones: MilestoneData,
@@ -670,19 +677,24 @@ def milestone_chart(
         merge_project_milestone_name(project, ms_names, i)
         for i, p in enumerate(project)
     ]
-    ms_names = handle_long_keys(combined)
+    ms_names = handle_long_keys(combined, output_type='milestones')
 
+    colour_start = 1
     for i, tp in enumerate(milestones.quarters):
         m = [
             x for x in milestones.sorted_milestone_dict[tp]["g_dates"] if x is not None
         ]
         ax1.scatter(
             m,
-            ms_names[0 : len(m)],
-            label=tp,
+            ms_names[0: len(m)],
+            label=LEGEND_DICT[tp],
             s=200,
             zorder=20 - i,
+            edgecolor=COLOUR_DICT['BLUE'],
+            fc=COLOUR_DICT['BLUE'],
+            alpha=colour_start,
         )
+        colour_start = colour_start - 0.3
 
     ax1.legend(prop={"size": 14})  # insert legend
     plt.yticks(size=10)

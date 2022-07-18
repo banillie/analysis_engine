@@ -199,22 +199,17 @@ def test_dashboards():
 
 def test_milestones():
     for x in MILESTONES_OP_ARGS:
-        md = open_json_file(
-            f"/home/will/Documents/{REPORTING_TYPE}/core_data/json/master.json",
-            **x,
-        )
-        set_default_args(x, group=md["groups"])
-        combined_args = {**x, **SETTINGS_DICT}
-        ms = MilestoneData(md, **combined_args)
+        cli = CliOpArgs(x)
+        ms = MilestoneData(cli.md, **cli.combined_args)
         if (
             # "type" in combined_args  # NOT IN USE.
-            "dates" in combined_args
-            or "koi" in combined_args
-            or "koi_fn" in combined_args
+            "dates" in cli.combined_args
+            or "koi" in cli.combined_args
+            or "koi_fn" in cli.combined_args
         ):
-            return_koi_fn_keys(combined_args)
-            ms.filter_chart_info(**combined_args)
-        ms_graph = milestone_chart(ms, md, **combined_args)
+            return_koi_fn_keys(cli.combined_args)
+            ms.filter_chart_info(**cli.combined_args)
+        ms_graph = milestone_chart(ms, cli.md, **cli.combined_args)
         doc = get_input_doc(
             str(SETTINGS_DICT["root_path"]) + SETTINGS_DICT["word_landscape"]
         )
