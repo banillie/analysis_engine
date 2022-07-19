@@ -2,6 +2,14 @@
 REPORTING_TYPE = "cdg"
 chart = "show"
 
+q_norm_keys = {
+    'test_name': 'query_normal',
+    'subparser_name': 'query',
+    'koi': 'Brief Description'
+}
+
+QUERY_ARGS = [q_norm_keys]
+
 ms_standard = {
     "test_name": "ms_standard",
     "subparser_name": "milestones",

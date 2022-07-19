@@ -91,7 +91,7 @@ def return_koi_fn_keys(op_args: Dict):  # op_args
         op_args['key'] = keys
         return op_args
     if 'koi' in op_args:
-        op_args['key'] = op_args['koi']
+        op_args['key'] = [op_args['koi']]  # what happens when more than one?
         return op_args
     else:
         return op_args

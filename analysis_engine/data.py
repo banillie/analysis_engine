@@ -1702,19 +1702,7 @@
 #                 return m_dict[k]["Notes"]
 #
 #
-# def convert_date(date_str: str):
-#     """
-#     When date converted into json file the dates take the standard python format
-#     year-month-day. This function converts format to year-day-month. This function is
-#     used when the MilestoneData class is created. Seems to be the best place to deploy.
-#     """
-#     try:
-#         return parser.parse(date_str)  # returns datetime
-#     except TypeError:  # for a different data value e.g integer.
-#         return date_str
-#     except ValueError:  # for string data that is not a date.
-#         return date_str
-#     # is a ParserError necessary here also?
+
 #
 #
 # class MilestoneData:

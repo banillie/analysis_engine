@@ -5,7 +5,7 @@ from tests.test_op_args import (
     REPORTING_TYPE,
     DANDELION_OP_ARGS_DICT,
     SPEED_DIAL_AND_DCA_OP_ARGS,
-    MILESTONES_OP_ARGS,
+    MILESTONES_OP_ARGS, QUERY_ARGS,
 )
 
 from analysis_engine.settings import report_config, set_default_args, return_koi_fn_keys
@@ -29,6 +29,8 @@ from analysis_engine.milestones import (
     milestone_chart,
     put_milestones_into_wb,
 )
+from analysis_engine.error_msgs import no_query_keys
+from analysis_engine.query import data_query_into_wb
 
 SETTINGS_DICT = report_config(REPORTING_TYPE)
 
@@ -52,6 +54,10 @@ class CliOpArgs:
         if ('dca', 'speed_dials', 'dashboards') == self.programme:
             if 'quarter' not in list(op_args.keys()):
                 op_args['quarter'] = 'standard'
+
+        if self.programme == 'query':
+            if "koi" not in op_args and "koi_fn" not in op_args:
+                no_query_keys()
 
         md = open_json_file(
             str(SETTINGS_DICT["root_path"]) + SETTINGS_DICT["master_path"],
@@ -215,28 +221,17 @@ def test_milestones():
         )
 
 
-def test_query():  # next
-    pass
+def test_query():
+    for x in QUERY_ARGS:
+        print(x['test_name'])
+        cli = CliOpArgs(x)
+        op_args = return_koi_fn_keys(cli.combined_args)
+        wb = data_query_into_wb(cli.md, **op_args)
+        wb.save(
+            str(SETTINGS_DICT["root_path"])
+            + SETTINGS_DICT["excel_save_path"].format(f"{x['test_name']}")
+        )
 
-
-# def test_data_queries_non_milestone(master):
-#     wb = data_query_into_wb(
-#         master,
-#         key=["Total Forecast"],
-#         quarter=["Q4 18/19", "Q4 17/18", "Q4 16/17"],
-#         group=[A11],
-#     )
-#     wb.save("resources/test_data_query.xlsx")
-#
-#
-# def test_data_queries_milestones(master):
-#     wb = data_query_into_wb(
-#         master,
-#         key=["Full Operations"],
-#         quarter=["Q4 19/20", "Q4 18/19"],
-#         group=[SOT],
-#     )
-#     wb.save("resources/test_data_query_milestones.xlsx")
 
 
 # @pytest.mark.skip(reason="refactor required")

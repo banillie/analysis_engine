@@ -222,7 +222,7 @@ def run_analysis(args, settings):
                 ms.filter_chart_info(**combined_args)
 
             if op_args["chart"] != "save":
-                ms_graph = milestone_chart(ms, md, **combined_args)
+                ms_graph = milestone_chart(ms, **combined_args)
                 doc = get_input_doc(
                     str(combined_args["root_path"]) + combined_args["word_landscape"]
                 )
@@ -232,7 +232,7 @@ def run_analysis(args, settings):
                     + combined_args["word_save_path"].format("milestones")
                 )
             else:
-                milestone_chart(ms, md, **combined_args)
+                milestone_chart(ms, **combined_args)
 
             wb = put_milestones_into_wb(ms)
             wb_save = True

@@ -26,8 +26,12 @@ COLOUR_DICT = {
 
 FACE_COLOUR = '#a0c1d5'
 
-black_text = Font(color='00000000')
+SALMON_FILL = PatternFill(
+    start_color="FFFF8080", end_color="FFFF8080", fill_type="solid"
+)
+AMBER_FILL = PatternFill(start_color="FFBF00", end_color="FFBF00", fill_type="solid")
 
+black_text = Font(color='00000000')
 ag_text = Font(color='00a5b700')  # text same colour as background
 ag_fill = PatternFill(bgColor='00a5b700')
 ar_text = Font(color='00f97b31')  # text same colour as background

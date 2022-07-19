@@ -118,6 +118,12 @@ def not_recognised_quarter(error):
     )
 
 
+def no_query_keys():
+    raise InputError(
+        "Please enter a key name(s) using either --koi or --koi_fn."
+    )
+
+
 def get_error_list(seq: list):
     seen = set()
     seen_add = seen.add
