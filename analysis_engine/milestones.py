@@ -655,16 +655,15 @@ def calculate_max_min_date(milestones: MilestoneData, **kwargs) -> int:
     if kwargs["value"] == "min":
         return min(final_m_list)
 
-LEGEND_DICT = {
-    "Q1 22/23": "THIS QUARTER",
-    "Q4 21/22": "LAST QUARTER",
-    "Q1 21/22": "ONE YEAR AG0",
-}
+# LEGEND_DICT = {
+#     "Q1 22/23": "THIS QUARTER",
+#     "Q4 21/22": "LAST QUARTER",
+#     "Q1 21/22": "ONE YEAR AG0",
+# }
 
 
 def milestone_chart(
     milestones: MilestoneData,
-    master,
     **kwargs,
 ) -> plt.figure:
     fig, ax1 = plt.subplots()
@@ -687,14 +686,14 @@ def milestone_chart(
         ax1.scatter(
             m,
             ms_names[0: len(m)],
-            label=LEGEND_DICT[tp],
+            label=tp,   # add functionality so user can add via config
             s=200,
             zorder=20 - i,
             edgecolor=COLOUR_DICT['BLUE'],
             fc=COLOUR_DICT['BLUE'],
             alpha=colour_start,
         )
-        colour_start = colour_start - 0.3
+        colour_start = colour_start - (len(milestones.quarters) / 1)
 
     ax1.legend(prop={"size": 14})  # insert legend
     plt.yticks(size=10)

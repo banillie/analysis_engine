@@ -280,7 +280,6 @@ class DandelionData:
                 "colour": "#FFFFFF",
                 "fill": "dashed",
                 "ec": COLOUR_DICT["GREY"],
-                "alignment": ("center", "center"),
             }
 
             g_radius_list.append(group_radius)
@@ -299,7 +298,7 @@ class DandelionData:
         )  # multiplied here so a gap to central circle
 
         for i, g in enumerate(self.group):
-            # if len(self.group) > 1:
+            # if len(self.group) > 1: # this needs testing
             y_axis = 0 + (
                 (math.sqrt(pf_wlc) + largest_g_radius)
                 * math.sin(math.radians(g_ang_l[i]))
@@ -311,6 +310,8 @@ class DandelionData:
             g_d[g]["axis"] = (y_axis, x_axis)
             g_d[g]["tp"] = (y_axis, x_axis)
             g_d[g]["angle"] = g_ang_l[i]
+
+            logger.info("The angles for groups are " + str(g_ang_l))
 
             # else:
             #     g_d = {}
@@ -328,13 +329,6 @@ class DandelionData:
             #         "ec": "grey",
             #         "alignment": ("center", "center"),
             #     }
-
-        # if len(self.kwargs[self.group_stage_switch]) > 1:
-        #     group_angles = []
-        #     for g in self.kwargs[self.group_stage_switch]:
-        #         group_angles.append((g, g_d[g]["angle"]))
-
-        logger.info("The angles for groups are " + str(g_ang_l))
 
         ## second outer circle
         for i, g in enumerate(self.group):
@@ -505,7 +499,7 @@ class DandelionData:
                     ang_l = [g_d[g]["angle"], g_d[g]["angle"] + 70]
 
             largest_p_radius = (
-                p_values_list[0] * 1.1
+                p_values_list[0] * 1.5
             )  # value used for distance from inner circle.
             for i, p in enumerate(p_list):
                 angle = ang_l[i]
@@ -516,18 +510,38 @@ class DandelionData:
                     math.radians(ang_l[i])
                 )
                 yx_text_position = (
-                    p_y_axis + (g_d[p]["r"] + g_d[p]["r"]*1/2) * math.sin(math.radians(angle)),
-                    p_x_axis + (g_d[p]["r"] + g_d[p]["r"]*1/2) * math.cos(math.radians(angle)),
+                    p_y_axis
+                    + (g_d[p]["r"] + g_d[p]["r"] * 1 / 2)
+                    * math.sin(math.radians(angle)),
+                    p_x_axis
+                    + (g_d[p]["r"] + g_d[p]["r"] * 1 / 2)
+                    * math.cos(math.radians(angle)),
                 )
 
-                # p_y_axis = g_y_axis + (g_radius + largest_p_radius) * math.sin(
-                #     math.radians(ang_l[i])
-                # )
+                # This is an important part of how text is rendered into the
+                # dandelion. To stop text overlapping with the circle.
+                # the way angles are calculated above means they can be greater than 360
+                ha = "center"  # default text position
+                va = "center"
+
+                if 11 <= angle <= 20 or 371 <= angle <= 380:
+                    va = "top"
+                elif 21 <= angle <= 174 or 381 <= angle <= 534:
+                    ha = "left"
+                elif 175 <= angle <= 185:
+                    va = "bottom"
+                elif 186 <= angle <= 339:
+                    ha = "right"
+                elif 340 <= angle <= 349:
+                    va = "top"
+                elif angle > 534:
+                    print(f"{p} angle is {angle}")
 
                 g_d[p]["axis"] = (p_y_axis, p_x_axis)
-                # g_d[p]["alignment"] = text_angle
+                g_d[p]["ha"] = ha
+                g_d[p]["va"] = va
                 g_d[p]["tp"] = yx_text_position
-                g_d[p]['angle'] = angle
+                g_d[p]["angle"] = angle
 
         self.d_data = g_d
 
@@ -567,9 +581,9 @@ def make_a_dandelion_auto(dl: DandelionData, **kwargs):
 
     if "circle_edge" in kwargs:
         if kwargs["circle_edge"] == "forward_look" or "ipa":
-            linewidth = 2.0
+            line_width = 2.0
     else:
-        linewidth = 1.0
+        line_width = 1.0
 
     ts = []
     x_list = []
@@ -581,79 +595,41 @@ def make_a_dandelion_auto(dl: DandelionData, **kwargs):
             radius=dl.d_data[c]["r"],
             fc=dl.d_data[c]["colour"],  # face colour
             ec=dl.d_data[c]["ec"],  # edge colour
-            linewidth=linewidth,
+            linewidth=line_width,
             zorder=2,
         )
         obj.append(circle)
         ax.add_patch(circle)
         x = dl.d_data[c]["tp"][0]
         y = dl.d_data[c]["tp"][1]
-        text = dl.d_data[c]["text"].strip()
+        text = dl.d_data[c]["text"].strip()  # what does strip do?
         if c in dl.group or c == "portfolio":
-            # ax.text(x, y, text.strip())
             ax.annotate(
-                dl.d_data[c]["text"],  # text
-                xy=dl.d_data[c]["axis"],  # x, y position
+                text,
+                xy=dl.d_data[c]["axis"],
                 xycoords="data",
-                # xytext=dl.d_data[c]["tp"],  # text position
                 fontsize=10,
                 fontname=FONT_TYPE,
-                horizontalalignment=dl.d_data[c]["alignment"][0],
-                verticalalignment=dl.d_data[c]["alignment"][1],
+                ha="center",
+                va="center",
                 weight="bold",
                 zorder=3,
             )
         else:
-            angle = dl.d_data[c]['angle']
-            ha = 'center'
-            va = 'center'
-            # needs braking down into small segments
-            if 270 <= angle <= 340:
-                ha = 'right'
-            if 340 <= angle <= 350:
-                va = 'top'
-            if 10 <= angle <= 20:
-                va = 'top'
-            if 370 <= angle <= 390:
-                va = 'bottom'
-            if 20 <= angle <= 170:
-                ha = 'left'
-                va = 'top'
-            if 190 <= angle <=269:
-                ha = 'right'
-                va = 'top'
-
-
-            ts.append(ax.text(
-                x, y,
-                text,
-                ha=ha,
-                va=va,
-            ))
+            ts.append(
+                ax.text(
+                    x,
+                    y,
+                    text,
+                    ha=dl.d_data[c]["ha"],
+                    va=dl.d_data[c]["va"],
+                )
+            )
             x_list.append(x)
             y_list.append(y)
-            # ax.annotate(
-            #     dl.d_data[c]["text"],  # text
-            #     xy=dl.d_data[c]["axis"],  # x, y position
-            #     # xycoords="data",
-            #     xytext=dl.d_data[c]['tp'],
-            #     fontsize=8,
-            #     fontname=FONT_TYPE,
-            #     horizontalalignment=dl.d_data[c]["alignment"][0],
-            #     verticalalignment=dl.d_data[c]["alignment"][1],
-            #     # ha='center',
-            #     # va='center',
-            #     zorder=3,
-            #     textcoords='offset points',
-            #     # bbox=dict(boxstyle='round,pad=0.2', fc='yellow', alpha=0.3),
-            #     # arrowprops=dict(arrowstyle='->', color='blue')
-            #
-            # )
-
 
     # place lines
     line_clr = "#ececec"
-    # line_style = "dashed"
     for i, g in enumerate(dl.group):
         dl.kwargs[dl.group_stage_switch] = [g]
         ax.arrow(
@@ -663,7 +639,6 @@ def make_a_dandelion_auto(dl: DandelionData, **kwargs):
             dl.d_data[g]["axis"][1],
             fc=line_clr,
             ec=line_clr,
-            # linestyle=line_style,
             zorder=1,
         )
 
@@ -679,19 +654,11 @@ def make_a_dandelion_auto(dl: DandelionData, **kwargs):
                 dl.d_data[p]["axis"][1] - dl.d_data[g]["axis"][1],
                 fc=line_clr,
                 ec=line_clr,
-                # linestyle=line_style,
                 zorder=1,
             )
 
     plt.axis("scaled")
     plt.axis("off")
-    # adjust_text(
-    #     ts,
-    #     x=x_list,
-    #     y=y_list,
-    #     add_objects=obj,
-    #     # arrowprops=dict(arrowstyle="->", color="red"),
-    # )
     if kwargs["chart"] != "save":
         plt.show()
 
