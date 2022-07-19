@@ -397,7 +397,7 @@ class DandelionData:
                 p_list.append((p_radius, p_schedule, p))
 
                 if "abbreviations" in self.kwargs:
-                    abb = self.master["project_information"][p]["abbreviations"]
+                    abb = self.master["project_information"][p]["Abbreviations"]
                     project_text = handle_long_keys(
                         f"{abb}, {dandelion_number_text(p_value, **self.kwargs)}"
                     )

@@ -26,7 +26,7 @@ class DcaData:
     def get_dictionary(self) -> None:
         quarter_dict = {}
         for tp in self.quarters:
-            group = get_group(self.master, tp, self.kwargs)
+            group = get_group(self.master, tp, **self.kwargs)
             type_dict = {}
             for conf_type in list(DCA_KEYS[self.report].keys()):  # confidence type
                 dca_dict = {}
@@ -47,7 +47,8 @@ class DcaData:
                     t = [("Type", dca_type)]
                     cost_amount = [("Costs", costs)]
                     quarter = [("Quarter", tp)]
-                    dca_dict[self.master["abbreviations"][project_name]["abb"]] = dict(
+                    abb = self.master["project_information"][project_name]["Abbreviations"]
+                    dca_dict[abb] = dict(
                         dca_colour + t + cost_amount + quarter + dca_score
                     )
                 type_dict[conf_type] = dca_dict

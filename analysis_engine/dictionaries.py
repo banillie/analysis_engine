@@ -196,7 +196,14 @@ DATA_KEY_DICT = {
     "Departmental DCA": "Overall Delivery Confidence",
 }
 
-CONVERT_RAG = []
+# Used in dashboards
+CONVERT_RAG = {
+    "Green": 'G',
+    "Amber/Green": 'A/G',
+    "Amber": 'A',
+    "Amber/Red": 'A/R',
+    "Red": 'R',
+}
 
 NEXT_STAGE_DICT = {
     "pre_SOBC": "SOBC - IPDC Approval",

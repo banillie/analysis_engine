@@ -693,7 +693,7 @@ def milestone_chart(
             fc=COLOUR_DICT['BLUE'],
             alpha=colour_start,
         )
-        colour_start = colour_start - (len(milestones.quarters) / 1)
+        colour_start = colour_start - (1 / len(milestones.quarters))
 
     ax1.legend(prop={"size": 14})  # insert legend
     plt.yticks(size=10)

@@ -113,11 +113,11 @@ def test_get_project_abbreviations():
     data = open_json_file(
         f"/home/will/Documents/{REPORTING_TYPE}/core_data/json/master.json"
     )
-    ## THESE ARE REPORTING SPECIFIC. NEED TO GENRALISE
-    assert data["abbreviations"]["Elizabeth House"]["abb"] == "EH"
-    assert (
-        data["abbreviations"]["Elizabeth House"]["full name"] == "Elizabeth House"
-    )  # to take 'full name' out as silly!
+    abb_list = []
+    for p in data['project_information']:
+        abb_list.append(data['project_information'][p]['Abbreviations'])
+
+    assert len(abb_list) != 0
 
 
 def test_build_dandelion_graph():
@@ -132,37 +132,29 @@ def test_build_dandelion_graph():
         doc_output_path = (
             str(SETTINGS_DICT["root_path"]) + SETTINGS_DICT["word_save_path"]
         )
-        doc.save(doc_output_path.format(f"dandelion{x['test_name']}"))
+        doc.save(doc_output_path.format(f"{x['test_name']}"))
 
 
 def test_dca_analysis():
     for x in SPEED_DIAL_AND_DCA_OP_ARGS:
-        md = open_json_file(
-            f"/home/will/Documents/{REPORTING_TYPE}/core_data/json/master.json",
-            **x,
-        )
-        set_default_args(x, group=md["groups"])
-        combined_args = {**x, **SETTINGS_DICT}
-        sdmd = DcaData(md, **combined_args)
+        print(x['test_name'])
+        cli = CliOpArgs(x)
+        sdmd = DcaData(cli.md, **cli.combined_args)
         sdmd.get_changes()
         changes_doc = dca_changes_into_word(
             sdmd, str(SETTINGS_DICT["root_path"]) + SETTINGS_DICT["word_portrait"]
         )
         changes_doc.save(
             str(SETTINGS_DICT["root_path"])
-            + SETTINGS_DICT["word_save_path"].format("dca_changes")
+            + SETTINGS_DICT["word_save_path"].format(f"dca_changes_{x['test_name']}")
         )
 
 
 def test_speed_dials():
     for x in SPEED_DIAL_AND_DCA_OP_ARGS:
-        md = open_json_file(
-            f"/home/will/Documents/{REPORTING_TYPE}/core_data/json/master.json",
-            **x,
-        )
-        set_default_args(x, group=md["groups"])
-        combined_args = {**x, **SETTINGS_DICT}
-        sdmd = DcaData(md, **combined_args)
+        print(x['test_name'])
+        cli = CliOpArgs(x)
+        sdmd = DcaData(cli.md, **cli.combined_args)
         sdmd.get_changes()
         sd_doc = get_input_doc(
             str(SETTINGS_DICT["root_path"]) + SETTINGS_DICT["word_landscape"]
@@ -170,19 +162,16 @@ def test_speed_dials():
         build_speed_dials(sdmd, sd_doc)
         sd_doc.save(
             str(SETTINGS_DICT["root_path"])
-            + SETTINGS_DICT["word_save_path"].format("speed_dials")
+            + SETTINGS_DICT["word_save_path"].format(f"speed_dials_{x['test_name']}")
         )
 
 
 def test_dashboards():
-    md = open_json_file(
-        f"/home/will/Documents/{REPORTING_TYPE}/core_data/json/master.json",
-        # quarter='standard'
-    )
+    cli = CliOpArgs({'subparser_name': 'dashboards'})
     narrative_d_master = get_input_doc(
         str(SETTINGS_DICT["root_path"]) + SETTINGS_DICT["narrative_dashboard"]
     )
-    narrative_dashboard(md, narrative_d_master)  #
+    narrative_dashboard(cli.md, narrative_d_master)  #
     narrative_d_master.save(
         str(SETTINGS_DICT["root_path"])
         + SETTINGS_DICT["excel_save_path"].format("narrative_dashboard_completed")
@@ -190,7 +179,7 @@ def test_dashboards():
     cdg_d_master = get_input_doc(
         str(SETTINGS_DICT["root_path"]) + SETTINGS_DICT["dashboard"]
     )
-    cdg_dashboard(md, cdg_d_master)
+    cdg_dashboard(cli.md, cdg_d_master)
     cdg_d_master.save(
         str(SETTINGS_DICT["root_path"])
         + SETTINGS_DICT["excel_save_path"].format("dashboard_completed")
@@ -199,6 +188,7 @@ def test_dashboards():
 
 def test_milestones():
     for x in MILESTONES_OP_ARGS:
+        print(x['test_name'])
         cli = CliOpArgs(x)
         ms = MilestoneData(cli.md, **cli.combined_args)
         if (
@@ -209,19 +199,19 @@ def test_milestones():
         ):
             return_koi_fn_keys(cli.combined_args)
             ms.filter_chart_info(**cli.combined_args)
-        ms_graph = milestone_chart(ms, cli.md, **cli.combined_args)
+        ms_graph = milestone_chart(ms, **cli.combined_args)
         doc = get_input_doc(
             str(SETTINGS_DICT["root_path"]) + SETTINGS_DICT["word_landscape"]
         )
         put_matplotlib_fig_into_word(doc, ms_graph, width=Inches(8))
         doc.save(
             str(SETTINGS_DICT["root_path"])
-            + SETTINGS_DICT["word_save_path"].format("milestones")
+            + SETTINGS_DICT["word_save_path"].format(f"milestones_{x['test_name']}")
         )
         wb = put_milestones_into_wb(ms)
         wb.save(
             str(SETTINGS_DICT["root_path"])
-            + SETTINGS_DICT["excel_save_path"].format("milestone_data")
+            + SETTINGS_DICT["excel_save_path"].format(f"milestones_{x['test_name']}")
         )
 
 
