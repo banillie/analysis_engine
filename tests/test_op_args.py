@@ -2,13 +2,38 @@
 REPORTING_TYPE = "cdg"
 chart = "show"
 
-q_norm_keys = {
-    'test_name': 'query_normal',
+q_koi = {
+    'test_name': 'query_koi',
     'subparser_name': 'query',
     'koi': 'Brief Description'
 }
 
-QUERY_ARGS = [q_norm_keys]
+q_koi_two_keys = {
+    'test_name': 'query_koi_two_keys',
+    'subparser_name': 'query',
+    'koi': ['Brief Description', 'Last Business Case (BC) achieved']
+}
+
+query_koi_quarters = {
+    'test_name': 'query_koi_quarters',
+    'subparser_name': 'query',
+    'koi': ['Brief Description', 'Last Business Case (BC) achieved'],
+    "quarter": ["Q1 22/23", "Q4 21/22", "Q3 21/22"],
+}
+
+query_koi_milestones = {
+    'test_name': 'query_koi_milestones',
+    'subparser_name': 'query',
+    'koi': "FBC CDG Approval",
+    "quarter": ["Q1 22/23", "Q4 21/22", "Q3 21/22"],
+}
+
+QUERY_ARGS = [
+    query_koi_milestones,
+    query_koi_quarters,
+    q_koi_two_keys,
+    q_koi
+]
 
 ms_standard = {
     "test_name": "ms_standard",

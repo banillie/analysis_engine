@@ -69,17 +69,16 @@ def milestone_info_handling(output_list: list, t_list: list, **kwargs) -> list:
 
 
 def get_milestone_date(
-    project_name: str,
-    milestone_dictionary: Dict[str, Union[datetime.date, str]],
-    quarter_bl: str,
+    ms_dict: Dict[str, Union[datetime.date, str]],
     milestone_name: str,
+    tp: str,
+    p_name: str,
 ) -> datetime:
-    m_dict = milestone_dictionary[quarter_bl]
-    for k in m_dict.keys():
-        if m_dict[k]["Project"] == project_name:
-            if m_dict[k]["Milestone"] == milestone_name:
-                # removed milestone_name[1:]
-                return m_dict[k]["Date"]
+    qrt_ms_dict = ms_dict[tp]
+    for k in qrt_ms_dict:
+        if qrt_ms_dict[k]["Project"] == p_name:
+            if qrt_ms_dict[k]["Milestone"] == milestone_name:
+                return qrt_ms_dict[k]["Date"]
 
 
 class MilestoneData:

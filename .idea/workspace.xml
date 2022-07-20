@@ -24,12 +24,9 @@
   <component name="ChangeListManager">
     <list default="true" id="205bd717-e7d2-47dc-82c7-88a8dae3593c" name="Default Changelist" comment="change portfolio_financial_profile.py to include old bl profile data">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/analysis_engine/colouring.py" beforeDir="false" afterPath="$PROJECT_DIR$/analysis_engine/colouring.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/analysis_engine/data.py" beforeDir="false" afterPath="$PROJECT_DIR$/analysis_engine/data.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/analysis_engine/error_msgs.py" beforeDir="false" afterPath="$PROJECT_DIR$/analysis_engine/error_msgs.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/analysis_engine/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/analysis_engine/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/analysis_engine/milestones.py" beforeDir="false" afterPath="$PROJECT_DIR$/analysis_engine/milestones.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/analysis_engine/query.py" beforeDir="false" afterPath="$PROJECT_DIR$/analysis_engine/query.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/analysis_engine/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/analysis_engine/settings.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/test_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test_data.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tests/test_op_args.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test_op_args.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -83,20 +80,20 @@
     <option name="showLibraryContents" value="true" />
     <option name="showMembers" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ASKED_MARK_IGNORED_FILES_AS_EXCLUDED": "true",
-    "WebServerToolWindowFactoryState": "false",
-    "last_opened_file_path": "/home/will/code/python/analysis_engine/analysis_engine/ipdc",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "run.code.analysis.last.selected.profile": "pProject Default",
-    "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ASKED_MARK_IGNORED_FILES_AS_EXCLUDED&quot;: &quot;true&quot;,
+    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/home/will/code/python/analysis_engine/analysis_engine/ipdc&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;run.code.analysis.last.selected.profile&quot;: &quot;pProject Default&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/analysis_engine/ipdc" />
@@ -214,7 +211,7 @@
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
-    <configuration name="pytest for test_data.test_get_project_abbreviations" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
+    <configuration name="pytest for test_data.test_milestones" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
       <module name="analysis_engine" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -227,7 +224,7 @@
       <option name="_new_keywords" value="&quot;&quot;" />
       <option name="_new_parameters" value="&quot;&quot;" />
       <option name="_new_additionalArguments" value="&quot;--tb\u003dshort&quot;" />
-      <option name="_new_target" value="&quot;test_data.test_get_project_abbreviations&quot;" />
+      <option name="_new_target" value="&quot;test_data.test_milestones&quot;" />
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
@@ -323,19 +320,19 @@
       <item itemvalue="Python tests.temp_tests" />
       <item itemvalue="Python tests.test_all" />
       <item itemvalue="Python tests.test_data_all" />
+      <item itemvalue="Python tests.pytest for test_data.test_milestones" />
       <item itemvalue="Python tests.pytest for test_data.test_dashboards" />
       <item itemvalue="Python tests.pytest for test_data.test_dca_analysis" />
-      <item itemvalue="Python tests.pytest for test_data.test_get_project_abbreviations" />
       <item itemvalue="Python tests.pytest for test_data.test_query" />
       <item itemvalue="Python tests.pytest for test_data.test_speed_dials" />
     </list>
     <recent_temporary>
       <list>
         <item itemvalue="Python tests.pytest for test_data.test_query" />
+        <item itemvalue="Python tests.pytest for test_data.test_milestones" />
         <item itemvalue="Python tests.pytest for test_data.test_dashboards" />
         <item itemvalue="Python tests.pytest for test_data.test_speed_dials" />
         <item itemvalue="Python tests.pytest for test_data.test_dca_analysis" />
-        <item itemvalue="Python tests.pytest for test_data.test_get_project_abbreviations" />
       </list>
     </recent_temporary>
   </component>
@@ -479,7 +476,8 @@
       <workItem from="1658040003888" duration="1816000" />
       <workItem from="1658132932734" duration="12864000" />
       <workItem from="1658152821057" duration="4022000" />
-      <workItem from="1658222912519" duration="12979000" />
+      <workItem from="1658222912519" duration="16063000" />
+      <workItem from="1658302909362" duration="9356000" />
     </task>
     <task id="LOCAL-00001" summary="comment">
       <created>1578327909392</created>
@@ -821,7 +819,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/analysis_engine/milestones.py</url>
-          <line>741</line>
+          <line>740</line>
           <option name="timeStamp" value="643" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -833,11 +831,6 @@
           <url>file://$PROJECT_DIR$/analysis_engine/dashboards.py</url>
           <line>42</line>
           <option name="timeStamp" value="646" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/analysis_engine/query.py</url>
-          <line>41</line>
-          <option name="timeStamp" value="651" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
@@ -860,7 +853,7 @@
     <SUITE FILE_PATH="coverage/analysis_engine$pytest_for_test_data_test_speedial_graph.coverage" NAME="pytest for test_data.test_speedial_graph Coverage Results" MODIFIED="1656946835782" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
     <SUITE FILE_PATH="coverage/analysis_engine$pytest_for_test_data_test_json_master_open.coverage" NAME="pytest for test_data.test_json_master_open Coverage Results" MODIFIED="1656067420456" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
     <SUITE FILE_PATH="coverage/analysis_engine$pytest_for_test_data_test_get_groupings.coverage" NAME="pytest for test_data.test_get_groupings Coverage Results" MODIFIED="1656072210207" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
-    <SUITE FILE_PATH="coverage/analysis_engine$test_data_all.coverage" NAME="test_data_all Coverage Results" MODIFIED="1658236099552" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
+    <SUITE FILE_PATH="coverage/analysis_engine$test_data_all.coverage" NAME="test_data_all Coverage Results" MODIFIED="1658312824177" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
     <SUITE FILE_PATH="coverage/analysis_engine$annotation.coverage" NAME="annotation Coverage Results" MODIFIED="1658146248648" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/analysis_engine" />
     <SUITE FILE_PATH="coverage/analysis_engine$data_review.coverage" NAME="data_review Coverage Results" MODIFIED="1656949515148" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/analysis_engine" />
     <SUITE FILE_PATH="coverage/analysis_engine$pytest_for_test_data_test_get_project_abbreviations.coverage" NAME="pytest for test_data.test_get_project_abbreviations Coverage Results" MODIFIED="1658231494264" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
@@ -870,10 +863,10 @@
     <SUITE FILE_PATH="coverage/analysis_engine$pytest_for_test_data_test_json_master.coverage" NAME="pytest for test_data.test_json_master Coverage Results" MODIFIED="1657723093000" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
     <SUITE FILE_PATH="coverage/analysis_engine$ar_data.coverage" NAME="ar_data Coverage Results" MODIFIED="1652186875735" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/analysis_engine" />
     <SUITE FILE_PATH="coverage/analysis_engine$pytest_for_test_data_test_get_project_information.coverage" NAME="pytest for test_data.test_get_project_information Coverage Results" MODIFIED="1657620443660" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
-    <SUITE FILE_PATH="coverage/analysis_engine$pytest_for_test_data_test_query.coverage" NAME="pytest for test_data.test_query Coverage Results" MODIFIED="1658239550360" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/analysis_engine$pytest_for_test_data_test_query.coverage" NAME="pytest for test_data.test_query Coverage Results" MODIFIED="1658313240822" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
     <SUITE FILE_PATH="coverage/analysis_engine$pytest_for_test_data_test_speed_dials.coverage" NAME="pytest for test_data.test_speed_dials Coverage Results" MODIFIED="1658235417386" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
     <SUITE FILE_PATH="coverage/analysis_engine$pytest_for_test_data_test_open_word_doc.coverage" NAME="pytest for test_data.test_open_word_doc Coverage Results" MODIFIED="1656073155470" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
-    <SUITE FILE_PATH="coverage/analysis_engine$pytest_for_test_data_test_milestones.coverage" NAME="pytest for test_data.test_milestones Coverage Results" MODIFIED="1658230737188" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/analysis_engine$pytest_for_test_data_test_milestones.coverage" NAME="pytest for test_data.test_milestones Coverage Results" MODIFIED="1658313063707" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
     <SUITE FILE_PATH="coverage/analysis_engine$pytest_for_test_data_test_dca_analysis.coverage" NAME="pytest for test_data.test_dca_analysis Coverage Results" MODIFIED="1658235327454" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
     <SUITE FILE_PATH="coverage/analysis_engine$pytest_for_test_data_test_dashboards.coverage" NAME="pytest for test_data.test_dashboards Coverage Results" MODIFIED="1658235970953" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
     <SUITE FILE_PATH="coverage/analysis_engine$pytest_for_test_data_test_get_master_data.coverage" NAME="pytest for test_data.test_get_master_data Coverage Results" MODIFIED="1656428609247" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
