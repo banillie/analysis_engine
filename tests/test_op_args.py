@@ -7,28 +7,32 @@ q_koi = {
     'subparser_name': 'query',
     'koi': 'Brief Description'
 }
-
 q_koi_two_keys = {
     'test_name': 'query_koi_two_keys',
     'subparser_name': 'query',
     'koi': ['Brief Description', 'Last Business Case (BC) achieved']
 }
-
 query_koi_quarters = {
     'test_name': 'query_koi_quarters',
     'subparser_name': 'query',
     'koi': ['Brief Description', 'Last Business Case (BC) achieved'],
     "quarter": ["Q1 22/23", "Q4 21/22", "Q3 21/22"],
 }
-
 query_koi_milestones = {
     'test_name': 'query_koi_milestones',
     'subparser_name': 'query',
     'koi': "FBC CDG Approval",
     "quarter": ["Q1 22/23", "Q4 21/22", "Q3 21/22"],
 }
+q_koi_fn = {
+    'test_name': 'query_koi_fn',
+    'subparser_name': 'query',
+    'koi_fn': 'test_query_keys',
+    "quarter": ["Q1 22/23", "Q4 21/22", "Q3 21/22"],
+}
 
 QUERY_ARGS = [
+    q_koi_fn,
     query_koi_milestones,
     query_koi_quarters,
     q_koi_two_keys,
