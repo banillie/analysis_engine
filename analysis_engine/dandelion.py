@@ -311,7 +311,7 @@ class DandelionData:
             g_d[g]["tp"] = (y_axis, x_axis)
             g_d[g]["angle"] = g_ang_l[i]
 
-            logger.info("The angles for groups are " + str(g_ang_l))
+        logger.info("The angles for groups are " + str(g_ang_l))
 
             # else:
             #     g_d = {}

@@ -12,58 +12,12 @@ from analysis_engine.core_data import get_core, open_json_file
 from analysis_engine.dandelion import DandelionData, make_a_dandelion_auto
 from analysis_engine.dashboards import narrative_dashboard, cdg_dashboard
 from analysis_engine.dca import DcaData, dca_changes_into_word
+from analysis_engine.query import data_query_into_wb
 from analysis_engine.render_utils import get_input_doc, put_matplotlib_fig_into_word
 from analysis_engine.settings import report_config, set_default_args, return_koi_fn_keys
 from analysis_engine.milestones import MilestoneData, milestone_chart, put_milestones_into_wb
-
-# from analysis_engine.ar_data import get_gmpp_ar_data
-
-# from analysis_engine.data import (
-#     # get_master_data,
-#     # Master,
-#     # get_project_information,
-#     VfMData,
-#     # root_path,
-#     # cdg_root_path,
-#     vfm_into_excel,
-#     MilestoneData,
-#     put_milestones_into_wb,
-#     run_p_reports,
-#     RiskData,
-#     risks_into_excel,
-#     DcaData,
-#     dca_changes_into_excel,
-#     dca_changes_into_word,
-#     ipdc_dashboard,
-#     CostData,
-#     cost_v_schedule_chart_into_wb,
-#     # DandelionData,
-#     # put_matplotlib_fig_into_word,
-#     data_query_into_wb,
-#     get_data_query_key_names,
-#     # ProjectNameError,
-#     # ProjectGroupError,
-#     # ProjectStageError,
-#     # milestone_chart,
-#     cost_stackplot_graph,
-#     # make_a_dandelion_auto,
-#     build_speedials,
-#     get_sp_data,
-#     # DFT_GROUP,
-#     # get_input_doc,
-#     # InputError,
-#     # JsonMaster,
-#     # JsonData,
-#     open_json_file,
-#     cost_profile_into_wb_new,
-#     cost_profile_graph_new,
-#     # get_gmpp_data,
-#     # place_gmpp_online_keys_into_dft_master_format,
-#     portfolio_risks_into_excel,
-# )
-
-# from analysis_engine.ar_data import get_ar_data, ar_run_p_reports
-from analysis_engine.gmpp_int import get_gmpp_data
+from analysis_engine.speed_dials import build_speed_dials
+from analysis_engine.error_msgs import no_query_keys
 
 from analysis_engine.error_msgs import (
     logger,
@@ -73,40 +27,43 @@ from analysis_engine.error_msgs import (
 )
 
 
-# As more and more meta data going into config could use a refactor to collect it all in
-# one go?
-from analysis_engine.speed_dials import build_speed_dials
+class CliOpArgs:
+    def __init__(self, args, settings):
+        self.args = args
+        self.settings = settings
+        self.combined_args = {}
+        self.md = {}
+        self.wb_save = False
+        self.programme = ''
+        self.cli_op_args()
 
+    def cli_op_args(self):
+        self.programme = self.args['subparser_name']
+        op_args = {k: v for k, v in self.args.items() if v is not None}
 
-def get_remove_income_totals(
-    confi_path: Path,
-) -> Dict:
-    # Returns a list of dft groups
-    try:
-        config = configparser.ConfigParser()
-        config.read(confi_path)
-        dict = {
-            "remove income from totals": config["COSTS"]["remove_income"],
-        }
-    except:
-        logger.critical(
-            "Configuration file issue. Please check remove_income list in the COST section"
+        # these programs have the latest two quarters as default.
+        # other program defaults are setting very get_iter_list()
+        if ('dca', 'speed_dials', 'dashboards') == self.programme:
+            if 'quarter' not in list(op_args.keys()):
+                op_args['quarter'] = 'standard'
+
+        try:
+            if self.programme == 'query':
+                if "koi" not in op_args and "koi_fn" not in op_args:
+                    no_query_keys()
+        except InputError as e:
+            logger.critical(e)
+            sys.exit(1)
+
+        md = open_json_file(
+            str(self.settings["root_path"]) + self.settings["master_path"],
+            **op_args,
         )
-        sys.exit(1)
-
-    return dict
-
-
-def check_remove(op_args):  # subcommand arg
-    if "remove" in op_args:
-        from analysis_engine.data import CURRENT_LOG
-
-        for p in op_args["remove"]:
-            if p + " successfully removed from analysis." not in CURRENT_LOG:
-                logger.warning(
-                    p + " not recognised and therefore not removed from analysis."
-                    ' Please make sure "remove" entry is correct.'
-                )
+        set_default_args(op_args, group=md["groups"], quarters=md["current_quarter"])
+        combined_args = {**op_args, **self.settings}
+        self.combined_args = combined_args
+        self.md = md
+        self.wb_save = False
 
 
 def settings_switch(parse_args, report_type):
@@ -114,12 +71,12 @@ def settings_switch(parse_args, report_type):
     This function either runs the initiate function which saves core_data into a json file,
     or runs the run_analysis function which produces analytical analysis.
     """
-    arguments = parse_args
+    args = vars(parse_args)
     settings = report_config(report_type)
-    if vars(arguments)["subparser_name"] == "initiate":
+    if args["subparser_name"] == "initiate":
         initiate(settings)
     else:
-        run_analysis(vars(arguments), settings)
+        run_analysis(args, settings)
 
 
 def initiate(settings_dict):
@@ -135,41 +92,28 @@ def initiate(settings_dict):
 
 
 def run_analysis(args, settings):
-    programme = args["subparser_name"]
-    op_args = {k: v for k, v in args.items() if v is not None}
-
-    if ('dca', 'speed_dials', 'dashboards') == programme:
-        op_args['quarter'] = 'standard'
-
-    md = open_json_file(
-        str(settings["root_path"]) + settings["master_path"],
-        **op_args,
-    )
-    set_default_args(op_args, group=md["groups"], quarters=md["current_quarter"])
-    combined_args = {**op_args, **settings}
-    wb_save = False
-
+    cli = CliOpArgs(args, settings)
     try:
-        if programme == "dandelion":
-            d_data = DandelionData(md, **combined_args)
-            if op_args["chart"] != "save":
-                make_a_dandelion_auto(d_data, **op_args)
+        if cli.programme == "dandelion":
+            d_data = DandelionData(cli.md, **cli.combined_args)
+            if cli.combined_args["chart"] != "save":
+                make_a_dandelion_auto(d_data, **cli.combined_args)
             else:
-                d_graph = make_a_dandelion_auto(d_data, **combined_args)
+                d_graph = make_a_dandelion_auto(d_data, **cli.combined_args)
                 doc_path = (
-                    str(combined_args["root_path"]) + combined_args["word_landscape"]
+                    str(cli.combined_args["root_path"]) + cli.combined_args["word_landscape"]
                 )
                 doc = get_input_doc(doc_path)
                 put_matplotlib_fig_into_word(doc, d_graph, width=Inches(8))
                 doc_output_path = (
-                    str(combined_args["root_path"]) + combined_args["word_save_path"]
+                    str(cli.combined_args["root_path"]) + cli.combined_args["word_save_path"]
                 )
                 doc.save(doc_output_path.format("dandelion"))
 
-        if programme == "speed_dials":
-            combined_args["rag_number"] = "5"
+        if cli.programme == "speed_dials":
+            cli.combined_args["rag_number"] = "5"
             # combined_args["quarter"] = "standard"
-            sdmd = DcaData(md, **combined_args)
+            sdmd = DcaData(cli.md, **cli.combined_args)
             sdmd.get_changes()
             sd_doc = get_input_doc(
                 str(settings["root_path"]) + settings["word_landscape"]
@@ -180,9 +124,9 @@ def run_analysis(args, settings):
                 + settings["word_save_path"].format("speed_dials")
             )
 
-        if programme == "dcas":
+        if cli.programme == "dcas":
             # combined_args["quarter"] = "standard"
-            sdmd = DcaData(md, **combined_args)
+            sdmd = DcaData(cli.md, **cli.combined_args)
             sdmd.get_changes()
             changes_doc = dca_changes_into_word(
                 sdmd, str(settings["root_path"]) + settings["word_portrait"]
@@ -192,11 +136,11 @@ def run_analysis(args, settings):
                 + settings["word_save_path"].format("dca_changes")
             )
 
-        if programme == "dashboards":
+        if cli.programme == "dashboards":
             narrative_d_master = get_input_doc(
                 str(settings["root_path"]) + settings["narrative_dashboard"]
             )
-            narrative_dashboard(md, narrative_d_master)  #
+            narrative_dashboard(cli.md, narrative_d_master)  #
             narrative_d_master.save(
                 str(settings["root_path"])
                 + settings["excel_save_path"].format("narrative_dashboard_completed")
@@ -204,322 +148,54 @@ def run_analysis(args, settings):
             cdg_d_master = get_input_doc(
                 str(settings["root_path"]) + settings["dashboard"]
             )
-            cdg_dashboard(md, cdg_d_master)
+            cdg_dashboard(cli.md, cdg_d_master)
             cdg_d_master.save(
                 str(settings["root_path"])
                 + settings["excel_save_path"].format("dashboard_completed")
             )
 
-        if programme == "milestones":
-            ms = MilestoneData(md, **combined_args)
+        if cli.programme == "milestones":
+            ms = MilestoneData(cli.md, **cli.combined_args)
             if (
                     # "type" in combined_args  # NOT IN USE.
-                    "dates" in combined_args
-                    or "koi" in combined_args
-                    or "koi_fn" in combined_args
+                    "dates" in cli.combined_args
+                    or "koi" in cli.combined_args
+                    or "koi_fn" in cli.combined_args
             ):
-                return_koi_fn_keys(combined_args)
-                ms.filter_chart_info(**combined_args)
+                return_koi_fn_keys(cli.combined_args)
+                ms.filter_chart_info(**cli.combined_args)
 
-            if op_args["chart"] != "save":
-                ms_graph = milestone_chart(ms, **combined_args)
+            if cli.op_args["chart"] != "save":
+                ms_graph = milestone_chart(ms, **cli.combined_args)
                 doc = get_input_doc(
-                    str(combined_args["root_path"]) + combined_args["word_landscape"]
+                    str(cli.combined_args["root_path"]) + cli.combined_args["word_landscape"]
                 )
                 put_matplotlib_fig_into_word(doc, ms_graph, width=Inches(8))
                 doc.save(
-                    str(combined_args["root_path"])
-                    + combined_args["word_save_path"].format("milestones")
+                    str(cli.combined_args["root_path"])
+                    + cli.combined_args["word_save_path"].format("milestones")
                 )
             else:
-                milestone_chart(ms, **combined_args)
+                milestone_chart(ms, **cli.combined_args)
 
             wb = put_milestones_into_wb(ms)
             wb_save = True
 
-        if wb_save:
-            if programme != "dashboards":
-                wb.save(combined_args["root_path"] + "/output/{}.xlsx".format(programme))
+        if cli.programme == 'query':
+            op_args = return_koi_fn_keys(cli.combined_args)
+            wb = data_query_into_wb(cli.md, **op_args)
+            wb.save(
+                str(settings["root_path"])
+                + settings["excel_save_path"].format('query')
+            )
+
+        if cli.wb_save:
+            if cli.programme != "dashboards":
+                wb.save(cli.combined_args["root_path"] + "/output/{}.xlsx".format(cli.programme))
 
     except (ProjectNameError, FileNotFoundError, InputError) as e:
         logger.critical(e)
         sys.exit(1)
-
-
-# def ipdc_run_general(args):
-#     # get portfolio reporting group information.
-#     META = get_group_stage_data(
-#         str(root_path) + "/core_data/ipdc_config.ini",
-#     )
-#     dft_group = META[0]
-#     dft_stage = META[2]
-#
-#     programme = args["subparser_name"]
-#     # wrap this into logging
-#     try:
-#         print("compiling ipdc " + programme + " analysis")
-#     except TypeError:  # NoneType as no programme entered
-#         print("Further command required. Use --help flag for guidance")
-#         sys.exit(1)
-#
-#     m = Master(open_json_file(str(root_path / "core_data/json/master.json")))
-#
-#     try:
-#         # print(args.items())
-#         op_args = {
-#             k: v for k, v in args.items() if v is not None
-#         }  # removes None values
-#         # print(op_args)
-#         if "group" not in op_args:
-#             if "stage" not in op_args:
-#                 op_args["group"] = dft_group
-#             if "stage" in op_args:
-#                 if op_args["stage"] == []:
-#                     op_args["stage"] = dft_stage
-#         if "quarter" not in op_args:
-#             if "baseline" not in op_args:
-#                 op_args["quarter"] = ["standard"]
-#
-#         # projects to have income removed added
-#         remove_income = get_remove_income_totals(
-#             str(root_path) + "/core_data/ipdc_config.ini"
-#         )
-#         op_args["remove income from totals"] = remove_income[
-#             "remove income from totals"
-#         ]
-#
-#         # print(op_args)
-#
-#         if programme == "vfm":
-#             c = VfMData(m, **op_args)  # c is class
-#             wb = vfm_into_excel(c)
-#
-#         if programme == "risks":
-#             c = RiskData(m, **op_args)
-#             wb = risks_into_excel(c)
-#
-#         if programme == "portfolio_risks":
-#             c = RiskData(m, **op_args)
-#             wb = portfolio_risks_into_excel(c)
-#
-#         if programme == "dcas":
-#             c = DcaData(m, **op_args)
-#             wb = dca_changes_into_excel(c)
-#
-#         if programme == "costs":
-#             if "baseline" in op_args:
-#                 if op_args["baseline"] == ["current"]:
-#                     op_args["quarter"] = [str(m.current_quarter)]
-#                     c = CostData(m, **op_args)
-#                     c.get_forecast_cost_profile()
-#                     c.get_baseline_cost_profile()
-#             else:
-#                 c = CostData(m, **op_args)
-#                 c.get_forecast_cost_profile()
-#             wb = cost_profile_into_wb_new(c)
-#             if "chart" not in op_args:
-#                 op_args["chart"] = True
-#                 cost_profile_graph_new(c, m, **op_args)
-#             else:
-#                 if op_args["chart"] == "save":
-#                     op_args["chart"] = False
-#                     cost_graph = cost_profile_graph_new(c, m, **op_args)
-#                     doc = get_input_doc(root_path / "input/summary_temp_landscape.docx")
-#                     put_matplotlib_fig_into_word(doc, cost_graph, size=7.5)
-#                     doc.save(root_path / "output/costs_graph.docx")
-#                 if op_args["chart"] == "show":
-#                     op_args["chart"] = True
-#                     cost_profile_graph_new(c, m, **op_args)
-#
-#         if programme == "costs_sp":
-#             sp_data = get_sp_data(m, **op_args)
-#
-#             if "chart" not in op_args:
-#                 op_args["chart"] = True
-#                 cost_stackplot_graph(sp_data, m, **op_args)
-#             else:
-#                 if op_args["chart"] == "save":
-#                     op_args["chart"] = False
-#                     sp_graph = cost_stackplot_graph(sp_data, m, **op_args)
-#                     doc = get_input_doc(root_path / "input/summary_temp_landscape.docx")
-#                     put_matplotlib_fig_into_word(doc, sp_graph, size=7.5)
-#                     doc.save(root_path / "output/stack_plot_graph.docx")
-#                 if op_args["chart"] == "show":
-#                     op_args["chart"] = True
-#                     cost_stackplot_graph(sp_data, m, **op_args)
-#
-#         if programme == "speedial":
-#             doc = get_input_doc(root_path / "input/summary_temp.docx")
-#             land_doc = get_input_doc(root_path / "input/summary_temp_landscape.docx")
-#             # if "conf_type" in op_args:
-#             #     if op_args["conf_type"] == "sro_three":
-#             #         op_args["rag_number"] = "3"
-#             #         op_args["quarter"] = [str(m.current_quarter)]
-#             #         data = DcaData(m, **op_args)
-#             #         build_speedials(data, land_doc)
-#             #         land_doc.save(root_path / "output/speed_dial_graph.docx")
-#             #     else:  # refactor!!
-#             op_args["rag_number"] = "3"
-#             data = DcaData(m, **op_args)
-#             data.get_changes()
-#             doc = dca_changes_into_word(data, doc)
-#             doc.save(root_path / "output/speed_dials_text.docx")
-#             build_speedials(data, land_doc)
-#             land_doc.save(root_path / "output/speed_dial_graph.docx")
-#             # else:
-#             #     op_args["rag_number"] = "5"
-#             #     data = DcaData(m, **op_args)
-#             #     data.get_changes()
-#             #     doc = dca_changes_into_word(data, doc)
-#             #     doc.save(root_path / "output/speed_dials_text.docx")
-#             #     build_speedials(data, land_doc)
-#             #     land_doc.save(root_path / "output/speed_dial_graph.docx")
-#
-#         if programme == "milestones":
-#             ms = MilestoneData(m, **op_args)
-#
-#             if (
-#                     "type" in op_args
-#                     or "dates" in op_args
-#                     or "koi" in op_args
-#                     or "koi_fn" in op_args
-#             ):
-#                 op_args = return_koi_fn_keys(op_args)
-#                 ms.filter_chart_info(**op_args)
-#
-#             if "chart" not in op_args:
-#                 pass
-#             else:
-#                 if op_args["chart"] == "save":
-#                     op_args["chart"] = False
-#                     ms_graph = milestone_chart(ms, m, **op_args)
-#                     doc = get_input_doc(root_path / "input/summary_temp_landscape.docx")
-#                     put_matplotlib_fig_into_word(
-#                         doc, ms_graph, size=8, transparent=False
-#                     )
-#                     doc.save(root_path / "output/milestones_chart.docx")
-#                 if op_args["chart"] == "show":
-#                     milestone_chart(ms, m, **op_args)
-#
-#             wb = put_milestones_into_wb(ms)
-#
-#         if programme == "dandelion":
-#             if op_args["quarter"] == [
-#                 "standard"
-#             ]:  # converts "standard" default to current quarter
-#                 op_args["quarter"] = [str(m.current_quarter)]
-#             # op_args["order_by"] = "schedule"
-#             d_data = DandelionData(m, **op_args)
-#             if "chart" not in op_args:
-#                 op_args["chart"] = True
-#                 make_a_dandelion_auto(d_data, **op_args)
-#             else:
-#                 if op_args["chart"] == "save":
-#                     op_args["chart"] = False
-#                     d_graph = make_a_dandelion_auto(d_data, **op_args)
-#                     doc = get_input_doc(root_path / "input/summary_temp_landscape.docx")
-#                     put_matplotlib_fig_into_word(doc, d_graph, size=7)
-#                     doc.save(root_path / "output/dandelion_graph.docx")
-#                 if op_args["chart"] == "show":
-#                     make_a_dandelion_auto(d_data, **op_args)
-#
-#         if programme == "dashboards":
-#             # op_args["baseline"] = ["standard"]
-#             dashboard_master = get_input_doc(root_path / "input/dashboards_master.xlsx")
-#             wb = ipdc_dashboard(m, dashboard_master, op_args)
-#             wb.save(root_path / "output/completed_ipdc_dashboard.xlsx")
-#
-#         if programme == "summaries":
-#             op_args["quarter"] = [str(m.current_quarter)]
-#             if "type" not in op_args:
-#                 op_args["type"] = "short"
-#             run_p_reports(m, **op_args)
-#
-#         # if programme == "top_250_summaries":
-#         #     if op_args["group"] == dft_group:
-#         #         op_args["group"] = ["HSRG", "RSS", "RIG", "RPE"]
-#         #     top35_run_p_reports(m, **op_args)
-#
-#         if programme == "matrix":
-#             costs = CostData(m, **op_args)
-#             miles = MilestoneData(m, *op_args)
-#             miles.calculate_schedule_changes()
-#             wb = cost_v_schedule_chart_into_wb(miles, costs)
-#             wb.save(root_path / "output/costs_schedule_matrix.xlsx")
-#
-#         if programme == "query":
-#             if "koi" not in op_args and "koi_fn" not in op_args:
-#                 logger.critical(
-#                     "Please enter a key name(s) using either --koi or --koi_fn"
-#                 )
-#                 sys.exit(1)
-#             op_args = return_koi_fn_keys(op_args)
-#             wb = data_query_into_wb(m, **op_args)
-#
-#         if programme == "gmpp_data":
-#             get_gmpp_data()
-#
-#         # if programme == "gmpp_ar":
-#         #     ar_meta = get_gmpp_ar_data(
-#         #         str(root_path) + "/core_data/ipdc_config.ini",
-#         #     )
-#         #     ar_data = get_ar_data(ar_meta["gmpp_ar_master"])
-#         #     ar_run_p_reports(ar_data)
-#
-#         check_remove(op_args)
-#
-#         try:
-#             if programme != "dashboards":
-#                 wb.save(root_path / "output/{}.xlsx".format(programme))
-#         except UnboundLocalError:
-#             pass
-#
-#         print(programme + " analysis has been compiled. Enjoy!")
-#
-#     except (ProjectNameError, FileNotFoundError, InputError) as e:
-#         logger.critical(e)
-#         sys.exit(1)
-#
-#     # TODO optional_args produces a list of strings, each of which are to be in the output file name path.
-#     # optional_args = get_args_for_file(args)
-#     # wb.save(root_path / "output/{}_{}.xlsx".format(programme, optional_args))
-#     # print(programme + " analysis has been compiled. Enjoy!")
-#
-# def cdg_run_general(args):
-
-#
-
-#
-#
-#         if programme == "dashboards":
-#             dashboard_master = get_input_doc(
-#                 cdg_root_path / "input/dashboard_master.xlsx"
-#             )
-#             narrative_d_master = get_input_doc(
-#                 cdg_root_path / "input/narrative_dashboard_master.xlsx"
-#             )
-#             wb = cdg_narrative_dashboard(m, narrative_d_master)
-#             wb.save(
-#                 cdg_root_path
-#                 / "output/{}.xlsx".format("cdg_narrative_dashboard_completed")
-#             )
-#             wb = cdg_dashboard(m, dashboard_master)
-#             wb.save(cdg_root_path / "output/{}.xlsx".format("cdg_dashboard_completed"))
-#
-#         check_remove(op_args)
-#
-#         try:
-#             if programme != "dashboards":
-#                 wb.save(cdg_root_path / "output/{}.xlsx".format(programme))
-#         except UnboundLocalError:
-#             pass
-#
-#         print(programme + " analysis has been compiled. Enjoy!")
-#
-#     except (ProjectNameError, FileNotFoundError, InputError) as e:
-#         logger.critical(e)
-#         sys.exit(1)
-#
 
 
 def run_parsers():
@@ -560,6 +236,10 @@ def run_parsers():
         description=dashboard_description,
         formatter_class=RawTextHelpFormatter,
     )  # no associated op args.
+    parser_data_query = subparsers.add_parser(
+        "query", help="returns required data from core data."
+    )
+
 
     parser_speed_dial = subparsers.add_parser("speed_dials", help="speed dial analysis")
     parser_dca = subparsers.add_parser("dcas", help="dca analysis")
@@ -583,6 +263,7 @@ def run_parsers():
         parser_dandelion,
         parser_dca,
         parser_milestones,
+        parser_data_query,
     ]:
         sub.add_argument(
             "--quarter",
@@ -604,9 +285,8 @@ def run_parsers():
         parser_dandelion,  # ipdc also has pipeline option. Not tested yet.
         # parser_costs,
         # parser_costs_sp,
-        # parser_data_query,
+        parser_data_query,
         parser_milestones,
-        # parser_data_query,
     ]:
         sub.add_argument(
             "--stage",
@@ -631,7 +311,7 @@ def run_parsers():
         parser_milestones,
         # parser_summaries,
         # parser_costs_sp,
-        # parser_data_query,
+        parser_data_query,
     ]:
         sub.add_argument(
             "--group",
@@ -662,6 +342,23 @@ def run_parsers():
         help="Provide the type of value to include in dandelion. Options are"
         ' "benefits" or "income".',
     )
+
+    for sub in [parser_milestones, parser_data_query]:
+        sub.add_argument(
+            "--koi",
+            type=str,
+            action="store",
+            nargs="+",
+            help="Returns the specified keys of interest (KOI).",
+        )
+
+    for sub in [parser_milestones, parser_data_query]:
+        sub.add_argument(
+            "--koi_fn",
+            type=str,
+            action="store",
+            help="provide name of csv file contain key names",
+        )
 
     parser_milestones.add_argument(
         "--dates",

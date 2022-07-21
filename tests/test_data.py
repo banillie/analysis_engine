@@ -1,4 +1,3 @@
-import pytest
 from docx.shared import Inches
 
 from tests.test_op_args import (
@@ -8,7 +7,8 @@ from tests.test_op_args import (
     MILESTONES_OP_ARGS, QUERY_ARGS,
 )
 
-from analysis_engine.settings import report_config, set_default_args, return_koi_fn_keys
+from analysis_engine.main import CliOpArgs
+from analysis_engine.settings import report_config, return_koi_fn_keys
 from analysis_engine.core_data import (
     PythonMasterData,
     get_master_data,
@@ -29,45 +29,44 @@ from analysis_engine.milestones import (
     milestone_chart,
     put_milestones_into_wb,
 )
-from analysis_engine.error_msgs import no_query_keys
 from analysis_engine.query import data_query_into_wb
 
 SETTINGS_DICT = report_config(REPORTING_TYPE)
 
 
 # replicates how arguments are pass into the cli.
-class CliOpArgs:
-    def __init__(self, args):
-        self.args = args
-        self.combined_args = {}
-        self.md = {}
-        self.wb_save = False
-        self.programme = ''
-        self.replicate_cli_op_args()
-
-    def replicate_cli_op_args(self):
-        self.programme = self.args['subparser_name']
-        op_args = {k: v for k, v in self.args.items() if v is not None}
-
-        # these programs have the latest two quarters as default.
-        # other program defaults are setting very get_iter_list()
-        if ('dca', 'speed_dials', 'dashboards') == self.programme:
-            if 'quarter' not in list(op_args.keys()):
-                op_args['quarter'] = 'standard'
-
-        if self.programme == 'query':
-            if "koi" not in op_args and "koi_fn" not in op_args:
-                no_query_keys()
-
-        md = open_json_file(
-            str(SETTINGS_DICT["root_path"]) + SETTINGS_DICT["master_path"],
-            **op_args,
-        )
-        set_default_args(op_args, group=md["groups"], quarters=md["current_quarter"])
-        combined_args = {**op_args, **SETTINGS_DICT}
-        self.combined_args = combined_args
-        self.md = md
-        self.wb_save = False
+# class CliOpArgs:
+#     def __init__(self, args):
+#         self.args = args
+#         self.combined_args = {}
+#         self.md = {}
+#         self.wb_save = False
+#         self.programme = ''
+#         self.replicate_cli_op_args()
+#
+#     def replicate_cli_op_args(self):
+#         self.programme = self.args['subparser_name']
+#         op_args = {k: v for k, v in self.args.items() if v is not None}
+#
+#         # these programs have the latest two quarters as default.
+#         # other program defaults are setting very get_iter_list()
+#         if ('dca', 'speed_dials', 'dashboards') == self.programme:
+#             if 'quarter' not in list(op_args.keys()):
+#                 op_args['quarter'] = 'standard'
+#
+#         if self.programme == 'query':
+#             if "koi" not in op_args and "koi_fn" not in op_args:
+#                 no_query_keys()
+#
+#         md = open_json_file(
+#             str(SETTINGS_DICT["root_path"]) + SETTINGS_DICT["master_path"],
+#             **op_args,
+#         )
+#         set_default_args(op_args, group=md["groups"], quarters=md["current_quarter"])
+#         combined_args = {**op_args, **SETTINGS_DICT}
+#         self.combined_args = combined_args
+#         self.md = md
+#         self.wb_save = False
 
 
 def test_get_project_information():
@@ -129,14 +128,14 @@ def test_get_project_abbreviations():
 def test_build_dandelion_graph():
     for x in DANDELION_OP_ARGS_DICT:
         print(x['test_name'])
-        cli = CliOpArgs(x)
+        cli = CliOpArgs(x, SETTINGS_DICT)
         dmd = DandelionData(cli.md, **cli.combined_args)
         d_lion = make_a_dandelion_auto(dmd, **cli.combined_args)
-        doc_path = str(SETTINGS_DICT["root_path"]) + SETTINGS_DICT["word_landscape"]
+        doc_path = str(cli.combined_args["root_path"]) + cli.settings["word_landscape"]
         doc = get_input_doc(doc_path)
         put_matplotlib_fig_into_word(doc, d_lion, width=Inches(8))
         doc_output_path = (
-            str(SETTINGS_DICT["root_path"]) + SETTINGS_DICT["word_save_path"]
+            str(cli.settings["root_path"]) + cli.settings["word_save_path"]
         )
         doc.save(doc_output_path.format(f"{x['test_name']}"))
 
@@ -144,58 +143,60 @@ def test_build_dandelion_graph():
 def test_dca_analysis():
     for x in SPEED_DIAL_AND_DCA_OP_ARGS:
         print(x['test_name'])
-        cli = CliOpArgs(x)
+        cli = CliOpArgs(x, SETTINGS_DICT)
         sdmd = DcaData(cli.md, **cli.combined_args)
         sdmd.get_changes()
         changes_doc = dca_changes_into_word(
-            sdmd, str(SETTINGS_DICT["root_path"]) + SETTINGS_DICT["word_portrait"]
+            sdmd, str(cli.settings["root_path"]) + cli.settings["word_portrait"]
         )
         changes_doc.save(
-            str(SETTINGS_DICT["root_path"])
-            + SETTINGS_DICT["word_save_path"].format(f"dca_changes_{x['test_name']}")
+            str(cli.settings["root_path"])
+            + cli.settings["word_save_path"].format(f"dca_changes_{x['test_name']}")
         )
 
 
 def test_speed_dials():
     for x in SPEED_DIAL_AND_DCA_OP_ARGS:
         print(x['test_name'])
-        cli = CliOpArgs(x)
+        cli = CliOpArgs(x, SETTINGS_DICT)
         sdmd = DcaData(cli.md, **cli.combined_args)
         sdmd.get_changes()
         sd_doc = get_input_doc(
-            str(SETTINGS_DICT["root_path"]) + SETTINGS_DICT["word_landscape"]
+            str(cli.settings["root_path"]) + cli.settings["word_landscape"]
         )
         build_speed_dials(sdmd, sd_doc)
         sd_doc.save(
-            str(SETTINGS_DICT["root_path"])
-            + SETTINGS_DICT["word_save_path"].format(f"speed_dials_{x['test_name']}")
+            str(cli.settings["root_path"])
+            + cli.settings["word_save_path"].format(f"speed_dials_{x['test_name']}")
         )
 
 
+# add group opitions to this?
 def test_dashboards():
-    cli = CliOpArgs({'subparser_name': 'dashboards'})
+    op_args = {'subparser_name': 'dashboards'}
+    cli = CliOpArgs(op_args, SETTINGS_DICT)
     narrative_d_master = get_input_doc(
-        str(SETTINGS_DICT["root_path"]) + SETTINGS_DICT["narrative_dashboard"]
+        str(cli.settings["root_path"]) + cli.settings["narrative_dashboard"]
     )
     narrative_dashboard(cli.md, narrative_d_master)  #
     narrative_d_master.save(
-        str(SETTINGS_DICT["root_path"])
-        + SETTINGS_DICT["excel_save_path"].format("narrative_dashboard_completed")
+        str(cli.settings["root_path"])
+        + cli.settings["excel_save_path"].format("narrative_dashboard_completed")
     )
     cdg_d_master = get_input_doc(
-        str(SETTINGS_DICT["root_path"]) + SETTINGS_DICT["dashboard"]
+        str(cli.settings["root_path"]) + cli.settings["dashboard"]
     )
     cdg_dashboard(cli.md, cdg_d_master)
     cdg_d_master.save(
-        str(SETTINGS_DICT["root_path"])
-        + SETTINGS_DICT["excel_save_path"].format("dashboard_completed")
+        str(cli.settings["root_path"])
+        + cli.settings["excel_save_path"].format("dashboard_completed")
     )
 
 
 def test_milestones():
     for x in MILESTONES_OP_ARGS:
         print(x['test_name'])
-        cli = CliOpArgs(x)
+        cli = CliOpArgs(x, SETTINGS_DICT)
         ms = MilestoneData(cli.md, **cli.combined_args)
         if (
             # "type" in combined_args  # NOT IN USE.
@@ -207,29 +208,29 @@ def test_milestones():
             ms.filter_chart_info(**cli.combined_args)
         ms_graph = milestone_chart(ms, **cli.combined_args)
         doc = get_input_doc(
-            str(SETTINGS_DICT["root_path"]) + SETTINGS_DICT["word_landscape"]
+            str(cli.settings["root_path"]) + cli.settings["word_landscape"]
         )
         put_matplotlib_fig_into_word(doc, ms_graph, width=Inches(8))
         doc.save(
-            str(SETTINGS_DICT["root_path"])
-            + SETTINGS_DICT["word_save_path"].format(f"milestones_{x['test_name']}")
+            str(cli.settings["root_path"])
+            + cli.settings["word_save_path"].format(f"milestones_{x['test_name']}")
         )
         wb = put_milestones_into_wb(ms)
         wb.save(
-            str(SETTINGS_DICT["root_path"])
-            + SETTINGS_DICT["excel_save_path"].format(f"milestones_{x['test_name']}")
+            str(cli.settings["root_path"])
+            + cli.settings["excel_save_path"].format(f"milestones_{x['test_name']}")
         )
 
 
 def test_query():
     for x in QUERY_ARGS:
         print(x['test_name'])
-        cli = CliOpArgs(x)
+        cli = CliOpArgs(x, SETTINGS_DICT)
         op_args = return_koi_fn_keys(cli.combined_args)
         wb = data_query_into_wb(cli.md, **op_args)
         wb.save(
-            str(SETTINGS_DICT["root_path"])
-            + SETTINGS_DICT["excel_save_path"].format(f"{x['test_name']}")
+            str(cli.settings["root_path"])
+            + cli.settings["excel_save_path"].format(f"{x['test_name']}")
         )
 
 

@@ -109,3 +109,34 @@ def get_board_date(op_args):
         return parser.parse(date_str).date()
     except:
         config_issue()
+
+
+# def get_remove_income_totals(
+#     confi_path: Path,
+# ) -> Dict:
+#     # Returns a list of dft groups
+#     try:
+#         config = configparser.ConfigParser()
+#         config.read(confi_path)
+#         dict = {
+#             "remove income from totals": config["COSTS"]["remove_income"],
+#         }
+#     except:
+#         logger.critical(
+#             "Configuration file issue. Please check remove_income list in the COST section"
+#         )
+#         sys.exit(1)
+#
+#     return dict
+
+#
+# def check_remove(op_args):  # subcommand arg
+#     if "remove" in op_args:
+#         from analysis_engine.data import CURRENT_LOG
+#
+#         for p in op_args["remove"]:
+#             if p + " successfully removed from analysis." not in CURRENT_LOG:
+#                 logger.warning(
+#                     p + " not recognised and therefore not removed from analysis."
+#                     ' Please make sure "remove" entry is correct.'
+#                 )

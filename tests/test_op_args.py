@@ -30,8 +30,13 @@ q_koi_fn = {
     'koi_fn': 'test_query_keys',
     "quarter": ["Q1 22/23", "Q4 21/22", "Q3 21/22"],
 }
+q_koi_failure = {
+    'test_name': 'query_koi_failure',
+    'subparser_name': 'query',
+}
 
 QUERY_ARGS = [
+    # q_koi_failure,
     q_koi_fn,
     query_koi_milestones,
     query_koi_quarters,
