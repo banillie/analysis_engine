@@ -1,5 +1,5 @@
 # should include some settings that are wrong to test error messaging
-REPORTING_TYPE = "cdg"
+REPORTING_TYPE = "ipdc"
 chart = "show"
 
 q_koi = {
@@ -126,13 +126,19 @@ dlion_standard = {
     "subparser_name": "dandelion",
     "chart": chart,
 }
-dlion_groups = {
+dlion_groups_cdg = {
     "test_name": "dlion_groups",
     "subparser_name": "dandelion",
     "group": ["SCS", "CFPD"],
     "chart": chart,
 }
-dlion_stages = {
+dlion_groups_ipdc = {
+    "test_name": "dlion_groups",
+    "subparser_name": "dandelion",
+    "group": ["RPE", "HSRG"],
+    "chart": chart,
+}
+dlion_stages_cdg = {
     "test_name": "dlion_stages",
     "subparser_name": "dandelion",
     "stage": [
@@ -144,17 +150,34 @@ dlion_stages = {
     ],
     "chart": chart,
 }
+dlion_stages_ipdc = {
+    "test_name": "dlion_stages",
+    "subparser_name": "dandelion",
+    "stage": [
+        'Strategic Outline Case',  # generalise these
+        'Outline Business Case',
+        "Full Business Case",
+    ],
+    "chart": chart,
+    'abbreviations': True,
+}
 dlion_quarter = {
     "test_name": "dlion_quarter",
     "subparser_name": "dandelion",
-    "quarter": ["Q2 21/22"],
-    "group": ["SCS", "CFPD", "GF"],
+    "quarter": ["Q3 21/22"],
     "chart": chart,
 }
-dlion_angles = {
+dlion_angles_cdg = {
     "test_name": "dlion_angles",
     "subparser_name": "dandelion",
     "angles": [280, 360, 80],
+    "chart": chart,
+}
+dlion_angles_ipdc = {
+    "test_name": "dlion_angles",
+    "subparser_name": "dandelion",
+    "angles": [250, 300, 350, 40, 90, 140],
+    'abbreviations': True,
     "chart": chart,
 }
 dlion_benefits = {
@@ -178,16 +201,30 @@ dlion_cli_group = {
     "chart": chart,
 }
 
-DANDELION_OP_ARGS_DICT = [
-    # # dlion_cli_group,  # Failing.
-    dlion_income,
-    dlion_benefits,
-    dlion_angles,
-    dlion_quarter,
-    dlion_stages,
-    dlion_groups,
-    dlion_standard,
-]
+if REPORTING_TYPE == 'cdg':
+    DANDELION_OP_ARGS_DICT = [
+        # dlion_cli_group,  # Failing.
+        dlion_income,
+        dlion_benefits,
+        dlion_angles_cdg,
+        dlion_quarter,
+        dlion_stages_cdg,
+        dlion_groups_cdg,
+        dlion_standard,
+    ]
+if REPORTING_TYPE == 'ipdc':
+    DANDELION_OP_ARGS_DICT = [
+        # # dlion_cli_group,  # Failing.
+        # dlion_income,
+        # dlion_benefits,
+        dlion_angles_ipdc,
+        # dlion_quarter,
+        # dlion_stages_ipdc,
+        # dlion_groups_ipdc,
+        # dlion_standard,
+    ]
+
+
 
 sd_standard = {
     "test_name": "sd_standard",

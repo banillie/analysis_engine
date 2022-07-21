@@ -42,9 +42,7 @@ def _platform_docs_dir(dir: str) -> Path:
 
 def report_config(report_type: str):
     if report_type == 'cdg' or report_type == 'ipdc':
-        func = project_data_from_master
-    if report_type == 'top_250':
-        func = project_data_from_master_month
+        func = project_data_from_master   # option to use project_data_from_master_month is necessary
     return {
         'report': report_type,
         'root_path': str(_platform_docs_dir(report_type)),
@@ -109,6 +107,17 @@ def get_board_date(op_args):
         return parser.parse(date_str).date()
     except:
         config_issue()
+
+
+def get_remove_income(op_args):
+    try:
+        config_path = op_args['root_path'] + op_args['config']
+        config = configparser.ConfigParser()
+        config.read(config_path)
+        return config['COSTS']['remove_income']
+    except:
+        config_issue()
+
 
 
 # def get_remove_income_totals(

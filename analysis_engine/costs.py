@@ -6,7 +6,8 @@ from analysis_engine.segmentation import (
 )
 from analysis_engine.cleaning import convert_none_types
 from analysis_engine.dictionaries import YEAR_LIST, COST_KEY_LIST, STANDARDISE_COST_KEYS
-from analysis_engine.error_msgs import logger
+from analysis_engine.error_msgs import ProjectNameError, logger
+from analysis_engine.settings import get_remove_income
 
 
 class CostData:
@@ -19,6 +20,7 @@ class CostData:
 
     def get_totals(self) -> None:
         lower_dict = {}
+        rm = get_remove_income(self.kwargs)
         for tp in self.kwargs['quarter']:
             spent = 0
             remaining = 0
@@ -27,26 +29,49 @@ class CostData:
             income_remaining = 0
             income_total = 0
             group = get_group(self.master, tp, **self.kwargs)
+            income_removed = []
             for project_name in group:
                 p_data = get_correct_p_data(self.master, project_name, tp)
-                spent += convert_none_types(
-                    p_data[STANDARDISE_COST_KEYS["spent"][self.report]]
-                )
-                remaining += convert_none_types(
-                    p_data[STANDARDISE_COST_KEYS["remaining"][self.report]]
-                )
+                #  All try statements temporary until consistency between rpting datasets
+                try:
+                    spent += convert_none_types(
+                        p_data[STANDARDISE_COST_KEYS[self.report]["spent"]]
+                    )
+                except KeyError:
+                    spent += 0
+                try:
+                    remaining += convert_none_types(
+                        p_data[STANDARDISE_COST_KEYS[self.report]["remaining"]]
+                    )
+                except KeyError:
+                    remaining += 0
                 total += convert_none_types(
-                    p_data[STANDARDISE_COST_KEYS["total"][self.report]]
+                    p_data[STANDARDISE_COST_KEYS[self.report]["total"]]
                 )
-                income_achieved += convert_none_types(
-                    p_data[STANDARDISE_COST_KEYS["income_achieved"][self.report]]
-                )
-                income_remaining += convert_none_types(
-                    p_data[STANDARDISE_COST_KEYS["income_remaining"][self.report]]
-                )
+                try:
+                    income_achieved += convert_none_types(
+                        p_data[STANDARDISE_COST_KEYS[self.report]["income_achieved"]]
+                    )
+                except KeyError:
+                    income_achieved += 0
+                try:
+                    income_remaining += convert_none_types(
+                        p_data[STANDARDISE_COST_KEYS[self.report]["income_remaining"]]
+                    )
+                except KeyError:
+                    income_remaining += 0
                 income_total += convert_none_types(
-                    p_data[STANDARDISE_COST_KEYS["income_total"][self.report]]
+                    p_data[STANDARDISE_COST_KEYS[self.report]["income_total"]]
                 )
+
+                # option here handled via config file
+                if project_name in rm:
+                    try:
+                        total - p_data[STANDARDISE_COST_KEYS[self.report]["income_total"]]
+                        if [project_name] == group:
+                            logger.info(f'income has been removed from the total of {project_name}')
+                    except KeyError:  # some older masters do have key.
+                        raise ProjectNameError()
 
             lower_dict[tp] = {
                 "costs_spent": spent,
@@ -56,6 +81,8 @@ class CostData:
                 "income_remaining": income_remaining,
                 "income_total": income_total,
             }
+
+
 
         # if self.kwargs['report'] == "ipdc":
         #     for tp in self.iter_list:

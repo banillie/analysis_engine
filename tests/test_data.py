@@ -1,5 +1,6 @@
 from docx.shared import Inches
 
+from analysis_engine.error_msgs import ProjectNameError, ProjectGroupError, ProjectStageError, logger
 from tests.test_op_args import (
     REPORTING_TYPE,
     DANDELION_OP_ARGS_DICT,
@@ -34,41 +35,6 @@ from analysis_engine.query import data_query_into_wb
 SETTINGS_DICT = report_config(REPORTING_TYPE)
 
 
-# replicates how arguments are pass into the cli.
-# class CliOpArgs:
-#     def __init__(self, args):
-#         self.args = args
-#         self.combined_args = {}
-#         self.md = {}
-#         self.wb_save = False
-#         self.programme = ''
-#         self.replicate_cli_op_args()
-#
-#     def replicate_cli_op_args(self):
-#         self.programme = self.args['subparser_name']
-#         op_args = {k: v for k, v in self.args.items() if v is not None}
-#
-#         # these programs have the latest two quarters as default.
-#         # other program defaults are setting very get_iter_list()
-#         if ('dca', 'speed_dials', 'dashboards') == self.programme:
-#             if 'quarter' not in list(op_args.keys()):
-#                 op_args['quarter'] = 'standard'
-#
-#         if self.programme == 'query':
-#             if "koi" not in op_args and "koi_fn" not in op_args:
-#                 no_query_keys()
-#
-#         md = open_json_file(
-#             str(SETTINGS_DICT["root_path"]) + SETTINGS_DICT["master_path"],
-#             **op_args,
-#         )
-#         set_default_args(op_args, group=md["groups"], quarters=md["current_quarter"])
-#         combined_args = {**op_args, **SETTINGS_DICT}
-#         self.combined_args = combined_args
-#         self.md = md
-#         self.wb_save = False
-
-
 def test_get_project_information():
     project_info = get_project_information(SETTINGS_DICT)
     assert isinstance(project_info, dict)
@@ -83,7 +49,7 @@ def test_get_group_metadata_from_config():
     assert isinstance(META, dict)
 
 
-def test_get_master_data_paths():
+def test_get_raw_master_data_in_list():
     md = get_master_data(SETTINGS_DICT)
     assert isinstance(md, list)
 
@@ -91,15 +57,18 @@ def test_get_master_data_paths():
 def test_saving_creating_json_master():
     GROUP_META = get_group_meta_data(SETTINGS_DICT)
     STAGE_META = get_stage_meta_data(SETTINGS_DICT)
-
     META = {**GROUP_META, **STAGE_META}
 
-    master = PythonMasterData(
-        get_master_data(SETTINGS_DICT),
-        get_project_information(SETTINGS_DICT),
-        META,
-        data_type=SETTINGS_DICT["report"],
-    )
+    try:
+        master = PythonMasterData(
+            get_master_data(SETTINGS_DICT),
+            get_project_information(SETTINGS_DICT),
+            META,
+            data_type=SETTINGS_DICT["report"],
+        )
+    except (ProjectNameError, ProjectGroupError, ProjectStageError) as e:
+        logger.critical(e)
+        pass
 
     master_json_path = str(
         "{0}/core_data/json/master".format(SETTINGS_DICT["root_path"])

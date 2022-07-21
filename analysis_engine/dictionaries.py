@@ -157,12 +157,23 @@ COST_KEY_LIST = [
 ]
 
 STANDARDISE_COST_KEYS = {
-    "spent": {"cdg": "Total Costs Spent"},
-    "remaining": {"cdg": "Total Costs Remaining"},
-    "total": {"cdg": "Total Costs"},
-    "income_achieved": {"cdg": "Total Income Achieved"},
-    "income_remaining": {"cdg": "Total Income Remaining"},
-    "income_total": {"cdg": "Total Income"},
+    'cdg': {
+        "spent": "Total Costs Spent",
+        "remaining": "Total Costs Remaining",
+        "total": "Total Costs",
+        "income_achieved": "Total Income Achieved",
+        "income_remaining": "Total Income Remaining",
+        "income_total": "Total Income",
+    },
+    'ipdc': {
+            "spent": None,
+            "remaining": None,
+            "total": "Total Forecast",
+            "income_achieved": None,
+            "income_remaining": None,
+            "income_total": "Total Forecast - Income both Revenue and Capital",
+    }
+
 }
 
 STANDARDISE_BEN_KEYS = {

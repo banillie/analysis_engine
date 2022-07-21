@@ -401,8 +401,8 @@ class main:
         )
 
         args = parser.parse_args(sys.argv[1:2])
-        if vars(args)["command"] not in ["ipdc", "top_250", "cdg"]:
-            print("Unrecognised command. Options are ipdc, top250 or cdg")
+        if vars(args)["command"] not in ["ipdc", "cdg"]:
+            print("Unrecognised command. Options are ipdc or cdg")
             exit(1)
 
         # use dispatch pattern to invoke method with same name

@@ -293,9 +293,14 @@ class DandelionData:
                     "The number of groups and angles don't match. Stopping."
                 )
 
-        largest_g_radius = (
-            max(g_radius_list) * 2.5
-        )  # multiplied here so a gap to central circle
+        if self.kwargs['report'] == 'ipdc':
+            largest_g_radius = (
+                    max(g_radius_list) * 4
+            )  # multiplied here so a gap to central circle
+        if self.kwargs['report'] == 'cdg':
+            largest_g_radius = (
+                max(g_radius_list) * 2.5
+            )  # multiplied here so a gap to central circle
 
         for i, g in enumerate(self.group):
             # if len(self.group) > 1: # this needs testing
@@ -589,6 +594,11 @@ def make_a_dandelion_auto(dl: DandelionData, **kwargs):
     x_list = []
     y_list = []
     obj = []
+
+    p_font_size = 10
+    if kwargs['report'] == 'ipdc':
+        p_font_size = 8
+
     for c in dl.d_data.keys():
         circle = plt.Circle(
             dl.d_data[c]["axis"],  # x, y position
@@ -621,6 +631,7 @@ def make_a_dandelion_auto(dl: DandelionData, **kwargs):
                     x,
                     y,
                     text,
+                    fontsize=p_font_size,
                     ha=dl.d_data[c]["ha"],
                     va=dl.d_data[c]["va"],
                 )
