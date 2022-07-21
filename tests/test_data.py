@@ -129,15 +129,20 @@ def test_build_dandelion_graph():
     for x in DANDELION_OP_ARGS_DICT:
         print(x['test_name'])
         cli = CliOpArgs(x, SETTINGS_DICT)
-        dmd = DandelionData(cli.md, **cli.combined_args)
-        d_lion = make_a_dandelion_auto(dmd, **cli.combined_args)
-        doc_path = str(cli.combined_args["root_path"]) + cli.settings["word_landscape"]
-        doc = get_input_doc(doc_path)
-        put_matplotlib_fig_into_word(doc, d_lion, width=Inches(8))
-        doc_output_path = (
-            str(cli.settings["root_path"]) + cli.settings["word_save_path"]
-        )
-        doc.save(doc_output_path.format(f"{x['test_name']}"))
+        d_data = DandelionData(cli.md, **cli.combined_args)
+        if cli.combined_args["chart"] != "save":
+            make_a_dandelion_auto(d_data, **cli.combined_args)
+        else:
+            d_graph = make_a_dandelion_auto(d_data, **cli.combined_args)
+            doc_path = (
+                    str(cli.combined_args["root_path"]) + cli.combined_args["word_landscape"]
+            )
+            doc = get_input_doc(doc_path)
+            put_matplotlib_fig_into_word(doc, d_graph, width=Inches(8))
+            doc_output_path = (
+                    str(cli.combined_args["root_path"]) + cli.combined_args["word_save_path"]
+            )
+            doc.save(doc_output_path.format(f"{x['test_name']}"))
 
 
 def test_dca_analysis():
@@ -147,10 +152,10 @@ def test_dca_analysis():
         sdmd = DcaData(cli.md, **cli.combined_args)
         sdmd.get_changes()
         changes_doc = dca_changes_into_word(
-            sdmd, str(cli.settings["root_path"]) + cli.settings["word_portrait"]
+            sdmd, str(cli.combined_args["root_path"]) + cli.combined_args["word_portrait"]
         )
         changes_doc.save(
-            str(cli.settings["root_path"])
+            str(cli.combined_args["root_path"])
             + cli.settings["word_save_path"].format(f"dca_changes_{x['test_name']}")
         )
 
@@ -162,11 +167,11 @@ def test_speed_dials():
         sdmd = DcaData(cli.md, **cli.combined_args)
         sdmd.get_changes()
         sd_doc = get_input_doc(
-            str(cli.settings["root_path"]) + cli.settings["word_landscape"]
+            str(cli.combined_args["root_path"]) + cli.combined_args["word_landscape"]
         )
         build_speed_dials(sdmd, sd_doc)
         sd_doc.save(
-            str(cli.settings["root_path"])
+            str(cli.combined_args["root_path"])
             + cli.settings["word_save_path"].format(f"speed_dials_{x['test_name']}")
         )
 
@@ -176,20 +181,20 @@ def test_dashboards():
     op_args = {'subparser_name': 'dashboards'}
     cli = CliOpArgs(op_args, SETTINGS_DICT)
     narrative_d_master = get_input_doc(
-        str(cli.settings["root_path"]) + cli.settings["narrative_dashboard"]
+        str(cli.combined_args["root_path"]) + cli.combined_args["narrative_dashboard"]
     )
     narrative_dashboard(cli.md, narrative_d_master)  #
     narrative_d_master.save(
-        str(cli.settings["root_path"])
-        + cli.settings["excel_save_path"].format("narrative_dashboard_completed")
+        str(cli.combined_args["root_path"])
+        + cli.combined_args["excel_save_path"].format("narrative_dashboard_completed")
     )
     cdg_d_master = get_input_doc(
-        str(cli.settings["root_path"]) + cli.settings["dashboard"]
+        str(cli.combined_args["root_path"]) + cli.combined_args["dashboard"]
     )
     cdg_dashboard(cli.md, cdg_d_master)
     cdg_d_master.save(
-        str(cli.settings["root_path"])
-        + cli.settings["excel_save_path"].format("dashboard_completed")
+        str(cli.combined_args["root_path"])
+        + cli.combined_args["excel_save_path"].format("dashboard_completed")
     )
 
 
@@ -199,25 +204,29 @@ def test_milestones():
         cli = CliOpArgs(x, SETTINGS_DICT)
         ms = MilestoneData(cli.md, **cli.combined_args)
         if (
-            # "type" in combined_args  # NOT IN USE.
-            "dates" in cli.combined_args
-            or "koi" in cli.combined_args
-            or "koi_fn" in cli.combined_args
+                # "type" in combined_args  # NOT IN USE.
+                "dates" in cli.combined_args
+                or "koi" in cli.combined_args
+                or "koi_fn" in cli.combined_args
         ):
             return_koi_fn_keys(cli.combined_args)
             ms.filter_chart_info(**cli.combined_args)
-        ms_graph = milestone_chart(ms, **cli.combined_args)
-        doc = get_input_doc(
-            str(cli.settings["root_path"]) + cli.settings["word_landscape"]
-        )
-        put_matplotlib_fig_into_word(doc, ms_graph, width=Inches(8))
-        doc.save(
-            str(cli.settings["root_path"])
-            + cli.settings["word_save_path"].format(f"milestones_{x['test_name']}")
-        )
+
+        if cli.combined_args["chart"] != "show":
+            ms_graph = milestone_chart(ms, **cli.combined_args)
+            doc = get_input_doc(
+                str(cli.combined_args["root_path"]) + cli.combined_args["word_landscape"]
+            )
+            put_matplotlib_fig_into_word(doc, ms_graph, width=Inches(8))
+            doc.save(
+                str(cli.combined_args["root_path"])
+                + cli.combined_args["word_save_path"].format(f"milestones_{x['test_name']}")
+            )
+        else:
+            milestone_chart(ms, **cli.combined_args)
+
         wb = put_milestones_into_wb(ms)
-        wb.save(
-            str(cli.settings["root_path"])
+        wb.save(cli.combined_args["root_path"]
             + cli.settings["excel_save_path"].format(f"milestones_{x['test_name']}")
         )
 

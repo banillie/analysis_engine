@@ -67,7 +67,7 @@ class CliOpArgs:
 
 
 def settings_switch(parse_args, report_type):
-    """ "
+    """
     This function either runs the initiate function which saves core_data into a json file,
     or runs the run_analysis function which produces analytical analysis.
     """
@@ -112,46 +112,44 @@ def run_analysis(args, settings):
 
         if cli.programme == "speed_dials":
             cli.combined_args["rag_number"] = "5"
-            # combined_args["quarter"] = "standard"
             sdmd = DcaData(cli.md, **cli.combined_args)
             sdmd.get_changes()
             sd_doc = get_input_doc(
-                str(settings["root_path"]) + settings["word_landscape"]
+                str(cli.combined_args["root_path"]) + cli.combined_args["word_landscape"]
             )
             build_speed_dials(sdmd, sd_doc)
             sd_doc.save(
-                str(settings["root_path"])
-                + settings["word_save_path"].format("speed_dials")
+                str(cli.combined_args["root_path"])
+                + cli.combined_args["word_save_path"].format("speed_dials")
             )
 
         if cli.programme == "dcas":
-            # combined_args["quarter"] = "standard"
             sdmd = DcaData(cli.md, **cli.combined_args)
             sdmd.get_changes()
             changes_doc = dca_changes_into_word(
-                sdmd, str(settings["root_path"]) + settings["word_portrait"]
+                sdmd, str(cli.combined_args["root_path"]) + cli.combined_args["word_portrait"]
             )
             changes_doc.save(
-                str(settings["root_path"])
-                + settings["word_save_path"].format("dca_changes")
+                str(cli.combined_args["root_path"])
+                + cli.combined_args["word_save_path"].format("dca_changes")
             )
 
         if cli.programme == "dashboards":
             narrative_d_master = get_input_doc(
-                str(settings["root_path"]) + settings["narrative_dashboard"]
+                str(cli.combined_args["root_path"]) + cli.combined_args["narrative_dashboard"]
             )
             narrative_dashboard(cli.md, narrative_d_master)  #
             narrative_d_master.save(
-                str(settings["root_path"])
-                + settings["excel_save_path"].format("narrative_dashboard_completed")
+                str(cli.combined_args["root_path"])
+                + cli.combined_args["excel_save_path"].format("narrative_dashboard_completed")
             )
             cdg_d_master = get_input_doc(
-                str(settings["root_path"]) + settings["dashboard"]
+                str(cli.combined_args["root_path"]) + cli.combined_args["dashboard"]
             )
             cdg_dashboard(cli.md, cdg_d_master)
             cdg_d_master.save(
-                str(settings["root_path"])
-                + settings["excel_save_path"].format("dashboard_completed")
+                str(cli.combined_args["root_path"])
+                + cli.combined_args["excel_save_path"].format("dashboard_completed")
             )
 
         if cli.programme == "milestones":
@@ -165,7 +163,7 @@ def run_analysis(args, settings):
                 return_koi_fn_keys(cli.combined_args)
                 ms.filter_chart_info(**cli.combined_args)
 
-            if cli.op_args["chart"] != "save":
+            if cli.combined_args["chart"] != "show":
                 ms_graph = milestone_chart(ms, **cli.combined_args)
                 doc = get_input_doc(
                     str(cli.combined_args["root_path"]) + cli.combined_args["word_landscape"]
@@ -179,19 +177,20 @@ def run_analysis(args, settings):
                 milestone_chart(ms, **cli.combined_args)
 
             wb = put_milestones_into_wb(ms)
-            wb_save = True
+            wb.save(cli.combined_args["root_path"] + "/output/{}.xlsx".format(cli.programme))
+            # cli.wb_save = True
 
         if cli.programme == 'query':
             op_args = return_koi_fn_keys(cli.combined_args)
             wb = data_query_into_wb(cli.md, **op_args)
             wb.save(
-                str(settings["root_path"])
+                str(cli.settings["root_path"])
                 + settings["excel_save_path"].format('query')
             )
 
-        if cli.wb_save:
-            if cli.programme != "dashboards":
-                wb.save(cli.combined_args["root_path"] + "/output/{}.xlsx".format(cli.programme))
+        # if cli.wb_save:
+        #     if cli.programme != "dashboards":
+        #         wb.save(cli.combined_args["root_path"] + "/output/{}.xlsx".format(cli.programme))
 
     except (ProjectNameError, FileNotFoundError, InputError) as e:
         logger.critical(e)
