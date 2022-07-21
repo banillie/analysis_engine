@@ -30,6 +30,7 @@ from analysis_engine.dictionaries import (
     FONT_TYPE,
     STANDARDISE_DCA_KEYS,
     NEXT_STAGE_DICT,
+    DASHBOARD_BC_STAGE_ABBREVIATION,
 )
 
 
@@ -73,11 +74,6 @@ def dandelion_number_text(number: int, **kwargs) -> str:
             return str(round(number, 1))
     try:
         if number == 0:
-            ## Not in use
-            # if "none_handle" in kwargs:
-            #     if kwargs["none_handle"] == "none":
-            #         return "£0m"
-            # else:
             return "£0"
         if total_len <= 2:
             # round_total = round(number, -1)
@@ -103,29 +99,6 @@ def dandelion_number_text(number: int, **kwargs) -> str:
                 return "£" + str(round_total)[:3] + "," + str(round_total)[3] + "bn"
             else:
                 return "£" + str(round_total)[:3] + "bn"
-
-        # this bit is for top250
-        if total_len == 7:
-            round_total = round(number, -5)
-            return "£" + str(round_total)[:1] + "m"
-        if total_len == 8:
-            round_total = round(number, -6)
-            return "£" + str(round_total)[:2] + "m"
-        if total_len == 9:
-            round_total = round(number, -7)
-            return "£" + str(round_total)[:3] + "m"
-        if total_len == 10:
-            round_total = round(number, -8)
-            if str(round_total)[1] != "0":
-                return "£" + str(round_total)[:1] + "," + str(round_total)[1] + "bn"
-            else:
-                return "£" + str(round_total)[:1] + "bn"
-        if total_len == 11:
-            round_total = round(number, -8)
-            if str(round_total)[2] != "0":
-                return "£" + str(round_total)[:2] + "," + str(round_total)[2] + "bn"
-            else:
-                return "£" + str(round_total)[:2] + "bn"
 
     except ValueError:
         print("not number")
@@ -258,8 +231,12 @@ class DandelionData:
             if "same_size" in self.kwargs:
                 if self.kwargs["same_size"] == "Yes":
                     g_wlc = 46000
+
+            g_abb = g
+            if self.group_stage_switch is 'stage':
+                g_abb = DASHBOARD_BC_STAGE_ABBREVIATION[g]
             g_text = (
-                g + "\n" + dandelion_number_text(g_wlc, **self.kwargs)
+                g_abb + "\n" + dandelion_number_text(g_wlc, **self.kwargs)
             )  # group text
 
             if g_wlc < pf_wlc / 10:  # adjusts any very small figures
@@ -293,47 +270,39 @@ class DandelionData:
                     "The number of groups and angles don't match. Stopping."
                 )
 
-        if self.kwargs['report'] == 'ipdc':
-            largest_g_radius = (
-                    max(g_radius_list) * 4
-            )  # multiplied here so a gap to central circle
-        if self.kwargs['report'] == 'cdg':
-            largest_g_radius = (
-                max(g_radius_list) * 2.5
-            )  # multiplied here so a gap to central circle
+        # multiplied here so a gap to central circle
+        largest_g_radius = (max(g_radius_list) * 2.5)
+        if len(self.group) > 3:
+            largest_g_radius = (max(g_radius_list) * 3)
 
         for i, g in enumerate(self.group):
-            # if len(self.group) > 1: # this needs testing
-            y_axis = 0 + (
-                (math.sqrt(pf_wlc) + largest_g_radius)
-                * math.sin(math.radians(g_ang_l[i]))
-            )
-            x_axis = 0 + (math.sqrt(pf_wlc) + largest_g_radius) * math.cos(
-                math.radians(g_ang_l[i])
-            )
+            if len(self.group) > 1: # this needs testing
+                y_axis = 0 + (
+                    (math.sqrt(pf_wlc) + largest_g_radius)
+                    * math.sin(math.radians(g_ang_l[i]))
+                )
+                x_axis = 0 + (math.sqrt(pf_wlc) + largest_g_radius) * math.cos(
+                    math.radians(g_ang_l[i])
+                )
 
-            g_d[g]["axis"] = (y_axis, x_axis)
-            g_d[g]["tp"] = (y_axis, x_axis)
-            g_d[g]["angle"] = g_ang_l[i]
+                g_d[g]["axis"] = (y_axis, x_axis)
+                g_d[g]["tp"] = (y_axis, x_axis)
+                g_d[g]["angle"] = g_ang_l[i]
 
-        logger.info("The angles for groups are " + str(g_ang_l))
+                logger.info("The angles for groups are " + str(g_ang_l))
 
-            # else:
-            #     g_d = {}
-            #     pf_wlc = g_wlc * 3
-            #     # g_text = g + "\n" + dandelion_number_text(g_wlc)  # group text
-            #     if g_wlc == 0:
-            #         g_wlc = 20
-            #     g_d[g] = {
-            #         "axis": (0, 0),
-            #         "r": math.sqrt(g_wlc),
-            #         "wlc": g_wlc,
-            #         "colour": "#FFFFFF",
-            #         "text": g_text,
-            #         "fill": "dashed",
-            #         "ec": "grey",
-            #         "alignment": ("center", "center"),
-            #     }
+            else:
+                g_d = {}  # delete the dictionary
+                g_d[g] = {
+                    "axis": (0, 0),
+                    "r": math.sqrt(g_wlc),
+                    "wlc": g_wlc,
+                    "colour": "#FFFFFF",
+                    "text": g_text,
+                    "fill": "dashed",
+                    "ec": "grey",
+                    "alignment": ("center", "center"),
+                }
 
         ## second outer circle
         for i, g in enumerate(self.group):
@@ -354,16 +323,14 @@ class DandelionData:
                     p_value = get_dandelion_type_total(
                         self.master, self.kwargs
                     )  # project wlc
-
-                #     p_value = p_values_list[i]
                 if "same_size" in self.kwargs:
                     if self.kwargs["same_size"] == "Yes":
                         p_value = 6000
 
                 if (
-                    p_value < pf_wlc * 0.05
+                    p_value < pf_wlc * 0.02
                 ):  # achieve some consistency for zero / low values
-                    p_value_adjusted = pf_wlc * 0.05
+                    p_value_adjusted = pf_wlc * 0.008
                 else:
                     p_value_adjusted = p_value
 
@@ -399,7 +366,7 @@ class DandelionData:
                 #     p_schedule = 0
 
                 p_schedule = []
-                p_list.append((p_radius, p_schedule, p))
+                p_list.append((p_value, p_radius, p_schedule, p))
 
                 if "abbreviations" in self.kwargs:
                     abb = self.master["project_information"][p]["Abbreviations"]
@@ -491,7 +458,7 @@ class DandelionData:
             g_x_axis = g_d[g]["axis"][1]  # group x axis
 
             try:
-                p_values_list, p_schedule_list, p_list = zip(*l_g_d[g])
+                p_value, p_radius_list, p_schedule_list, p_list = zip(*l_g_d[g])
             except ValueError:  # handles no projects in l_g_d list
                 continue
 
@@ -504,7 +471,7 @@ class DandelionData:
                     ang_l = [g_d[g]["angle"], g_d[g]["angle"] + 70]
 
             largest_p_radius = (
-                p_values_list[0] * 1.5
+                p_radius_list[0] * 1.5
             )  # value used for distance from inner circle.
             for i, p in enumerate(p_list):
                 angle = ang_l[i]
@@ -610,8 +577,6 @@ def make_a_dandelion_auto(dl: DandelionData, **kwargs):
         )
         obj.append(circle)
         ax.add_patch(circle)
-        x = dl.d_data[c]["tp"][0]
-        y = dl.d_data[c]["tp"][1]
         text = dl.d_data[c]["text"].strip()  # what does strip do?
         if c in dl.group or c == "portfolio":
             ax.annotate(
@@ -626,6 +591,8 @@ def make_a_dandelion_auto(dl: DandelionData, **kwargs):
                 zorder=3,
             )
         else:
+            x = dl.d_data[c]["tp"][0]
+            y = dl.d_data[c]["tp"][1]
             ts.append(
                 ax.text(
                     x,

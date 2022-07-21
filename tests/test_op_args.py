@@ -137,6 +137,7 @@ dlion_groups_ipdc = {
     "subparser_name": "dandelion",
     "group": ["RPE", "HSRG"],
     "chart": chart,
+    'abbreviations': True,
 }
 dlion_stages_cdg = {
     "test_name": "dlion_stages",
@@ -194,11 +195,18 @@ dlion_income = {
     "chart": chart,
 }
 # this will crash if project not in quarter data master
-dlion_cli_group = {
+dlion_cli_group_cdg = {
     "test_name": "dlion_groups",
     "subparser_name": "dandelion",
     "group": ["WIT retail project", "Mayfield", "MSG"],
     "chart": chart,
+}
+dlion_cli_group_ipdc = {
+    "test_name": "dlion_groups",
+    "subparser_name": "dandelion",
+    "group": ["RPE"],
+    "chart": chart,
+    "abbreviations": True,
 }
 
 if REPORTING_TYPE == 'cdg':
@@ -214,14 +222,14 @@ if REPORTING_TYPE == 'cdg':
     ]
 if REPORTING_TYPE == 'ipdc':
     DANDELION_OP_ARGS_DICT = [
-        # # dlion_cli_group,  # Failing.
-        # dlion_income,
-        # dlion_benefits,
+        dlion_cli_group_ipdc,
+        dlion_income,
+        dlion_benefits,
         dlion_angles_ipdc,
-        # dlion_quarter,
-        # dlion_stages_ipdc,
-        # dlion_groups_ipdc,
-        # dlion_standard,
+        dlion_quarter,
+        dlion_stages_ipdc,
+        dlion_groups_ipdc,
+        dlion_standard,
     ]
 
 
