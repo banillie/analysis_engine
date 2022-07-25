@@ -133,6 +133,7 @@ dlion_standard = {
     "test_name": "dlion_standard",
     "subparser_name": "dandelion",
     "chart": chart,
+    "abbreviations": True,
 }
 dlion_groups_cdg = {
     "test_name": "dlion_groups",
@@ -231,8 +232,8 @@ if REPORTING_TYPE == 'cdg':
 if REPORTING_TYPE == 'ipdc':
     DANDELION_OP_ARGS_DICT = [
         dlion_cli_group_ipdc,
-        dlion_income,
-        dlion_benefits,
+        # dlion_income,
+        # dlion_benefits,
         dlion_angles_ipdc,
         dlion_quarter,
         dlion_stages_ipdc,

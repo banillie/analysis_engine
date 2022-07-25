@@ -128,7 +128,6 @@ def get_integration_data(op_args):
         op_args["project_map_path"] = config["GMPP INTEGRATION"]["project_map"]
         op_args["gmpp_data_path"] = config["GMPP INTEGRATION"]["gmpp_data"]
         op_args["key_map_path"] = config["GMPP INTEGRATION"]["key_map"]
-        op_args["master_comp_path"] = config["GMPP INTEGRATION"]["master_for_comparison"]
         return op_args
     except:
         config_issue()

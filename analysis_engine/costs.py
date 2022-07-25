@@ -67,7 +67,7 @@ class CostData:
                 # option here handled via config file
                 if project_name in rm:
                     try:
-                        total - p_data[STANDARDISE_COST_KEYS[self.report]["income_total"]]
+                        total - convert_none_types(p_data[STANDARDISE_COST_KEYS[self.report]["income_total"]])
                         if [project_name] == group:
                             logger.info(f'income has been removed from the total of {project_name}')
                     except KeyError:  # some older masters do have key.

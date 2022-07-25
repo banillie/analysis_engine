@@ -64,15 +64,8 @@ def get_gmpp_online_data(**op_args):
             if n_value != 0:
                 s_value = n_value
             if "Date" in key or "date" in key or "6.03c: To" in key:
-                # s_value = datetime(*xlrd.xldate_as_tuple(n_value, 0))
-                # print(project_name, key, n_value)
                 if n_value > 20000:
-                    # if "7.02.10" in key:
-                    #     pass
-                    # else:
                     s_value = datetime(*xlrd.xldate_as_tuple(n_value, 0))
-                    # else:
-                    #     s_value = n_value
             if "Grade" in key:  # to make grade 6 consistent with dft data
                 try:
                     s_value = int(s_value)
@@ -84,72 +77,47 @@ def get_gmpp_online_data(**op_args):
             else:
                 initial_dict[project_name] = {key: s_value}
 
-    ## Use for checking to see if key map missing keys.
-    # for x in missing_keys:
-    #     print(x)
-
     return initial_dict
 
 
 def place_gmpp_online_keys_into_dft_master_format(
     initial_dict: Dict,
-    # km_file_name: str,
-    # ipdc_d_file_path,
-    project_list=False,
     **op_args,
 ):
     wb = Workbook()
     ws = wb.active
 
-    # get non-gmpp keys from team
-
     key_map = get_map(
         load_workbook(op_args['root_path'] + "/input/{}.xlsx".format(op_args["key_map_path"])),
         commas=True,
         gaps=True,
+        flip=True
     )
-    # ipdc_data = project_data_from_master(
-    #     op_args['root_path'] + "/core_data/{}.xlsx".format(op_args["master_comp_path"]), 2, 2021
-    # )
     project_map = get_map(
         load_workbook(op_args['root_path'] + '/input/GMPP_INTEGRATION_PROJECT_MAP.xlsx')
     )
 
-
-    # a_proj_name = ipdc_data.projects[1]
-    # # a_proj_name = 'East Coast Mainline Programme'
-    # if project_list:
-    #     list_of_projects = project_list
-    # else:
     list_of_projects = list(initial_dict.keys())
 
     for x, project in enumerate(list_of_projects):
         ws.cell(row=1, column=3 + x).value = project_map[project]
-        i = 0
-        for i, k in enumerate(initial_dict[project].keys()):
-            v = initial_dict[project][k]
-            ws.cell(row=2 + i, column=3 + x).value = v
-            if isinstance(v, datetime.datetime):
-                ws.cell(row=2 + i, column=3 + x).number_format = "dd/mm/yy"
-        # for v in ipdc_data.data[a_proj_name].keys():
-        #     # for ipa_key, dft_key in key_map.items():
-        #     ws.cell(row=2 + i, column=1).value = v
-        #     try:
-        #         ipa_key = key_map[v]
-        #         ws.cell(row=2 + i, column=2).value = ipa_key
-        #         # try:
-        #         ipa_value = initial_dict[project][ipa_key]
-        #         if isinstance(ipa_value, datetime.datetime):
-        #             ipa_value = ipa_value.date()
-        #             ws.cell(
-        #                 row=2 + i, column=3 + x, value=ipa_value
-        #             ).number_format = "dd/mm/yy"
-        #         ws.cell(row=2 + i, column=3 + x).value = ipa_value
-        #         # except KeyError:
-        #         #     pass
-        #     except KeyError:
-        #         pass
-        #     i += 1
+        for i, k in enumerate(key_map.keys()):
+            if x == 0:
+                try:
+                    ws.cell(row=2 + i, column=1).value = k
+                    ws.cell(row=2 + i, column=2).value = key_map[k]
+                except KeyError:
+                    print(f'{k} not in the key map')
+            try:
+                if key_map[k] == 'Total Forecast':
+                    pass
+                    # v = initial_dict[project][]
+                v = initial_dict[project][k]
+                ws.cell(row=2 + i, column=3 + x).value = v
+                if isinstance(v, datetime.datetime):
+                    ws.cell(row=2 + i, column=3 + x).number_format = "dd/mm/yy"
+            except KeyError:
+                pass
 
     ws.cell(row=1, column=1).value = "Project Name (DfT Keys)"
     ws.cell(row=1, column=2).value = "Project Name (IPA Keys)"
