@@ -1,6 +1,8 @@
 from docx.shared import Inches
 
 from analysis_engine.error_msgs import ProjectNameError, ProjectGroupError, ProjectStageError, logger
+from analysis_engine.gmpp_int import get_gmpp_data
+from analysis_engine.merge import Merge
 from tests.test_op_args import (
     REPORTING_TYPE,
     DANDELION_OP_ARGS_DICT,
@@ -9,7 +11,7 @@ from tests.test_op_args import (
 )
 
 from analysis_engine.main import CliOpArgs
-from analysis_engine.settings import report_config, return_koi_fn_keys
+from analysis_engine.settings import report_config, return_koi_fn_keys, get_masters_to_merge
 from analysis_engine.core_data import (
     PythonMasterData,
     get_master_data,
@@ -212,6 +214,15 @@ def test_query():
         )
 
 
+def test_gmpp_online_data():
+    cli = CliOpArgs({'subparser_name': 'gmpp_data'}, SETTINGS_DICT)
+    get_gmpp_data(**cli.combined_args)
+
+
+def test_merge_masters():
+    cli = CliOpArgs({'subparser_name': 'merge_masters'}, SETTINGS_DICT)
+    get_masters_to_merge(cli.combined_args)
+    Merge(**cli.combined_args)
 
 # @pytest.mark.skip(reason="refactor required")
 # def test_calculating_spent(master):

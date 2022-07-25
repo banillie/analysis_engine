@@ -1,6 +1,7 @@
 import configparser
 import platform
 import csv
+import json
 from pathlib import Path
 from typing import List, Dict
 from dateutil import parser
@@ -118,6 +119,33 @@ def get_remove_income(op_args):
     except:
         config_issue()
 
+
+def get_integration_data(op_args):
+    try:
+        config_path = op_args['root_path'] + op_args['config']
+        config = configparser.ConfigParser()
+        config.read(config_path)
+        op_args["project_map_path"] = config["GMPP INTEGRATION"]["project_map"]
+        op_args["gmpp_data_path"] = config["GMPP INTEGRATION"]["gmpp_data"]
+        op_args["key_map_path"] = config["GMPP INTEGRATION"]["key_map"]
+        op_args["master_comp_path"] = config["GMPP INTEGRATION"]["master_for_comparison"]
+        return op_args
+    except:
+        config_issue()
+
+
+def get_masters_to_merge(op_args):
+    # try:
+    config_path = op_args['root_path'] + op_args['config']
+    config = configparser.ConfigParser()
+    config.read(config_path)
+    # msts = config["MERGE"]["masters_list"]
+    msts = json.loads(config.get('MERGE', 'masters_list'))  # to return a list
+    # group_all = json.loads(config.get('GROUPS', 'all_groups'))
+    # # except:
+    # #     config_issue()
+
+    op_args['masters_list'] = msts
 
 
 # def get_remove_income_totals(

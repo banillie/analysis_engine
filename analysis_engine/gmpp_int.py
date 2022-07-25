@@ -1,32 +1,9 @@
-import configparser
 import datetime
-from pathlib import Path
-from typing import Dict, List
+from typing import Dict
 from openpyxl import load_workbook, Workbook
 
 from datamaps.api import project_data_from_master
-
-
-def get_integration_data(
-    confi_path: Path,
-) -> Dict:
-    # Returns a list of dft groups
-    try:
-        config = configparser.ConfigParser()
-        config.read(confi_path)
-        path_dict = {
-            "project_map_path": config["GMPP INTEGRATION"]["project_map"],
-            "gmpp_data_path": config["GMPP INTEGRATION"]["gmpp_data"],
-            "key_map_path": config["GMPP INTEGRATION"]["key_map"],
-            "master_comp_path": config["GMPP INTEGRATION"]["master_for_comparison"],
-        }
-    except:
-        logger.critical(
-            "Configuration file issue. Please check and make sure it's correct."
-        )
-        sys.exit(1)
-
-    return path_dict
+from analysis_engine.settings import get_integration_data
 
 
 def get_map(wb, commas=False, gaps=False, flip=False):
@@ -54,25 +31,21 @@ def get_map(wb, commas=False, gaps=False, flip=False):
     return output_dict
 
 
-def get_gmpp_online_data(
-    file_name: str,
-):
+def get_gmpp_online_data(**op_args):
     from datetime import datetime
     import xlrd
 
+    file_name = op_args['gmpp_data_path']
     try:
-        wb = load_workbook(
-            root_path / "input/{}.xlsx".format(file_name), data_only=True
-        )
-    except:  # bit of flexibility to help user with different file types
-        wb = load_workbook(
-            root_path / "input/{}.xlsm".format(file_name), data_only=True
-        )
+        wb = load_workbook(op_args['root_path'] + '/input/{}.xlsx'.format(file_name, data_only=True))
+    except:
+        wb = load_workbook(op_args['root_path'] + '/input/{}.xlsm'.format(file_name, data_only=True))
+
     ws = wb.active
     ws_list = [ws]
 
     key_map = get_map(
-        load_workbook(root_path / "input/GMPP_INTEGRATION_KEY_MAP.xlsx"),
+        load_workbook(op_args['root_path'] + "/input/GMPP_INTEGRATION_KEY_MAP.xlsx"),
         commas=True,
         gaps=True,
     )
@@ -120,9 +93,10 @@ def get_gmpp_online_data(
 
 def place_gmpp_online_keys_into_dft_master_format(
     initial_dict: Dict,
-    km_file_name: str,
-    ipdc_d_file_path,
+    # km_file_name: str,
+    # ipdc_d_file_path,
     project_list=False,
+    **op_args,
 ):
     wb = Workbook()
     ws = wb.active
@@ -130,48 +104,63 @@ def place_gmpp_online_keys_into_dft_master_format(
     # get non-gmpp keys from team
 
     key_map = get_map(
-        load_workbook(root_path / "input/{}.xlsx".format(km_file_name)),
+        load_workbook(op_args['root_path'] + "/input/{}.xlsx".format(op_args["key_map_path"])),
         commas=True,
         gaps=True,
     )
-    ipdc_data = project_data_from_master(
-        root_path / "core_data/{}.xlsx".format(ipdc_d_file_path), 2, 2021
+    # ipdc_data = project_data_from_master(
+    #     op_args['root_path'] + "/core_data/{}.xlsx".format(op_args["master_comp_path"]), 2, 2021
+    # )
+    project_map = get_map(
+        load_workbook(op_args['root_path'] + '/input/GMPP_INTEGRATION_PROJECT_MAP.xlsx')
     )
 
-    a_proj_name = ipdc_data.projects[1]
-    # a_proj_name = 'East Coast Mainline Programme'
-    if project_list:
-        list_of_projects = project_list
-    else:
-        list_of_projects = list(initial_dict.keys())
+
+    # a_proj_name = ipdc_data.projects[1]
+    # # a_proj_name = 'East Coast Mainline Programme'
+    # if project_list:
+    #     list_of_projects = project_list
+    # else:
+    list_of_projects = list(initial_dict.keys())
 
     for x, project in enumerate(list_of_projects):
-        ws.cell(row=1, column=3 + x).value = project
+        ws.cell(row=1, column=3 + x).value = project_map[project]
         i = 0
-        for v in ipdc_data.data[a_proj_name].keys():
-            # for ipa_key, dft_key in key_map.items():
-            ws.cell(row=2 + i, column=1).value = v
-            try:
-                ipa_key = key_map[v]
-                ws.cell(row=2 + i, column=2).value = ipa_key
-                # try:
-                ipa_value = initial_dict[project][ipa_key]
-                if isinstance(ipa_value, datetime.datetime):
-                    ipa_value = ipa_value.date()
-                    ws.cell(
-                        row=2 + i, column=3 + x, value=ipa_value
-                    ).number_format = "dd/mm/yy"
-                ws.cell(row=2 + i, column=3 + x).value = ipa_value
-                # except KeyError:
-                #     pass
-            except KeyError:
-                pass
-            i += 1
+        for i, k in enumerate(initial_dict[project].keys()):
+            v = initial_dict[project][k]
+            ws.cell(row=2 + i, column=3 + x).value = v
+            if isinstance(v, datetime.datetime):
+                ws.cell(row=2 + i, column=3 + x).number_format = "dd/mm/yy"
+        # for v in ipdc_data.data[a_proj_name].keys():
+        #     # for ipa_key, dft_key in key_map.items():
+        #     ws.cell(row=2 + i, column=1).value = v
+        #     try:
+        #         ipa_key = key_map[v]
+        #         ws.cell(row=2 + i, column=2).value = ipa_key
+        #         # try:
+        #         ipa_value = initial_dict[project][ipa_key]
+        #         if isinstance(ipa_value, datetime.datetime):
+        #             ipa_value = ipa_value.date()
+        #             ws.cell(
+        #                 row=2 + i, column=3 + x, value=ipa_value
+        #             ).number_format = "dd/mm/yy"
+        #         ws.cell(row=2 + i, column=3 + x).value = ipa_value
+        #         # except KeyError:
+        #         #     pass
+        #     except KeyError:
+        #         pass
+        #     i += 1
 
     ws.cell(row=1, column=1).value = "Project Name (DfT Keys)"
     ws.cell(row=1, column=2).value = "Project Name (IPA Keys)"
 
-    wb.save(root_path / "output/gmpp_online_data_dft_master_format.xlsx")
+    wb.save(op_args['root_path'] + "/output/gmpp_online_data_dft_master_format.xlsx")
+
+
+def get_gmpp_data(**op_args):
+    get_integration_data(op_args)
+    gmpp_data = get_gmpp_online_data(**op_args)
+    place_gmpp_online_keys_into_dft_master_format(gmpp_data, **op_args,)
 
 
 ## Code not currently in use.
@@ -321,21 +310,3 @@ def place_gmpp_online_keys_into_dft_master_format(
 #
 #     wb.save(root_path / f"output/GMPP_IPDC_DATA_CHECK_USING_{ipdc_d_file_path}.xlsx")
 
-
-def get_gmpp_data(*arg, **kwargs):
-    integration_meta = get_integration_data(
-        str(root_path) + "/core_data/ipdc_config.ini",
-    )
-    gmpp_data = get_gmpp_online_data(integration_meta["gmpp_data_path"])
-    place_gmpp_online_keys_into_dft_master_format(
-        gmpp_data,
-        integration_meta["key_map_path"],
-        integration_meta["master_comp_path"],
-    )
-
-    ## Code was previously required when portfolio team had to enter data.
-    # data_check_print_out(
-    #     integration_meta['master_comp_path'],
-    #     integration_meta['key_map_path'],
-    #     integration_meta['project_map_path']
-    # )

@@ -49,10 +49,16 @@ ms_standard = {
     "subparser_name": "milestones",
     "chart": chart,
 }
-ms_groups = {
+ms_groups_cdg = {
     "test_name": "ms_groups",
     "subparser_name": "milestones",
     "group": ["SCS"],
+    "chart": chart,
+}
+ms_groups_ipdc = {
+    "test_name": "ms_groups",
+    "subparser_name": "milestones",
+    "group": ["HSRG"],
     "chart": chart,
 }
 ms_dates = {
@@ -65,6 +71,7 @@ ms_blue_line_config = {
     "test_name": "ms_bl_config",
     "subparser_name": "milestones",
     "blue_line": "config_date",
+    "group": ["HSRG"],
     "chart": chart,
 }
 ms_blue_line_today = {
@@ -91,12 +98,6 @@ ms_quarters = {
     "chart": chart,
     "quarter": ["Q4 21/22", "Q3 21/22", "Q2 21/22"],
 }
-ms_groups = {
-    "test_name": "ms_groups",
-    "subparser_name": "milestones",
-    "group": ["SCS"],
-    "chart": chart,
-}
 ms_stages = {
     "test_name": "ms_stages",
     "subparser_name": "milestones",
@@ -108,18 +109,25 @@ ms_stages = {
     "chart": chart,
 }
 
-MILESTONES_OP_ARGS = [
-    ms_stages,
-    ms_groups,
-    ms_quarters,
-    ms_koi_fn,
-    ms_koi,
-    ms_blue_line_today,
-    ms_blue_line_config,
-    ms_dates,
-    ms_groups,
-    ms_standard,
-]
+if REPORTING_TYPE == 'ipdc':
+    MILESTONES_OP_ARGS = [
+        # ms_groups_ipdc,
+        # ms_dates,
+        ms_blue_line_config,
+    ]
+if REPORTING_TYPE == 'cdg':
+    MILESTONES_OP_ARGS = [
+        ms_stages,
+        ms_groups_cdg,
+        ms_quarters,
+        ms_koi_fn,
+        ms_koi,
+        ms_blue_line_today,
+        ms_blue_line_config,
+        ms_dates,
+        ms_groups_cdg,
+        ms_standard,
+    ]
 
 dlion_standard = {
     "test_name": "dlion_standard",
