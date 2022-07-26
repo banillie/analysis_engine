@@ -176,20 +176,22 @@ def gauge(
     return fig
 
 
+def delete_from_c_count(count_list: list, to_remove: list):
+    """
+    As dca rag ratings have been standardised via DCA_RATINGS_SCORES a small helper
+    function is require to get the c_count list and rate list used in function
+    build_speed_dials to match. This is necessary as cdg report uses five rag ratings
+    while ipdc uses three.
+    """
+    for x in to_remove:
+        del count_list[x]
+    return count_list
+
+
 def build_speed_dials(dca_data, doc):
     for conf_type in dca_data.dca_count[dca_data.quarters[0]]:
         c_count = []
         l_count = []
-        # if dca_data.kwargs["rag_number"] == "3":
-        #     rag_no = {"Green": 5, "Amber": 3, "Red": 1}
-        # if dca_data.kwargs["rag_number"] == "5":
-        #     rag_no = {
-        #         "Green": 5,
-        #         "Amber/Green": 4,
-        #         "Amber": 3,
-        #         "Amber/Red": 2,
-        #         "Red": 1,
-        #     }
         for colour in DCA_RATING_SCORES.keys():
             c_no = dca_data.dca_count[dca_data.quarters[0]][conf_type][colour]["count"]
             c_count.append(c_no)
@@ -217,8 +219,12 @@ def build_speed_dials(dca_data, doc):
 
         if dca_data.kwargs["rag_number"] == "3":
             rate = [0, 0.5, 1]
+            c_count = delete_from_c_count(c_count, [1, 2, 3])
+            l_count = delete_from_c_count(l_count, [1, 2, 3])
         if dca_data.kwargs["rag_number"] == "5":
             rate = [0, 0.25, 0.5, 0.75, 1]
+            c_count = delete_from_c_count(c_count, [-1])
+            l_count = delete_from_c_count(l_count, [-1])
         dial_one = np.average(rate, weights=c_count)
         try:
             dial_two = np.average(rate, weights=l_count)

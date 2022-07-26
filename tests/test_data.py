@@ -139,6 +139,12 @@ def test_speed_dials():
     for x in SPEED_DIAL_AND_DCA_OP_ARGS:
         print(x['test_name'])
         cli = CliOpArgs(x, SETTINGS_DICT)
+
+        if cli.combined_args['report'] == 'ipdc':
+            cli.combined_args["rag_number"] = '3'
+        if cli.combined_args['report'] == 'cdg':
+            cli.combined_args["rag_number"] = '5'
+
         sdmd = DcaData(cli.md, **cli.combined_args)
         sdmd.get_changes()
         sd_doc = get_input_doc(

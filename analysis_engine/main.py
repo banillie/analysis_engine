@@ -47,7 +47,7 @@ class CliOpArgs:
 
         # these programs have the latest two quarters as default.
         # other program defaults are setting very get_iter_list()
-        if ("dca", "speed_dials", "dashboards") == self.programme:
+        if self.programme in ["dca", "speed_dials", "dashboards"]:
             if "quarter" not in list(op_args.keys()):
                 op_args["quarter"] = "standard"
 

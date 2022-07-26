@@ -246,23 +246,20 @@ if REPORTING_TYPE == 'ipdc':
         dlion_groups_ipdc,
         dlion_standard,
     ]
+
+# write some separate tests for dcas
 sd_standard = {
     "test_name": "sd_standard",
     "subparser_name": "speed_dials",
-    "rag_number": "5",  # NOT REQUIRED FOR DCA ANALYSIS
-    "quarter": "standard",
 }
 sd_quarters = {
     "test_name": "sd_quarters",
     "subparser_name": "speed_dials",
-    "rag_number": "5",
     "quarter": ["Q2 21/22", "Q4 21/22"],
 }
 sd_stage = {
     "test_name": "sd_stage",
     "subparser_name": "speed_dials",
-    "rag_number": "5",
-    "quarter": "standard",
     "stage": [
         "OBC",
         "FBC",
@@ -271,15 +268,11 @@ sd_stage = {
 sd_groups_cdg = {
     "test_name": "sd_groups",
     "subparser_name": "speed_dials",
-    "rag_number": "5",
-    "quarter": "standard",
     "group": ["SCS", "CFPD"],
 }
 sd_groups_ipdc = {
     "test_name": "sd_groups",
     "subparser_name": "speed_dials",
-    "rag_number": "5",
-    "quarter": "standard",
     "group": ["HSRG", "RPE"],
 }
 
@@ -292,10 +285,10 @@ if REPORTING_TYPE == 'cdg':
     ]
 if REPORTING_TYPE == 'ipdc':
     SPEED_DIAL_AND_DCA_OP_ARGS = [
-        # sd_groups_ipdc,
-        # sd_stage,
+        sd_groups_ipdc,
+        sd_stage,
         sd_quarters,
-        # sd_standard
+        sd_standard
     ]
 
 
