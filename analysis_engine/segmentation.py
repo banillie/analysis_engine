@@ -9,7 +9,7 @@ from analysis_engine.error_msgs import (
     not_recognised_quarter,
 )
 
-from analysis_engine.dictionaries import BC_STAGE_DICT
+from analysis_engine.dictionaries import BC_STAGE_DICT_ABB_TO_FULL, BC_STAGE_DICT_FULL_TO_ABB
 
 
 def get_iter_list(md, **kwargs) -> List[str]:
@@ -42,10 +42,8 @@ def get_group(md, tp, **kwargs) -> List[str]:
     which is calculated at the data initiate stage in PythonData.
     """
     initial_error_case = []
-    final_error_case = []
     output_list = []
     meta_groupings = md["meta_groupings"]
-
     # need to standardise so always full name used.
     if "group" in kwargs:
         for g in kwargs["group"]:
@@ -68,25 +66,25 @@ def get_group(md, tp, **kwargs) -> List[str]:
                 output_list += loop_list
             except KeyError:
                 try:  # abbreviated term
-                    loop_list = meta_groupings[tp][BC_STAGE_DICT[rpt][s]]
+                    loop_list = meta_groupings[tp][BC_STAGE_DICT_ABB_TO_FULL[s]]
                     output_list += loop_list
                 except KeyError:
                     initial_error_case.append(s)
 
+    final_error_case = []
     if initial_error_case:
         project_names = md[
             "project_information"
         ].keys()  # is this needed if just single project?
         abbreviations = md["abbreviations"]
         for p in initial_error_case:
-            try:
-                if p in project_names:
-                    output_list.append(p)
-                elif p in list(abbreviations.keys()):
-                    output_list.append(
-                        abbreviations[p]
-                    )  # coverts abbreviations back to full names
-            except KeyError:
+            if p in project_names:
+                output_list.append(p)
+            elif p in list(abbreviations.keys()):
+                output_list.append(
+                    abbreviations[p]
+                )  # coverts abbreviations back to full names
+            else:
                 final_error_case.append(p)
 
     not_recognised_project_group_or_stage(final_error_case)

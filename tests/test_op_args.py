@@ -231,18 +231,15 @@ if REPORTING_TYPE == 'cdg':
     ]
 if REPORTING_TYPE == 'ipdc':
     DANDELION_OP_ARGS_DICT = [
-        dlion_cli_group_ipdc,
-        # dlion_income,
-        # dlion_benefits,
-        dlion_angles_ipdc,
-        dlion_quarter,
-        dlion_stages_ipdc,
-        dlion_groups_ipdc,
+        # dlion_cli_group_ipdc,
+        # # dlion_income,
+        # # dlion_benefits,
+        # dlion_angles_ipdc,
+        # dlion_quarter,
+        # dlion_stages_ipdc,
+        # dlion_groups_ipdc,
         dlion_standard,
     ]
-
-
-
 sd_standard = {
     "test_name": "sd_standard",
     "subparser_name": "speed_dials",
@@ -265,20 +262,36 @@ sd_stage = {
         "FBC",
     ],
 }
-sd_groups = {
+sd_groups_cdg = {
     "test_name": "sd_groups",
     "subparser_name": "speed_dials",
     "rag_number": "5",
     "quarter": "standard",
     "group": ["SCS", "CFPD"],
 }
+sd_groups_ipdc = {
+    "test_name": "sd_groups",
+    "subparser_name": "speed_dials",
+    "rag_number": "5",
+    "quarter": "standard",
+    "group": ["HSRG", "RPE"],
+}
 
-SPEED_DIAL_AND_DCA_OP_ARGS = [
-    sd_groups,
-    sd_stage,
-    sd_quarters,
-    sd_standard
-]
+if REPORTING_TYPE == 'cdg':
+    SPEED_DIAL_AND_DCA_OP_ARGS = [
+        sd_groups_cdg,
+        sd_stage,
+        sd_quarters,
+        sd_standard
+    ]
+if REPORTING_TYPE == 'ipdc':
+    SPEED_DIAL_AND_DCA_OP_ARGS = [
+        # sd_groups_ipdc,
+        # sd_stage,
+        sd_quarters,
+        # sd_standard
+    ]
+
 
 
 # 'rag_number': '5',

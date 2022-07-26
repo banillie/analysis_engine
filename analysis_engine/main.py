@@ -65,6 +65,10 @@ class CliOpArgs:
         )
         set_default_args(op_args, group=md["groups"], quarters=md["current_quarter"])
         combined_args = {**op_args, **self.settings}
+
+        if combined_args['report'] == 'ipdc':
+            combined_args["circle_edge"] = "forward_look"  # for dandelion
+
         self.combined_args = combined_args
         self.md = md
         self.wb_save = False

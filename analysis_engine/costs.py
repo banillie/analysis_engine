@@ -29,7 +29,6 @@ class CostData:
             income_remaining = 0
             income_total = 0
             group = get_group(self.master, tp, **self.kwargs)
-            income_removed = []
             for project_name in group:
                 p_data = get_correct_p_data(self.master, project_name, tp)
                 #  All try statements temporary until consistency between rpting datasets

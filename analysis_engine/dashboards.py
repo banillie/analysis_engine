@@ -4,7 +4,7 @@ from openpyxl.formatting import Rule
 
 from analysis_engine.dictionaries import (
     DATA_KEY_DICT,
-    DASHBOARD_BC_STAGE_ABBREVIATION,
+    BC_STAGE_DICT_FULL_TO_ABB,
     CONVERT_RAG,
     rag_txt_list,
     conf_list,
@@ -32,7 +32,7 @@ def narrative_dashboard(master, wb: Workbook) -> None:
             bc_stage = master["master_data"][0]["data"][project_name][
                 DATA_KEY_DICT["IPDC approval point"]
             ]
-            ws.cell(row=row_num, column=5).value = DASHBOARD_BC_STAGE_ABBREVIATION[
+            ws.cell(row=row_num, column=5).value = BC_STAGE_DICT_FULL_TO_ABB[
                 bc_stage
             ]
             costs = master["master_data"][0]["data"][project_name][
@@ -92,7 +92,7 @@ def cdg_dashboard(master, wb: Workbook) -> None:
             bc_stage = master["master_data"][0]["data"][project_name][
                 DATA_KEY_DICT["IPDC approval point"]
             ]
-            ws.cell(row=row_num, column=5).value = DASHBOARD_BC_STAGE_ABBREVIATION[
+            ws.cell(row=row_num, column=5).value = BC_STAGE_DICT_FULL_TO_ABB[
                 bc_stage
             ]
             costs = master["master_data"][0]["data"][project_name][

@@ -14,28 +14,21 @@ RAG_RANKING_DICT_COLOUR = {
     None: 0,
 }
 
-BC_STAGE_DICT = {
-    "cdg": {
-        "SOBC": "Strategic Outline Case",
-        "pre-SOBC": "pre-Strategic Outline Case",
-        "OBC": "Outline Business Case",
-        "FBC": "Full Business Case",
-        "Ongoing Board papers": "Ongoing Board papers",
-    },
-    "ipdc": {
-        "SOBC": "SOBC",
-        "pre-SOBC": "pre-SOBC",
-        "OBC": "OBC",
-        "FBC": "FBC",
-    },
+# BC stage terms are consistent across reports
+BC_STAGE_DICT_ABB_TO_FULL = {
+    "SOBC": "Strategic Outline Case",
+    "pre-SOBC": "pre-Strategic Outline Case",
+    "OBC": "Outline Business Case",
+    "FBC": "Full Business Case",
+    "Ongoing Board papers": "Ongoing Board papers",
 }
 
-DASHBOARD_BC_STAGE_ABBREVIATION = {
+BC_STAGE_DICT_FULL_TO_ABB = {
     "Strategic Outline Case": "SOBC",
+    "pre-Strategic Outline Case": "pre-SOBC",
     "Outline Business Case": "OBC",
     "Full Business Case": "FBC",
-    "pre-Strategic Outline Case": "pre-SOBC",
-    "Ongoing Board papers": "Ongoing Board papers",
+    "Ongoing Board papers": "OBPs",
 }
 
 # def convert_bc_stage_text(bc_stage: str) -> str:
@@ -83,10 +76,10 @@ DCA_KEYS = {
         "schedule": "Schedule Confidence",
     },
     "ipdc": {
-        "sro": "Overall Delivery Confidence",
-        "finance": "Costs Confidence",
-        "benefits": "Benefits Confidence",
-        "schedule": "Schedule Confidence",
+        "sro": "Departmental DCA",
+        "finance": "SRO Finance confidence",
+        "benefits": "SRO Benefits RAG",
+        "schedule": "SRO Schedule Confidence",
     },
 }
 
@@ -97,14 +90,14 @@ DCA_RATING_SCORES = {
     "Amber": 3,
     "Amber/Red": 2,
     "Red": 1,
-    # None: None,
+    None: None,
 }
 
-STANDARDISE_DCA_KEYS = {
-    "cdg": "Overall Delivery Confidence",
-    "top_250": None,
-    "ipdc": "Departmental DCA",
-}
+# STANDARDISE_DCA_KEYS = {
+#     "cdg": "Overall Delivery Confidence",
+#     "top_250": None,
+#     "ipdc": "Departmental DCA",
+# }
 
 FONT_TYPE = ["sans serif", "Ariel"]
 
@@ -229,4 +222,9 @@ NEXT_STAGE_DICT = {
     # 'FBC - IPDC Approval'
     "FBC": "Project End Date",
     "Other": None,
+}
+
+
+DANDELION_KEYS = {
+    'forward_look': "SRO Forward Look Assessment",
 }

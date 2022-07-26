@@ -40,7 +40,7 @@ class DcaData:
                     colour = p_data[dca_type]
                     score = DCA_RATING_SCORES[p_data[dca_type]]
                     costs = convert_none_types(
-                        p_data[STANDARDISE_COST_KEYS["total"][self.report]]
+                        p_data[STANDARDISE_COST_KEYS[self.report]["total"]]
                     )
                     dca_colour = [("DCA", colour)]
                     dca_score = [("DCA score", score)]

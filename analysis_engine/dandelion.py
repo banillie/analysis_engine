@@ -25,12 +25,9 @@ from analysis_engine.render_utils import make_file_friendly, handle_long_keys
 from analysis_engine.dictionaries import (
     RAG_RANKING_DICT_NUMBER,
     RAG_RANKING_DICT_COLOUR,
-    BC_STAGE_DICT,
     DCA_KEYS,
     FONT_TYPE,
-    STANDARDISE_DCA_KEYS,
-    NEXT_STAGE_DICT,
-    DASHBOARD_BC_STAGE_ABBREVIATION,
+    NEXT_STAGE_DICT, DANDELION_KEYS,
 )
 
 
@@ -195,7 +192,7 @@ class DandelionData:
         self.group = self.kwargs[group_stage_switch]
 
     def get_data(self):
-        dca_confidence = STANDARDISE_DCA_KEYS[self.kwargs["report"]]
+        # dca_confidence = DCA_KEYS[self.kwargs["report"]]
         g_d = {}  # group dictionary. first outer circle.
         l_g_d = {}  # lower group dictionary
         pf_wlc = get_dandelion_type_total(self.master, self.kwargs)  # portfolio wlc
@@ -234,7 +231,7 @@ class DandelionData:
 
             g_abb = g
             if self.group_stage_switch is "stage":
-                g_abb = DASHBOARD_BC_STAGE_ABBREVIATION[g]
+                g_abb = BC_STAGE_DICT_FULL_TO_ABB[g]
             g_text = (
                 g_abb + "\n" + dandelion_number_text(g_wlc, **self.kwargs)
             )  # group text
@@ -397,9 +394,9 @@ class DandelionData:
                 p_data = get_correct_p_data(self.master, p, self.quarter)
                 try:  # this is for pipeline projects
                     if "confidence" in self.kwargs:  # change confidence type here
-                        rag = p_data[DCA_KEYS[self.kwargs["confidence"]]]
+                        rag = p_data[DCA_KEYS[self.kwargs['report']][self.kwargs["confidence"]]]
                     else:
-                        rag = p_data[dca_confidence]
+                        rag = p_data[DCA_KEYS[self.kwargs['report']]['sro']]
                     colour = COLOUR_DICT[rag]  # bubble colour
                 except TypeError:  # p_data is None for pipeline projects
                     colour = COLOUR_DICT["WHITE"]
@@ -422,7 +419,7 @@ class DandelionData:
                 if "circle_edge" in self.kwargs:
                     if self.kwargs["circle_edge"] == "forward_look":
                         try:
-                            fwd_look = p_data["SRO Forward Look Assessment"]
+                            fwd_look = p_data[DANDELION_KEYS[self.kwargs["circle_edge"]]]
                             edge_rag = calculate_circle_edge(rag, fwd_look)
                             edge_colour = COLOUR_DICT[edge_rag]
                         except KeyError:
