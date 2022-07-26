@@ -35,17 +35,21 @@ def get_gmpp_online_data(**op_args):
     from datetime import datetime
     import xlrd
 
-    file_name = op_args['gmpp_data_path']
+    file_name = op_args["gmpp_data_path"]
     try:
-        wb = load_workbook(op_args['root_path'] + '/input/{}.xlsx'.format(file_name, data_only=True))
+        wb = load_workbook(
+            op_args["root_path"] + "/input/{}.xlsx".format(file_name, data_only=True)
+        )
     except:
-        wb = load_workbook(op_args['root_path'] + '/input/{}.xlsm'.format(file_name, data_only=True))
+        wb = load_workbook(
+            op_args["root_path"] + "/input/{}.xlsm".format(file_name, data_only=True)
+        )
 
     ws = wb.active
     ws_list = [ws]
 
     key_map = get_map(
-        load_workbook(op_args['root_path'] + "/input/GMPP_INTEGRATION_KEY_MAP.xlsx"),
+        load_workbook(op_args["root_path"] + "/input/GMPP_INTEGRATION_KEY_MAP.xlsx"),
         commas=True,
         gaps=True,
     )
@@ -88,13 +92,15 @@ def place_gmpp_online_keys_into_dft_master_format(
     ws = wb.active
 
     key_map = get_map(
-        load_workbook(op_args['root_path'] + "/input/{}.xlsx".format(op_args["key_map_path"])),
+        load_workbook(
+            op_args["root_path"] + "/input/{}.xlsx".format(op_args["key_map_path"])
+        ),
         commas=True,
         gaps=True,
-        flip=True
+        flip=True,
     )
     project_map = get_map(
-        load_workbook(op_args['root_path'] + '/input/GMPP_INTEGRATION_PROJECT_MAP.xlsx')
+        load_workbook(op_args["root_path"] + "/input/GMPP_INTEGRATION_PROJECT_MAP.xlsx")
     )
 
     list_of_projects = list(initial_dict.keys())
@@ -107,9 +113,9 @@ def place_gmpp_online_keys_into_dft_master_format(
                     ws.cell(row=2 + i, column=1).value = k
                     ws.cell(row=2 + i, column=2).value = key_map[k]
                 except KeyError:
-                    print(f'{k} not in the key map')
+                    print(f"{k} not in the key map")
             try:
-                if key_map[k] == 'Total Forecast':
+                if key_map[k] == "Total Forecast":
                     pass
                     # v = initial_dict[project][]
                 v = initial_dict[project][k]
@@ -122,13 +128,16 @@ def place_gmpp_online_keys_into_dft_master_format(
     ws.cell(row=1, column=1).value = "Project Name (DfT Keys)"
     ws.cell(row=1, column=2).value = "Project Name (IPA Keys)"
 
-    wb.save(op_args['root_path'] + "/output/gmpp_online_data_dft_master_format.xlsx")
+    wb.save(op_args["root_path"] + "/output/gmpp_online_data_dft_master_format.xlsx")
 
 
 def get_gmpp_data(**op_args):
     get_integration_data(op_args)
     gmpp_data = get_gmpp_online_data(**op_args)
-    place_gmpp_online_keys_into_dft_master_format(gmpp_data, **op_args,)
+    place_gmpp_online_keys_into_dft_master_format(
+        gmpp_data,
+        **op_args,
+    )
 
 
 ## Code not currently in use.
@@ -277,4 +286,3 @@ def get_gmpp_data(**op_args):
 #             print(x)
 #
 #     wb.save(root_path / f"output/GMPP_IPDC_DATA_CHECK_USING_{ipdc_d_file_path}.xlsx")
-

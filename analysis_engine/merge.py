@@ -8,17 +8,17 @@ class Merge:
         self.op_args = op_args
         self.key_list = []
         self.p_names = []
-        self.ignore_keys = [None, 'file name', 'Project/Programme Name']
+        self.ignore_keys = [None, "file name", "Project/Programme Name"]
         self.get_key_names()
         self.get_project_names()
         self.put_into_wb()
 
     def get_key_names(self):
         key_list = []
-        for mst in self.op_args['masters_list']:
-            wb = load_workbook(self.op_args['root_path'] + f'/input/{mst}.xlsx')
+        for mst in self.op_args["masters_list"]:
+            wb = load_workbook(self.op_args["root_path"] + f"/input/{mst}.xlsx")
             ws = wb.active
-            for cell in ws['A']:
+            for cell in ws["A"]:
                 if cell.value in self.ignore_keys:
                     continue
                 c = Cleanser(cell.value)
@@ -30,10 +30,10 @@ class Merge:
 
     def get_project_names(self):
         p_names = []
-        for mst in self.op_args['masters_list']:
-            wb = load_workbook(self.op_args['root_path'] + f'/input/{mst}.xlsx')
+        for mst in self.op_args["masters_list"]:
+            wb = load_workbook(self.op_args["root_path"] + f"/input/{mst}.xlsx")
             ws = wb.active
-            for cell in ws['1']:
+            for cell in ws["1"]:
                 if cell.value in self.ignore_keys:
                     continue
                 c = Cleanser(cell.value)
@@ -48,8 +48,12 @@ class Merge:
         ws = wb.active
 
         pd_msts = []  # pd_msts = python dictionary masters
-        for mst in self.op_args['masters_list']:
-            pd_msts.append(project_data_from_master(self.op_args['root_path'] + f'/input/{mst}.xlsx', 1, 2022))
+        for mst in self.op_args["masters_list"]:
+            pd_msts.append(
+                project_data_from_master(
+                    self.op_args["root_path"] + f"/input/{mst}.xlsx", 1, 2022
+                )
+            )
 
         for pn, project in enumerate(self.p_names):  # pn = project number
             ws.cell(row=1, column=2 + pn).value = project
@@ -63,12 +67,6 @@ class Merge:
         for kn, key in enumerate(self.key_list):
             ws.cell(row=2 + kn, column=1).value = key
 
-        ws.cell(row=1, column=1).value = 'Project/Programme Name'
+        ws.cell(row=1, column=1).value = "Project/Programme Name"
 
-        wb.save(self.op_args['root_path'] + "/output/merged_masters.xlsx")
-
-
-
-
-
-
+        wb.save(self.op_args["root_path"] + "/output/merged_masters.xlsx")

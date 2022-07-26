@@ -58,30 +58,34 @@ def get_group(md, tp, **kwargs) -> List[str]:
                 initial_error_case.append(g)
 
     if "stage" in kwargs:
-        rpt = kwargs['report']  # only needed for stage
+        rpt = kwargs["report"]  # only needed for stage
         # inelegant loop there are two try statements to handle abbrevations
         # of stage terms e.g. Full Business Case and FBC. But must be a better
         # way to handle.
-        for s in kwargs['stage']:
+        for s in kwargs["stage"]:
             try:  # full term
                 loop_list = meta_groupings[tp][s]
                 output_list += loop_list
             except KeyError:
-                try: # abbreviated term
+                try:  # abbreviated term
                     loop_list = meta_groupings[tp][BC_STAGE_DICT[rpt][s]]
                     output_list += loop_list
                 except KeyError:
                     initial_error_case.append(s)
 
     if initial_error_case:
-        project_names = md['project_information'].keys()  # is this needed if just single project?
-        abbreviations = md['abbreviations']
+        project_names = md[
+            "project_information"
+        ].keys()  # is this needed if just single project?
+        abbreviations = md["abbreviations"]
         for p in initial_error_case:
             try:
                 if p in project_names:
                     output_list.append(p)
                 elif p in list(abbreviations.keys()):
-                    output_list.append(abbreviations[p])  # coverts abbreviations back to full names
+                    output_list.append(
+                        abbreviations[p]
+                    )  # coverts abbreviations back to full names
             except KeyError:
                 final_error_case.append(p)
 

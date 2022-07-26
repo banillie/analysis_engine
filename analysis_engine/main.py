@@ -15,7 +15,11 @@ from analysis_engine.dca import DcaData, dca_changes_into_word
 from analysis_engine.query import data_query_into_wb
 from analysis_engine.render_utils import get_input_doc, put_matplotlib_fig_into_word
 from analysis_engine.settings import report_config, set_default_args, return_koi_fn_keys
-from analysis_engine.milestones import MilestoneData, milestone_chart, put_milestones_into_wb
+from analysis_engine.milestones import (
+    MilestoneData,
+    milestone_chart,
+    put_milestones_into_wb,
+)
 from analysis_engine.speed_dials import build_speed_dials
 from analysis_engine.error_msgs import no_query_keys
 
@@ -34,21 +38,21 @@ class CliOpArgs:
         self.combined_args = {}
         self.md = {}
         self.wb_save = False
-        self.programme = ''
+        self.programme = ""
         self.cli_op_args()
 
     def cli_op_args(self):
-        self.programme = self.args['subparser_name']
+        self.programme = self.args["subparser_name"]
         op_args = {k: v for k, v in self.args.items() if v is not None}
 
         # these programs have the latest two quarters as default.
         # other program defaults are setting very get_iter_list()
-        if ('dca', 'speed_dials', 'dashboards') == self.programme:
-            if 'quarter' not in list(op_args.keys()):
-                op_args['quarter'] = 'standard'
+        if ("dca", "speed_dials", "dashboards") == self.programme:
+            if "quarter" not in list(op_args.keys()):
+                op_args["quarter"] = "standard"
 
         try:
-            if self.programme == 'query':
+            if self.programme == "query":
                 if "koi" not in op_args and "koi_fn" not in op_args:
                     no_query_keys()
         except InputError as e:
@@ -101,12 +105,14 @@ def run_analysis(args, settings):
             else:
                 d_graph = make_a_dandelion_auto(d_data, **cli.combined_args)
                 doc_path = (
-                    str(cli.combined_args["root_path"]) + cli.combined_args["word_landscape"]
+                    str(cli.combined_args["root_path"])
+                    + cli.combined_args["word_landscape"]
                 )
                 doc = get_input_doc(doc_path)
                 put_matplotlib_fig_into_word(doc, d_graph, width=Inches(8))
                 doc_output_path = (
-                    str(cli.combined_args["root_path"]) + cli.combined_args["word_save_path"]
+                    str(cli.combined_args["root_path"])
+                    + cli.combined_args["word_save_path"]
                 )
                 doc.save(doc_output_path.format("dandelion"))
 
@@ -115,7 +121,8 @@ def run_analysis(args, settings):
             sdmd = DcaData(cli.md, **cli.combined_args)
             sdmd.get_changes()
             sd_doc = get_input_doc(
-                str(cli.combined_args["root_path"]) + cli.combined_args["word_landscape"]
+                str(cli.combined_args["root_path"])
+                + cli.combined_args["word_landscape"]
             )
             build_speed_dials(sdmd, sd_doc)
             sd_doc.save(
@@ -127,7 +134,9 @@ def run_analysis(args, settings):
             sdmd = DcaData(cli.md, **cli.combined_args)
             sdmd.get_changes()
             changes_doc = dca_changes_into_word(
-                sdmd, str(cli.combined_args["root_path"]) + cli.combined_args["word_portrait"]
+                sdmd,
+                str(cli.combined_args["root_path"])
+                + cli.combined_args["word_portrait"],
             )
             changes_doc.save(
                 str(cli.combined_args["root_path"])
@@ -136,12 +145,15 @@ def run_analysis(args, settings):
 
         if cli.programme == "dashboards":
             narrative_d_master = get_input_doc(
-                str(cli.combined_args["root_path"]) + cli.combined_args["narrative_dashboard"]
+                str(cli.combined_args["root_path"])
+                + cli.combined_args["narrative_dashboard"]
             )
             narrative_dashboard(cli.md, narrative_d_master)  #
             narrative_d_master.save(
                 str(cli.combined_args["root_path"])
-                + cli.combined_args["excel_save_path"].format("narrative_dashboard_completed")
+                + cli.combined_args["excel_save_path"].format(
+                    "narrative_dashboard_completed"
+                )
             )
             cdg_d_master = get_input_doc(
                 str(cli.combined_args["root_path"]) + cli.combined_args["dashboard"]
@@ -155,10 +167,10 @@ def run_analysis(args, settings):
         if cli.programme == "milestones":
             ms = MilestoneData(cli.md, **cli.combined_args)
             if (
-                    # "type" in combined_args  # NOT IN USE.
-                    "dates" in cli.combined_args
-                    or "koi" in cli.combined_args
-                    or "koi_fn" in cli.combined_args
+                # "type" in combined_args  # NOT IN USE.
+                "dates" in cli.combined_args
+                or "koi" in cli.combined_args
+                or "koi_fn" in cli.combined_args
             ):
                 return_koi_fn_keys(cli.combined_args)
                 ms.filter_chart_info(**cli.combined_args)
@@ -166,7 +178,8 @@ def run_analysis(args, settings):
             if cli.combined_args["chart"] != "show":
                 ms_graph = milestone_chart(ms, **cli.combined_args)
                 doc = get_input_doc(
-                    str(cli.combined_args["root_path"]) + cli.combined_args["word_landscape"]
+                    str(cli.combined_args["root_path"])
+                    + cli.combined_args["word_landscape"]
                 )
                 put_matplotlib_fig_into_word(doc, ms_graph, width=Inches(8))
                 doc.save(
@@ -177,15 +190,17 @@ def run_analysis(args, settings):
                 milestone_chart(ms, **cli.combined_args)
 
             wb = put_milestones_into_wb(ms)
-            wb.save(cli.combined_args["root_path"] + "/output/{}.xlsx".format(cli.programme))
+            wb.save(
+                cli.combined_args["root_path"] + "/output/{}.xlsx".format(cli.programme)
+            )
             # cli.wb_save = True
 
-        if cli.programme == 'query':
+        if cli.programme == "query":
             op_args = return_koi_fn_keys(cli.combined_args)
             wb = data_query_into_wb(cli.md, **op_args)
             wb.save(
                 str(cli.settings["root_path"])
-                + settings["excel_save_path"].format('query')
+                + settings["excel_save_path"].format("query")
             )
 
         # if cli.wb_save:
@@ -238,7 +253,6 @@ def run_parsers():
     parser_data_query = subparsers.add_parser(
         "query", help="returns required data from core data."
     )
-
 
     parser_speed_dial = subparsers.add_parser("speed_dials", help="speed dial analysis")
     parser_dca = subparsers.add_parser("dcas", help="dca analysis")
@@ -374,7 +388,7 @@ def run_parsers():
         metavar="",
         action="store",
         help="Insert blue line into chart to represent a date. "
-             'Options are "Today" "CDG" or a date in correct format e.g. "1/1/2021".',
+        'Options are "Today" "CDG" or a date in correct format e.g. "1/1/2021".',
     )
 
     cli_args = parser.parse_args(sys.argv[2:])

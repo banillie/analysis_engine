@@ -81,7 +81,13 @@ DCA_KEYS = {
         "finance": "Costs Confidence",
         "benefits": "Benefits Confidence",
         "schedule": "Schedule Confidence",
-    }
+    },
+    "ipdc": {
+        "sro": "Overall Delivery Confidence",
+        "finance": "Costs Confidence",
+        "benefits": "Benefits Confidence",
+        "schedule": "Schedule Confidence",
+    },
 }
 
 # rationalise with RAG_RANKING_DICT_COLOUR
@@ -157,7 +163,7 @@ COST_KEY_LIST = [
 ]
 
 STANDARDISE_COST_KEYS = {
-    'cdg': {
+    "cdg": {
         "spent": "Total Costs Spent",
         "remaining": "Total Costs Remaining",
         "total": "Total Costs",
@@ -165,15 +171,14 @@ STANDARDISE_COST_KEYS = {
         "income_remaining": "Total Income Remaining",
         "income_total": "Total Income",
     },
-    'ipdc': {
-            "spent": None,
-            "remaining": None,
-            "total": "Total Forecast",
-            "income_achieved": None,
-            "income_remaining": None,
-            "income_total": "Total Forecast - Income both Revenue and Capital",
-    }
-
+    "ipdc": {
+        "spent": None,
+        "remaining": None,
+        "total": "Total Forecast",
+        "income_achieved": None,
+        "income_remaining": None,
+        "income_total": "Total Forecast - Income both Revenue and Capital",
+    },
 }
 
 STANDARDISE_BEN_KEYS = {
@@ -209,11 +214,11 @@ DATA_KEY_DICT = {
 
 # Used in dashboards
 CONVERT_RAG = {
-    "Green": 'G',
-    "Amber/Green": 'A/G',
-    "Amber": 'A',
-    "Amber/Red": 'A/R',
-    "Red": 'R',
+    "Green": "G",
+    "Amber/Green": "A/G",
+    "Amber": "A",
+    "Amber/Red": "A/R",
+    "Red": "R",
 }
 
 NEXT_STAGE_DICT = {

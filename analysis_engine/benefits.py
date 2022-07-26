@@ -26,7 +26,7 @@ class BenefitsData:
         Returns lists containing benefit totals
         """
         lower_dict = {}
-        for tp in self.kwargs['quarter']:
+        for tp in self.kwargs["quarter"]:
             delivered = 0
             remaining = 0
             total = 0

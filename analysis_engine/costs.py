@@ -21,7 +21,7 @@ class CostData:
     def get_totals(self) -> None:
         lower_dict = {}
         rm = get_remove_income(self.kwargs)
-        for tp in self.kwargs['quarter']:
+        for tp in self.kwargs["quarter"]:
             spent = 0
             remaining = 0
             total = 0
@@ -67,9 +67,13 @@ class CostData:
                 # option here handled via config file
                 if project_name in rm:
                     try:
-                        total - convert_none_types(p_data[STANDARDISE_COST_KEYS[self.report]["income_total"]])
+                        total - convert_none_types(
+                            p_data[STANDARDISE_COST_KEYS[self.report]["income_total"]]
+                        )
                         if [project_name] == group:
-                            logger.info(f'income has been removed from the total of {project_name}')
+                            logger.info(
+                                f"income has been removed from the total of {project_name}"
+                            )
                     except KeyError:  # some older masters do have key.
                         raise ProjectNameError()
 
@@ -81,8 +85,6 @@ class CostData:
                 "income_remaining": income_remaining,
                 "income_total": income_total,
             }
-
-
 
         # if self.kwargs['report'] == "ipdc":
         #     for tp in self.iter_list:

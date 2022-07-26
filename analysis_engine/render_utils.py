@@ -88,15 +88,15 @@ def get_chart_title(
 
 # helper function for milestone chart
 def handle_long_keys(key_name: str, **kwargs) -> str:
-    if 'output_type' in kwargs:
-        if kwargs['output_type'] == 'milestones':
+    if "output_type" in kwargs:
+        if kwargs["output_type"] == "milestones":
             output_list = []
             for name in key_name:
                 if len(name) >= 30:
                     l = name.split()
-                    l.insert(6, '\n')
+                    l.insert(6, "\n")
                     new_str = " ".join(l)
-                    output_list.append(re.sub('\s\\n\s', '\n', new_str))
+                    output_list.append(re.sub("\s\\n\s", "\n", new_str))
                 else:
                     output_list.append(name)
 
@@ -109,11 +109,10 @@ def handle_long_keys(key_name: str, **kwargs) -> str:
             if word_count == 1:
                 return key_name
             if word_count == 2:
-                l.insert(1, '\n')
+                l.insert(1, "\n")
             if word_count >= 4:
-                    l.insert(3, '\n')
+                l.insert(3, "\n")
             new_str = " ".join(l)
-            return re.sub('\s\\n\s', '\n', new_str)
+            return re.sub("\s\\n\s", "\n", new_str)
         else:
             return key_name
-

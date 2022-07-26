@@ -86,7 +86,7 @@ class MilestoneData:
         self.master = master
         self.kwargs = kwargs
         self.report = kwargs["report"]
-        self.quarters = self.master['quarter_list']
+        self.quarters = self.master["quarter_list"]
         self.milestone_dict = {}
         self.sorted_milestone_dict = {}
         self.max_date = None
@@ -114,7 +114,7 @@ class MilestoneData:
                 if p_data is None:
                     continue
                 # i loops below removes None Milestone names and rejects non-datetime date values.
-                p = self.master['project_information'][project_name]['Abbreviations']
+                p = self.master["project_information"][project_name]["Abbreviations"]
                 category = "Milestone"
                 if self.kwargs["report"] == "cdg":
                     # report = "CDG"
@@ -654,6 +654,7 @@ def calculate_max_min_date(milestones: MilestoneData, **kwargs) -> int:
     if kwargs["value"] == "min":
         return min(final_m_list)
 
+
 # LEGEND_DICT = {
 #     "Q1 22/23": "THIS QUARTER",
 #     "Q4 21/22": "LAST QUARTER",
@@ -675,7 +676,7 @@ def milestone_chart(
         merge_project_milestone_name(project, ms_names, i)
         for i, p in enumerate(project)
     ]
-    ms_names = handle_long_keys(combined, output_type='milestones')
+    ms_names = handle_long_keys(combined, output_type="milestones")
 
     colour_start = 1
     for i, tp in enumerate(milestones.quarters):
@@ -684,12 +685,12 @@ def milestone_chart(
         ]
         ax1.scatter(
             m,
-            ms_names[0: len(m)],
-            label=tp,   # add functionality so user can add via config
+            ms_names[0 : len(m)],
+            label=tp,  # add functionality so user can add via config
             s=200,
             zorder=20 - i,
-            edgecolor=COLOUR_DICT['BLUE'],
-            fc=COLOUR_DICT['BLUE'],
+            edgecolor=COLOUR_DICT["BLUE"],
+            fc=COLOUR_DICT["BLUE"],
             alpha=colour_start,
         )
         colour_start = colour_start - (1 / len(milestones.quarters))
@@ -791,19 +792,15 @@ def put_milestones_into_wb(milestones: MilestoneData) -> Workbook:
             i
         ]  # milestone
         try:
-            notes = milestones.sorted_milestone_dict[milestones.quarters[0]]["notes"][
-                i
-            ]
+            notes = milestones.sorted_milestone_dict[milestones.quarters[0]]["notes"][i]
             ws.cell(row=row_num + i, column=len(milestones.quarters) + 9).value = notes
         except KeyError:  # "notes" not in central support dict
             pass
         try:  # only present in top250 milestones
-            status = milestones.sorted_milestone_dict[milestones.quarters[0]][
-                "status"
-            ][i]
-            ws.cell(
-                row=row_num + i, column=len(milestones.quarters) + 5
-            ).value = status
+            status = milestones.sorted_milestone_dict[milestones.quarters[0]]["status"][
+                i
+            ]
+            ws.cell(row=row_num + i, column=len(milestones.quarters) + 5).value = status
         except (IndexError, KeyError):
             # IndexError for ipdc rpting. "status" is in dict, but list is empty.
             # KeyError for top250 central support, which does not have "status" in dict.
@@ -840,9 +837,7 @@ def put_milestones_into_wb(milestones: MilestoneData) -> Workbook:
     for x, tp in enumerate(milestones.quarters):
         ws.cell(row=1, column=5 + x).value = tp
     ws.cell(row=1, column=len(milestones.quarters) + 5).value = "Status (top 250 ms)"
-    ws.cell(
-        row=1, column=len(milestones.quarters) + 6
-    ).value = "Escalated (top 250 cs)"
+    ws.cell(row=1, column=len(milestones.quarters) + 6).value = "Escalated (top 250 cs)"
     ws.cell(row=1, column=len(milestones.quarters) + 7).value = "Type (top 250 cs)"
     ws.cell(row=1, column=len(milestones.quarters) + 8).value = "Secured (top 250 cs)"
     ws.cell(

@@ -233,7 +233,7 @@ class DandelionData:
                     g_wlc = 46000
 
             g_abb = g
-            if self.group_stage_switch is 'stage':
+            if self.group_stage_switch is "stage":
                 g_abb = DASHBOARD_BC_STAGE_ABBREVIATION[g]
             g_text = (
                 g_abb + "\n" + dandelion_number_text(g_wlc, **self.kwargs)
@@ -271,12 +271,12 @@ class DandelionData:
                 )
 
         # multiplied here so a gap to central circle
-        largest_g_radius = (max(g_radius_list) * 2.5)
+        largest_g_radius = max(g_radius_list) * 2.5
         if len(self.group) > 3:
-            largest_g_radius = (max(g_radius_list) * 3)
+            largest_g_radius = max(g_radius_list) * 3
 
         for i, g in enumerate(self.group):
-            if len(self.group) > 1: # this needs testing
+            if len(self.group) > 1:  # this needs testing
                 y_axis = 0 + (
                     (math.sqrt(pf_wlc) + largest_g_radius)
                     * math.sin(math.radians(g_ang_l[i]))
@@ -563,7 +563,7 @@ def make_a_dandelion_auto(dl: DandelionData, **kwargs):
     obj = []
 
     p_font_size = 10
-    if kwargs['report'] == 'ipdc':
+    if kwargs["report"] == "ipdc":
         p_font_size = 8
 
     for c in dl.d_data.keys():

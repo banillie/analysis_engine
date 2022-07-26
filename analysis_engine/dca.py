@@ -16,7 +16,7 @@ class DcaData:
         self.master = master
         self.kwargs = kwargs
         self.report = kwargs["report"]
-        self.quarters = self.master['quarter_list']
+        self.quarters = self.master["quarter_list"]
         self.dca_dictionary = {}
         self.dca_changes = {}
         self.dca_count = {}
@@ -47,7 +47,9 @@ class DcaData:
                     t = [("Type", dca_type)]
                     cost_amount = [("Costs", costs)]
                     quarter = [("Quarter", tp)]
-                    abb = self.master["project_information"][project_name]["Abbreviations"]
+                    abb = self.master["project_information"][project_name][
+                        "Abbreviations"
+                    ]
                     dca_dict[abb] = dict(
                         dca_colour + t + cost_amount + quarter + dca_score
                     )
@@ -58,8 +60,8 @@ class DcaData:
 
     def get_changes(self) -> None:
         """compiles dictionary of changes in dca ratings when provided with two quarter arguments"""
-        current_quarter = self.master['quarter_list'][0]
-        last_quarter = self.master['quarter_list'][1]
+        current_quarter = self.master["quarter_list"][0]
+        last_quarter = self.master["quarter_list"][1]
         c_dict = {}
         for conf_type in list(DCA_KEYS[self.report].keys()):  # confidence type
             lower_dict = {}

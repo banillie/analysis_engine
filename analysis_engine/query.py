@@ -16,10 +16,10 @@ def data_query_into_wb(md, **kwargs) -> Workbook:
     """
 
     wb = Workbook()
-    md['quarter_list'].reverse()
+    md["quarter_list"].reverse()
     ms = MilestoneData(md, **kwargs).milestone_dict
     lst_qrt = None
-    for z, tp in enumerate(md['quarter_list']):
+    for z, tp in enumerate(md["quarter_list"]):
         ws = wb.create_sheet(
             make_file_friendly(tp), 0
         )  # creating worksheets. names restricted to 30 characters.
@@ -29,11 +29,13 @@ def data_query_into_wb(md, **kwargs) -> Workbook:
         """list project names, groups and stage in ws"""
         for y, p in enumerate(qrt_group):  # p is project name
             p_data = get_correct_p_data(md, p, tp)
-            abb = md['project_information'][p]['Abbreviations']
-            ws.cell(row=2 + y, column=1).value = md['project_information'][p]["Directorate"]
+            abb = md["project_information"][p]["Abbreviations"]
+            ws.cell(row=2 + y, column=1).value = md["project_information"][p][
+                "Directorate"
+            ]
             ws.cell(row=2 + y, column=2).value = p
             ws.cell(row=2 + y, column=3).value = abb
-            ws.cell(row=2 + y, column=4).value = md['project_information'][p]["GMPP"]
+            ws.cell(row=2 + y, column=4).value = md["project_information"][p]["GMPP"]
 
             for x, key in enumerate(kwargs["key"]):
                 ws.cell(row=1, column=5 + x, value=key)

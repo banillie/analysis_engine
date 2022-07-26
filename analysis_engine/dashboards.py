@@ -121,9 +121,7 @@ def cdg_dashboard(master, wb: Workbook) -> None:
                 ws.cell(row=row_num, column=10).value = ""
 
             for i, key in enumerate(conf_list):
-                dca = CONVERT_RAG[
-                    master["master_data"][0]["data"][project_name][key]
-                ]
+                dca = CONVERT_RAG[master["master_data"][0]["data"][project_name][key]]
                 ws.cell(row=row_num, column=11 + i).value = dca
 
             for i, key in enumerate(risk_list):
