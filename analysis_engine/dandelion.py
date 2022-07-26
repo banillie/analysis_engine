@@ -27,7 +27,8 @@ from analysis_engine.dictionaries import (
     RAG_RANKING_DICT_COLOUR,
     DCA_KEYS,
     FONT_TYPE,
-    NEXT_STAGE_DICT, DANDELION_KEYS,
+    DANDELION_KEYS,
+    BC_STAGE_DICT_FULL_TO_ABB, BC_STAGE_DICT_ABB_TO_FULL,
 )
 
 
@@ -230,8 +231,13 @@ class DandelionData:
                     g_wlc = 46000
 
             g_abb = g
-            if self.group_stage_switch is "stage":
-                g_abb = BC_STAGE_DICT_FULL_TO_ABB[g]
+            if self.group_stage_switch == "stage":
+                try:
+                    g_abb = BC_STAGE_DICT_FULL_TO_ABB[g]
+                except KeyError:
+                    if g in BC_STAGE_DICT_ABB_TO_FULL.keys():
+                        g_abb = g
+
             g_text = (
                 g_abb + "\n" + dandelion_number_text(g_wlc, **self.kwargs)
             )  # group text
@@ -286,8 +292,6 @@ class DandelionData:
                 g_d[g]["tp"] = (y_axis, x_axis)
                 g_d[g]["angle"] = g_ang_l[i]
 
-                logger.info("The angles for groups are " + str(g_ang_l))
-
             else:
                 g_d = {}  # delete the dictionary
                 g_d[g] = {
@@ -300,6 +304,8 @@ class DandelionData:
                     "ec": "grey",
                     "alignment": ("center", "center"),
                 }
+
+        logger.info("The angles for groups are " + str(g_ang_l))
 
         ## second outer circle
         for i, g in enumerate(self.group):

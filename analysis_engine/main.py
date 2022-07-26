@@ -103,6 +103,10 @@ def run_analysis(args, settings):
     cli = CliOpArgs(args, settings)
     try:
         if cli.programme == "dandelion":
+
+            if cli.combined_args['report'] == 'ipdc':
+                cli.combined_args['abbreviations'] = True
+
             d_data = DandelionData(cli.md, **cli.combined_args)
             if cli.combined_args["chart"] != "save":
                 make_a_dandelion_auto(d_data, **cli.combined_args)
