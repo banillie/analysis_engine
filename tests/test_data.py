@@ -1,7 +1,7 @@
 from docx.shared import Inches
 
 from analysis_engine.error_msgs import ProjectNameError, ProjectGroupError, ProjectStageError, logger
-from analysis_engine.gmpp_int import get_gmpp_data
+from analysis_engine.gmpp_int import GmppOnlineCosts
 from analysis_engine.merge import Merge
 from tests.test_op_args import (
     REPORTING_TYPE,
@@ -226,13 +226,20 @@ def test_query():
 
 def test_gmpp_online_data():
     cli = CliOpArgs({'subparser_name': 'gmpp_data'}, SETTINGS_DICT)
-    get_gmpp_data(**cli.combined_args)
+    md = GmppOnlineCosts(**cli.combined_args)
+    md.place_into_dft_master_format()
 
 
 def test_merge_masters():
     cli = CliOpArgs({'subparser_name': 'merge_masters'}, SETTINGS_DICT)
     get_masters_to_merge(cli.combined_args)
     Merge(**cli.combined_args)
+
+
+def test_gmpp_costs():
+    cli = CliOpArgs({'subparser_name': 'gmpp_data'}, SETTINGS_DICT)
+    md = GmppOnlineCosts(**cli.combined_args)
+    md.put_cost_totals_into_wb()
 
 # @pytest.mark.skip(reason="refactor required")
 # def test_calculating_spent(master):

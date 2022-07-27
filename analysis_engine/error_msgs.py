@@ -30,7 +30,8 @@ class InputError(Exception):
 
 def config_issue():
     logger.critical(
-        "Configuration file issue. Please check and make sure it's correct."
+        "Configuration file issue. Please check and make sure it's correct. Hint: It could be "
+        "a file name(s) does not match what is in the config or is not in the correct folder."
     )
     sys.exit(1)
 

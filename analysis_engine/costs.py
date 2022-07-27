@@ -5,7 +5,7 @@ from analysis_engine.segmentation import (
     moving_average,
 )
 from analysis_engine.cleaning import convert_none_types
-from analysis_engine.dictionaries import YEAR_LIST, COST_KEY_LIST, STANDARDISE_COST_KEYS
+from analysis_engine.dictionaries import STANDARDISE_COST_KEYS
 from analysis_engine.error_msgs import ProjectNameError, logger
 from analysis_engine.settings import get_remove_income
 

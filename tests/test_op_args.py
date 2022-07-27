@@ -2,17 +2,33 @@
 REPORTING_TYPE = "ipdc"
 chart = "show"
 
-q_koi = {
+q_koi_cdg = {
     'test_name': 'query_koi',
     'subparser_name': 'query',
     'koi': 'Brief Description'
 }
-q_koi_two_keys = {
+q_koi_ipdc = {
+    'test_name': 'query_koi',
+    'subparser_name': 'query',
+    'koi': 'Departmental DCA'
+}
+q_koi_two_keys_ipdc = {
+    'test_name': 'query_koi_two_keys',
+    'subparser_name': 'query',
+    'koi': ['Snapshot Date', 'IO4 - Monetised?']
+}
+q_koi_two_keys_cdg = {
     'test_name': 'query_koi_two_keys',
     'subparser_name': 'query',
     'koi': ['Brief Description', 'Last Business Case (BC) achieved']
 }
-query_koi_quarters = {
+query_koi_quarters_ipdc = {
+    'test_name': 'query_koi_quarters',
+    'subparser_name': 'query',
+    'koi': ['Departmental DCA'],
+    "quarter": ["Q4 21/22", "Q3 21/22", "Q2 21/22"],
+}
+query_koi_quarters_cdg = {
     'test_name': 'query_koi_quarters',
     'subparser_name': 'query',
     'koi': ['Brief Description', 'Last Business Case (BC) achieved'],
@@ -34,15 +50,24 @@ q_koi_failure = {
     'test_name': 'query_koi_failure',
     'subparser_name': 'query',
 }
-
-QUERY_ARGS = [
-    # q_koi_failure,
-    q_koi_fn,
-    query_koi_milestones,
-    query_koi_quarters,
-    q_koi_two_keys,
-    q_koi
-]
+if REPORTING_TYPE == 'cdg':
+    QUERY_ARGS = [
+        # q_koi_failure,
+        q_koi_fn,
+        query_koi_milestones,
+        query_koi_quarters_cdg,
+        q_koi_two_keys_cdg,
+        q_koi_cdg
+    ]
+if REPORTING_TYPE == 'ipdc':
+    QUERY_ARGS = [
+        # # q_koi_failure,
+        # q_koi_fn,
+        # query_koi_milestones,
+        query_koi_quarters_ipdc,
+        q_koi_two_keys_ipdc,
+        q_koi_ipdc
+    ]
 
 ms_standard = {
     "test_name": "ms_standard",
