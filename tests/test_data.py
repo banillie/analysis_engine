@@ -123,6 +123,7 @@ def test_build_dandelion_graph():
 def test_dca_analysis():
     for x in SPEED_DIAL_AND_DCA_OP_ARGS:
         print(x['test_name'])
+        x["subparser_name"] = "dca"
         cli = CliOpArgs(x, SETTINGS_DICT)
         sdmd = DcaData(cli.md, **cli.combined_args)
         sdmd.get_changes()
@@ -157,7 +158,6 @@ def test_speed_dials():
         )
 
 
-# add group opitions to this?
 def test_dashboards():
     op_args = {'subparser_name': 'dashboards'}
     cli = CliOpArgs(op_args, SETTINGS_DICT)
@@ -225,16 +225,18 @@ def test_query():
 
 
 def test_gmpp_online_data():
-    cli = CliOpArgs({'subparser_name': 'gmpp_data'}, SETTINGS_DICT)
-    md = GmppOnlineCosts(**cli.combined_args)
-    md.place_into_dft_master_format()
-    md.put_cost_totals_into_wb()
+    if REPORTING_TYPE == 'ipdc':
+        cli = CliOpArgs({'subparser_name': 'gmpp_data'}, SETTINGS_DICT)
+        md = GmppOnlineCosts(**cli.combined_args)
+        md.place_into_dft_master_format()
+        md.put_cost_totals_into_wb()
 
 
 def test_merge_masters():
-    cli = CliOpArgs({'subparser_name': 'merge_masters'}, SETTINGS_DICT)
-    get_masters_to_merge(cli.combined_args)
-    Merge(**cli.combined_args)
+    if REPORTING_TYPE == 'ipdc':
+        cli = CliOpArgs({'subparser_name': 'merge_masters'}, SETTINGS_DICT)
+        get_masters_to_merge(cli.combined_args)
+        Merge(**cli.combined_args)
 
 
 

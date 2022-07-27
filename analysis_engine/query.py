@@ -2,7 +2,7 @@ import datetime
 
 from openpyxl import Workbook
 
-from analysis_engine.dictionaries import DCA_KEYS
+from analysis_engine.dictionaries import DCA_KEYS, PROJECT_INFO_KEYS
 from analysis_engine.milestones import MilestoneData, get_milestone_date, convert_date
 
 from analysis_engine.segmentation import get_iter_list, get_group, get_correct_p_data
@@ -32,7 +32,7 @@ def data_query_into_wb(md, **kwargs) -> Workbook:
             p_data = get_correct_p_data(md, p, tp)
             abb = md["project_information"][p]["Abbreviations"]
             ws.cell(row=2 + y, column=1).value = md["project_information"][p][
-                DCA_KEYS[kwargs["report"]]["group"]
+                PROJECT_INFO_KEYS[kwargs["report"]]["group"]
             ]
             ws.cell(row=2 + y, column=2).value = p
             ws.cell(row=2 + y, column=3).value = abb
@@ -42,7 +42,8 @@ def data_query_into_wb(md, **kwargs) -> Workbook:
                 ws.cell(row=1, column=5 + x, value=key)
                 try:  # standard keys
                     value = p_data[key]
-                    value = convert_date(value)  # in case value direct date.
+                    if isinstance(value, datetime.date): # in case value direct date.
+                        value = convert_date(value)
                 except KeyError:  # milestone keys
                     value = get_milestone_date(ms, key, tp, abb)
 
@@ -59,7 +60,7 @@ def data_query_into_wb(md, **kwargs) -> Workbook:
                 if lst_qrt:
                     try:
                         last_q_data = get_correct_p_data(md, p, lst_qrt)
-                        lst_value = last_q_data[p][key]
+                        lst_value = last_q_data[key]
                     except KeyError:
                         lst_value = get_milestone_date(ms, key, lst_qrt, abb)
 

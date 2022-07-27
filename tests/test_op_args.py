@@ -1,5 +1,5 @@
 # should include some settings that are wrong to test error messaging
-REPORTING_TYPE = "ipdc"
+REPORTING_TYPE = "cdg"
 chart = "show"
 
 q_koi_cdg = {
@@ -34,11 +34,17 @@ query_koi_quarters_cdg = {
     'koi': ['Brief Description', 'Last Business Case (BC) achieved'],
     "quarter": ["Q1 22/23", "Q4 21/22", "Q3 21/22"],
 }
-query_koi_milestones = {
+query_koi_milestones_cdg = {
     'test_name': 'query_koi_milestones',
     'subparser_name': 'query',
     'koi': "FBC CDG Approval",
     "quarter": ["Q1 22/23", "Q4 21/22", "Q3 21/22"],
+}
+query_koi_milestones_ipdc = {
+    'test_name': 'query_koi_milestones',
+    'subparser_name': 'query',
+    'koi': ["OBC - IPDC Approval", "Planning Consents"],
+    "quarter": ["Q4 21/22", "Q3 21/22", "Q2 21/22"],
 }
 q_koi_fn = {
     'test_name': 'query_koi_fn',
@@ -54,19 +60,19 @@ if REPORTING_TYPE == 'cdg':
     QUERY_ARGS = [
         # q_koi_failure,
         q_koi_fn,
-        query_koi_milestones,
+        query_koi_milestones_cdg,
         query_koi_quarters_cdg,
         q_koi_two_keys_cdg,
         q_koi_cdg
     ]
 if REPORTING_TYPE == 'ipdc':
     QUERY_ARGS = [
-        # # q_koi_failure,
-        # q_koi_fn,
-        # query_koi_milestones,
+        # q_koi_failure,
+        q_koi_fn,
+        query_koi_milestones_ipdc,
         query_koi_quarters_ipdc,
         q_koi_two_keys_ipdc,
-        q_koi_ipdc
+        q_koi_ipdc,
     ]
 
 ms_standard = {
@@ -136,8 +142,8 @@ ms_stages = {
 
 if REPORTING_TYPE == 'ipdc':
     MILESTONES_OP_ARGS = [
-        # ms_groups_ipdc,
-        # ms_dates,
+        ms_groups_ipdc,
+        ms_dates,
         ms_blue_line_config,
     ]
 if REPORTING_TYPE == 'cdg':
@@ -310,10 +316,10 @@ if REPORTING_TYPE == 'cdg':
     ]
 if REPORTING_TYPE == 'ipdc':
     SPEED_DIAL_AND_DCA_OP_ARGS = [
-        # sd_groups_ipdc,
-        # sd_stage,
+        sd_groups_ipdc,
+        sd_stage,
         sd_quarters,
-        # sd_standard
+        sd_standard
     ]
 
 

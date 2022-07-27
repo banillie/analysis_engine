@@ -113,6 +113,13 @@ def not_recognised_project_group_or_stage(error_case):
         )
 
 
+def not_recognised_quarter(error_case):
+    logger.critical(error_case + " not a recognised quarter.")
+    raise InputError(
+        "Program stopping. Please check project, group or stage names being entered."
+    )
+
+
 def not_recognised_quarter(error):
     raise InputError(
         error + " not a recognised quarter. Program stopped. Please re-enter."

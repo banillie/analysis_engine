@@ -90,7 +90,15 @@ def get_group(md, tp, **kwargs) -> List[str]:
             else:
                 final_error_case.append(p)
 
-    not_recognised_project_group_or_stage(final_error_case)
+    if len(final_error_case) != 0:
+        qrt_list = []
+        for m in md['master_data']:
+            qrt_list.append(m['quarter'])
+
+        if tp not in qrt_list:
+            not_recognised_quarter(tp)
+        else:
+            not_recognised_project_group_or_stage(final_error_case)
 
     return output_list
 
