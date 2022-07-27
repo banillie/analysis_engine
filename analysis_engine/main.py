@@ -14,7 +14,12 @@ from analysis_engine.dashboards import narrative_dashboard, cdg_dashboard
 from analysis_engine.dca import DcaData, dca_changes_into_word
 from analysis_engine.query import data_query_into_wb
 from analysis_engine.render_utils import get_input_doc, put_matplotlib_fig_into_word
-from analysis_engine.settings import report_config, set_default_args, return_koi_fn_keys, get_integration_data
+from analysis_engine.settings import (
+    report_config,
+    set_default_args,
+    return_koi_fn_keys,
+    get_integration_data,
+)
 from analysis_engine.milestones import (
     MilestoneData,
     milestone_chart,
@@ -66,10 +71,10 @@ class CliOpArgs:
         set_default_args(op_args, group=md["groups"], quarters=md["current_quarter"])
         combined_args = {**op_args, **self.settings}
 
-        if combined_args['report'] == 'ipdc':
+        if combined_args["report"] == "ipdc":
             combined_args["circle_edge"] = "forward_look"  # for dandelion
 
-        if self.programme == 'gmpp_data':
+        if self.programme == "gmpp_data":
             get_integration_data(combined_args)
 
         self.combined_args = combined_args
@@ -107,8 +112,8 @@ def run_analysis(args, settings):
     try:
         if cli.programme == "dandelion":
 
-            if cli.combined_args['report'] == 'ipdc':
-                cli.combined_args['abbreviations'] = True
+            if cli.combined_args["report"] == "ipdc":
+                cli.combined_args["abbreviations"] = True
 
             d_data = DandelionData(cli.md, **cli.combined_args)
             if cli.combined_args["chart"] != "save":
@@ -129,10 +134,10 @@ def run_analysis(args, settings):
 
         if cli.programme == "speed_dials":
 
-            if cli.combined_args['report'] == 'ipdc':
-                cli.combined_args["rag_number"] = '3'
-            if cli.combined_args['report'] == 'cdg':
-                cli.combined_args["rag_number"] = '5'
+            if cli.combined_args["report"] == "ipdc":
+                cli.combined_args["rag_number"] = "3"
+            if cli.combined_args["report"] == "cdg":
+                cli.combined_args["rag_number"] = "5"
 
             sdmd = DcaData(cli.md, **cli.combined_args)
             sdmd.get_changes()

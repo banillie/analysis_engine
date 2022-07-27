@@ -32,9 +32,7 @@ def narrative_dashboard(master, wb: Workbook) -> None:
             bc_stage = master["master_data"][0]["data"][project_name][
                 DATA_KEY_DICT["IPDC approval point"]
             ]
-            ws.cell(row=row_num, column=5).value = BC_STAGE_DICT_FULL_TO_ABB[
-                bc_stage
-            ]
+            ws.cell(row=row_num, column=5).value = BC_STAGE_DICT_FULL_TO_ABB[bc_stage]
             costs = master["master_data"][0]["data"][project_name][
                 DATA_KEY_DICT["Total Forecast"]
             ]
@@ -92,9 +90,7 @@ def cdg_dashboard(master, wb: Workbook) -> None:
             bc_stage = master["master_data"][0]["data"][project_name][
                 DATA_KEY_DICT["IPDC approval point"]
             ]
-            ws.cell(row=row_num, column=5).value = BC_STAGE_DICT_FULL_TO_ABB[
-                bc_stage
-            ]
+            ws.cell(row=row_num, column=5).value = BC_STAGE_DICT_FULL_TO_ABB[bc_stage]
             costs = master["master_data"][0]["data"][project_name][
                 DATA_KEY_DICT["Total Forecast"]
             ]

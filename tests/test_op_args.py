@@ -310,10 +310,10 @@ if REPORTING_TYPE == 'cdg':
     ]
 if REPORTING_TYPE == 'ipdc':
     SPEED_DIAL_AND_DCA_OP_ARGS = [
-        sd_groups_ipdc,
-        sd_stage,
+        # sd_groups_ipdc,
+        # sd_stage,
         sd_quarters,
-        sd_standard
+        # sd_standard
     ]
 
 

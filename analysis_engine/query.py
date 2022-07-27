@@ -32,7 +32,7 @@ def data_query_into_wb(md, **kwargs) -> Workbook:
             p_data = get_correct_p_data(md, p, tp)
             abb = md["project_information"][p]["Abbreviations"]
             ws.cell(row=2 + y, column=1).value = md["project_information"][p][
-                DCA_KEYS[kwargs['report']]['group']
+                DCA_KEYS[kwargs["report"]]["group"]
             ]
             ws.cell(row=2 + y, column=2).value = p
             ws.cell(row=2 + y, column=3).value = abb

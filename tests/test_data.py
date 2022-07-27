@@ -228,6 +228,7 @@ def test_gmpp_online_data():
     cli = CliOpArgs({'subparser_name': 'gmpp_data'}, SETTINGS_DICT)
     md = GmppOnlineCosts(**cli.combined_args)
     md.place_into_dft_master_format()
+    md.put_cost_totals_into_wb()
 
 
 def test_merge_masters():
@@ -236,10 +237,6 @@ def test_merge_masters():
     Merge(**cli.combined_args)
 
 
-def test_gmpp_costs():
-    cli = CliOpArgs({'subparser_name': 'gmpp_data'}, SETTINGS_DICT)
-    md = GmppOnlineCosts(**cli.combined_args)
-    md.put_cost_totals_into_wb()
 
 # @pytest.mark.skip(reason="refactor required")
 # def test_calculating_spent(master):

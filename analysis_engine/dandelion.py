@@ -28,7 +28,8 @@ from analysis_engine.dictionaries import (
     DCA_KEYS,
     FONT_TYPE,
     DANDELION_KEYS,
-    BC_STAGE_DICT_FULL_TO_ABB, BC_STAGE_DICT_ABB_TO_FULL,
+    BC_STAGE_DICT_FULL_TO_ABB,
+    BC_STAGE_DICT_ABB_TO_FULL,
 )
 
 
@@ -400,9 +401,11 @@ class DandelionData:
                 p_data = get_correct_p_data(self.master, p, self.quarter)
                 try:  # this is for pipeline projects
                     if "confidence" in self.kwargs:  # change confidence type here
-                        rag = p_data[DCA_KEYS[self.kwargs['report']][self.kwargs["confidence"]]]
+                        rag = p_data[
+                            DCA_KEYS[self.kwargs["report"]][self.kwargs["confidence"]]
+                        ]
                     else:
-                        rag = p_data[DCA_KEYS[self.kwargs['report']]['sro']]
+                        rag = p_data[DCA_KEYS[self.kwargs["report"]]["sro"]]
                     colour = COLOUR_DICT[rag]  # bubble colour
                 except TypeError:  # p_data is None for pipeline projects
                     colour = COLOUR_DICT["WHITE"]
@@ -425,7 +428,9 @@ class DandelionData:
                 if "circle_edge" in self.kwargs:
                     if self.kwargs["circle_edge"] == "forward_look":
                         try:
-                            fwd_look = p_data[DANDELION_KEYS[self.kwargs["circle_edge"]]]
+                            fwd_look = p_data[
+                                DANDELION_KEYS[self.kwargs["circle_edge"]]
+                            ]
                             edge_rag = calculate_circle_edge(rag, fwd_look)
                             edge_colour = COLOUR_DICT[edge_rag]
                         except KeyError:

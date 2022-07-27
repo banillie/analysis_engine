@@ -44,12 +44,14 @@ class GmppOnlineCosts:
         file_name = self.op_args["gmpp_data_path"]
         try:
             wb = load_workbook(
-                self.op_args["root_path"] + "/input/{}.xlsm".format(file_name, data_only=True)
+                self.op_args["root_path"]
+                + "/input/{}.xlsm".format(file_name, data_only=True)
             )
         except FileNotFoundError:
             try:
                 wb = load_workbook(
-                    self.op_args["root_path"] + "/input/{}.xlsm".format(file_name, data_only=True)
+                    self.op_args["root_path"]
+                    + "/input/{}.xlsm".format(file_name, data_only=True)
                 )
             except FileNotFoundError:
                 config_issue()
@@ -61,7 +63,9 @@ class GmppOnlineCosts:
         import xlrd
 
         key_map = get_map(
-            load_workbook(self.op_args["root_path"] + "/input/GMPP_INTEGRATION_KEY_MAP.xlsx"),
+            load_workbook(
+                self.op_args["root_path"] + "/input/GMPP_INTEGRATION_KEY_MAP.xlsx"
+            ),
             commas=True,
             gaps=True,
         )
@@ -92,7 +96,7 @@ class GmppOnlineCosts:
             else:
                 gmpp_dict[project_name] = {key: s_value}
 
-        print('These keys are missing')
+        print("These keys are missing")
         for x in list(set(missing_keys)):
             print(x)
 
@@ -114,37 +118,39 @@ class GmppOnlineCosts:
             cdel_ng = 0
             for i in range(2, 51, 2):
                 try:
-                    rdel_income += self.gmpp_dict[p][f'9.01.{i}: RDEL Income']
+                    rdel_income += self.gmpp_dict[p][f"9.01.{i}: RDEL Income"]
                 except KeyError:
                     rdel_income += 0
                 try:
-                    rdel_oonc += self.gmpp_dict[p][f'9.01.{i}: One off new costs']
+                    rdel_oonc += self.gmpp_dict[p][f"9.01.{i}: One off new costs"]
                 except KeyError:
                     rdel_oonc += 0
                 try:
-                    rdel_rnc += self.gmpp_dict[p][f'9.01.{i}: Recurring new costs']
+                    rdel_rnc += self.gmpp_dict[p][f"9.01.{i}: Recurring new costs"]
                 except KeyError:
                     rdel_rnc += 0
                 try:
-                    rdel_ng += self.gmpp_dict[p][f'9.01.{i}: Non Gov']
+                    rdel_ng += self.gmpp_dict[p][f"9.01.{i}: Non Gov"]
                 except KeyError:
                     rdel_ng += 0
 
             for i in range(2, 51, 2):
                 try:
-                    cdel_income += self.gmpp_dict[p][f'9.02.{i}: CDEL Income']
+                    cdel_income += self.gmpp_dict[p][f"9.02.{i}: CDEL Income"]
                 except KeyError:
                     cdel_income += 0
                 try:
-                    cdel_oonc += self.gmpp_dict[p][f'9.02.{i}: One off new costs']  # oonc = one off new costs!
+                    cdel_oonc += self.gmpp_dict[p][
+                        f"9.02.{i}: One off new costs"
+                    ]  # oonc = one off new costs!
                 except KeyError:
                     cdel_oonc += 0
                 try:
-                    cdel_rnc += self.gmpp_dict[p][f'9.02.{i}: Recurring new costs']
+                    cdel_rnc += self.gmpp_dict[p][f"9.02.{i}: Recurring new costs"]
                 except KeyError:
                     cdel_rnc += 0
                 try:
-                    cdel_ng += self.gmpp_dict[p][f'9.02.{i}: Non Gov']
+                    cdel_ng += self.gmpp_dict[p][f"9.02.{i}: Non Gov"]
                 except KeyError:
                     cdel_ng += 0
 
@@ -159,7 +165,9 @@ class GmppOnlineCosts:
         ws = wb.active
 
         project_map = get_map(
-            load_workbook(self.op_args["root_path"] + "/input/GMPP_INTEGRATION_PROJECT_MAP.xlsx")
+            load_workbook(
+                self.op_args["root_path"] + "/input/GMPP_INTEGRATION_PROJECT_MAP.xlsx"
+            )
         )
 
         for x, project in enumerate(list(self.cost_total.keys())):
@@ -179,14 +187,17 @@ class GmppOnlineCosts:
 
         key_map = get_map(
             load_workbook(
-                self.op_args["root_path"] + "/input/{}.xlsx".format(self.op_args["key_map_path"])
+                self.op_args["root_path"]
+                + "/input/{}.xlsx".format(self.op_args["key_map_path"])
             ),
             commas=True,
             gaps=True,
             flip=True,
         )
         project_map = get_map(
-            load_workbook(self.op_args["root_path"] + "/input/GMPP_INTEGRATION_PROJECT_MAP.xlsx")
+            load_workbook(
+                self.op_args["root_path"] + "/input/GMPP_INTEGRATION_PROJECT_MAP.xlsx"
+            )
         )
 
         for x, project in enumerate(list(self.gmpp_dict.keys())):
@@ -213,7 +224,10 @@ class GmppOnlineCosts:
         ws.cell(row=1, column=1).value = "Project Name (DfT Keys)"
         ws.cell(row=1, column=2).value = "Project Name (IPA Keys)"
 
-        wb.save(self.op_args["root_path"] + "/output/gmpp_online_data_dft_master_format.xlsx")
+        wb.save(
+            self.op_args["root_path"]
+            + "/output/gmpp_online_data_dft_master_format.xlsx"
+        )
 
     # # Code not currently in use.
     # def data_check_print_out(self):
@@ -357,10 +371,3 @@ class GmppOnlineCosts:
     #             print(x)
     #
     #     wb.save(root_path / f"output/GMPP_IPDC_DATA_CHECK_USING_{ipdc_d_file_path}.xlsx")
-
-
-
-
-
-
-

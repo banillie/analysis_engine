@@ -9,7 +9,10 @@ from analysis_engine.error_msgs import (
     not_recognised_quarter,
 )
 
-from analysis_engine.dictionaries import BC_STAGE_DICT_ABB_TO_FULL, BC_STAGE_DICT_FULL_TO_ABB
+from analysis_engine.dictionaries import (
+    BC_STAGE_DICT_ABB_TO_FULL,
+    BC_STAGE_DICT_FULL_TO_ABB,
+)
 
 
 def get_iter_list(md, **kwargs) -> List[str]:

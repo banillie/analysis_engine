@@ -37,14 +37,21 @@ DCA_KEYS = {
         "finance": "Costs Confidence",
         "benefits": "Benefits Confidence",
         "schedule": "Schedule Confidence",
-        "group": "Directorate",  # project info doc
     },
     "ipdc": {
         "sro": "Departmental DCA",
         "finance": "SRO Finance confidence",
         "benefits": "SRO Benefits RAG",
         "schedule": "SRO Schedule Confidence",
-        "group": "Group",  # project info doc
+    },
+}
+
+PROJECT_INFO_KEYS = {
+    "cdg": {
+        "group": "Directorate",
+    },
+    "ipdc": {
+        "group": "Group",
     },
 }
 
@@ -191,5 +198,5 @@ NEXT_STAGE_DICT = {
 }
 
 DANDELION_KEYS = {
-    'forward_look': "SRO Forward Look Assessment",
+    "forward_look": "SRO Forward Look Assessment",
 }
