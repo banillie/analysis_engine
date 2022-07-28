@@ -116,3 +116,18 @@ def handle_long_keys(key_name: str, **kwargs) -> str:
             return re.sub("\s\\n\s", "\n", new_str)
         else:
             return key_name
+
+
+def plus_minus_days(change_value):
+    """mini function to place plus or minus sign before time delta
+    value in milestone_table function. Only need + signs to be added
+    as negative numbers have minus already"""
+    try:
+        if change_value > 0:
+            text = "+ " + str(change_value)
+        else:
+            text = str(change_value)
+    except TypeError:
+        text = change_value
+
+    return text

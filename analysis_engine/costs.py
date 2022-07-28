@@ -15,13 +15,15 @@ class CostData:
         self.master = master
         self.kwargs = kwargs
         self.report = kwargs["report"]
+        self.quarters = self.master["quarter_list"]
         self.totals = {}
+        self.baseline = {}
         self.get_totals()
 
     def get_totals(self) -> None:
         lower_dict = {}
         rm = get_remove_income(self.kwargs)
-        for tp in self.kwargs["quarter"]:
+        for tp in self.quarters:
             spent = 0
             remaining = 0
             total = 0
@@ -73,7 +75,7 @@ class CostData:
                             logger.info(
                                 f"income has been removed from the total of {project_name}"
                             )
-                    except KeyError:  # some older masters do have key.
+                    except KeyError:  # some older masters don't have key.
                         raise ProjectNameError()
 
             lower_dict[tp] = {

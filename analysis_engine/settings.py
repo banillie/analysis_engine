@@ -50,7 +50,7 @@ def report_config(report_type: str):
         "config": f"/core_data/{report_type}_config.ini",
         "callable": func,
         "master_path": "/core_data/json/master.json",
-        "dashboard": "/input/dashboard_master.xlsx",
+        "dashboard": "/input/dashboards_master.xlsx",
         "narrative_dashboard": "/input/narrative_dashboard_master.xlsx",
         "excel_save_path": "/output/{}.xlsx",
         "word_save_path": "/output/{}.docx",

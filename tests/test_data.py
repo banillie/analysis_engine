@@ -26,7 +26,7 @@ from analysis_engine.dandelion import DandelionData, make_a_dandelion_auto
 from analysis_engine.dca import DcaData, dca_changes_into_word
 from analysis_engine.speed_dials import build_speed_dials
 from analysis_engine.render_utils import put_matplotlib_fig_into_word, get_input_doc
-from analysis_engine.dashboards import narrative_dashboard, cdg_dashboard
+from analysis_engine.dashboards import narrative_dashboard, cdg_dashboard, ipdc_dashboard
 from analysis_engine.milestones import (
     MilestoneData,
     milestone_chart,
@@ -123,7 +123,7 @@ def test_build_dandelion_graph():
 def test_dca_analysis():
     for x in SPEED_DIAL_AND_DCA_OP_ARGS:
         print(x['test_name'])
-        x["subparser_name"] = "dca"
+        x["subparser_name"] = "dcas"
         cli = CliOpArgs(x, SETTINGS_DICT)
         sdmd = DcaData(cli.md, **cli.combined_args)
         sdmd.get_changes()
@@ -161,22 +161,32 @@ def test_speed_dials():
 def test_dashboards():
     op_args = {'subparser_name': 'dashboards'}
     cli = CliOpArgs(op_args, SETTINGS_DICT)
-    narrative_d_master = get_input_doc(
-        str(cli.combined_args["root_path"]) + cli.combined_args["narrative_dashboard"]
-    )
-    narrative_dashboard(cli.md, narrative_d_master)  #
-    narrative_d_master.save(
-        str(cli.combined_args["root_path"])
-        + cli.combined_args["excel_save_path"].format("narrative_dashboard_completed")
-    )
-    cdg_d_master = get_input_doc(
-        str(cli.combined_args["root_path"]) + cli.combined_args["dashboard"]
-    )
-    cdg_dashboard(cli.md, cdg_d_master)
-    cdg_d_master.save(
-        str(cli.combined_args["root_path"])
-        + cli.combined_args["excel_save_path"].format("dashboard_completed")
-    )
+    if REPORTING_TYPE == 'cdg':
+        narrative_d_master = get_input_doc(
+            str(cli.combined_args["root_path"]) + cli.combined_args["narrative_dashboard"]
+        )
+        narrative_dashboard(cli.md, narrative_d_master)  #
+        narrative_d_master.save(
+            str(cli.combined_args["root_path"])
+            + cli.combined_args["excel_save_path"].format("narrative_dashboard_completed")
+        )
+        cdg_d_master = get_input_doc(
+            str(cli.combined_args["root_path"]) + cli.combined_args["dashboard"]
+        )
+        cdg_dashboard(cli.md, cdg_d_master)
+        cdg_d_master.save(
+            str(cli.combined_args["root_path"])
+            + cli.combined_args["excel_save_path"].format("dashboard_completed")
+        )
+    if REPORTING_TYPE == 'ipdc':
+        ipdc_d_master = get_input_doc(
+            str(cli.combined_args["root_path"]) + cli.combined_args["dashboard"]
+        )
+        ipdc_dashboard(cli.md, ipdc_d_master, **cli.combined_args)
+        ipdc_d_master.save(
+            str(cli.combined_args["root_path"])
+            + cli.combined_args["excel_save_path"].format("dashboards_completed")
+        )
 
 
 def test_milestones():

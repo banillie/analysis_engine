@@ -52,9 +52,12 @@ class CliOpArgs:
 
         # these programs have the latest two quarters as default.
         # other program defaults are setting very get_iter_list()
-        if self.programme in ["dca", "speed_dials", "dashboards"]:
+        if self.programme in ["dcas", "speed_dials", "dashboards"]:
             if "quarter" not in list(op_args.keys()):
                 op_args["quarter"] = "standard"
+
+        if self.programme == "dashboards":
+            op_args["quarter"] = "four"
 
         try:
             if self.programme == "query":
@@ -444,381 +447,382 @@ class main:
         getattr(self, args.command)()
 
     def ipdc(self):
-        parser = argparse.ArgumentParser(
-            description="runs all analysis for ipdc reporting"
-        )
-        subparsers = parser.add_subparsers(dest="subparser_name")
-        subparsers.metavar = "                      "
+        run_parsers()
+        # parser = argparse.ArgumentParser(
+        #     description="runs all analysis for ipdc reporting"
+        # )
+        # subparsers = parser.add_subparsers(dest="subparser_name")
+        # subparsers.metavar = "                      "
+        # # parser_vfm = subparsers.add_parser("vfm", help="vfm analysis")
+        # parser_initiate = subparsers.add_parser(
+        #     "initiate", help="creates a master data file"
+        # )
+        # dashboard_description = (
+        #     "Creates IPDC dashboards. There are no optional arguments for this command.\n\n"
+        #     "A blank master dashboard titled dashboards_master.xlsx must be in input file.\n\n"
+        #     "A completed dashboard title completed_ipdc_dashboard.xlsx will be placed into\n"
+        #     "the output file."
+        # )
+        # parser_dashboard = subparsers.add_parser(
+        #     "dashboards",
+        #     help="IPDC dashboards",
+        #     description=dashboard_description,
+        #     formatter_class=RawTextHelpFormatter,
+        # )
+        # dandelion_description = (
+        #     "Creates the IPDC 'dandelion' graph. See below optional arguments for changing the "
+        #     "dandelion that is compiled. The command analysis dandelion returns the default "
+        #     'dandelion graph. The user must specify --chart "save" to save the chart, otherwise '
+        #     "only a temporary matplotlib chart will be generated."
+        # )
+        # parser_dandelion = subparsers.add_parser(
+        #     "dandelion",
+        #     help="Dandelion graph.",
+        #     description=dandelion_description,
+        #     # formatter_class=RawTextHelpFormatter,  # can't use as effects how optional arguments are shown.
+        # )
+        #
+        # costs_description = (
+        #     "Creates a cost profile graph. See below optional arguments. The user "
+        #     'must specify --chart "save" to save the chart, otherwise '
+        #     "only a temporary matplotlib chart will be generated."
+        # )
+        #
+        # parser_costs = subparsers.add_parser(
+        #     "costs",
+        #     help="cost trend profile graph and data.",
+        #     description=costs_description,
+        # )
+        #
+        # costs_sp_description = (
+        #     "Creates a cost stack plot profile graph. See below optional arguments. The user "
+        #     'must specify --chart "save" to save the chart, otherwise '
+        #     "only a temporary matplotlib chart will be generated."
+        # )
+        #
+        # parser_costs_sp = subparsers.add_parser(
+        #     "costs_sp",
+        #     help="cost stack plot graph and data.",
+        #     description=costs_sp_description,
+        # )
+        #
+        # parser_milestones = subparsers.add_parser(
+        #     "milestones",
+        #     help="milestone schedule graphs and data.",
+        # )
         # parser_vfm = subparsers.add_parser("vfm", help="vfm analysis")
-        parser_initiate = subparsers.add_parser(
-            "initiate", help="creates a master data file"
-        )
-        dashboard_description = (
-            "Creates IPDC dashboards. There are no optional arguments for this command.\n\n"
-            "A blank master dashboard titled dashboards_master.xlsx must be in input file.\n\n"
-            "A completed dashboard title completed_ipdc_dashboard.xlsx will be placed into\n"
-            "the output file."
-        )
-        parser_dashboard = subparsers.add_parser(
-            "dashboards",
-            help="IPDC dashboards",
-            description=dashboard_description,
-            formatter_class=RawTextHelpFormatter,
-        )
-        dandelion_description = (
-            "Creates the IPDC 'dandelion' graph. See below optional arguments for changing the "
-            "dandelion that is compiled. The command analysis dandelion returns the default "
-            'dandelion graph. The user must specify --chart "save" to save the chart, otherwise '
-            "only a temporary matplotlib chart will be generated."
-        )
-        parser_dandelion = subparsers.add_parser(
-            "dandelion",
-            help="Dandelion graph.",
-            description=dandelion_description,
-            # formatter_class=RawTextHelpFormatter,  # can't use as effects how optional arguments are shown.
-        )
-
-        costs_description = (
-            "Creates a cost profile graph. See below optional arguments. The user "
-            'must specify --chart "save" to save the chart, otherwise '
-            "only a temporary matplotlib chart will be generated."
-        )
-
-        parser_costs = subparsers.add_parser(
-            "costs",
-            help="cost trend profile graph and data.",
-            description=costs_description,
-        )
-
-        costs_sp_description = (
-            "Creates a cost stack plot profile graph. See below optional arguments. The user "
-            'must specify --chart "save" to save the chart, otherwise '
-            "only a temporary matplotlib chart will be generated."
-        )
-
-        parser_costs_sp = subparsers.add_parser(
-            "costs_sp",
-            help="cost stack plot graph and data.",
-            description=costs_sp_description,
-        )
-
-        parser_milestones = subparsers.add_parser(
-            "milestones",
-            help="milestone schedule graphs and data.",
-        )
-        parser_vfm = subparsers.add_parser("vfm", help="vfm analysis")
-        parser_summaries = subparsers.add_parser("summaries", help="summary reports")
-        parser_risks = subparsers.add_parser("risks", help="project risk analysis")
-        parser_port_risks = subparsers.add_parser(
-            "portfolio_risks", help="portfolio risk analysis"
-        )
-        parser_dca = subparsers.add_parser("dcas", help="dca analysis")
-        parser_speedial = subparsers.add_parser("speedial", help="speed dial analysis")
-        parser_matrix = subparsers.add_parser(
-            "matrix", help="cost v schedule chart. In development not working."
-        )
-        parser_data_query = subparsers.add_parser(
-            "query", help="return data from core data"
-        )
-        parser_gmpp_data = subparsers.add_parser(
-            "gmpp_data", help="converts gmpp online data into the dft master format"
-        )
-        parser_gmpp_ar = subparsers.add_parser(
-            "gmpp_ar", help="compiled summaries for the IPA GMPP annual report"
-        )
-
-        # Arguments
-        # stage
-        for sub in [
-            parser_dca,
-            parser_vfm,
-            parser_risks,
-            parser_port_risks,
-            parser_speedial,
-            # parser_dandelion,
-            parser_costs,
-            parser_costs_sp,
-            # parser_data_query,
-            parser_milestones,
-            parser_data_query,
-        ]:
-            sub.add_argument(
-                "--stage",
-                type=str,
-                metavar="",
-                action="store",
-                nargs="*",
-                choices=["FBC", "OBC", "SOBC", "pre-SOBC"],
-                help="Returns analysis for only those projects at the specified planning stage(s). By default "
-                "the --stage argument will return the list of bc_stages specified in the config file."
-                'Or user can enter one or combination of "FBC", "OBC", "SOBC", "pre-SOBC".',
-            )
-        # stage dandelion only
-        parser_dandelion.add_argument(
-            "--stage",
-            type=str,
-            metavar="",
-            action="store",
-            nargs="*",
-            choices=["FBC", "OBC", "SOBC", "pre-SOBC", "pipeline"],
-            help="Returns analysis for only those projects at the specified planning stage(s). By default "
-            "the --stage argument will return the list of bc_stages specified in the config file."
-            'Or user can enter one or combination of "FBC", "OBC", "SOBC", "pre-SOBC".For dandelion "pipeline" is also available',
-        )
-
-        # group
-        for sub in [
-            parser_dca,
-            parser_vfm,
-            parser_risks,
-            parser_port_risks,
-            parser_speedial,
-            parser_dandelion,
-            parser_costs,
-            parser_milestones,
-            parser_summaries,
-            parser_costs_sp,
-            parser_data_query,
-        ]:
-            sub.add_argument(
-                "--group",
-                type=str,
-                metavar="",
-                action="store",
-                nargs="+",
-                help="Returns analysis for specified project(s), only. User must enter one or a combination of "
-                'DfT Group names; "HSRG", "RSS", "RIG", "AMIS","RPE", or the project(s) acronym or full name.',
-            )
-        # remove
-        for sub in [
-            parser_dca,
-            parser_vfm,
-            parser_risks,
-            parser_port_risks,
-            parser_speedial,
-            parser_dandelion,
-            parser_costs,
-            parser_costs_sp,
-            parser_data_query,
-            parser_milestones,
-        ]:
-            sub.add_argument(
-                "--remove",
-                type=str,
-                metavar="",
-                action="store",
-                nargs="+",
-                help="Removes specified projects from analysis. User must enter one or a combination of either"
-                " a recognised DfT Group name, a recognised planning stage or the project(s) acronym or full"
-                " name.",
-            )
-        # quarter
-        for sub in [
-            parser_dca,
-            parser_vfm,
-            parser_risks,
-            parser_port_risks,
-            parser_speedial,
-            parser_dandelion,
-            parser_costs,
-            parser_costs_sp,
-            parser_data_query,
-            parser_milestones,
-        ]:
-            sub.add_argument(
-                "--quarter",
-                type=str,
-                metavar="",
-                action="store",
-                nargs="+",
-                help="Returns analysis for one or combination of specified quarters. "
-                'User must use correct format e.g "Q3 19/20"',
-            )
-
-        parser_costs.add_argument(
-            "--baseline",
-            type=str,
-            metavar="",
-            action="store",
-            nargs="+",
-            choices=["current"],
-            help="baseline option for costs refactored in Q1 21/22. Choose 'current' to return project "
-            "reported bls as well as latest forecast profile",
-        )
-
-        parser_milestones.add_argument(
-            "--type",
-            type=str,
-            metavar="",
-            action="store",
-            nargs="+",
-            choices=["Approval", "Assurance", "Delivery"],
-            help="Returns analysis for specified type of milestones.",
-        )
-
-        parser_speedial.add_argument(
-            "--conf_type",
-            type=str,
-            metavar="",
-            action="store",
-            choices=["sro", "finance", "benefits", "schedule", "resource"],
-            help="Returns analysis for specified confidence types. options are"
-            "'sro', 'finance', 'benefits', 'schedule', 'resource'."
-            " As of Q2 20/21 it only provides a three rag dial.",
-        )
-
-        for sub in [parser_milestones, parser_data_query]:
-            sub.add_argument(
-                "--koi",
-                type=str,
-                action="store",
-                nargs="+",
-                help="Returns the specified keys of interest (KOI).",
-            )
-
-        for sub in [parser_milestones, parser_data_query]:
-            sub.add_argument(
-                "--koi_fn",
-                type=str,
-                action="store",
-                help="provide name of csv file contain key names",
-            )
-
-        parser_milestones.add_argument(
-            "--dates",
-            type=str,
-            metavar="",
-            action="store",
-            nargs=2,
-            help="dates for analysis. Must provide start date and then end date in format e.g. '1/1/2021' '1/1/2022'.",
-        )
-
-        parser_dandelion.add_argument(
-            "--type",
-            type=str,
-            metavar="",
-            action="store",
-            choices=[
-                "spent",
-                "remaining",
-                "benefits",
-                "ps resource",
-                "contract resource",
-                "total resource",
-                "funded resource",
-            ],
-            help="Provide the type of value to include in dandelion. Options are"
-            ' "spent", "remaining", "benefits", "ps resource", "contract resource", "total resource", "funded resource".',
-        )
-
-        parser_dandelion.add_argument(
-            "--order_by",
-            type=str,
-            metavar="",
-            action="store",
-            choices=["schedule"],
-            help="Specify how project circles should be ordered: 'schedule' only current"
-            " option.",
-        )
-
-        parser_summaries.add_argument(
-            "--type",
-            type=str,
-            metavar="",
-            action="store",
-            choices=["long", "short"],
-            help="Specify which form of report is required. Options are 'short' or 'long'",
-        )
-
-        parser_costs_sp.add_argument(
-            "--type",
-            type=str,
-            metavar="",
-            action="store",
-            choices=["cat"],
-            help="Provide the type of value to include in dandelion. Options are"
-            ' "cat".',
-        )
-
-        parser_dandelion.add_argument(
-            "--angles",
-            type=int,
-            metavar="",
-            action="store",
-            nargs="+",
-            # choices=['sro', 'finance', 'benefits', 'schedule', 'resource'],
-            help="Use can manually enter angles for group bubbles",
-        )
-
-        parser_dandelion.add_argument(
-            "--confidence",
-            type=str,
-            metavar="",
-            action="store",
-            choices=["sro", "finance", "benefits", "schedule", "resource"],
-            help="specify the confidence type to displayed for each project.",
-        )
-
-        parser_dandelion.add_argument(
-            "--pc",
-            type=str,
-            metavar="",
-            action="store",
-            choices=["G", "A/G", "A", "A/R", "R"],
-            help="specify the colour for the overall portfolio circle",
-        )
-
-        parser_dandelion.add_argument(
-            "--circle_colour",
-            type=str,
-            metavar="",
-            action="store",
-            choices=["No", "Yes"],
-            help="specify whether to colour circles with DCA rating colours",
-        )
-
-        parser_dandelion.add_argument(
-            "--circle_edge",
-            type=str,
-            metavar="",
-            action="store",
-            choices=["forward_look", "ipa"],
-            help="specify whether to colour circle edge with SRO forward look rating. "
-            "Options are 'forward_look' or 'ipa'.",
-        )
-
-        # chart
-        for sub in [parser_dandelion, parser_costs, parser_costs_sp, parser_milestones]:
-            sub.add_argument(
-                "--chart",
-                type=str,
-                metavar="",
-                action="store",
-                choices=["show", "save"],
-                help="options for building and saving graph output. Commands are 'show' or 'save' ",
-            )
-
-        # title
-        for sub in [parser_costs, parser_milestones, parser_costs_sp]:
-            sub.add_argument(
-                "--title",
-                type=str,
-                metavar="",
-                action="store",
-                help="provide a title for chart. Optional",
-            )
-
-        parser_milestones.add_argument(
-            "--blue_line",
-            type=str,
-            metavar="",
-            action="store",
-            help="Insert blue line into chart to represent a date. "
-            'Options are "today" "config_date" or a date in correct format e.g. "1/1/2021".',
-        )
-
-        cli_args = parser.parse_args(sys.argv[2:])
-        settings_switch(cli_args, "ipdc")
+        # parser_summaries = subparsers.add_parser("summaries", help="summary reports")
+        # parser_risks = subparsers.add_parser("risks", help="project risk analysis")
+        # parser_port_risks = subparsers.add_parser(
+        #     "portfolio_risks", help="portfolio risk analysis"
+        # )
+        # parser_dca = subparsers.add_parser("dcas", help="dca analysis")
+        # parser_speedial = subparsers.add_parser("speedial", help="speed dial analysis")
+        # parser_matrix = subparsers.add_parser(
+        #     "matrix", help="cost v schedule chart. In development not working."
+        # )
+        # parser_data_query = subparsers.add_parser(
+        #     "query", help="return data from core data"
+        # )
+        # parser_gmpp_data = subparsers.add_parser(
+        #     "gmpp_data", help="converts gmpp online data into the dft master format"
+        # )
+        # parser_gmpp_ar = subparsers.add_parser(
+        #     "gmpp_ar", help="compiled summaries for the IPA GMPP annual report"
+        # )
+        #
+        # # Arguments
+        # # stage
+        # for sub in [
+        #     parser_dca,
+        #     parser_vfm,
+        #     parser_risks,
+        #     parser_port_risks,
+        #     parser_speedial,
+        #     # parser_dandelion,
+        #     parser_costs,
+        #     parser_costs_sp,
+        #     # parser_data_query,
+        #     parser_milestones,
+        #     parser_data_query,
+        # ]:
+        #     sub.add_argument(
+        #         "--stage",
+        #         type=str,
+        #         metavar="",
+        #         action="store",
+        #         nargs="*",
+        #         choices=["FBC", "OBC", "SOBC", "pre-SOBC"],
+        #         help="Returns analysis for only those projects at the specified planning stage(s). By default "
+        #         "the --stage argument will return the list of bc_stages specified in the config file."
+        #         'Or user can enter one or combination of "FBC", "OBC", "SOBC", "pre-SOBC".',
+        #     )
+        # # stage dandelion only
+        # parser_dandelion.add_argument(
+        #     "--stage",
+        #     type=str,
+        #     metavar="",
+        #     action="store",
+        #     nargs="*",
+        #     choices=["FBC", "OBC", "SOBC", "pre-SOBC", "pipeline"],
+        #     help="Returns analysis for only those projects at the specified planning stage(s). By default "
+        #     "the --stage argument will return the list of bc_stages specified in the config file."
+        #     'Or user can enter one or combination of "FBC", "OBC", "SOBC", "pre-SOBC".For dandelion "pipeline" is also available',
+        # )
+        #
+        # # group
+        # for sub in [
+        #     parser_dca,
+        #     parser_vfm,
+        #     parser_risks,
+        #     parser_port_risks,
+        #     parser_speedial,
+        #     parser_dandelion,
+        #     parser_costs,
+        #     parser_milestones,
+        #     parser_summaries,
+        #     parser_costs_sp,
+        #     parser_data_query,
+        # ]:
+        #     sub.add_argument(
+        #         "--group",
+        #         type=str,
+        #         metavar="",
+        #         action="store",
+        #         nargs="+",
+        #         help="Returns analysis for specified project(s), only. User must enter one or a combination of "
+        #         'DfT Group names; "HSRG", "RSS", "RIG", "AMIS","RPE", or the project(s) acronym or full name.',
+        #     )
+        # # remove
+        # for sub in [
+        #     parser_dca,
+        #     parser_vfm,
+        #     parser_risks,
+        #     parser_port_risks,
+        #     parser_speedial,
+        #     parser_dandelion,
+        #     parser_costs,
+        #     parser_costs_sp,
+        #     parser_data_query,
+        #     parser_milestones,
+        # ]:
+        #     sub.add_argument(
+        #         "--remove",
+        #         type=str,
+        #         metavar="",
+        #         action="store",
+        #         nargs="+",
+        #         help="Removes specified projects from analysis. User must enter one or a combination of either"
+        #         " a recognised DfT Group name, a recognised planning stage or the project(s) acronym or full"
+        #         " name.",
+        #     )
+        # # quarter
+        # for sub in [
+        #     parser_dca,
+        #     parser_vfm,
+        #     parser_risks,
+        #     parser_port_risks,
+        #     parser_speedial,
+        #     parser_dandelion,
+        #     parser_costs,
+        #     parser_costs_sp,
+        #     parser_data_query,
+        #     parser_milestones,
+        # ]:
+        #     sub.add_argument(
+        #         "--quarter",
+        #         type=str,
+        #         metavar="",
+        #         action="store",
+        #         nargs="+",
+        #         help="Returns analysis for one or combination of specified quarters. "
+        #         'User must use correct format e.g "Q3 19/20"',
+        #     )
+        #
+        # parser_costs.add_argument(
+        #     "--baseline",
+        #     type=str,
+        #     metavar="",
+        #     action="store",
+        #     nargs="+",
+        #     choices=["current"],
+        #     help="baseline option for costs refactored in Q1 21/22. Choose 'current' to return project "
+        #     "reported bls as well as latest forecast profile",
+        # )
+        #
+        # parser_milestones.add_argument(
+        #     "--type",
+        #     type=str,
+        #     metavar="",
+        #     action="store",
+        #     nargs="+",
+        #     choices=["Approval", "Assurance", "Delivery"],
+        #     help="Returns analysis for specified type of milestones.",
+        # )
+        #
+        # parser_speedial.add_argument(
+        #     "--conf_type",
+        #     type=str,
+        #     metavar="",
+        #     action="store",
+        #     choices=["sro", "finance", "benefits", "schedule", "resource"],
+        #     help="Returns analysis for specified confidence types. options are"
+        #     "'sro', 'finance', 'benefits', 'schedule', 'resource'."
+        #     " As of Q2 20/21 it only provides a three rag dial.",
+        # )
+        #
+        # for sub in [parser_milestones, parser_data_query]:
+        #     sub.add_argument(
+        #         "--koi",
+        #         type=str,
+        #         action="store",
+        #         nargs="+",
+        #         help="Returns the specified keys of interest (KOI).",
+        #     )
+        #
+        # for sub in [parser_milestones, parser_data_query]:
+        #     sub.add_argument(
+        #         "--koi_fn",
+        #         type=str,
+        #         action="store",
+        #         help="provide name of csv file contain key names",
+        #     )
+        #
+        # parser_milestones.add_argument(
+        #     "--dates",
+        #     type=str,
+        #     metavar="",
+        #     action="store",
+        #     nargs=2,
+        #     help="dates for analysis. Must provide start date and then end date in format e.g. '1/1/2021' '1/1/2022'.",
+        # )
+        #
+        # parser_dandelion.add_argument(
+        #     "--type",
+        #     type=str,
+        #     metavar="",
+        #     action="store",
+        #     choices=[
+        #         "spent",
+        #         "remaining",
+        #         "benefits",
+        #         "ps resource",
+        #         "contract resource",
+        #         "total resource",
+        #         "funded resource",
+        #     ],
+        #     help="Provide the type of value to include in dandelion. Options are"
+        #     ' "spent", "remaining", "benefits", "ps resource", "contract resource", "total resource", "funded resource".',
+        # )
+        #
+        # parser_dandelion.add_argument(
+        #     "--order_by",
+        #     type=str,
+        #     metavar="",
+        #     action="store",
+        #     choices=["schedule"],
+        #     help="Specify how project circles should be ordered: 'schedule' only current"
+        #     " option.",
+        # )
+        #
+        # parser_summaries.add_argument(
+        #     "--type",
+        #     type=str,
+        #     metavar="",
+        #     action="store",
+        #     choices=["long", "short"],
+        #     help="Specify which form of report is required. Options are 'short' or 'long'",
+        # )
+        #
+        # parser_costs_sp.add_argument(
+        #     "--type",
+        #     type=str,
+        #     metavar="",
+        #     action="store",
+        #     choices=["cat"],
+        #     help="Provide the type of value to include in dandelion. Options are"
+        #     ' "cat".',
+        # )
+        #
+        # parser_dandelion.add_argument(
+        #     "--angles",
+        #     type=int,
+        #     metavar="",
+        #     action="store",
+        #     nargs="+",
+        #     # choices=['sro', 'finance', 'benefits', 'schedule', 'resource'],
+        #     help="Use can manually enter angles for group bubbles",
+        # )
+        #
+        # parser_dandelion.add_argument(
+        #     "--confidence",
+        #     type=str,
+        #     metavar="",
+        #     action="store",
+        #     choices=["sro", "finance", "benefits", "schedule", "resource"],
+        #     help="specify the confidence type to displayed for each project.",
+        # )
+        #
+        # parser_dandelion.add_argument(
+        #     "--pc",
+        #     type=str,
+        #     metavar="",
+        #     action="store",
+        #     choices=["G", "A/G", "A", "A/R", "R"],
+        #     help="specify the colour for the overall portfolio circle",
+        # )
+        #
+        # parser_dandelion.add_argument(
+        #     "--circle_colour",
+        #     type=str,
+        #     metavar="",
+        #     action="store",
+        #     choices=["No", "Yes"],
+        #     help="specify whether to colour circles with DCA rating colours",
+        # )
+        #
+        # parser_dandelion.add_argument(
+        #     "--circle_edge",
+        #     type=str,
+        #     metavar="",
+        #     action="store",
+        #     choices=["forward_look", "ipa"],
+        #     help="specify whether to colour circle edge with SRO forward look rating. "
+        #     "Options are 'forward_look' or 'ipa'.",
+        # )
+        #
+        # # chart
+        # for sub in [parser_dandelion, parser_costs, parser_costs_sp, parser_milestones]:
+        #     sub.add_argument(
+        #         "--chart",
+        #         type=str,
+        #         metavar="",
+        #         action="store",
+        #         choices=["show", "save"],
+        #         help="options for building and saving graph output. Commands are 'show' or 'save' ",
+        #     )
+        #
+        # # title
+        # for sub in [parser_costs, parser_milestones, parser_costs_sp]:
+        #     sub.add_argument(
+        #         "--title",
+        #         type=str,
+        #         metavar="",
+        #         action="store",
+        #         help="provide a title for chart. Optional",
+        #     )
+        #
+        # parser_milestones.add_argument(
+        #     "--blue_line",
+        #     type=str,
+        #     metavar="",
+        #     action="store",
+        #     help="Insert blue line into chart to represent a date. "
+        #     'Options are "today" "config_date" or a date in correct format e.g. "1/1/2021".',
+        # )
+        #
+        # cli_args = parser.parse_args(sys.argv[2:])
+        # settings_switch(cli_args, "ipdc")
 
     def cdg(self):
         run_parsers()

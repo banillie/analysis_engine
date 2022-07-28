@@ -200,3 +200,9 @@ NEXT_STAGE_DICT = {
 DANDELION_KEYS = {
     "forward_look": "SRO Forward Look Assessment",
 }
+
+DASHBOARD_KEYS = {
+    'BC_STAGE': 'IPDC approval point',
+    'CONTINGENCY': "Overall contingency (£m)",
+    'OB': "Overall figure for Optimism Bias (£m)",
+}

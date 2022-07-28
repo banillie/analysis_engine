@@ -1,5 +1,5 @@
 # should include some settings that are wrong to test error messaging
-REPORTING_TYPE = "cdg"
+REPORTING_TYPE = "ipdc"
 chart = "show"
 
 q_koi_cdg = {

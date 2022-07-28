@@ -23,6 +23,18 @@ def get_iter_list(md, **kwargs) -> List[str]:
                 md["quarter_list"][0],
                 md["quarter_list"][1],
             ]
+        elif kwargs['quarter'] == 'four':
+            try:
+                iter_list = [
+                    md["quarter_list"][0],
+                    md["quarter_list"][1],
+                    md["quarter_list"][2],
+                    md["quarter_list"][3],
+                ]
+            except:  # what is the exception
+                iter_list = md["quarter_list"]
+                logger.info('Less than four quarters present in core_data folder')
+
         elif kwargs["quarter"] == "all":
             iter_list = md["quarter_list"]
         else:
@@ -82,11 +94,12 @@ def get_group(md, tp, **kwargs) -> List[str]:
         abbreviations = md["abbreviations"]
         for p in initial_error_case:
             if p in project_names:
-                output_list.append(p)
+                if p in md['master_data'][md['quarter_list'].index(tp)]['data'].keys():
+                    output_list.append(p)
             elif p in list(abbreviations.keys()):
-                output_list.append(
-                    abbreviations[p]
-                )  # coverts abbreviations back to full names
+                pfn = abbreviations[p]  # pfn = project full name. coverts abbreviations back to full names
+                if pfn in md['master_data'][md['quarter_list'].index(tp)]['data'].keys():
+                    output_list.append(pfn)
             else:
                 final_error_case.append(p)
 
