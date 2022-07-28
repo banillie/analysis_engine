@@ -42,7 +42,7 @@ def data_query_into_wb(md, **kwargs) -> Workbook:
                 ws.cell(row=1, column=5 + x, value=key)
                 try:  # standard keys
                     value = p_data[key]
-                    if isinstance(value, datetime.date): # in case value direct date.
+                    if isinstance(value, datetime.date):  # in case value direct date.
                         value = convert_date(value)
                 except KeyError:  # milestone keys
                     value = get_milestone_date(ms, key, tp, abb)

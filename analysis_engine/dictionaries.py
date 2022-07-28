@@ -202,7 +202,7 @@ DANDELION_KEYS = {
 }
 
 DASHBOARD_KEYS = {
-    'BC_STAGE': 'IPDC approval point',
-    'CONTINGENCY': "Overall contingency (£m)",
-    'OB': "Overall figure for Optimism Bias (£m)",
+    "BC_STAGE": "IPDC approval point",
+    "CONTINGENCY": "Overall contingency (£m)",
+    "OB": "Overall figure for Optimism Bias (£m)",
 }

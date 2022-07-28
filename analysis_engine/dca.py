@@ -138,7 +138,9 @@ class DcaData:
                     for y, project in enumerate(
                         list(self.dca_dictionary[quarter][dca_type].keys())
                     ):
-                        score = self.dca_dictionary[quarter][dca_type][project]['DCA score']
+                        score = self.dca_dictionary[quarter][dca_type][project][
+                            "DCA score"
+                        ]
                         if score:
                             total += 1
                         try:

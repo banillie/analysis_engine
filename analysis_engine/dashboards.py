@@ -10,7 +10,10 @@ from analysis_engine.dictionaries import (
     CONVERT_RAG,
     rag_txt_list,
     conf_list,
-    risk_list, DASHBOARD_KEYS, DCA_KEYS, STANDARDISE_COST_KEYS,
+    risk_list,
+    DASHBOARD_KEYS,
+    DCA_KEYS,
+    STANDARDISE_COST_KEYS,
 )
 from analysis_engine.dandelion import dandelion_number_text
 from analysis_engine.colouring import black_text, fill_colour_list
@@ -174,7 +177,7 @@ def ipdc_dashboard(md, wb: Workbook, **op_args) -> Workbook:
 
 
 def resource_dashboard(master, wb: Workbook, **kwargs) -> Workbook:
-    ws = wb['Resource']
+    ws = wb["Resource"]
 
     current_data = master.master_data[0]["data"]
     last_data = master.master_data[1]["data"]
@@ -194,27 +197,31 @@ def resource_dashboard(master, wb: Workbook, **kwargs) -> Workbook:
             bc_stage = current_data[project_name]["IPDC approval point"]
             ws.cell(row=row_num, column=4).value = BC_STAGE_DICT_FULL_TO_ABB(bc_stage)
 
-            'Resourcing data'
+            "Resourcing data"
             resource_keys = [
-                'DfTc Public Sector Employees',
-                'DfTc External Contractors',
-                'DfTc Project Team Total',
-                'DfTc Funded Posts',
-                'DfTc Resource Gap',
-                'DfTc Resource Gap Criticality'
+                "DfTc Public Sector Employees",
+                "DfTc External Contractors",
+                "DfTc Project Team Total",
+                "DfTc Funded Posts",
+                "DfTc Resource Gap",
+                "DfTc Resource Gap Criticality",
             ]
 
             for i, key in enumerate(resource_keys):
                 try:
-                    if key == 'DfTc Resource Gap Criticality':
-                        ws.cell(row=row_num, column=5 + i).value = CONVERT_RAG(current_data[project_name][key])
+                    if key == "DfTc Resource Gap Criticality":
+                        ws.cell(row=row_num, column=5 + i).value = CONVERT_RAG(
+                            current_data[project_name][key]
+                        )
                     else:
-                        ws.cell(row=row_num, column=5 + i).value = current_data[project_name][key]
+                        ws.cell(row=row_num, column=5 + i).value = current_data[
+                            project_name
+                        ][key]
                 except KeyError:
                     raise InputError(
-                        key + ' key is not in quarter master. This key must'
-                        ' be present for dashboard compilation. Stopping. '
-                              'Make sure all resource keys are in Master.'
+                        key + " key is not in quarter master. This key must"
+                        " be present for dashboard compilation. Stopping. "
+                        "Make sure all resource keys are in Master."
                     )
 
             """DCA rating - this quarter"""
@@ -270,35 +277,47 @@ def resource_dashboard(master, wb: Workbook, **kwargs) -> Workbook:
 
 
 def financial_dashboard(
-        md, 
-        wb: Workbook,
-        **op_args,
+    md,
+    wb: Workbook,
+    **op_args,
 ) -> Workbook:
-    
-    ws = wb['Finance']
-    cmd = md['master_data'][0]["data"]  # cmd = current master data
-    lmd = md['master_data'][1]["data"]
+
+    ws = wb["Finance"]
+    cmd = md["master_data"][0]["data"]  # cmd = current master data
+    lmd = md["master_data"][1]["data"]
 
     rm = get_remove_income(op_args)
 
     for row_num in range(2, ws.max_row + 1):
         project_name = ws.cell(row=row_num, column=3).value
-        if project_name not in md['current_projects']:
+        if project_name not in md["current_projects"]:
             continue
 
         """BC Stage"""
-        bc_stage = cmd[project_name][DASHBOARD_KEYS['BC_STAGE']]
+        bc_stage = cmd[project_name][DASHBOARD_KEYS["BC_STAGE"]]
         ws.cell(row=row_num, column=4).value = BC_STAGE_DICT_FULL_TO_ABB[bc_stage]
         """Total WLC"""
-        wlc_now = convert_none_types(cmd[project_name][STANDARDISE_COST_KEYS[op_args['report']]["total"]])
+        wlc_now = convert_none_types(
+            cmd[project_name][STANDARDISE_COST_KEYS[op_args["report"]]["total"]]
+        )
         if project_name in rm:
-            wlc_now = wlc_now - convert_none_types(cmd[project_name][STANDARDISE_COST_KEYS[op_args['report']]["income_total"]])
+            wlc_now = wlc_now - convert_none_types(
+                cmd[project_name][
+                    STANDARDISE_COST_KEYS[op_args["report"]]["income_total"]
+                ]
+            )
         ws.cell(row=row_num, column=6).value = wlc_now
         """WLC variance against lst quarter"""
         try:
-            wlc_lst_qrt = convert_none_types(lmd[project_name][STANDARDISE_COST_KEYS[op_args['report']]["total"]])
+            wlc_lst_qrt = convert_none_types(
+                lmd[project_name][STANDARDISE_COST_KEYS[op_args["report"]]["total"]]
+            )
             if project_name in rm:
-                wlc_lst_qrt = wlc_lst_qrt - convert_none_types(lmd[project_name][STANDARDISE_COST_KEYS[op_args['report']]["income_total"]])
+                wlc_lst_qrt = wlc_lst_qrt - convert_none_types(
+                    lmd[project_name][
+                        STANDARDISE_COST_KEYS[op_args["report"]]["income_total"]
+                    ]
+                )
             print(project_name, wlc_now, wlc_lst_qrt)
             diff_lst_qrt = wlc_now - wlc_lst_qrt
             if float(diff_lst_qrt) > 0.49 or float(diff_lst_qrt) < -0.49:
@@ -320,22 +339,24 @@ def financial_dashboard(
         # except TypeError:
         #     pass
 
-        con = cmd[project_name][DASHBOARD_KEYS['CONTINGENCY']]
+        con = cmd[project_name][DASHBOARD_KEYS["CONTINGENCY"]]
         if con == 0 or con is None:
             con = "-"
         ws.cell(row=row_num, column=13).value = con
 
         """OB"""
-        ob = cmd[project_name][DASHBOARD_KEYS['OB']]
+        ob = cmd[project_name][DASHBOARD_KEYS["OB"]]
         if ob == 0 or ob is None:
             ob = "-"
         ws.cell(row=row_num, column=14).value = ob
 
         """financial DCA ratings"""
-        for i, q in enumerate(md['quarter_list']):
+        for i, q in enumerate(md["quarter_list"]):
             try:
                 ws.cell(row=row_num, column=15 + i).value = CONVERT_RAG[
-                    md['master_data'][i]['data'][project_name][DCA_KEYS[op_args['report']]['finance']]
+                    md["master_data"][i]["data"][project_name][
+                        DCA_KEYS[op_args["report"]]["finance"]
+                    ]
                 ]
             except KeyError:
                 ws.cell(row=row_num, column=16).value = ""
@@ -358,18 +379,18 @@ def financial_dashboard(
 
 
 def schedule_dashboard(
-        master,
-        milestones: MilestoneData,
-        m_filtered,
-        wb: Workbook,
-        **op_args,
+    master,
+    milestones: MilestoneData,
+    m_filtered,
+    wb: Workbook,
+    **op_args,
 ) -> Workbook:
-    ws = wb['Schedule']
+    ws = wb["Schedule"]
     # overall_ws = wb.worksheets[3]
 
     current_data = master.master_data[0]["data"]
     last_data = master.master_data[1]["data"]
-    IPDC_DATE = parser.parse(op_args['data'], dayfirst=True).date()
+    IPDC_DATE = parser.parse(op_args["data"], dayfirst=True).date()
     #     get_ipdc_date(str(root_path) + "/core_data/ipdc_config.ini", "ipdc_date"),
     #     dayfirst=True,
     # ).date()
@@ -556,7 +577,7 @@ def schedule_dashboard(
 
 
 def benefits_dashboard(master, wb: Workbook) -> Workbook:
-    ws = wb['Benefits_VfM']
+    ws = wb["Benefits_VfM"]
     # overall_ws = wb.worksheets[3]
 
     current_data = master.master_data[0]["data"]
@@ -646,9 +667,9 @@ def benefits_dashboard(master, wb: Workbook) -> Workbook:
             """vfm category now"""
             if current_data[project_name]["VfM Category single entry"] is None:
                 vfm_cat = (
-                        str(current_data[project_name]["VfM Category lower range"])
-                        + " - "
-                        + str(current_data[project_name]["VfM Category upper range"])
+                    str(current_data[project_name]["VfM Category lower range"])
+                    + " - "
+                    + str(current_data[project_name]["VfM Category upper range"])
                 )
                 if vfm_cat == "None - None":
                     vfm_cat = "None"
@@ -783,9 +804,7 @@ def benefits_dashboard(master, wb: Workbook) -> Workbook:
             text = black_text
             fill = fill_colour_list[i]
             dxf = DifferentialStyle(font=text, fill=fill)
-            rule = Rule(
-                type="containsText", operator="containsText", text=dca, dxf=dxf
-            )
+            rule = Rule(type="containsText", operator="containsText", text=dca, dxf=dxf)
             for_rule_formula = 'NOT(ISERROR(SEARCH("' + dca + '",' + column + "5)))"
             rule.formula = [for_rule_formula]
             ws.conditional_formatting.add("" + column + "5:" + column + "60", rule)
@@ -799,18 +818,15 @@ def benefits_dashboard(master, wb: Workbook) -> Workbook:
 
 
 def overall_dashboard(
-        master,
-        milestones: MilestoneData,
-        wb: Workbook,
-        **op_args
+    master, milestones: MilestoneData, wb: Workbook, **op_args
 ) -> Workbook:
-    ws = wb['Overall']
+    ws = wb["Overall"]
 
     current_data = master.master_data[0]["data"]
     last_data = master.master_data[1]["data"]
     last_qrt_group = get_group(op_args["group"], master, 1)
 
-    IPDC_DATE = parser.parse(op_args['data'], dayfirst=True).date()
+    IPDC_DATE = parser.parse(op_args["data"], dayfirst=True).date()
     #     get_ipdc_date(str(root_path) + "/core_data/ipdc_config.ini", "ipdc_date"),
     #     dayfirst=True,
     # ).date()
@@ -858,12 +874,12 @@ def overall_dashboard(
             #     pass
 
             """Total WLC"""
-            wlc_now = c.c_totals[str(master.current_quarter)]['total']
+            wlc_now = c.c_totals[str(master.current_quarter)]["total"]
             # ws.cell(row=row_num, column=6).value = wlc_now
             ws.cell(row=row_num, column=5).value = wlc_now
             """WLC variance against lst quarter"""
             try:
-                lst_qrt_costs = c.c_totals[str(master.quarter_list[1])]['total']
+                lst_qrt_costs = c.c_totals[str(master.quarter_list[1])]["total"]
                 diff_lst_qrt = wlc_now - lst_qrt_costs
                 if float(diff_lst_qrt) > 0.49 or float(diff_lst_qrt) < -0.49:
                     # ws.cell(row=row_num, column=7).value = diff_lst_qrt
@@ -888,7 +904,7 @@ def overall_dashboard(
                 ws.cell(row=row_num, column=6).value = "-"
 
             """WLC variance against baseline"""
-            wlc_baseline = c.c_bl_totals[str(master.current_quarter)]['total']
+            wlc_baseline = c.c_bl_totals[str(master.current_quarter)]["total"]
             # bl = master.bl_index["ipdc_costs"][project_name][2]
             # wlc_baseline = master.master_data[bl]["data"][project_name][
             #     "Total Forecast"
@@ -923,9 +939,9 @@ def overall_dashboard(
             """vfm category now"""
             if current_data[project_name]["VfM Category single entry"] is None:
                 vfm_cat = (
-                        str(current_data[project_name]["VfM Category lower range"])
-                        + " - "
-                        + str(current_data[project_name]["VfM Category upper range"])
+                    str(current_data[project_name]["VfM Category lower range"])
+                    + " - "
+                    + str(current_data[project_name]["VfM Category upper range"])
                 )
                 if vfm_cat == "None - None":
                     vfm_cat = "None"
@@ -988,12 +1004,18 @@ def overall_dashboard(
 
             abb = master.abbreviations[project_name]["abb"]
             current = get_milestone_date(
-                abb, milestones.milestone_dict, str(master.current_quarter), "Full Operations"
+                abb,
+                milestones.milestone_dict,
+                str(master.current_quarter),
+                "Full Operations",
             )
             # if current == None:
             #     current = "None"
             last_quarter = get_milestone_date(
-                abb, milestones.milestone_dict, str(master.quarter_list[1]), "Full Operations"
+                abb,
+                milestones.milestone_dict,
+                str(master.quarter_list[1]),
+                "Full Operations",
             )
             # bl = get_milestone_date(
             #     abb, milestones.milestone_dict, "bl_one", " Full Operations"
@@ -1040,8 +1062,8 @@ def overall_dashboard(
                 ipa_dca = CONVERT_RAG(current_data[project_name]["GMPP - IPA DCA"])
             except KeyError:
                 raise InputError(
-                    'No GMPP IPA DCA key in quarter master. This key must'
-                    ' be present for dashboard compilation. Stopping.'
+                    "No GMPP IPA DCA key in quarter master. This key must"
+                    " be present for dashboard compilation. Stopping."
                 )
             ws.cell(row=row_num, column=15).value = ipa_dca
             if ipa_dca == "None":
@@ -1049,11 +1071,11 @@ def overall_dashboard(
 
             # SRO forward look
             try:
-                fwd_look = current_data[project_name]['SRO Forward Look Assessment']
+                fwd_look = current_data[project_name]["SRO Forward Look Assessment"]
             except KeyError:
                 raise InputError(
-                    'No SRO Forward Look Assessment key in current quarter master. This key must'
-                    ' be present for dashboard compilation. Stopping.'
+                    "No SRO Forward Look Assessment key in current quarter master. This key must"
+                    " be present for dashboard compilation. Stopping."
                 )
             if fwd_look == "Worsening":
                 ws.cell(row=row_num, column=18).value = 1
@@ -1065,7 +1087,9 @@ def overall_dashboard(
                 ws.cell(row=row_num, column=18).value = ""
 
             """SRO three DCA rating"""
-            sro_dca_three = CONVERT_RAG(current_data[project_name]["Departmental DCA"])  # "GMPP - SRO DCA"
+            sro_dca_three = CONVERT_RAG(
+                current_data[project_name]["Departmental DCA"]
+            )  # "GMPP - SRO DCA"
             ws.cell(row=row_num, column=16).value = sro_dca_three
             if sro_dca_three == "None":
                 ws.cell(row=row_num, column=16).value = ""
@@ -1103,7 +1127,7 @@ def overall_dashboard(
             # )
 
     # places arrow icons for sro forward look assessment
-    icon_set_rule = IconSetRule("3Arrows", "num", ['1', '2', '3'], showValue=False)
+    icon_set_rule = IconSetRule("3Arrows", "num", ["1", "2", "3"], showValue=False)
     ws.conditional_formatting.add("R4:R40", icon_set_rule)
 
     """list of columns with conditional formatting"""
@@ -1115,9 +1139,7 @@ def overall_dashboard(
             text = black_text
             fill = fill_colour_list[i]
             dxf = DifferentialStyle(font=text, fill=fill)
-            rule = Rule(
-                type="containsText", operator="containsText", text=dca, dxf=dxf
-            )
+            rule = Rule(type="containsText", operator="containsText", text=dca, dxf=dxf)
             for_rule_formula = 'NOT(ISERROR(SEARCH("' + dca + '",' + column + "5)))"
             rule.formula = [for_rule_formula]
             ws.conditional_formatting.add(column + "5:" + column + "60", rule)

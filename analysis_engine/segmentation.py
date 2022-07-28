@@ -23,7 +23,7 @@ def get_iter_list(md, **kwargs) -> List[str]:
                 md["quarter_list"][0],
                 md["quarter_list"][1],
             ]
-        elif kwargs['quarter'] == 'four':
+        elif kwargs["quarter"] == "four":
             try:
                 iter_list = [
                     md["quarter_list"][0],
@@ -33,7 +33,7 @@ def get_iter_list(md, **kwargs) -> List[str]:
                 ]
             except:  # what is the exception
                 iter_list = md["quarter_list"]
-                logger.info('Less than four quarters present in core_data folder')
+                logger.info("Less than four quarters present in core_data folder")
 
         elif kwargs["quarter"] == "all":
             iter_list = md["quarter_list"]
@@ -94,19 +94,24 @@ def get_group(md, tp, **kwargs) -> List[str]:
         abbreviations = md["abbreviations"]
         for p in initial_error_case:
             if p in project_names:
-                if p in md['master_data'][md['quarter_list'].index(tp)]['data'].keys():
+                if p in md["master_data"][md["quarter_list"].index(tp)]["data"].keys():
                     output_list.append(p)
             elif p in list(abbreviations.keys()):
-                pfn = abbreviations[p]  # pfn = project full name. coverts abbreviations back to full names
-                if pfn in md['master_data'][md['quarter_list'].index(tp)]['data'].keys():
+                pfn = abbreviations[
+                    p
+                ]  # pfn = project full name. coverts abbreviations back to full names
+                if (
+                    pfn
+                    in md["master_data"][md["quarter_list"].index(tp)]["data"].keys()
+                ):
                     output_list.append(pfn)
             else:
                 final_error_case.append(p)
 
     if len(final_error_case) != 0:
         qrt_list = []
-        for m in md['master_data']:
-            qrt_list.append(m['quarter'])
+        for m in md["master_data"]:
+            qrt_list.append(m["quarter"])
 
         if tp not in qrt_list:
             not_recognised_quarter(tp)
