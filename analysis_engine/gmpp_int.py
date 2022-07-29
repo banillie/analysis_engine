@@ -36,6 +36,8 @@ class GmppOnlineCosts:
         self.op_args = op_args
         self.income = {}
         self.cost_total = {}
+        self.income_ach = {}
+        self.spent = {}
         self.get_workbook()
         self.get_data()
         self.get_cost_totals()
@@ -105,6 +107,8 @@ class GmppOnlineCosts:
     def get_cost_totals(self):
         income = {}
         total = {}
+        income_ach = {}
+        spent = {}
         for p in self.gmpp_dict.keys():
             # all forecast (not baseline).
             # There is no recurring old cost keys or non gov keys in here at mo
@@ -112,10 +116,14 @@ class GmppOnlineCosts:
             rdel_oonc = 0  # oonc = one off new costs!
             rdel_rnc = 0  # rnc = recurring new costs!
             rdel_ng = 0  # ng = non gov
+            rdel_income_ach = 0
+            rdel_spent = 0
             cdel_income = 0
             cdel_oonc = 0
             cdel_rnc = 0
             cdel_ng = 0
+            cdel_income_ach = 0
+            cdel_spent = 0
             for i in range(2, 51, 2):
                 try:
                     rdel_income += self.gmpp_dict[p][f"9.01.{i}: RDEL Income"]
@@ -133,6 +141,10 @@ class GmppOnlineCosts:
                     rdel_ng += self.gmpp_dict[p][f"9.01.{i}: Non Gov"]
                 except KeyError:
                     rdel_ng += 0
+
+                if i == 8:
+                    rdel_income_ach += rdel_income
+                    rdel_spent += (rdel_oonc + rdel_rnc + rdel_ng)
 
             for i in range(2, 51, 2):
                 try:
@@ -154,11 +166,19 @@ class GmppOnlineCosts:
                 except KeyError:
                     cdel_ng += 0
 
+                if i == 8:
+                    cdel_income_ach += cdel_income
+                    cdel_spent += (cdel_oonc + cdel_rnc + cdel_ng)
+
             income[p] = rdel_income + cdel_income
             total[p] = rdel_oonc + rdel_rnc + rdel_ng + cdel_oonc + cdel_rnc + cdel_ng
+            income_ach[p] = rdel_income_ach + cdel_income_ach
+            spent[p] = rdel_spent + cdel_spent
 
         self.income = income
         self.cost_total = total
+        self.income_ach = income_ach
+        self.spent = spent
 
     def put_cost_totals_into_wb(self):
         wb = Workbook()
@@ -173,11 +193,15 @@ class GmppOnlineCosts:
         for x, project in enumerate(list(self.cost_total.keys())):
             ws.cell(row=2 + x, column=1).value = project_map[project]
             ws.cell(row=2 + x, column=2).value = self.cost_total[project]
-            ws.cell(row=2 + x, column=3).value = self.income[project]
+            ws.cell(row=2 + x, column=3).value = self.spent[project]
+            ws.cell(row=2 + x, column=4).value = self.income[project]
+            ws.cell(row=2 + x, column=5).value = self.income_ach[project]
 
         ws.cell(row=1, column=1).value = "Project Name"
         ws.cell(row=1, column=2).value = "Total Forecast Cost"
-        ws.cell(row=1, column=3).value = "Total Income"
+        ws.cell(row=1, column=3).value = "Spent"
+        ws.cell(row=1, column=4).value = "Income"
+        ws.cell(row=1, column=5).value = "Income Realised"
 
         wb.save(self.op_args["root_path"] + "/output/gmpp_online_total_costs.xlsx")
 

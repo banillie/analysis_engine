@@ -246,7 +246,7 @@ def test_gmpp_online_data():
     if REPORTING_TYPE == 'ipdc':
         cli = CliOpArgs({'subparser_name': 'gmpp_data'}, SETTINGS_DICT)
         md = GmppOnlineCosts(**cli.combined_args)
-        md.place_into_dft_master_format()
+        # md.place_into_dft_master_format()
         md.put_cost_totals_into_wb()
 
 
