@@ -8,7 +8,13 @@ class Merge:
         self.op_args = op_args
         self.key_list = []
         self.p_names = []
-        self.ignore_keys = [None, "file name", "Project/Programme Name"]
+        self.ignore_keys = [
+            None,
+            "file name",
+            "Project/Programme Name",
+            "Project Name (IPA Keys)",
+            "Project Name (DfT Keys)",
+        ]
         self.get_key_names()
         self.get_project_names()
         self.put_into_wb()

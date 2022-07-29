@@ -221,8 +221,8 @@ class GmppOnlineCosts:
                 except KeyError:
                     pass
 
-        ws.cell(row=1, column=1).value = "Project Name (DfT Keys)"
-        ws.cell(row=1, column=2).value = "Project Name (IPA Keys)"
+        ws.cell(row=1, column=1).value = "Project Name (IPA Keys)"
+        ws.cell(row=1, column=2).value = "Project Name (DfT Keys)"
 
         wb.save(
             self.op_args["root_path"]

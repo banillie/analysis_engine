@@ -134,17 +134,15 @@ def get_integration_data(op_args):
 
 
 def get_masters_to_merge(op_args):
-    # try:
-    config_path = op_args["root_path"] + op_args["config"]
-    config = configparser.ConfigParser()
-    config.read(config_path)
-    # msts = config["MERGE"]["masters_list"]
-    msts = json.loads(config.get("MERGE", "masters_list"))  # to return a list
-    # group_all = json.loads(config.get('GROUPS', 'all_groups'))
-    # # except:
-    # #     config_issue()
+    try:
+        config_path = op_args["root_path"] + op_args["config"]
+        config = configparser.ConfigParser()
+        config.read(config_path)
+        msts = json.loads(config.get("MERGE", "masters_list"))  # to return a list
+        op_args["masters_list"] = msts
+    except:
+        config_issue()
 
-    op_args["masters_list"] = msts
 
 
 # def get_remove_income_totals(

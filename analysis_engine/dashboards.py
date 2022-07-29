@@ -352,6 +352,7 @@ def financial_dashboard(
 
         """financial DCA ratings"""
         for i, q in enumerate(md["quarter_list"]):
+            print(i)
             try:
                 ws.cell(row=row_num, column=15 + i).value = CONVERT_RAG[
                     md["master_data"][i]["data"][project_name][
@@ -359,7 +360,7 @@ def financial_dashboard(
                     ]
                 ]
             except KeyError:
-                ws.cell(row=row_num, column=16).value = ""
+                ws.cell(row=row_num, column=15 + i).value = ""
 
     """list of columns with conditional formatting"""
     list_columns = ["o", "p", "q", "r", "s"]

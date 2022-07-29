@@ -223,7 +223,7 @@ class DandelionData:
         for i, g in enumerate(self.group):
             self.kwargs[self.group_stage_switch] = [g]
             if g == "pipeline":
-                g_wlc = self.master.pipeline_dict["pipeline"]["wlc"]
+                g_wlc = self.master['pipeline_dict']["pipeline"]["wlc"]
             else:
                 g_wlc = get_dandelion_type_total(self.master, self.kwargs)
 
@@ -295,6 +295,8 @@ class DandelionData:
 
             else:
                 g_d = {}  # delete the dictionary
+                # to alter out circles with low values in line with group wlc
+                pf_wlc = g_wlc
                 g_d[g] = {
                     "axis": (0, 0),
                     "r": math.sqrt(g_wlc),
@@ -312,7 +314,7 @@ class DandelionData:
         for i, g in enumerate(self.group):
             self.kwargs[self.group_stage_switch] = [g]
             if g == "pipeline":
-                project_group = self.master.pipeline_list
+                project_group = self.master['pipeline_list']
             else:
                 project_group = get_group(
                     self.master, self.quarter, **self.kwargs
@@ -322,11 +324,14 @@ class DandelionData:
             for p in project_group:
                 self.kwargs[self.group_stage_switch] = [p]
                 if g == "pipeline":
-                    p_value = self.master.pipeline_dict[p]["wlc"]
+                    p_value = self.master['pipeline_dict'][p]["wlc"]
+                    p_data = {}
                 else:
                     p_value = get_dandelion_type_total(
                         self.master, self.kwargs
                     )  # project wlc
+                    p_data = get_correct_p_data(self.master, p, self.quarter)
+
                 if "same_size" in self.kwargs:
                     if self.kwargs["same_size"] == "Yes":
                         p_value = 6000
@@ -398,7 +403,6 @@ class DandelionData:
                     if self.kwargs["values"] == "No":
                         project_text = self.master.abbreviations[p]["abb"]
 
-                p_data = get_correct_p_data(self.master, p, self.quarter)
                 try:  # this is for pipeline projects
                     if "confidence" in self.kwargs:  # change confidence type here
                         rag = p_data[
@@ -407,7 +411,7 @@ class DandelionData:
                     else:
                         rag = p_data[DCA_KEYS[self.kwargs["report"]]["sro"]]
                     colour = COLOUR_DICT[rag]  # bubble colour
-                except TypeError:  # p_data is None for pipeline projects
+                except KeyError:  # p_data is None for pipeline projects
                     colour = COLOUR_DICT["WHITE"]
 
                 if "circle_colour" in self.kwargs:
@@ -425,21 +429,23 @@ class DandelionData:
                     else:
                         edge_colour = colour
 
-                if "circle_edge" in self.kwargs:
-                    if self.kwargs["circle_edge"] == "forward_look":
-                        try:
-                            fwd_look = p_data[
-                                DANDELION_KEYS[self.kwargs["circle_edge"]]
-                            ]
-                            edge_rag = calculate_circle_edge(rag, fwd_look)
-                            edge_colour = COLOUR_DICT[edge_rag]
-                        except KeyError:
-                            raise InputError(
-                                "No SRO Forward Look Assessment key in quarter master. "
-                                "This key must be present for this dandelion command. Stopping."
-                            )
-                    if self.kwargs["circle_edge"] == "ipa":
-                        edge_colour = COLOUR_DICT[p_data["GMPP - IPA DCA"]]
+                if g != 'pipeline':
+                    print(g)
+                    if "circle_edge" in self.kwargs:
+                        if self.kwargs["circle_edge"] == "forward_look":
+                            try:
+                                fwd_look = p_data[
+                                    DANDELION_KEYS[self.kwargs["circle_edge"]]
+                                ]
+                                edge_rag = calculate_circle_edge(rag, fwd_look)
+                                edge_colour = COLOUR_DICT[edge_rag]
+                            except KeyError:
+                                raise InputError(
+                                    "No SRO Forward Look Assessment key in quarter master. "
+                                    "This key must be present for this dandelion command. Stopping."
+                                )
+                        if self.kwargs["circle_edge"] == "ipa":
+                            edge_colour = COLOUR_DICT[p_data["GMPP - IPA DCA"]]
 
                 g_d[p] = {
                     "r": p_radius,
@@ -509,7 +515,7 @@ class DandelionData:
                 elif 21 <= angle <= 174 or 381 <= angle <= 534:
                     ha = "left"
                 elif 175 <= angle <= 185:
-                    va = "bottom"
+                    va = "top"
                 elif 186 <= angle <= 339:
                     ha = "right"
                 elif 340 <= angle <= 349:
@@ -629,7 +635,7 @@ def make_a_dandelion_auto(dl: DandelionData, **kwargs):
         )
 
         if g == "pipeline":
-            lower_g = dl.master.pipeline_list
+            lower_g = dl.master['pipeline_list']
         else:
             lower_g = get_group(dl.master, dl.kwargs["quarter"][0], **dl.kwargs)
         for p in lower_g:

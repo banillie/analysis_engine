@@ -253,6 +253,12 @@ dlion_cli_group_ipdc = {
     "group": ["RPE"],
     "chart": chart,
 }
+dlion_cli_pipeline_ipdc = {
+    "test_name": "dlion_groups",
+    "subparser_name": "dandelion",
+    "group": ["pipeline"],
+    "chart": chart,
+}
 
 if REPORTING_TYPE == 'cdg':
     DANDELION_OP_ARGS_DICT = [
@@ -267,6 +273,7 @@ if REPORTING_TYPE == 'cdg':
     ]
 if REPORTING_TYPE == 'ipdc':
     DANDELION_OP_ARGS_DICT = [
+        dlion_cli_pipeline_ipdc,
         dlion_cli_group_ipdc,
         # dlion_income,
         # dlion_benefits,
