@@ -56,6 +56,10 @@ class CliOpArgs:
             if "quarter" not in list(op_args.keys()):
                 op_args["quarter"] = "standard"
 
+        if self.programme == 'milestones':
+            if "chart" not in (op_args.keys()):
+                op_args["chart"] = None
+
         if self.programme == "dashboards":
             op_args["quarter"] = "four"
 
@@ -204,25 +208,23 @@ def run_analysis(args, settings):
                 return_koi_fn_keys(cli.combined_args)
                 ms.filter_chart_info(**cli.combined_args)
 
-            if cli.combined_args["chart"] != "show":
+            if cli.combined_args["chart"] == "save":
                 ms_graph = milestone_chart(ms, **cli.combined_args)
                 doc = get_input_doc(
-                    str(cli.combined_args["root_path"])
-                    + cli.combined_args["word_landscape"]
+                    str(cli.combined_args["root_path"]) + cli.combined_args["word_landscape"]
                 )
                 put_matplotlib_fig_into_word(doc, ms_graph, width=Inches(8))
                 doc.save(
                     str(cli.combined_args["root_path"])
-                    + cli.combined_args["word_save_path"].format("milestones")
+                    + cli.combined_args["word_save_path"].format(f"milestones_{x['test_name']}")
                 )
-            else:
+            if cli.combined_args["chart"] == "show":
                 milestone_chart(ms, **cli.combined_args)
 
             wb = put_milestones_into_wb(ms)
             wb.save(
                 cli.combined_args["root_path"] + "/output/{}.xlsx".format(cli.programme)
             )
-            # cli.wb_save = True
 
         if cli.programme == "query":
             op_args = return_koi_fn_keys(cli.combined_args)
@@ -255,6 +257,9 @@ def run_parsers():
     parser_milestones = subparsers.add_parser(
         "milestones",
         help="milestone schedule graphs and data.",
+        description='Generates raw data outputs as well as visuals for milestone data. The default is simply '
+                    'the return of an excel file with milestone data. Use the --chart options to produce'
+                    'visual outputs '
     )
     dandelion_description = (
         "Creates the 'dandelion' graph. See below optional arguments for changing the "
@@ -283,8 +288,20 @@ def run_parsers():
         "query", help="returns required data from core data."
     )
 
-    parser_speed_dial = subparsers.add_parser("speed_dials", help="speed dial analysis")
-    parser_dca = subparsers.add_parser("dcas", help="dca analysis")
+    parser_speed_dial = subparsers.add_parser(
+        "speed_dials",
+        help="speed dial analysis",
+        description="Creates the speed dial visual outputs. All confidence speed dials are created "
+                    "at the same time and saved into the output folder. It has a maximum of two quarters "
+                    "for the --quarters argument."
+    )
+    parser_dca = subparsers.add_parser(
+        "dcas",
+        help="dca analysis",
+        description="Generates a print out on DCA changes between quarters. All DCAs are placed "
+                    "into the same file and placed in output folder. It has a maximum of two quarters "
+                    "for the --quarters argument."
+    )
 
     for sub in [
         parser_milestones,
@@ -296,7 +313,8 @@ def run_parsers():
             metavar="",
             action="store",
             choices=["show", "save"],
-            help="options for building and saving graph output. Commands are 'show' or 'save' ",
+            help="Creates a graphical output. The user can choose to either temporarily 'show' the chart "
+                 "or 'save' it into a word document which is saved into the output folder",
         )
 
     # quarter
@@ -393,7 +411,9 @@ def run_parsers():
             type=str,
             action="store",
             nargs="+",
-            help="Returns the specified keys of interest (KOI).",
+            help="Key of interest (koi). The user can specify data keys that are of specific interest for "
+                 "analysis. The user can specify keys as in the master document or they can specify "
+                 "milestone names being reported by projects.",
         )
 
     for sub in [parser_milestones, parser_data_query]:
@@ -401,7 +421,9 @@ def run_parsers():
             "--koi_fn",
             type=str,
             action="store",
-            help="provide name of csv file contain key names",
+            help="Key of interest file name (koi_fn). As per --koi. But in this instance the user can specify "
+                 "keys via a csv document saved in the input folder. Keys need to be in column A, and A1 should be "
+                 "titled key_name. "
         )
 
     parser_milestones.add_argument(
@@ -418,8 +440,10 @@ def run_parsers():
         type=str,
         metavar="",
         action="store",
-        help="Insert blue line into chart to represent a date. "
-        'Options are "Today" "CDG" or a date in correct format e.g. "1/1/2021".',
+        choices=["config_date", "today"],
+        help="User can insert blue line into chart to represent a date. "
+        "Options are 'config_date' or 'today'. The config_data is set in the config file in the "
+             "Globals / milestones_blue_line_date value."
     )
 
     parser_dandelion.add_argument(

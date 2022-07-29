@@ -1,6 +1,6 @@
 from docx.shared import Inches
 
-from analysis_engine.error_msgs import ProjectNameError, ProjectGroupError, ProjectStageError, logger
+from analysis_engine.error_msgs import ProjectNameError, ProjectGroupError, ProjectStageError, logger, InputError
 from analysis_engine.gmpp_int import GmppOnlineCosts
 from analysis_engine.merge import Merge
 from tests.test_op_args import (
@@ -124,16 +124,20 @@ def test_dca_analysis():
     for x in SPEED_DIAL_AND_DCA_OP_ARGS:
         print(x['test_name'])
         x["subparser_name"] = "dcas"
-        cli = CliOpArgs(x, SETTINGS_DICT)
-        sdmd = DcaData(cli.md, **cli.combined_args)
-        sdmd.get_changes()
-        changes_doc = dca_changes_into_word(
-            sdmd, str(cli.combined_args["root_path"]) + cli.combined_args["word_portrait"]
-        )
-        changes_doc.save(
-            str(cli.combined_args["root_path"])
-            + cli.settings["word_save_path"].format(f"dca_changes_{x['test_name']}")
-        )
+        try:
+            cli = CliOpArgs(x, SETTINGS_DICT)
+            sdmd = DcaData(cli.md, **cli.combined_args)
+            sdmd.get_changes()
+            changes_doc = dca_changes_into_word(
+                sdmd, str(cli.combined_args["root_path"]) + cli.combined_args["word_portrait"]
+            )
+            changes_doc.save(
+                str(cli.combined_args["root_path"])
+                + cli.settings["word_save_path"].format(f"dca_changes_{x['test_name']}")
+            )
+        except InputError as e:
+            logger.critical(e)
+            pass
 
 
 def test_speed_dials():
@@ -146,16 +150,20 @@ def test_speed_dials():
         if cli.combined_args['report'] == 'cdg':
             cli.combined_args["rag_number"] = '5'
 
-        sdmd = DcaData(cli.md, **cli.combined_args)
-        sdmd.get_changes()
-        sd_doc = get_input_doc(
-            str(cli.combined_args["root_path"]) + cli.combined_args["word_landscape"]
-        )
-        build_speed_dials(sdmd, sd_doc)
-        sd_doc.save(
-            str(cli.combined_args["root_path"])
-            + cli.settings["word_save_path"].format(f"speed_dials_{x['test_name']}")
-        )
+        try:
+            sdmd = DcaData(cli.md, **cli.combined_args)
+            sdmd.get_changes()
+            sd_doc = get_input_doc(
+                str(cli.combined_args["root_path"]) + cli.combined_args["word_landscape"]
+            )
+            build_speed_dials(sdmd, sd_doc)
+            sd_doc.save(
+                str(cli.combined_args["root_path"])
+                + cli.settings["word_save_path"].format(f"speed_dials_{x['test_name']}")
+            )
+        except InputError as e:
+            logger.critical(e)
+            pass
 
 
 def test_dashboards():
@@ -203,7 +211,7 @@ def test_milestones():
             return_koi_fn_keys(cli.combined_args)
             ms.filter_chart_info(**cli.combined_args)
 
-        if cli.combined_args["chart"] != "show":
+        if cli.combined_args["chart"] == "save":
             ms_graph = milestone_chart(ms, **cli.combined_args)
             doc = get_input_doc(
                 str(cli.combined_args["root_path"]) + cli.combined_args["word_landscape"]
@@ -213,7 +221,7 @@ def test_milestones():
                 str(cli.combined_args["root_path"])
                 + cli.combined_args["word_save_path"].format(f"milestones_{x['test_name']}")
             )
-        else:
+        if cli.combined_args["chart"] == "show":
             milestone_chart(ms, **cli.combined_args)
 
         wb = put_milestones_into_wb(ms)

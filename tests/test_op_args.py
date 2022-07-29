@@ -111,11 +111,17 @@ ms_blue_line_today = {
     "blue_line": "today",
     "chart": chart,
 }
-ms_koi = {
+ms_koi_cdg = {
     "test_name": "ms_koi",
     "subparser_name": "milestones",
     "chart": chart,
     "koi": "FBC CDG Approval",
+}
+ms_koi_ipdc = {
+    "test_name": "ms_koi",
+    "subparser_name": "milestones",
+    "chart": chart,
+    "koi": "OBC - IPDC Approval",
 }
 ms_koi_fn = {
     "test_name": "ms_koi_fn",
@@ -142,6 +148,8 @@ ms_stages = {
 
 if REPORTING_TYPE == 'ipdc':
     MILESTONES_OP_ARGS = [
+        ms_koi_fn,
+        ms_koi_ipdc,
         ms_groups_ipdc,
         ms_dates,
         ms_blue_line_config,
@@ -152,7 +160,7 @@ if REPORTING_TYPE == 'cdg':
         ms_groups_cdg,
         ms_quarters,
         ms_koi_fn,
-        ms_koi,
+        ms_koi_cdg,
         ms_blue_line_today,
         ms_blue_line_config,
         ms_dates,
@@ -321,6 +329,11 @@ sd_quarters = {
     "subparser_name": "speed_dials",
     "quarter": ["Q2 21/22", "Q4 21/22"],
 }
+sd_too_many_quarters = {
+    "test_name": "sd_quarters",
+    "subparser_name": "speed_dials",
+    "quarter": ["Q1 22/21", "Q4 21/22", "Q2 21/22"],
+}
 sd_stage = {
     "test_name": "sd_stage",
     "subparser_name": "speed_dials",
@@ -349,6 +362,7 @@ if REPORTING_TYPE == 'cdg':
     ]
 if REPORTING_TYPE == 'ipdc':
     SPEED_DIAL_AND_DCA_OP_ARGS = [
+        sd_too_many_quarters,
         sd_groups_ipdc,
         sd_stage,
         sd_quarters,

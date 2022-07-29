@@ -8,7 +8,7 @@ from analysis_engine.dictionaries import (
     DCA_RATING_SCORES,
     STANDARDISE_COST_KEYS,
 )
-from analysis_engine.error_msgs import get_error_list
+from analysis_engine.error_msgs import get_error_list, InputError
 
 
 class DcaData:
@@ -25,6 +25,11 @@ class DcaData:
 
     def get_dictionary(self) -> None:
         quarter_dict = {}
+        if len(self.quarters) > 2:
+            raise InputError(
+                'Too many quarters entered. This analysis can have a maximum of two quarters. Program '
+                'stopping. Please re-enter.'
+            )
         for tp in self.quarters:
             group = get_group(self.master, tp, **self.kwargs)
             type_dict = {}
