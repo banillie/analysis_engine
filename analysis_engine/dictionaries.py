@@ -188,11 +188,9 @@ CONVERT_RAG = {
 }
 
 NEXT_STAGE_DICT = {
-    "pre_SOBC": "SOBC - IPDC Approval",
     "pre-SOBC": "SOBC - IPDC Approval",
     "SOBC": "OBC - IPDC Approval",
     "OBC": "FBC - IPDC Approval",
-    # 'FBC - IPDC Approval'
     "FBC": "Project End Date",
     "Other": None,
 }

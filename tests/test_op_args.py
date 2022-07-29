@@ -209,6 +209,12 @@ dlion_stages_abb_ipdc = {
     ],
     "chart": chart,
 }
+dlion_stages_default_ipdc = {
+    "test_name": "dlion_stages",
+    "subparser_name": "dandelion",
+    "stage": [],
+    "chart": chart,
+}
 dlion_quarter = {
     "test_name": "dlion_quarter",
     "subparser_name": "dandelion",
@@ -241,22 +247,39 @@ dlion_income = {
     "chart": chart,
 }
 # this will crash if project not in quarter data master
-dlion_cli_group_cdg = {
-    "test_name": "dlion_groups",
-    "subparser_name": "dandelion",
-    "group": ["WIT retail project", "Mayfield", "MSG"],
-    "chart": chart,
-}
-dlion_cli_group_ipdc = {
-    "test_name": "dlion_groups",
-    "subparser_name": "dandelion",
-    "group": ["RPE"],
-    "chart": chart,
-}
+# dlion_cli_group_cdg = {
+#     "test_name": "dlion_groups",
+#     "subparser_name": "dandelion",
+#     "group": ["WIT retail project", "Mayfield", "MSG"],
+#     "chart": chart,
+# }
+# dlion_cli_group_ipdc = {
+#     "test_name": "dlion_groups",
+#     "subparser_name": "dandelion",
+#     "group": ["RPE"],
+#     "chart": chart,
+# }
 dlion_cli_pipeline_ipdc = {
     "test_name": "dlion_groups",
     "subparser_name": "dandelion",
     "group": ["pipeline"],
+    "chart": chart,
+}
+dlion_pipeline_as_stage_ipdc = {
+    "test_name": "dlion_groups",
+    "subparser_name": "dandelion",
+    "stage": ["pipeline", "SOBC"],
+    "chart": chart,
+}
+dlion_stages_order_by_ipdc = {
+    "test_name": "dlion_stages",
+    "subparser_name": "dandelion",
+    "stage": [
+        'SOBC',
+        'OBC',
+        "FBC",
+    ],
+    "order_by": "schedule",
     "chart": chart,
 }
 
@@ -273,8 +296,11 @@ if REPORTING_TYPE == 'cdg':
     ]
 if REPORTING_TYPE == 'ipdc':
     DANDELION_OP_ARGS_DICT = [
+        dlion_pipeline_as_stage_ipdc,
+        dlion_stages_default_ipdc,
+        dlion_stages_order_by_ipdc,
         dlion_cli_pipeline_ipdc,
-        dlion_cli_group_ipdc,
+        # dlion_cli_group_ipdc,
         # dlion_income,
         # dlion_benefits,
         dlion_angles_ipdc,

@@ -30,6 +30,8 @@ from analysis_engine.dictionaries import (
     DANDELION_KEYS,
     BC_STAGE_DICT_FULL_TO_ABB,
     BC_STAGE_DICT_ABB_TO_FULL,
+    DASHBOARD_KEYS,
+    NEXT_STAGE_DICT,
 )
 
 
@@ -112,9 +114,9 @@ def cal_group_angle(dist_amount: int, group: List[str], inner_circles=False):
     output_list = []
     for i in range(n_points):
         if inner_circles:
-            output_list.append((g_ang * i) + 270)
+            output_list.append(int((g_ang * i) + 270))
         else:
-            output_list.append(g_ang * i)
+            output_list.append(int(g_ang * i))
 
     return output_list
 
@@ -222,7 +224,7 @@ class DandelionData:
         for i, g in enumerate(self.group):
             self.kwargs[self.group_stage_switch] = [g]
             if g == "pipeline":
-                g_wlc = self.master['pipeline_dict']["pipeline"]["wlc"]
+                g_wlc = self.master["pipeline_dict"]["pipeline"]["wlc"]
             else:
                 g_wlc = get_dandelion_type_total(self.master, self.kwargs)
 
@@ -313,7 +315,7 @@ class DandelionData:
         for i, g in enumerate(self.group):
             self.kwargs[self.group_stage_switch] = [g]
             if g == "pipeline":
-                project_group = self.master['pipeline_list']
+                project_group = self.master["pipeline_list"]
             else:
                 project_group = get_group(
                     self.master, self.quarter, **self.kwargs
@@ -323,7 +325,7 @@ class DandelionData:
             for p in project_group:
                 self.kwargs[self.group_stage_switch] = [p]
                 if g == "pipeline":
-                    p_value = self.master['pipeline_dict'][p]["wlc"]
+                    p_value = self.master["pipeline_dict"][p]["wlc"]
                     p_data = {}
                 else:
                     p_value = get_dandelion_type_total(
@@ -344,37 +346,30 @@ class DandelionData:
 
                 p_radius = math.sqrt(p_value_adjusted)
 
-                # if "report" not in self.kwargs:  # DON'T UNDERSTAND THIS IF STATEMENT
-                # if "something" in self.kwargs:  # SOMETHING TO DO WITH SCHEDULE?
-                #     if g == "pipeline":
-                #         p_schedule = self.master.pipeline_dict[p]["wlc"]
-                #     else:
-                #         quarter_index = get_quarter_index(self.master, self.quarter)
-                #         bc = BC_STAGE_DICT[
-                #             self.master.master_data[quarter_index]["data"][p][
-                #                 "IPDC approval point"
-                #             ]
-                #         ]
-                #         ms = MilestoneData(self.master, **self.kwargs)
-                #         next_stage = NEXT_STAGE_DICT[bc]
-                #         try:
-                #             d = get_milestone_date(
-                #                 self.master.abbreviations[p]["abb"],
-                #                 ms.milestone_dict,
-                #                 self.quarter,
-                #                 next_stage,
-                #             )
-                #             p_schedule = (d - datetime.date.today()).days
-                #         except TypeError:
-                #             p_schedule = 10000000000
-                #             if "order_by" in self.kwargs:
-                #                 if self.kwargs["order_by"] == "schedule":
-                #                     print("can't calculate " + p + "'s schedule")
-                # else:
-                #     p_schedule = 0
-
-                p_schedule = []
-                p_list.append((p_value, p_radius, p_schedule, p))
+                p_schedule = None
+                if "order_by" in self.kwargs:  # SOMETHING TO DO WITH SCHEDULE?
+                    if g == "pipeline":
+                        raise InputError(
+                            "The argument order_by cannot be used with pipeline projects as milestone data is required"
+                        )
+                    else:
+                        bc = BC_STAGE_DICT_FULL_TO_ABB[
+                            self.master["master_data"][0]["data"][p][
+                                DASHBOARD_KEYS["BC_STAGE"]
+                            ]
+                        ]
+                        ms = MilestoneData(self.master, **self.kwargs)
+                        next_stage = NEXT_STAGE_DICT[bc]
+                        try:
+                            d = get_milestone_date(
+                                ms,
+                                next_stage,
+                                self.quarter,
+                                p,
+                            )
+                            p_schedule = (d - datetime.date.today()).days
+                        except TypeError:
+                            p_schedule = 10000000000
 
                 if "abbreviations" in self.kwargs:
                     abb = self.master["project_information"][p]["Abbreviations"]
@@ -428,8 +423,7 @@ class DandelionData:
                     else:
                         edge_colour = colour
 
-                if g != 'pipeline':
-                    print(g)
+                if g != "pipeline":
                     if "circle_edge" in self.kwargs:
                         if self.kwargs["circle_edge"] == "forward_look":
                             try:
@@ -455,6 +449,8 @@ class DandelionData:
                     "ec": edge_colour,
                 }
 
+                p_list.append((p_value, p_radius, p_schedule, p))
+
             if "order_by" in self.kwargs:
                 if self.kwargs["order_by"] == "schedule":
                     p_list.sort(key=lambda x: x[1])
@@ -475,16 +471,22 @@ class DandelionData:
             except ValueError:  # handles no projects in l_g_d list
                 continue
 
-            if len(p_list) > 2:
+            if len(p_list) > 3:
                 ang_l = cal_group_angle(360, p_list)
             else:
                 if len(p_list) == 1:
                     ang_l = [g_d[g]["angle"]]
                 if len(p_list) == 2:
                     ang_l = [g_d[g]["angle"], g_d[g]["angle"] + 70]
+                if len(p_list) == 3:
+                    ang_l = [
+                        g_d[g]["angle"],
+                        g_d[g]["angle"] + 70,
+                        g_d[g]["angle"] + 140,
+                    ]
 
             largest_p_radius = (
-                p_radius_list[0] * 1.5
+                max(p_radius_list) * 1.5
             )  # value used for distance from inner circle.
             for i, p in enumerate(p_list):
                 angle = ang_l[i]
@@ -577,7 +579,7 @@ def make_a_dandelion_auto(dl: DandelionData, **kwargs):
 
     p_font_size = 10
     if kwargs["report"] == "ipdc":
-        p_font_size = 8
+        p_font_size = 6
 
     for c in dl.d_data.keys():
         circle = plt.Circle(
@@ -634,7 +636,7 @@ def make_a_dandelion_auto(dl: DandelionData, **kwargs):
         )
 
         if g == "pipeline":
-            lower_g = dl.master['pipeline_list']
+            lower_g = dl.master["pipeline_list"]
         else:
             lower_g = get_group(dl.master, dl.kwargs["quarter"][0], **dl.kwargs)
         for p in lower_g:

@@ -52,7 +52,7 @@ class CliOpArgs:
 
         # these programs have the latest two quarters as default.
         # other program defaults are setting very get_iter_list()
-        if self.programme in ["dcas", "speed_dials", "dashboards"]:
+        if self.programme in ["dcas", "speed_dials"]:
             if "quarter" not in list(op_args.keys()):
                 op_args["quarter"] = "standard"
 
@@ -71,7 +71,12 @@ class CliOpArgs:
             str(self.settings["root_path"]) + self.settings["master_path"],
             **op_args,
         )
-        set_default_args(op_args, group=md["groups"], quarters=md["current_quarter"])
+        set_default_args(
+            op_args,
+            group=md["groups"],
+            quarters=md["current_quarter"],
+            stage=md["stages"],
+        )
         combined_args = {**op_args, **self.settings}
 
         if combined_args["report"] == "ipdc":
@@ -332,9 +337,10 @@ def run_parsers():
             action="store",
             nargs="*",
             choices=["FBC", "OBC", "SOBC", "pre-SOBC", "pipeline"],
-            help="Returns analysis for only those projects at the specified planning stage(s). By default "
-            "the --stage argument will return the list of bc_stages specified in the config file."
-            'Or user can enter one or combination of "FBC", "OBC", "SOBC", "pre-SOBC".',
+            help="Returns analysis for those projects at the specified planning stage(s). By default "
+            "the --stage argument will return the list of business case stages specified in the config file. "
+            "Or user can enter one or combination of business cases (which must match the those specified in "
+            "the config file). The dandelion the dandelion command the user has the added option of 'pipeline'",
         )
     # group
     for sub in [
@@ -357,7 +363,8 @@ def run_parsers():
             action="store",
             nargs="+",
             help="Returns analysis for specified project(s), only. User must enter one or a combination of "
-            'DfT Group names; "HSRG", "RSS", "RIG", "AMIS","RPE", or the project(s) acronym or full name.',
+            "DfT Group names. Group names must match those in the config document. For the dandelion command the user "
+            "has an added group option of 'pipeline'.",
         )
 
     parser_dandelion.add_argument(
@@ -413,6 +420,15 @@ def run_parsers():
         action="store",
         help="Insert blue line into chart to represent a date. "
         'Options are "Today" "CDG" or a date in correct format e.g. "1/1/2021".',
+    )
+
+    parser_dandelion.add_argument(
+        "--order_by",
+        type=str,
+        metavar="",
+        action="store",
+        choices=["schedule"],
+        help="User can change the order in which circles are placed. The only choice for this argument currently is 'schedule' ",
     )
 
     cli_args = parser.parse_args(sys.argv[2:])

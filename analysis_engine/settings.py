@@ -63,6 +63,9 @@ def report_config(report_type: str):
 def set_default_args(op_args, **kwargs):
     if "group" not in op_args and "stage" not in op_args:
         op_args["group"] = kwargs["group"]
+    if "stage" in op_args:
+        if op_args["stage"] == []:
+            op_args["stage"] = kwargs["stage"]
     if "quarter" not in op_args:
         op_args["quarter"] = [kwargs["quarters"]]
     if "chart" not in op_args:
@@ -142,7 +145,6 @@ def get_masters_to_merge(op_args):
         op_args["masters_list"] = msts
     except:
         config_issue()
-
 
 
 # def get_remove_income_totals(

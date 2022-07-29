@@ -71,11 +71,12 @@ def get_group(md, tp, **kwargs) -> List[str]:
                 initial_error_case.append(g)
 
     if "stage" in kwargs:
-        rpt = kwargs["report"]  # only needed for stage
         # inelegant loop there are two try statements to handle abbrevations
         # of stage terms e.g. Full Business Case and FBC. But must be a better
         # way to handle.
         for s in kwargs["stage"]:
+            if s == "pipeline":
+                continue
             try:  # full term
                 loop_list = meta_groupings[tp][s]
                 output_list += loop_list
