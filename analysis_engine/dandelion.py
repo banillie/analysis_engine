@@ -194,7 +194,6 @@ class DandelionData:
         self.group = self.kwargs[group_stage_switch]
 
     def get_data(self):
-        # dca_confidence = DCA_KEYS[self.kwargs["report"]]
         g_d = {}  # group dictionary. first outer circle.
         l_g_d = {}  # lower group dictionary
         pf_wlc = get_dandelion_type_total(self.master, self.kwargs)  # portfolio wlc

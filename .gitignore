@@ -28,3 +28,6 @@ analysis_engine.egg-info
 .nox
 .eggs
 other/
+
+analysis_engine/annotation.py
+analysis_engine/main_store.py

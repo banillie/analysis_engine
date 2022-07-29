@@ -24,10 +24,6 @@
   <component name="ChangeListManager">
     <list default="true" id="205bd717-e7d2-47dc-82c7-88a8dae3593c" name="Default Changelist" comment="change portfolio_financial_profile.py to include old bl profile data">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/analysis_engine/dandelion.py" beforeDir="false" afterPath="$PROJECT_DIR$/analysis_engine/dandelion.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/analysis_engine/dashboards.py" beforeDir="false" afterPath="$PROJECT_DIR$/analysis_engine/dashboards.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/analysis_engine/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/analysis_engine/settings.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/test_op_args.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test_op_args.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -103,7 +99,7 @@
       <recent name="$PROJECT_DIR$/" />
     </key>
   </component>
-  <component name="RunManager" selected="Python tests.pytest for test_data.test_merge_masters">
+  <component name="RunManager" selected="Python tests.test_data_all">
     <configuration name="vfm" type="PythonConfigurationType" factoryName="Python">
       <module name="analysis_engine" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -486,7 +482,7 @@
       <workItem from="1658913223822" duration="12396000" />
       <workItem from="1658998774325" duration="12144000" />
       <workItem from="1659019502005" duration="1556000" />
-      <workItem from="1659083439498" duration="974000" />
+      <workItem from="1659083439498" duration="2374000" />
     </task>
     <task id="LOCAL-00001" summary="comment">
       <created>1578327909392</created>
@@ -856,16 +852,6 @@
           <line>225</line>
           <option name="timeStamp" value="706" />
         </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/analysis_engine/merge.py</url>
-          <line>59</line>
-          <option name="timeStamp" value="709" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/analysis_engine/merge.py</url>
-          <line>40</line>
-          <option name="timeStamp" value="710" />
-        </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
         <breakpoint type="python-exception">
@@ -886,7 +872,7 @@
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/analysis_engine$pytest_for_test_data_test_json_master.coverage" NAME="pytest for test_data.test_json_master Coverage Results" MODIFIED="1658403909127" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
-    <SUITE FILE_PATH="coverage/analysis_engine$test_data_all.coverage" NAME="test_data_all Coverage Results" MODIFIED="1659016109400" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
+    <SUITE FILE_PATH="coverage/analysis_engine$test_data_all.coverage" NAME="test_data_all Coverage Results" MODIFIED="1659085230638" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
     <SUITE FILE_PATH="coverage/analysis_engine$pytest_for_test_data_test_milestones.coverage" NAME="pytest for test_data.test_milestones Coverage Results" MODIFIED="1658606260411" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
     <SUITE FILE_PATH="coverage/analysis_engine$pytest_for_test_data_test_dashboards.coverage" NAME="pytest for test_data.test_dashboards Coverage Results" MODIFIED="1659021044666" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
     <SUITE FILE_PATH="coverage/analysis_engine$pytest_for_test_data_test_open_word_doc.coverage" NAME="pytest for test_data.test_open_word_doc Coverage Results" MODIFIED="1656073155470" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
@@ -894,7 +880,7 @@
     <SUITE FILE_PATH="coverage/analysis_engine$pytest_for_test_data_test_get_group_metadata_from_config.coverage" NAME="pytest for test_data.test_get_group_metadata_from_config Coverage Results" MODIFIED="1658753188830" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
     <SUITE FILE_PATH="coverage/analysis_engine$pytest_for_test_data_test_get_project_information.coverage" NAME="pytest for test_data.test_get_project_information Coverage Results" MODIFIED="1658753183533" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
     <SUITE FILE_PATH="coverage/analysis_engine$pytest_for_test_data_test_get_master_data_paths.coverage" NAME="pytest for test_data.test_get_master_data_paths Coverage Results" MODIFIED="1658403060888" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
-    <SUITE FILE_PATH="coverage/analysis_engine$pytest_for_test_data_test_gmpp_online_data.coverage" NAME="pytest for test_data.test_gmpp_online_data Coverage Results" MODIFIED="1659084415887" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/analysis_engine$pytest_for_test_data_test_gmpp_online_data.coverage" NAME="pytest for test_data.test_gmpp_online_data Coverage Results" MODIFIED="1659084492149" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
     <SUITE FILE_PATH="coverage/analysis_engine$ar_data.coverage" NAME="ar_data Coverage Results" MODIFIED="1652186875735" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/analysis_engine" />
     <SUITE FILE_PATH="coverage/analysis_engine$pytest_for_test_data_test_get_raw_master_data_in_list.coverage" NAME="pytest for test_data.test_get_raw_master_data_in_list Coverage Results" MODIFIED="1658753193457" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
     <SUITE FILE_PATH="coverage/analysis_engine$circles.coverage" NAME="circles Coverage Results" MODIFIED="1657880250561" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/analysis_engine" />
@@ -902,7 +888,7 @@
     <SUITE FILE_PATH="coverage/analysis_engine$pytest_for_test_data_test_get_master_data.coverage" NAME="pytest for test_data.test_get_master_data Coverage Results" MODIFIED="1656428609247" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
     <SUITE FILE_PATH="coverage/analysis_engine$data_review.coverage" NAME="data_review Coverage Results" MODIFIED="1656949515148" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/analysis_engine" />
     <SUITE FILE_PATH="coverage/analysis_engine$pytest_for_test_data_test_speed_dials.coverage" NAME="pytest for test_data.test_speed_dials Coverage Results" MODIFIED="1658922562152" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
-    <SUITE FILE_PATH="coverage/analysis_engine$pytest_for_test_data_test_merge_masters.coverage" NAME="pytest for test_data.test_merge_masters Coverage Results" MODIFIED="1659084096601" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/analysis_engine$pytest_for_test_data_test_merge_masters.coverage" NAME="pytest for test_data.test_merge_masters Coverage Results" MODIFIED="1659084614863" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
     <SUITE FILE_PATH="coverage/analysis_engine$pytest_for_test_data_test_json_master_open.coverage" NAME="pytest for test_data.test_json_master_open Coverage Results" MODIFIED="1656067420456" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
     <SUITE FILE_PATH="coverage/analysis_engine$pytest_for_test_data_test_query.coverage" NAME="pytest for test_data.test_query Coverage Results" MODIFIED="1658924813689" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
     <SUITE FILE_PATH="coverage/analysis_engine$pytest_for_test_data_test_saving_creating_json_master.coverage" NAME="pytest for test_data.test_saving_creating_json_master Coverage Results" MODIFIED="1658924603229" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
