@@ -82,7 +82,7 @@ def get_chart_title(
     if "title" in c_kwargs:
         return c_kwargs["title"]
     else:
-        logger.info("Please provide a title for this chart using --title.")
+        logger.info("Please note you can provide a title for this chart using --title.")
         return None
 
 

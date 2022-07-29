@@ -96,9 +96,9 @@ class GmppOnlineCosts:
             else:
                 gmpp_dict[project_name] = {key: s_value}
 
-        print("These keys are missing")
-        for x in list(set(missing_keys)):
-            print(x)
+        # print("These keys are missing")
+        # for x in list(set(missing_keys)):
+        #     print(x)
 
         self.gmpp_dict = gmpp_dict
 

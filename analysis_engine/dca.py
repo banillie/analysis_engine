@@ -27,8 +27,8 @@ class DcaData:
         quarter_dict = {}
         if len(self.quarters) > 2:
             raise InputError(
-                'Too many quarters entered. This analysis can have a maximum of two quarters. Program '
-                'stopping. Please re-enter.'
+                "Too many quarters entered. This analysis can have a maximum of two quarters. Program "
+                "stopping. Please re-enter."
             )
         for tp in self.quarters:
             group = get_group(self.master, tp, **self.kwargs)

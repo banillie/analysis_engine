@@ -12,13 +12,15 @@ from analysis_engine.core_data import get_core, open_json_file
 from analysis_engine.dandelion import DandelionData, make_a_dandelion_auto
 from analysis_engine.dashboards import narrative_dashboard, cdg_dashboard
 from analysis_engine.dca import DcaData, dca_changes_into_word
+from analysis_engine.gmpp_int import GmppOnlineCosts
+from analysis_engine.merge import Merge
 from analysis_engine.query import data_query_into_wb
 from analysis_engine.render_utils import get_input_doc, put_matplotlib_fig_into_word
 from analysis_engine.settings import (
     report_config,
     set_default_args,
     return_koi_fn_keys,
-    get_integration_data,
+    get_integration_data, get_masters_to_merge,
 )
 from analysis_engine.milestones import (
     MilestoneData,
@@ -56,7 +58,7 @@ class CliOpArgs:
             if "quarter" not in list(op_args.keys()):
                 op_args["quarter"] = "standard"
 
-        if self.programme == 'milestones':
+        if self.programme == "milestones":
             if "chart" not in (op_args.keys()):
                 op_args["chart"] = None
 
@@ -133,14 +135,14 @@ def run_analysis(args, settings):
             else:
                 d_graph = make_a_dandelion_auto(d_data, **cli.combined_args)
                 doc_path = (
-                    str(cli.combined_args["root_path"])
-                    + cli.combined_args["word_landscape"]
+                        str(cli.combined_args["root_path"])
+                        + cli.combined_args["word_landscape"]
                 )
                 doc = get_input_doc(doc_path)
                 put_matplotlib_fig_into_word(doc, d_graph, width=Inches(8))
                 doc_output_path = (
-                    str(cli.combined_args["root_path"])
-                    + cli.combined_args["word_save_path"]
+                        str(cli.combined_args["root_path"])
+                        + cli.combined_args["word_save_path"]
                 )
                 doc.save(doc_output_path.format("dandelion"))
 
@@ -200,10 +202,10 @@ def run_analysis(args, settings):
         if cli.programme == "milestones":
             ms = MilestoneData(cli.md, **cli.combined_args)
             if (
-                # "type" in combined_args  # NOT IN USE.
-                "dates" in cli.combined_args
-                or "koi" in cli.combined_args
-                or "koi_fn" in cli.combined_args
+                    # "type" in combined_args  # NOT IN USE.
+                    "dates" in cli.combined_args
+                    or "koi" in cli.combined_args
+                    or "koi_fn" in cli.combined_args
             ):
                 return_koi_fn_keys(cli.combined_args)
                 ms.filter_chart_info(**cli.combined_args)
@@ -211,12 +213,13 @@ def run_analysis(args, settings):
             if cli.combined_args["chart"] == "save":
                 ms_graph = milestone_chart(ms, **cli.combined_args)
                 doc = get_input_doc(
-                    str(cli.combined_args["root_path"]) + cli.combined_args["word_landscape"]
+                    str(cli.combined_args["root_path"])
+                    + cli.combined_args["word_landscape"]
                 )
                 put_matplotlib_fig_into_word(doc, ms_graph, width=Inches(8))
                 doc.save(
                     str(cli.combined_args["root_path"])
-                    + cli.combined_args["word_save_path"].format(f"milestones_{x['test_name']}")
+                    + cli.combined_args["word_save_path"].format("milestones_chart")
                 )
             if cli.combined_args["chart"] == "show":
                 milestone_chart(ms, **cli.combined_args)
@@ -233,6 +236,14 @@ def run_analysis(args, settings):
                 str(cli.settings["root_path"])
                 + settings["excel_save_path"].format("query")
             )
+
+        if cli.programme == "gmpp_data":
+            md = GmppOnlineCosts(**cli.combined_args)
+            md.place_into_dft_master_format()
+
+        if cli.programme == "merge_masters":
+            get_masters_to_merge(cli.combined_args)
+            Merge(**cli.combined_args)
 
         # if cli.wb_save:
         #     if cli.programme != "dashboards":
@@ -252,14 +263,14 @@ def run_parsers():
     subparsers = parser.add_subparsers(dest="subparser_name")
     subparsers.metavar = "                      "
     parser_initiate = subparsers.add_parser(
-        "initiate", help="creates a master data file"
+        "initiate", help="Creates a master data file"
     )
     parser_milestones = subparsers.add_parser(
         "milestones",
-        help="milestone schedule graphs and data.",
-        description='Generates raw data outputs as well as visuals for milestone data. The default is simply '
-                    'the return of an excel file with milestone data. Use the --chart options to produce'
-                    'visual outputs '
+        help="Milestone schedule graphs and data.",
+        description="Generates raw data outputs as well as visuals for milestone data. The default is simply "
+                    "the return of an excel file with milestone data. Use the --chart options to produce"
+                    "visual outputs ",
     )
     dandelion_description = (
         "Creates the 'dandelion' graph. See below optional arguments for changing the "
@@ -284,23 +295,43 @@ def run_parsers():
         description=dashboard_description,
         formatter_class=RawTextHelpFormatter,
     )  # no associated op args.
+
     parser_data_query = subparsers.add_parser(
-        "query", help="returns required data from core data."
+        "query", help="Returns required data from core data."
     )
 
     parser_speed_dial = subparsers.add_parser(
         "speed_dials",
-        help="speed dial analysis",
+        help="For speed dial analysis",
         description="Creates the speed dial visual outputs. All confidence speed dials are created "
                     "at the same time and saved into the output folder. It has a maximum of two quarters "
-                    "for the --quarters argument."
+                    "for the --quarters argument.",
     )
     parser_dca = subparsers.add_parser(
         "dcas",
-        help="dca analysis",
+        help="For dca analysis",
         description="Generates a print out on DCA changes between quarters. All DCAs are placed "
                     "into the same file and placed in output folder. It has a maximum of two quarters "
-                    "for the --quarters argument."
+                    "for the --quarters argument.",
+    )
+
+    parser_gmpp_online = subparsers.add_parser(
+        "gmpp_data",
+        help="For GMPP online data",
+        description="This program converts gmpp online data into the dft master file "
+                    "format. It requires three files. A file containing the gmpp online data - as provided by "
+                    "the IPA, a GMPP_INTEGRATION_KEY_MAP, and a GMPP_INTEGRATION_PROJECT_MAP. These files must "
+                    "be referenced in the config file in the GMPP INTEGRATION section and saved in the input folder. "
+                    "There are no optional arguments for this program other than --help."
+    )
+
+    parser_merge_masters = subparsers.add_parser(
+        "merge_masters",
+        help="To merge separate master files into one master file",
+        description="This program takes separate master data files and places them into one master file. The user "
+                    "can set the masters that it would like to merge via the config file in the MERGE / masters_list "
+                    "section. The masters must be saved in the input folder. There are no optional arguments for this "
+                    "program other than --help."
     )
 
     for sub in [
@@ -332,7 +363,7 @@ def run_parsers():
             action="store",
             nargs="+",
             help="Returns analysis for one or combination of specified quarters. "
-            'User must use correct format e.g "Q3 19/20"',
+                 'User must use correct format e.g "Q3 19/20"',
         )
 
     # stage
@@ -356,9 +387,9 @@ def run_parsers():
             nargs="*",
             choices=["FBC", "OBC", "SOBC", "pre-SOBC", "pipeline"],
             help="Returns analysis for those projects at the specified planning stage(s). By default "
-            "the --stage argument will return the list of business case stages specified in the config file. "
-            "Or user can enter one or combination of business cases (which must match the those specified in "
-            "the config file). The dandelion the dandelion command the user has the added option of 'pipeline'",
+                 "the --stage argument will return the list of business case stages specified in the config file. "
+                 "Or user can enter one or combination of business cases (which must match the those specified in "
+                 "the config file). The dandelion the dandelion command the user has the added option of 'pipeline'",
         )
     # group
     for sub in [
@@ -381,8 +412,8 @@ def run_parsers():
             action="store",
             nargs="+",
             help="Returns analysis for specified project(s), only. User must enter one or a combination of "
-            "DfT Group names. Group names must match those in the config document. For the dandelion command the user "
-            "has an added group option of 'pipeline'.",
+                 "DfT Group names. Group names must match those in the config document. For the dandelion command the user "
+                 "has an added group option of 'pipeline'.",
         )
 
     parser_dandelion.add_argument(
@@ -402,7 +433,7 @@ def run_parsers():
         action="store",
         choices=["benefits", "income"],
         help="Provide the type of value to include in dandelion. Options are"
-        ' "benefits" or "income".',
+             ' "benefits" or "income".',
     )
 
     for sub in [parser_milestones, parser_data_query]:
@@ -423,7 +454,7 @@ def run_parsers():
             action="store",
             help="Key of interest file name (koi_fn). As per --koi. But in this instance the user can specify "
                  "keys via a csv document saved in the input folder. Keys need to be in column A, and A1 should be "
-                 "titled key_name. "
+                 "titled key_name. ",
         )
 
     parser_milestones.add_argument(
@@ -442,8 +473,8 @@ def run_parsers():
         action="store",
         choices=["config_date", "today"],
         help="User can insert blue line into chart to represent a date. "
-        "Options are 'config_date' or 'today'. The config_data is set in the config file in the "
-             "Globals / milestones_blue_line_date value."
+             "Options are 'config_date' or 'today'. The config_data is set in the config file in the "
+             "Globals / milestones_blue_line_date value.",
     )
 
     parser_dandelion.add_argument(
@@ -452,7 +483,17 @@ def run_parsers():
         metavar="",
         action="store",
         choices=["schedule"],
-        help="User can change the order in which circles are placed. The only choice for this argument currently is 'schedule' ",
+        help="User can change the order in which circles are placed. The only choice for "
+             "this argument currently is 'schedule' ",
+    )
+
+    parser_milestones.add_argument(
+        "--title",
+        type=str,
+        metavar="",
+        action="store",
+        help="The user can specify and title for the chart output. Please enter as text, for "
+             "example 'This the title'.",
     )
 
     cli_args = parser.parse_args(sys.argv[2:])
@@ -564,9 +605,7 @@ class main:
         # parser_data_query = subparsers.add_parser(
         #     "query", help="return data from core data"
         # )
-        # parser_gmpp_data = subparsers.add_parser(
-        #     "gmpp_data", help="converts gmpp online data into the dft master format"
-        # )
+
         # parser_gmpp_ar = subparsers.add_parser(
         #     "gmpp_ar", help="compiled summaries for the IPA GMPP annual report"
         # )
@@ -842,15 +881,7 @@ class main:
         #         help="options for building and saving graph output. Commands are 'show' or 'save' ",
         #     )
         #
-        # # title
-        # for sub in [parser_costs, parser_milestones, parser_costs_sp]:
-        #     sub.add_argument(
-        #         "--title",
-        #         type=str,
-        #         metavar="",
-        #         action="store",
-        #         help="provide a title for chart. Optional",
-        #     )
+
         #
         # parser_milestones.add_argument(
         #     "--blue_line",

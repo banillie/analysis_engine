@@ -145,9 +145,17 @@ ms_stages = {
     ],
     "chart": chart,
 }
+ms_koi_title_ipdc = {
+    "test_name": "ms_koi",
+    "subparser_name": "milestones",
+    "chart": chart,
+    "koi": "OBC - IPDC Approval",
+    "title": "OBC Approvals",
+}
 
 if REPORTING_TYPE == 'ipdc':
     MILESTONES_OP_ARGS = [
+        ms_koi_title_ipdc,
         ms_koi_fn,
         ms_koi_ipdc,
         ms_groups_ipdc,
