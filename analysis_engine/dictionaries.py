@@ -137,7 +137,7 @@ STANDARDISE_COST_KEYS = {
         "income_total": "Total Income",
     },
     "ipdc": {
-        "spent": None,
+        "spent": "Spent Costs",
         "remaining": None,
         "total": "Total Forecast",
         "income_achieved": None,

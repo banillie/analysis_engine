@@ -142,11 +142,6 @@ class GmppOnlineCosts:
                 except KeyError:
                     rdel_ng += 0
 
-                if i == 8:
-                    rdel_income_ach += rdel_income
-                    rdel_spent += (rdel_oonc + rdel_rnc + rdel_ng)
-
-            for i in range(2, 51, 2):
                 try:
                     cdel_income += self.gmpp_dict[p][f"9.02.{i}: CDEL Income"]
                 except KeyError:
@@ -167,6 +162,8 @@ class GmppOnlineCosts:
                     cdel_ng += 0
 
                 if i == 8:
+                    rdel_income_ach += rdel_income
+                    rdel_spent += (rdel_oonc + rdel_rnc + rdel_ng)
                     cdel_income_ach += cdel_income
                     cdel_spent += (cdel_oonc + cdel_rnc + cdel_ng)
 
@@ -216,7 +213,7 @@ class GmppOnlineCosts:
             ),
             commas=True,
             gaps=True,
-            flip=True,
+            # flip=True,
         )
         project_map = get_map(
             load_workbook(
@@ -234,11 +231,17 @@ class GmppOnlineCosts:
                     except KeyError:
                         print(f"{k} not in the key map")
                 try:
-                    if key_map[k] == "Total Forecast":
+                    if k == "Total Forecast":
                         v = self.cost_total[project]
                         ws.cell(row=2 + i, column=3 + x).value = v
+                    if k == "Spent Costs":
+                        v = self.spent[project]
+                        ws.cell(row=2 + i, column=3 + x).value = v
+                    if k == "Total Forecast - Income both Revenue and Capital":
+                        v = self.income[project]
+                        ws.cell(row=2 + i, column=3 + x).value = v
                     else:
-                        v = self.gmpp_dict[project][k]
+                        v = self.gmpp_dict[project][key_map[k]]
                         ws.cell(row=2 + i, column=3 + x).value = v
                         if isinstance(v, datetime.datetime):
                             ws.cell(row=2 + i, column=3 + x).number_format = "dd/mm/yy"

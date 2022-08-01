@@ -255,6 +255,12 @@ dlion_benefits = {
     "type": "benefits",
     "chart": chart,
 }
+dlion_remaining = {
+    "test_name": "dlion_benefits",
+    "subparser_name": "dandelion",
+    "type": "remaining",
+    "chart": chart,
+}
 dlion_income = {
     "test_name": "dlion_income",
     "angles": [280, 360, 80],
@@ -312,19 +318,20 @@ if REPORTING_TYPE == 'cdg':
     ]
 if REPORTING_TYPE == 'ipdc':
     DANDELION_OP_ARGS_DICT = [
-        dlion_pipeline_as_stage_ipdc,
-        dlion_stages_default_ipdc,
-        dlion_stages_order_by_ipdc,
-        dlion_cli_pipeline_ipdc,
-        # dlion_cli_group_ipdc,
-        # dlion_income,
-        # dlion_benefits,
-        dlion_angles_ipdc,
-        dlion_quarter,
-        dlion_stages_ipdc,
-        dlion_stages_abb_ipdc,
-        dlion_groups_ipdc,
-        dlion_standard,
+        dlion_remaining,
+        # dlion_pipeline_as_stage_ipdc,
+        # dlion_stages_default_ipdc,
+        # dlion_stages_order_by_ipdc,
+        # dlion_cli_pipeline_ipdc,
+        # # dlion_cli_group_ipdc,
+        # # dlion_income,
+        # # dlion_benefits,
+        # dlion_angles_ipdc,
+        # dlion_quarter,
+        # dlion_stages_ipdc,
+        # dlion_stages_abb_ipdc,
+        # dlion_groups_ipdc,
+        # dlion_standard,
     ]
 
 # write some separate tests for dcas

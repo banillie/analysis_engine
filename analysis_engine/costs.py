@@ -34,6 +34,9 @@ class CostData:
             for project_name in group:
                 p_data = get_correct_p_data(self.master, project_name, tp)
                 #  All try statements temporary until consistency between rpting datasets
+                total += convert_none_types(
+                    p_data[STANDARDISE_COST_KEYS[self.report]["total"]]
+                )
                 try:
                     spent += convert_none_types(
                         p_data[STANDARDISE_COST_KEYS[self.report]["spent"]]
@@ -41,14 +44,9 @@ class CostData:
                 except KeyError:
                     spent += 0
                 try:
-                    remaining += convert_none_types(
-                        p_data[STANDARDISE_COST_KEYS[self.report]["remaining"]]
-                    )
+                    remaining += (total - spent)
                 except KeyError:
                     remaining += 0
-                total += convert_none_types(
-                    p_data[STANDARDISE_COST_KEYS[self.report]["total"]]
-                )
                 try:
                     income_achieved += convert_none_types(
                         p_data[STANDARDISE_COST_KEYS[self.report]["income_achieved"]]
