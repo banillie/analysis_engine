@@ -284,7 +284,8 @@ def financial_dashboard(
 
     ws = wb["Finance"]
     cmd = md["master_data"][0]["data"]  # cmd = current master data
-    lmd = md["master_data"][1]["data"]
+    lmd = md["master_data"][1]["data"]  # lmd = last master data
+    lymd = md["master_data"][3]["data"]  # lymd = last year master data
 
     rm = get_remove_income(op_args)
 
@@ -318,41 +319,35 @@ def financial_dashboard(
                         STANDARDISE_COST_KEYS[op_args["report"]]["income_total"]
                     ]
                 )
-            print(project_name, wlc_now, wlc_lst_qrt)
-            diff_lst_qrt = wlc_now - wlc_lst_qrt
-            if float(diff_lst_qrt) > 0.49 or float(diff_lst_qrt) < -0.49:
-                ws.cell(row=row_num, column=7).value = diff_lst_qrt
+            diff = wlc_now - wlc_lst_qrt
+            if float(diff) > 0.49 or float(diff) < -0.49:
+                ws.cell(row=row_num, column=7).value = diff
             else:
                 ws.cell(row=row_num, column=7).value = "-"
         except KeyError:
             ws.cell(row=row_num, column=7).value = "-"
 
-        # """WLC variance against baseline quarter"""
-        # wlc_baseline = costs.baseline[str(md.current_quarter)]['total']
-        # try:
-        #     diff_bl = wlc_now - wlc_baseline
-        #     if float(diff_bl) > 0.49 or float(diff_bl) < -0.49:
-        #         ws.cell(row=row_num, column=8).value = diff_bl
-        #     else:
-        #         ws.cell(row=row_num, column=8).value = "-"
-        # # exception is here as some projects e.g. Hs2 phase 2b have (real) written into historical totals
-        # except TypeError:
-        #     pass
-
-        con = cmd[project_name][DASHBOARD_KEYS["CONTINGENCY"]]
-        if con == 0 or con is None:
-            con = "-"
-        ws.cell(row=row_num, column=13).value = con
-
-        """OB"""
-        ob = cmd[project_name][DASHBOARD_KEYS["OB"]]
-        if ob == 0 or ob is None:
-            ob = "-"
-        ws.cell(row=row_num, column=14).value = ob
+        """WLC variance against last year"""
+        try:
+            wlc_lst_year = convert_none_types(
+                lymd[project_name][STANDARDISE_COST_KEYS[op_args["report"]]["total"]]
+            )
+            if project_name in rm:
+                wlc_lst_year = wlc_lst_year - convert_none_types(
+                    lymd[project_name][
+                        STANDARDISE_COST_KEYS[op_args["report"]]["income_total"]
+                    ]
+                )
+            diff = wlc_now - wlc_lst_year
+            if float(diff) > 0.49 or float(diff) < -0.49:
+                ws.cell(row=row_num, column=8).value = diff
+            else:
+                ws.cell(row=row_num, column=8).value = "-"
+        except KeyError:
+            ws.cell(row=row_num, column=8).value = "-"
 
         """financial DCA ratings"""
         for i, q in enumerate(md["quarter_list"]):
-            print(i)
             try:
                 ws.cell(row=row_num, column=15 + i).value = CONVERT_RAG[
                     md["master_data"][i]["data"][project_name][
@@ -881,10 +876,10 @@ def overall_dashboard(
             """WLC variance against lst quarter"""
             try:
                 lst_qrt_costs = c.c_totals[str(master.quarter_list[1])]["total"]
-                diff_lst_qrt = wlc_now - lst_qrt_costs
-                if float(diff_lst_qrt) > 0.49 or float(diff_lst_qrt) < -0.49:
-                    # ws.cell(row=row_num, column=7).value = diff_lst_qrt
-                    ws.cell(row=row_num, column=6).value = diff_lst_qrt
+                diff = wlc_now - lst_qrt_costs
+                if float(diff) > 0.49 or float(diff) < -0.49:
+                    # ws.cell(row=row_num, column=7).value = diff
+                    ws.cell(row=row_num, column=6).value = diff
                 else:
                     # ws.cell(row=row_num, column=7).value = "-"
                     ws.cell(row=row_num, column=6).value = "-"
