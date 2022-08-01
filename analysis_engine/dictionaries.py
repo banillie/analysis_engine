@@ -204,3 +204,19 @@ DASHBOARD_KEYS = {
     "CONTINGENCY": "Overall contingency (£m)",
     "OB": "Overall figure for Optimism Bias (£m)",
 }
+
+RESOURCE_KEYS_OLD = {
+    "ps_resource": "DfTc Public Sector Employees",
+    "contractor_resource": "DfTc External Contractors",
+    "total_resource": "DfTc Project Team Total",
+    "funded_resource": "DfTc Funded Posts",
+}
+
+RESOURCE_KEYS = {
+    "ps_resource": "No public sector employees working on the project",
+    "contractor_resource": "No external contractors working on the project",
+    "total_resource": "Total Number working in the project team FTEs",
+    "funded_resource": "No employees funded to work on project",
+}
+
+

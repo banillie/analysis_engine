@@ -258,16 +258,49 @@ dlion_benefits = {
 dlion_remaining = {
     "test_name": "dlion_benefits",
     "subparser_name": "dandelion",
-    "type": "remaining",
+    "type": "remaining_costs",
+    "chart": chart,
+    "angles": [250, 320, 40, 110],
+    "order_by": "schedule",
+    "stage": [],
+}
+dlion_spent = {
+    "test_name": "dlion_benefits",
+    "subparser_name": "dandelion",
+    "type": "spent",
     "chart": chart,
 }
 dlion_income = {
     "test_name": "dlion_income",
-    "angles": [280, 360, 80],
     "subparser_name": "dandelion",
     "type": "income",
     "chart": chart,
 }
+dlion_funded_resource = {
+    "test_name": "dlion_income",
+    "subparser_name": "dandelion",
+    "type": "funded_resource",
+    "chart": chart,
+}
+dlion_ps_resource = {
+    "test_name": "dlion_income",
+    "subparser_name": "dandelion",
+    "type": "ps_resource",
+    "chart": chart,
+}
+dlion_contractor_resource = {
+    "test_name": "dlion_income",
+    "subparser_name": "dandelion",
+    "type": "contractor_resource",
+    "chart": chart,
+}
+dlion_total_resource = {
+    "test_name": "dlion_income",
+    "subparser_name": "dandelion",
+    "type": "total_resource",
+    "chart": chart,
+}
+
 # this will crash if project not in quarter data master
 # dlion_cli_group_cdg = {
 #     "test_name": "dlion_groups",
@@ -304,6 +337,12 @@ dlion_stages_order_by_ipdc = {
     "order_by": "schedule",
     "chart": chart,
 }
+dlion_remove = {
+    "test_name": "dlion_standard",
+    "subparser_name": "dandelion",
+    "chart": chart,
+    "remove": ['NPR', 'A66'],
+}
 
 if REPORTING_TYPE == 'cdg':
     DANDELION_OP_ARGS_DICT = [
@@ -318,13 +357,19 @@ if REPORTING_TYPE == 'cdg':
     ]
 if REPORTING_TYPE == 'ipdc':
     DANDELION_OP_ARGS_DICT = [
-        dlion_remaining,
+        dlion_remove,
+        # dlion_total_resource,
+        # dlion_contractor_resource,
+        # dlion_ps_resource,
+        # dlion_funded_resource,
+        # dlion_spent,
+        # dlion_remaining,
         # dlion_pipeline_as_stage_ipdc,
         # dlion_stages_default_ipdc,
         # dlion_stages_order_by_ipdc,
         # dlion_cli_pipeline_ipdc,
         # # dlion_cli_group_ipdc,
-        # # dlion_income,
+        # dlion_income,
         # # dlion_benefits,
         # dlion_angles_ipdc,
         # dlion_quarter,

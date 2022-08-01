@@ -44,10 +44,6 @@ class CostData:
                 except KeyError:
                     spent += 0
                 try:
-                    remaining += (total - spent)
-                except KeyError:
-                    remaining += 0
-                try:
                     income_achieved += convert_none_types(
                         p_data[STANDARDISE_COST_KEYS[self.report]["income_achieved"]]
                     )
@@ -59,6 +55,7 @@ class CostData:
                     )
                 except KeyError:
                     income_remaining += 0
+
                 income_total += convert_none_types(
                     p_data[STANDARDISE_COST_KEYS[self.report]["income_total"]]
                 )
@@ -75,6 +72,11 @@ class CostData:
                             )
                     except KeyError:  # some older masters don't have key.
                         raise ProjectNameError()
+
+            try:
+                remaining += (total - spent)
+            except KeyError:
+                remaining += 0
 
             lower_dict[tp] = {
                 "costs_spent": spent,

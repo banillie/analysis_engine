@@ -245,9 +245,10 @@ def run_analysis(args, settings):
             get_masters_to_merge(cli.combined_args)
             Merge(**cli.combined_args)
 
-        # if cli.wb_save:
-        #     if cli.programme != "dashboards":
-        #         wb.save(cli.combined_args["root_path"] + "/output/{}.xlsx".format(cli.programme))
+        # ProjectNameError below captures any naming errors
+        if "remove" in cli.combined_args.keys():
+            for x in cli.combined_args["remove"]:
+                logger.info(f'{x} has been removed from analysis')
 
     except (ProjectNameError, FileNotFoundError, InputError) as e:
         logger.critical(e)
@@ -431,9 +432,11 @@ def run_parsers():
         type=str,
         metavar="",
         action="store",
-        choices=["benefits", "income"],
-        help="Provide the type of value to include in dandelion. Options are"
-             ' "benefits" or "income".',
+        choices=["spent_costs", "remaining_costs", "income", "ps_resource", "contractor_resource",
+                 "total_resource", "funded_resource"],
+        help="The user can specify the type of value for project bubble sizes in the dandelion. Options are "
+             "'remaining_costs', 'spent_costs', 'income', 'ps_resource', 'contractor_resource', "
+             "'total_resource' or 'funded_resource'."
     )
 
     for sub in [parser_milestones, parser_data_query]:
@@ -495,6 +498,29 @@ def run_parsers():
         help="The user can specify and title for the chart output. Please enter as text, for "
              "example 'This the title'.",
     )
+
+    # remove
+    for sub in [
+        parser_dca,
+        # parser_vfm,
+        # parser_risks,
+        # parser_port_risks,
+        parser_speed_dial,
+        parser_dandelion,
+        # parser_costs,
+        # parser_costs_sp,
+        parser_data_query,
+        parser_milestones,
+    ]:
+        sub.add_argument(
+            "--remove",
+            type=str,
+            metavar="",
+            action="store",
+            nargs="+",
+            help="The User can remove project(s) from analysis is necessary. The projects full name "
+                 "or acronym can be used."
+        )
 
     cli_args = parser.parse_args(sys.argv[2:])
     settings_switch(cli_args, report_type)
@@ -672,29 +698,7 @@ class main:
         #         help="Returns analysis for specified project(s), only. User must enter one or a combination of "
         #         'DfT Group names; "HSRG", "RSS", "RIG", "AMIS","RPE", or the project(s) acronym or full name.',
         #     )
-        # # remove
-        # for sub in [
-        #     parser_dca,
-        #     parser_vfm,
-        #     parser_risks,
-        #     parser_port_risks,
-        #     parser_speedial,
-        #     parser_dandelion,
-        #     parser_costs,
-        #     parser_costs_sp,
-        #     parser_data_query,
-        #     parser_milestones,
-        # ]:
-        #     sub.add_argument(
-        #         "--remove",
-        #         type=str,
-        #         metavar="",
-        #         action="store",
-        #         nargs="+",
-        #         help="Removes specified projects from analysis. User must enter one or a combination of either"
-        #         " a recognised DfT Group name, a recognised planning stage or the project(s) acronym or full"
-        #         " name.",
-        #     )
+
         # # quarter
         # for sub in [
         #     parser_dca,

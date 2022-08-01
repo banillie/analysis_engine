@@ -67,10 +67,10 @@ def dandelion_number_text(number: int, **kwargs) -> str:
     total_len = len(str(int(number)))
     if "type" in kwargs:
         if kwargs["type"] in [
-            "ps resource",
-            "contract resource",
-            "total resource",
-            "funded resource",
+            "ps_resource",
+            "contractor_resource",
+            "total_resource",
+            "funded_resource",
         ]:
             return str(round(number, 1))
     try:
@@ -126,34 +126,28 @@ def cal_group_angle(dist_amount: int, group: List[str], inner_circles=False):
 def get_dandelion_type_total(master, kwargs) -> int or str:
     tp = kwargs["quarter"][0]  # only one quarter for dandelion
     if "type" in kwargs:
-        if kwargs["type"] == "remaining":
+        if kwargs["type"] == "remaining_costs":
             cost = CostData(master, **kwargs)  # group costs data
-            cost.get_forecast_cost_profile()
+            # cost.get_forecast_cost_profile()
             # return sum(cost.profiles[tp]["total"]) - sum(cost.profiles[tp]["std"])
-            return sum(cost.profiles[tp]["total"])
+            # return sum(cost.profiles[tp]["total"])
+            return cost.totals[tp]["costs_remaining"]
         if kwargs["type"] == "spent":
             cost = CostData(master, **kwargs)
-            cost.get_forecast_cost_profile()
-            # return cost.c_totals[tp]['total'] - (sum(cost.profiles[tp]["total"]) - sum(cost.profiles[tp]["std"]))
-            return cost.totals[tp]["total"] - sum(cost.profiles[tp]["total"])
+            # cost.get_forecast_cost_profile()
+            # # return cost.c_totals[tp]['total'] - (sum(cost.profiles[tp]["total"]) - sum(cost.profiles[tp]["std"]))
+            # return cost.totals[tp]["total"] - sum(cost.profiles[tp]["total"])
+            return cost.totals[tp]["costs_spent"]
         if kwargs["type"] == "income":
             cost = CostData(master, **kwargs)
+            # return cost.totals[tp]["income_total"]
             return cost.totals[tp]["income_total"]
         if kwargs["type"] == "benefits":
             benefits = BenefitsData(master, **kwargs)
             return benefits.b_totals[tp]["total"]
-        if kwargs["type"] == "ps resource":
+        if kwargs["type"] in ("ps_resource", "contractor_resource", "total_resource", "funded_resource"):
             resource = ResourceData(master, **kwargs)
-            return resource.ps_resource
-        if kwargs["type"] == "contract resource":
-            resource = ResourceData(master, **kwargs)
-            return resource.contractor_resource
-        if kwargs["type"] == "total resource":
-            resource = ResourceData(master, **kwargs)
-            return resource.total_resource
-        if kwargs["type"] == "funded resource":
-            resource = ResourceData(master, **kwargs)
-            return resource.funded
+            return resource.totals[tp][kwargs["type"]]
 
     else:
         cost = CostData(master, **kwargs)  # group costs data
@@ -276,17 +270,17 @@ class DandelionData:
                 )
 
         # multiplied here so a gap to central circle
-        largest_g_radius = max(g_radius_list) * 2.5
+        g_radius_dist = g_d["portfolio"]["r"] * 2
         if len(self.group) > 3:
-            largest_g_radius = max(g_radius_list) * 3
+            g_radius_dist = g_d["portfolio"]["r"] * 2.5
 
         for i, g in enumerate(self.group):
             if len(self.group) > 1:  # this needs testing
                 y_axis = 0 + (
-                    (math.sqrt(pf_wlc) + largest_g_radius)
+                    (math.sqrt(pf_wlc) + g_radius_dist)
                     * math.sin(math.radians(g_ang_l[i]))
                 )
-                x_axis = 0 + (math.sqrt(pf_wlc) + largest_g_radius) * math.cos(
+                x_axis = 0 + (math.sqrt(pf_wlc) + g_radius_dist) * math.cos(
                     math.radians(g_ang_l[i])
                 )
 
@@ -511,11 +505,11 @@ class DandelionData:
                 ha = "center"  # default text position
                 va = "center"
 
-                if 11 <= angle <= 20 or 371 <= angle <= 380:
-                    va = "top"
-                elif 21 <= angle <= 174 or 381 <= angle <= 534:
+                if 0 <= angle <= 11 or 371 <= angle <= 380:
+                    va = "bottom"
+                elif 11 <= angle <= 174 or 381 <= angle <= 534:
                     ha = "left"
-                elif 175 <= angle <= 185:
+                elif 165 <= angle <= 195:
                     va = "top"
                 elif 186 <= angle <= 339:
                     ha = "right"

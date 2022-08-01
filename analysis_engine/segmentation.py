@@ -59,6 +59,7 @@ def get_group(md, tp, **kwargs) -> List[str]:
     initial_error_case = []
     output_list = []
     meta_groupings = md["meta_groupings"]
+    abbreviations = md["abbreviations"]
     # need to standardise so always full name used.
     if "group" in kwargs:
         for g in kwargs["group"]:
@@ -92,15 +93,12 @@ def get_group(md, tp, **kwargs) -> List[str]:
         project_names = md[
             "project_information"
         ].keys()  # is this needed if just single project?
-        abbreviations = md["abbreviations"]
         for p in initial_error_case:
             if p in project_names:
                 if p in md["master_data"][md["quarter_list"].index(tp)]["data"].keys():
                     output_list.append(p)
             elif p in list(abbreviations.keys()):
-                pfn = abbreviations[
-                    p
-                ]  # pfn = project full name. coverts abbreviations back to full names
+                pfn = abbreviations[p]  # pfn = project full name. coverts abbreviations back to full names
                 if (
                     pfn
                     in md["master_data"][md["quarter_list"].index(tp)]["data"].keys()
@@ -119,61 +117,59 @@ def get_group(md, tp, **kwargs) -> List[str]:
         else:
             not_recognised_project_group_or_stage(final_error_case)
 
+    if "remove" in kwargs:
+        for p in kwargs["remove"]:
+            try:
+                if p in output_list:
+                    output_list.remove(p)
+                if abbreviations[p] in output_list:
+                    output_list.remove(abbreviations[p])
+            except KeyError:
+                final_error_case.append(p)
+                not_recognised_project_group_or_stage(final_error_case)
+
     return output_list
 
 
-# def get_group(md, **group_kwargs) -> List[str]:
-#     group = cal_group(
-#         md,
-#         **group_kwargs,
-#     )
-#     if "remove" in group_kwargs:
-#         print('refactor needed')
-#         # group = remove_from_group(
-#         #     group, group_kwargs["remove"], md, tp_indx, group_kwargs
-#         # )
-#     return group
-
-
-def remove_from_group(
-    pg_list: List[str],
-    remove_list: List[str] or List[list[str]],
-    master,
-    tp_index: int,
-) -> List[str]:
-    if any(isinstance(x, list) for x in remove_list):
-        remove_list = [item for sublist in remove_list for item in sublist]
-    else:
-        remove_list = remove_list
-    removed_case = []
-    q_str = master.quarter_list[tp_index]
-    for pg in remove_list:
-        try:
-            local_g = master.project_stage[q_str][pg]
-            pg_list = [x for x in pg_list if x not in local_g]
-            removed_case.append(pg)
-        except KeyError:
-            try:
-                local_g = master.meta_groupings[q_str][pg]
-                pg_list = [x for x in pg_list if x not in local_g]
-                removed_case.append(pg)
-            except KeyError:
-                try:
-                    pg_list.remove(master.abbreviations[pg]["full name"])
-                    removed_case.append(pg)
-                except (ValueError, KeyError):
-                    try:
-                        pg_list.remove(master.full_names[pg])
-                        removed_case.append(pg)
-                    except (ValueError, KeyError):
-                        pass
-
-    if removed_case:
-        for p in removed_case:
-            logger.info(p + " successfully removed from analysis.")
-
-    return pg_list
-
+# def remove_from_group(
+#     pg_list: List[str],
+#     remove_list: List[str] or List[list[str]],
+#     master,
+#     tp_index: int,
+# ) -> List[str]:
+#     if any(isinstance(x, list) for x in remove_list):
+#         remove_list = [item for sublist in remove_list for item in sublist]
+#     else:
+#         remove_list = remove_list
+#     removed_case = []
+#     q_str = master.quarter_list[tp_index]
+#     for pg in remove_list:
+#         try:
+#             local_g = master.project_stage[q_str][pg]
+#             pg_list = [x for x in pg_list if x not in local_g]
+#             removed_case.append(pg)
+#         except KeyError:
+#             try:
+#                 local_g = master.meta_groupings[q_str][pg]
+#                 pg_list = [x for x in pg_list if x not in local_g]
+#                 removed_case.append(pg)
+#             except KeyError:
+#                 try:
+#                     pg_list.remove(master.abbreviations[pg]["full name"])
+#                     removed_case.append(pg)
+#                 except (ValueError, KeyError):
+#                     try:
+#                         pg_list.remove(master.full_names[pg])
+#                         removed_case.append(pg)
+#                     except (ValueError, KeyError):
+#                         pass
+#
+#     if removed_case:
+#         for p in removed_case:
+#             logger.info(p + " successfully removed from analysis.")
+#
+#     return pg_list
+#
 
 def get_correct_p_data(
     master,

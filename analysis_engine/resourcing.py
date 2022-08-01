@@ -1,3 +1,4 @@
+from analysis_engine.dictionaries import RESOURCE_KEYS, RESOURCE_KEYS_OLD
 from analysis_engine.segmentation import get_iter_list, get_group, get_correct_p_data
 from analysis_engine.cleaning import convert_none_types
 
@@ -5,41 +6,51 @@ from analysis_engine.cleaning import convert_none_types
 class ResourceData:
     def __init__(self, master, **kwargs):
         self.master = master
-        self.baseline_type = "ipdc_costs"
+        self.quarters = self.master["quarter_list"]
         self.kwargs = kwargs
-        self.start_group = []
-        self.group = []
-        self.iter_list = []
+        self.totals = {}
         self.get_resource_totals()
-        # self.ps_resource = 0
-        # self.contractor_resource = 0
-        # self.total_resource = 0
 
     def get_resource_totals(self) -> None:
-        self.iter_list = get_iter_list(self.kwargs, self.master)
-        for tp in self.iter_list:
-            self.group = get_group(self.master, tp, self.kwargs)
+        totals_dict = {}
+        for tp in self.quarters:
             public_sector_resource = []
             c_resource = []
             t_resource = []
             fp_resource = []
-            for project_name in self.group:
-                p_data = get_correct_p_data(
-                    self.kwargs, self.master, self.baseline_type, project_name, tp
-                )
-                if p_data is None:
-                    break
-                else:
-                    ps = convert_none_types(p_data["DfTc Public Sector Employees"])
-                    public_sector_resource.append(ps)
-                    c = convert_none_types(p_data["DfTc External Contractors"])
-                    c_resource.append(c)
-                    t = convert_none_types(p_data["DfTc Project Team Total"])
-                    t_resource.append(t)
-                    fp = convert_none_types(p_data["DfTc Funded Posts"])
-                    fp_resource.append(fp)
+            group = get_group(self.master, tp, **self.kwargs)
+            for project_name in group:
+                p_data = get_correct_p_data(self.master, project_name, tp)
+                try:
+                    ps = convert_none_types(p_data[RESOURCE_KEYS["ps_resource"]])
+                except KeyError:
+                    ps = convert_none_types(p_data[RESOURCE_KEYS_OLD["ps_resource"]])
+                public_sector_resource.append(ps)
+                try:
+                    c = convert_none_types(p_data[RESOURCE_KEYS["contractor_resource"]])
+                except KeyError:
+                    c = convert_none_types(p_data[RESOURCE_KEYS_OLD["contractor_resource"]])
+                c_resource.append(c)
+                try:
+                    t = convert_none_types(p_data[RESOURCE_KEYS["total_resource"]])
+                except KeyError:
+                    t = convert_none_types(p_data[RESOURCE_KEYS_OLD["total_resource"]])
+                t_resource.append(t)
+                try:
+                    fp = convert_none_types(p_data[RESOURCE_KEYS["funded_resource"]])
+                except KeyError:
+                    fp = convert_none_types(p_data[RESOURCE_KEYS_OLD["funded_resource"]])
+                fp_resource.append(fp)
 
-        self.ps_resource = sum(public_sector_resource)
-        self.contractor_resource = sum(c_resource)
-        self.total_resource = sum(t_resource)
-        self.funded = sum(fp_resource)
+            totals_dict[tp] = {
+                "ps_resource": sum(public_sector_resource),
+                "contractor_resource": sum(c_resource),
+                "total_resource": sum(t_resource),
+                "funded_resource": sum(fp_resource)
+            }
+
+        self.totals = totals_dict
+
+
+
+
