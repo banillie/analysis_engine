@@ -186,9 +186,9 @@ SCHEDULE_DASHBOARD_KEYS = [
 
 DASHBOARD_RESOURCE_KEYS = [
     "No of DfTc FTEs working on Project",
-    "Number of External Contractors",
+    "Number of External Contractors (FTEs)",
     "Total (FTEs)",
     "Total Number of Funded Posts (FTEs)",
     "Resource Gap",
-    "DfTc Resource Gap Criticality",
+    "DfTc Resource Gap Criticality (RAG rating)",
 ]

@@ -10,7 +10,7 @@ from docx.shared import Inches
 from analysis_engine import __version__
 from analysis_engine.core_data import get_core, open_json_file
 from analysis_engine.dandelion import DandelionData, make_a_dandelion_auto
-from analysis_engine.dashboards import narrative_dashboard, cdg_dashboard
+from analysis_engine.dashboards import narrative_dashboard, cdg_dashboard, ipdc_dashboard
 from analysis_engine.dca import DcaData, dca_changes_into_word
 from analysis_engine.gmpp_int import GmppOnlineCosts
 from analysis_engine.merge import Merge
@@ -180,25 +180,32 @@ def run_analysis(args, settings):
             )
 
         if cli.programme == "dashboards":
-            narrative_d_master = get_input_doc(
-                str(cli.combined_args["root_path"])
-                + cli.combined_args["narrative_dashboard"]
-            )
-            narrative_dashboard(cli.md, narrative_d_master)  #
-            narrative_d_master.save(
-                str(cli.combined_args["root_path"])
-                + cli.combined_args["excel_save_path"].format(
-                    "narrative_dashboard_completed"
+            if cli.combined_args['report'] == 'cdg':
+                narrative_d_master = get_input_doc(
+                    str(cli.combined_args["root_path"]) + cli.combined_args["narrative_dashboard"]
                 )
-            )
-            cdg_d_master = get_input_doc(
-                str(cli.combined_args["root_path"]) + cli.combined_args["dashboard"]
-            )
-            cdg_dashboard(cli.md, cdg_d_master)
-            cdg_d_master.save(
-                str(cli.combined_args["root_path"])
-                + cli.combined_args["excel_save_path"].format("dashboard_completed")
-            )
+                narrative_dashboard(cli.md, narrative_d_master)  #
+                narrative_d_master.save(
+                    str(cli.combined_args["root_path"])
+                    + cli.combined_args["excel_save_path"].format("narrative_dashboard_completed")
+                )
+                cdg_d_master = get_input_doc(
+                    str(cli.combined_args["root_path"]) + cli.combined_args["dashboard"]
+                )
+                cdg_dashboard(cli.md, cdg_d_master)
+                cdg_d_master.save(
+                    str(cli.combined_args["root_path"])
+                    + cli.combined_args["excel_save_path"].format("dashboard_completed")
+                )
+            if cli.combined_args['report'] == 'ipdc':
+                ipdc_d_master = get_input_doc(
+                    str(cli.combined_args["root_path"]) + cli.combined_args["dashboard"]
+                )
+                ipdc_dashboard(cli.md, ipdc_d_master, **cli.combined_args)
+                ipdc_d_master.save(
+                    str(cli.combined_args["root_path"])
+                    + cli.combined_args["excel_save_path"].format("dashboards_completed")
+                )
 
         if cli.programme == "milestones":
             ms = MilestoneData(cli.md, **cli.combined_args)

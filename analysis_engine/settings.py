@@ -122,8 +122,8 @@ def get_board_date(op_args):
         config_path = op_args["root_path"] + op_args["config"]
         config = configparser.ConfigParser()
         config.read(config_path)
-        date_str = config["GLOBALS"]["milestones_blue_line_date"]
-        return convert_date(parser.parse(date_str).date())
+        date_str = config["GLOBALS"]["date"]
+        return parser.parse(date_str, dayfirst=True).date()
     except:
         config_issue()
 

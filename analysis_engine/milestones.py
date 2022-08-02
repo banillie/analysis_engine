@@ -639,12 +639,12 @@ class MilestoneData:
                 ):
                     d = x["Date"]
                     ms = x["Milestone"]
-                    if d > date:
-                        next_ms_dict[p] = {
-                            "milestone": ms,
-                            "date": d,
-                        }
-                        break
+                    if d >= date:
+                        if p not in list(next_ms_dict.keys()):
+                            next_ms_dict[p] = {
+                                "milestone": ms,
+                                "date": d,
+                            }
 
         self.next_milestone_dict = next_ms_dict
 
