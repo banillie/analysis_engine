@@ -44,12 +44,10 @@ DCA_KEYS = {
         "benefits": "SRO Benefits RAG",
         "schedule": "SRO Schedule Confidence",
     },
-    'ipa': {
+    "ipa": {
         "ipa": "GMPP - IPA DCA",
     },
-    'resource': {
-        'resource': "Overall Resource DCA - Now"
-    }
+    "resource": {"resource": "Overall Resource DCA - Now"},
 }
 
 PROJECT_INFO_KEYS = {
@@ -187,12 +185,10 @@ SCHEDULE_DASHBOARD_KEYS = [
 ]
 
 DASHBOARD_RESOURCE_KEYS = [
-            "No of DfTc FTEs working on Project",
-            "Number of External Contractors",
-            "Total (FTEs)",
-            "Total Number of Funded Posts (FTEs)",
-            "Resource Gap",
-            "DfTc Resource Gap Criticality",
-        ]
-
-
+    "No of DfTc FTEs working on Project",
+    "Number of External Contractors",
+    "Total (FTEs)",
+    "Total Number of Funded Posts (FTEs)",
+    "Resource Gap",
+    "DfTc Resource Gap Criticality",
+]

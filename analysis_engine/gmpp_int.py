@@ -163,9 +163,9 @@ class GmppOnlineCosts:
 
                 if i == 8:
                     rdel_income_ach += rdel_income
-                    rdel_spent += (rdel_oonc + rdel_rnc + rdel_ng)
+                    rdel_spent += rdel_oonc + rdel_rnc + rdel_ng
                     cdel_income_ach += cdel_income
-                    cdel_spent += (cdel_oonc + cdel_rnc + cdel_ng)
+                    cdel_spent += cdel_oonc + cdel_rnc + cdel_ng
 
             income[p] = rdel_income + cdel_income
             total[p] = rdel_oonc + rdel_rnc + rdel_ng + cdel_oonc + cdel_rnc + cdel_ng
@@ -225,7 +225,9 @@ class GmppOnlineCosts:
             try:
                 ws.cell(row=1, column=3 + x).value = project_map[project]
             except KeyError:
-                raise ProjectNameError(f"{project} not in the key map. Please up date and re-run")
+                raise ProjectNameError(
+                    f"{project} not in the key map. Please up date and re-run"
+                )
             for i, k in enumerate(key_map.keys()):
                 if x == 0:
                     try:

@@ -74,7 +74,7 @@ class CostData:
                         raise ProjectNameError()
 
             try:
-                remaining += (total - spent)
+                remaining += total - spent
             except KeyError:
                 remaining += 0
 

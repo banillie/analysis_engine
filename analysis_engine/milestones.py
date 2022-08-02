@@ -626,20 +626,23 @@ class MilestoneData:
         self.schedule_change = output_dict
 
     def get_next_milestone(
-            self,
-            date: datetime.date,
+        self,
+        date: datetime.date,
     ) -> list:
         next_ms_dict = {}
         group = get_group(self.master, self.quarters[0], **self.kwargs)
         for p in group:
             for x in self.milestone_dict[self.quarters[0]].values():
-                if x['Project'] == self.master['project_information'][p]['Abbreviations']:
+                if (
+                    x["Project"]
+                    == self.master["project_information"][p]["Abbreviations"]
+                ):
                     d = x["Date"]
                     ms = x["Milestone"]
                     if d > date:
                         next_ms_dict[p] = {
-                            'milestone': ms,
-                            'date': d,
+                            "milestone": ms,
+                            "date": d,
                         }
                         break
 
@@ -852,6 +855,3 @@ def put_milestones_into_wb(milestones: MilestoneData) -> Workbook:
     ).value = "Notes / Central Response (top 250 cs)"
 
     return wb
-
-
-

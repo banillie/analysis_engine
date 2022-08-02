@@ -29,7 +29,9 @@ class ResourceData:
                 try:
                     c = convert_none_types(p_data[RESOURCE_KEYS["contractor_resource"]])
                 except KeyError:
-                    c = convert_none_types(p_data[RESOURCE_KEYS_OLD["contractor_resource"]])
+                    c = convert_none_types(
+                        p_data[RESOURCE_KEYS_OLD["contractor_resource"]]
+                    )
                 c_resource.append(c)
                 try:
                     t = convert_none_types(p_data[RESOURCE_KEYS["total_resource"]])
@@ -39,18 +41,16 @@ class ResourceData:
                 try:
                     fp = convert_none_types(p_data[RESOURCE_KEYS["funded_resource"]])
                 except KeyError:
-                    fp = convert_none_types(p_data[RESOURCE_KEYS_OLD["funded_resource"]])
+                    fp = convert_none_types(
+                        p_data[RESOURCE_KEYS_OLD["funded_resource"]]
+                    )
                 fp_resource.append(fp)
 
             totals_dict[tp] = {
                 "ps_resource": sum(public_sector_resource),
                 "contractor_resource": sum(c_resource),
                 "total_resource": sum(t_resource),
-                "funded_resource": sum(fp_resource)
+                "funded_resource": sum(fp_resource),
             }
 
         self.totals = totals_dict
-
-
-
-

@@ -13,7 +13,11 @@ from analysis_engine.dictionaries import (
     risk_list,
     DASHBOARD_KEYS,
     DCA_KEYS,
-    STANDARDISE_COST_KEYS, DANDELION_KEYS, FWD_LOOK_DICT, SCHEDULE_DASHBOARD_KEYS, DASHBOARD_RESOURCE_KEYS,
+    STANDARDISE_COST_KEYS,
+    DANDELION_KEYS,
+    FWD_LOOK_DICT,
+    SCHEDULE_DASHBOARD_KEYS,
+    DASHBOARD_RESOURCE_KEYS,
 )
 from analysis_engine.dandelion import dandelion_number_text
 from analysis_engine.colouring import black_text, fill_colour_list
@@ -163,7 +167,9 @@ def cdg_dashboard(master, wb: Workbook) -> None:
 
 def ipdc_dashboard(md, wb: Workbook, **op_args) -> Workbook:
     IPDC_DATE = get_board_date(op_args)
-    logger.info(f'The {op_args["report"].upper} date has been taken from the GLOBALS date in the config file')
+    logger.info(
+        f'The {op_args["report"].upper} date has been taken from the GLOBALS date in the config file'
+    )
 
     financial_dashboard(md, wb, **op_args)
     resource_dashboard(md, wb, **op_args)
@@ -174,11 +180,7 @@ def ipdc_dashboard(md, wb: Workbook, **op_args) -> Workbook:
     return wb
 
 
-def resource_dashboard(
-        md,
-        wb: Workbook,
-        **op_args
-) -> Workbook:
+def resource_dashboard(md, wb: Workbook, **op_args) -> Workbook:
 
     ws = wb["Resource"]
     cmd = md["master_data"][0]["data"]  # cmd = current master data
@@ -200,9 +202,7 @@ def resource_dashboard(
                         cmd[project_name][key]
                     )
                 else:
-                    ws.cell(row=row_num, column=5 + i).value = cmd[
-                        project_name
-                    ][key]
+                    ws.cell(row=row_num, column=5 + i).value = cmd[project_name][key]
             except KeyError:
                 raise InputError(
                     key + " key is not in quarter master. This key must"
@@ -215,7 +215,7 @@ def resource_dashboard(
             try:
                 ws.cell(row=row_num, column=12 + i).value = CONVERT_RAG[
                     md["master_data"][i]["data"][project_name][
-                        DCA_KEYS['resource']["resource"]
+                        DCA_KEYS["resource"]["resource"]
                     ]
                 ]
             except KeyError:
@@ -342,10 +342,10 @@ def financial_dashboard(
 
 
 def schedule_dashboard(
-        md,
-        wb: Workbook,
-        IPDC_DATE,
-        **op_args,
+    md,
+    wb: Workbook,
+    IPDC_DATE,
+    **op_args,
 ) -> Workbook:
     ws = wb["Schedule"]
     # overall_ws = wb.worksheets[3]
@@ -359,15 +359,19 @@ def schedule_dashboard(
         p = ws.cell(row=row_num, column=3).value
         if p not in md["current_projects"]:
             continue
-        abb = md['project_information'][p]['Abbreviations']
+        abb = md["project_information"][p]["Abbreviations"]
         """IPDC approval point"""
         bc_stage = cmd[p][DASHBOARD_KEYS["BC_STAGE"]]
         ws.cell(row=row_num, column=4).value = BC_STAGE_DICT_FULL_TO_ABB[bc_stage]
 
         add_column = 0
         for m in SCHEDULE_DASHBOARD_KEYS:
-            current = get_milestone_date(ms.milestone_dict, m, md['quarter_list'][0], abb)
-            last_quarter = get_milestone_date(ms.milestone_dict, m, md['quarter_list'][0], abb)
+            current = get_milestone_date(
+                ms.milestone_dict, m, md["quarter_list"][0], abb
+            )
+            last_quarter = get_milestone_date(
+                ms.milestone_dict, m, md["quarter_list"][0], abb
+            )
             ws.cell(row=row_num, column=10 + add_column).value = current
             if current is not None and current < IPDC_DATE:
                 ws.cell(row=row_num, column=10 + add_column).value = "Completed"
@@ -375,9 +379,9 @@ def schedule_dashboard(
                 ws.cell(row=row_num, column=10 + add_column).value = "-"
             try:
                 last_change = (current - last_quarter).days
-                ws.cell(
-                    row=row_num, column=11 + add_column
-                ).value = plus_minus_days(last_change)
+                ws.cell(row=row_num, column=11 + add_column).value = plus_minus_days(
+                    last_change
+                )
             except TypeError:
                 pass
             add_column += 3
@@ -393,7 +397,7 @@ def schedule_dashboard(
             except KeyError:
                 ws.cell(row=row_num, column=22 + i).value = ""
 
-    op_args['type'] = ['Approval']
+    op_args["type"] = ["Approval"]
     ms.filter_chart_info(**op_args)
     ms.get_next_milestone(IPDC_DATE)
     for row_num in range(2, ws.max_row + 1):
@@ -402,8 +406,10 @@ def schedule_dashboard(
             continue
         """Next milestone name and variance"""
         try:
-            ws.cell(row=row_num, column=6).value = ms.next_milestone_dict[p]['milestone']
-            ws.cell(row=row_num, column=7).value = ms.next_milestone_dict[p]['date']
+            ws.cell(row=row_num, column=6).value = ms.next_milestone_dict[p][
+                "milestone"
+            ]
+            ws.cell(row=row_num, column=7).value = ms.next_milestone_dict[p]["date"]
         except KeyError:
             ws.cell(row=row_num, column=6).value = "None Reported"
             ws.cell(row=row_num, column=7).value = None
@@ -431,9 +437,9 @@ def schedule_dashboard(
 
 
 def benefits_dashboard(
-        md,
-        wb: Workbook,
-        **op_args,
+    md,
+    wb: Workbook,
+    **op_args,
 ) -> Workbook:
     ws = wb["Benefits_VfM"]
     cmd = md["master_data"][0]["data"]  # cmd = current master data
@@ -448,14 +454,10 @@ def benefits_dashboard(
         bc_stage = cmd[project_name][DASHBOARD_KEYS["BC_STAGE"]]
         ws.cell(row=row_num, column=4).value = BC_STAGE_DICT_FULL_TO_ABB[bc_stage]
         """initial bcr"""
-        initial_bcr = cmd[project_name][
-            "Initial Benefits Cost Ratio (BCR)"
-        ]
+        initial_bcr = cmd[project_name]["Initial Benefits Cost Ratio (BCR)"]
         ws.cell(row=row_num, column=6).value = initial_bcr
         """adjusted bcr"""
-        adjusted_bcr = cmd[project_name][
-            "Adjusted Benefits Cost Ratio (BCR)"
-        ]
+        adjusted_bcr = cmd[project_name]["Adjusted Benefits Cost Ratio (BCR)"]
         ws.cell(row=row_num, column=8).value = adjusted_bcr
         """vfm category now"""
         if cmd[project_name]["VfM Category single entry"] is None:
@@ -591,8 +593,10 @@ def overall_dashboard(
             vfm_cat = cmd[project_name]["VfM Category single entry"]
             ws.cell(row=row_num, column=8).value = vfm_cat
 
-        abb = md['project_information'][project_name]['Abbreviations']
-        current = get_milestone_date(ms.milestone_dict, "Full Operations", md['quarter_list'][0], abb)
+        abb = md["project_information"][project_name]["Abbreviations"]
+        current = get_milestone_date(
+            ms.milestone_dict, "Full Operations", md["quarter_list"][0], abb
+        )
         # last_quarter = get_milestone_date(ms.milestone_dict, "Full Operations", md['quarter_list'][0], abb)
         ws.cell(row=row_num, column=9).value = current
         if current is not None and current < IPDC_DATE:
@@ -609,7 +613,7 @@ def overall_dashboard(
 
         """IPA DCA rating"""
         try:
-            ipa_dca = CONVERT_RAG[cmd[project_name][DCA_KEYS['ipa']["ipa"]]]
+            ipa_dca = CONVERT_RAG[cmd[project_name][DCA_KEYS["ipa"]["ipa"]]]
         except KeyError:
             raise InputError(
                 f"No {DCA_KEYS['ipa']['ipa']} key in quarter master. This key must"
@@ -621,7 +625,9 @@ def overall_dashboard(
 
         # SRO forward look
         try:
-            ws.cell(row=row_num, column=18).value = FWD_LOOK_DICT[cmd[project_name][DANDELION_KEYS["forward_look"]]]
+            ws.cell(row=row_num, column=18).value = FWD_LOOK_DICT[
+                cmd[project_name][DANDELION_KEYS["forward_look"]]
+            ]
         except KeyError:
             raise InputError(
                 "No SRO Forward Look Assessment key in current quarter master. This key must"

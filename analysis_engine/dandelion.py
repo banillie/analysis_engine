@@ -145,7 +145,12 @@ def get_dandelion_type_total(master, kwargs) -> int or str:
         if kwargs["type"] == "benefits":
             benefits = BenefitsData(master, **kwargs)
             return benefits.b_totals[tp]["total"]
-        if kwargs["type"] in ("ps_resource", "contractor_resource", "total_resource", "funded_resource"):
+        if kwargs["type"] in (
+            "ps_resource",
+            "contractor_resource",
+            "total_resource",
+            "funded_resource",
+        ):
             resource = ResourceData(master, **kwargs)
             return resource.totals[tp][kwargs["type"]]
 

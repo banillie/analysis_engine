@@ -98,7 +98,9 @@ def get_group(md, tp, **kwargs) -> List[str]:
                 if p in md["master_data"][md["quarter_list"].index(tp)]["data"].keys():
                     output_list.append(p)
             elif p in list(abbreviations.keys()):
-                pfn = abbreviations[p]  # pfn = project full name. coverts abbreviations back to full names
+                pfn = abbreviations[
+                    p
+                ]  # pfn = project full name. coverts abbreviations back to full names
                 if (
                     pfn
                     in md["master_data"][md["quarter_list"].index(tp)]["data"].keys()
@@ -170,6 +172,7 @@ def get_group(md, tp, **kwargs) -> List[str]:
 #
 #     return pg_list
 #
+
 
 def get_correct_p_data(
     master,
