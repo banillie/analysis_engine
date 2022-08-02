@@ -1,7 +1,7 @@
 import datetime
 from openpyxl import load_workbook, Workbook
 
-from analysis_engine.error_msgs import config_issue
+from analysis_engine.error_msgs import config_issue, ProjectNameError
 
 
 def get_map(wb, commas=False, gaps=False, flip=False):
@@ -222,14 +222,17 @@ class GmppOnlineCosts:
         )
 
         for x, project in enumerate(list(self.gmpp_dict.keys())):
-            ws.cell(row=1, column=3 + x).value = project_map[project]
+            try:
+                ws.cell(row=1, column=3 + x).value = project_map[project]
+            except KeyError:
+                raise ProjectNameError(f"{project} not in the key map. Please up date and re-run")
             for i, k in enumerate(key_map.keys()):
                 if x == 0:
                     try:
                         ws.cell(row=2 + i, column=1).value = k
                         ws.cell(row=2 + i, column=2).value = key_map[k]
                     except KeyError:
-                        print(f"{k} not in the key map")
+                        pass
                 try:
                     if k == "Total Forecast":
                         v = self.cost_total[project]
