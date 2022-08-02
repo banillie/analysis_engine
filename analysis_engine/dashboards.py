@@ -13,7 +13,7 @@ from analysis_engine.dictionaries import (
     risk_list,
     DASHBOARD_KEYS,
     DCA_KEYS,
-    STANDARDISE_COST_KEYS,
+    STANDARDISE_COST_KEYS, DANDELION_KEYS, FWD_LOOK_DICT, SCHEDULE_DASHBOARD_KEYS, DASHBOARD_RESOURCE_KEYS,
 )
 from analysis_engine.dandelion import dandelion_number_text
 from analysis_engine.colouring import black_text, fill_colour_list
@@ -166,7 +166,7 @@ def ipdc_dashboard(md, wb: Workbook, **op_args) -> Workbook:
     logger.info(f'The {op_args["report"].upper} date has been taken from the GLOBALS date in the config file')
 
     financial_dashboard(md, wb, **op_args)
-    # resource_dashboard(md, wb, **op_args)
+    resource_dashboard(md, wb, **op_args)
     schedule_dashboard(md, wb, IPDC_DATE, **op_args)
     benefits_dashboard(md, wb, **op_args)
     overall_dashboard(md, wb, IPDC_DATE, **op_args)
@@ -174,83 +174,52 @@ def ipdc_dashboard(md, wb: Workbook, **op_args) -> Workbook:
     return wb
 
 
-def resource_dashboard(master, wb: Workbook, **kwargs) -> Workbook:
-    ws = wb["Resource"]
+def resource_dashboard(
+        md,
+        wb: Workbook,
+        **op_args
+) -> Workbook:
 
-    current_data = master.master_data[0]["data"]
-    last_data = master.master_data[1]["data"]
-    last_qrt_group = get_group(kwargs["group"], master)
+    ws = wb["Resource"]
+    cmd = md["master_data"][0]["data"]  # cmd = current master data
 
     for row_num in range(2, ws.max_row + 1):
         project_name = ws.cell(row=row_num, column=3).value
-        if project_name in master.current_projects:
-            if project_name in last_qrt_group:
-                kwargs["group"] = [project_name]
-                kwargs["quarter"] = ["standard"]
-            else:
-                kwargs["group"] = [project_name]
-                kwargs["quarter"] = [str(master.current_quarter)]
+        if project_name not in md["current_projects"]:
+            continue
 
-            """BC Stage"""
-            bc_stage = current_data[project_name]["IPDC approval point"]
-            ws.cell(row=row_num, column=4).value = BC_STAGE_DICT_FULL_TO_ABB(bc_stage)
+        """BC Stage"""
+        bc_stage = cmd[project_name][DASHBOARD_KEYS["BC_STAGE"]]
+        ws.cell(row=row_num, column=4).value = BC_STAGE_DICT_FULL_TO_ABB[bc_stage]
 
-            "Resourcing data"
-            resource_keys = [
-                "DfTc Public Sector Employees",
-                "DfTc External Contractors",
-                "DfTc Project Team Total",
-                "DfTc Funded Posts",
-                "DfTc Resource Gap",
-                "DfTc Resource Gap Criticality",
-            ]
-
-            for i, key in enumerate(resource_keys):
-                try:
-                    if key == "DfTc Resource Gap Criticality":
-                        ws.cell(row=row_num, column=5 + i).value = CONVERT_RAG(
-                            current_data[project_name][key]
-                        )
-                    else:
-                        ws.cell(row=row_num, column=5 + i).value = current_data[
-                            project_name
-                        ][key]
-                except KeyError:
-                    raise InputError(
-                        key + " key is not in quarter master. This key must"
-                        " be present for dashboard compilation. Stopping. "
-                        "Make sure all resource keys are in Master."
+        "Resourcing data"
+        for i, key in enumerate(DASHBOARD_RESOURCE_KEYS):
+            try:
+                if key == "DfTc Resource Gap Criticality":
+                    ws.cell(row=row_num, column=5 + i).value = CONVERT_RAG(
+                        cmd[project_name][key]
                     )
-
-            """DCA rating - this quarter"""
-            ws.cell(row=row_num, column=12).value = CONVERT_RAG(
-                current_data[project_name]["Overall Resource DCA - Now"]
-            )
-            """DCA rating - last qrt"""
-            try:
-                ws.cell(row=row_num, column=13).value = CONVERT_RAG(
-                    last_data[project_name]["Overall Resource DCA - Now"]
-                )
+                else:
+                    ws.cell(row=row_num, column=5 + i).value = cmd[
+                        project_name
+                    ][key]
             except KeyError:
-                ws.cell(row=row_num, column=13).value = ""
-            """DCA rating - 2 qrts ago"""
-            try:
-                ws.cell(row=row_num, column=14).value = CONVERT_RAG(
-                    master.master_data[2]["data"][project_name][
-                        "Overall Resource DCA - Now"
-                    ]
+                raise InputError(
+                    key + " key is not in quarter master. This key must"
+                    " be present for dashboard compilation. Stopping. "
+                    "Make sure all resource keys are in Master."
                 )
-            except (KeyError, IndexError):
-                ws.cell(row=row_num, column=14).value = ""
-            """DCA rating - 3 qrts ago"""
+
+        """DCA ratings"""
+        for i, q in enumerate(md["quarter_list"]):
             try:
-                ws.cell(row=row_num, column=15).value = CONVERT_RAG(
-                    master.master_data[3]["data"][project_name][
-                        "Overall Resource DCA - Now"
+                ws.cell(row=row_num, column=12 + i).value = CONVERT_RAG[
+                    md["master_data"][i]["data"][project_name][
+                        DCA_KEYS['resource']["resource"]
                     ]
-                )
-            except (KeyError, IndexError):
-                ws.cell(row=row_num, column=15).value = ""
+                ]
+            except KeyError:
+                ws.cell(row=row_num, column=12 + i).value = ""
 
     """list of columns with conditional formatting"""
     list_columns = ["j", "l", "m", "n", "o"]
@@ -395,14 +364,8 @@ def schedule_dashboard(
         bc_stage = cmd[p][DASHBOARD_KEYS["BC_STAGE"]]
         ws.cell(row=row_num, column=4).value = BC_STAGE_DICT_FULL_TO_ABB[bc_stage]
 
-        milestone_keys = [
-            "Start of Construction/build",
-            "Start of Operation",
-            "Full Operations",
-            "Project End Date",
-        ]
         add_column = 0
-        for m in milestone_keys:
+        for m in SCHEDULE_DASHBOARD_KEYS:
             current = get_milestone_date(ms.milestone_dict, m, md['quarter_list'][0], abb)
             last_quarter = get_milestone_date(ms.milestone_dict, m, md['quarter_list'][0], abb)
             ws.cell(row=row_num, column=10 + add_column).value = current
@@ -474,7 +437,7 @@ def benefits_dashboard(
 ) -> Workbook:
     ws = wb["Benefits_VfM"]
     cmd = md["master_data"][0]["data"]  # cmd = current master data
-    lmd = md["master_data"][1]["data"]  # lmd = last master data
+    # lmd = md["master_data"][1]["data"]  # lmd = last master data
 
     for row_num in range(2, ws.max_row + 1):
         project_name = ws.cell(row=row_num, column=3).value
@@ -552,21 +515,18 @@ def overall_dashboard(
     cmd = md["master_data"][0]["data"]  # cmd = current master data
     lmd = md["master_data"][1]["data"]  # lmd = last master data
     lymd = md["master_data"][3]["data"]  # lymd = last year master data
-
     rm = get_remove_income(op_args)
-
     ms = MilestoneData(md, **op_args)
 
     for row_num in range(2, ws.max_row + 1):
-        project_name = ws.cell(row=row_num, column=3).value
+        project_name = ws.cell(row=row_num, column=2).value
         if project_name not in md["current_projects"]:
             continue
 
         """BC Stage"""
         bc_stage = cmd[project_name][DASHBOARD_KEYS["BC_STAGE"]]
-        ws.cell(row=row_num, column=4).value = BC_STAGE_DICT_FULL_TO_ABB[bc_stage]
+        ws.cell(row=row_num, column=3).value = BC_STAGE_DICT_FULL_TO_ABB[bc_stage]
 
-        """Total WLC"""
         """Total WLC"""
         wlc_now = convert_none_types(
             cmd[project_name][STANDARDISE_COST_KEYS[op_args["report"]]["total"]]
@@ -631,13 +591,14 @@ def overall_dashboard(
             vfm_cat = cmd[project_name]["VfM Category single entry"]
             ws.cell(row=row_num, column=8).value = vfm_cat
 
+        abb = md['project_information'][project_name]['Abbreviations']
         current = get_milestone_date(ms.milestone_dict, "Full Operations", md['quarter_list'][0], abb)
         # last_quarter = get_milestone_date(ms.milestone_dict, "Full Operations", md['quarter_list'][0], abb)
         ws.cell(row=row_num, column=9).value = current
         if current is not None and current < IPDC_DATE:
-            ws.cell(row=row_num, column=10).value = "Completed"
+            ws.cell(row=row_num, column=9).value = "Completed"
         if current is None:
-            ws.cell(row=row_num, column=10).value = "-"
+            ws.cell(row=row_num, column=9).value = "-"
         # try:
         #     last_change = (current - last_quarter).days
         #     ws.cell(
@@ -648,10 +609,10 @@ def overall_dashboard(
 
         """IPA DCA rating"""
         try:
-            ipa_dca = CONVERT_RAG(cmd[project_name]["GMPP - IPA DCA"])
+            ipa_dca = CONVERT_RAG[cmd[project_name][DCA_KEYS['ipa']["ipa"]]]
         except KeyError:
             raise InputError(
-                "No GMPP IPA DCA key in quarter master. This key must"
+                f"No {DCA_KEYS['ipa']['ipa']} key in quarter master. This key must"
                 " be present for dashboard compilation. Stopping."
             )
         ws.cell(row=row_num, column=15).value = ipa_dca
@@ -660,60 +621,23 @@ def overall_dashboard(
 
         # SRO forward look
         try:
-            fwd_look = cmd[project_name]["SRO Forward Look Assessment"]
+            ws.cell(row=row_num, column=18).value = FWD_LOOK_DICT[cmd[project_name][DANDELION_KEYS["forward_look"]]]
         except KeyError:
             raise InputError(
                 "No SRO Forward Look Assessment key in current quarter master. This key must"
                 " be present for dashboard compilation. Stopping."
             )
-        if fwd_look == "Worsening":
-            ws.cell(row=row_num, column=18).value = 1
-        if fwd_look == "No Change Expected":
-            ws.cell(row=row_num, column=18).value = 2
-        if fwd_look == "Improving":
-            ws.cell(row=row_num, column=18).value = 3
-        if fwd_look is None:
-            ws.cell(row=row_num, column=18).value = ""
-
-        # """SRO three DCA rating"""
-        # sro_dca_three = CONVERT_RAG(
-        #     cmd[project_name]["Departmental DCA"]
-        # )  # "GMPP - SRO DCA"
-        # ws.cell(row=row_num, column=16).value = sro_dca_three
-        # if sro_dca_three == "None":
-        #     ws.cell(row=row_num, column=16).value = ""
 
         """DCA rating - this quarter"""
-        ws.cell(row=row_num, column=19).value = CONVERT_RAG(
-            cmd[project_name]["Departmental DCA"]
-        )
-        """DCA rating - last qrt"""
-        try:
-            ws.cell(row=row_num, column=20).value = CONVERT_RAG(
-                lmd[project_name]["Departmental DCA"]
-            )
-        except KeyError:
-            ws.cell(row=row_num, column=20).value = ""
-        """DCA rating - 2 qrts ago"""
-        try:
-            ws.cell(row=row_num, column=21).value = CONVERT_RAG(
-                master.master_data[2]["data"][project_name]["Departmental DCA"]
-            )
-        except (KeyError, IndexError):
-            ws.cell(row=row_num, column=21).value = ""
-        """DCA rating - 3 qrts ago"""
-        try:
-            ws.cell(row=row_num, column=22).value = CONVERT_RAG(
-                master.master_data[3]["data"][project_name]["Departmental DCA"]
-            )
-        except (KeyError, IndexError):
-            ws.cell(row=row_num, column=22).value = ""
-
-        # """DCA rating - baseline"""
-        # bl_i = master.bl_index["ipdc_costs"][project_name][2]
-        # ws.cell(row=row_num, column=23).value = CONVERT_RAG(
-        #     master.master_data[bl_i]["data"][project_name]["Departmental DCA"]
-        # )
+        for i, q in enumerate(md["quarter_list"]):
+            try:
+                ws.cell(row=row_num, column=19 + i).value = CONVERT_RAG[
+                    md["master_data"][i]["data"][project_name][
+                        DCA_KEYS[op_args["report"]]["sro"]
+                    ]
+                ]
+            except KeyError:
+                ws.cell(row=row_num, column=19 + i).value = ""
 
     # places arrow icons for sro forward look assessment
     icon_set_rule = IconSetRule("3Arrows", "num", ["1", "2", "3"], showValue=False)

@@ -44,6 +44,12 @@ DCA_KEYS = {
         "benefits": "SRO Benefits RAG",
         "schedule": "SRO Schedule Confidence",
     },
+    'ipa': {
+        "ipa": "GMPP - IPA DCA",
+    },
+    'resource': {
+        'resource': "Overall Resource DCA - Now"
+    }
 }
 
 PROJECT_INFO_KEYS = {
@@ -72,60 +78,6 @@ DCA_RATING_SCORES = {
 # }
 
 FONT_TYPE = ["sans serif", "Ariel"]
-
-# BEN_TYPE_KEY_LIST = [
-#     (
-#         "Pre-profile BEN Forecast Gov Cashable",
-#         "Pre-profile BEN Forecast Gov Non-Cashable",
-#         "Pre-profile BEN Forecast - Economic (inc Private Partner)",
-#         "Pre-profile BEN Forecast - Disbenefit UK Economic",
-#     ),
-#     (
-#         "Total BEN Forecast - Gov. Cashable",
-#         "Total BEN Forecast - Gov. Non-Cashable",
-#         "Total BEN Forecast - Economic (inc Private Partner)",
-#         "Total BEN Forecast - Disbenefit UK Economic",
-#     ),
-#     (
-#         "Unprofiled Remainder BEN Forecast - Gov. Cashable",
-#         "Unprofiled Remainder BEN Forecast - Gov. Non-Cashable",
-#         "Unprofiled Remainder BEN Forecast - Economic (inc Private Partner)",
-#         "Unprofiled Remainder BEN Forecast - Disbenefit UK Economic",
-#     ),
-# ]
-#
-# YEAR_LIST = [
-#     # "16-17",
-#     # "17-18",
-#     # "18-19",
-#     # "19-20",
-#     # "20-21",
-#     "21-22",
-#     "22-23",
-#     "23-24",
-#     "24-25",
-#     "25-26",
-#     "26-27",
-#     "27-28",
-#     "28-29",
-#     "29-30",
-#     "30-31",
-#     "31-32",
-#     "32-33",
-#     "33-34",
-#     "34-35",
-#     "35-36",
-#     "36-37",
-#     "37-38",
-#     "38-39",
-#     "39-40",
-# ]
-
-# COST_KEY_LIST = [
-#     " RDEL Forecast Total",
-#     " CDEL Forecast one off new costs",
-#     " Forecast Non-Gov",
-# ]
 
 STANDARDISE_COST_KEYS = {
     "cdg": {
@@ -185,6 +137,7 @@ CONVERT_RAG = {
     "Amber": "A",
     "Amber/Red": "A/R",
     "Red": "R",
+    None: None,
 }
 
 NEXT_STAGE_DICT = {
@@ -197,6 +150,13 @@ NEXT_STAGE_DICT = {
 
 DANDELION_KEYS = {
     "forward_look": "SRO Forward Look Assessment",
+}
+
+FWD_LOOK_DICT = {
+    "Worsening": 1,
+    "No Change Expected": 2,
+    "Improving": 3,
+    None: "",
 }
 
 DASHBOARD_KEYS = {
@@ -218,5 +178,21 @@ RESOURCE_KEYS = {
     "total_resource": "Total Number working in the project team FTEs",
     "funded_resource": "No employees funded to work on project",
 }
+
+SCHEDULE_DASHBOARD_KEYS = [
+    "Start of Construction/build",
+    "Start of Operation",
+    "Full Operations",
+    "Project End Date",
+]
+
+DASHBOARD_RESOURCE_KEYS = [
+            "No of DfTc FTEs working on Project",
+            "Number of External Contractors",
+            "Total (FTEs)",
+            "Total Number of Funded Posts (FTEs)",
+            "Resource Gap",
+            "DfTc Resource Gap Criticality",
+        ]
 
 

@@ -10,22 +10,7 @@ from analysis_engine.colouring import COLOUR_DICT
 from analysis_engine.render_utils import set_fig_size, get_chart_title, handle_long_keys
 from analysis_engine.segmentation import get_group, get_correct_p_data
 from analysis_engine.error_msgs import logger
-from analysis_engine.settings import get_board_date
-
-
-def convert_date(date_str: str):
-    """
-    When date converted into json file the dates take the standard python format
-    year-month-day. This function converts format to year-day-month. This function is
-    used when the MilestoneData class is created. Seems to be the best place to deploy.
-    """
-    try:
-        return parser.parse(date_str)  # returns datetime
-    except TypeError:  # for a different data value e.g integer.
-        return date_str
-    except ValueError:  # for string data that is not a date.
-        return date_str
-    # is a ParserError necessary here also?
+from analysis_engine.settings import get_board_date, convert_date
 
 
 def milestone_info_handling(output_list: list, t_list: list, **kwargs) -> list:

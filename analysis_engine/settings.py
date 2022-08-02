@@ -102,13 +102,28 @@ def return_koi_fn_keys(op_args: Dict):  # op_args
         return op_args
 
 
+def convert_date(date_str: str):
+    """
+    When date converted into json file the dates take the standard python format
+    year-month-day. This function converts format to year-day-month. This function is
+    used when the MilestoneData class is created. Seems to be the best place to deploy.
+    """
+    try:
+        return parser.parse(date_str)  # returns datetime
+    except TypeError:  # for a different data value e.g integer.
+        return date_str
+    except ValueError:  # for string data that is not a date.
+        return date_str
+    # is a ParserError necessary here also?
+
+
 def get_board_date(op_args):
     try:
         config_path = op_args["root_path"] + op_args["config"]
         config = configparser.ConfigParser()
         config.read(config_path)
         date_str = config["GLOBALS"]["milestones_blue_line_date"]
-        return parser.parse(date_str).date()
+        return convert_date(parser.parse(date_str).date())
     except:
         config_issue()
 
