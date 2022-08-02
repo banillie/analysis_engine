@@ -89,6 +89,7 @@ class MilestoneData:
         self.quarters = self.master["quarter_list"]
         self.milestone_dict = {}
         self.sorted_milestone_dict = {}
+        self.next_milestone_dict = {}
         self.max_date = None
         self.min_date = None
         # self.schedule_change = {}
@@ -96,6 +97,7 @@ class MilestoneData:
         # self.schedule_key_baseline = None
         self.get_milestones()
         self.get_chart_info()
+        # self.get_next_milestone()
         # # self.calculate_schedule_changes()
 
     def get_milestones(self) -> None:
@@ -638,6 +640,26 @@ class MilestoneData:
 
         self.schedule_change = output_dict
 
+    def get_next_milestone(
+            self,
+            date: datetime.date,
+    ) -> list:
+        next_ms_dict = {}
+        group = get_group(self.master, self.quarters[0], **self.kwargs)
+        for p in group:
+            for x in self.milestone_dict[self.quarters[0]].values():
+                if x['Project'] == self.master['project_information'][p]['Abbreviations']:
+                    d = x["Date"]
+                    ms = x["Milestone"]
+                    if d > date:
+                        next_ms_dict[p] = {
+                            'milestone': ms,
+                            'date': d,
+                        }
+                        break
+
+        self.next_milestone_dict = next_ms_dict
+
 
 def merge_project_milestone_name(project, ms_names, no):
     return project[no] + ", " + ms_names[no]
@@ -845,3 +867,6 @@ def put_milestones_into_wb(milestones: MilestoneData) -> Workbook:
     ).value = "Notes / Central Response (top 250 cs)"
 
     return wb
+
+
+

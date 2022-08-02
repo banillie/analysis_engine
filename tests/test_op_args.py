@@ -246,7 +246,7 @@ dlion_angles_cdg = {
 dlion_angles_ipdc = {
     "test_name": "dlion_angles",
     "subparser_name": "dandelion",
-    "angles": [250, 300, 350, 40, 90, 140],
+    "angles": [250, 290, 350, 40, 90, 130],
     "chart": chart,
 }
 dlion_benefits = {
@@ -358,25 +358,23 @@ if REPORTING_TYPE == 'cdg':
 if REPORTING_TYPE == 'ipdc':
     DANDELION_OP_ARGS_DICT = [
         dlion_remove,
-        # dlion_total_resource,
-        # dlion_contractor_resource,
-        # dlion_ps_resource,
-        # dlion_funded_resource,
-        # dlion_spent,
-        # dlion_remaining,
-        # dlion_pipeline_as_stage_ipdc,
-        # dlion_stages_default_ipdc,
-        # dlion_stages_order_by_ipdc,
-        # dlion_cli_pipeline_ipdc,
-        # # dlion_cli_group_ipdc,
-        # dlion_income,
-        # # dlion_benefits,
-        # dlion_angles_ipdc,
-        # dlion_quarter,
-        # dlion_stages_ipdc,
-        # dlion_stages_abb_ipdc,
-        # dlion_groups_ipdc,
-        # dlion_standard,
+        dlion_total_resource,
+        dlion_contractor_resource,
+        dlion_ps_resource,
+        dlion_funded_resource,
+        dlion_spent,
+        dlion_remaining,
+        dlion_pipeline_as_stage_ipdc,
+        dlion_stages_default_ipdc,
+        dlion_stages_order_by_ipdc,
+        dlion_cli_pipeline_ipdc,
+        dlion_income,
+        dlion_angles_ipdc,
+        dlion_quarter,
+        dlion_stages_ipdc,
+        dlion_stages_abb_ipdc,
+        dlion_groups_ipdc,
+        dlion_standard,
     ]
 
 # write some separate tests for dcas
