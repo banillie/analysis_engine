@@ -16,6 +16,7 @@ from analysis_engine.gmpp_int import GmppOnlineCosts
 from analysis_engine.merge import Merge
 from analysis_engine.query import data_query_into_wb
 from analysis_engine.render_utils import get_input_doc, put_matplotlib_fig_into_word
+from analysis_engine.risks import RiskData, portfolio_risks_into_excel
 from analysis_engine.settings import (
     report_config,
     set_default_args,
@@ -253,6 +254,14 @@ def run_analysis(args, settings):
             get_masters_to_merge(cli.combined_args)
             Merge(**cli.combined_args)
 
+        if cli.programme == "portfolio_risks":
+            rd = RiskData(cli.md, **cli.combined_args)
+            wb = portfolio_risks_into_excel(rd)
+            wb.save(
+                str(cli.settings["root_path"])
+                + cli.settings["excel_save_path"].format("portfolio_risks")
+            )
+
         # ProjectNameError below captures any naming errors
         if "remove" in cli.combined_args.keys():
             for x in cli.combined_args["remove"]:
@@ -343,6 +352,12 @@ def run_parsers():
         "program other than --help.",
     )
 
+    parser_port_risks = subparsers.add_parser(
+        "portfolio_risks",
+        help="portfolio risk analysis",
+        description="This program extracts all portfolio risk data used in the IPDC portfolio report."
+    )
+
     for sub in [
         parser_milestones,
         parser_dandelion,
@@ -364,6 +379,7 @@ def run_parsers():
         parser_dca,
         parser_milestones,
         parser_data_query,
+        parser_port_risks,
     ]:
         sub.add_argument(
             "--quarter",
@@ -379,12 +395,9 @@ def run_parsers():
     for sub in [
         parser_dca,
         parser_speed_dial,
-        # parser_vfm,
         # parser_risks,
-        # parser_port_risks,
-        parser_dandelion,  # ipdc also has pipeline option. Not tested yet.
-        # parser_costs,
-        # parser_costs_sp,
+        parser_port_risks,
+        parser_dandelion,
         parser_data_query,
         parser_milestones,
     ]:
@@ -403,15 +416,12 @@ def run_parsers():
     # group
     for sub in [
         parser_dca,
-        # parser_vfm,
         # parser_risks,
-        # parser_port_risks,
+        parser_port_risks,
         parser_speed_dial,
         parser_dandelion,
-        # parser_costs,
         parser_milestones,
         # parser_summaries,
-        # parser_costs_sp,
         parser_data_query,
     ]:
         sub.add_argument(

@@ -192,3 +192,43 @@ DASHBOARD_RESOURCE_KEYS = [
     "Resource Gap",
     "DfTc Resource Gap Criticality (RAG rating)",
 ]
+
+RISK_LIST = [
+    "Brief Risk Description ",
+    "BRD Risk Category",
+    "BRD Primary Risk to",
+    "BRD Internal Control",
+    "BRD Mitigation - Actions taken (brief description)",
+    "BRD Residual Impact",
+    "BRD Residual Likelihood",
+    "Severity Score Risk Category",
+    "BRD Has this Risk turned into an Issue?",
+]
+
+PORTFOLIO_RISK_LIST = [
+    "Portfolio Risk Impact Description",
+    "Portfolio Risk Mitigation",
+    "Portfolio Risk Likelihood",
+    "Portfolio Risk Impact Assessment",
+    "Severity Score Risk Category",
+]
+
+RISK_SCORES = {
+    "Very Low": 0,
+    "Low": 1,
+    "Medium": 2,
+    "High": 3,
+    "Very High": 4,
+    "N/A": None,
+    None: None,
+}
+
+PORTFOLIO_RISK_SCORES = {
+    "N/A": None,
+    "Unlikely": 1,
+    None: None,
+    "Very Unlikely": 0,
+    "Likely": 3,
+    "Possible": 2,
+    "Very Likely": 4,
+}

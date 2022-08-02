@@ -1,13 +1,15 @@
+import click
 from docx.shared import Inches
 
 from analysis_engine.error_msgs import ProjectNameError, ProjectGroupError, ProjectStageError, logger, InputError
 from analysis_engine.gmpp_int import GmppOnlineCosts
 from analysis_engine.merge import Merge
+from analysis_engine.risks import RiskData, portfolio_risks_into_excel
 from tests.test_op_args import (
     REPORTING_TYPE,
     DANDELION_OP_ARGS_DICT,
     SPEED_DIAL_AND_DCA_OP_ARGS,
-    MILESTONES_OP_ARGS, QUERY_ARGS,
+    MILESTONES_OP_ARGS, QUERY_ARGS, PORT_RISK_OP_ARGS,
 )
 
 from analysis_engine.main import CliOpArgs
@@ -256,6 +258,18 @@ def test_merge_masters():
         get_masters_to_merge(cli.combined_args)
         Merge(**cli.combined_args)
 
+
+def test_portfolio_risks():
+    if REPORTING_TYPE == 'ipdc':
+        for x in PORT_RISK_OP_ARGS:
+            print(x['test_name'])
+            cli = CliOpArgs(x, SETTINGS_DICT)
+            rd = RiskData(cli.md, **cli.combined_args)
+            wb = portfolio_risks_into_excel(rd)
+            wb.save(
+                str(cli.settings["root_path"])
+                + cli.settings["excel_save_path"].format(f"{x['test_name']}")
+            )
 
 
 # @pytest.mark.skip(reason="refactor required")

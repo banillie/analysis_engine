@@ -427,7 +427,34 @@ if REPORTING_TYPE == 'ipdc':
         sd_standard
     ]
 
+pr_standard = {
+    "test_name": "pr_standard",
+    "subparser_name": "portfolio_risks",
+}
+pr_quarters = {
+    "test_name": "pr_quarters",
+    "subparser_name": "portfolio_risks",
+    "quarter": ["Q1 22/23", "Q4 21/22"],
+}
+pr_groups_ipdc = {
+    "test_name": "pr_groups",
+    "subparser_name": "portfolio_risks",
+    "group": ["HSRG", "RPE"],
+}
+pr_stage = {
+    "test_name": "pr_stage",
+    "subparser_name": "portfolio_risks",
+    "stage": [
+        "FBC",
+    ],
+}
 
+PORT_RISK_OP_ARGS =[
+    pr_stage,
+    pr_groups_ipdc,
+    pr_quarters,
+    pr_standard,
+]
 
 # 'rag_number': '5',
 # 'order_by': 'cost',
