@@ -286,6 +286,13 @@ def test_risks():
             )
 
 
+# def test_summaries():
+#     if programme == "summaries":
+#     op_args["quarter"] = [str(m.current_quarter)]
+#     if "type" not in op_args:
+#         op_args["type"] = "short"
+#     run_p_reports(m, **op_args)
+
 # @pytest.mark.skip(reason="refactor required")
 # def test_calculating_spent(master):
 #     test_dict = master.master_data[0]["data"]
