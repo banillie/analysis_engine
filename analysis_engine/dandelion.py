@@ -6,7 +6,6 @@ from openpyxl import Workbook
 from openpyxl.workbook import workbook
 
 from matplotlib import pyplot as plt
-from adjustText import adjust_text
 
 from analysis_engine.costs import CostData
 from analysis_engine.benefits import BenefitsData
