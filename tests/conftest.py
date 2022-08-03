@@ -1,11 +1,12 @@
-import configparser
-import os
 import pytest
-from datamaps.api import project_data_from_master, project_data_from_master_month
-from openpyxl import load_workbook
+import os
 
-from analysis_engine.data import open_word_doc, open_pickle_file, root_path, Master, open_json_file, JsonMaster, \
-    get_master_data, get_project_information, JsonData
+from datamaps.api import project_data_from_master
+
+from analysis_engine.core_data import get_core, get_project_information
+
+# from analysis_engine.data import open_word_doc
+# from analysis_engine.config import _platform_docs_dir
 
 
 def pytest_addoption(parser):
@@ -28,6 +29,16 @@ def pytest_collection_modifyitems(config, items):
             item.add_marker(skip_slow)
 
 
+# @pytest.fixture()
+# def root_path():
+#     return _platform_docs_dir(list(INITIATE_DICT.keys())[0])
+#
+
+# @pytest.fixture()
+# def func():
+#     return INITIATE_DICT[REPORTING_TYPE]['callable']
+
+
 @pytest.fixture
 def word_doc():
     wd_path = os.path.join(os.getcwd(), "resources/summary_temp.docx")
@@ -35,20 +46,18 @@ def word_doc():
     return doc
 
 
-@pytest.fixture
-def word_doc_landscape():
-    wd_path = os.path.join(os.getcwd(), "resources/summary_temp_landscape.docx")
-    doc = open_word_doc(wd_path)
-    return doc
+# @pytest.fixture
+# def word_doc_landscape():
+#     return open_word_doc(os.path.join(os.getcwd(), "resources/summary_temp_landscape.docx"))
 
 
-@pytest.fixture
-def project_info():
-    return get_project_information(
-        "resources/basic_m_confi.ini",
-        "resources/"
-    )
-
+# @pytest.fixture
+# def project_info():
+#     root_path = _platform_docs_dir('cdg')
+#     config_path = str(root_path) + test_initiate_dict['cdg']['config']
+#     return get_project_information(config_path,
+#                 str(root_path) + "/core_data/",
+#             )
 
 # def cdg_project_info():
 #     return project_data_from_master(
@@ -61,18 +70,16 @@ def project_info():
 @pytest.fixture()
 def basic_masters_dicts():
     return get_master_data(
-        "resources/basic_m_confi.ini",
-        "resources/",
-        project_data_from_master
+        "resources/basic_m_confi.ini", "resources/", project_data_from_master
     )
 
 
 @pytest.fixture()
 def full_test_masters_dict():
-    return get_master_data(
-        "resources/full_m_confi.ini",
-        "resources/",
-        project_data_from_master
+    get_core(
+        reporting_type="cdg",
+        config_file=INITIATE_DICT["cdg"]["config"],
+        func=INITIATE_DICT["cdg"]["callable"],
     )
 
 
@@ -97,7 +104,7 @@ def cdg_masters():
 
 @pytest.fixture()
 def master_json_path():
-    return os.path.join(os.getcwd(), "resources/" "json_master")
+    return str("{0}/core_data/json/master".format(root_path))
 
 
 @pytest.fixture()
@@ -174,34 +181,29 @@ def sp_data():
 #     }
 
 
-@pytest.fixture()
-def ipdc_data():
-    return {
-        "docx_save_path": "resources/{}.docx",
-        "master": open_pickle_file(os.path.join(os.getcwd(), "resources/test_master.pickle")),
-        "op_args": {
-            "quarter": ["Q1 20/21"],
-            "group": ["HSRG", "RSS", "RIG", "AMIS", "RPE"],
-            "chart": False,
-        },
-    }
+# @pytest.fixture()
+# def ipdc_data():
+#     return {
+#         "docx_save_path": "resources/{}.docx",
+#         "master": open_pickle_file(os.path.join(os.getcwd(), "resources/test_master.pickle")),
+#         "op_args": {
+#             "quarter": ["Q1 20/21"],
+#             "group": ["HSRG", "RSS", "RIG", "AMIS", "RPE"],
+#             "chart": False,
+#         },
+#     }
 
 
 @pytest.fixture()
 def top35_master():
     return get_master_data(
-            "resources/top250_confi.ini",
-            "resources/",
-            project_data_from_master_month
-        )
+        "resources/top250_confi.ini", "resources/", project_data_from_master_month
+    )
 
 
 @pytest.fixture()
 def top35_project_info():
-    return get_project_information(
-            "resources/top250_confi.ini",
-            "resources/"
-        )
+    return get_project_information("resources/top250_confi.ini", "resources/")
 
 
 @pytest.fixture()
@@ -216,7 +218,6 @@ def top35_data():
             "group": ["RIG"],
             "chart": True,
             "data_type": "top35",
-            "circle_colour": 'No',
+            "circle_colour": "No",
         },
     }
-

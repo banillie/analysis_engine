@@ -29,6 +29,11 @@ analysis_engine.egg-info
 .eggs
 other/
 
+<<<<<<< HEAD
 
 analysis_engine/annotation.py
 analysis_engine/main_store.py
+=======
+analysis_engine/annotation.py
+analysis_engine/main_store.py
+>>>>>>> core_data

@@ -38,10 +38,11 @@ from analysis_engine.data import (
     set_col_widths,
     make_columns_bold,
     change_text_size,
-    Master,
+    # Master,
     get_group,
     compare_text_new_and_old,
-    get_ipdc_date, dandelion_number_text,
+    get_ipdc_date,
+    dandelion_number_text,
 )
 
 
@@ -69,6 +70,7 @@ from analysis_engine.data import (
 #         cdg_root_path / "core_data/cdg_project_info.xlsx", 2, 2020
 #     )
 #
+
 
 def place_data_into_new_master_format(master_data: Dict):  # throw away
     wb = load_workbook(cdg_root_path / "core_data/CDG_portfolio_report.xlsx")
@@ -115,7 +117,7 @@ DCG_DATE = datetime.date(
 )  # ipdc date. Python date format is Year, Month, day
 
 
-def cdg_overall_dashboard(master: Master, wb: Workbook) -> Workbook:
+def cdg_overall_dashboard(master, wb: Workbook) -> Workbook:
     wb = load_workbook(wb)
     ws = wb.worksheets[0]
 
@@ -438,7 +440,7 @@ def cdg_overall_dashboard(master: Master, wb: Workbook) -> Workbook:
 def cdg_compile_p_report(
     doc: Document,
     project_info: Dict[str, Union[str, int, date, float]],
-    master: Master,
+    master,
     project_name: str,
 ) -> Document:
     wd_heading(doc, project_info, project_name)
@@ -487,26 +489,27 @@ def cdg_compile_p_report(
     return doc
 
 
-def cdg_run_p_reports(master: Master, **kwargs) -> None:
-    group = master.current_projects
-    # group = get_group(master, str(master.current_quarter), kwargs)
-
-    for p in group:
-        print("Compiling summary for " + p)
-        report_doc = open_word_doc(cdg_root_path / "input/summary_temp.docx")
-        qrt = make_file_friendly(str(master.master_data[0].quarter))
-        output = cdg_compile_p_report(
-            report_doc, cdg_get_project_information(), master, p
-        )
-        abb = master.abbreviations[p]["abb"]
-        output.save(
-            cdg_root_path / "output/{}_report_{}.docx".format(abb, qrt)
-        )  # add quarter here
+## Not being used.
+# def cdg_run_p_reports(master, **kwargs) -> None:
+#     group = master.current_projects
+#     # group = get_group(master, str(master.current_quarter), kwargs)
+#
+#     for p in group:
+#         print("Compiling summary for " + p)
+#         report_doc = open_word_doc(cdg_root_path / "input/summary_temp.docx")
+#         qrt = make_file_friendly(str(master.master_data[0].quarter))
+#         output = cdg_compile_p_report(
+#             report_doc, cdg_get_project_information(), master, p
+#         )
+#         abb = master.abbreviations[p]["abb"]
+#         output.save(
+#             cdg_root_path / "output/{}_report_{}.docx".format(abb, qrt)
+#         )  # add quarter here
 
 
 def cdg_project_report_meta_data(
     doc: Document,
-    master: Master,
+    master,
     project_name: str,
 ):
     """Meta data table"""
@@ -555,22 +558,15 @@ def cdg_project_report_meta_data(
     return doc
 
 
-DATA_KEY_DICT = {
-        "IPDC approval point": "Last Business Case (BC) achieved",
-        "Total Forecast": "Total Costs",
-        "Departmental DCA": "Overall Delivery Confidence",
-    }
-
-
 def add_sterling_symbol(figure: int or float):
     if figure != 0:
         return "£" + str(figure) + "m"
 
 
 def cdg_dashboard(
-        master: Master,
-        # milestones: MilestoneData,
-        wb: Workbook,
+    master,
+    # milestones: MilestoneData,
+    wb: Workbook,
 ) -> Workbook:
     # wb = load_workbook(wb_path)
     ws = wb.active
@@ -579,11 +575,17 @@ def cdg_dashboard(
         project_name = ws.cell(row=row_num, column=3).value
         if project_name in master.current_projects:
             # Group
-            ws.cell(row=row_num, column=2).value = master.project_information[project_name]["Directorate"]
+            ws.cell(row=row_num, column=2).value = master.project_information[
+                project_name
+            ]["Directorate"]
             # Abbreviation
-            ws.cell(row=row_num, column=4).value = master.project_information[project_name]["Abbreviations"]
+            ws.cell(row=row_num, column=4).value = master.project_information[
+                project_name
+            ]["Abbreviations"]
             # Stage
-            bc_stage = master.master_data[0]["data"][project_name][DATA_KEY_DICT["IPDC approval point"]]
+            bc_stage = master.master_data[0]["data"][project_name][
+                DATA_KEY_DICT["IPDC approval point"]
+            ]
             ws.cell(row=row_num, column=5).value = convert_bc_stage_text(bc_stage)
             # try:
             #     bc_stage_lst_qrt = master.master_data[1].data[project_name][
@@ -600,8 +602,12 @@ def cdg_dashboard(
             #     pass
 
             # Total Costs
-            costs = master.master_data[0]["data"][project_name][DATA_KEY_DICT["Total Forecast"]]
-            ws.cell(row=row_num, column=6).value = dandelion_number_text(costs, none_handle="none")
+            costs = master.master_data[0]["data"][project_name][
+                DATA_KEY_DICT["Total Forecast"]
+            ]
+            ws.cell(row=row_num, column=6).value = dandelion_number_text(
+                costs, none_handle="none"
+            )
             # try:
             #     wlc_lst_quarter = master.master_data[1].data[project_name][
             #         "Total Forecast"
@@ -630,14 +636,17 @@ def cdg_dashboard(
 
             # Total Income
             income = master.master_data[0]["data"][project_name]["Total Income"]
-            ws.cell(row=row_num, column=7).value = dandelion_number_text(income, none_handle="none")
+            ws.cell(row=row_num, column=7).value = dandelion_number_text(
+                income, none_handle="none"
+            )
             # Total Benefits
             benefits = master.master_data[0]["data"][project_name]["Total Benefits"]
-            ws.cell(row=row_num, column=8).value = dandelion_number_text(benefits, none_handle="none")
+            ws.cell(row=row_num, column=8).value = dandelion_number_text(
+                benefits, none_handle="none"
+            )
             # VfM Category
             vfm = master.master_data[0]["data"][project_name]["VfM Category"]
             ws.cell(row=row_num, column=9).value = vfm
-
 
             # """WLC variance against baseline quarter"""
             # bl = master.bl_index["ipdc_costs"][project_name][2]
@@ -795,18 +804,22 @@ def cdg_dashboard(
 
             # DCA ratings
             overall_dca = convert_rag_text(
-                master.master_data[0]["data"][project_name][DATA_KEY_DICT["Departmental DCA"]]
+                master.master_data[0]["data"][project_name][
+                    DATA_KEY_DICT["Departmental DCA"]
+                ]
             )
             ws.cell(row=row_num, column=10).value = overall_dca
             if overall_dca == "None":
                 ws.cell(row=row_num, column=10).value = ""
 
-            conf_list = ["Costs Confidence", "Schedule Confidence", "Benefits Confidence"]
+            conf_list = [
+                "Costs Confidence",
+                "Schedule Confidence",
+                "Benefits Confidence",
+            ]
             for i, key in enumerate(conf_list):
-                dca = convert_rag_text(
-                    master.master_data[0]["data"][project_name][key]
-                )
-                ws.cell(row=row_num, column=11+i).value = dca
+                dca = convert_rag_text(master.master_data[0]["data"][project_name][key])
+                ws.cell(row=row_num, column=11 + i).value = dca
 
             risk_list = [
                 "Benefits",
@@ -817,12 +830,12 @@ def cdg_dashboard(
                 "Schedule",
                 "Sponsorship",
                 "Stakeholders",
-                ]
+            ]
 
             for i, key in enumerate(risk_list):
                 risk = master.master_data[0]["data"][project_name][key]
                 if risk == "YES":
-                    ws.cell(row=row_num, column=14+i).value = risk
+                    ws.cell(row=row_num, column=14 + i).value = risk
 
             # """DCA rating - this quarter"""
             # ws.cell(row=row_num, column=17).value = convert_rag_text(
@@ -885,63 +898,7 @@ def cdg_dashboard(
     return wb
 
 
-def cdg_narrative_dashboard(
-        master: Master,
-        # milestones: MilestoneData,
-        wb: Workbook,
-) -> Workbook:
-    # wb = load_workbook(wb_path)
-    ws = wb.active
-
-    for row_num in range(2, ws.max_row + 1):
-        project_name = ws.cell(row=row_num, column=3).value
-        if project_name in master.current_projects:
-            # Group
-            ws.cell(row=row_num, column=2).value = master.project_information[project_name]["Directorate"]
-            # Abbreviation
-            ws.cell(row=row_num, column=4).value = master.project_information[project_name]["Abbreviations"]
-            # Stage
-            bc_stage = master.master_data[0]["data"][project_name][DATA_KEY_DICT["IPDC approval point"]]
-            ws.cell(row=row_num, column=5).value = convert_bc_stage_text(bc_stage)
-            costs = master.master_data[0]["data"][project_name][DATA_KEY_DICT["Total Forecast"]]
-            ws.cell(row=row_num, column=6).value = dandelion_number_text(costs)
-
-            overall_dca = convert_rag_text(
-                master.master_data[0]["data"][project_name][DATA_KEY_DICT["Departmental DCA"]]
-            )
-            ws.cell(row=row_num, column=7).value = overall_dca
-            if overall_dca == "None":
-                ws.cell(row=row_num, column=7).value = ""
-
-            sro_n = master.master_data[0]["data"][project_name]["SRO Narrative"]
-            ws.cell(row=row_num, column=8).value = sro_n
-
-
-        """list of columns with conditional formatting"""
-        list_columns = ["g"]
-
-        """same loop but the text is black. In addition these two loops go through the list_columns list above"""
-        for column in list_columns:
-            for i, dca in enumerate(rag_txt_list):
-                text = black_text
-                fill = fill_colour_list[i]
-                dxf = DifferentialStyle(font=text, fill=fill)
-                rule = Rule(
-                    type="containsText", operator="containsText", text=dca, dxf=dxf
-                )
-                for_rule_formula = 'NOT(ISERROR(SEARCH("' + dca + '",' + column + "5)))"
-                rule.formula = [for_rule_formula]
-                ws.conditional_formatting.add(column + "5:" + column + "60", rule)
-
-        for row_num in range(2, ws.max_row + 1):
-            for col_num in range(5, ws.max_column + 1):
-                if ws.cell(row=row_num, column=col_num).value == 0:
-                    ws.cell(row=row_num, column=col_num).value = "-"
-
-    return wb
-
-
-def cdg_run_p_reports(master: Master, **kwargs) -> None:
+def cdg_run_p_reports(master, **kwargs) -> None:
     group = get_group(master, str(master.current_quarter), kwargs)
     for p in group:
         p_name = master.project_information.data[p]["Abbreviations"]
@@ -955,7 +912,7 @@ def cdg_run_p_reports(master: Master, **kwargs) -> None:
 
 def cdg_compile_p_report(
     doc: Document,
-    master: Master,
+    master,
     project_name: str,
     **kwargs,
 ) -> Document:
@@ -967,7 +924,7 @@ def cdg_compile_p_report(
     return doc
 
 
-def project_scope_text(doc: Document, master: Master, project_name: str) -> Document:
+def project_scope_text(doc: Document, master, project_name: str) -> Document:
     doc.add_paragraph().add_run("Short project description").bold = True
     text_one = str(master.master_data[0].data[project_name]["Brief Description"])
     # try:
@@ -998,9 +955,7 @@ def dca_narratives(doc: Document, master: Dict, project_name: str) -> None:
     ]
 
     for x in range(len(narrative_keys_list)):
-        text_one = str(
-            master.master_data[0].data[project_name][narrative_keys_list[x]]
-        )
+        text_one = str(master.master_data[0].data[project_name][narrative_keys_list[x]])
         # text_two = str(
         #     master.master_data[1].data[project_name][narrative_keys_list[x]]
         # )

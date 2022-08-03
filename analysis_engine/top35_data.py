@@ -23,12 +23,16 @@ from analysis_engine.data import (
     dandelion_number_text,
     cal_group_angle,
     convert_rag_text,
-    Master,
+    # Master,
     logger,
     MilestoneData,
     milestone_info_handling,
-    wd_heading, convert_date, get_project_info_data,
+    wd_heading,
+    convert_date,
 )
+
+from analysis_engine.core_data import get_project_information
+
 import platform
 from pathlib import Path
 from docx import Document, table
@@ -52,7 +56,7 @@ def _top_35_platform_docs_dir() -> Path:
 top35_root_path = _top_35_platform_docs_dir()
 
 
-def top35_run_p_reports(master: Master, **kwargs) -> None:
+def top35_run_p_reports(master, **kwargs) -> None:
     group = get_group(master, str(master.current_quarter), kwargs)
     for p in group:
         p_name = master.project_information[p]["Abbreviations"]
@@ -100,7 +104,7 @@ def top35_run_p_reports(master: Master, **kwargs) -> None:
 
 def compile_p_report(
     doc: Document,
-    master: Master,
+    master,
     project_name: str,
     **kwargs,
 ) -> Document:
@@ -157,7 +161,7 @@ def key_contacts(doc: Document, master: Dict, project_name: str) -> None:
     doc.add_paragraph("SRO: " + str(sro_name) + ", " + str(sro_email))
 
 
-def project_scope_text(doc: Document, master: Master, project_name: str) -> Document:
+def project_scope_text(doc: Document, master, project_name: str) -> Document:
     doc.add_paragraph().add_run("Short project description").bold = True
     text_one = str(
         master.master_data[0]["data"][project_name]["SHORT PROJECT DESCRIPTION"]
@@ -268,7 +272,9 @@ def project_report_meta_data(
         total_last = dandelion_number_text(p_master_last["WLC TOTAL"])
     else:
         total = dandelion_number_text(p_master["WLC TOTAL"] + p_master["WLC NON GOV"])
-        total_last = dandelion_number_text(p_master_last["WLC TOTAL"] + p_master_last["WLC NON GOV"])
+        total_last = dandelion_number_text(
+            p_master_last["WLC TOTAL"] + p_master_last["WLC NON GOV"]
+        )
     row_cells[3].text = total
     make_text_red(row_cells[3], total, total_last)
     row_cells = t.add_row().cells
@@ -305,7 +311,7 @@ def dca_narratives(doc: Document, master: Dict, project_name: str) -> None:
         "PRIMARY CONCERN & MITIGATING ACTIONS",
         "SHORT UPDATE FOR PM NOTE",
         ["IMPACT ON MILESTONES", "COVID CONTINGENCY PLANS"],
-        ["CONTRIBUTION TO LEVELLING UP", "CHALLENGES TO LEVELLING UP"]
+        ["CONTRIBUTION TO LEVELLING UP", "CHALLENGES TO LEVELLING UP"],
     ]
 
     headings_list = [
@@ -313,24 +319,40 @@ def dca_narratives(doc: Document, master: Dict, project_name: str) -> None:
         "SRO single biggest concern",
         "Short update for PM",
         "Impact and Mitigation to COVID19",
-        "Leveling-up aims and challenges"
+        "Leveling-up aims and challenges",
     ]
 
     for x, heading in enumerate(narrative_keys_list):
         if type(heading) == list:
-            li_one_text_one = str(master.master_data[0]["data"][project_name][narrative_keys_list[x][0]])
-            li_two_text_one = str(master.master_data[0]["data"][project_name][narrative_keys_list[x][1]])
+            li_one_text_one = str(
+                master.master_data[0]["data"][project_name][narrative_keys_list[x][0]]
+            )
+            li_two_text_one = str(
+                master.master_data[0]["data"][project_name][narrative_keys_list[x][1]]
+            )
             text_one = li_one_text_one + li_two_text_one
             try:
-                li_one_text_two = str(master.master_data[1]["data"][project_name][narrative_keys_list[x][0]])
-                li_two_text_two = str(master.master_data[1]["data"][project_name][narrative_keys_list[x][1]])
+                li_one_text_two = str(
+                    master.master_data[1]["data"][project_name][
+                        narrative_keys_list[x][0]
+                    ]
+                )
+                li_two_text_two = str(
+                    master.master_data[1]["data"][project_name][
+                        narrative_keys_list[x][1]
+                    ]
+                )
                 text_two = li_one_text_two + li_two_text_two
             except KeyError:
                 text_two = text_one
         else:
-            text_one = str(master.master_data[0]["data"][project_name][narrative_keys_list[x]])
+            text_one = str(
+                master.master_data[0]["data"][project_name][narrative_keys_list[x]]
+            )
             try:
-                text_two = str(master.master_data[1]["data"][project_name][narrative_keys_list[x]])
+                text_two = str(
+                    master.master_data[1]["data"][project_name][narrative_keys_list[x]]
+                )
             except KeyError:
                 text_two = text_one
         doc.add_paragraph().add_run(str(headings_list[x])).bold = True
@@ -392,6 +414,7 @@ def dca_narratives(doc: Document, master: Dict, project_name: str) -> None:
 #             pass
 #
 
+
 def cs_info_handling(output_list: list, t_list: list) -> list:
     """helper function for handling and cleaning up milestone date generated
     via MilestoneDate class. Removes none type milestone names and non date
@@ -405,7 +428,7 @@ def cs_info_handling(output_list: list, t_list: list) -> list:
 class CentralSupportData:
     def __init__(
         self,
-        master: Master,
+        master,
         # baseline_type: str = "ipdc_milestones",
         **kwargs,
     ):
@@ -859,7 +882,9 @@ def print_out_central_support(
         hdr_cells[4].text = "Type - other"
         hdr_cells[5].text = "Further details"
 
-        for i, m in enumerate(centrals.sorted_milestone_dict[centrals.iter_list[0]]["names"]):
+        for i, m in enumerate(
+            centrals.sorted_milestone_dict[centrals.iter_list[0]]["names"]
+        ):
             row_cells = table.add_row().cells
             row_cells[0].text = m
             paragraph = row_cells[0].paragraphs[0]
@@ -867,9 +892,9 @@ def print_out_central_support(
             font = run[0].font
             font.size = Pt(8)  # font size = 8
             try:
-                row_cells[1].text = centrals.sorted_milestone_dict[centrals.iter_list[0]][
-                    "r_dates"
-                ][i].strftime("%d/%m/%Y")
+                row_cells[1].text = centrals.sorted_milestone_dict[
+                    centrals.iter_list[0]
+                ]["r_dates"][i].strftime("%d/%m/%Y")
                 paragraph = row_cells[1].paragraphs[0]
                 run = paragraph.runs
                 font = run[0].font
