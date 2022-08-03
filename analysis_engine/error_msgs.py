@@ -136,3 +136,8 @@ def get_error_list(seq: list):
     seen = set()
     seen_add = seen.add
     return [x for x in seq if not (x in seen or seen_add(x))]
+
+
+def resourcing_keys(p_name, key_name):
+    logger.info(f"{p_name} has reported text for the key {key_name}. It has been skipped. "
+                f"This data needs to be changed to a number.")

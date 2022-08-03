@@ -1,9 +1,7 @@
-#../.idea/
 .venv/
 __pycache__
 tests/__pycache__
 live.db
-#.idea/
 **/.__pycache__/*
 *.~lock*
 .vscode/*
@@ -13,8 +11,6 @@ pip-wheel-metadata/*
 prof/*
 tags
 skip-covered/
-#.idea/
-#.idea
 dist/
 **/.mypy_cache/*
 **/__pycache__/*
@@ -28,12 +24,7 @@ analysis_engine.egg-info
 .nox
 .eggs
 other/
-
-<<<<<<< HEAD
-
 analysis_engine/annotation.py
 analysis_engine/main_store.py
-=======
-analysis_engine/annotation.py
-analysis_engine/main_store.py
->>>>>>> core_data
+
+

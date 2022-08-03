@@ -171,10 +171,10 @@ RESOURCE_KEYS_OLD = {
 }
 
 RESOURCE_KEYS = {
-    "ps_resource": "No public sector employees working on the project",
-    "contractor_resource": "No external contractors working on the project",
-    "total_resource": "Total Number working in the project team FTEs",
-    "funded_resource": "No employees funded to work on project",
+    "ps_resource": "No of DfTc FTEs working on Project",
+    "contractor_resource": "Number of External Contractors (FTEs)",
+    "total_resource": "Total (FTEs)",
+    "funded_resource": "Total Number of Funded Posts (FTEs)",
 }
 
 SCHEDULE_DASHBOARD_KEYS = [
