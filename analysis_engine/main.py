@@ -16,7 +16,7 @@ from analysis_engine.gmpp_int import GmppOnlineCosts
 from analysis_engine.merge import Merge
 from analysis_engine.query import data_query_into_wb
 from analysis_engine.render_utils import get_input_doc, put_matplotlib_fig_into_word
-from analysis_engine.risks import RiskData, portfolio_risks_into_excel
+from analysis_engine.risks import RiskData, portfolio_risks_into_excel, risks_into_excel
 from analysis_engine.settings import (
     report_config,
     set_default_args,
@@ -262,7 +262,15 @@ def run_analysis(args, settings):
                 + cli.settings["excel_save_path"].format("portfolio_risks")
             )
 
-        # ProjectNameError below captures any naming errors
+        if cli.programme == 'project_risks':
+            rd = RiskData(cli.md, **cli.combined_args)
+            wb = risks_into_excel(rd)
+            wb.save(
+                str(cli.settings["root_path"])
+                + cli.settings["excel_save_path"].format("project_risks")
+            )
+
+        # ProjectNameError below captures any naming errors both this is hit.
         if "remove" in cli.combined_args.keys():
             for x in cli.combined_args["remove"]:
                 logger.info(f"{x} has been removed from analysis")
@@ -276,20 +284,11 @@ def run_parsers():
     report_type = sys.argv[1]
 
     parser = argparse.ArgumentParser(
-        description=f"runs all analysis for {report_type} reporting"
+        description=f"Welcome to analysis engine for {report_type} reporting. All optional commands are below."
     )
     subparsers = parser.add_subparsers(dest="subparser_name")
     subparsers.metavar = "                      "
-    parser_initiate = subparsers.add_parser(
-        "initiate", help="Creates a master data file"
-    )
-    parser_milestones = subparsers.add_parser(
-        "milestones",
-        help="Milestone schedule graphs and data.",
-        description="Generates raw data outputs as well as visuals for milestone data. The default is simply "
-        "the return of an excel file with milestone data. Use the --chart options to produce"
-        "visual outputs ",
-    )
+
     dandelion_description = (
         "Creates the 'dandelion' graph. See below optional arguments for changing the "
         "dandelion that is compiled. The command analysis dandelion returns the default "
@@ -301,61 +300,100 @@ def run_parsers():
         help="Dandelion graph.",
         description=dandelion_description,
     )
+
     dashboard_description = (
-        "Creates dashboards. There are no optional arguments for this command.\n\n"
-        "A blank master dashboard titled dashboards_master.xlsx must be in input file.\n\n"
-        "A completed dashboard named completed_dashboard.xlsx will be placed into\n"
+        "Creates dashboards. A blank master dashboard titled dashboards_master.xlsx must be in input folder. "
+        "A completed dashboard named completed_dashboard.xlsx will be placed into "
         "the output file."
     )
     subparsers.add_parser(
         "dashboards",
-        help="dashboard",
+        help="Dashboard compilation.",
         description=dashboard_description,
         formatter_class=RawTextHelpFormatter,
-    )  # no associated op args.
-
-    parser_data_query = subparsers.add_parser(
-        "query", help="Returns required data from core data."
     )
 
-    parser_speed_dial = subparsers.add_parser(
-        "speed_dials",
-        help="For speed dial analysis",
-        description="Creates the speed dial visual outputs. All confidence speed dials are created "
-        "at the same time and saved into the output folder. It has a maximum of two quarters "
-        "for the --quarters argument.",
-    )
     parser_dca = subparsers.add_parser(
         "dcas",
-        help="For dca analysis",
+        help="DCA comparisons between quarters",
         description="Generates a print out on DCA changes between quarters. All DCAs are placed "
-        "into the same file and placed in output folder. It has a maximum of two quarters "
-        "for the --quarters argument.",
+                    "into the same file and placed in output folder. It has a maximum of two quarters "
+                    "for the --quarters argument.",
     )
 
     parser_gmpp_online = subparsers.add_parser(
         "gmpp_data",
-        help="For GMPP online data",
+        help="Compiles GMPP online data (as provided by IPA) into master file format.",
         description="This program converts gmpp online data into the dft master file "
-        "format. It requires three files. A file containing the gmpp online data - as provided by "
-        "the IPA, a GMPP_INTEGRATION_KEY_MAP, and a GMPP_INTEGRATION_PROJECT_MAP. These files must "
-        "be referenced in the config file in the GMPP INTEGRATION section and saved in the input folder. "
-        "There are no optional arguments for this program other than --help.",
+                    "format. It requires three files. A file containing the gmpp online data - as provided by "
+                    "the IPA, a GMPP_INTEGRATION_KEY_MAP, and a GMPP_INTEGRATION_PROJECT_MAP. These files must "
+                    "be referenced in the config file in the GMPP INTEGRATION section and saved in the input folder. "
+                    "There are no optional arguments for this program other than --help.",
+    )
+
+    parser_initiate = subparsers.add_parser(
+        "initiate", help="IMPORTANT. This command must be run everytime new data is saved in core_data."
     )
 
     parser_merge_masters = subparsers.add_parser(
         "merge_masters",
-        help="To merge separate master files into one master file",
+        help="This program takes separate master data files and places them into one master file",
         description="This program takes separate master data files and places them into one master file. The user "
-        "can set the masters that it would like to merge via the config file in the MERGE / masters_list "
-        "section. The masters must be saved in the input folder. There are no optional arguments for this "
-        "program other than --help.",
+                    "can set the masters that it would like to merge via the config file in the MERGE / masters_list "
+                    "section. The masters must be saved in the input folder. There are no optional arguments for this "
+                    "program other than --help.",
+    )
+
+    parser_milestones = subparsers.add_parser(
+        "milestones",
+        help="Compiles milestone schedule graphs and data.",
+        description="Generates raw data outputs as well as visuals for milestone data. The default is simply "
+        "the return of an excel file with milestone data. Use the --chart options to produce"
+        "visual outputs ",
     )
 
     parser_port_risks = subparsers.add_parser(
         "portfolio_risks",
-        help="portfolio risk analysis",
+        help="Compiles portfolio risk analysis.",
         description="This program extracts all portfolio risk data used in the IPDC portfolio report."
+    )
+    parser_risks = subparsers.add_parser(
+        "project_risks",
+        help="Compiles project risk analysis",
+        description='This program extracts all project level risk data contained in the master data set.'
+    )
+
+    parser_data_query = subparsers.add_parser(
+        "query", help="Returns data from master data set as specified by the user."
+    )
+
+    parser_speed_dial = subparsers.add_parser(
+        "speed_dials",
+        help="Produces the speed dial analysis and visuals used in the portfolio management report.",
+        description="Creates the speed dial visual outputs. All confidence speed dials are created "
+        "at the same time and saved into the output folder. It has a maximum of two quarters "
+        "for the --quarters argument.",
+    )
+
+    parser_dandelion.add_argument(
+        "--angles",
+        type=int,
+        metavar="",
+        action="store",
+        nargs="+",
+        # choices=['sro', 'finance', 'benefits', 'schedule', 'resource'],
+        help="Use can manually enter angles for group bubbles",
+    )
+
+    parser_milestones.add_argument(
+        "--blue_line",
+        type=str,
+        metavar="",
+        action="store",
+        choices=["config_date", "today"],
+        help="User can insert blue line into chart to represent a date. "
+             "Options are 'config_date' or 'today'. The config_data is set in the config file in the "
+             "Globals / milestones_blue_line_date value.",
     )
 
     for sub in [
@@ -372,56 +410,23 @@ def run_parsers():
             "or 'save' it into a word document which is saved into the output folder",
         )
 
-    # quarter
-    for sub in [
-        parser_speed_dial,
-        parser_dandelion,
-        parser_dca,
-        parser_milestones,
-        parser_data_query,
-        parser_port_risks,
-    ]:
-        sub.add_argument(
-            "--quarter",
-            type=str,
-            metavar="",
-            action="store",
-            nargs="+",
-            help="Returns analysis for one or combination of specified quarters. "
-            'User must use correct format e.g "Q3 19/20"',
-        )
+    parser_milestones.add_argument(
+        "--dates",
+        type=str,
+        metavar="",
+        action="store",
+        nargs=2,
+        help="dates for analysis. Must provide start date and then end date in format e.g. '1/1/2021' '1/1/2022'.",
+    )
 
-    # stage
-    for sub in [
-        parser_dca,
-        parser_speed_dial,
-        # parser_risks,
-        parser_port_risks,
-        parser_dandelion,
-        parser_data_query,
-        parser_milestones,
-    ]:
-        sub.add_argument(
-            "--stage",
-            type=str,
-            metavar="",
-            action="store",
-            nargs="*",
-            choices=["FBC", "OBC", "SOBC", "pre-SOBC", "pipeline"],
-            help="Returns analysis for those projects at the specified planning stage(s). By default "
-            "the --stage argument will return the list of business case stages specified in the config file. "
-            "Or user can enter one or combination of business cases (which must match the those specified in "
-            "the config file). The dandelion the dandelion command the user has the added option of 'pipeline'",
-        )
     # group
     for sub in [
         parser_dca,
-        # parser_risks,
+        parser_risks,
         parser_port_risks,
         parser_speed_dial,
         parser_dandelion,
         parser_milestones,
-        # parser_summaries,
         parser_data_query,
     ]:
         sub.add_argument(
@@ -431,38 +436,9 @@ def run_parsers():
             action="store",
             nargs="+",
             help="Returns analysis for specified project(s), only. User must enter one or a combination of "
-            "DfT Group names. Group names must match those in the config document. For the dandelion command the user "
-            "has an added group option of 'pipeline'.",
+                 "DfT Group names. Group names must match those in the config document. For the dandelion command the user "
+                 "has an added group option of 'pipeline'.",
         )
-
-    parser_dandelion.add_argument(
-        "--angles",
-        type=int,
-        metavar="",
-        action="store",
-        nargs="+",
-        # choices=['sro', 'finance', 'benefits', 'schedule', 'resource'],
-        help="Use can manually enter angles for group bubbles",
-    )
-
-    parser_dandelion.add_argument(
-        "--type",
-        type=str,
-        metavar="",
-        action="store",
-        choices=[
-            "spent_costs",
-            "remaining_costs",
-            "income",
-            "ps_resource",
-            "contractor_resource",
-            "total_resource",
-            "funded_resource",
-        ],
-        help="The user can specify the type of value for project bubble sizes in the dandelion. Options are "
-        "'remaining_costs', 'spent_costs', 'income', 'ps_resource', 'contractor_resource', "
-        "'total_resource' or 'funded_resource'.",
-    )
 
     for sub in [parser_milestones, parser_data_query]:
         sub.add_argument(
@@ -485,26 +461,6 @@ def run_parsers():
             "titled key_name. ",
         )
 
-    parser_milestones.add_argument(
-        "--dates",
-        type=str,
-        metavar="",
-        action="store",
-        nargs=2,
-        help="dates for analysis. Must provide start date and then end date in format e.g. '1/1/2021' '1/1/2022'.",
-    )
-
-    parser_milestones.add_argument(
-        "--blue_line",
-        type=str,
-        metavar="",
-        action="store",
-        choices=["config_date", "today"],
-        help="User can insert blue line into chart to represent a date. "
-        "Options are 'config_date' or 'today'. The config_data is set in the config file in the "
-        "Globals / milestones_blue_line_date value.",
-    )
-
     parser_dandelion.add_argument(
         "--order_by",
         type=str,
@@ -512,28 +468,36 @@ def run_parsers():
         action="store",
         choices=["schedule"],
         help="User can change the order in which circles are placed. The only choice for "
-        "this argument currently is 'schedule' ",
+             "this argument currently is 'schedule' ",
     )
 
-    parser_milestones.add_argument(
-        "--title",
-        type=str,
-        metavar="",
-        action="store",
-        help="The user can specify and title for the chart output. Please enter as text, for "
-        "example 'This the title'.",
-    )
+    # quarter
+    for sub in [
+        parser_speed_dial,
+        parser_dandelion,
+        parser_dca,
+        parser_milestones,
+        parser_data_query,
+        parser_port_risks,
+        parser_risks,
+    ]:
+        sub.add_argument(
+            "--quarter",
+            type=str,
+            metavar="",
+            action="store",
+            nargs="+",
+            help="Returns analysis for one or combination of specified quarters. "
+            'User must use correct format e.g "Q3 19/20"',
+        )
 
     # remove
     for sub in [
         parser_dca,
-        # parser_vfm,
-        # parser_risks,
-        # parser_port_risks,
+        parser_risks,
+        parser_port_risks,
         parser_speed_dial,
         parser_dandelion,
-        # parser_costs,
-        # parser_costs_sp,
         parser_data_query,
         parser_milestones,
     ]:
@@ -547,6 +511,57 @@ def run_parsers():
             "or acronym can be used.",
         )
 
+    # stage
+    for sub in [
+        parser_dca,
+        parser_speed_dial,
+        parser_risks,
+        parser_port_risks,
+        parser_dandelion,
+        parser_data_query,
+        parser_milestones,
+    ]:
+        sub.add_argument(
+            "--stage",
+            type=str,
+            metavar="",
+            action="store",
+            nargs="*",
+            choices=["FBC", "OBC", "SOBC", "pre-SOBC", "pipeline"],
+            help="Returns analysis for those projects at the specified planning stage(s). By default "
+            "the --stage argument will return the list of business case stages specified in the config file. "
+            "Or user can enter one or combination of business cases (which must match the those specified in "
+            "the config file). The dandelion the dandelion command the user has the added option of 'pipeline'",
+        )
+
+    parser_milestones.add_argument(
+        "--title",
+        type=str,
+        metavar="",
+        action="store",
+        help="The user can specify and title for the chart output. Please enter as text, for "
+             "example 'This the title'.",
+    )
+
+    parser_dandelion.add_argument(
+        "--type",
+        type=str,
+        metavar="",
+        action="store",
+        choices=[
+            "spent_costs",
+            "remaining_costs",
+            "income",
+            "ps_resource",
+            "contractor_resource",
+            "total_resource",
+            "funded_resource",
+        ],
+        help="The user can specify the type of value for project bubble sizes in the dandelion. Options are "
+        "'remaining_costs', 'spent_costs', 'income', 'ps_resource', 'contractor_resource', "
+        "'total_resource' or 'funded_resource'.",
+    )
+
     cli_args = parser.parse_args(sys.argv[2:])
     settings_switch(cli_args, report_type)
 
@@ -554,9 +569,9 @@ def run_parsers():
 class main:
     def __init__(self):
         ae_description = (
-            "Welcome to the DfT Major Projects Portfolio Office analysis engine.\n\n"
-            "To operate use subcommands outlined below. To navigate each subcommand\n"
-            "option use the --help flag which will provide instructions on which optional\n"
+            "Welcome to the DfT Major Projects Portfolio Office analysis engine.\n  \n"
+            "To operate use subcommands outlined below. To navigate each subcommand "
+            "option use the --help flag which will provide instructions on which optional "
             "arguments can be used with each subcommand. e.g. analysis dandelion --help."
         )
         parser = argparse.ArgumentParser(
@@ -567,7 +582,7 @@ class main:
 
         parser.add_argument(
             "command",
-            help="Initial command to specify whether ipdc, top2_50, cdg analysis if required",
+            help="Initial command to specify the reporting type required. Options are 'ipdc' or 'cdg'.",
         )
 
         args = parser.parse_args(sys.argv[1:2])

@@ -448,8 +448,15 @@ pr_stage = {
         "FBC",
     ],
 }
+pr_remove = {
+    "test_name": "pr_remove",
+    "subparser_name": "portfolio_risks",
+    "group": ["HSRG"],
+    "remove": ["HS2 Ph 1"]
+}
 
 PORT_RISK_OP_ARGS =[
+    pr_remove,
     pr_stage,
     pr_groups_ipdc,
     pr_quarters,

@@ -4,7 +4,7 @@ from docx.shared import Inches
 from analysis_engine.error_msgs import ProjectNameError, ProjectGroupError, ProjectStageError, logger, InputError
 from analysis_engine.gmpp_int import GmppOnlineCosts
 from analysis_engine.merge import Merge
-from analysis_engine.risks import RiskData, portfolio_risks_into_excel
+from analysis_engine.risks import RiskData, portfolio_risks_into_excel, risks_into_excel
 from tests.test_op_args import (
     REPORTING_TYPE,
     DANDELION_OP_ARGS_DICT,
@@ -269,6 +269,20 @@ def test_portfolio_risks():
             wb.save(
                 str(cli.settings["root_path"])
                 + cli.settings["excel_save_path"].format(f"{x['test_name']}")
+            )
+
+
+def test_risks():
+    if REPORTING_TYPE == 'ipdc':
+        for x in PORT_RISK_OP_ARGS:
+            print(x['test_name'] + '_RISKS')
+            x["subparser_name"] = "project_risks"
+            cli = CliOpArgs(x, SETTINGS_DICT)
+            rd = RiskData(cli.md, **cli.combined_args)
+            wb = risks_into_excel(rd)
+            wb.save(
+                str(cli.settings["root_path"])
+                + cli.settings["excel_save_path"].format(f"{x['test_name']}_Risks")
             )
 
 
