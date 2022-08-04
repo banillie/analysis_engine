@@ -7,6 +7,7 @@ from openpyxl.workbook import workbook
 
 from matplotlib import pyplot as plt
 
+from analysis_engine.core_data import get_enviroment_funds_information
 from analysis_engine.costs import CostData
 from analysis_engine.benefits import BenefitsData
 from analysis_engine.resourcing import ResourceData
@@ -20,6 +21,7 @@ from analysis_engine.segmentation import (
 from analysis_engine.error_msgs import InputError, logger
 from analysis_engine.colouring import COLOUR_DICT, FACE_COLOUR
 from analysis_engine.render_utils import make_file_friendly, handle_long_keys
+from analysis_engine.cleaning import convert_none_types
 
 from analysis_engine.dictionaries import (
     RAG_RANKING_DICT_NUMBER,
@@ -127,19 +129,12 @@ def get_dandelion_type_total(master, kwargs) -> int or str:
     if "type" in kwargs:
         if kwargs["type"] == "remaining_costs":
             cost = CostData(master, **kwargs)  # group costs data
-            # cost.get_forecast_cost_profile()
-            # return sum(cost.profiles[tp]["total"]) - sum(cost.profiles[tp]["std"])
-            # return sum(cost.profiles[tp]["total"])
             return cost.totals[tp]["costs_remaining"]
         if kwargs["type"] == "spent":
             cost = CostData(master, **kwargs)
-            # cost.get_forecast_cost_profile()
-            # # return cost.c_totals[tp]['total'] - (sum(cost.profiles[tp]["total"]) - sum(cost.profiles[tp]["std"]))
-            # return cost.totals[tp]["total"] - sum(cost.profiles[tp]["total"])
             return cost.totals[tp]["costs_spent"]
         if kwargs["type"] == "income":
             cost = CostData(master, **kwargs)
-            # return cost.totals[tp]["income_total"]
             return cost.totals[tp]["income_total"]
         if kwargs["type"] == "benefits":
             benefits = BenefitsData(master, **kwargs)
@@ -152,7 +147,6 @@ def get_dandelion_type_total(master, kwargs) -> int or str:
         ):
             resource = ResourceData(master, **kwargs)
             return resource.totals[tp][kwargs["type"]]
-
     else:
         cost = CostData(master, **kwargs)  # group costs data
         return cost.totals[tp]["total"]
@@ -181,6 +175,10 @@ class DandelionData:
         self.group_stage_switch = ""
         self.handle_group()
         self.quarter = self.kwargs["quarter"][0]
+        self.e_dict = {}
+        # self.e_list = []
+        self.e_groups = []
+        self.e_funds = None
         self.d_data = {}
         self.get_data()
 
@@ -266,12 +264,15 @@ class DandelionData:
 
         g_ang_l = cal_group_angle(180, g_radius_list, inner_circles=True)
         if "angles" in self.kwargs:
-            if len(self.kwargs["angles"]) == len(self.group):
-                g_ang_l = self.kwargs["angles"]
+            if self.kwargs["group"] == ["environ_funds"]:
+                pass
             else:
-                raise InputError(
-                    "The number of groups and angles don't match. Stopping."
-                )
+                if len(self.kwargs["angles"]) == len(self.group):
+                    g_ang_l = self.kwargs["angles"]
+                else:
+                    raise InputError(
+                        "The number of groups and angles don't match. Stopping."
+                    )
 
         # multiplied here so a gap to central circle
         g_radius_dist = g_d["portfolio"]["r"] * 2
@@ -370,10 +371,15 @@ class DandelionData:
                             p_schedule = 10000000000
 
                 if "abbreviations" in self.kwargs:
-                    abb = self.master["project_information"][p]["Abbreviations"]
-                    project_text = handle_long_keys(
-                        f"{abb}, {dandelion_number_text(p_value, **self.kwargs)}"
-                    )
+                    try:
+                        abb = self.master["project_information"][p]["Abbreviations"]
+                        project_text = handle_long_keys(
+                            f"{abb}, {dandelion_number_text(p_value, **self.kwargs)}"
+                        )
+                    except KeyError:
+                        project_text = handle_long_keys(
+                            f"{p}, {dandelion_number_text(p_value, **self.kwargs)}"
+                        )
                 else:
                     project_text = handle_long_keys(
                         f"{p}, {dandelion_number_text(p_value, **self.kwargs)}"
@@ -509,17 +515,17 @@ class DandelionData:
                 ha = "center"  # default text position
                 va = "center"
 
-                if 0 <= angle <= 11 or 371 <= angle <= 380:
+                if 0 <= angle <= 11 or 340 <= angle <= 380:
                     va = "bottom"
-                elif 11 <= angle <= 174 or 381 <= angle <= 534:
+                if 11 <= angle <= 174 or 381 <= angle <= 534:
                     ha = "left"
-                elif 165 <= angle <= 195:
+                if 165 <= angle <= 195:
                     va = "top"
-                elif 186 <= angle <= 339:
+                if 186 <= angle <= 350:
                     ha = "right"
-                elif 340 <= angle <= 349:
-                    va = "top"
-                elif angle > 534:
+                # elif 340 <= angle <= 350:
+                #     va = "top"
+                if angle > 534:
                     print(f"{p} angle is {angle}")
 
                 g_d[p]["axis"] = (p_y_axis, p_x_axis)
@@ -529,6 +535,300 @@ class DandelionData:
                 g_d[p]["angle"] = angle
 
         self.d_data = g_d
+
+    def get_environmental_fund_data(self):
+        g_d = {}  # group dictionary. first outer circle.
+        l_g_d = {}  # lower group dictionary
+        self.environmental_funds_dictionaries()
+        pf_wlc = self.e_dict["total"]["wlc"]
+        # pf_wlc = get_dandelion_type_total(self.master, self.kwargs)  # portfolio wlc
+        pf_colour = COLOUR_DICT["WHITE"]
+        pf_colour_edge = COLOUR_DICT["GREY"]
+        pf_text = "Portfolio\n" + dandelion_number_text(pf_wlc, **self.kwargs)
+
+        ## center circle
+        g_d["portfolio"] = {
+            "axis": (0, 0),
+            "tp": (0, 0),
+            "r": math.sqrt(pf_wlc),
+            "colour": pf_colour,
+            "text": pf_text,
+            "fill": "solid",
+            "ec": pf_colour_edge,
+            "alignment": ("center", "center"),
+        }
+
+        ## first outer circle
+        g_radius_list = []
+        for i, g in enumerate(self.e_groups):
+            g_wlc = 0
+            for p in self.e_dict[g]:
+                g_wlc += self.e_dict[p]['wlc']
+
+            g_abb = g
+
+            g_text = (
+                g_abb + "\n" + dandelion_number_text(g_wlc, **self.kwargs)
+            )  # group text
+
+            if g_wlc < pf_wlc / 10:  # adjusts any very small figures
+                g_wlc_adjusted = pf_wlc / 10
+            else:
+                g_wlc_adjusted = g_wlc
+
+            group_radius = math.sqrt(g_wlc_adjusted)
+
+            g_d[g] = {
+                "r": group_radius,
+                "wlc": g_wlc_adjusted,
+                "text": g_text,
+                "colour": "#FFFFFF",
+                "fill": "dashed",
+                "ec": COLOUR_DICT["GREY"],
+            }
+
+            g_radius_list.append(group_radius)
+
+        g_ang_l = cal_group_angle(180, g_radius_list, inner_circles=True)
+
+        if "angles" in self.kwargs:
+            if len(self.kwargs["angles"]) == len(self.e_groups):
+                g_ang_l = self.kwargs["angles"]
+            else:
+                raise InputError(
+                    "The number of groups and angles don't match. Stopping."
+                )
+
+        # multiplied here so a gap to central circle
+        g_radius_dist = g_d["portfolio"]["r"] * 2.75
+        # if len(self.e_groups) > 3:
+        #     g_radius_dist = g_d["portfolio"]["r"] * 2.5
+
+        for i, g in enumerate(self.e_groups):
+            if len(self.e_groups) > 1:  # this needs testing
+                y_axis = 0 + (
+                    (math.sqrt(pf_wlc) + g_radius_dist)
+                    * math.sin(math.radians(g_ang_l[i]))
+                )
+                x_axis = 0 + (math.sqrt(pf_wlc) + g_radius_dist) * math.cos(
+                    math.radians(g_ang_l[i])
+                )
+
+                g_d[g]["axis"] = (y_axis, x_axis)
+                g_d[g]["tp"] = (y_axis, x_axis)
+                g_d[g]["angle"] = g_ang_l[i]
+
+            else:
+                g_d = {}  # delete the dictionary
+                # to alter out circles with low values in line with group wlc
+                pf_wlc = g_wlc
+                g_d[g] = {
+                    "axis": (0, 0),
+                    "r": math.sqrt(g_wlc),
+                    "wlc": g_wlc,
+                    "colour": "#FFFFFF",
+                    "text": g_text,
+                    "fill": "dashed",
+                    "ec": "grey",
+                    "alignment": ("center", "center"),
+                }
+
+        logger.info("The angles for groups are " + str(g_ang_l))
+
+        ## second outer circle
+        for i, g in enumerate(self.e_groups):
+            p_list = []
+            for p in self.e_dict[g]:
+                p_value = self.e_dict[p]["wlc"]
+                p_data = None
+
+                if "same_size" in self.kwargs:
+                    if self.kwargs["same_size"] == "Yes":
+                        p_value = 6000
+
+                if (
+                    p_value < pf_wlc * 0.02
+                ):  # achieve some consistency for zero / low values
+                    p_value_adjusted = pf_wlc * 0.008
+                else:
+                    p_value_adjusted = p_value
+
+                p_radius = math.sqrt(p_value_adjusted)
+
+                p_schedule = None
+
+                if "abbreviations" in self.kwargs:
+                    try:
+                        abb = self.master["project_information"][p]["Abbreviations"]
+                        project_text = handle_long_keys(
+                            f"{abb}, {dandelion_number_text(p_value, **self.kwargs)}"
+                        )
+                    except KeyError:
+                        project_text = handle_long_keys(
+                            f"{p}, {dandelion_number_text(p_value, **self.kwargs)}"
+                        )
+                else:
+                    project_text = handle_long_keys(
+                        f"{p}, {dandelion_number_text(p_value, **self.kwargs)}"
+                    )
+
+                if "type" in self.kwargs:
+                    if self.kwargs["type"] in [
+                        "ps resource",
+                        "contract resource",
+                        "total resource",
+                        "funded resource",
+                    ]:
+                        project_text = (
+                            self.master.abbreviations[p]["abb"]
+                            + ", "
+                            + dandelion_number_text(p_value, **self.kwargs)
+                        )
+                if "values" in self.kwargs:
+                    if self.kwargs["values"] == "No":
+                        project_text = self.master.abbreviations[p]["abb"]
+
+                colour = COLOUR_DICT["WHITE"]
+
+                if "circle_colour" in self.kwargs:
+                    if self.kwargs["circle_colour"] == "No":
+                        colour = FACE_COLOUR
+
+                if colour == COLOUR_DICT["WHITE"] or colour == FACE_COLOUR:
+                    if p in self.master["meta_groupings"][self.quarter]["GMPP"]:
+                        edge_colour = COLOUR_DICT["BLACK"]
+                    else:
+                        edge_colour = COLOUR_DICT["GREY"]
+                else:
+                    if p in self.master["meta_groupings"][self.quarter]["GMPP"]:
+                        edge_colour = COLOUR_DICT["BLACK"]
+                    else:
+                        edge_colour = colour
+
+                g_d[p] = {
+                    "r": p_radius,
+                    "wlc": p_value,
+                    "colour": colour,
+                    "text": project_text,
+                    "fill": "solid",
+                    "ec": edge_colour,
+                }
+
+                p_list.append((p_value, p_radius, p_schedule, p))
+
+            l_g_d[g] = list(reversed(sorted(p_list)))
+
+        for g in self.e_groups:
+            g_radius = g_d[g]["r"]
+            g_y_axis = g_d[g]["axis"][0]  # group y axis
+            g_x_axis = g_d[g]["axis"][1]  # group x axis
+
+            try:
+                p_value, p_radius_list, p_schedule_list, p_list = zip(*l_g_d[g])
+            except ValueError:  # handles no projects in l_g_d list
+                continue
+
+            if len(p_list) > 3:
+                ang_l = cal_group_angle(360, p_list)
+            else:
+                if len(p_list) == 1:
+                    ang_l = [g_d[g]["angle"]]
+                if len(p_list) == 2:
+                    ang_l = [g_d[g]["angle"], g_d[g]["angle"] + 70]
+                if len(p_list) == 3:
+                    ang_l = [
+                        g_d[g]["angle"],
+                        g_d[g]["angle"] + 70,
+                        g_d[g]["angle"] + 140,
+                    ]
+
+            largest_p_radius = (
+                max(p_radius_list) * 1.5
+            )  # value used for distance from inner circle.
+            for i, p in enumerate(p_list):
+                angle = ang_l[i]
+                p_y_axis = g_y_axis + (g_radius + largest_p_radius) * math.sin(
+                    math.radians(ang_l[i])
+                )
+                p_x_axis = g_x_axis + (g_radius + largest_p_radius) * math.cos(
+                    math.radians(ang_l[i])
+                )
+                yx_text_position = (
+                    p_y_axis
+                    + (g_d[p]["r"] + g_d[p]["r"] * 1 / 2)
+                    * math.sin(math.radians(angle)),
+                    p_x_axis
+                    + (g_d[p]["r"] + g_d[p]["r"] * 1 / 2)
+                    * math.cos(math.radians(angle)),
+                )
+                ha = "center"  # default text position
+                va = "center"
+
+                if 0 <= angle <= 11 or 340 <= angle <= 380:
+                    va = "bottom"
+                if 11 <= angle <= 174 or 381 <= angle <= 534:
+                    ha = "left"
+                if 165 <= angle <= 195:
+                    va = "top"
+                if 186 <= angle <= 350:
+                    ha = "right"
+                # elif 340 <= angle <= 350:
+                #     va = "top"
+                if angle > 534:
+                    print(f"{p} angle is {angle}")
+
+                g_d[p]["axis"] = (p_y_axis, p_x_axis)
+                g_d[p]["ha"] = ha
+                g_d[p]["va"] = va
+                g_d[p]["tp"] = yx_text_position
+                g_d[p]["angle"] = angle
+
+        self.d_data = g_d
+
+    def environmental_funds_dictionaries(self):
+        e_dict = {}
+        e_groups = []
+        # e_funds_list = []
+        # e_list = []
+        total_wlc = 0
+        critical_group_errors = []
+        environ_data = get_enviroment_funds_information(self.kwargs)
+        for p in environ_data.keys():
+            e_groups.append(environ_data[p]["DG Group"])
+            # e_funds_list.append(environ_data[p]["Fund"])
+            wlc = convert_none_types(environ_data[p]["WLC"])
+            e_dict[p] = {
+                "wlc": convert_none_types(environ_data[p]["WLC"])
+            }
+            # e_list.append(p)
+            total_wlc += wlc
+
+        e_dict["total"] = {"wlc": total_wlc}
+        self.e_groups = set(list(e_groups))
+        # self.e_funds = set(list(e_funds_list))
+
+        for group in self.e_groups:
+            group_list = []
+            # for fund in self.e_funds:
+            #     fund_list = []
+            for p in environ_data.keys():
+                #  This data comes from the project information document. Not master.
+                project_group = environ_data[p]["DG Group"]
+                project_fund = environ_data[p]["Fund"]
+                if project_group is None or project_fund is None:
+                    if p not in critical_group_errors:
+                        critical_group_errors.append(p)
+                if project_group == group:
+                    group_list.append(p)
+                    # if project_fund == fund:
+                    #     fund_list.append(p)
+
+                # group_dict[fund] = fund
+
+            e_dict[group] = group_list
+
+        self.e_dict = e_dict
+        # self.e_list = e_list
 
 
 def dandelion_data_into_wb(d_data: DandelionData) -> workbook:
@@ -591,7 +891,7 @@ def make_a_dandelion_auto(dl: DandelionData, **kwargs):
         obj.append(circle)
         ax.add_patch(circle)
         text = dl.d_data[c]["text"].strip()  # what does strip do?
-        if c in dl.group or c == "portfolio":
+        if c in dl.group or c in dl.e_groups or c == "portfolio":
             ax.annotate(
                 text,
                 xy=dl.d_data[c]["axis"],
@@ -621,7 +921,12 @@ def make_a_dandelion_auto(dl: DandelionData, **kwargs):
 
     # place lines
     line_clr = "#ececec"
-    for i, g in enumerate(dl.group):
+    if dl.group == ["environ_funds"]:
+        local_group = dl.e_groups
+    else:
+        local_group = dl.group
+
+    for i, g in enumerate(local_group):
         dl.kwargs[dl.group_stage_switch] = [g]
         ax.arrow(
             0,
@@ -636,7 +941,11 @@ def make_a_dandelion_auto(dl: DandelionData, **kwargs):
         if g == "pipeline":
             lower_g = dl.master["pipeline_list"]
         else:
-            lower_g = get_group(dl.master, dl.kwargs["quarter"][0], **dl.kwargs)
+            if dl.group == ['environ_funds']:
+                lower_g = dl.e_dict[g]
+            else:
+                lower_g = get_group(dl.master, dl.kwargs["quarter"][0], **dl.kwargs)
+
         for p in lower_g:
             ax.arrow(
                 dl.d_data[g]["axis"][0],
@@ -654,3 +963,8 @@ def make_a_dandelion_auto(dl: DandelionData, **kwargs):
         plt.show()
 
     return fig
+
+
+
+
+

@@ -132,6 +132,10 @@ def run_analysis(args, settings):
                 cli.combined_args["abbreviations"] = True
 
             d_data = DandelionData(cli.md, **cli.combined_args)
+
+            if cli.combined_args["group"] == ["environ_funds"]:
+                d_data.get_environmental_fund_data()
+
             if cli.combined_args["chart"] != "save":
                 make_a_dandelion_auto(d_data, **cli.combined_args)
             else:
@@ -437,7 +441,7 @@ def run_parsers():
             nargs="+",
             help="Returns analysis for specified project(s), only. User must enter one or a combination of "
                  "DfT Group names. Group names must match those in the config document. For the dandelion command the user "
-                 "has an added group option of 'pipeline'.",
+                 "has an added group options of 'pipeline' and 'environ_funds'.",
         )
 
     for sub in [parser_milestones, parser_data_query]:

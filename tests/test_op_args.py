@@ -343,6 +343,13 @@ dlion_remove = {
     "chart": chart,
     "remove": ['NPR', 'A66'],
 }
+dlion_eviron_funds = {
+    "test_name": "dlion_standard",
+    "subparser_name": "dandelion",
+    "chart": chart,
+    "group": ["environ_funds"],
+    "angles": [290, 390],
+}
 
 if REPORTING_TYPE == 'cdg':
     DANDELION_OP_ARGS_DICT = [
@@ -357,24 +364,25 @@ if REPORTING_TYPE == 'cdg':
     ]
 if REPORTING_TYPE == 'ipdc':
     DANDELION_OP_ARGS_DICT = [
-        dlion_remove,
-        dlion_total_resource,
-        dlion_contractor_resource,
-        dlion_ps_resource,
-        dlion_funded_resource,
-        dlion_spent,
-        dlion_remaining,
-        dlion_pipeline_as_stage_ipdc,
-        dlion_stages_default_ipdc,
-        dlion_stages_order_by_ipdc,
-        dlion_cli_pipeline_ipdc,
-        dlion_income,
-        dlion_angles_ipdc,
-        dlion_quarter,
-        dlion_stages_ipdc,
-        dlion_stages_abb_ipdc,
-        dlion_groups_ipdc,
-        dlion_standard,
+        dlion_eviron_funds,
+        # dlion_remove,
+        # dlion_total_resource,
+        # dlion_contractor_resource,
+        # dlion_ps_resource,
+        # dlion_funded_resource,
+        # dlion_spent,
+        # dlion_remaining,
+        # dlion_pipeline_as_stage_ipdc,
+        # dlion_stages_default_ipdc,
+        # dlion_stages_order_by_ipdc,
+        # dlion_cli_pipeline_ipdc,
+        # dlion_income,
+        # dlion_angles_ipdc,
+        # dlion_quarter,
+        # dlion_stages_ipdc,
+        # dlion_stages_abb_ipdc,
+        # dlion_groups_ipdc,
+        # dlion_standard,
     ]
 
 # write some separate tests for dcas
