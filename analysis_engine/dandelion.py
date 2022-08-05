@@ -264,7 +264,7 @@ class DandelionData:
 
         g_ang_l = cal_group_angle(180, g_radius_list, inner_circles=True)
         if "angles" in self.kwargs:
-            if self.kwargs["group"] == ["environ_funds"]:
+            if self.group == ["environ_funds"]:
                 pass
             else:
                 if len(self.kwargs["angles"]) == len(self.group):
@@ -562,8 +562,9 @@ class DandelionData:
         g_radius_list = []
         for i, g in enumerate(self.e_groups):
             g_wlc = 0
-            for p in self.e_dict[g]:
-                g_wlc += self.e_dict[p]['wlc']
+            for fund in self.e_dict[g]:
+                for p in self.e_dict[g][fund]:
+                    g_wlc += self.e_dict[p]['wlc']
 
             g_abb = g
 
@@ -600,7 +601,7 @@ class DandelionData:
                 )
 
         # multiplied here so a gap to central circle
-        g_radius_dist = g_d["portfolio"]["r"] * 2.75
+        g_radius_dist = g_d["portfolio"]["r"] * 2.5
         # if len(self.e_groups) > 3:
         #     g_radius_dist = g_d["portfolio"]["r"] * 2.5
 
@@ -637,23 +638,20 @@ class DandelionData:
 
         ## second outer circle
         for i, g in enumerate(self.e_groups):
-            p_list = []
-            for p in self.e_dict[g]:
-                p_value = self.e_dict[p]["wlc"]
-                p_data = None
-
-                if "same_size" in self.kwargs:
-                    if self.kwargs["same_size"] == "Yes":
-                        p_value = 6000
+            fund_list = []
+            for fund in self.e_dict[g]:
+                fund_value = 0
+                for p in self.e_dict[g][fund]:
+                    fund_value += self.e_dict[p]['wlc']
 
                 if (
-                    p_value < pf_wlc * 0.02
+                    fund_value < pf_wlc * 0.02
                 ):  # achieve some consistency for zero / low values
-                    p_value_adjusted = pf_wlc * 0.008
+                    fund_value_adjusted = pf_wlc * 0.008
                 else:
-                    p_value_adjusted = p_value
+                    fund_value_adjusted = fund_value
 
-                p_radius = math.sqrt(p_value_adjusted)
+                p_radius = math.sqrt(fund_value_adjusted)
 
                 p_schedule = None
 
@@ -661,32 +659,16 @@ class DandelionData:
                     try:
                         abb = self.master["project_information"][p]["Abbreviations"]
                         project_text = handle_long_keys(
-                            f"{abb}, {dandelion_number_text(p_value, **self.kwargs)}"
+                            f"{abb}, {dandelion_number_text(fund_value, **self.kwargs)}"
                         )
                     except KeyError:
                         project_text = handle_long_keys(
-                            f"{p}, {dandelion_number_text(p_value, **self.kwargs)}"
+                            f"{fund}, {dandelion_number_text(fund_value, **self.kwargs)}"
                         )
                 else:
                     project_text = handle_long_keys(
-                        f"{p}, {dandelion_number_text(p_value, **self.kwargs)}"
+                        f"{p}, {dandelion_number_text(fund_value, **self.kwargs)}"
                     )
-
-                if "type" in self.kwargs:
-                    if self.kwargs["type"] in [
-                        "ps resource",
-                        "contract resource",
-                        "total resource",
-                        "funded resource",
-                    ]:
-                        project_text = (
-                            self.master.abbreviations[p]["abb"]
-                            + ", "
-                            + dandelion_number_text(p_value, **self.kwargs)
-                        )
-                if "values" in self.kwargs:
-                    if self.kwargs["values"] == "No":
-                        project_text = self.master.abbreviations[p]["abb"]
 
                 colour = COLOUR_DICT["WHITE"]
 
@@ -705,18 +687,18 @@ class DandelionData:
                     else:
                         edge_colour = colour
 
-                g_d[p] = {
+                g_d[fund] = {
                     "r": p_radius,
-                    "wlc": p_value,
+                    "wlc": fund_value,
                     "colour": colour,
                     "text": project_text,
                     "fill": "solid",
                     "ec": edge_colour,
                 }
 
-                p_list.append((p_value, p_radius, p_schedule, p))
+                fund_list.append((fund_value, p_radius, p_schedule, fund))
 
-            l_g_d[g] = list(reversed(sorted(p_list)))
+            l_g_d[g] = list(reversed(sorted(fund_list)))
 
         for g in self.e_groups:
             g_radius = g_d[g]["r"]
@@ -724,28 +706,28 @@ class DandelionData:
             g_x_axis = g_d[g]["axis"][1]  # group x axis
 
             try:
-                p_value, p_radius_list, p_schedule_list, p_list = zip(*l_g_d[g])
+                fund_value, p_radius_list, p_schedule_list, fund_list = zip(*l_g_d[g])
             except ValueError:  # handles no projects in l_g_d list
                 continue
 
-            if len(p_list) > 3:
-                ang_l = cal_group_angle(360, p_list)
+            if len(fund_list) > 2:
+                ang_l = cal_group_angle(360, fund_list)
             else:
-                if len(p_list) == 1:
+                if len(fund_list) == 1:
                     ang_l = [g_d[g]["angle"]]
-                if len(p_list) == 2:
+                if len(fund_list) == 2:
                     ang_l = [g_d[g]["angle"], g_d[g]["angle"] + 70]
-                if len(p_list) == 3:
-                    ang_l = [
-                        g_d[g]["angle"],
-                        g_d[g]["angle"] + 70,
-                        g_d[g]["angle"] + 140,
-                    ]
+                # if len(fund_list) == 3:
+                #     ang_l = [
+                #         g_d[g]["angle"],
+                #         g_d[g]["angle"] + 70,
+                #         g_d[g]["angle"] + 140,
+                #     ]
 
             largest_p_radius = (
                 max(p_radius_list) * 1.5
             )  # value used for distance from inner circle.
-            for i, p in enumerate(p_list):
+            for i, p in enumerate(fund_list):
                 angle = ang_l[i]
                 p_y_axis = g_y_axis + (g_radius + largest_p_radius) * math.sin(
                     math.radians(ang_l[i])
@@ -768,7 +750,7 @@ class DandelionData:
                     va = "bottom"
                 if 11 <= angle <= 174 or 381 <= angle <= 534:
                     ha = "left"
-                if 165 <= angle <= 195:
+                if 160 <= angle <= 200:
                     va = "top"
                 if 186 <= angle <= 350:
                     ha = "right"
@@ -788,14 +770,14 @@ class DandelionData:
     def environmental_funds_dictionaries(self):
         e_dict = {}
         e_groups = []
-        # e_funds_list = []
+        e_funds_list = []
         # e_list = []
         total_wlc = 0
         critical_group_errors = []
         environ_data = get_enviroment_funds_information(self.kwargs)
         for p in environ_data.keys():
             e_groups.append(environ_data[p]["DG Group"])
-            # e_funds_list.append(environ_data[p]["Fund"])
+            e_funds_list.append(environ_data[p]["Fund"])
             wlc = convert_none_types(environ_data[p]["WLC"])
             e_dict[p] = {
                 "wlc": convert_none_types(environ_data[p]["WLC"])
@@ -805,27 +787,30 @@ class DandelionData:
 
         e_dict["total"] = {"wlc": total_wlc}
         self.e_groups = set(list(e_groups))
-        # self.e_funds = set(list(e_funds_list))
+        self.e_funds = set(list(e_funds_list))
 
         for group in self.e_groups:
-            group_list = []
-            # for fund in self.e_funds:
-            #     fund_list = []
-            for p in environ_data.keys():
-                #  This data comes from the project information document. Not master.
-                project_group = environ_data[p]["DG Group"]
-                project_fund = environ_data[p]["Fund"]
-                if project_group is None or project_fund is None:
-                    if p not in critical_group_errors:
-                        critical_group_errors.append(p)
-                if project_group == group:
-                    group_list.append(p)
-                    # if project_fund == fund:
-                    #     fund_list.append(p)
+            group_dict = {}
+            for fund in self.e_funds:
+                fund_list = []
+                for p in environ_data.keys():
+                    #  This data comes from the project information document. Not master.
+                    project_group = environ_data[p]["DG Group"]
+                    project_fund = environ_data[p]["Fund"]
+                    if project_group is None or project_fund is None:
+                        if p not in critical_group_errors:
+                            critical_group_errors.append(p)
+                    if project_group == group:
+                        # group_list.append(p)
+                        if project_fund == fund:
+                            fund_list.append(p)
 
-                # group_dict[fund] = fund
+                if fund_list == []:
+                    pass
+                else:
+                    group_dict[fund] = fund_list
 
-            e_dict[group] = group_list
+            e_dict[group] = group_dict
 
         self.e_dict = e_dict
         # self.e_list = e_list
@@ -877,7 +862,7 @@ def make_a_dandelion_auto(dl: DandelionData, **kwargs):
 
     p_font_size = 10
     if kwargs["report"] == "ipdc":
-        p_font_size = 6
+        p_font_size = 10
 
     for c in dl.d_data.keys():
         circle = plt.Circle(

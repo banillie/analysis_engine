@@ -216,7 +216,7 @@ dlion_stages_ipdc = {
     "chart": chart,
 }
 dlion_stages_abb_ipdc = {
-    "test_name": "dlion_stages",
+    "test_name": "dlion_stages_abb_ipdc",
     "subparser_name": "dandelion",
     "stage": [
         'SOBC',
@@ -226,7 +226,7 @@ dlion_stages_abb_ipdc = {
     "chart": chart,
 }
 dlion_stages_default_ipdc = {
-    "test_name": "dlion_stages",
+    "test_name": "dlion_stages_default_ipdc",
     "subparser_name": "dandelion",
     "stage": [],
     "chart": chart,
@@ -249,14 +249,14 @@ dlion_angles_ipdc = {
     "angles": [250, 290, 350, 40, 90, 130],
     "chart": chart,
 }
-dlion_benefits = {
-    "test_name": "dlion_benefits",
-    "subparser_name": "dandelion",
-    "type": "benefits",
-    "chart": chart,
-}
+# dlion_benefits = {
+#     "test_name": "dlion_benefits",
+#     "subparser_name": "dandelion",
+#     "type": "benefits",
+#     "chart": chart,
+# }
 dlion_remaining = {
-    "test_name": "dlion_benefits",
+    "test_name": "dlion_remaining",
     "subparser_name": "dandelion",
     "type": "remaining_costs",
     "chart": chart,
@@ -265,7 +265,7 @@ dlion_remaining = {
     "stage": [],
 }
 dlion_spent = {
-    "test_name": "dlion_benefits",
+    "test_name": "dlion_funded_resource",
     "subparser_name": "dandelion",
     "type": "spent",
     "chart": chart,
@@ -277,25 +277,25 @@ dlion_income = {
     "chart": chart,
 }
 dlion_funded_resource = {
-    "test_name": "dlion_income",
+    "test_name": "dlion_funded_resource",
     "subparser_name": "dandelion",
     "type": "funded_resource",
     "chart": chart,
 }
 dlion_ps_resource = {
-    "test_name": "dlion_income",
+    "test_name": "dlion_ps_resource",
     "subparser_name": "dandelion",
     "type": "ps_resource",
     "chart": chart,
 }
 dlion_contractor_resource = {
-    "test_name": "dlion_income",
+    "test_name": "dlion_contractor_resource",
     "subparser_name": "dandelion",
     "type": "contractor_resource",
     "chart": chart,
 }
 dlion_total_resource = {
-    "test_name": "dlion_income",
+    "test_name": "dlion_total_resource",
     "subparser_name": "dandelion",
     "type": "total_resource",
     "chart": chart,
@@ -315,19 +315,19 @@ dlion_total_resource = {
 #     "chart": chart,
 # }
 dlion_cli_pipeline_ipdc = {
-    "test_name": "dlion_groups",
+    "test_name": "dlion_cli_pipeline_ipdc",
     "subparser_name": "dandelion",
     "group": ["pipeline"],
     "chart": chart,
 }
 dlion_pipeline_as_stage_ipdc = {
-    "test_name": "dlion_groups",
+    "test_name": "dlion_pipeline_as_stage_ipdc",
     "subparser_name": "dandelion",
     "stage": ["pipeline", "SOBC"],
     "chart": chart,
 }
 dlion_stages_order_by_ipdc = {
-    "test_name": "dlion_stages",
+    "test_name": "dlion_stages_order_by_ipdc",
     "subparser_name": "dandelion",
     "stage": [
         'SOBC',
@@ -338,24 +338,24 @@ dlion_stages_order_by_ipdc = {
     "chart": chart,
 }
 dlion_remove = {
-    "test_name": "dlion_standard",
+    "test_name": "dlion_remove",
     "subparser_name": "dandelion",
     "chart": chart,
     "remove": ['NPR', 'A66'],
 }
 dlion_eviron_funds = {
-    "test_name": "dlion_standard",
+    "test_name": "dlion_eviron_funds",
     "subparser_name": "dandelion",
     "chart": chart,
     "group": ["environ_funds"],
-    "angles": [290, 390],
+    # "angles": [320, 40],
 }
 
 if REPORTING_TYPE == 'cdg':
     DANDELION_OP_ARGS_DICT = [
         # dlion_cli_group,  # Failing.
         dlion_income,
-        dlion_benefits,
+        # dlion_benefits,
         dlion_angles_cdg,
         dlion_quarter,
         dlion_stages_cdg,
@@ -365,24 +365,24 @@ if REPORTING_TYPE == 'cdg':
 if REPORTING_TYPE == 'ipdc':
     DANDELION_OP_ARGS_DICT = [
         dlion_eviron_funds,
-        # dlion_remove,
-        # dlion_total_resource,
-        # dlion_contractor_resource,
-        # dlion_ps_resource,
-        # dlion_funded_resource,
-        # dlion_spent,
-        # dlion_remaining,
-        # dlion_pipeline_as_stage_ipdc,
-        # dlion_stages_default_ipdc,
-        # dlion_stages_order_by_ipdc,
-        # dlion_cli_pipeline_ipdc,
-        # dlion_income,
-        # dlion_angles_ipdc,
-        # dlion_quarter,
-        # dlion_stages_ipdc,
-        # dlion_stages_abb_ipdc,
-        # dlion_groups_ipdc,
-        # dlion_standard,
+        dlion_remove,
+        dlion_total_resource,
+        dlion_contractor_resource,
+        dlion_ps_resource,
+        dlion_funded_resource,
+        dlion_spent,
+        dlion_remaining,
+        dlion_pipeline_as_stage_ipdc,
+        dlion_stages_default_ipdc,
+        dlion_stages_order_by_ipdc,
+        dlion_cli_pipeline_ipdc,
+        dlion_income,
+        dlion_angles_ipdc,
+        dlion_quarter,
+        dlion_stages_ipdc,
+        dlion_stages_abb_ipdc,
+        dlion_groups_ipdc,
+        dlion_standard,
     ]
 
 # write some separate tests for dcas
