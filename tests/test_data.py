@@ -25,7 +25,7 @@ from analysis_engine.core_data import (
 )
 
 from analysis_engine.dandelion import DandelionData, make_a_dandelion_auto
-from analysis_engine.dca import DcaData, dca_changes_into_word
+from analysis_engine.dca import DcaData, dca_changes_into_word, dca_changes_into_excel
 from analysis_engine.speed_dials import build_speed_dials
 from analysis_engine.render_utils import put_matplotlib_fig_into_word, get_input_doc
 from analysis_engine.dashboards import narrative_dashboard, cdg_dashboard, ipdc_dashboard
@@ -137,6 +137,10 @@ def test_dca_analysis():
                 str(cli.combined_args["root_path"])
                 + cli.settings["word_save_path"].format(f"dca_changes_{x['test_name']}")
             )
+            wb = dca_changes_into_excel(sdmd)
+            wb.save(cli.combined_args["root_path"]
+                    + cli.settings["excel_save_path"].format(f"dca_changes_{x['test_name']}")
+                    )
         except InputError as e:
             logger.critical(e)
             pass

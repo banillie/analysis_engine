@@ -4523,50 +4523,6 @@ def dca_changes_into_word(dca_data: DcaData, doc: Document) -> Document:
     return doc
 
 
-def dca_changes_into_excel(dca_data: DcaData) -> workbook:
-    wb = Workbook()
-
-    for tp in dca_data.dca_dictionary.keys():
-        start_row = 3
-        ws = wb.create_sheet(
-            make_file_friendly(tp)
-        )  # creating worksheets. names restricted to 30 characters.
-        ws.title = make_file_friendly(tp)  # title of worksheet
-        for i, dca_type in enumerate(list(dca_data.dca_count[tp].keys())):
-            ws.cell(row=start_row + i, column=2).value = dca_type
-            ws.cell(row=start_row + i, column=3).value = "Count"
-            ws.cell(row=start_row + i, column=4).value = "Costs"
-            ws.cell(row=start_row + i, column=5).value = "Proportion costs"
-            for x, colour in enumerate(
-                ["Green", "Amber/Green", "Amber", "Amber/Red", "Red", None, "Total"]
-            ):
-                ws.cell(row=start_row + i + x + 1, column=2).value = colour
-                ws.cell(row=start_row + i + x + 1, column=3).value = dca_data.dca_count[
-                    tp
-                ][dca_type][colour]["count"]
-                ws.cell(row=start_row + i + x + 1, column=4).value = dca_data.dca_count[
-                    tp
-                ][dca_type][colour]["cost"]
-                ws.cell(row=start_row + i + x + 1, column=5).value = dca_data.dca_count[
-                    tp
-                ][dca_type][colour]["ct"]
-                if colour is None:
-                    ws.cell(row=start_row + i + x + 1, column=2).value = "None"
-
-            start_row += 9
-    wb.remove(wb["Sheet"])
-    return wb
-
-
-
-
-
-
-
-
-
-
-
 VFM_LIST = [
     "NPV for all projects and NPV for programmes if available",
     "Adjusted Benefits Cost Ratio (BCR)",

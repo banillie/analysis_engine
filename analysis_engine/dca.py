@@ -1,7 +1,8 @@
 from docx import Document
 from docx.enum.section import WD_SECTION_START
+from openpyxl import workbook, Workbook
 
-from analysis_engine.segmentation import get_iter_list, get_group, get_correct_p_data
+from analysis_engine.segmentation import get_group, get_correct_p_data
 from analysis_engine.cleaning import convert_none_types
 from analysis_engine.dictionaries import (
     DCA_KEYS,
@@ -9,6 +10,7 @@ from analysis_engine.dictionaries import (
     STANDARDISE_COST_KEYS,
 )
 from analysis_engine.error_msgs import get_error_list, InputError
+from analysis_engine.render_utils import make_file_friendly
 
 
 class DcaData:
@@ -175,12 +177,12 @@ class DcaData:
                     clr[colour] = {
                         "count": count,
                         "cost": cost,
-                        # "ct": cost / cost_total,
+                        "ct": cost / cost_total,
                     }
                     clr["Total"] = {
                         "count": total,
                         "cost": cost_total,
-                        # "ct": cost_total / cost_total,
+                        "ct": cost_total / cost_total,
                     }
                 dca_dict[dca_type] = clr
             output_dict[quarter] = dca_dict
@@ -278,3 +280,42 @@ def dca_changes_into_word(dca_data: DcaData, document_path) -> Document:
         doc.add_paragraph(total_line)
 
     return doc
+
+
+def dca_changes_into_excel(dca_data: DcaData) -> workbook:
+    wb = Workbook()
+
+    for tp in dca_data.dca_dictionary.keys():
+        start_row = 3
+        ws = wb.create_sheet(
+            make_file_friendly(tp)
+        )  # creating worksheets. names restricted to 30 characters.
+        ws.title = make_file_friendly(tp)  # title of worksheet
+        for i, dca_type in enumerate(list(dca_data.dca_count[tp].keys())):
+            ws.cell(row=start_row + i, column=2).value = dca_type.upper()
+            ws.cell(row=start_row + i, column=3).value = "Count"
+            ws.cell(row=start_row + i, column=4).value = "Costs"
+            ws.cell(row=start_row + i, column=5).value = "Proportion costs"
+            for x, colour in enumerate(
+                ["Green", "Amber/Green", "Amber", "Amber/Red", "Red", None, "Total"]
+            ):
+                ws.cell(row=start_row + i + x + 1, column=2).value = colour
+                ws.cell(row=start_row + i + x + 1, column=3).value = dca_data.dca_count[
+                    tp
+                ][dca_type][colour]["count"]
+                ws.cell(row=start_row + i + x + 1, column=4).value = dca_data.dca_count[
+                    tp
+                ][dca_type][colour]["cost"]
+                ws.cell(row=start_row + i + x + 1, column=5).value = dca_data.dca_count[
+                    tp
+                ][dca_type][colour]["ct"]
+                if colour is None:
+                    ws.cell(row=start_row + i + x + 1, column=2).value = "None"
+
+            start_row += 9
+    wb.remove(wb["Sheet"])
+    return wb
+
+
+
+

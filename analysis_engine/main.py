@@ -11,7 +11,7 @@ from analysis_engine import __version__
 from analysis_engine.core_data import get_core, open_json_file
 from analysis_engine.dandelion import DandelionData, make_a_dandelion_auto
 from analysis_engine.dashboards import narrative_dashboard, cdg_dashboard, ipdc_dashboard
-from analysis_engine.dca import DcaData, dca_changes_into_word
+from analysis_engine.dca import DcaData, dca_changes_into_word, dca_changes_into_excel
 from analysis_engine.gmpp_int import GmppOnlineCosts
 from analysis_engine.merge import Merge
 from analysis_engine.query import data_query_into_wb
@@ -179,6 +179,10 @@ def run_analysis(args, settings):
                 str(cli.combined_args["root_path"])
                 + cli.combined_args["word_save_path"].format("dca_changes")
             )
+            wb = dca_changes_into_excel(sdmd)
+            wb.save(cli.combined_args["root_path"]
+                    + cli.settings["excel_save_path"].format(f"dca_data")
+                    )
 
         if cli.programme == "dashboards":
             if cli.combined_args['report'] == 'cdg':
@@ -315,9 +319,11 @@ def run_parsers():
 
     parser_dca = subparsers.add_parser(
         "dcas",
-        help="DCA comparisons between quarters",
-        description="Generates a print out on DCA changes between quarters. All DCAs are placed "
-                    "into the same file and placed in output folder. It has a maximum of two quarters "
+        help="DCA data and comparison between quarters",
+        description="Generates two outputs. 1) An excel file with all DCA ratings, which is used to build "
+                    "bar charts of the portfolio report 2) A word document containing a print out of DCA "
+                    "changes between quarters. This can be used to annotation speed dial analysis. "
+                    "Outputs are placed into the output folder. It has a maximum of two quarters "
                     "for the --quarters argument.",
     )
 
