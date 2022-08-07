@@ -264,7 +264,7 @@ class DandelionData:
 
         g_ang_l = cal_group_angle(180, g_radius_list, inner_circles=True)
         if "angles" in self.kwargs:
-            if self.group == ["environ_funds"]:
+            if "env_funds" in self.kwargs:
                 pass
             else:
                 if len(self.kwargs["angles"]) == len(self.group):
@@ -308,7 +308,8 @@ class DandelionData:
                     "alignment": ("center", "center"),
                 }
 
-        logger.info("The angles for groups are " + str(g_ang_l))
+        if "env_funds" not in self.kwargs:
+            logger.info("The angles for groups are " + str(g_ang_l))
 
         ## second outer circle
         for i, g in enumerate(self.group):
@@ -600,10 +601,7 @@ class DandelionData:
                     "The number of groups and angles don't match. Stopping."
                 )
 
-        # multiplied here so a gap to central circle
-        g_radius_dist = g_d["portfolio"]["r"] * 2.5
-        # if len(self.e_groups) > 3:
-        #     g_radius_dist = g_d["portfolio"]["r"] * 2.5
+        g_radius_dist = g_d["portfolio"]["r"] * 3
 
         for i, g in enumerate(self.e_groups):
             if len(self.e_groups) > 1:  # this needs testing
@@ -641,8 +639,10 @@ class DandelionData:
             fund_list = []
             for fund in self.e_dict[g]:
                 fund_value = 0
+                p_number = 0
                 for p in self.e_dict[g][fund]:
                     fund_value += self.e_dict[p]['wlc']
+                    p_number += 1
 
                 if (
                     fund_value < pf_wlc * 0.02
@@ -655,19 +655,25 @@ class DandelionData:
 
                 p_schedule = None
 
+                if p_number > 1:
+                    p_no_text = f'({p_number} projects.)'
+                else:
+                    p_no_text = f'(1 project.)'
+
+
                 if "abbreviations" in self.kwargs:
                     try:
                         abb = self.master["project_information"][p]["Abbreviations"]
                         project_text = handle_long_keys(
-                            f"{abb}, {dandelion_number_text(fund_value, **self.kwargs)}"
+                            f"{abb}, {dandelion_number_text(fund_value, **self.kwargs)}. {p_no_text}"
                         )
                     except KeyError:
                         project_text = handle_long_keys(
-                            f"{fund}, {dandelion_number_text(fund_value, **self.kwargs)}"
+                            f"{fund}, {dandelion_number_text(fund_value, **self.kwargs)}. {p_no_text}"
                         )
                 else:
                     project_text = handle_long_keys(
-                        f"{p}, {dandelion_number_text(fund_value, **self.kwargs)}"
+                        f"{p}, {dandelion_number_text(fund_value, **self.kwargs)}. {p_no_text}"
                     )
 
                 colour = COLOUR_DICT["WHITE"]
@@ -717,12 +723,6 @@ class DandelionData:
                     ang_l = [g_d[g]["angle"]]
                 if len(fund_list) == 2:
                     ang_l = [g_d[g]["angle"], g_d[g]["angle"] + 70]
-                # if len(fund_list) == 3:
-                #     ang_l = [
-                #         g_d[g]["angle"],
-                #         g_d[g]["angle"] + 70,
-                #         g_d[g]["angle"] + 140,
-                #     ]
 
             largest_p_radius = (
                 max(p_radius_list) * 1.5
@@ -862,7 +862,10 @@ def make_a_dandelion_auto(dl: DandelionData, **kwargs):
 
     p_font_size = 10
     if kwargs["report"] == "ipdc":
-        p_font_size = 10
+        if "env_funds" in kwargs:
+            p_font_size = 9
+        else:
+            p_font_size = 6
 
     for c in dl.d_data.keys():
         circle = plt.Circle(
@@ -906,7 +909,7 @@ def make_a_dandelion_auto(dl: DandelionData, **kwargs):
 
     # place lines
     line_clr = "#ececec"
-    if dl.group == ["environ_funds"]:
+    if "env_funds" in kwargs:
         local_group = dl.e_groups
     else:
         local_group = dl.group
@@ -926,7 +929,7 @@ def make_a_dandelion_auto(dl: DandelionData, **kwargs):
         if g == "pipeline":
             lower_g = dl.master["pipeline_list"]
         else:
-            if dl.group == ['environ_funds']:
+            if "env_funds" in kwargs:
                 lower_g = dl.e_dict[g]
             else:
                 lower_g = get_group(dl.master, dl.kwargs["quarter"][0], **dl.kwargs)
