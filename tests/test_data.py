@@ -9,7 +9,10 @@ from tests.test_op_args import (
     REPORTING_TYPE,
     DANDELION_OP_ARGS_DICT,
     SPEED_DIAL_AND_DCA_OP_ARGS,
-    MILESTONES_OP_ARGS, QUERY_ARGS, PORT_RISK_OP_ARGS,
+    MILESTONES_OP_ARGS,
+    QUERY_ARGS,
+    PORT_RISK_OP_ARGS,
+    COST_OP_ARGS,
 )
 
 from analysis_engine.main import CliOpArgs
@@ -35,6 +38,7 @@ from analysis_engine.milestones import (
     put_milestones_into_wb,
 )
 from analysis_engine.query import data_query_into_wb
+from analysis_engine.costs import CostData, cost_profile_graph_new, cost_profile_into_wb_new
 
 SETTINGS_DICT = report_config(REPORTING_TYPE)
 
@@ -290,6 +294,33 @@ def test_risks():
             wb.save(
                 str(cli.settings["root_path"])
                 + cli.settings["excel_save_path"].format(f"{x['test_name']}_Risks")
+            )
+
+
+def test_costs():
+    if REPORTING_TYPE == 'ipdc':
+        for x in COST_OP_ARGS:
+            print(x['test_name'])
+            cli = CliOpArgs(x, SETTINGS_DICT)
+            c = CostData(cli.md, **cli.combined_args)
+            c.get_forecast_cost_profile()
+            wb = cost_profile_into_wb_new(c)
+            if cli.combined_args["chart"] == "save":
+                ms_graph = cost_profile_graph_new(c, **cli.combined_args)
+                doc = get_input_doc(
+                    str(cli.combined_args["root_path"]) + cli.combined_args["word_landscape"]
+                )
+                put_matplotlib_fig_into_word(doc, ms_graph, width=Inches(8))
+                doc.save(
+                    str(cli.combined_args["root_path"])
+                    + cli.combined_args["word_save_path"].format(f"{x['test_name']}")
+                )
+            if cli.combined_args["chart"] == "show":
+                cost_profile_graph_new(c, **cli.combined_args)
+
+            wb.save(
+                str(cli.settings["root_path"])
+                + cli.settings["excel_save_path"].format(f"{x['test_name']}")
             )
 
 

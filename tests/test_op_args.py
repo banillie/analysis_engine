@@ -2,6 +2,56 @@
 REPORTING_TYPE = "ipdc"
 chart = "show"
 
+cost_standard = {
+    "test_name": "cost_standard",
+    "subparser_name": "costs",
+    "chart": chart,
+}
+cost_quarters = {
+    "test_name": "cost_quarters",
+    "subparser_name": "costs",
+    "chart": chart,
+    "quarter": ["Q1 22/23", "Q4 21/22", "Q1 21/22"],
+}
+cost_groups = {
+    "test_name": "cost_groups",
+    "subparser_name": "costs",
+    "group": ["LTC"],
+    "quarter": ["Q1 22/23", "Q4 21/22", "Q1 21/22"],
+    "chart": chart,
+}
+cost_baseline = {
+    "test_name": "cost_baseline",
+    "subparser_name": "costs",
+    "chart": chart,
+    "baseline": [],
+}
+cost_baseline_remove = {
+    "test_name": "cost_baseline_remove",
+    "subparser_name": "costs",
+    "chart": chart,
+    "baseline": [],
+    "remove": ["HS2 Ph 1"]
+}
+cost_baseline_quarter = {
+    "test_name": "cost_baseline_qrt",
+    "subparser_name": "costs",
+    "chart": chart,
+    "baseline": [],
+    "quarter" : ["Q4 21/22"]
+}
+
+if REPORTING_TYPE == 'ipdc':
+    COST_OP_ARGS = [
+        cost_baseline_quarter,
+        cost_baseline_remove,
+        cost_baseline,
+        cost_groups,
+        cost_standard,
+        cost_quarters,
+    ]
+
+
 q_koi_cdg = {
     'test_name': 'query_koi',
     'subparser_name': 'query',
@@ -190,7 +240,13 @@ dlion_groups_cdg = {
 dlion_groups_ipdc = {
     "test_name": "dlion_groups",
     "subparser_name": "dandelion",
-    "group": ["RPE", "HSRG"],
+    "group": ["HSRG"],
+    "chart": chart,
+}
+dlion_groups_ipdc_two = {
+    "test_name": "dlion_groups_two",
+    "subparser_name": "dandelion",
+    "group": ["HSRG", "RPE"],
     "chart": chart,
 }
 dlion_stages_cdg = {
@@ -371,6 +427,8 @@ if REPORTING_TYPE == 'cdg':
     ]
 if REPORTING_TYPE == 'ipdc':
     DANDELION_OP_ARGS_DICT = [
+        dlion_groups_ipdc_two,
+        dlion_groups_ipdc,
         dlion_eviron_funds,
         dlion_remove,
         dlion_total_resource,
@@ -388,7 +446,6 @@ if REPORTING_TYPE == 'ipdc':
         dlion_quarter,
         dlion_stages_ipdc,
         dlion_stages_abb_ipdc,
-        dlion_groups_ipdc,
         dlion_standard,
     ]
 

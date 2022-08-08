@@ -232,3 +232,65 @@ PORTFOLIO_RISK_SCORES = {
     "Possible": 2,
     "Very Likely": 4,
 }
+
+
+YEAR_LIST = [
+    # "16-17",
+    # "17-18",
+    # "18-19",
+    # "19-20",
+    # "20-21",
+    "21-22",
+    "22-23",
+    "23-24",
+    "24-25",
+    "25-26",
+    "26-27",
+    "27-28",
+    # "28-29",
+    # "29-30",
+    # "30-31",
+    # "31-32",
+    # "32-33",
+    # "33-34",
+    # "34-35",
+    # "35-36",
+    # "36-37",
+    # "37-38",
+    # "38-39",
+    # "39-40",
+]
+
+RDEL_FORECAST_COST_KEYS = {
+    "Forecast one off new costs": [],
+    "Forecast recurring new costs": [],
+    "Forecast recurring old costs": [],
+    "Forecast Non Gov costs": [],
+    # "Forecast Total": [],
+    # "Forecast Income": [],
+}
+CDEL_FORECAST_COST_KEYS = {
+    "Forecast one off new costs": [],
+    "Forecast recurring new costs": [],
+    "Forecast recurring old costs": [],
+    " Forecast Non-Gov": [],
+    # "Forecast Total WLC": [],
+    # " Forecast - Income both Revenue and Capital": [],
+}
+
+RDEL_BL_COST_KEYS = {
+    "BL one off new costs": [],
+    "BL recurring new costs": [],
+    "BL recurring old costs": [],
+    "BL Non Gov costs": [],
+    # "BL Total": [],
+    # "BL Income": [],
+}
+CDEL_BL_COST_KEYS = {
+    "BL one off new costs": [],
+    "BL recurring new costs": [],
+    "BL recurring old costs": [],
+    " BL Non-Gov": [],
+    # "BL WLC": [],
+    # " BL Income both Revenue and Capital": [],
+}

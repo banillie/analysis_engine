@@ -39,6 +39,8 @@ from analysis_engine.error_msgs import (
     InputError,
 )
 
+from analysis_engine.costs import CostData, cost_profile_graph_new, cost_profile_into_wb_new
+
 
 class CliOpArgs:
     def __init__(self, args, settings):
@@ -126,6 +128,29 @@ def initiate(settings_dict):
 def run_analysis(args, settings):
     cli = CliOpArgs(args, settings)
     try:
+
+        if cli.programme == "costs":
+            c = CostData(cli.md, **cli.combined_args)
+            c.get_forecast_cost_profile()
+            wb = cost_profile_into_wb_new(c)
+            if cli.combined_args["chart"] == "save":
+                ms_graph = cost_profile_graph_new(c, **cli.combined_args)
+                doc = get_input_doc(
+                    str(cli.combined_args["root_path"]) + cli.combined_args["word_landscape"]
+                )
+                put_matplotlib_fig_into_word(doc, ms_graph, width=Inches(8))
+                doc.save(
+                    str(cli.combined_args["root_path"])
+                    + cli.combined_args["word_save_path"].format("cost_chart")
+                )
+            if cli.combined_args["chart"] == "show":
+                cost_profile_graph_new(c, **cli.combined_args)
+
+            wb.save(
+                str(cli.settings["root_path"])
+                + cli.settings["excel_save_path"].format("costs_data")
+            )
+
         if cli.programme == "dandelion":
 
             if cli.combined_args["report"] == "ipdc":
@@ -303,6 +328,18 @@ def run_parsers():
     subparsers = parser.add_subparsers(dest="subparser_name")
     subparsers.metavar = "                      "
 
+    costs_description = (
+        "Provides cost profile data and graphs. It provides the current quarters profile if not optional "
+        "arguments are specified. All optional al arguments are as below including --baseline. "
+        "This argument returns the baseline cost profile for any given quarter. "
+
+    )
+    parser_costs = subparsers.add_parser(
+        "costs",
+        help="cost trend profile graph and data.",
+        description=costs_description,
+    )
+
     dandelion_description = (
         "Creates the 'dandelion' graph. See below optional arguments for changing the "
         "dandelion that is compiled. The command analysis dandelion returns the default "
@@ -402,6 +439,17 @@ def run_parsers():
         help="Use can manually enter angles for group bubbles",
     )
 
+    parser_costs.add_argument(
+        "--baseline",
+        type=str,
+        metavar="",
+        action="store",
+        nargs="*",
+        # choices=[],
+        help="Returns the baseline cost profile. --baseline is the default "
+             "and no other commands are necessary. "
+    )
+
     parser_milestones.add_argument(
         "--blue_line",
         type=str,
@@ -416,6 +464,7 @@ def run_parsers():
     for sub in [
         parser_milestones,
         parser_dandelion,
+        parser_costs,
     ]:
         sub.add_argument(
             "--chart",
@@ -459,6 +508,7 @@ def run_parsers():
         parser_dandelion,
         parser_milestones,
         parser_data_query,
+        parser_costs,
     ]:
         sub.add_argument(
             "--group",
@@ -511,6 +561,7 @@ def run_parsers():
         parser_data_query,
         parser_port_risks,
         parser_risks,
+        parser_costs,
     ]:
         sub.add_argument(
             "--quarter",
@@ -531,6 +582,7 @@ def run_parsers():
         parser_dandelion,
         parser_data_query,
         parser_milestones,
+        parser_costs,
     ]:
         sub.add_argument(
             "--remove",
@@ -551,6 +603,7 @@ def run_parsers():
         parser_dandelion,
         parser_data_query,
         parser_milestones,
+        parser_costs,
     ]:
         sub.add_argument(
             "--stage",
@@ -565,14 +618,15 @@ def run_parsers():
             "the config file). The dandelion the dandelion command the user has the added option of 'pipeline'",
         )
 
-    parser_milestones.add_argument(
-        "--title",
-        type=str,
-        metavar="",
-        action="store",
-        help="The user can specify and title for the chart output. Please enter as text, for "
-        "example 'This the title'.",
-    )
+    for sub in [parser_milestones, parser_costs]:
+        sub.add_argument(
+            "--title",
+            type=str,
+            metavar="",
+            action="store",
+            help="The user can specify and title for the chart output. Please enter as text, for "
+            "example 'This the title'.",
+        )
 
     parser_dandelion.add_argument(
         "--type",
@@ -660,11 +714,7 @@ class main:
         #     # formatter_class=RawTextHelpFormatter,  # can't use as effects how optional arguments are shown.
         # )
         #
-        # costs_description = (
-        #     "Creates a cost profile graph. See below optional arguments. The user "
-        #     'must specify --chart "save" to save the chart, otherwise '
-        #     "only a temporary matplotlib chart will be generated."
-        # )
+
         #
         # parser_costs = subparsers.add_parser(
         #     "costs",

@@ -1253,22 +1253,6 @@ class CostData:
             list_cdel_total = []
             list_ngov_total = []
             for p in self.group:
-                RDEL_BL_COST_KEYS = {
-                    "BL one off new costs": [],
-                    "BL recurring new costs": [],
-                    "BL recurring old costs": [],
-                    "BL Non Gov costs": [],
-                    "BL Total": [],
-                    "BL Income": [],
-                }
-                CDEL_BL_COST_KEYS = {
-                    "BL one off new costs": [],
-                    "BL recurring new costs": [],
-                    "BL recurring old costs": [],
-                    " BL Non-Gov": [],
-                    "BL WLC": [],
-                    " BL Income both Revenue and Capital": [],
-                }
                 # at moment bl only coming from current quarters data
                 p_data = self.master.master_data[0]["data"][p]
                 # p_data = get_correct_p_data(
@@ -2762,30 +2746,6 @@ def cost_profile_into_wb(costs: CostData) -> Workbook:
         for i, cv in enumerate(costs.c_profiles[tp]["prof"]):  # cv cost value
             ws.cell(row=row_num + i, column=1).value = YEAR_LIST[i]
             ws.cell(row=row_num + i, column=2 + x).value = cv
-
-    return wb
-
-
-def cost_profile_into_wb_new(costs: CostData) -> Workbook:
-    wb = Workbook()
-    # ws = wb.active
-
-    type_list = ["rdel_total", "cdel_total", "ngov_total", "total"]
-
-    for tp in list(costs.profiles.keys()):
-        ws = wb.create_sheet(
-            make_file_friendly(tp)
-        )  # creating worksheets. names restricted to 30 characters.
-        ws.title = make_file_friendly(tp)  # title of worksheet
-        ws.cell(row=1, column=1).value = "F/Y"
-        ws.cell(row=1, column=2).value = tp
-        for x, key in enumerate(type_list):
-            ws.cell(row=1, column=2 + x).value = key
-            for i, cv in enumerate(costs.profiles[tp][key]):
-                ws.cell(row=2 + i, column=1).value = YEAR_LIST[i]
-                ws.cell(row=2 + i, column=2 + x).value = cv
-
-    wb.remove(wb["Sheet"])
 
     return wb
 

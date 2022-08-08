@@ -306,6 +306,7 @@ class DandelionData:
                     "fill": "dashed",
                     "ec": "grey",
                     "alignment": ("center", "center"),
+                    "angle": 0,
                 }
 
         if "env_funds" not in self.kwargs:
@@ -476,7 +477,7 @@ class DandelionData:
             except ValueError:  # handles no projects in l_g_d list
                 continue
 
-            if len(p_list) > 3:
+            if len(p_list) >= 3:
                 ang_l = cal_group_angle(360, p_list)
             else:
                 if len(p_list) == 1:
