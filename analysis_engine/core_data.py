@@ -367,6 +367,7 @@ def get_project_information(settings_dict) -> Dict[str, Union[str, int]]:
         str(settings_dict["root_path"])
         + "/core_data/"
         + config["PROJECT INFO"]["projects"]
+        + ".xlsx"
     )
     return get_project_info_data(path)
 
@@ -419,5 +420,6 @@ def get_enviroment_funds_information(settings_dict) -> Dict[str, Union[str, int]
         str(settings_dict["root_path"])
         + "/core_data/"
         + config["ENVIROMENTAL FUNDS"]["master"]
+        + ".xlsx"
     )
     return get_project_info_data(path)
