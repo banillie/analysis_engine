@@ -132,8 +132,8 @@ def run_analysis(args, settings):
                 cli.combined_args["abbreviations"] = True
 
             d_data = DandelionData(cli.md, **cli.combined_args)
-            if 'env_funds' in cli.combined_args:
-                if not cli.combined_args['env_funds']:  # empty list
+            if "env_funds" in cli.combined_args:
+                if not cli.combined_args["env_funds"]:  # empty list
                     d_data.get_environmental_fund_data()
 
             if cli.combined_args["chart"] != "save":
@@ -184,9 +184,10 @@ def run_analysis(args, settings):
                 + cli.combined_args["word_save_path"].format("dca_changes")
             )
             wb = dca_changes_into_excel(sdmd)
-            wb.save(cli.combined_args["root_path"]
-                    + cli.settings["excel_save_path"].format(f"dca_data")
-                    )
+            wb.save(
+                cli.combined_args["root_path"]
+                + cli.settings["excel_save_path"].format(f"dca_data")
+            )
 
         if cli.programme == "dashboards":
             if cli.combined_args["report"] == "cdg":
@@ -330,10 +331,10 @@ def run_parsers():
         "dcas",
         help="DCA data and comparison between quarters",
         description="Generates two outputs. 1) An excel file with all DCA ratings, which is used to build "
-                    "bar charts of the portfolio report 2) A word document containing a print out of DCA "
-                    "changes between quarters. This can be used to annotation speed dial analysis. "
-                    "Outputs are placed into the output folder. It has a maximum of two quarters "
-                    "for the --quarters argument.",
+        "bar charts of the portfolio report 2) A word document containing a print out of DCA "
+        "changes between quarters. This can be used to annotation speed dial analysis. "
+        "Outputs are placed into the output folder. It has a maximum of two quarters "
+        "for the --quarters argument.",
     )
 
     parser_gmpp_online = subparsers.add_parser(
@@ -443,10 +444,10 @@ def run_parsers():
         nargs="*",
         # choices=[],
         help="Returns a dandelion graph for all environmental fund projects. Data for this graphic is "
-             "taken from a separate excel file saved in the core data folder which needs to be referenced "
-             "in the [ENVIRONMENTAL FUNDS] / master section of the config file. --env_fund is the default "
-             "and no other commands are necessary. However, the user can altered the output with other optional "
-             "arguments e.g. --angles . ",
+        "taken from a separate excel file saved in the core data folder which needs to be referenced "
+        "in the [ENVIRONMENTAL FUNDS] / master section of the config file. --env_fund is the default "
+        "and no other commands are necessary. However, the user can altered the output with other optional "
+        "arguments e.g. --angles . ",
     )
 
     # group

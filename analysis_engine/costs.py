@@ -61,17 +61,20 @@ class CostData:
                 )
 
                 # option here handled via config file
-                if project_name in rm:
-                    try:
-                        total - convert_none_types(
-                            p_data[STANDARDISE_COST_KEYS[self.report]["income_total"]]
-                        )
-                        if [project_name] == group:
-                            logger.info(
-                                f"income has been removed from the total of {project_name}"
+                if "env_funds" not in self.kwargs:
+                    if project_name in rm:
+                        try:
+                            total - convert_none_types(
+                                p_data[
+                                    STANDARDISE_COST_KEYS[self.report]["income_total"]
+                                ]
                             )
-                    except KeyError:  # some older masters don't have key.
-                        raise ProjectNameError()
+                            if [project_name] == group:
+                                logger.info(
+                                    f"income has been removed from the total of {project_name}"
+                                )
+                        except KeyError:  # some older masters don't have key.
+                            raise ProjectNameError()
 
             try:
                 remaining += total - spent

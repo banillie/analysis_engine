@@ -161,7 +161,6 @@ def cdg_dashboard(master, wb: Workbook) -> None:
                     ws.cell(row=row_num, column=col_num).value = "-"
 
 
-
 def ipdc_dashboard(md, wb: Workbook, **op_args) -> Workbook:
     IPDC_DATE = get_board_date(op_args)
     logger.info(
@@ -195,7 +194,9 @@ def resource_dashboard(md, wb: Workbook, **op_args) -> Workbook:
         for i, key in enumerate(DASHBOARD_RESOURCE_KEYS):
             try:
                 if key == "DfTc Resource Gap Criticality (RAG rating)":
-                    ws.cell(row=row_num, column=5 + i).value = CONVERT_RAG[cmd[project_name][key]]
+                    ws.cell(row=row_num, column=5 + i).value = CONVERT_RAG[
+                        cmd[project_name][key]
+                    ]
                 else:
                     ws.cell(row=row_num, column=5 + i).value = cmd[project_name][key]
             except KeyError:

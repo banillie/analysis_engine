@@ -28,7 +28,7 @@ class ResourceData:
                 except KeyError:
                     ps = convert_none_types(p_data[RESOURCE_KEYS_OLD["ps_resource"]])
                 if type(ps) == str:
-                    resourcing_keys(project_name, RESOURCE_KEYS_OLD['ps_resource'])
+                    resourcing_keys(project_name, RESOURCE_KEYS_OLD["ps_resource"])
                     public_sector_resource.append(0)
                 else:
                     public_sector_resource.append(ps)
@@ -40,7 +40,9 @@ class ResourceData:
                         p_data[RESOURCE_KEYS_OLD["contractor_resource"]]
                     )
                 if type(c) == str:
-                    resourcing_keys(project_name, RESOURCE_KEYS_OLD["contractor_resource"])
+                    resourcing_keys(
+                        project_name, RESOURCE_KEYS_OLD["contractor_resource"]
+                    )
                     c_resource.append(0)
                 else:
                     c_resource.append(c)

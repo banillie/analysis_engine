@@ -3096,8 +3096,6 @@ def get_word_doc() -> Document():
     return open_word_doc(wd_path)
 
 
-
-
 def key_contacts(doc: Document, master, **kwargs) -> None:
     data = master.master_data[0]["data"][kwargs["full_name"]]
     """Function adds keys contact details"""
@@ -3298,8 +3296,6 @@ def forward_look_narrative(doc: Document, master, **kwargs) -> None:
         compare_text_new_and_old(text_one, text_two, doc)
 
 
-
-
 def convert_rag_text(dca_rating: str) -> str:
     """Converts RAG name into a acronym"""
 
@@ -3315,8 +3311,6 @@ def convert_rag_text(dca_rating: str) -> str:
         return "R"
     else:
         return ""
-
-
 
 
 def set_col_widths(word_table: table, widths: list) -> None:
@@ -5123,8 +5117,6 @@ def make_text_red(columns: list) -> None:
                         run.font.color.rgb = RGBColor(255, 0, 0)
 
 
-
-
 def print_out_project_milestones(
     doc: Document, milestones: MilestoneData, project_name: str
 ) -> Document:
@@ -5249,7 +5241,6 @@ def print_out_project_milestones(
     return doc
 
 
-
 def compile_p_report(
     doc: Document,
     master,
@@ -5303,9 +5294,6 @@ def compile_p_report(
     change_word_doc_portrait(doc)
     project_scope_text(doc, master, project_name)
     return doc
-
-
-
 
 
 # TODO refactor all code below

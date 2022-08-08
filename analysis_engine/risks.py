@@ -2,7 +2,12 @@ from collections import Counter
 
 from openpyxl import workbook, Workbook
 
-from analysis_engine.dictionaries import RISK_SCORES, PORTFOLIO_RISK_SCORES, RISK_LIST, PORTFOLIO_RISK_LIST
+from analysis_engine.dictionaries import (
+    RISK_SCORES,
+    PORTFOLIO_RISK_SCORES,
+    RISK_LIST,
+    PORTFOLIO_RISK_LIST,
+)
 from analysis_engine.segmentation import get_group, get_correct_p_data
 from analysis_engine.render_utils import make_file_friendly
 from analysis_engine.error_msgs import logger
@@ -213,7 +218,7 @@ class RiskData:
 
         if missing_key_list:
             for p in missing_key_list:
-                logger.info(f'{p} key is missing')
+                logger.info(f"{p} key is missing")
 
         self.portfolio_risk_dictionary = quarter_dict
 

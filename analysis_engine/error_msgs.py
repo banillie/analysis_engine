@@ -139,5 +139,7 @@ def get_error_list(seq: list):
 
 
 def resourcing_keys(p_name, key_name):
-    logger.info(f"{p_name} has reported text for the key {key_name}. It has been skipped. "
-                f"This data needs to be changed to a number.")
+    logger.info(
+        f"{p_name} has reported text for the key {key_name}. It has been skipped. "
+        f"This data needs to be changed to a number."
+    )

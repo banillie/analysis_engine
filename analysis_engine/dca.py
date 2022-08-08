@@ -315,7 +315,3 @@ def dca_changes_into_excel(dca_data: DcaData) -> workbook:
             start_row += 9
     wb.remove(wb["Sheet"])
     return wb
-
-
-
-

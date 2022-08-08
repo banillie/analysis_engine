@@ -565,7 +565,7 @@ class DandelionData:
             g_wlc = 0
             for fund in self.e_dict[g]:
                 for p in self.e_dict[g][fund]:
-                    g_wlc += self.e_dict[p]['wlc']
+                    g_wlc += self.e_dict[p]["wlc"]
 
             g_abb = g
 
@@ -641,7 +641,7 @@ class DandelionData:
                 fund_value = 0
                 p_number = 0
                 for p in self.e_dict[g][fund]:
-                    fund_value += self.e_dict[p]['wlc']
+                    fund_value += self.e_dict[p]["wlc"]
                     p_number += 1
 
                 if (
@@ -656,10 +656,9 @@ class DandelionData:
                 p_schedule = None
 
                 if p_number > 1:
-                    p_no_text = f'({p_number} projects.)'
+                    p_no_text = f"({p_number} projects.)"
                 else:
-                    p_no_text = f'(1 project.)'
-
+                    p_no_text = f"(1 project.)"
 
                 if "abbreviations" in self.kwargs:
                     try:
@@ -779,9 +778,7 @@ class DandelionData:
             e_groups.append(environ_data[p]["DG Group"])
             e_funds_list.append(environ_data[p]["Fund"])
             wlc = convert_none_types(environ_data[p]["WLC"])
-            e_dict[p] = {
-                "wlc": convert_none_types(environ_data[p]["WLC"])
-            }
+            e_dict[p] = {"wlc": convert_none_types(environ_data[p]["WLC"])}
             # e_list.append(p)
             total_wlc += wlc
 
@@ -951,8 +948,3 @@ def make_a_dandelion_auto(dl: DandelionData, **kwargs):
         plt.show()
 
     return fig
-
-
-
-
-
