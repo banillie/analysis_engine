@@ -786,8 +786,8 @@ class DandelionData:
             total_wlc += wlc
 
         e_dict["total"] = {"wlc": total_wlc}
-        self.e_groups = set(list(e_groups))
-        self.e_funds = set(list(e_funds_list))
+        self.e_groups = list(set(e_groups))
+        self.e_funds = list(set(e_funds_list))
 
         for group in self.e_groups:
             group_dict = {}

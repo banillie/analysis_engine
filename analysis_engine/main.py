@@ -10,7 +10,11 @@ from docx.shared import Inches
 from analysis_engine import __version__
 from analysis_engine.core_data import get_core, open_json_file
 from analysis_engine.dandelion import DandelionData, make_a_dandelion_auto
-from analysis_engine.dashboards import narrative_dashboard, cdg_dashboard, ipdc_dashboard
+from analysis_engine.dashboards import (
+    narrative_dashboard,
+    cdg_dashboard,
+    ipdc_dashboard,
+)
 from analysis_engine.dca import DcaData, dca_changes_into_word
 from analysis_engine.gmpp_int import GmppOnlineCosts
 from analysis_engine.merge import Merge
@@ -132,9 +136,9 @@ def run_analysis(args, settings):
                 cli.combined_args["abbreviations"] = True
 
             d_data = DandelionData(cli.md, **cli.combined_args)
-
-            if cli.combined_args["group"] == ["environ_funds"]:
-                d_data.get_environmental_fund_data()
+            if 'env_funds' in cli.combined_args:
+                if not cli.combined_args['env_funds']:  # empty list
+                    d_data.get_environmental_fund_data()
 
             if cli.combined_args["chart"] != "save":
                 make_a_dandelion_auto(d_data, **cli.combined_args)
@@ -185,14 +189,17 @@ def run_analysis(args, settings):
             )
 
         if cli.programme == "dashboards":
-            if cli.combined_args['report'] == 'cdg':
+            if cli.combined_args["report"] == "cdg":
                 narrative_d_master = get_input_doc(
-                    str(cli.combined_args["root_path"]) + cli.combined_args["narrative_dashboard"]
+                    str(cli.combined_args["root_path"])
+                    + cli.combined_args["narrative_dashboard"]
                 )
                 narrative_dashboard(cli.md, narrative_d_master)  #
                 narrative_d_master.save(
                     str(cli.combined_args["root_path"])
-                    + cli.combined_args["excel_save_path"].format("narrative_dashboard_completed")
+                    + cli.combined_args["excel_save_path"].format(
+                        "narrative_dashboard_completed"
+                    )
                 )
                 cdg_d_master = get_input_doc(
                     str(cli.combined_args["root_path"]) + cli.combined_args["dashboard"]
@@ -202,14 +209,16 @@ def run_analysis(args, settings):
                     str(cli.combined_args["root_path"])
                     + cli.combined_args["excel_save_path"].format("dashboard_completed")
                 )
-            if cli.combined_args['report'] == 'ipdc':
+            if cli.combined_args["report"] == "ipdc":
                 ipdc_d_master = get_input_doc(
                     str(cli.combined_args["root_path"]) + cli.combined_args["dashboard"]
                 )
                 ipdc_dashboard(cli.md, ipdc_d_master, **cli.combined_args)
                 ipdc_d_master.save(
                     str(cli.combined_args["root_path"])
-                    + cli.combined_args["excel_save_path"].format("dashboards_completed")
+                    + cli.combined_args["excel_save_path"].format(
+                        "dashboards_completed"
+                    )
                 )
 
         if cli.programme == "milestones":
@@ -266,7 +275,7 @@ def run_analysis(args, settings):
                 + cli.settings["excel_save_path"].format("portfolio_risks")
             )
 
-        if cli.programme == 'project_risks':
+        if cli.programme == "project_risks":
             rd = RiskData(cli.md, **cli.combined_args)
             wb = risks_into_excel(rd)
             wb.save(
@@ -321,31 +330,32 @@ def run_parsers():
         "dcas",
         help="DCA comparisons between quarters",
         description="Generates a print out on DCA changes between quarters. All DCAs are placed "
-                    "into the same file and placed in output folder. It has a maximum of two quarters "
-                    "for the --quarters argument.",
+        "into the same file and placed in output folder. It has a maximum of two quarters "
+        "for the --quarters argument.",
     )
 
     parser_gmpp_online = subparsers.add_parser(
         "gmpp_data",
         help="Compiles GMPP online data (as provided by IPA) into master file format.",
         description="This program converts gmpp online data into the dft master file "
-                    "format. It requires three files. A file containing the gmpp online data - as provided by "
-                    "the IPA, a GMPP_INTEGRATION_KEY_MAP, and a GMPP_INTEGRATION_PROJECT_MAP. These files must "
-                    "be referenced in the config file in the GMPP INTEGRATION section and saved in the input folder. "
-                    "There are no optional arguments for this program other than --help.",
+        "format. It requires three files. A file containing the gmpp online data - as provided by "
+        "the IPA, a GMPP_INTEGRATION_KEY_MAP, and a GMPP_INTEGRATION_PROJECT_MAP. These files must "
+        "be referenced in the config file in the GMPP INTEGRATION section and saved in the input folder. "
+        "There are no optional arguments for this program other than --help.",
     )
 
     parser_initiate = subparsers.add_parser(
-        "initiate", help="IMPORTANT. This command must be run everytime new data is saved in core_data."
+        "initiate",
+        help="IMPORTANT. This command must be run everytime new data is saved in core_data.",
     )
 
     parser_merge_masters = subparsers.add_parser(
         "merge_masters",
         help="This program takes separate master data files and places them into one master file",
         description="This program takes separate master data files and places them into one master file. The user "
-                    "can set the masters that it would like to merge via the config file in the MERGE / masters_list "
-                    "section. The masters must be saved in the input folder. There are no optional arguments for this "
-                    "program other than --help.",
+        "can set the masters that it would like to merge via the config file in the MERGE / masters_list "
+        "section. The masters must be saved in the input folder. There are no optional arguments for this "
+        "program other than --help.",
     )
 
     parser_milestones = subparsers.add_parser(
@@ -359,12 +369,12 @@ def run_parsers():
     parser_port_risks = subparsers.add_parser(
         "portfolio_risks",
         help="Compiles portfolio risk analysis.",
-        description="This program extracts all portfolio risk data used in the IPDC portfolio report."
+        description="This program extracts all portfolio risk data used in the IPDC portfolio report.",
     )
     parser_risks = subparsers.add_parser(
         "project_risks",
         help="Compiles project risk analysis",
-        description='This program extracts all project level risk data contained in the master data set.'
+        description="This program extracts all project level risk data contained in the master data set.",
     )
 
     parser_data_query = subparsers.add_parser(
@@ -396,8 +406,8 @@ def run_parsers():
         action="store",
         choices=["config_date", "today"],
         help="User can insert blue line into chart to represent a date. "
-             "Options are 'config_date' or 'today'. The config_data is set in the config file in the "
-             "Globals / milestones_blue_line_date value.",
+        "Options are 'config_date' or 'today'. The config_data is set in the config file in the "
+        "Globals / milestones_blue_line_date value.",
     )
 
     for sub in [
@@ -423,6 +433,20 @@ def run_parsers():
         help="dates for analysis. Must provide start date and then end date in format e.g. '1/1/2021' '1/1/2022'.",
     )
 
+    parser_dandelion.add_argument(
+        "--env_funds",
+        type=str,
+        metavar="",
+        action="store",
+        nargs="*",
+        # choices=[],
+        help="Returns a dandelion graph for all environmental fund projects. Data for this graphic is "
+             "taken from a separate excel file saved in the core data folder which needs to be referenced "
+             "in the [ENVIRONMENTAL FUNDS] / master section of the config file. --env_fund is the default "
+             "and no other commands are necessary. However, the user can altered the output with other optional "
+             "arguments e.g. --angles . ",
+    )
+
     # group
     for sub in [
         parser_dca,
@@ -440,8 +464,8 @@ def run_parsers():
             action="store",
             nargs="+",
             help="Returns analysis for specified project(s), only. User must enter one or a combination of "
-                 "DfT Group names. Group names must match those in the config document. For the dandelion command the user "
-                 "has an added group options of 'pipeline' and 'environ_funds'.",
+            "DfT Group names. Group names must match those in the config document. For the dandelion command the user "
+            "has an added group option of 'pipeline'.",
         )
 
     for sub in [parser_milestones, parser_data_query]:
@@ -472,7 +496,7 @@ def run_parsers():
         action="store",
         choices=["schedule"],
         help="User can change the order in which circles are placed. The only choice for "
-             "this argument currently is 'schedule' ",
+        "this argument currently is 'schedule' ",
     )
 
     # quarter
@@ -544,7 +568,7 @@ def run_parsers():
         metavar="",
         action="store",
         help="The user can specify and title for the chart output. Please enter as text, for "
-             "example 'This the title'.",
+        "example 'This the title'.",
     )
 
     parser_dandelion.add_argument(
