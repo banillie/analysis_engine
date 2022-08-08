@@ -367,6 +367,7 @@ def get_project_information(settings_dict) -> Dict[str, Union[str, int]]:
         str(settings_dict["root_path"])
         + "/core_data/"
         + config["PROJECT INFO"]["projects"]
+        + ".xlsx"
     )
     return get_project_info_data(path)
 
@@ -407,3 +408,18 @@ def open_json_file(path: str, **op_args):
         md["quarter_list"] = cli_qrts
         del md["json_master_data"]  # no longer required.
         return md
+
+
+def get_enviroment_funds_information(settings_dict) -> Dict[str, Union[str, int]]:
+    """Returns dictionary containing all project meta data. confi_path is the config.ini file path.
+    root_path is the core data root_path."""
+    config_path = settings_dict["root_path"] + settings_dict["config"]
+    config = configparser.ConfigParser()
+    config.read(config_path)
+    path = (
+        str(settings_dict["root_path"])
+        + "/core_data/"
+        + config["ENVIROMENTAL FUNDS"]["master"]
+        + ".xlsx"
+    )
+    return get_project_info_data(path)

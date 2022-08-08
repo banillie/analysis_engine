@@ -94,7 +94,7 @@ def handle_long_keys(key_name: str, **kwargs) -> str:
             for name in key_name:
                 if len(name) >= 30:
                     l = name.split()
-                    l.insert(6, "\n")
+                    l.insert(3, "\n")
                     new_str = " ".join(l)
                     output_list.append(re.sub("\s\\n\s", "\n", new_str))
                 else:
@@ -112,6 +112,7 @@ def handle_long_keys(key_name: str, **kwargs) -> str:
                 l.insert(1, "\n")
             if word_count >= 4:
                 l.insert(3, "\n")
+                l.insert(6, "\n")
             new_str = " ".join(l)
             return re.sub("\s\\n\s", "\n", new_str)
         else:

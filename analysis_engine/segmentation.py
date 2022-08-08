@@ -63,7 +63,7 @@ def get_group(md, tp, **kwargs) -> List[str]:
     # need to standardise so always full name used.
     if "group" in kwargs:
         for g in kwargs["group"]:
-            if g == "pipeline":
+            if g == "pipeline" or g == "environ_funds":
                 continue
             try:
                 loop_list = meta_groupings[tp][g]

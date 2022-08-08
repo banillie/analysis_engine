@@ -26,5 +26,6 @@ analysis_engine.egg-info
 other/
 analysis_engine/annotation.py
 analysis_engine/main_store.py
+.idea
 
 

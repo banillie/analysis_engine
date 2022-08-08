@@ -106,6 +106,9 @@ def test_build_dandelion_graph():
             cli.combined_args['abbreviations'] = True
 
         d_data = DandelionData(cli.md, **cli.combined_args)
+        if 'env_funds' in cli.combined_args:
+            if not cli.combined_args['env_funds']:  # empty list
+                d_data.get_environmental_fund_data()
 
         if cli.combined_args["chart"] != "save":
             make_a_dandelion_auto(d_data, **cli.combined_args)
