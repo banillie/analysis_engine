@@ -641,10 +641,12 @@ def run_parsers():
             "contractor_resource",
             "total_resource",
             "funded_resource",
+            "near_spend",
         ],
         help="The user can specify the type of value for project bubble sizes in the dandelion. Options are "
         "'remaining_costs', 'spent_costs', 'income', 'ps_resource', 'contractor_resource', "
-        "'total_resource' or 'funded_resource'.",
+        "'total_resource', 'funded_resource' or 'near_spend', which returns spend for this and the next "
+        "financial year.",
     )
 
     cli_args = parser.parse_args(sys.argv[2:])

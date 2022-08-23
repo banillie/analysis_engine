@@ -43,11 +43,12 @@ DCA_KEYS = {
         "finance": "SRO Finance confidence",
         "benefits": "SRO Benefits RAG",
         "schedule": "SRO Schedule Confidence",
+        "resource": "Overall Resource DCA - Now",
     },
     "ipa": {
         "ipa": "GMPP - IPA DCA",
     },
-    "resource": {"resource": "Overall Resource DCA - Now"},
+    # "resource": {"resource": "Overall Resource DCA - Now"},
 }
 
 PROJECT_INFO_KEYS = {
@@ -233,32 +234,13 @@ PORTFOLIO_RISK_SCORES = {
     "Very Likely": 4,
 }
 
-
 YEAR_LIST = [
-    # "16-17",
-    # "17-18",
-    # "18-19",
-    # "19-20",
-    # "20-21",
-    "21-22",
     "22-23",
     "23-24",
     "24-25",
     "25-26",
     "26-27",
     "27-28",
-    # "28-29",
-    # "29-30",
-    # "30-31",
-    # "31-32",
-    # "32-33",
-    # "33-34",
-    # "34-35",
-    # "35-36",
-    # "36-37",
-    # "37-38",
-    # "38-39",
-    # "39-40",
 ]
 
 RDEL_FORECAST_COST_KEYS = {

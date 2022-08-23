@@ -126,16 +126,17 @@ def cal_group_angle(dist_amount: int, group: List[str], inner_circles=False):
 #  change type to dandelion_type
 def get_dandelion_type_total(master, kwargs) -> int or str:
     tp = kwargs["quarter"][0]  # only one quarter for dandelion
+    cost = CostData(master, **kwargs)
     if "type" in kwargs:
         if kwargs["type"] == "remaining_costs":
-            cost = CostData(master, **kwargs)  # group costs data
             return cost.totals[tp]["costs_remaining"]
         if kwargs["type"] == "spent":
-            cost = CostData(master, **kwargs)
             return cost.totals[tp]["costs_spent"]
         if kwargs["type"] == "income":
-            cost = CostData(master, **kwargs)
             return cost.totals[tp]["income_total"]
+        if kwargs["type"] == "near_spend":
+            cost.get_forecast_cost_profile()
+            return sum(cost.profiles[tp]["Total Forecast"][0:2])  # reliant on YEAR_LIST
         if kwargs["type"] == "benefits":
             benefits = BenefitsData(master, **kwargs)
             return benefits.b_totals[tp]["total"]
@@ -148,7 +149,6 @@ def get_dandelion_type_total(master, kwargs) -> int or str:
             resource = ResourceData(master, **kwargs)
             return resource.totals[tp][kwargs["type"]]
     else:
-        cost = CostData(master, **kwargs)  # group costs data
         return cost.totals[tp]["total"]
 
 

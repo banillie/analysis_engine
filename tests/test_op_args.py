@@ -413,6 +413,12 @@ dlion_eviron_funds_group = {
     "env_funds": True,
     "angles": [320, 40],
 }
+dlion_near_spend = {
+    "test_name": "dlion_near_spend",
+    "subparser_name": "dandelion",
+    "type": "near_spend",
+    "chart": chart,
+}
 
 if REPORTING_TYPE == 'cdg':
     DANDELION_OP_ARGS_DICT = [
@@ -427,6 +433,7 @@ if REPORTING_TYPE == 'cdg':
     ]
 if REPORTING_TYPE == 'ipdc':
     DANDELION_OP_ARGS_DICT = [
+        dlion_near_spend,
         dlion_groups_ipdc_two,
         dlion_groups_ipdc,
         dlion_eviron_funds,
