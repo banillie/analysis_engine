@@ -485,19 +485,19 @@ def run_parsers():
         help="dates for analysis. Must provide start date and then end date in format e.g. '1/1/2021' '1/1/2022'.",
     )
 
-    parser_dandelion.add_argument(
-        "--env_funds",
-        type=str,
-        metavar="",
-        action="store",
-        nargs="*",
-        # choices=[],
-        help="Returns a dandelion graph for all environmental fund projects. Data for this graphic is "
-        "taken from a separate excel file saved in the core data folder which needs to be referenced "
-        "in the [ENVIRONMENTAL FUNDS] / master section of the config file. --env_fund is the default "
-        "and no other commands are necessary. However, the user can altered the output with other optional "
-        "arguments e.g. --angles . ",
-    )
+    # parser_dandelion.add_argument(
+    #     "--env_funds",
+    #     type=str,
+    #     metavar="",
+    #     action="store",
+    #     nargs="*",
+    #     # choices=[],
+    #     help="Returns a dandelion graph for all environmental fund projects. Data for this graphic is "
+    #     "taken from a separate excel file saved in the core data folder which needs to be referenced "
+    #     "in the [ENVIRONMENTAL FUNDS] / master section of the config file. --env_fund is the default "
+    #     "and no other commands are necessary. However, the user can altered the output with other optional "
+    #     "arguments e.g. --angles . ",
+    # )
 
     # group
     for sub in [
