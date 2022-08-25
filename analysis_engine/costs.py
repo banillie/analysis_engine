@@ -70,7 +70,7 @@ class CostData:
                 if "env_funds" not in self.kwargs:
                     if project_name in rm:
                         try:
-                            total - convert_none_types(
+                            total = total - convert_none_types(
                                 p_data[
                                     STANDARDISE_COST_KEYS[self.report]["income_total"]
                                 ]
