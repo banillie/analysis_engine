@@ -231,6 +231,13 @@ dlion_standard = {
     "subparser_name": "dandelion",
     "chart": chart,
 }
+dlion_pc_colour = {
+    "test_name": "dlion_pc_colour",
+    "subparser_name": "dandelion",
+    "chart": chart,
+    "pc": "A/R",
+    "angles": [250, 300, 360, 410, 440, 470]
+}
 dlion_groups_cdg = {
     "test_name": "dlion_groups",
     "subparser_name": "dandelion",
@@ -433,10 +440,11 @@ if REPORTING_TYPE == 'cdg':
     ]
 if REPORTING_TYPE == 'ipdc':
     DANDELION_OP_ARGS_DICT = [
+        dlion_pc_colour,
         dlion_near_spend,
         dlion_groups_ipdc_two,
         dlion_groups_ipdc,
-        dlion_eviron_funds,
+        # dlion_eviron_funds,  ## failing due to text colour
         dlion_remove,
         dlion_total_resource,
         dlion_contractor_resource,

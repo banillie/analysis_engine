@@ -141,10 +141,10 @@ def get_dandelion_type_total(master, kwargs) -> int or str:
             benefits = BenefitsData(master, **kwargs)
             return benefits.b_totals[tp]["total"]
         if kwargs["type"] in (
-            "ps_resource",
-            "contractor_resource",
-            "total_resource",
-            "funded_resource",
+                "ps_resource",
+                "contractor_resource",
+                "total_resource",
+                "funded_resource",
         ):
             resource = ResourceData(master, **kwargs)
             return resource.totals[tp][kwargs["type"]]
@@ -201,7 +201,22 @@ class DandelionData:
         else:
             pf_colour = COLOUR_DICT["WHITE"]
             pf_colour_edge = COLOUR_DICT["GREY"]
-        pf_text = "Portfolio\n" + dandelion_number_text(pf_wlc, **self.kwargs)
+        no_projects = len(get_group(self.master, self.quarter, **self.kwargs))
+
+        pf_text = f"Total Portfolio,\n{no_projects} Projects,\n{dandelion_number_text(pf_wlc, **self.kwargs)}.\n(forecast costs.)"
+        if "type" in self.kwargs:
+            if self.kwargs["type"] in (
+                    "ps_resource",
+                    "contractor_resource",
+                    "total_resource",
+                    "funded_resource",
+            ):
+                pf_text = f"Total Portfolio,\n{no_projects} Projects,\n{dandelion_number_text(pf_wlc, **self.kwargs)} FTEs."
+
+        if pf_colour != COLOUR_DICT["WHITE"]:
+            text_colour = "white"
+        else:
+            text_colour = "black"
 
         ## center circle
         g_d["portfolio"] = {
@@ -213,6 +228,7 @@ class DandelionData:
             "fill": "solid",
             "ec": pf_colour_edge,
             "alignment": ("center", "center"),
+            "text colour": text_colour,
         }
 
         ## first outer circle
@@ -237,7 +253,7 @@ class DandelionData:
                         g_abb = g
 
             g_text = (
-                g_abb + "\n" + dandelion_number_text(g_wlc, **self.kwargs)
+                    g_abb + "\n" + dandelion_number_text(g_wlc, **self.kwargs)
             )  # group text
 
             if g_wlc < pf_wlc / 10:  # adjusts any very small figures
@@ -255,6 +271,7 @@ class DandelionData:
                 "r": group_radius,
                 "wlc": g_wlc_adjusted,
                 "text": g_text,
+                "text colour": "black",
                 "colour": "#FFFFFF",
                 "fill": "dashed",
                 "ec": COLOUR_DICT["GREY"],
@@ -282,8 +299,8 @@ class DandelionData:
         for i, g in enumerate(self.group):
             if len(self.group) > 1:  # this needs testing
                 y_axis = 0 + (
-                    (math.sqrt(pf_wlc) + g_radius_dist)
-                    * math.sin(math.radians(g_ang_l[i]))
+                        (math.sqrt(pf_wlc) + g_radius_dist)
+                        * math.sin(math.radians(g_ang_l[i]))
                 )
                 x_axis = 0 + (math.sqrt(pf_wlc) + g_radius_dist) * math.cos(
                     math.radians(g_ang_l[i])
@@ -307,6 +324,7 @@ class DandelionData:
                     "ec": "grey",
                     "alignment": ("center", "center"),
                     "angle": 0,
+                    "text colour": "black",
                 }
 
         if "env_funds" not in self.kwargs:
@@ -339,7 +357,7 @@ class DandelionData:
                         p_value = 6000
 
                 if (
-                    p_value < pf_wlc * 0.02
+                        p_value < pf_wlc * 0.02
                 ):  # achieve some consistency for zero / low values
                     p_value_adjusted = pf_wlc * 0.008
                 else:
@@ -395,9 +413,9 @@ class DandelionData:
                         "funded resource",
                     ]:
                         project_text = (
-                            self.master.abbreviations[p]["abb"]
-                            + ", "
-                            + dandelion_number_text(p_value, **self.kwargs)
+                                self.master.abbreviations[p]["abb"]
+                                + ", "
+                                + dandelion_number_text(p_value, **self.kwargs)
                         )
                 if "values" in self.kwargs:
                     if self.kwargs["values"] == "No":
@@ -453,6 +471,7 @@ class DandelionData:
                     "text": project_text,
                     "fill": "solid",
                     "ec": edge_colour,
+                    "text colour": "black",
                 }
 
                 p_list.append((p_value, p_radius, p_schedule, p))
@@ -492,7 +511,7 @@ class DandelionData:
                     ]
 
             largest_p_radius = (
-                max(p_radius_list) * 1.5
+                    max(p_radius_list) * 1.5
             )  # value used for distance from inner circle.
             for i, p in enumerate(p_list):
                 angle = ang_l[i]
@@ -571,7 +590,7 @@ class DandelionData:
             g_abb = g
 
             g_text = (
-                g_abb + "\n" + dandelion_number_text(g_wlc, **self.kwargs)
+                    g_abb + "\n" + dandelion_number_text(g_wlc, **self.kwargs)
             )  # group text
 
             if g_wlc < pf_wlc / 10:  # adjusts any very small figures
@@ -607,8 +626,8 @@ class DandelionData:
         for i, g in enumerate(self.e_groups):
             if len(self.e_groups) > 1:  # this needs testing
                 y_axis = 0 + (
-                    (math.sqrt(pf_wlc) + g_radius_dist)
-                    * math.sin(math.radians(g_ang_l[i]))
+                        (math.sqrt(pf_wlc) + g_radius_dist)
+                        * math.sin(math.radians(g_ang_l[i]))
                 )
                 x_axis = 0 + (math.sqrt(pf_wlc) + g_radius_dist) * math.cos(
                     math.radians(g_ang_l[i])
@@ -646,7 +665,7 @@ class DandelionData:
                     p_number += 1
 
                 if (
-                    fund_value < pf_wlc * 0.02
+                        fund_value < pf_wlc * 0.02
                 ):  # achieve some consistency for zero / low values
                     fund_value_adjusted = pf_wlc * 0.008
                 else:
@@ -725,7 +744,7 @@ class DandelionData:
                     ang_l = [g_d[g]["angle"], g_d[g]["angle"] + 70]
 
             largest_p_radius = (
-                max(p_radius_list) * 1.5
+                    max(p_radius_list) * 1.5
             )  # value used for distance from inner circle.
             for i, p in enumerate(fund_list):
                 angle = ang_l[i]
@@ -888,6 +907,7 @@ def make_a_dandelion_auto(dl: DandelionData, **kwargs):
                 va="center",
                 weight="bold",
                 zorder=3,
+                color=dl.d_data[c]["text colour"],
             )
         else:
             x = dl.d_data[c]["tp"][0]

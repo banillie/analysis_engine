@@ -552,6 +552,16 @@ def run_parsers():
         "this argument currently is 'schedule' ",
     )
 
+    parser_dandelion.add_argument(
+        "--pc",
+        type=str,
+        metavar="",
+        action="store",
+        choices=["G", "A/G", "A", "A/R", "R"],
+        help="User can specify the colour of the central portfolio bubble, if desired. The options are "
+             "'G' 'A/G' 'A' 'A/R' 'R'.",
+    )
+
     # quarter
     for sub in [
         parser_speed_dial,
