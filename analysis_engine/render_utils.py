@@ -1,13 +1,13 @@
 import os
 import re
+import difflib
 
 from typing import TextIO, Union, Tuple, List
 from matplotlib import pyplot as plt
-from docx import Document
-from docx.shared import Inches
+from docx import Document, table
+from docx.shared import Pt, Cm, RGBColor, Inches
 from pdf2image import convert_from_path
 from openpyxl import Workbook, load_workbook
-from textwrap import wrap
 
 from analysis_engine.error_msgs import logger
 
@@ -132,3 +132,100 @@ def plus_minus_days(change_value):
         text = change_value
 
     return text
+
+
+def set_col_widths(word_table: table, widths: list) -> None:
+    """This function sets the width of table in a word document"""
+    for row in word_table.rows:
+        for idx, width in enumerate(widths):
+            row.cells[idx].width = width
+
+
+def compare_text_new_and_old(text_1: str, text_2: str, doc: Document) -> None:
+    """
+    Compares two sets of text and highlights differences in red text. In word.
+    """
+
+    comp = difflib.Differ()
+    diff = list(comp.compare(text_2.split(), text_1.split()))
+    diff = [x for x in diff if x[0] != "-"]  # remove all deleted text
+    diff = [x for x in diff if x[0] != "?"]  # remove ?. not sure what these represent.
+    y = doc.add_paragraph()
+    for i, text in enumerate(diff):
+        # f = len(diff) - 1
+        # if i < f:
+        #     a = i - 1
+        # else:
+        #     a = i
+
+        if text[0:3] == "  |" or text[0:3] == "+ |":
+            # j = i + 1
+            # if diff[i][:3] == "  |"
+            # if diff[i][0:3] and diff[a][0:3] == "  |":
+            y = doc.add_paragraph()
+            # else:
+            #     pass
+        # elif text[0:3] == "+ |":
+        #     if diff[i][0:3] and diff[a][0:3] == "+ |":
+        #         y = doc.add_paragraph()
+        #     else:
+        #         pass
+        # if text[0:3] == "- |":
+        #     pass
+        # if text[0:3] == "  -":
+        #     y = doc.add_paragraph()
+        #     g = diff[i][2]
+        #     y.add_run(g)
+        # elif text[0:3] == "  •":
+        #     y = doc.add_paragraph()
+        #     g = text[2]
+        #     y.add_run(g)
+        if text[0] == " ":
+            # total_nc += 1
+            if i == 0:
+                y.add_run(text[2:])
+            # if total_nc == 1:
+            #     y.add_run(text[2:])
+            else:
+                y.add_run(text[1:])
+        if text[0] == "+":
+            # w = len(diff[i])
+            # g = diff[i][1:w]
+            # total_plus += 1  # new text might not be first
+            if i == 0:
+                y.add_run(text[2:]).font.color.rgb = RGBColor(255, 0, 0)
+            else:
+                y.add_run(text[1:]).font.color.rgb = RGBColor(255, 0, 0)
+        # if diff[i][0] == "-":
+        #     pass
+        # if diff[i][0] == "?":
+        #     pass
+        # else:
+        #     if diff[i] != "+ |":
+        #         y.add_run(diff[i][1:])
+
+
+def make_columns_bold(columns: list) -> None:
+    for column in columns:
+        for cell in column.cells:
+            for paragraph in cell.paragraphs:
+                for run in paragraph.runs:
+                    run.font.bold = True
+
+
+def change_text_size(columns: list, size: int) -> None:
+    for column in columns:
+        for cell in column.cells:
+            for paragraph in cell.paragraphs:
+                for run in paragraph.runs:
+                    font = run.font
+                    font.size = Pt(size)
+
+
+def make_text_red(columns: list) -> None:
+    for column in columns:
+        for cell in column.cells:
+            for paragraph in cell.paragraphs:
+                for run in paragraph.runs:
+                    if run.text == "Not reported":
+                        run.font.color.rgb = RGBColor(255, 0, 0)

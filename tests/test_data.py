@@ -5,6 +5,7 @@ from analysis_engine.error_msgs import ProjectNameError, ProjectGroupError, Proj
 from analysis_engine.gmpp_int import GmppOnlineCosts
 from analysis_engine.merge import Merge
 from analysis_engine.risks import RiskData, portfolio_risks_into_excel, risks_into_excel
+from analysis_engine.summaries import run_p_reports
 from tests.test_op_args import *
 
 from analysis_engine.main import CliOpArgs
@@ -319,11 +320,9 @@ def test_costs():
 def test_summaries():
     if REPORTING_TYPE == 'ipdc':
         for x in SUM_OP_ARGS:
-            pass
-            # op_args["quarter"] = [str(m.current_quarter)]
-            # if "type" not in op_args:
-            #     op_args["type"] = "short"
-            # run_p_reports(m, **op_args)
+            print(x['test_name'])
+            cli = CliOpArgs(x, SETTINGS_DICT)
+            run_p_reports(cli.md, **cli.combined_args)
 
 
 # def test_summaries():
