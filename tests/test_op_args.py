@@ -1,3 +1,19 @@
+import datetime
+from dateutil.relativedelta import relativedelta
+
+
+def date_past():
+    # helper function for setting test dates
+    month_ago = datetime.datetime.today() - relativedelta(months=+1)
+    return month_ago.strftime('%d-%m-%Y')
+
+
+def date_future():
+    # helper function for setting test dates
+    three_months = datetime.datetime.today() + relativedelta(months=+3)
+    return three_months.strftime('%d-%m-%Y')
+
+
 # should include some settings that are wrong to test error messaging
 REPORTING_TYPE = "ipdc"
 chart = "show"
@@ -141,12 +157,13 @@ ms_groups_ipdc = {
     "subparser_name": "milestones",
     "group": ["HSRG"],
     "chart": chart,
+    "dates": [date_past(), date_future()],
 }
 ms_dates = {
     "test_name": "ms_dates",
     "subparser_name": "milestones",
     "chart": chart,
-    "dates": ["1/2/2022", "1/2/2023"],
+    "dates": [date_past(), date_future()],
 }
 ms_blue_line_config = {
     "test_name": "ms_bl_config",
@@ -154,12 +171,14 @@ ms_blue_line_config = {
     "blue_line": "config_date",
     "group": ["HSRG"],
     "chart": chart,
+    "dates": [date_past(), date_future()],
 }
 ms_blue_line_today = {
     "test_name": "ms_bl_today",
     "subparser_name": "milestones",
     "blue_line": "today",
     "chart": chart,
+    "dates": [date_past(), date_future()],
 }
 ms_koi_cdg = {
     "test_name": "ms_koi",
@@ -171,29 +190,32 @@ ms_koi_ipdc = {
     "test_name": "ms_koi",
     "subparser_name": "milestones",
     "chart": chart,
-    "koi": "OBC - IPDC Approval",
+    "koi": "FBC - IPDC Approval",
 }
 ms_koi_fn = {
     "test_name": "ms_koi_fn",
     "subparser_name": "milestones",
     "chart": chart,
     "koi_fn": "milestone_keys",
+    "dates": [date_past(), date_future()],
 }
 ms_quarters = {
     "test_name": "ms_quarters",
     "subparser_name": "milestones",
     "chart": chart,
     "quarter": ["Q4 21/22", "Q3 21/22", "Q2 21/22"],
+    "dates": [date_past(), date_future()],
 }
 ms_stages = {
     "test_name": "ms_stages",
     "subparser_name": "milestones",
     "stage": [
         # 'Outline Business Case',
-        # 'Full Business Case',
-        "Ongoing Board papers"
+        'Full Business Case',
     ],
     "chart": chart,
+    "dates": [date_past(), date_future()],
+
 }
 ms_koi_title_ipdc = {
     "test_name": "ms_koi",
@@ -201,16 +223,21 @@ ms_koi_title_ipdc = {
     "chart": chart,
     "koi": "OBC - IPDC Approval",
     "title": "OBC Approvals",
+    # "dates": [date_past(), date_future()],
 }
 
 if REPORTING_TYPE == 'ipdc':
     MILESTONES_OP_ARGS = [
+        # ms_standard,  # to large / slow to test
         ms_koi_title_ipdc,
         ms_koi_fn,
         ms_koi_ipdc,
         ms_groups_ipdc,
         ms_dates,
         ms_blue_line_config,
+        ms_blue_line_today,
+        ms_quarters,
+        ms_stages,
     ]
 if REPORTING_TYPE == 'cdg':
     MILESTONES_OP_ARGS = [
@@ -549,6 +576,16 @@ PORT_RISK_OP_ARGS =[
     pr_quarters,
     pr_standard,
 ]
+
+sum_standard = {
+    "test_name": "sum_standard",
+    "subparser_name": "summaries",
+}
+
+SUM_OP_ARGS = [
+    sum_standard,
+]
+
 
 # 'rag_number': '5',
 # 'order_by': 'cost',

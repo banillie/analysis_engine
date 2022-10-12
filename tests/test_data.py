@@ -5,15 +5,7 @@ from analysis_engine.error_msgs import ProjectNameError, ProjectGroupError, Proj
 from analysis_engine.gmpp_int import GmppOnlineCosts
 from analysis_engine.merge import Merge
 from analysis_engine.risks import RiskData, portfolio_risks_into_excel, risks_into_excel
-from tests.test_op_args import (
-    REPORTING_TYPE,
-    DANDELION_OP_ARGS_DICT,
-    SPEED_DIAL_AND_DCA_OP_ARGS,
-    MILESTONES_OP_ARGS,
-    QUERY_ARGS,
-    PORT_RISK_OP_ARGS,
-    COST_OP_ARGS,
-)
+from tests.test_op_args import *
 
 from analysis_engine.main import CliOpArgs
 from analysis_engine.settings import report_config, return_koi_fn_keys, get_masters_to_merge
@@ -322,6 +314,16 @@ def test_costs():
                 str(cli.settings["root_path"])
                 + cli.settings["excel_save_path"].format(f"{x['test_name']}")
             )
+
+
+def test_summaries():
+    if REPORTING_TYPE == 'ipdc':
+        for x in SUM_OP_ARGS:
+            pass
+            # op_args["quarter"] = [str(m.current_quarter)]
+            # if "type" not in op_args:
+            #     op_args["type"] = "short"
+            # run_p_reports(m, **op_args)
 
 
 # def test_summaries():
