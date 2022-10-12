@@ -24,7 +24,6 @@ analysis_engine.egg-info
 .nox
 .eggs
 other/
-analysis_engine/workings.py
 analysis_engine/main_store.py
 .idea
 
