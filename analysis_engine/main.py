@@ -66,7 +66,8 @@ class CliOpArgs:
             if "chart" not in (op_args.keys()):
                 op_args["chart"] = None
 
-        if self.programme == "dashboards":
+        # this limits summaries to current quarter only
+        if self.programme in ["dashboards", "summaries"]:
             op_args["quarter"] = "four"
 
         try:

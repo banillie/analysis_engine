@@ -23,7 +23,7 @@ from analysis_engine.cleaning import convert_none_types
 
 
 def run_p_reports(master, **kwargs) -> None:
-    group = get_group(master, master["current_quarter"], **kwargs)
+    group = get_group(master, master['current_quarter'], **kwargs)
     for p in group:
         print("Compiling summary for " + p)
         kwargs["full_name"] = p
@@ -85,7 +85,7 @@ def wd_heading(
 
 
 def key_contacts(doc: Document, master, **kwargs) -> None:
-    data = master.master_data[0]["data"][kwargs["full_name"]]
+    data = master["master_data"][0]["data"][kwargs["full_name"]]
     """Function adds keys contact details"""
     sro_name = data["Senior Responsible Owner (SRO)"]
     if sro_name is None:
@@ -141,6 +141,7 @@ def key_contacts(doc: Document, master, **kwargs) -> None:
     # )
 
 
+
 def dca_table(doc: Document, master, **kwargs) -> None:
     """Creates SRO confidence table"""
 
@@ -154,15 +155,15 @@ def dca_table(doc: Document, master, **kwargs) -> None:
     hdr_cells = w_table.rows[0].cells
     hdr_cells[0].text = "Delivery confidence"
     hdr_cells[1].text = "This quarter"
-    hdr_cells[2].text = str(master.master_data[1]["quarter"])
-    hdr_cells[3].text = str(master.master_data[2]["quarter"])
-    hdr_cells[4].text = str(master.master_data[3]["quarter"])
+    hdr_cells[2].text = str(master["master_data"][1]["quarter"])
+    hdr_cells[3].text = str(master["master_data"][2]["quarter"])
+    hdr_cells[4].text = str(master["master_data"][3]["quarter"])
 
     SRO_CONF_KEY_LIST = []
     for x, dca_key in enumerate(list(SRO_CONF_KEY_LIST.keys())):
         row_cells = w_table.add_row().cells
         row_cells[0].text = SRO_CONF_KEY_LIST[dca_key]
-        for i, m in enumerate(master.master_data[:4]):  # last four masters taken
+        for i, m in enumerate(master['master_data'][:4]):  # last four masters taken
             try:
                 rating = ""
                 # rating = convert_rag_text(m["data"][kwargs["full_name"]][dca_key])
@@ -215,13 +216,13 @@ def dca_narratives(doc: Document, master, **kwargs) -> None:
     for x in range(len(headings_list)):
         try:  # overall try statement relates to data_bridge
             text_one = str(
-                master.master_data[0]["data"][kwargs["full_name"]][
+                master['master_data'][0]["data"][kwargs["full_name"]][
                     narrative_keys_list[x]
                 ]
             )
             try:
                 text_two = str(
-                    master.master_data[1]["data"][kwargs["full_name"]][
+                    master['master_data'][1]["data"][kwargs["full_name"]][
                         narrative_keys_list[x]
                     ]
                 )
@@ -244,7 +245,7 @@ def forward_look(doc: Document, master, **kwargs) -> None:
     p.add_run(text).font.color.rgb = RGBColor(255, 0, 0)
 
     fwd_look = str(
-        master.master_data[0]["data"][kwargs["full_name"]][
+        master['master_data'][0]["data"][kwargs["full_name"]][
             "SRO Forward Look Assessment"
         ]
     )
@@ -264,13 +265,13 @@ def forward_look_narrative(doc: Document, master, **kwargs) -> None:
     for x in range(len(headings_list)):
         try:  # overall try statement relates to data_bridge
             text_one = str(
-                master.master_data[0]["data"][kwargs["full_name"]][
+                master['master_data'][0]["data"][kwargs["full_name"]][
                     narrative_keys_list[x]
                 ]
             )
             try:
                 text_two = str(
-                    master.master_data[1]["data"][kwargs["full_name"]][
+                    master['master_data'][1]["data"][kwargs["full_name"]][
                         narrative_keys_list[x]
                     ]
                 )
@@ -289,10 +290,10 @@ def forward_look_narrative(doc: Document, master, **kwargs) -> None:
 def project_scope_text(doc: Document, master, **kwargs) -> Document:
 
     doc.add_paragraph().add_run("Project Scope").bold = True
-    text_one = str(master.master_data[0]["data"][kwargs["full_name"]]["Project Scope"])
+    text_one = str(master['master_data'][0]["data"][kwargs["full_name"]]["Project Scope"])
     try:
         text_two = str(
-            master.master_data[1]["data"][kwargs["full_name"]]["Project Scope"]
+            master['master_data'][1]["data"][kwargs["full_name"]]["Project Scope"]
         )
     except KeyError:
         text_two = text_one
@@ -321,7 +322,7 @@ def project_report_meta_data(
     font = run.font
     font.bold = True
     font.underline = True
-    # master_data = costs.master.master_data[0]["data"]
+    # master_data = costs.master['master_data'][0]["data"]
     t = doc.add_table(rows=1, cols=4)
     hdr_cells = t.rows[0].cells
 
@@ -362,11 +363,11 @@ def project_report_meta_data(
     hdr_cells = table.rows[0].cells
     hdr_cells[0].text = "Type of funding:"
     hdr_cells[1].text = str(
-        master.master_data[0]["data"][kwargs["full_name"]]["Source of Finance"]
+        master['master_data'][0]["data"][kwargs["full_name"]]["Source of Finance"]
     )
     hdr_cells[2].text = "Contingency:"
     contingency = convert_none_types(
-        master.master_data[0]["data"][kwargs["full_name"]]["Overall contingency (£m)"]
+        master['master_data'][0]["data"][kwargs["full_name"]]["Overall contingency (£m)"]
     )
     if contingency is None:  # can this be refactored?
         hdr_cells[3].text = "None"
@@ -375,7 +376,7 @@ def project_report_meta_data(
     row_cells = table.add_row().cells
     row_cells[0].text = "Optimism Bias (OB):"
     ob = convert_none_types(
-        master.master_data[0]["data"][kwargs["full_name"]][
+        master['master_data'][0]["data"][kwargs["full_name"]][
             "Overall figure for Optimism Bias (£m)"
         ]
     )
@@ -387,7 +388,7 @@ def project_report_meta_data(
         except TypeError:
             row_cells[1].text = ob
     row_cells[2].text = "Contingency in costs:"
-    con_included_wlc = master.master_data[0]["data"][kwargs["full_name"]][
+    con_included_wlc = master['master_data'][0]["data"][kwargs["full_name"]][
         "Is this Continency amount included within the WLC?"
     ]
     if con_included_wlc is None:
@@ -396,7 +397,7 @@ def project_report_meta_data(
         row_cells[3].text = con_included_wlc
     row_cells = table.add_row().cells
     row_cells[0].text = "OB in costs:"
-    ob_included_wlc = master.master_data[0]["data"][kwargs["full_name"]][
+    ob_included_wlc = master['master_data'][0]["data"][kwargs["full_name"]][
         "Is this Optimism Bias included within the WLC?"
     ]
     if ob_included_wlc is None:
@@ -424,13 +425,13 @@ def project_report_meta_data(
     table = doc.add_table(rows=1, cols=4)
     hdr_cells = table.rows[0].cells
     hdr_cells[0].text = "Business case stage:"
-    hdr_cells[1].text = master.master_data[0]["data"][kwargs["full_name"]][
+    hdr_cells[1].text = master['master_data'][0]["data"][kwargs["full_name"]][
         "IPDC approval point"
     ]
     hdr_cells[2].text = "Delivery stage:"
     delivery_stage = str(
         convert_none_types(
-            master.master_data[0]["data"][kwargs["full_name"]]["Project stage"]
+            master['master_data'][0]["data"][kwargs["full_name"]]["Project stage"]
         )
     )
     if delivery_stage is None:
@@ -525,12 +526,12 @@ def project_report_meta_data(
     table = doc.add_table(rows=1, cols=4)
     hdr_cells = table.rows[0].cells
     hdr_cells[0].text = "VfM category:"
-    vfm_cat = master.master_data[0]["data"][kwargs["full_name"]][
+    vfm_cat = master['master_data'][0]["data"][kwargs["full_name"]][
         "VfM Category single entry"
     ]
     hdr_cells[1].text = str(vfm_cat)
     hdr_cells[2].text = "BCR:"
-    bcr = master.master_data[0]["data"][kwargs["full_name"]][
+    bcr = master['master_data'][0]["data"][kwargs["full_name"]][
         "Adjusted Benefits Cost Ratio (BCR)"
     ]
     hdr_cells[3].text = str(bcr)
@@ -559,7 +560,7 @@ def project_report_meta_data(
         + str(
             round(
                 convert_none_types(
-                    master.master_data[0]["data"][kwargs["full_name"]][
+                    master['master_data'][0]["data"][kwargs["full_name"]][
                         "Total BEN Forecast - Total Monetised Benefits"
                     ]
                 )
@@ -573,7 +574,7 @@ def project_report_meta_data(
         + str(
             round(
                 convert_none_types(
-                    master.master_data[0]["data"][kwargs["full_name"]][
+                    master['master_data'][0]["data"][kwargs["full_name"]][
                         "Total BEN Forecast - Economic (inc Private Partner)"
                     ]
                 )
@@ -589,7 +590,7 @@ def project_report_meta_data(
         + str(
             round(
                 convert_none_types(
-                    master.master_data[0]["data"][kwargs["full_name"]][
+                    master['master_data'][0]["data"][kwargs["full_name"]][
                         "Total BEN Forecast - Gov. Cashable"
                     ]
                 )
@@ -603,7 +604,7 @@ def project_report_meta_data(
         + str(
             round(
                 convert_none_types(
-                    master.master_data[0]["data"][kwargs["full_name"]][
+                    master['master_data'][0]["data"][kwargs["full_name"]][
                         "Total BEN Forecast - Disbenefit UK Economic"
                     ]
                 )
@@ -619,7 +620,7 @@ def project_report_meta_data(
         + str(
             round(
                 convert_none_types(
-                    master.master_data[0]["data"][kwargs["full_name"]][
+                    master['master_data'][0]["data"][kwargs["full_name"]][
                         "Total BEN Forecast - Gov. Non-Cashable"
                     ]
                 )

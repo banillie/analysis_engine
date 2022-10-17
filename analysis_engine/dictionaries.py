@@ -31,6 +31,12 @@ BC_STAGE_DICT_FULL_TO_ABB = {
     "Ongoing Board papers": "OBPs",
 }
 
+def list_dca_keys(dca_dict):
+    """
+    returns list for DCA_Keys dictionary. Purpose is keep the keys all in one
+    place so can be change once and not multiple time
+    """
+
 DCA_KEYS = {
     "cdg": {
         "sro": "Overall Delivery Confidence",
