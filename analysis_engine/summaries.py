@@ -3,9 +3,10 @@ from docx.enum.section import WD_SECTION_START, WD_ORIENTATION
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.oxml import parse_xml
 from docx.oxml.ns import nsdecls
-from docx.shared import Cm, RGBColor
+from docx.shared import Cm, RGBColor, Inches
 from docx import Document
 
+from analysis_engine.dictionaries import DCA_KEYS, narrative_keys_list, headings_list
 from analysis_engine.segmentation import get_group
 from analysis_engine.render_utils import (
     make_file_friendly,
@@ -14,9 +15,9 @@ from analysis_engine.render_utils import (
     make_columns_bold,
     change_text_size,
     make_text_red,
-    get_input_doc,
+    get_input_doc, put_matplotlib_fig_into_word,
 )
-from analysis_engine.costs import CostData
+from analysis_engine.costs import CostData, cost_profile_graph_new
 from analysis_engine.milestones import MilestoneData, get_milestone_date
 from analysis_engine.risks import RiskData
 from analysis_engine.cleaning import convert_none_types
@@ -27,11 +28,15 @@ def run_p_reports(master, **kwargs) -> None:
     for p in group:
         print("Compiling summary for " + p)
         kwargs["full_name"] = p
-        kwargs["group"] = master['project_information'][p]['Abbreviations']
+        kwargs["group"] = [master['project_information'][p]['Abbreviations']]
         # report_doc = ""
         report_doc = get_input_doc(kwargs["root_path"] + kwargs['word_portrait'])
         # qrt = make_file_friendly(str(master["current_quarter"])
-        compile_p_report_new(report_doc, master, **kwargs)
+        out = compile_p_report_new(report_doc, master, **kwargs)
+        out.save(
+            str(kwargs["root_path"])
+            + kwargs["word_save_path"].format(f'{p}_summary')
+        )
         # if kwargs["type"] == "long":
         #     output.save(root_path / "output/{}_long_report_{}.docx".format(p, qrt))
         # if kwargs["type"] == "short":
@@ -51,18 +56,25 @@ def compile_p_report_new(
     project_scope_text(doc, master, **kwargs)
     dca_narratives(doc, master, **kwargs)
     forward_look_narrative(doc, master, **kwargs)
+    # from this point needs to be current quarters data. Hack not a very elegant solution.
+    # However, not sure if summaries warrant time spent on a better solution.
+    # master['quarter_list'] = [master['current_quarter']]
+    # kwargs['group'] = [kwargs['group']]
     costs = CostData(master, **kwargs)
     costs.get_forecast_cost_profile()
-    costs.get_baseline_cost_profile()
+    # costs.get_baseline_cost_profile()
     # costs.get_cost_profile()
     # benefits = BenefitsData(master, **kwargs)
     milestones = MilestoneData(master, **kwargs)
     project_report_meta_data(doc, master, costs, milestones, **kwargs)
     change_word_doc_landscape(doc)
-    # cost_profile = cost_profile_graph_new(costs, master, **kwargs)
-    # put_matplotlib_fig_into_word(doc, cost_profile, **kwargs)
-    risks = RiskData(master, **kwargs)
-    print_out_project_risks(doc, risks, **kwargs)
+    ms_graph = cost_profile_graph_new(costs, **kwargs)
+    put_matplotlib_fig_into_word(doc, ms_graph, width=Inches(8))
+
+    # # cost_profile = cost_profile_graph_new(costs, master, **kwargs)
+    # # put_matplotlib_fig_into_word(doc, cost_profile, **kwargs)
+    # risks = RiskData(master, **kwargs)
+    # print_out_project_risks(doc, risks, **kwargs)
     return doc
 
 
@@ -159,10 +171,11 @@ def dca_table(doc: Document, master, **kwargs) -> None:
     hdr_cells[3].text = str(master["master_data"][2]["quarter"])
     hdr_cells[4].text = str(master["master_data"][3]["quarter"])
 
-    SRO_CONF_KEY_LIST = []
-    for x, dca_key in enumerate(list(SRO_CONF_KEY_LIST.keys())):
+    SRO_CONF_KEY_LIST = [list(DCA_KEYS["ipdc"].values())]
+    for x, dca_key in enumerate(SRO_CONF_KEY_LIST):
         row_cells = w_table.add_row().cells
-        row_cells[0].text = SRO_CONF_KEY_LIST[dca_key]
+        row_cells[0].text = dca_key
+        # row_cells[0].text = SRO_CONF_KEY_LIST[dca_key]  # to delete if refactor works
         for i, m in enumerate(master['master_data'][:4]):  # last four masters taken
             try:
                 rating = ""
@@ -188,32 +201,10 @@ def dca_narratives(doc: Document, master, **kwargs) -> None:
     # text = "*Red text highlights changes in narratives from last quarter"
     # p.add_run(text).font.color.rgb = RGBColor(255, 0, 0)
 
-    headings_list = [
-        "SRO delivery confidence narrative",
-        "Financial cost narrative",
-        "Financial comparison with last quarter",
-        "Financial comparison with baseline",
-        "Benefits Narrative",
-        "Benefits comparison with last quarter",
-        "Benefits comparison with baseline",
-        "Milestone narrative",
-    ]
-
-    narrative_keys_list = [
-        "Departmental DCA Narrative",
-        "Project Costs Narrative",
-        "Cost comparison with last quarters cost narrative",
-        "Cost comparison within this quarters cost narrative",
-        "Benefits Narrative",
-        "Ben comparison with last quarters cost - narrative",
-        "Ben comparison within this quarters cost - narrative",
-        "Milestone Commentary",
-    ]
-
     if kwargs["type"] == "short":
-        headings_list = headings_list[:1]
+        alt_headings_list = headings_list[:1]
 
-    for x in range(len(headings_list)):
+    for x in range(len(alt_headings_list)):
         try:  # overall try statement relates to data_bridge
             text_one = str(
                 master['master_data'][0]["data"][kwargs["full_name"]][
@@ -231,7 +222,7 @@ def dca_narratives(doc: Document, master, **kwargs) -> None:
         except KeyError:
             break
 
-        doc.add_paragraph().add_run(str(headings_list[x])).bold = True
+        doc.add_paragraph().add_run(str(alt_headings_list[x])).bold = True
 
         # There are two options here for comparing text. Have left this for now.
         # compare_text_showall(dca_a, dca_b, doc)
@@ -328,23 +319,23 @@ def project_report_meta_data(
 
     hdr_cells[0].text = "Total:"
     hdr_cells[1].text = (
-        "£" + str(round(costs.c_totals[kwargs["quarter"][0]]["total"])) + "m"
+        "£" + str(round(costs.totals[master['current_quarter']]['total'])) + "m"
     )
 
-    hdr_cells[2].text = "CDEL:"
-    hdr_cells[3].text = (
-        "£" + str(round(costs.c_totals[kwargs["quarter"][0]]["cdel"])) + "m"
-    )
-
-    row_cells = t.add_row().cells
-    row_cells[0].text = "RDEL:"
-    row_cells[1].text = (
-        "£" + str(round(costs.c_totals[kwargs["quarter"][0]]["rdel"])) + "m"
-    )
-    row_cells[2].text = "Non-Gov:"
-    row_cells[3].text = (
-        "£" + str(round(costs.c_totals[kwargs["quarter"][0]]["ngov"])) + "m"
-    )
+    # hdr_cells[2].text = "CDEL:"
+    # hdr_cells[3].text = (
+    #     "£" + str(round(costs.totals[master['current_quarter']]['cdel'])) + "m"
+    # )
+    #
+    # row_cells = t.add_row().cells
+    # row_cells[0].text = "RDEL:"
+    # row_cells[1].text = (
+    #     "£" + str(round(costs.totals[master['current_quarter']]['rdel'])) + "m"
+    # )
+    # row_cells[2].text = "Non-Gov:"
+    # row_cells[3].text = (
+    #     "£" + str(round(costs.totals[master['current_quarter']]['n_gov'])) + "m"
+    # )
 
     # set column width
     column_widths = (Cm(4), Cm(3), Cm(4), Cm(3))

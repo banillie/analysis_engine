@@ -580,6 +580,7 @@ PORT_RISK_OP_ARGS =[
 sum_standard = {
     "test_name": "sum_standard",
     "subparser_name": "summaries",
+    "type": "short",
 }
 
 SUM_OP_ARGS = [

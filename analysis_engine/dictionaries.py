@@ -31,12 +31,6 @@ BC_STAGE_DICT_FULL_TO_ABB = {
     "Ongoing Board papers": "OBPs",
 }
 
-def list_dca_keys(dca_dict):
-    """
-    returns list for DCA_Keys dictionary. Purpose is keep the keys all in one
-    place so can be change once and not multiple time
-    """
-
 DCA_KEYS = {
     "cdg": {
         "sro": "Overall Delivery Confidence",
@@ -282,3 +276,27 @@ CDEL_BL_COST_KEYS = {
     # "BL WLC": [],
     # " BL Income both Revenue and Capital": [],
 }
+
+# for summaries
+headings_list = [
+        "SRO delivery confidence narrative",
+        "Financial cost narrative",
+        "Financial comparison with last quarter",
+        "Financial comparison with baseline",
+        "Benefits Narrative",
+        "Benefits comparison with last quarter",
+        "Benefits comparison with baseline",
+        "Milestone narrative",
+    ]
+
+# for summaries
+narrative_keys_list = [
+    "Departmental DCA Narrative",
+    "Project Costs Narrative",
+    "Cost comparison with last quarters cost narrative",
+    "Cost comparison within this quarters cost narrative",
+    "Benefits Narrative",
+    "Ben comparison with last quarters cost - narrative",
+    "Ben comparison within this quarters cost - narrative",
+    "Milestone Commentary",
+]

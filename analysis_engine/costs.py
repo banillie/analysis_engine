@@ -178,7 +178,11 @@ class CostData:
                     try:
                         p_data = get_correct_p_data(self.master, p, tp)
                     except KeyError:
-                        p_data = get_correct_p_data(self.master, p, lst_qrt)
+                        try:
+                            p_data = get_correct_p_data(self.master, p, lst_qrt)
+                        except KeyError:
+                            p_data = None
+
                     if p_data is None:
                         continue
 
