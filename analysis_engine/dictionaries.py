@@ -51,6 +51,15 @@ DCA_KEYS = {
     # "resource": {"resource": "Overall Resource DCA - Now"},
 }
 
+SUMMARY_DCA_TEXT = {
+    "Departmental DCA": "SRO Overall DCA",
+    "SRO Finance confidence": "SRO Cost DCA",
+    "SRO Benefits RAG": "SRO Benefits DCA",
+    "Overall Resource DCA - Now": "SRO Resource DCA",
+    "SRO Schedule Confidence": "SRO Schedule DCA",
+}
+
+
 PROJECT_INFO_KEYS = {
     "cdg": {
         "group": "Directorate",
@@ -129,7 +138,7 @@ DATA_KEY_DICT = {
     "Departmental DCA": "Overall Delivery Confidence",
 }
 
-# Used in dashboards
+# Used in dashboards and summaries
 CONVERT_RAG = {
     "Green": "G",
     "Amber/Green": "A/G",
@@ -278,25 +287,17 @@ CDEL_BL_COST_KEYS = {
 }
 
 # for summaries
-headings_list = [
-        "SRO delivery confidence narrative",
-        "Financial cost narrative",
-        "Financial comparison with last quarter",
-        "Financial comparison with baseline",
-        "Benefits Narrative",
-        "Benefits comparison with last quarter",
-        "Benefits comparison with baseline",
-        "Milestone narrative",
-    ]
+SUMMARY_NARRATIVES = {
+    "SRO Forward Look Assessment": "SRO Forward Look Assessment",
+    "SRO delivery confidence narrative": "Departmental DCA Narrative",
+    "SRO Forward Look Narrative": "SRO Forward Look Narrative",
+    "Financial cost narrative": "Project Costs Narrative",
+    "Financial comparison with last quarter": "Cost comparison with last quarters cost narrative",
+    "Financial comparison with baseline": "Cost comparison within this quarters cost narrative",
+    "Benefits Narrative": "Benefits Narrative",
+    "Benefits comparison with last quarter": "Ben comparison with last quarters cost - narrative",
+    "Benefits comparison with baseline": "Ben comparison within this quarters cost - narrative",
+    "Milestone narrative": "Milestone Commentary",
+    "Project Scope": "Project Scope",
+}
 
-# for summaries
-narrative_keys_list = [
-    "Departmental DCA Narrative",
-    "Project Costs Narrative",
-    "Cost comparison with last quarters cost narrative",
-    "Cost comparison within this quarters cost narrative",
-    "Benefits Narrative",
-    "Ben comparison with last quarters cost - narrative",
-    "Ben comparison within this quarters cost - narrative",
-    "Milestone Commentary",
-]

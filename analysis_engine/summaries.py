@@ -6,7 +6,13 @@ from docx.oxml.ns import nsdecls
 from docx.shared import Cm, RGBColor, Inches
 from docx import Document
 
-from analysis_engine.dictionaries import DCA_KEYS, narrative_keys_list, headings_list
+from analysis_engine.benefits import BenefitsData
+from analysis_engine.dictionaries import (
+    DCA_KEYS,
+    SUMMARY_DCA_TEXT,
+    CONVERT_RAG,
+    SUMMARY_NARRATIVES,
+)
 from analysis_engine.segmentation import get_group
 from analysis_engine.render_utils import (
     make_file_friendly,
@@ -15,7 +21,8 @@ from analysis_engine.render_utils import (
     make_columns_bold,
     change_text_size,
     make_text_red,
-    get_input_doc, put_matplotlib_fig_into_word,
+    get_input_doc,
+    put_matplotlib_fig_into_word,
 )
 from analysis_engine.costs import CostData, cost_profile_graph_new
 from analysis_engine.milestones import MilestoneData, get_milestone_date
@@ -24,18 +31,17 @@ from analysis_engine.cleaning import convert_none_types
 
 
 def run_p_reports(master, **kwargs) -> None:
-    group = get_group(master, master['current_quarter'], **kwargs)
+    group = get_group(master, master["current_quarter"], **kwargs)
     for p in group:
         print("Compiling summary for " + p)
         kwargs["full_name"] = p
-        kwargs["group"] = [master['project_information'][p]['Abbreviations']]
+        kwargs["group"] = [master["project_information"][p]["Abbreviations"]]
         # report_doc = ""
-        report_doc = get_input_doc(kwargs["root_path"] + kwargs['word_portrait'])
+        report_doc = get_input_doc(kwargs["root_path"] + kwargs["word_portrait"])
         # qrt = make_file_friendly(str(master["current_quarter"])
         out = compile_p_report_new(report_doc, master, **kwargs)
         out.save(
-            str(kwargs["root_path"])
-            + kwargs["word_save_path"].format(f'{p}_summary')
+            str(kwargs["root_path"]) + kwargs["word_save_path"].format(f"{p}_summary")
         )
         # if kwargs["type"] == "long":
         #     output.save(root_path / "output/{}_long_report_{}.docx".format(p, qrt))
@@ -48,31 +54,19 @@ def compile_p_report_new(
     master,
     **kwargs,
 ) -> Document:
-    # kwargs["full_name"] = master.full_names[kwargs["group"][0]]
     wd_heading(doc, **kwargs)
     key_contacts(doc, master, **kwargs)
     dca_table(doc, master, **kwargs)
-    forward_look(doc, master, **kwargs)
-    project_scope_text(doc, master, **kwargs)
     dca_narratives(doc, master, **kwargs)
-    forward_look_narrative(doc, master, **kwargs)
-    # from this point needs to be current quarters data. Hack not a very elegant solution.
-    # However, not sure if summaries warrant time spent on a better solution.
-    # master['quarter_list'] = [master['current_quarter']]
-    # kwargs['group'] = [kwargs['group']]
     costs = CostData(master, **kwargs)
     costs.get_forecast_cost_profile()
-    # costs.get_baseline_cost_profile()
-    # costs.get_cost_profile()
-    # benefits = BenefitsData(master, **kwargs)
+    # benefits = BenefitsData(master, **kwargs)  # not used
     milestones = MilestoneData(master, **kwargs)
     project_report_meta_data(doc, master, costs, milestones, **kwargs)
     change_word_doc_landscape(doc)
+    kwargs["title"] = "Cost Profile (for each of the last four quarters)"
     ms_graph = cost_profile_graph_new(costs, **kwargs)
     put_matplotlib_fig_into_word(doc, ms_graph, width=Inches(8))
-
-    # # cost_profile = cost_profile_graph_new(costs, master, **kwargs)
-    # # put_matplotlib_fig_into_word(doc, cost_profile, **kwargs)
     # risks = RiskData(master, **kwargs)
     # print_out_project_risks(doc, risks, **kwargs)
     return doc
@@ -131,28 +125,6 @@ def key_contacts(doc: Document, master, **kwargs) -> None:
         "PD: " + str(pd_name) + ", " + str(pd_email) + ", " + str(pd_phone)
     )
 
-    # contact_name = data["Working Contact Name"]
-    # if contact_name is None:
-    #     contact_name = "tbc"
-
-    # contact_email = data["Working Contact Email"]
-    # if contact_email is None:
-    #     contact_email = "email: tbc"
-    #
-    # contact_phone = data["Working Contact Telephone"]
-    # if contact_phone is None:
-    #     contact_phone = "phone: tbc"
-    #
-    # doc.add_paragraph(
-    #     "PfM reporting lead: "
-    #     + str(contact_name)
-    #     + ", "
-    #     + str(contact_email)
-    #     + ", "
-    #     + str(contact_phone)
-    # )
-
-
 
 def dca_table(doc: Document, master, **kwargs) -> None:
     """Creates SRO confidence table"""
@@ -171,15 +143,13 @@ def dca_table(doc: Document, master, **kwargs) -> None:
     hdr_cells[3].text = str(master["master_data"][2]["quarter"])
     hdr_cells[4].text = str(master["master_data"][3]["quarter"])
 
-    SRO_CONF_KEY_LIST = [list(DCA_KEYS["ipdc"].values())]
+    SRO_CONF_KEY_LIST = list(DCA_KEYS["ipdc"].values())
     for x, dca_key in enumerate(SRO_CONF_KEY_LIST):
         row_cells = w_table.add_row().cells
-        row_cells[0].text = dca_key
-        # row_cells[0].text = SRO_CONF_KEY_LIST[dca_key]  # to delete if refactor works
-        for i, m in enumerate(master['master_data'][:4]):  # last four masters taken
+        row_cells[0].text = SUMMARY_DCA_TEXT[dca_key]
+        for i, m in enumerate(master["master_data"][:4]):  # last four masters taken
             try:
-                rating = ""
-                # rating = convert_rag_text(m["data"][kwargs["full_name"]][dca_key])
+                rating = CONVERT_RAG[m["data"][kwargs["full_name"]][dca_key]]
                 row_cells[i + 1].text = rating
                 cell_colouring(row_cells[i + 1], rating)
             except (KeyError, TypeError):
@@ -196,74 +166,23 @@ def dca_narratives(doc: Document, master, **kwargs) -> None:
     """Places all narratives into document and checks for differences between
     current and last quarter"""
 
-    # doc.add_paragraph()
-    # p = doc.add_paragraph()
-    # text = "*Red text highlights changes in narratives from last quarter"
-    # p.add_run(text).font.color.rgb = RGBColor(255, 0, 0)
-
-    if kwargs["type"] == "short":
-        alt_headings_list = headings_list[:1]
-
-    for x in range(len(alt_headings_list)):
-        try:  # overall try statement relates to data_bridge
-            text_one = str(
-                master['master_data'][0]["data"][kwargs["full_name"]][
-                    narrative_keys_list[x]
-                ]
-            )
-            try:
-                text_two = str(
-                    master['master_data'][1]["data"][kwargs["full_name"]][
-                        narrative_keys_list[x]
-                    ]
-                )
-            except (KeyError, IndexError):  # index error relates to data_bridge
-                text_two = text_one
-        except KeyError:
-            break
-
-        doc.add_paragraph().add_run(str(alt_headings_list[x])).bold = True
-
-        # There are two options here for comparing text. Have left this for now.
-        # compare_text_showall(dca_a, dca_b, doc)
-        compare_text_new_and_old(text_one, text_two, doc)
-
-
-def forward_look(doc: Document, master, **kwargs) -> None:
     doc.add_paragraph()
     p = doc.add_paragraph()
     text = "*Red text highlights changes in narratives from last quarter"
     p.add_run(text).font.color.rgb = RGBColor(255, 0, 0)
 
-    fwd_look = str(
-        master['master_data'][0]["data"][kwargs["full_name"]][
-            "SRO Forward Look Assessment"
-        ]
-    )
-
-    doc.add_paragraph().add_run(
-        "SRO Forward Look Assessment: " + str(fwd_look).upper()
-    ).bold = True
-
-
-def forward_look_narrative(doc: Document, master, **kwargs) -> None:
-    headings_list = [
-        "SRO Forward Look Narrative",
-    ]
-
-    narrative_keys_list = ["SRO Forward Look Narrative"]
-
-    for x in range(len(headings_list)):
-        try:  # overall try statement relates to data_bridge
+    for k in list(SUMMARY_NARRATIVES.keys()):
+        try:
+            doc.add_paragraph().add_run(k).bold = True
             text_one = str(
-                master['master_data'][0]["data"][kwargs["full_name"]][
-                    narrative_keys_list[x]
+                master["master_data"][0]["data"][kwargs["full_name"]][
+                    SUMMARY_NARRATIVES[k]
                 ]
             )
             try:
                 text_two = str(
-                    master['master_data'][1]["data"][kwargs["full_name"]][
-                        narrative_keys_list[x]
+                    master["master_data"][1]["data"][kwargs["full_name"]][
+                        SUMMARY_NARRATIVES[k]
                     ]
                 )
             except (KeyError, IndexError):  # index error relates to data_bridge
@@ -271,27 +190,7 @@ def forward_look_narrative(doc: Document, master, **kwargs) -> None:
         except KeyError:
             break
 
-        doc.add_paragraph().add_run(str(headings_list[x])).bold = True
-
-        # There are two options here for comparing text. Have left this for now.
-        # compare_text_showall(dca_a, dca_b, doc)
         compare_text_new_and_old(text_one, text_two, doc)
-
-
-def project_scope_text(doc: Document, master, **kwargs) -> Document:
-
-    doc.add_paragraph().add_run("Project Scope").bold = True
-    text_one = str(master['master_data'][0]["data"][kwargs["full_name"]]["Project Scope"])
-    try:
-        text_two = str(
-            master['master_data'][1]["data"][kwargs["full_name"]]["Project Scope"]
-        )
-    except KeyError:
-        text_two = text_one
-    # different options for comparing costs
-    # compare_text_showall(dca_a, dca_b, doc)
-    compare_text_new_and_old(text_one, text_two, doc)
-    return doc
 
 
 def project_report_meta_data(
@@ -319,9 +218,10 @@ def project_report_meta_data(
 
     hdr_cells[0].text = "Total:"
     hdr_cells[1].text = (
-        "£" + str(round(costs.totals[master['current_quarter']]['total'])) + "m"
+        "£" + str(round(costs.totals[master["current_quarter"]]["total"])) + "m"
     )
 
+    ## NOT USER REQUIREMENT AT MOMENT
     # hdr_cells[2].text = "CDEL:"
     # hdr_cells[3].text = (
     #     "£" + str(round(costs.totals[master['current_quarter']]['cdel'])) + "m"
@@ -354,11 +254,13 @@ def project_report_meta_data(
     hdr_cells = table.rows[0].cells
     hdr_cells[0].text = "Type of funding:"
     hdr_cells[1].text = str(
-        master['master_data'][0]["data"][kwargs["full_name"]]["Source of Finance"]
+        master["master_data"][0]["data"][kwargs["full_name"]]["Source of Finance"]
     )
     hdr_cells[2].text = "Contingency:"
     contingency = convert_none_types(
-        master['master_data'][0]["data"][kwargs["full_name"]]["Overall contingency (£m)"]
+        master["master_data"][0]["data"][kwargs["full_name"]][
+            "Overall contingency (£m)"
+        ]
     )
     if contingency is None:  # can this be refactored?
         hdr_cells[3].text = "None"
@@ -367,7 +269,7 @@ def project_report_meta_data(
     row_cells = table.add_row().cells
     row_cells[0].text = "Optimism Bias (OB):"
     ob = convert_none_types(
-        master['master_data'][0]["data"][kwargs["full_name"]][
+        master["master_data"][0]["data"][kwargs["full_name"]][
             "Overall figure for Optimism Bias (£m)"
         ]
     )
@@ -379,7 +281,7 @@ def project_report_meta_data(
         except TypeError:
             row_cells[1].text = ob
     row_cells[2].text = "Contingency in costs:"
-    con_included_wlc = master['master_data'][0]["data"][kwargs["full_name"]][
+    con_included_wlc = master["master_data"][0]["data"][kwargs["full_name"]][
         "Is this Continency amount included within the WLC?"
     ]
     if con_included_wlc is None:
@@ -388,7 +290,7 @@ def project_report_meta_data(
         row_cells[3].text = con_included_wlc
     row_cells = table.add_row().cells
     row_cells[0].text = "OB in costs:"
-    ob_included_wlc = master['master_data'][0]["data"][kwargs["full_name"]][
+    ob_included_wlc = master["master_data"][0]["data"][kwargs["full_name"]][
         "Is this Optimism Bias included within the WLC?"
     ]
     if ob_included_wlc is None:
@@ -416,13 +318,13 @@ def project_report_meta_data(
     table = doc.add_table(rows=1, cols=4)
     hdr_cells = table.rows[0].cells
     hdr_cells[0].text = "Business case stage:"
-    hdr_cells[1].text = master['master_data'][0]["data"][kwargs["full_name"]][
+    hdr_cells[1].text = master["master_data"][0]["data"][kwargs["full_name"]][
         "IPDC approval point"
     ]
     hdr_cells[2].text = "Delivery stage:"
     delivery_stage = str(
         convert_none_types(
-            master['master_data'][0]["data"][kwargs["full_name"]]["Project stage"]
+            master["master_data"][0]["data"][kwargs["full_name"]]["Project stage"]
         )
     )
     if delivery_stage is None:
@@ -452,10 +354,10 @@ def project_report_meta_data(
     hdr_cells[0].text = "Start date:"
     try:
         start_project = get_milestone_date(
-            abb,
             milestones.milestone_dict,
-            str(master.current_quarter),
-            "Start of Project",
+            "Project - Start Date",
+            str(master["current_quarter"]),
+            abb,
         )
         hdr_cells[1].text = start_project.strftime("%d/%m/%Y")
     except (KeyError, AttributeError):
@@ -464,10 +366,10 @@ def project_report_meta_data(
     hdr_cells[2].text = "Start of operations:"
     try:
         start_ops = get_milestone_date(
-            abb,
             milestones.milestone_dict,
-            str(master.current_quarter),
             "Start of Operation",
+            str(master["current_quarter"]),
+            abb,
         )
         hdr_cells[3].text = start_ops.strftime("%d/%m/%Y")
     except (KeyError, AttributeError):
@@ -477,10 +379,10 @@ def project_report_meta_data(
     row_cells[0].text = "Start of construction:"
     try:
         start_con = get_milestone_date(
-            abb,
             milestones.milestone_dict,
-            str(master.current_quarter),
             "Start of Construction/build",
+            str(master["current_quarter"]),
+            abb,
         )
         row_cells[1].text = start_con.strftime("%d/%m/%Y")
     except (KeyError, AttributeError):
@@ -489,10 +391,10 @@ def project_report_meta_data(
     row_cells[2].text = "Full Operations:"  # check
     try:
         full_ops = get_milestone_date(
-            abb,
             milestones.milestone_dict,
-            str(master.current_quarter),
             "Full Operations",
+            str(master["current_quarter"]),
+            abb,
         )
         row_cells[3].text = full_ops.strftime("%d/%m/%Y")
     except (KeyError, AttributeError):
@@ -517,12 +419,12 @@ def project_report_meta_data(
     table = doc.add_table(rows=1, cols=4)
     hdr_cells = table.rows[0].cells
     hdr_cells[0].text = "VfM category:"
-    vfm_cat = master['master_data'][0]["data"][kwargs["full_name"]][
+    vfm_cat = master["master_data"][0]["data"][kwargs["full_name"]][
         "VfM Category single entry"
     ]
     hdr_cells[1].text = str(vfm_cat)
     hdr_cells[2].text = "BCR:"
-    bcr = master['master_data'][0]["data"][kwargs["full_name"]][
+    bcr = master["master_data"][0]["data"][kwargs["full_name"]][
         "Adjusted Benefits Cost Ratio (BCR)"
     ]
     hdr_cells[3].text = str(bcr)
@@ -551,7 +453,7 @@ def project_report_meta_data(
         + str(
             round(
                 convert_none_types(
-                    master['master_data'][0]["data"][kwargs["full_name"]][
+                    master["master_data"][0]["data"][kwargs["full_name"]][
                         "Total BEN Forecast - Total Monetised Benefits"
                     ]
                 )
@@ -565,7 +467,7 @@ def project_report_meta_data(
         + str(
             round(
                 convert_none_types(
-                    master['master_data'][0]["data"][kwargs["full_name"]][
+                    master["master_data"][0]["data"][kwargs["full_name"]][
                         "Total BEN Forecast - Economic (inc Private Partner)"
                     ]
                 )
@@ -581,7 +483,7 @@ def project_report_meta_data(
         + str(
             round(
                 convert_none_types(
-                    master['master_data'][0]["data"][kwargs["full_name"]][
+                    master["master_data"][0]["data"][kwargs["full_name"]][
                         "Total BEN Forecast - Gov. Cashable"
                     ]
                 )
@@ -595,7 +497,7 @@ def project_report_meta_data(
         + str(
             round(
                 convert_none_types(
-                    master['master_data'][0]["data"][kwargs["full_name"]][
+                    master["master_data"][0]["data"][kwargs["full_name"]][
                         "Total BEN Forecast - Disbenefit UK Economic"
                     ]
                 )
@@ -611,7 +513,7 @@ def project_report_meta_data(
         + str(
             round(
                 convert_none_types(
-                    master['master_data'][0]["data"][kwargs["full_name"]][
+                    master["master_data"][0]["data"][kwargs["full_name"]][
                         "Total BEN Forecast - Gov. Non-Cashable"
                     ]
                 )

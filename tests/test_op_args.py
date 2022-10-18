@@ -583,8 +583,16 @@ sum_standard = {
     "type": "short",
 }
 
+sum_group = {
+    "test_name": "sum_standard",
+    "subparser_name": "summaries",
+    "type": "short",
+    "group": ["HSRG"],
+}
+
 SUM_OP_ARGS = [
     sum_standard,
+    # sum_group,
 ]
 
 
