@@ -129,13 +129,16 @@ def get_board_date(op_args):
 
 
 def get_remove_income(op_args):
-    try:
-        config_path = op_args["root_path"] + op_args["config"]
-        config = configparser.ConfigParser()
-        config.read(config_path)
-        return config["COSTS"]["remove_income"]
-    except:
-        config_issue()
+    if op_args['report'] == 'ipdc':
+        try:
+            config_path = op_args["root_path"] + op_args["config"]
+            config = configparser.ConfigParser()
+            config.read(config_path)
+            return config["COSTS"]["remove_income"]
+        except:
+            config_issue()  # this could be improved to be more specific
+    else:
+        return []
 
 
 def get_integration_data(op_args):

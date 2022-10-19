@@ -4,18 +4,18 @@ from dateutil.relativedelta import relativedelta
 
 def date_past():
     # helper function for setting test dates
-    month_ago = datetime.datetime.today() - relativedelta(months=+1)
+    month_ago = datetime.datetime.today() - relativedelta(months=+12)
     return month_ago.strftime('%d-%m-%Y')
 
 
 def date_future():
     # helper function for setting test dates
-    three_months = datetime.datetime.today() + relativedelta(months=+3)
+    three_months = datetime.datetime.today() + relativedelta(months=+12)
     return three_months.strftime('%d-%m-%Y')
 
 
 # should include some settings that are wrong to test error messaging
-REPORTING_TYPE = "ipdc"
+REPORTING_TYPE = "cdg"
 chart = "show"
 
 cost_standard = {
@@ -169,7 +169,7 @@ ms_blue_line_config = {
     "test_name": "ms_bl_config",
     "subparser_name": "milestones",
     "blue_line": "config_date",
-    "group": ["HSRG"],
+    "group": ["CFPD"],
     "chart": chart,
     "dates": [date_past(), date_future()],
 }
