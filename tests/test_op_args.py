@@ -263,7 +263,7 @@ dlion_pc_colour = {
     "subparser_name": "dandelion",
     "chart": chart,
     "pc": "A/R",
-    "angles": [250, 300, 360, 410, 440, 470]
+    # "angles": [250, 300, 360, 410, 440, 470, 500]
 }
 dlion_groups_cdg = {
     "test_name": "dlion_groups",
@@ -336,7 +336,7 @@ dlion_angles_cdg = {
 dlion_angles_ipdc = {
     "test_name": "dlion_angles",
     "subparser_name": "dandelion",
-    "angles": [250, 290, 350, 40, 90, 130],
+    "angles": [250, 290, 350, 40, 90, 130, 170],
     "chart": chart,
 }
 # dlion_benefits = {
@@ -590,9 +590,17 @@ sum_group = {
     "group": ["HSRG"],
 }
 
+sum_group_two = {
+    "test_name": "sum_standard",
+    "subparser_name": "summaries",
+    "type": "short",
+    "group": ["A358"],
+}
+
 SUM_OP_ARGS = [
-    sum_standard,
-    # sum_group,
+    # sum_standard,
+    sum_group,
+    # sum_group_two,
 ]
 
 

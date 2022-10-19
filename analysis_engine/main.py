@@ -40,6 +40,7 @@ from analysis_engine.error_msgs import (
 )
 
 from analysis_engine.costs import CostData, cost_profile_graph_new, cost_profile_into_wb_new
+from analysis_engine.summaries import run_p_reports
 
 
 class CliOpArgs:
@@ -129,6 +130,9 @@ def initiate(settings_dict):
 def run_analysis(args, settings):
     cli = CliOpArgs(args, settings)
     try:
+
+        if cli.programme == "summaries":
+            run_p_reports(cli.md, **cli.combined_args)
 
         if cli.programme == "costs":
             c = CostData(cli.md, **cli.combined_args)
@@ -430,6 +434,13 @@ def run_parsers():
         "for the --quarters argument.",
     )
 
+    parser_summaries = subparsers.add_parser(
+        "summaries",
+        help="Produce summary reports for projects in a word document.",
+        description="Produce summary reports for projects in a word document. You have use the --group argument "
+                    "to specify which projects you would like to produce summaries for."
+    )
+
     parser_dandelion.add_argument(
         "--angles",
         type=int,
@@ -510,6 +521,7 @@ def run_parsers():
         parser_milestones,
         parser_data_query,
         parser_costs,
+        parser_summaries,
     ]:
         sub.add_argument(
             "--group",

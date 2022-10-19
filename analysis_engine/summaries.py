@@ -361,7 +361,16 @@ def project_report_meta_data(
         )
         hdr_cells[1].text = start_project.strftime("%d/%m/%Y")
     except (KeyError, AttributeError):
-        hdr_cells[1].text = "Not reported"
+        try:   # the team has two keys !!!!
+            start_project = get_milestone_date(
+                milestones.milestone_dict,
+                "Start of Project",
+                str(master["current_quarter"]),
+                abb,
+            )
+            hdr_cells[1].text = start_project.strftime("%d/%m/%Y")
+        except (KeyError, AttributeError):
+            hdr_cells[1].text = "Not reported"
 
     hdr_cells[2].text = "Start of operations:"
     try:
