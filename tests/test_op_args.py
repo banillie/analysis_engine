@@ -2,15 +2,15 @@ import datetime
 from dateutil.relativedelta import relativedelta
 
 
-def date_past():
+def date_past(time_period: int):
     # helper function for setting test dates
-    month_ago = datetime.datetime.today() - relativedelta(months=+12)
+    month_ago = datetime.datetime.today() - relativedelta(months=+time_period)
     return month_ago.strftime('%d-%m-%Y')
 
 
-def date_future():
+def date_future(time_period: int):
     # helper function for setting test dates
-    three_months = datetime.datetime.today() + relativedelta(months=+12)
+    three_months = datetime.datetime.today() + relativedelta(months=+time_period)
     return three_months.strftime('%d-%m-%Y')
 
 
@@ -141,10 +141,18 @@ if REPORTING_TYPE == 'ipdc':
         q_koi_ipdc,
     ]
 
+if REPORTING_TYPE == 'ipdc':
+    start_date = date_past(1)
+    end_date = date_future(3)
+if REPORTING_TYPE == 'cdg':
+    start_date = date_past(6)
+    end_date = date_future(6)
+
 ms_standard = {
     "test_name": "ms_standard",
     "subparser_name": "milestones",
     "chart": chart,
+    "dates": [start_date, end_date],
 }
 ms_groups_cdg = {
     "test_name": "ms_groups",
@@ -157,28 +165,27 @@ ms_groups_ipdc = {
     "subparser_name": "milestones",
     "group": ["HSRG"],
     "chart": chart,
-    "dates": [date_past(), date_future()],
+    "dates": [start_date, end_date],
 }
-ms_dates = {
+ms_dates_ipdc = {
     "test_name": "ms_dates",
     "subparser_name": "milestones",
     "chart": chart,
-    "dates": [date_past(), date_future()],
+    "dates": [start_date, end_date],
 }
 ms_blue_line_config = {
     "test_name": "ms_bl_config",
     "subparser_name": "milestones",
     "blue_line": "config_date",
-    "group": ["CFPD"],
     "chart": chart,
-    "dates": [date_past(), date_future()],
+    "dates": [start_date, end_date],
 }
 ms_blue_line_today = {
     "test_name": "ms_bl_today",
     "subparser_name": "milestones",
     "blue_line": "today",
     "chart": chart,
-    "dates": [date_past(), date_future()],
+    "dates": [start_date, end_date],
 }
 ms_koi_cdg = {
     "test_name": "ms_koi",
@@ -197,14 +204,14 @@ ms_koi_fn = {
     "subparser_name": "milestones",
     "chart": chart,
     "koi_fn": "milestone_keys",
-    "dates": [date_past(), date_future()],
+    "dates": [start_date, end_date],
 }
 ms_quarters = {
     "test_name": "ms_quarters",
     "subparser_name": "milestones",
     "chart": chart,
     "quarter": ["Q4 21/22", "Q3 21/22", "Q2 21/22"],
-    "dates": [date_past(), date_future()],
+    "dates": [start_date, end_date],
 }
 ms_stages = {
     "test_name": "ms_stages",
@@ -214,7 +221,7 @@ ms_stages = {
         'Full Business Case',
     ],
     "chart": chart,
-    "dates": [date_past(), date_future()],
+    "dates": [start_date, end_date],
 
 }
 ms_koi_title_ipdc = {
@@ -223,8 +230,16 @@ ms_koi_title_ipdc = {
     "chart": chart,
     "koi": "OBC - IPDC Approval",
     "title": "OBC Approvals",
-    # "dates": [date_past(), date_future()],
 }
+# ms_for_reporting_cdg_far = {
+#     "test_name": "ms_for_reporting_cdg_far",
+#     "subparser_name": "milestones",
+#     "blue_line": "config_date",
+#     "chart": chart,
+#     "dates": ["1/3/2023", "31/12/2024"],
+#     "quarter": ["Q2 22/23", "Q1 22/23", "Q2 21/22"],
+#
+# }
 
 if REPORTING_TYPE == 'ipdc':
     MILESTONES_OP_ARGS = [
@@ -233,7 +248,7 @@ if REPORTING_TYPE == 'ipdc':
         ms_koi_fn,
         ms_koi_ipdc,
         ms_groups_ipdc,
-        ms_dates,
+        ms_dates_ipdc,
         ms_blue_line_config,
         ms_blue_line_today,
         ms_quarters,
@@ -241,6 +256,7 @@ if REPORTING_TYPE == 'ipdc':
     ]
 if REPORTING_TYPE == 'cdg':
     MILESTONES_OP_ARGS = [
+        # ms_for_reporting_cdg_far,  # only use for actual reporting
         ms_stages,
         ms_groups_cdg,
         ms_quarters,
@@ -248,7 +264,7 @@ if REPORTING_TYPE == 'cdg':
         ms_koi_cdg,
         ms_blue_line_today,
         ms_blue_line_config,
-        ms_dates,
+        ms_dates_ipdc,
         ms_groups_cdg,
         ms_standard,
     ]
@@ -366,6 +382,13 @@ dlion_income = {
     "type": "income",
     "chart": chart,
 }
+dlion_income_cdg = {
+    "test_name": "dlion_income",
+    "subparser_name": "dandelion",
+    "type": "income",
+    "chart": chart,
+    "angles": [280, 360, 100],
+}
 dlion_funded_resource = {
     "test_name": "dlion_funded_resource",
     "subparser_name": "dandelion",
@@ -456,9 +479,9 @@ dlion_near_spend = {
 
 if REPORTING_TYPE == 'cdg':
     DANDELION_OP_ARGS_DICT = [
-        # dlion_cli_group,  # Failing.
-        dlion_income,
-        # dlion_benefits,
+        # # dlion_cli_group,  # Failing.
+        dlion_income_cdg,
+        # # dlion_benefits,
         dlion_angles_cdg,
         dlion_quarter,
         dlion_stages_cdg,

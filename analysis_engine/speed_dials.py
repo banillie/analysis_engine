@@ -144,31 +144,31 @@ def gauge(
     ax.add_patch(Circle((0, 0), radius=0.01, facecolor="w", zorder=11))
 
     ## arrows around the dial
-    if arrow_one != arrow_two:  # only done if two quarters data available.
-        plt.annotate(
-            "",
-            xy=(-0.2, 0.4),
-            xycoords="data",
-            xytext=(-0.4, 0.2),
-            textcoords="data",
-            arrowprops=dict(
-                arrowstyle="->", connectionstyle="arc3, rad=-0.3", linewidth=4
-            ),
-        )
-        ax.text(-0.35, 0.35, down, fontsize=30, fontname=FONT_TYPE)
+    # if arrow_one != arrow_two:  # not sure what this did?
+    plt.annotate(
+        "",
+        xy=(-0.2, 0.4),
+        xycoords="data",
+        xytext=(-0.4, 0.2),
+        textcoords="data",
+        arrowprops=dict(
+            arrowstyle="->", connectionstyle="arc3, rad=-0.3", linewidth=4
+        ),
+    )
+    ax.text(-0.35, 0.35, down, fontsize=30, fontname=FONT_TYPE)
 
-        ax.text(0.35, 0.35, up, fontsize=30, fontname=FONT_TYPE)
+    ax.text(0.35, 0.35, up, fontsize=30, fontname=FONT_TYPE)
 
-        plt.annotate(
-            "",
-            xy=(0.4, 0.2),
-            xycoords="data",
-            xytext=(0.2, 0.4),
-            textcoords="data",
-            arrowprops=dict(
-                arrowstyle="<-", connectionstyle="arc3, rad=-0.3", linewidth=4
-            ),
-        )
+    plt.annotate(
+        "",
+        xy=(0.4, 0.2),
+        xycoords="data",
+        xytext=(0.2, 0.4),
+        textcoords="data",
+        arrowprops=dict(
+            arrowstyle="<-", connectionstyle="arc3, rad=-0.3", linewidth=4
+        ),
+    )
 
     plt.axis("scaled")
     plt.axis("off")
