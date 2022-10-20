@@ -288,7 +288,7 @@ CDEL_BL_COST_KEYS = {
 
 # for summaries
 SUMMARY_NARRATIVES = {
-    "SRO Forward Look Assessment": "SRO Forward Look Assessment",
+    "SRO forward look assessment": "SRO Forward Look Assessment",
     "SRO delivery confidence narrative": "Departmental DCA Narrative",
     "SRO Forward Look Narrative": "SRO Forward Look Narrative",
     "Financial cost narrative": "Project Costs Narrative",
@@ -298,6 +298,7 @@ SUMMARY_NARRATIVES = {
     "Benefits comparison with last quarter": "Ben comparison with last quarters cost - narrative",
     "Benefits comparison with baseline": "Ben comparison within this quarters cost - narrative",
     "Milestone narrative": "Milestone Commentary",
+    "Resource commentary": "Resources commentary",
     "Project Scope": "Project Scope",
 }
 

@@ -172,6 +172,7 @@ def dca_narratives(doc: Document, master, **kwargs) -> None:
     p.add_run(text).font.color.rgb = RGBColor(255, 0, 0)
 
     for k in list(SUMMARY_NARRATIVES.keys()):
+        # keeping this statement in as don't want to crash output if a key name has changed.
         try:
             doc.add_paragraph().add_run(k).bold = True
             text_one = str(

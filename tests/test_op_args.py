@@ -15,7 +15,7 @@ def date_future(time_period: int):
 
 
 # should include some settings that are wrong to test error messaging
-REPORTING_TYPE = "cdg"
+REPORTING_TYPE = "ipdc"
 chart = "show"
 
 cost_standard = {
