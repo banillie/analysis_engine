@@ -1,15 +1,16 @@
 from collections import Counter
 
 from openpyxl import workbook, Workbook
+from docx import Document
 
 from analysis_engine.dictionaries import (
     RISK_SCORES,
     PORTFOLIO_RISK_SCORES,
     RISK_LIST,
-    PORTFOLIO_RISK_LIST,
+    PORTFOLIO_RISK_LIST, PORTFOLIO_RISKS_WORD, RISK_NO_DICTIONARY,
 )
 from analysis_engine.segmentation import get_group, get_correct_p_data
-from analysis_engine.render_utils import make_file_friendly
+from analysis_engine.render_utils import make_file_friendly, get_input_doc, compare_text_new_and_old
 from analysis_engine.error_msgs import logger
 
 
@@ -164,8 +165,8 @@ class RiskData:
                     continue
                 portfolio_number_dict = {}
                 for x in range(
-                    1, 7
-                ):  # currently 6 risks. Changed from 5 to 6 in Q4 2021
+                    1, 6
+                ):  # currently 5 risks.
                     portfolio_risk_list = []
                     group = (
                         "Group",
@@ -522,3 +523,61 @@ def portfolio_risks_into_excel(risk_data: RiskData) -> workbook:
     wb.remove(wb["Sheet"])
 
     return wb
+
+
+def portfolio_risks_into_word_by_project(risk_data: RiskData) -> Document:
+    doc = get_input_doc(risk_data.kwargs["root_path"] + risk_data.kwargs["word_portrait"])
+    latest_q = risk_data.quarters[0]
+    other_q = risk_data.quarters[1]
+    for p in risk_data.risk_dictionary[latest_q].keys():
+        heading = str(p)
+        intro = doc.add_heading(heading, 0)
+        intro.alignment = 1
+        intro.bold = True
+        for port_risk_no in range(1, 6):
+            doc.add_paragraph().add_run(RISK_NO_DICTIONARY[port_risk_no]).bold = True
+            for k in PORTFOLIO_RISKS_WORD:
+                try:
+                    doc.add_paragraph().add_run(k).italic = True
+                    text_one = str(risk_data.portfolio_risk_dictionary[latest_q][p][port_risk_no][k])
+                    try:
+                        text_two = str(risk_data.portfolio_risk_dictionary[other_q][p][port_risk_no][k])
+                    except (KeyError, IndexError):  # index error relates to data_bridge
+                        text_two = text_one
+                except KeyError:
+                    break
+
+                compare_text_new_and_old(text_one, text_two, doc)
+
+    return doc
+
+
+def portfolio_risks_into_word_by_risk(risk_data: RiskData) -> Document:
+    doc = get_input_doc(risk_data.kwargs["root_path"] + risk_data.kwargs["word_portrait"])
+    latest_q = risk_data.quarters[0]
+    other_q = risk_data.quarters[1]
+    for port_risk_no in range(1, 6):
+        heading = str(RISK_NO_DICTIONARY[port_risk_no])
+        intro = doc.add_heading(heading, 0)
+        intro.alignment = 1
+        intro.bold = True
+        for p in risk_data.risk_dictionary[latest_q].keys():
+            doc.add_paragraph().add_run(p).bold = True
+            for k in PORTFOLIO_RISKS_WORD:
+                try:
+                    doc.add_paragraph().add_run(k).italic = True
+                    text_one = str(risk_data.portfolio_risk_dictionary[latest_q][p][port_risk_no][k])
+                    try:
+                        text_two = str(risk_data.portfolio_risk_dictionary[other_q][p][port_risk_no][k])
+                    except (KeyError, IndexError):  # index error relates to data_bridge
+                        text_two = text_one
+                except KeyError:
+                    break
+
+                compare_text_new_and_old(text_one, text_two, doc)
+
+    return doc
+
+
+
+

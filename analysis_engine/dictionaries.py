@@ -223,6 +223,22 @@ PORTFOLIO_RISK_LIST = [
     "Severity Score Risk Category",
 ]
 
+PORTFOLIO_RISKS_WORD = [
+    "Portfolio Risk Likelihood",
+    "Portfolio Risk Impact Assessment",
+    "Portfolio Risk Impact Description",
+    "Portfolio Risk Mitigation"
+]
+
+RISK_NO_DICTIONARY = {
+    1: 'Infrastructure Decarbonisation',
+    2: 'Planning Policy',
+    3: 'Supply Chain and Materials',
+    4: 'Value for Money',
+    5: 'Coordinated Stakeholder Management'
+
+}
+
 RISK_SCORES = {
     "Very Low": 0,
     "Low": 1,

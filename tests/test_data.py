@@ -4,7 +4,8 @@ from docx.shared import Inches
 from analysis_engine.error_msgs import ProjectNameError, ProjectGroupError, ProjectStageError, logger, InputError
 from analysis_engine.gmpp_int import GmppOnlineCosts
 from analysis_engine.merge import Merge
-from analysis_engine.risks import RiskData, portfolio_risks_into_excel, risks_into_excel
+from analysis_engine.risks import RiskData, portfolio_risks_into_excel, risks_into_excel, \
+    portfolio_risks_into_word_by_project, portfolio_risks_into_word_by_risk
 from analysis_engine.summaries import run_p_reports
 from tests.test_op_args import *
 
@@ -263,7 +264,7 @@ def test_merge_masters():
         Merge(**cli.combined_args)
 
 
-def test_portfolio_risks():
+def test_portfolio_risks_excel():
     if REPORTING_TYPE == 'ipdc':
         for x in PORT_RISK_OP_ARGS:
             print(x['test_name'])
@@ -276,7 +277,7 @@ def test_portfolio_risks():
             )
 
 
-def test_risks():
+def test_risks_excel():
     if REPORTING_TYPE == 'ipdc':
         for x in PORT_RISK_OP_ARGS:
             print(x['test_name'] + '_RISKS')
@@ -287,6 +288,25 @@ def test_risks():
             wb.save(
                 str(cli.settings["root_path"])
                 + cli.settings["excel_save_path"].format(f"{x['test_name']}_Risks")
+            )
+
+
+def test_risks_word():
+    if REPORTING_TYPE == 'ipdc':
+        for x in PORT_RISK_OP_WORD_ARGS:
+            print(x['test_name'] + '_RISKS_WORD')
+            x["subparser_name"] = "risks_printout"
+            cli = CliOpArgs(x, SETTINGS_DICT)
+            rd = RiskData(cli.md, **cli.combined_args)
+            by_proj_doc = portfolio_risks_into_word_by_project(rd)
+            by_proj_doc.save(
+                str(cli.settings["root_path"]) + cli.settings["word_save_path"].format(
+                    f"{x['test_name']}_risks_printout_by_project")
+            )
+            by_risk_doc = portfolio_risks_into_word_by_risk(rd)
+            by_risk_doc.save(
+                str(cli.settings["root_path"]) + cli.settings["word_save_path"].format(
+                    f"{x['test_name']}_risks_printout_by_risk")
             )
 
 

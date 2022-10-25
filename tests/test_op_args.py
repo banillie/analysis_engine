@@ -600,6 +600,11 @@ PORT_RISK_OP_ARGS =[
     pr_standard,
 ]
 
+PORT_RISK_OP_WORD_ARGS = [
+    pr_standard,
+    pr_quarters,
+]
+
 sum_standard = {
     "test_name": "sum_standard",
     "subparser_name": "summaries",
