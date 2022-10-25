@@ -281,7 +281,7 @@ def test_risks_excel():
     if REPORTING_TYPE == 'ipdc':
         for x in PORT_RISK_OP_ARGS:
             print(x['test_name'] + '_RISKS')
-            x["subparser_name"] = "project_risks"
+            x["subparser_name"] = "risks_project"
             cli = CliOpArgs(x, SETTINGS_DICT)
             rd = RiskData(cli.md, **cli.combined_args)
             wb = risks_into_excel(rd)

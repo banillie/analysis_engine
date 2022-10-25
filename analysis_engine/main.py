@@ -17,7 +17,8 @@ from analysis_engine.gmpp_int import GmppOnlineCosts
 from analysis_engine.merge import Merge
 from analysis_engine.query import data_query_into_wb
 from analysis_engine.render_utils import get_input_doc, put_matplotlib_fig_into_word
-from analysis_engine.risks import RiskData, portfolio_risks_into_excel, risks_into_excel
+from analysis_engine.risks import RiskData, portfolio_risks_into_excel, risks_into_excel, \
+    portfolio_risks_into_word_by_project, portfolio_risks_into_word_by_risk
 from analysis_engine.settings import (
     report_config,
     set_default_args,
@@ -298,20 +299,33 @@ def run_analysis(args, settings):
             get_masters_to_merge(cli.combined_args)
             Merge(**cli.combined_args)
 
-        if cli.programme == "portfolio_risks":
+        if cli.programme == "risks_portfolio":
             rd = RiskData(cli.md, **cli.combined_args)
             wb = portfolio_risks_into_excel(rd)
             wb.save(
                 str(cli.settings["root_path"])
-                + cli.settings["excel_save_path"].format("portfolio_risks")
+                + cli.settings["excel_save_path"].format("risks_portfolio")
             )
 
-        if cli.programme == "project_risks":
+        if cli.programme == "risks_printout":
+            rd = RiskData(cli.md, **cli.combined_args)
+            by_proj_doc = portfolio_risks_into_word_by_project(rd)
+            by_proj_doc.save(
+                str(cli.settings["root_path"]) + cli.settings["word_save_path"].format(
+                    "risks_printout_by_project")
+            )
+            by_risk_doc = portfolio_risks_into_word_by_risk(rd)
+            by_risk_doc.save(
+                str(cli.settings["root_path"]) + cli.settings["word_save_path"].format(
+                    "risks_printout_by_risk")
+            )
+
+        if cli.programme == "risks_projects":
             rd = RiskData(cli.md, **cli.combined_args)
             wb = risks_into_excel(rd)
             wb.save(
                 str(cli.settings["root_path"])
-                + cli.settings["excel_save_path"].format("project_risks")
+                + cli.settings["excel_save_path"].format("risks_projects")
             )
 
         # ProjectNameError below captures any naming errors both this is hit.
@@ -411,19 +425,25 @@ def run_parsers():
         "visual outputs ",
     )
 
+    parser_data_query = subparsers.add_parser(
+        "query", help="Returns data from master data set as specified by the user."
+    )
+
     parser_port_risks = subparsers.add_parser(
-        "portfolio_risks",
-        help="Compiles portfolio risk analysis.",
+        "risks_portfolio",
+        help="Compiles portfolio risk analysis into an excel document.",
         description="This program extracts all portfolio risk data used in the IPDC portfolio report.",
     )
     parser_risks = subparsers.add_parser(
-        "project_risks",
-        help="Compiles project risk analysis",
+        "risks_projects",
+        help="Compiles project risk analysis into an excel document.",
         description="This program extracts all project level risk data contained in the master data set.",
     )
-
-    parser_data_query = subparsers.add_parser(
-        "query", help="Returns data from master data set as specified by the user."
+    parser_risks_po = subparsers.add_parser(
+        "risks_printout",
+        help="Compiles into word documents a print out of all text related portfolio risk data.",
+        description="Compiles into word documents a print out of all text related portfolio risk data. Two word "
+                    "documents are created. One with data ordered by project and one ordered by risk.",
     )
 
     parser_speed_dial = subparsers.add_parser(
@@ -516,6 +536,7 @@ def run_parsers():
         parser_dca,
         parser_risks,
         parser_port_risks,
+        parser_risks_po,
         parser_speed_dial,
         parser_dandelion,
         parser_milestones,
@@ -584,6 +605,7 @@ def run_parsers():
         parser_data_query,
         parser_port_risks,
         parser_risks,
+        parser_risks_po,
         parser_costs,
     ]:
         sub.add_argument(
@@ -601,6 +623,7 @@ def run_parsers():
         parser_dca,
         parser_risks,
         parser_port_risks,
+        parser_risks_po,
         parser_speed_dial,
         parser_dandelion,
         parser_data_query,
@@ -623,6 +646,7 @@ def run_parsers():
         parser_speed_dial,
         parser_risks,
         parser_port_risks,
+        parser_risks_po,
         parser_dandelion,
         parser_data_query,
         parser_milestones,

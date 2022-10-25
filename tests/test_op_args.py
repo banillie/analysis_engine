@@ -566,28 +566,28 @@ if REPORTING_TYPE == 'ipdc':
 
 pr_standard = {
     "test_name": "pr_standard",
-    "subparser_name": "portfolio_risks",
+    "subparser_name": "risks_portfolio",
 }
 pr_quarters = {
     "test_name": "pr_quarters",
-    "subparser_name": "portfolio_risks",
+    "subparser_name": "risks_portfolio",
     "quarter": ["Q1 22/23", "Q4 21/22"],
 }
 pr_groups_ipdc = {
     "test_name": "pr_groups",
-    "subparser_name": "portfolio_risks",
+    "subparser_name": "risks_portfolio",
     "group": ["HSRG", "RPE"],
 }
 pr_stage = {
     "test_name": "pr_stage",
-    "subparser_name": "portfolio_risks",
+    "subparser_name": "risks_portfolio",
     "stage": [
         "FBC",
     ],
 }
 pr_remove = {
     "test_name": "pr_remove",
-    "subparser_name": "portfolio_risks",
+    "subparser_name": "risks_portfolio",
     "group": ["HSRG"],
     "remove": ["HS2 Ph 1"]
 }
