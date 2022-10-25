@@ -227,16 +227,15 @@ PORTFOLIO_RISKS_WORD = [
     "Portfolio Risk Likelihood",
     "Portfolio Risk Impact Assessment",
     "Portfolio Risk Impact Description",
-    "Portfolio Risk Mitigation"
+    "Portfolio Risk Mitigation",
 ]
 
 RISK_NO_DICTIONARY = {
-    1: 'Infrastructure Decarbonisation',
-    2: 'Planning Policy',
-    3: 'Supply Chain and Materials',
-    4: 'Value for Money',
-    5: 'Coordinated Stakeholder Management'
-
+    1: "Infrastructure Decarbonisation",
+    2: "Planning Policy",
+    3: "Supply Chain and Materials",
+    4: "Value for Money",
+    5: "Coordinated Stakeholder Management",
 }
 
 RISK_SCORES = {
@@ -317,4 +316,3 @@ SUMMARY_NARRATIVES = {
     "Resource commentary": "Resources commentary",
     "Project Scope": "Project Scope",
 }
-

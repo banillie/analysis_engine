@@ -129,7 +129,7 @@ def get_board_date(op_args):
 
 
 def get_remove_income(op_args):
-    if op_args['report'] == 'ipdc':
+    if op_args["report"] == "ipdc":
         try:
             config_path = op_args["root_path"] + op_args["config"]
             config = configparser.ConfigParser()

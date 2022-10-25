@@ -7,8 +7,14 @@ from analysis_engine.segmentation import (
     get_correct_p_data,
 )
 from analysis_engine.cleaning import convert_none_types
-from analysis_engine.dictionaries import STANDARDISE_COST_KEYS, YEAR_LIST, RDEL_FORECAST_COST_KEYS, \
-    CDEL_FORECAST_COST_KEYS, RDEL_BL_COST_KEYS, CDEL_BL_COST_KEYS
+from analysis_engine.dictionaries import (
+    STANDARDISE_COST_KEYS,
+    YEAR_LIST,
+    RDEL_FORECAST_COST_KEYS,
+    CDEL_FORECAST_COST_KEYS,
+    RDEL_BL_COST_KEYS,
+    CDEL_BL_COST_KEYS,
+)
 from analysis_engine.error_msgs import ProjectNameError, logger
 from analysis_engine.settings import get_remove_income
 from analysis_engine.render_utils import make_file_friendly
@@ -187,7 +193,7 @@ class CostData:
                         continue
 
                     for cat in COST_CAT:
-                        if cat == ' RDEL ':
+                        if cat == " RDEL ":
                             for k in RDEL_FORECAST_COST_KEYS.keys():
                                 # if y in ["16-17", "17-18", "18-19"]:
                                 #     try:
@@ -201,10 +207,12 @@ class CostData:
                             for k in RDEL_BL_COST_KEYS.keys():
                                 b_local_rdel = convert_none_types(p_data[y + cat + k])
                                 b_year_rdel += b_local_rdel
-                        if cat == ' CDEL ':
+                        if cat == " CDEL ":
                             for k in CDEL_FORECAST_COST_KEYS.keys():
                                 try:
-                                    f_local_cdel = convert_none_types(p_data[y + cat + k])
+                                    f_local_cdel = convert_none_types(
+                                        p_data[y + cat + k]
+                                    )
                                 except KeyError:
                                     # try:
                                     f_local_cdel = convert_none_types(p_data[y + k])
@@ -213,7 +221,9 @@ class CostData:
                                 f_year_cdel += f_local_cdel
                             for k in CDEL_BL_COST_KEYS.keys():
                                 try:
-                                    b_local_cdel = convert_none_types(p_data[y + cat + k])
+                                    b_local_cdel = convert_none_types(
+                                        p_data[y + cat + k]
+                                    )
                                 except KeyError:
                                     # try:
                                     b_local_cdel = convert_none_types(p_data[y + k])
@@ -242,7 +252,6 @@ class CostData:
             }
 
         self.profiles = profile_dict
-
 
     # def get_baseline_cost_profile(self) -> None:
     #     COST_CAT = [" RDEL ", " CDEL "]

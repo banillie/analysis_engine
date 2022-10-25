@@ -7,10 +7,16 @@ from analysis_engine.dictionaries import (
     RISK_SCORES,
     PORTFOLIO_RISK_SCORES,
     RISK_LIST,
-    PORTFOLIO_RISK_LIST, PORTFOLIO_RISKS_WORD, RISK_NO_DICTIONARY,
+    PORTFOLIO_RISK_LIST,
+    PORTFOLIO_RISKS_WORD,
+    RISK_NO_DICTIONARY,
 )
 from analysis_engine.segmentation import get_group, get_correct_p_data
-from analysis_engine.render_utils import make_file_friendly, get_input_doc, compare_text_new_and_old
+from analysis_engine.render_utils import (
+    make_file_friendly,
+    get_input_doc,
+    compare_text_new_and_old,
+)
 from analysis_engine.error_msgs import logger
 
 
@@ -164,9 +170,7 @@ class RiskData:
                 if p_data is None:
                     continue
                 portfolio_number_dict = {}
-                for x in range(
-                    1, 6
-                ):  # currently 5 risks.
+                for x in range(1, 6):  # currently 5 risks.
                     portfolio_risk_list = []
                     group = (
                         "Group",
@@ -526,7 +530,9 @@ def portfolio_risks_into_excel(risk_data: RiskData) -> workbook:
 
 
 def portfolio_risks_into_word_by_project(risk_data: RiskData) -> Document:
-    doc = get_input_doc(risk_data.kwargs["root_path"] + risk_data.kwargs["word_portrait"])
+    doc = get_input_doc(
+        risk_data.kwargs["root_path"] + risk_data.kwargs["word_portrait"]
+    )
     latest_q = risk_data.quarters[0]
     other_q = risk_data.quarters[1]
     for p in risk_data.risk_dictionary[latest_q].keys():
@@ -539,9 +545,17 @@ def portfolio_risks_into_word_by_project(risk_data: RiskData) -> Document:
             for k in PORTFOLIO_RISKS_WORD:
                 try:
                     doc.add_paragraph().add_run(k).italic = True
-                    text_one = str(risk_data.portfolio_risk_dictionary[latest_q][p][port_risk_no][k])
+                    text_one = str(
+                        risk_data.portfolio_risk_dictionary[latest_q][p][port_risk_no][
+                            k
+                        ]
+                    )
                     try:
-                        text_two = str(risk_data.portfolio_risk_dictionary[other_q][p][port_risk_no][k])
+                        text_two = str(
+                            risk_data.portfolio_risk_dictionary[other_q][p][
+                                port_risk_no
+                            ][k]
+                        )
                     except (KeyError, IndexError):  # index error relates to data_bridge
                         text_two = text_one
                 except KeyError:
@@ -553,7 +567,9 @@ def portfolio_risks_into_word_by_project(risk_data: RiskData) -> Document:
 
 
 def portfolio_risks_into_word_by_risk(risk_data: RiskData) -> Document:
-    doc = get_input_doc(risk_data.kwargs["root_path"] + risk_data.kwargs["word_portrait"])
+    doc = get_input_doc(
+        risk_data.kwargs["root_path"] + risk_data.kwargs["word_portrait"]
+    )
     latest_q = risk_data.quarters[0]
     other_q = risk_data.quarters[1]
     for port_risk_no in range(1, 6):
@@ -566,9 +582,17 @@ def portfolio_risks_into_word_by_risk(risk_data: RiskData) -> Document:
             for k in PORTFOLIO_RISKS_WORD:
                 try:
                     doc.add_paragraph().add_run(k).italic = True
-                    text_one = str(risk_data.portfolio_risk_dictionary[latest_q][p][port_risk_no][k])
+                    text_one = str(
+                        risk_data.portfolio_risk_dictionary[latest_q][p][port_risk_no][
+                            k
+                        ]
+                    )
                     try:
-                        text_two = str(risk_data.portfolio_risk_dictionary[other_q][p][port_risk_no][k])
+                        text_two = str(
+                            risk_data.portfolio_risk_dictionary[other_q][p][
+                                port_risk_no
+                            ][k]
+                        )
                     except (KeyError, IndexError):  # index error relates to data_bridge
                         text_two = text_one
                 except KeyError:
@@ -577,7 +601,3 @@ def portfolio_risks_into_word_by_risk(risk_data: RiskData) -> Document:
                 compare_text_new_and_old(text_one, text_two, doc)
 
     return doc
-
-
-
-

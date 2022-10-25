@@ -151,9 +151,7 @@ def gauge(
         xycoords="data",
         xytext=(-0.4, 0.2),
         textcoords="data",
-        arrowprops=dict(
-            arrowstyle="->", connectionstyle="arc3, rad=-0.3", linewidth=4
-        ),
+        arrowprops=dict(arrowstyle="->", connectionstyle="arc3, rad=-0.3", linewidth=4),
     )
     ax.text(-0.35, 0.35, down, fontsize=30, fontname=FONT_TYPE)
 
@@ -165,9 +163,7 @@ def gauge(
         xycoords="data",
         xytext=(0.2, 0.4),
         textcoords="data",
-        arrowprops=dict(
-            arrowstyle="<-", connectionstyle="arc3, rad=-0.3", linewidth=4
-        ),
+        arrowprops=dict(arrowstyle="<-", connectionstyle="arc3, rad=-0.3", linewidth=4),
     )
 
     plt.axis("scaled")
