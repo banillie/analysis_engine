@@ -247,10 +247,11 @@ class DandelionData:
             g_abb = g
             if self.group_stage_switch == "stage":
                 try:
-                    g_abb = BC_STAGE_DICT_FULL_TO_ABB[g]
+                    g_abb = self.master['stages'][g]
                 except KeyError:
-                    if g in BC_STAGE_DICT_ABB_TO_FULL.keys():
-                        g_abb = g
+                    for term, abb in self.master['stages'].items():
+                        if abb == g:
+                            g_abb = g
 
             g_text = (
                 g_abb + "\n" + dandelion_number_text(g_wlc, **self.kwargs)
@@ -372,13 +373,10 @@ class DandelionData:
                             "The argument order_by cannot be used with pipeline projects as milestone data is required"
                         )
                     else:
-                        bc = BC_STAGE_DICT_FULL_TO_ABB[
-                            self.master["master_data"][0]["data"][p][
-                                DASHBOARD_KEYS["BC_STAGE"]
-                            ]
-                        ]
+                        bc = self.master["master_data"][0]["data"][p][DASHBOARD_KEYS["BC_STAGE"]]
+                        bc_abb = self.master["stages"][bc]
+                        next_stage = NEXT_STAGE_DICT[bc_abb]
                         ms = MilestoneData(self.master, **self.kwargs)
-                        next_stage = NEXT_STAGE_DICT[bc]
                         try:
                             d = get_milestone_date(
                                 ms,

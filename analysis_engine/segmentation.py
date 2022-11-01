@@ -83,9 +83,10 @@ def get_group(md, tp, **kwargs) -> List[str]:
                 output_list += loop_list
             except KeyError:
                 try:  # abbreviated term
-                    loop_list = meta_groupings[tp][BC_STAGE_DICT_ABB_TO_FULL[s]]
+                    full_name = list(md["stages"].keys())[list(md["stages"].values()).index(s)]
+                    loop_list = meta_groupings[tp][full_name]
                     output_list += loop_list
-                except KeyError:
+                except (KeyError, ValueError):
                     initial_error_case.append(s)
 
     final_error_case = []

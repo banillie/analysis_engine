@@ -15,21 +15,9 @@ RAG_RANKING_DICT_COLOUR = {  # for dandelion
 }
 
 # BC stage terms are consistent across reports
-BC_STAGE_DICT_ABB_TO_FULL = {
-    "SOBC": "Strategic Outline Case",
-    "pre-SOBC": "pre-Strategic Outline Case",
-    "OBC": "Outline Business Case",
-    "FBC": "Full Business Case",
-    "Ongoing Board papers": "Ongoing Board papers",
-}
+BC_STAGE_DICT_ABB_TO_FULL = {}
 
-BC_STAGE_DICT_FULL_TO_ABB = {
-    "Strategic Outline Case": "SOBC",
-    "pre-Strategic Outline Case": "pre-SOBC",
-    "Outline Business Case": "OBC",
-    "Full Business Case": "FBC",
-    "Ongoing Board papers": "OBPs",
-}
+BC_STAGE_DICT_FULL_TO_ABB = {}
 
 DCA_KEYS = {
     "cdg": {

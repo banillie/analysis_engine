@@ -352,7 +352,7 @@ dlion_angles_cdg = {
 dlion_angles_ipdc = {
     "test_name": "dlion_angles",
     "subparser_name": "dandelion",
-    "angles": [250, 290, 350, 40, 90, 130, 170],
+    "angles": [250, 305, 370, 60, 90, 130],
     "chart": chart,
 }
 # dlion_benefits = {
@@ -366,9 +366,9 @@ dlion_remaining = {
     "subparser_name": "dandelion",
     "type": "remaining_costs",
     "chart": chart,
-    "angles": [250, 320, 40, 110],
-    "order_by": "schedule",
-    "stage": [],
+    # "angles": [250, 290, 350, 40, 90, 130, 170],
+    # "order_by": "schedule",
+    # "stage": [],
 }
 dlion_spent = {
     "test_name": "dlion_funded_resource",

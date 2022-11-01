@@ -173,7 +173,7 @@ class PythonMasterData:
                     project_stage = master.data[p][
                         META_STAGE_DICT[self.kwargs["data_type"]]
                     ]
-                    if project_stage is None or project_stage not in self.stages:
+                    if project_stage is None or project_stage not in list(self.stages.keys()):
                         if i == 0:
                             if p not in critical_stage_errors:
                                 critical_stage_errors.append(p)
@@ -311,12 +311,15 @@ def get_stage_meta_data(settings_dict) -> Dict:
         config_path = settings_dict["root_path"] + settings_dict["config"]
         config = configparser.ConfigParser()
         config.read(config_path)
-        bc_stages = json.loads(config.get("GROUPS", "bc_stages"))
+        groups = config.get("GROUPS", "bc_stages")
+        bc_stages = json.loads(groups)
     except:
         config_issue()
 
+    bc_stages_dict = {x: y for x, y in zip(bc_stages[::2], bc_stages[1::2])}
+
     stage_meta_dict = {
-        "stages": bc_stages,
+        "stages": bc_stages_dict,
     }
 
     return stage_meta_dict

@@ -45,7 +45,7 @@ def narrative_dashboard(master, wb: Workbook) -> None:
             bc_stage = master["master_data"][0]["data"][project_name][
                 DATA_KEY_DICT["IPDC approval point"]
             ]
-            ws.cell(row=row_num, column=5).value = BC_STAGE_DICT_FULL_TO_ABB[bc_stage]
+            ws.cell(row=row_num, column=5).value = master['stages'][bc_stage]
             costs = master["master_data"][0]["data"][project_name][
                 DATA_KEY_DICT["Total Forecast"]
             ]
@@ -103,7 +103,7 @@ def cdg_dashboard(master, wb: Workbook) -> None:
             bc_stage = master["master_data"][0]["data"][project_name][
                 DATA_KEY_DICT["IPDC approval point"]
             ]
-            ws.cell(row=row_num, column=5).value = BC_STAGE_DICT_FULL_TO_ABB[bc_stage]
+            ws.cell(row=row_num, column=5).value = master['stages'][bc_stage]
             costs = master["master_data"][0]["data"][project_name][
                 DATA_KEY_DICT["Total Forecast"]
             ]
@@ -188,7 +188,7 @@ def resource_dashboard(md, wb: Workbook, **op_args) -> Workbook:
 
         """BC Stage"""
         bc_stage = cmd[project_name][DASHBOARD_KEYS["BC_STAGE"]]
-        ws.cell(row=row_num, column=4).value = BC_STAGE_DICT_FULL_TO_ABB[bc_stage]
+        ws.cell(row=row_num, column=4).value = md['stages'][bc_stage]
 
         "Resourcing data"
         for i, key in enumerate(DASHBOARD_RESOURCE_KEYS):
@@ -259,7 +259,7 @@ def financial_dashboard(
 
         """BC Stage"""
         bc_stage = cmd[project_name][DASHBOARD_KEYS["BC_STAGE"]]
-        ws.cell(row=row_num, column=4).value = BC_STAGE_DICT_FULL_TO_ABB[bc_stage]
+        ws.cell(row=row_num, column=4).value = md['stages'][bc_stage]
         """Total WLC"""
         wlc_now = convert_none_types(
             cmd[project_name][STANDARDISE_COST_KEYS[op_args["report"]]["total"]]
@@ -358,7 +358,7 @@ def schedule_dashboard(
         abb = md["project_information"][p]["Abbreviations"]
         """IPDC approval point"""
         bc_stage = cmd[p][DASHBOARD_KEYS["BC_STAGE"]]
-        ws.cell(row=row_num, column=4).value = BC_STAGE_DICT_FULL_TO_ABB[bc_stage]
+        ws.cell(row=row_num, column=4).value = md['stages'][bc_stage]
 
         add_column = 0
         for m in SCHEDULE_DASHBOARD_KEYS:
@@ -448,7 +448,7 @@ def benefits_dashboard(
 
         """BICC approval point"""
         bc_stage = cmd[project_name][DASHBOARD_KEYS["BC_STAGE"]]
-        ws.cell(row=row_num, column=4).value = BC_STAGE_DICT_FULL_TO_ABB[bc_stage]
+        ws.cell(row=row_num, column=4).value = md['stages'][bc_stage]
         """initial bcr"""
         initial_bcr = cmd[project_name]["Initial Benefits Cost Ratio (BCR)"]
         ws.cell(row=row_num, column=6).value = initial_bcr
@@ -523,7 +523,7 @@ def overall_dashboard(
 
         """BC Stage"""
         bc_stage = cmd[project_name][DASHBOARD_KEYS["BC_STAGE"]]
-        ws.cell(row=row_num, column=4).value = BC_STAGE_DICT_FULL_TO_ABB[bc_stage]
+        ws.cell(row=row_num, column=4).value = md['stages'][bc_stage]
 
         """Total WLC"""
         wlc_now = convert_none_types(
