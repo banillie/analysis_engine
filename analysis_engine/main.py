@@ -5,7 +5,7 @@ import sys
 from docx.shared import Inches
 
 from analysis_engine import __version__
-from analysis_engine.core_data import get_core, open_json_file
+from analysis_engine.core_data import get_core, open_json_file, report_config
 from analysis_engine.dandelion import DandelionData, make_a_dandelion_auto
 from analysis_engine.dca import DcaData, dca_changes_into_word, dca_changes_into_excel
 from analysis_engine.dashboards import (
@@ -25,7 +25,6 @@ from analysis_engine.risks import (
     portfolio_risks_into_word_by_risk,
 )
 from analysis_engine.settings import (
-    report_config,
     set_default_args,
     return_koi_fn_keys,
     get_integration_data,
@@ -98,7 +97,9 @@ class CliOpArgs:
             group=md["groups"],
             quarters=md["current_quarter"],
             stage=md["stages"],
+            **self.settings
         )
+
         combined_args = {**op_args, **self.settings}
 
         if combined_args["report"] == "ipdc":

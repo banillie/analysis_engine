@@ -1,18 +1,20 @@
 import configparser
 import json
+import platform
 import sys
 import datetime
+from pathlib import Path
 from typing import List, Dict, Union, Optional, Tuple, TextIO, Callable
 
 # from datetime import timedelta, date
 from collections import OrderedDict
 
+from datamaps.api import project_data_from_master
 from openpyxl import load_workbook
 
 from datamaps.process import Cleanser
 
 from analysis_engine.segmentation import get_iter_list
-from analysis_engine.settings import report_config
 from analysis_engine.error_msgs import (
     ProjectNameError,
     ProjectGroupError,
@@ -27,6 +29,7 @@ from analysis_engine.error_msgs import (
     historic_stage_names_error,
     config_issue,
 )
+
 
 ## figure out way to set reporting type here
 # CONFIG_DICT = report_config()
@@ -290,16 +293,37 @@ def get_group_meta_data(settings_dict) -> Dict:
         config_path = settings_dict["root_path"] + settings_dict["config"]
         config = configparser.ConfigParser()
         config.read(config_path)
-        portfolio_group = json.loads(
-            config.get("GROUPS", "portfolio_groups")
-        )  # to return a list
+        # portfolio_group = json.loads(
+        #     config.get("GROUPS", "portfolio_groups")
+        # )  # to return a list
         group_all = json.loads(config.get("GROUPS", "all_groups"))
     except:
         config_issue()
 
-    group_meta_dict = {"port_group": portfolio_group, "all_groups": group_all}
+    return {"all_groups": group_all}
 
-    return group_meta_dict
+
+def get_dandelion_meta_data(settings_dict) -> Dict:
+    """
+    Gets group metadata types from config file. This is necessary as terminology is set in the config file
+    and must correspond to terms used in project information document.
+    """
+
+    try:
+        config_path = settings_dict["root_path"] + settings_dict["config"]
+        config = configparser.ConfigParser()
+        config.read(config_path)
+        # portfolio_group = json.loads(
+        #     config.get("GROUPS", "portfolio_groups")
+        # )  # to return a list
+        groups = json.loads(config.get("DANDELION", "portfolio_groups"))
+        angles = json.loads(config.get("DANDELION", "angles"))
+    except:
+        config_issue()
+
+    meta = {"port_group": groups, "angles": angles}
+
+    return meta
 
 
 def get_stage_meta_data(settings_dict) -> Dict:
@@ -378,7 +402,8 @@ def get_project_information(settings_dict) -> Dict[str, Union[str, int]]:
 def get_core(settings_dict) -> None:
     GROUP_META = get_group_meta_data(settings_dict)
     STAGE_META = get_stage_meta_data(settings_dict)
-    META = {**GROUP_META, **STAGE_META}
+    PORT_META = get_dandelion_meta_data(settings_dict)
+    META = {**GROUP_META, **STAGE_META, **PORT_META}
 
     try:
         master = PythonMasterData(
@@ -426,3 +451,32 @@ def get_enviroment_funds_information(settings_dict) -> Dict[str, Union[str, int]
         + ".xlsx"
     )
     return get_project_info_data(path)
+
+
+def report_config(report_type: str):
+    if report_type == "cdg" or report_type == "ipdc":
+        func = project_data_from_master  # option to use project_data_from_master_month is necessary
+    return {
+        "report": report_type,
+        "root_path": str(_platform_docs_dir(report_type)),
+        "config": f"/core_data/{report_type}_config.ini",
+        "callable": func,
+        "master_path": "/core_data/json/master.json",
+        "dashboard": "/input/dashboards_master.xlsx",
+        "narrative_dashboard": "/input/narrative_dashboard_master.xlsx",
+        "excel_save_path": "/output/{}.xlsx",
+        "word_save_path": "/output/{}.docx",
+        "word_landscape": "/input/summary_temp_landscape.docx",
+        "word_portrait": "/input/summary_temp.docx",
+    }
+    # return INITIATE_DICT[report_type]
+
+
+def _platform_docs_dir(dir: str) -> Path:
+    #  Cross plaform file path handling. The dir (directorary) controls the report type.
+    if platform.system() == "Linux":
+        return Path.home() / "Documents" / dir
+    if platform.system() == "Darwin":
+        return Path.home() / "Documents" / dir
+    else:
+        return Path.home() / "Documents" / dir

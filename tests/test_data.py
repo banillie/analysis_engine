@@ -10,7 +10,7 @@ from analysis_engine.summaries import run_p_reports
 from tests.test_op_args import *
 
 from analysis_engine.main import CliOpArgs
-from analysis_engine.settings import report_config, return_koi_fn_keys, get_masters_to_merge
+from analysis_engine.settings import return_koi_fn_keys, get_masters_to_merge
 from analysis_engine.core_data import (
     PythonMasterData,
     get_master_data,
@@ -18,7 +18,7 @@ from analysis_engine.core_data import (
     get_stage_meta_data,
     get_project_information,
     JsonData,
-    open_json_file,
+    open_json_file, report_config, get_dandelion_meta_data,
 )
 
 from analysis_engine.dandelion import DandelionData, make_a_dandelion_auto
@@ -59,7 +59,8 @@ def test_get_raw_master_data_in_list():
 def test_saving_creating_json_master():
     GROUP_META = get_group_meta_data(SETTINGS_DICT)
     STAGE_META = get_stage_meta_data(SETTINGS_DICT)
-    META = {**GROUP_META, **STAGE_META}
+    PORT_META = get_dandelion_meta_data(SETTINGS_DICT)
+    META = {**GROUP_META, **STAGE_META, **PORT_META}
 
     try:
         master = PythonMasterData(

@@ -899,7 +899,7 @@ def make_a_dandelion_auto(dl: DandelionData, **kwargs):
                 text,
                 xy=dl.d_data[c]["axis"],
                 xycoords="data",
-                fontsize=10,
+                fontsize=8,
                 fontname=FONT_TYPE,
                 ha="center",
                 va="center",
