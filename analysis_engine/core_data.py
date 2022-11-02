@@ -127,20 +127,18 @@ class PythonMasterData:
     def check_project_names(self) -> None:
         """Checks that project names in all master are present/the same as in project info.
         Stops the programme if not"""
-        critical_error_cases = []
-        info_error_cases = {}
+        error_cases_current = []
+        error_cases_old = {}
         for i, master in enumerate(self.master_data):
-            for p in self.current_projects:
+            for p in master.projects:
                 if p not in self.all_projects:
                     if i == 0:  # latest master
-                        critical_error_cases.append(p)
+                        error_cases_current.append(p)
                     else:
-                        # try:
-                        info_error_cases[p] = master.quarter
-                        # except find the error
+                        error_cases_old[p] = master.quarter
 
-        latest_project_names_error(critical_error_cases)
-        historic_project_names_error(info_error_cases)
+        latest_project_names_error(error_cases_current)
+        historic_project_names_error(error_cases_old)
 
     def get_and_check_groupings(self) -> None:
         """gets the groups that projects are part of"""

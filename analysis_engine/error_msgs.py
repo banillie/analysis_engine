@@ -41,17 +41,16 @@ def latest_project_names_error(error_cases):
         for e in error_cases:
             logger.critical(e + " has not been found in the project_info document.")
         raise ProjectNameError(
-            "Project names in the latest master and project_info must match. Program stopping. Please amend."
+            "Project names in the latest master data set and project_info must match. Program stopping. Please amend."
         )
 
 
 def historic_project_names_error(error_cases):
     if error_cases:
         for e in error_cases:
-            logger.info(
-                f"Project name {e} in master {error_cases[e]} not in project information "
-                f"document. Please make sure project names are consistent or it could cause "
-                f"analysis engine to crash or inaccurate analysis."
+            logger.critical(f"Project name {e} in master {error_cases[e]} not in project information document")
+        raise ProjectNameError(
+                "Project names need to be consistent across all masters. Program stopping. Please amend."
             )
 
 

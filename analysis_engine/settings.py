@@ -9,14 +9,11 @@ from analysis_engine.error_msgs import config_issue
 
 
 def set_default_args(op_args, **kwargs):
-    # group = kwargs["groups"],
-    # quarters = kwargs["current_quarter"],
-    # stage = kwargs["stages"],
     if "group" not in op_args and "stage" not in op_args:
         op_args["group"] = kwargs["group"]
         if op_args['subparser_name'] == "dandelion":
             op_args["group"] = get_dandelion_meta_data(kwargs)['port_group']
-            # going to need an if statement here:
+            # thought a if statement might be required here, but working ok without.
             op_args["angles"] = get_dandelion_meta_data(kwargs)['angles']
     if "stage" in op_args:
         if op_args["stage"] == []:
