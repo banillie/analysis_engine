@@ -130,10 +130,10 @@ def initiate(settings_dict):
     """
     This function does the 'initiate' command for all reports
     """
-    logger.info("Initiating process to create master data for reporting.")
+    logger.info("Initiating process to create master data for reporting. A number of checks are done to the data "
+                "at this point. Any issues found will be flagged below.")
     get_core(settings_dict)
     logger.info(
-        "The latest master and project information match. "
         "Master data file has been successfully created."
     )
 

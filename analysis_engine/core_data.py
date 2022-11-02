@@ -27,7 +27,7 @@ from analysis_engine.error_msgs import (
     abbreviation_error,
     latest_stage_names_error,
     historic_stage_names_error,
-    config_issue,
+    config_issue, cost_magnitude_error_case_current, cost_magnitude_error_case_old,
 )
 
 
@@ -107,6 +107,7 @@ class PythonMasterData:
         self.get_quarter_list()
         self.pipeline_projects_information()
         self.get_current_tp()
+        self.check_cost_magnitude()
 
     # why is this collecting full names also? Seems silly.
     def check_project_abbreviations(self) -> None:
@@ -233,6 +234,21 @@ class PythonMasterData:
             )
         except KeyError:
             self.current_quarter = self.master_data[0].quarter
+
+    def check_cost_magnitude(self):
+        error_cases_current = []
+        error_cases_old = {}
+        for i, master in enumerate(self.master_data):
+            for p in master.projects:
+                total_c = master.data[p]['Total Forecast']
+                if len("{:.1f}".format(total_c)) > 7:
+                    if i == 0:
+                        error_cases_current.append(p)
+                    else:
+                        error_cases_old[p] = master.quarter
+
+        cost_magnitude_error_case_current(error_cases_current)
+        cost_magnitude_error_case_old(error_cases_old)
 
 
 def json_date_converter(o):

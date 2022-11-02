@@ -54,6 +54,26 @@ def historic_project_names_error(error_cases):
             )
 
 
+def cost_magnitude_error_case_current(error_cases):
+    if error_cases:
+        for e in error_cases:
+            logger.critical(e + " is reporting the wrong magnitude of cost in the latest master data.")
+        raise ProjectNameError(
+            "Cost data needs to be reported in £ millions otherwise it will cause analysis engine to crash. Program "
+            "stopping. Please amend data."
+        )
+
+
+def cost_magnitude_error_case_old(error_cases):
+    if error_cases:
+        for e in error_cases:
+            logger.critical(f"{e} in master {error_cases[e]} is reporting the wrong magnitude of cost.")
+        raise ProjectNameError(
+            "Cost data needs to be reported in £ millions otherwise it will cause analysis engine to crash. Program "
+            "stopping. Please amend data."
+        )
+
+
 def historic_stage_names_error(error_cases):
     if error_cases:
         for e in error_cases:
