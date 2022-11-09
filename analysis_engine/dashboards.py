@@ -211,7 +211,7 @@ def resource_dashboard(md, wb: Workbook, **op_args) -> Workbook:
             try:
                 ws.cell(row=row_num, column=12 + i).value = CONVERT_RAG[
                     md["master_data"][i]["data"][project_name][
-                        DCA_KEYS["resource"]["resource"]
+                        DCA_KEYS[op_args["report"]]["resource"]
                     ]
                 ]
             except KeyError:
