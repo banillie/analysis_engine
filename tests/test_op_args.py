@@ -296,7 +296,7 @@ dlion_groups_ipdc = {
 dlion_groups_ipdc_two = {
     "test_name": "dlion_groups_two",
     "subparser_name": "dandelion",
-    "group": ["HSRG", "RPE"],
+    "group": ["HSRG", "RIG"],
     "chart": chart,
 }
 dlion_stages_cdg = {
@@ -545,7 +545,7 @@ sd_groups_cdg = {
 sd_groups_ipdc = {
     "test_name": "sd_groups",
     "subparser_name": "speed_dials",
-    "group": ["HSRG", "RPE"],
+    "group": ["HSRG", "RLG"],
 }
 
 if REPORTING_TYPE == 'cdg':
@@ -576,7 +576,7 @@ pr_quarters = {
 pr_groups_ipdc = {
     "test_name": "pr_groups",
     "subparser_name": "risks_portfolio",
-    "group": ["HSRG", "RPE"],
+    "group": ["HSRG", "AMS"],
 }
 pr_stage = {
     "test_name": "pr_stage",
