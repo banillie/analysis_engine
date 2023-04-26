@@ -1,4 +1,4 @@
-datamaps
+datamaps==1.1.9
 python-docx==0.8.10
 openpyxl
 matplotlib==3.4.1
