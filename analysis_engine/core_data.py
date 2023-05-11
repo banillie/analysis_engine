@@ -241,11 +241,14 @@ class PythonMasterData:
         for i, master in enumerate(self.master_data):
             for p in master.projects:
                 total_c = master.data[p]['Total Forecast']
-                if len("{:.1f}".format(total_c)) > 7:
-                    if i == 0:
-                        error_cases_current.append(p)
-                    else:
-                        error_cases_old[p] = master.quarter
+                try:
+                    if len("{:.1f}".format(total_c)) > 7:
+                        if i == 0:
+                            error_cases_current.append(p)
+                        else:
+                            error_cases_old[p] = master.quarter
+                except TypeError:
+                    error_cases_current.append(p)
 
         cost_magnitude_error_case_current(error_cases_current)
         cost_magnitude_error_case_old(error_cases_old)

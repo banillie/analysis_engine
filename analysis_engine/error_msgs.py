@@ -57,7 +57,8 @@ def historic_project_names_error(error_cases):
 def cost_magnitude_error_case_current(error_cases):
     if error_cases:
         for e in error_cases:
-            logger.critical(e + " is reporting the wrong magnitude of cost in the latest master data.")
+            logger.critical(e + " is reporting the wrong magnitude of cost in the latest master data or doesn't have "
+                                "any Total Forecast value.")
         raise ProjectNameError(
             "Cost data needs to be reported in £ millions otherwise it will cause analysis engine to crash. Program "
             "stopping. Please amend data."
