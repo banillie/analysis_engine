@@ -83,11 +83,14 @@ class GmppOnlineCosts:
             if key not in key_map.values():
                 if key not in missing_keys:
                     missing_keys.append(key)
+            if not key:
+                continue
             s_value = self.ws.cell(row=x, column=7).value
             n_value = self.ws.cell(row=x, column=8).value
             if n_value != 0:
                 s_value = n_value
             if "Date" in key or "date" in key or "6.03c: To" in key:
+                # print(s_value, n_value)
                 if n_value > 20000:
                     s_value = datetime(*xlrd.xldate_as_tuple(n_value, 0))
             if "Grade" in key:  # to make grade 6 consistent with dft data
