@@ -1,7 +1,8 @@
 import datetime
+from lxml import etree
 from openpyxl import load_workbook, Workbook
 
-from analysis_engine.error_msgs import config_issue, ProjectNameError
+from analysis_engine.error_msgs import config_issue, ProjectNameError, corrupted_file_issue
 
 
 def get_map(wb, commas=False, gaps=False, flip=False):
@@ -57,6 +58,8 @@ class GmppOnlineCosts:
                 )
             except FileNotFoundError:
                 config_issue()
+        except etree.XMLSyntaxError:
+            corrupted_file_issue(file_name)
 
         self.ws = wb.active
 

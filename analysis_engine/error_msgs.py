@@ -36,6 +36,13 @@ def config_issue():
     sys.exit(1)
 
 
+def corrupted_file_issue(file):
+    logger.critical(
+        f"{file} is corrupted. Stopping"
+    )
+    sys.exit(1)
+
+
 def latest_project_names_error(error_cases):
     if error_cases:
         for e in error_cases:
