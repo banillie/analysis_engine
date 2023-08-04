@@ -202,21 +202,42 @@ RISK_LIST = [
     "Severity Score Risk Category",
     "BRD Has this Risk turned into an Issue?",
 ]
-
+# changed Q1 23/24
+# PORTFOLIO_RISK_LIST = [
+#     "Portfolio Risk Impact Description",
+#     "Portfolio Risk Mitigation",
+#     "Portfolio Risk Likelihood",
+#     "Portfolio Risk Impact Assessment",
+#     "Severity Score Risk Category",
+# ]
 PORTFOLIO_RISK_LIST = [
-    "Portfolio Risk Impact Description",
-    "Portfolio Risk Mitigation",
-    "Portfolio Risk Likelihood",
+    "Portfolio Risk Description",
+    "Portfolio Risk Mitigation Planned",
+    "Portfolio Risk Mitigation Completed",
+    "Portfolio Risk Likelihood Assessment",
     "Portfolio Risk Impact Assessment",
-    "Severity Score Risk Category",
+    "Portfolio Risk Trend Assessment",
+    "Severity Score Risk Category"
+]
+
+# This key is not presented in the datamap. It is calculated by analysis engine based on
+# likelihood and impact assessments
+PORTFOLIO_RISK_IMPACT_ASSESSMENT = "Severity Score Risk Category"
+
+# This keys are filtered out for the quantative analysis.
+PORTFOLIO_RISK_COUNT_FILTER_OUTED_KEYS = [
+    "Portfolio Risk Description",
+    "Portfolio Risk Mitigation Planned",
+    "Portfolio Risk Mitigation Completed",
+    "Portfolio Risk Trend Assessment",
 ]
 
 PORTFOLIO_RISKS_WORD = [
-    "Portfolio Risk Likelihood",
+    "Portfolio Risk Likelihood Assessment",
+    # "Portfolio Risk Likelihood",
     "Portfolio Risk Impact Assessment",
     "Portfolio Risk Impact Description",
-    "Portfolio Risk Mitigation",
-]
+    "Portfolio Risk Mitigation", ]
 
 RISK_NO_DICTIONARY = {
     1: "Infrastructure Decarbonisation",

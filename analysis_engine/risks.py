@@ -10,6 +10,8 @@ from analysis_engine.dictionaries import (
     PORTFOLIO_RISK_LIST,
     PORTFOLIO_RISKS_WORD,
     RISK_NO_DICTIONARY,
+    PORTFOLIO_RISK_IMPACT_ASSESSMENT,
+    PORTFOLIO_RISK_COUNT_FILTER_OUTED_KEYS
 )
 from analysis_engine.segmentation import get_group, get_correct_p_data
 from analysis_engine.render_utils import (
@@ -114,7 +116,7 @@ class RiskData:
                                     project_risk_list.append(risk)
                                 except KeyError:
                                     try:
-                                        if risk_type == "Severity Score Risk Category":
+                                        if risk_type == PORTFOLIO_RISK_IMPACT_ASSESSMENT:
                                             impact = (
                                                 "BRD Residual Impact"[:4]
                                                 + str(x)
@@ -130,12 +132,12 @@ class RiskData:
                                                 p_data[likelihoood],
                                             )
                                             risk = (
-                                                "Severity Score Risk Category",
+                                                PORTFOLIO_RISK_IMPACT_ASSESSMENT,
                                                 score,
                                             )
                                             project_risk_list.append(risk)
                                     except KeyError:
-                                        if risk_type == "Severity Score Risk Category":
+                                        if risk_type == PORTFOLIO_RISK_IMPACT_ASSESSMENT:
                                             pass
                                         else:
                                             print(
@@ -170,7 +172,7 @@ class RiskData:
                 if p_data is None:
                     continue
                 portfolio_number_dict = {}
-                for x in range(1, 6):  # currently 5 risks.
+                for x in range(1, 9):  # currently 8 risks.
                     portfolio_risk_list = []
                     group = (
                         "Group",
@@ -188,19 +190,18 @@ class RiskData:
                             )
                             portfolio_risk_list.append(risk)
                         except KeyError:
-                            if risk_type == "Severity Score Risk Category":
+                            if risk_type == PORTFOLIO_RISK_IMPACT_ASSESSMENT:
                                 try:
                                     score = risk_score(
                                         p_data[
                                             "Portfolio Risk Impact Assessment " + str(x)
                                         ],
-                                        p_data["Portfolio Risk Likelihood " + str(x)],
+                                        p_data["Portfolio Risk Likelihood Assessment " + str(x)],
                                     )
                                     risk = (
-                                        "Severity Score Risk Category",
+                                        PORTFOLIO_RISK_IMPACT_ASSESSMENT,
                                         score,
                                     )
-                                    # print(risk)
                                     portfolio_risk_list.append(risk)
                                 except KeyError:
                                     pass
@@ -248,7 +249,7 @@ class RiskData:
                             ][RISK_LIST[i]]
                             impact = self.risk_dictionary[quarter][project_name][
                                 number
-                            ]["Severity Score Risk Category"]
+                            ][PORTFOLIO_RISK_IMPACT_ASSESSMENT]
                             count_list.append(risk_value)
                             impact_list.append((risk_value, impact))
                         except KeyError:
@@ -287,7 +288,7 @@ class RiskData:
                             # impact = 'High'
                             impact = self.portfolio_risk_dictionary[quarter][
                                 project_name
-                            ][number]["Severity Score Risk Category"]
+                            ][number][PORTFOLIO_RISK_IMPACT_ASSESSMENT]
                             count_list.append(risk_value)
                             # impact_list.append((number, impact))
                             impact_list.append((risk_value, impact))
@@ -297,7 +298,7 @@ class RiskData:
                 count_lower_dict[PORTFOLIO_RISK_LIST[i]] = Counter(count_list)
                 impact_lower_dict[PORTFOLIO_RISK_LIST[i]] = Counter(impact_list)
 
-            for i in range(1, 7):  # currently 6 risks. Changed from 5 to 6 in Q4 2021
+            for i in range(1, 9):  # currently 6 risks. Changed from 5 to 6 in Q4 2021
                 type_list = []
                 for project_name in list(
                     self.portfolio_risk_dictionary[quarter].keys()
@@ -306,7 +307,7 @@ class RiskData:
                         risk_type = i
                         impact = self.portfolio_risk_dictionary[quarter][project_name][
                             i
-                        ]["Severity Score Risk Category"]
+                        ][PORTFOLIO_RISK_IMPACT_ASSESSMENT]
                         type_list.append(impact)
                     except KeyError:
                         pass
@@ -416,6 +417,7 @@ def portfolio_risks_into_excel(risk_data: RiskData) -> workbook:
         for y, project_name in enumerate(
             list(risk_data.portfolio_risk_dictionary[q].keys())
         ):
+            # print(project_name)
             for x, number in enumerate(
                 list(risk_data.portfolio_risk_dictionary[q][project_name].keys())
             ):
@@ -460,10 +462,7 @@ def portfolio_risks_into_excel(risk_data: RiskData) -> workbook:
 
         start_row = 3
         for v, risk_cat in enumerate(list(risk_data.portfolio_risk_count[q].keys())):
-            if (
-                risk_cat == "Portfolio Risk Impact Description"
-                or risk_cat == "Portfolio Risk Mitigation"
-            ):
+            if risk_cat in PORTFOLIO_RISK_COUNT_FILTER_OUTED_KEYS:
                 pass
             else:
                 ws.cell(row=start_row, column=2).value = risk_cat
@@ -474,6 +473,7 @@ def portfolio_risks_into_excel(risk_data: RiskData) -> workbook:
                 for b, cat in enumerate(
                     list(risk_data.portfolio_risk_count[q][risk_cat].keys())
                 ):
+                    # print(b, cat)
                     ws.cell(row=start_row + b + 1, column=2).value = str(cat)
                     ws.cell(
                         row=start_row + b + 1, column=3
@@ -494,7 +494,11 @@ def portfolio_risks_into_excel(risk_data: RiskData) -> workbook:
                         row=start_row + b + 1, column=6
                     ).value = risk_data.portfolio_risk_count[q][risk_cat][cat]
 
-                start_row += b + 4
+                try:
+                    start_row += b + 4
+                except UnboundLocalError:
+                    # couldn't debug error, but exception working.
+                    pass
 
         ws.cell(row=start_row, column=2).value = "Risk Type"
         ws.cell(row=start_row, column=3).value = "Low"
