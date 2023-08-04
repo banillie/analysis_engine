@@ -251,6 +251,9 @@ RISK_NO_DICTIONARY = {
     3: "Supply Chain and Materials",
     4: "Value for Money",
     5: "Coordinated Stakeholder Management",
+    6: "Inflation",
+    7: "Capacity and Capability of Delivery Partners",
+    8: "Dependencies Impacting the Realisation of Benefits"
 }
 
 RISK_SCORES = {

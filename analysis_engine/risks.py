@@ -544,7 +544,7 @@ def portfolio_risks_into_word_by_project(risk_data: RiskData) -> Document:
         intro = doc.add_heading(heading, 0)
         intro.alignment = 1
         intro.bold = True
-        for port_risk_no in range(1, 6):
+        for port_risk_no in range(1, 9):
             doc.add_paragraph().add_run(RISK_NO_DICTIONARY[port_risk_no]).bold = True
             for k in PORTFOLIO_RISKS_WORD:
                 try:
@@ -576,7 +576,7 @@ def portfolio_risks_into_word_by_risk(risk_data: RiskData) -> Document:
     )
     latest_q = risk_data.quarters[0]
     other_q = risk_data.quarters[1]
-    for port_risk_no in range(1, 6):
+    for port_risk_no in range(1, 9):
         heading = str(RISK_NO_DICTIONARY[port_risk_no])
         intro = doc.add_heading(heading, 0)
         intro.alignment = 1
