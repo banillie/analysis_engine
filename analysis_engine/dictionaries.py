@@ -236,8 +236,14 @@ PORTFOLIO_RISKS_WORD = [
     "Portfolio Risk Likelihood Assessment",
     # "Portfolio Risk Likelihood",
     "Portfolio Risk Impact Assessment",
-    "Portfolio Risk Impact Description",
-    "Portfolio Risk Mitigation", ]
+    # "Portfolio Risk Impact Description",
+    "Portfolio Risk Description",
+    # "Portfolio Risk Mitigation",
+    "Portfolio Risk Mitigation Planned",
+    "Portfolio Risk Mitigation Completed",
+    "Portfolio Risk Trend Assessment",
+]
+
 
 RISK_NO_DICTIONARY = {
     1: "Infrastructure Decarbonisation",
